@@ -1,0 +1,117 @@
+//
+// This file is part of Totara LMS
+//
+// Copyright (C) 2016 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <ht    tp://www.gnu.org/licenses/>.
+//
+// @copyright 2016 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Joby Harding <joby.harding@totaralearning.com>
+// @package   theme_basis
+
+// Block needs abstracting into its own Bootstrap style
+// module incl. global variables. Until we can properly
+// integrate as a framework component just override Roots
+// styles. Based on Roots blocks.less implementation.
+.block {
+
+    position: relative;
+    border-radius: 0;
+    border-color: @block-border-color;
+    box-shadow: none;
+
+    .block-header {
+        background-color: transparent;
+        color: @block-actions-color;
+        padding: @block-header-padding-vertical;
+        padding-bottom: 0;
+        border-width: 0;
+        h2 {
+            vertical-align: middle;
+            font-size: (@font-size-base * 0.9);
+            text-transform: uppercase;
+            padding: 3px 0;
+        }
+    }
+
+    .block-title {
+        width: 100%;
+        box-shadow: inset 0 -1px 0 @block-border-color;
+        padding-bottom: @block-header-padding-vertical;
+        min-height: 30px;
+    }
+
+    // Reset.
+    .moodle-actionmenu > ul {
+        line-height: @line-height-base;
+        display: inline;
+    }
+
+    .block_action {
+        display: inline-block;
+        text-align: right;
+        width: ceil(@font-size-base * 2.7);
+        margin-top: -2px; // Problems positioning icons inside container.
+        a {
+            color: @block-actions-color;
+        }
+    }
+
+    // Displayed when edit mode is switched on.
+    .block-control-actions {
+        margin: -@block-header-padding-vertical;
+        margin-bottom: @block-header-padding-vertical;
+        > ul {
+            > li {
+                display: inline;
+                .toggle-display,
+                .editing_move,
+                .moodle-core-dragdrop-draghandle {
+                    display: inline-block;
+                    padding: @padding-large-vertical;
+                    border-left: 1px solid @block-border-color;
+                }
+            }
+        }
+
+        background-color: @block-actions-bg;
+        box-shadow: inset 0 -@basis-border-thick rgb(212, 215, 218);
+
+        // Override white knockout.
+        ul[role='menubar'] {
+            .ft-stack-suffix {
+                text-shadow:
+                    -1px 0 0 @block-actions-bg,
+                    1px 0 0 @block-actions-bg,
+                    0 -1px @block-actions-bg,
+                    0 1px 0 @block-actions-bg,
+                    2px 2px 0 @block-actions-bg;
+            }
+        }
+
+    }
+
+    &.hidden {
+        .header,
+        .title {
+            box-shadow: none;
+        }
+    }
+
+}
+
+.jsenabled .moodle-actionmenu[data-enhance] .toggle-display {
+    display: inline-block;
+}

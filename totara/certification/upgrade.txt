@@ -1,0 +1,16 @@
+This file describes API changes in Totara Certification,
+information provided here is intended for developers.
+
+=== 10 ===
+
+* rb_display_certif_status has been moved in to a new style auto-loading class
+  display function (\totara_certification\rb\display\certif_status) to use this class
+  $this->usedcomponents[] = 'totara_certification'; must be set in the constructor for
+  report source.
+* certif_create_completion added third optional parameter $message which will be added to the start of relevant logs
+* certif_create_completion now creates the prog_completion record when the record is missing, rather than giving an error
+* certif_create_completion now deletes "expired" certif_completion_history records when they are used to reassign a user
+* certification_event_handler::unassigned() is deprecated. Call certif_conditionally_delete_completion directly instead.
+* delete_removed_users() is deprecated. This functionality is already performed in existing Totara code.
+* totara_certification_renderer::get_completion_checker_results has been changed - the $data parameter now requires
+  fulllist, aggregatelist and totalcount.

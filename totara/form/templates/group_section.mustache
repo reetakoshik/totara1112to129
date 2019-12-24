@@ -1,0 +1,68 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Petr Skoda <petr.skoda@totaralms.com>
+   @package totara_form
+}}
+{{!
+
+    @template totara_form/group_section
+
+    This template generates Totara form section.
+
+    Classes required for JS:
+    * tf_section_legend
+    * collapsible
+    * collapsed is mutually exclusive with collapsible
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+     * form_item_template string this template, used for dynamic partials
+     * name__xxxx bool true where xxxx is the name of this form item
+     * name string name of this item
+     * id string id of this item
+     * legend string
+     * collapsible bool
+     * expanded bool
+     * items array contained form items included via dynamic partial from form_item_template
+
+    Example context (json):
+      There is no example for this template as its just a husk, please refer to the form template.
+}}
+<div class="tf_group totara_form_group_section clearfix">
+    <fieldset id="{{id}}" class="{{#collapsible}}{{#expanded}}collapsible{{/expanded}}{{^expanded}}collapsed{{/expanded}}{{/collapsible}}">
+        {{#collapsible}}<input type="hidden" class="tf_section_collapsible" name="{{name}}[expanded]" value="{{#expanded}}1{{/expanded}}{{^expanded}}0{{/expanded}}" />{{/collapsible}}
+        <legend class="tf_section_legend">{{legend}}</legend>{{> totara_form/help_button}}
+        <div class="tf_section_items">
+        {{#items}}
+            <div data-item-classification="{{elementclassification}}"
+                 data-element-type="{{elementtype}}"
+                 data-element-id="{{elementid}}"
+                 data-element-template="{{form_item_template}}"
+                 data-element-frozen="{{frozen}}"
+                {{#amdmodule}} data-element-amd-module="{{.}}"{{/amdmodule}}
+                 class="nostyles">
+                {{> &&form_item_template }}
+            </div>
+        {{/items}}
+        </div>
+    </fieldset>
+    {{> totara_form/validation_errors}}
+</div>

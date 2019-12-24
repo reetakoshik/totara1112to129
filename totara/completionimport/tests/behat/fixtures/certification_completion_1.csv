@@ -1,0 +1,4 @@
+username,certificationshortname,certificationidnumber,completiondate,duedate
+learner1,Cert1,1,2015-01-01,2016-01-01
+learner1,thisisevidence,notacertification,2015-01-01,2016-01-01
+

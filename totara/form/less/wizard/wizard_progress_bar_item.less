@@ -1,0 +1,76 @@
+//
+// This file is part of Totara Learn
+//
+// Copyright (C) 2017 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @copyright 2017 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Kevin Hottinger <kevin.hottinger@totaralearning.com>
+// @package   theme_roots
+
+// List item
+.tf_wizard_progress_bar_item {
+    background: @wizard-bar-background;
+    border-bottom: 1px solid @wizard-bar-border-color;
+    border-top: 1px solid @wizard-bar-border-color;
+    display: inline-block;
+    margin-bottom: 5px;
+    position: relative;
+    white-space: nowrap;
+
+    // First list item
+    &:first-child {
+        border-left: 1px solid @wizard-bar-border-color;
+
+        .tf_wizard_progress_bar_item_link {
+            padding-left: @wizard-bar-item-firstlink-padding-lft;
+        }
+    }
+
+    // Last list item
+    &:last-child {
+        border-right: 1px solid @wizard-bar-border-color;
+
+        .tf_wizard_progress_bar_item_link {
+            padding-right: @wizard-bar-item-lastlink-padding-rgt;
+        }
+    }
+
+}
+
+// List item links
+.tf_wizard_progress_bar_item_link {
+    color: @wizard-bar-font-color;
+    display: block;
+    padding:
+        @wizard-bar-item-link-padding-top
+        @wizard-bar-item-link-padding-rgt
+        @wizard-bar-item-link-padding-btm
+        @wizard-bar-item-link-padding-lft;
+    position: relative;
+
+    &:hover,
+    &:focus,
+    &:active {
+        color: @wizard-bar-font-color;
+        text-decoration: none;
+    }
+}
+
+// List item text
+.tf_wizard_progress_bar_item_text {
+    display: inline-block;
+}

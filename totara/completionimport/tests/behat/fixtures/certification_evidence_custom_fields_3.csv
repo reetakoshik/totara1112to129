@@ -1,0 +1,2 @@
+username,certificationshortname,certificationidnumber,completiondate,duedate,customfield_invalidfield
+learner1,Cert1,1,2015-01-01,2016-01-01,thisshouldnotwork

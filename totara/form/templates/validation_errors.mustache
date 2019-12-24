@@ -1,0 +1,49 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Petr Skoda <petr.skoda@totaralms.com>
+   @package totara_form
+}}
+{{!
+
+    @template totara_form/validation_errors
+
+    This template generates form validation errors.
+
+    Classes required for JS:
+    * totara_form-error-container Any HTML outside of this element will not be removed once validation has been cleared
+        (eg. once something has been placed in a required field)
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+
+    * errors_has_items bool
+
+    errors: array of errors
+    * message string error message
+
+    Example context (json):
+      {}
+}}
+{{#errors_has_items}}
+    <div class="totara_form-error-container">
+        {{#errors}}<span class="validation-error" tabindex="0">{{{message}}}</span><br />{{/errors}}
+    </div>
+{{/errors_has_items}}

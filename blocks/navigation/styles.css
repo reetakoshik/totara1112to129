@@ -1,0 +1,49 @@
+
+.block_navigation .block_tree ul {
+    margin-left: 18px;
+}
+
+.block_navigation .block_tree p.hasicon img {
+    width: 1.3em;
+    height: 16px;
+    margin-top: 3px;
+    margin-right: 5px;
+    vertical-align: top;
+}
+
+.block_navigation .block_tree p.hasicon.visibleifjs {
+    display: block;
+}
+
+.block_navigation .block_tree .tree_item {
+    cursor: pointer;
+    padding-left: 0;
+    margin: 3px 0;
+}
+
+.block_navigation .block_tree .active_tree_node {
+    font-weight: bold;
+}
+
+.block_navigation .block_tree [aria-hidden="false"] {
+    display: block;
+}
+
+.block_navigation .block_tree [aria-hidden="true"]:not(.flex-icon) {
+    display: none;
+}
+
+/** Internet explorer specific rules **/
+.ie6 .block_navigation .block_tree .tree_item {
+    width: 100%;
+}
+
+/** Overide for RTL layout **/
+.dir-rtl .block_navigation .block_tree .tree_item img {
+    margin-right: 0;
+    margin-left: 5px;
+}
+
+.dir-rtl .block_navigation .block_tree ul {
+    margin: 0 16px 0 0;
+}

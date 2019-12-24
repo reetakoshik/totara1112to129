@@ -1,0 +1,287 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2015 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+
+    @template totara_core/scheduled_reports
+
+    Scheduled Reports.
+
+    This template generates a table of scheduled reports for the My Reports page.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * table A table data object. For information about tables see core/table.
+    * scheduled_reports_count A count of the number of scheduled reports.
+    * scheduled_report_form The output for a mform that allows the user to select a report to schedule.
+
+    Example context (json):
+    {
+        "table": {
+            "body": [{
+                "cells": [{
+                    "abbr": null,
+                    "cellid": null,
+                    "cellscope": null,
+                    "colspan": null,
+                    "rowspan": null,
+                    "column": "0",
+                    "content": "My User",
+                    "cellattributes": null,
+                    "cellclasses": null,
+                    "cellstyle": null,
+                    "header": false,
+                    "lastcol": false
+                }, {
+                    "abbr": null,
+                    "cellid": null,
+                    "cellscope": null,
+                    "colspan": null,
+                    "rowspan": null,
+                    "column": "1",
+                    "content": "All data",
+                    "cellattributes": null,
+                    "cellclasses": null,
+                    "cellstyle": null,
+                    "header": false,
+                    "lastcol": false
+                }, {
+                    "abbr": null,
+                    "cellid": null,
+                    "cellscope": null,
+                    "colspan": null,
+                    "rowspan": null,
+                    "column": "2",
+                    "content": "",
+                    "cellattributes": null,
+                    "cellclasses": null,
+                    "cellstyle": null,
+                    "header": false,
+                    "lastcol": false
+                }, {
+                    "abbr": null,
+                    "cellid": null,
+                    "cellscope": null,
+                    "colspan": null,
+                    "rowspan": null,
+                    "column": "3",
+                    "content": "Daily at 12:00 AM<br />Tuesday, 9 February 2016, 12:00 AM",
+                    "cellattributes": null,
+                    "cellclasses": null,
+                    "cellstyle": null,
+                    "header": false,
+                    "lastcol": false
+                }, {
+                    "abbr": null,
+                    "cellid": null,
+                    "cellscope": null,
+                    "colspan": null,
+                    "rowspan": null,
+                    "column": "4",
+                    "content": "<a href=\"#\"><img src=\"__WWWROOT__/theme/image.php?theme=__THEME__&amp;component=core&amp;image=%2Ft%2Fedit\" alt=\"Edit\" class=\"iconsmall\" /></a> <a href=\"#\"><img src=\"__WWWROOT__/theme/image.php?theme=__THEME__&amp;component=core&amp;image=%2Ft%2Fdelete\" alt=\"Delete\" class=\"iconsmall\" /></a>",
+                    "cellattributes": null,
+                    "cellclasses": "options",
+                    "cellstyle": null,
+                    "header": false,
+                    "lastcol": true
+                }],
+                "divider": false,
+                "lastrow": false,
+                "rowattributes": [],
+                "rowclasses": null,
+                "rowid": null,
+                "rowstyle": null
+            }, {
+                "cells": [{
+                    "abbr": null,
+                    "cellid": null,
+                    "cellscope": null,
+                    "colspan": null,
+                    "rowspan": null,
+                    "column": "0",
+                    "content": "My Site Logs",
+                    "cellattributes": null,
+                    "cellclasses": null,
+                    "cellstyle": null,
+                    "header": false,
+                    "lastcol": false
+                }, {
+                    "abbr": null,
+                    "cellid": null,
+                    "cellscope": null,
+                    "colspan": null,
+                    "rowspan": null,
+                    "column": "1",
+                    "content": "All data",
+                    "cellattributes": null,
+                    "cellclasses": null,
+                    "cellstyle": null,
+                    "header": false,
+                    "lastcol": false
+                }, {
+                    "abbr": null,
+                    "cellid": null,
+                    "cellscope": null,
+                    "colspan": null,
+                    "rowspan": null,
+                    "column": "2",
+                    "content": "",
+                    "cellattributes": null,
+                    "cellclasses": null,
+                    "cellstyle": null,
+                    "header": false,
+                    "lastcol": false
+                }, {
+                    "abbr": null,
+                    "cellid": null,
+                    "cellscope": null,
+                    "colspan": null,
+                    "rowspan": null,
+                    "column": "3",
+                    "content": "Daily at 12:00 AM<br />Tuesday, 9 February 2016, 12:00 AM",
+                    "cellattributes": null,
+                    "cellclasses": null,
+                    "cellstyle": null,
+                    "header": false,
+                    "lastcol": false
+                }, {
+                    "abbr": null,
+                    "cellid": null,
+                    "cellscope": null,
+                    "colspan": null,
+                    "rowspan": null,
+                    "column": "4",
+                    "content": "<a href=\"#\"><img src=\"__WWWROOT__/theme/image.php?theme=__THEME__&amp;component=core&amp;image=%2Ft%2Fedit\" alt=\"Edit\" class=\"iconsmall\" /></a> <a href=\"#\"><img src=\"__WWWROOT__/theme/image.php?theme=__THEME__&amp;component=core&amp;image=%2Ft%2Fdelete\" alt=\"Delete\" class=\"iconsmall\" /></a>",
+                    "cellattributes": null,
+                    "cellclasses": "options",
+                    "cellstyle": null,
+                    "header": false,
+                    "lastcol": true
+                }],
+                "divider": false,
+                "lastrow": true,
+                "rowattributes": [],
+                "rowclasses": null,
+                "rowid": null,
+                "rowstyle": null
+            }],
+            "caption": null,
+            "cellpadding": null,
+            "cellspacing": null,
+            "columns": 5,
+            "has_head": true,
+            "has_body": true,
+            "head": [{
+                "abbr": null,
+                "cellid": null,
+                "cellscope": "col",
+                "colspan": null,
+                "rowspan": null,
+                "column": "0",
+                "content": "Report Name",
+                "cellattributes": null,
+                "cellclasses": null,
+                "cellstyle": null,
+                "header": true,
+                "lastcol": false
+            }, {
+                "abbr": null,
+                "cellid": null,
+                "cellscope": "col",
+                "colspan": null,
+                "rowspan": null,
+                "column": "1",
+                "content": "Saved Search",
+                "cellattributes": null,
+                "cellclasses": null,
+                "cellstyle": null,
+                "header": true,
+                "lastcol": false
+            }, {
+                "abbr": null,
+                "cellid": null,
+                "cellscope": "col",
+                "colspan": null,
+                "rowspan": null,
+                "column": "2",
+                "content": "Format",
+                "cellattributes": null,
+                "cellclasses": null,
+                "cellstyle": null,
+                "header": true,
+                "lastcol": false
+            }, {
+                "abbr": null,
+                "cellid": null,
+                "cellscope": "col",
+                "colspan": null,
+                "rowspan": null,
+                "column": "3",
+                "content": "Schedule",
+                "cellattributes": null,
+                "cellclasses": null,
+                "cellstyle": null,
+                "header": true,
+                "lastcol": false
+            }, {
+                "abbr": null,
+                "cellid": null,
+                "cellscope": "col",
+                "colspan": null,
+                "rowspan": null,
+                "column": "4",
+                "content": "Options",
+                "cellattributes": null,
+                "cellclasses": null,
+                "cellstyle": null,
+                "header": true,
+                "lastcol": true
+            }],
+            "id": "scheduled_reports",
+            "summary": null,
+            "tableattributes": [],
+            "tableclasses": "generaltable",
+            "width": null
+        },
+        "scheduled_reports_count": 2,
+        "scheduled_report_form": "\n<form autocomplete=\"off\" action=\"#\" method=\"post\" accept-charset=\"utf-8\" id=\"mform1\" class=\"mform\">\n\t<div style=\"display: none;\"><div style=\"display: none;\"><label for=\"autofill-prevention1\">?</label><input id=\"autofill-prevention1\" type=\"password\" /></div><input name=\"sesskey\" type=\"hidden\" value=\"dWZDplkagC\" />\n<input name=\"_qf__scheduled_reports_add_form\" type=\"hidden\" value=\"1\" />\n</div>\n\n\n\t\t<div id=\"fgroup_id_addanewscheduledreport\" class=\"fitem fitem_fgroup \"><fieldset class=\"fgroup\"><legend><span class=\"legend\">Add a new scheduled report to the list: </span></legend><div class=\"felement\"><label class=\"accesshide\" for=\"id_addanewscheduledreport_reportid\" >Add scheduled</label><select name=\"addanewscheduledreport[reportid]\" id=\"id_addanewscheduledreport_reportid\">\n\t<option value=\"44\">My SIte Logs</option>\n\t<option value=\"43\">My User</option>\n</select><input name=\"addanewscheduledreport[submitbutton]\" value=\"Add scheduled report\" type=\"submit\" id=\"id_addanewscheduledreport_submitbutton\" /></div></fieldset></div>\n</form>"
+    }
+}}
+
+{{#scheduled_reports_visible}}
+<div id ="scheduledreports_section_inner">
+    <h2 id="scheduled">{{#str}}scheduledreports,totara_reportbuilder{{/str}}</h2>
+
+    {{#scheduled_reports_count}}
+        {{>core/table}}
+    {{/scheduled_reports_count}}
+    {{^scheduled_reports_count}}
+        <p>{{#str}}noscheduledreports, totara_reportbuilder{{/str}}</p>
+    {{/scheduled_reports_count}}
+    {{#scheduled_report_form}}
+        {{{scheduled_report_form}}}
+    {{/scheduled_report_form}}
+</div>
+{{/scheduled_reports_visible}}
+
+

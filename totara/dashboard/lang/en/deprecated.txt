@@ -1,0 +1,2 @@
+updatelayoutoff,totara_dashboard
+updatelayouton,totara_dashboard

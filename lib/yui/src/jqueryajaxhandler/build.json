@@ -1,0 +1,10 @@
+{
+  "name": "moodle-core-jqueryajaxhandler",
+  "builds": {
+    "moodle-core-jqueryajaxhandler": {
+      "jsfiles": [
+        "jqueryajaxhandler.js"
+      ]
+    }
+  }
+}

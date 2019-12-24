@@ -1,0 +1,3 @@
+showinguser,block_completionstatus
+status,block_completionstatus
+required,block_completionstatus

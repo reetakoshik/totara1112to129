@@ -1,0 +1,55 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Andrew McGhie <andrew.mcghie@totaralearning.com>
+   @package block_totara_featured_links
+}}
+{{!
+
+    @template block_totara_featured_links/element_audience_list_item
+
+    This template generates an item to be used in the element_audience_list list.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+     * name string name of the audience to display
+     * cohortid int the id of the audience
+     * num_learners int the number of learners in the audience
+
+    Other context variables for following partials:
+     * none
+
+    Example context (json):
+      {
+        "name": "examplename",
+        "cohortid": 1,
+        "num_learners": 2
+      }
+}}
+<li>
+    {{name}}
+    <a title="Delete" class="coursecohortdeletelink" href="#" data-type="cohort_delete" cohortid="{{cohortid}}">
+        {{#deleteicon}}{{#context}}{{> &&template }}{{/context}}{{/deleteicon}}
+    </a>
+    (#{{num_learners}})
+</li>

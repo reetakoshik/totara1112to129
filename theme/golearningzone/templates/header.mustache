@@ -1,0 +1,274 @@
+<script src="{{siteurl}}/mod/lzojt/ui/build/main.js"></script>
+<header data-color="{{color}}">
+    <section class="header-top text-right">  
+        <div class="container">    
+            <a class="navbar-brand pull-left" href="/">
+                <img class="center-block" alt="Brand" src="{{logo}}">
+            </a>
+            <div class="menu-btn-wrapper pull-left">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#totara-navbar" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="actions-wrapper pull-right">
+                {{#tour.enabled}}
+                    <div class="btn-group action-totara-alerts">
+                        <button type="button"
+                                data-action="tool_usertours/resetpagetour"
+                                class="btn btn-default dropdown-toggle tooltip"
+                                data-toggle="dropdown" >
+                            <i class="fa fa-map-marker" aria-hidden="true"></i>
+                            <span class="tooltiptext tooltip-bottom">{{tour.tooltip}}</span>
+                        </button>
+                    </div>
+                    <div class="btn-group action-totara-alerts-sm">
+                        <a  class="btn btn-default dropdown-toggle"
+                            href="#"
+                            data-action="tool_usertours/resetpagetour">
+                            <i class="fa fa-map-marker" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                {{/tour.enabled}}
+                {{#search.enabled}}
+                    <div class="btn-group action-totara-alerts">
+                        <button type="button"
+                                class="btn btn-default dropdown-toggle menu-search"
+                                data-toggle="dropdown" >
+                            <i class="fa fa-search" aria-hidden="true"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-left alerts-list">
+                            <div class="header-list-top">
+                                <div class="triangle-left"></div>
+                                <div class="triangle-right"></div>
+                                {{search.text.header}}
+                            </div>
+                            <form class="form-inline"
+                                  method="POST"
+                                  action="{{siteurl}}/local/lz_report/activity_search/filter.php">
+                                <input type="text" name="activityname" class="form-control" placeholder="{{search.text.placeholder}}">
+                                <button type="submit">{{search.text.submit}}</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="btn-group action-totara-alerts-sm">
+                        <a  class="btn btn-default dropdown-toggle"
+                            href="/local/lz_report/activity_search/embedded.php">
+                            <i class="fa fa-search" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                {{/search.enabled}}
+                {{#badges}}
+                    <div class="btn-group action-totara-alerts">
+                        <button type="button"
+                                class="btn btn-default dropdown-toggle"
+                                data-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                                id="dropdownMenu1" >
+                            <i class="fa fa-trophy" aria-hidden="true"></i>
+                            {{#total_badges}}
+                                <span class="items-count">{{{total_badges}}}</span>
+                            {{/total_badges}}
+                        </button>
+                        <div aria-labelledby="dropdownMenu1" class="dropdown-menu dropdown-menu-left alerts-list">
+                            <div class="header-list-top">
+                                <div class="triangle-left"></div>
+                                <div class="triangle-right"></div>
+                                {{my_badges}}
+                            </div>
+                            <ul>
+                                {{# list }}
+                                    <li class="badge pull-left">
+                                        <a href="{{siteurl}}/badges/view.php?type=1">
+                                            <img src="{{image}}"><br>
+                                            <span>{{name}}</span>
+                                        </a>
+                                    </li>
+                                {{/ list }}
+                            </ul>
+                            <a class="total_link" href="{{siteurl}}/badges/view.php?type=1">{{{total_badges_string}}}</a>
+                        </div>
+                    </div>
+                    <div class="btn-group action-totara-alerts-sm">
+                        <a class="btn btn-default dropdown-toggle" href="{{siteurl}}/badges/view.php?type=1">
+                            <i class="fa fa-trophy" aria-hidden="true"></i>
+                            {{#total_badges}}
+                                <span class="items-count">{{{total_badges}}}</span>
+                            {{/total_badges}}
+                        </a>
+                    </div>
+                {{/badges}}
+                <!--{{#alerts}}-->
+                    <!--<div class="btn-group action-totara-alerts">-->
+                        <!--<button type="button"-->
+                                <!--class="btn btn-default dropdown-toggle"-->
+                                <!--data-toggle="dropdown"-->
+                                <!--aria-haspopup="true"-->
+                                <!--aria-expanded="false">-->
+                            <!--<i class="fa fa-bell-o" aria-hidden="true"></i>-->
+                            <!--{{#total_alerts}}-->
+                                <!--<span class="items-count">{{{total_alerts}}}</span>-->
+                            <!--{{/total_alerts}}-->
+                        <!--</button>-->
+                        <!--<div class="dropdown-menu dropdown-menu-left alerts-list">-->
+                            <!--<div class="header-list-top">-->
+                                <!--<div class="triangle-left"></div>-->
+                                <!--<div class="triangle-right"></div>-->
+                                <!--{{my_alerts}}-->
+                            <!--</div>-->
+                            <!--<ul>-->
+                                <!--{{# list }}-->
+                                    <!--<li>-->
+                            <!--<span>-->
+                                <!--<div class="icon pull-left">-->
+                                    <!--<a href="/totara/message/alerts.php">-->
+                                        <!--{{{icon}}}-->
+                                    <!--</a>-->
+                                <!--</div>-->
+                                <!--<div class="text pull-left">-->
+                                    <!--<a href="/totara/message/alerts.php">-->
+                                        <!--{{subject}}-->
+                                    <!--</a>-->
+                                <!--</div>-->
+                                <!--<div class="actions pull-left">-->
+                                    <!--<form class="remove-form" method="POST" action="/theme/golearningzone/action.php">-->
+                                        <!--<input type="hidden" name="sesskey" value="{{sesskey}}">-->
+                                        <!--<input type="hidden" name="Id" value="{{id}}">-->
+                                        <!--<button type="submit">-->
+                                            <!--<i class="fa fa-times" aria-hidden="true"></i>-->
+                                        <!--</button>-->
+                                    <!--</form>-->
+                                <!--</div>-->
+                            <!--</span>-->
+                                    <!--</li>-->
+                                <!--{{/ list }}-->
+                            <!--</ul>-->
+                            <!--<a class="total_link" href="/totara/message/alerts.php">{{{total_alerts_string}}}</a>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                    <!--<div class="btn-group action-totara-alerts-sm">-->
+                        <!--<a class="btn btn-default dropdown-toggle" href="/totara/message/alerts.php">-->
+                            <!--<i class="fa fa-bell-o" aria-hidden="true"></i>-->
+                            <!--{{#total_alerts}}-->
+                                <!--<span class="items-count">{{{total_alerts}}}</span>-->
+                            <!--{{/total_alerts}}-->
+                        <!--</a>-->
+                    <!--</div>-->
+                <!--{{/alerts}}-->
+                {{#notifications}}
+                    <div class="btn-group action-totara-alerts">
+                        <button type="button"
+                                class="btn btn-default dropdown-toggle"
+                                data-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false">
+                            <i class="fa fa-bell-o" aria-hidden="true"></i>
+                            {{#total_notifications}}
+                                <span class="items-count">{{{total_notifications}}}</span>
+                            {{/total_notifications}}
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-left alerts-list">
+                            <div class="header-list-top">
+                                <div class="triangle-left"></div>
+                                <div class="triangle-right"></div>
+                                {{my_notifications}}
+                            </div>
+                            <ul>
+                                {{# list }}
+                                {{#timeread}}
+                                     <li class="text-muted">
+                                {{/timeread}}
+                                {{^timeread}}
+                                     <li>
+                                {{/timeread}}
+                                        <div class="icon pull-left">
+                                            <a href="{{siteurl}}/message/output/popup/notifications.php?notificationid={{id}}">
+                                                {{{icon}}}
+                                            </a>
+                                        </div>
+                                        <div class="text pull-left">
+                                            <a href="{{siteurl}}/message/output/popup/notifications.php?notificationid={{id}}">
+                                                {{subject}}
+                                            </a>
+                                        </div>
+                                    </li>
+                                {{/ list }}
+                            </ul>
+                            <a class="total_link" href="{{siteurl}}/message/output/popup/notifications.php">{{{total_notifications_string}}}</a>
+                        </div>
+                    </div>
+                    <div class="btn-group action-totara-alerts-sm">
+                        <a class="btn btn-default dropdown-toggle" href="{{siteurl}}/message/output/popup/notifications.php">
+                            <i class="fa fa-bell-o" aria-hidden="true"></i>
+                            {{#total_notifications}}
+                                <span class="items-count">{{{total_notifications}}}</span>
+                            {{/total_notifications}}
+                        </a>
+                    </div>
+                {{/notifications}}
+                {{#messages}}
+                    <div class="btn-group action-totara-alerts">
+                        <button type="button"
+                                class="btn btn-default dropdown-toggle"
+                                data-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false">
+                            <i class="fa fa-envelope-o" aria-hidden="true"></i>
+                            {{#total_messages}}
+                                <span class="items-count">{{{total_messages}}}</span>
+                            {{/total_messages}}
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-left alerts-list">
+                            <div class="header-list-top">
+                                <div class="triangle-left"></div>
+                                <div class="triangle-right"></div>
+                                {{my_messages}}
+                            </div>
+                            <ul>
+                                {{# list }}
+                                    <li>
+                                        <div class="icon pull-left">
+                                            {{# pic }}
+                                                {{{ pic }}}
+                                            {{/ pic }}
+                                            {{^ pic }}
+                                                <a href="{{siteurl}}/message/index.php?usergroup=unread&id={{userid}}">
+                                                    <i class="fa fa-user" aria-hidden="true"></i>
+                                                </a>
+                                            {{/ pic }}
+                                        </div>
+                                        <div class="text pull-left">
+                                            <a href="{{siteurl}}/message/index.php?usergroup=unread&id={{userid}}">
+                                                {{{text}}}
+                                            </a>
+                                        </div>
+                                    </li>
+                                {{/ list }}
+                            </ul>
+                            <a class="total_link" href="{{siteurl}}/message/index.php">{{{total_messages_string}}}</a>
+                        </div>
+                    </div>
+                    <div class="btn-group action-totara-alerts-sm">
+                        <a class="btn btn-default dropdown-toggle" href="{{siteurl}}/message/index.php">
+                            <i class="fa fa-envelope-o" aria-hidden="true"></i>
+                            {{#total_messages}}
+                                <span class="items-count">{{{total_messages}}}</span>
+                            {{/total_messages}}
+                        </a>
+                    </div>
+                {{/messages}}
+                {{{user_menu}}}
+            </div>
+            {{{navbar_button}}}
+            {{{budges}}} 
+            <div class="clearer"></div> 
+        </div>
+    </section>
+    <nav role="navigation" class="navbar navbar-default navbar-site">  
+        <div class="container container-fluid text-left">
+            {{{totaramenu}}}
+        </div>
+    </nav>
+</header>
+

@@ -1,0 +1,12 @@
+This files describes API changes in Learning plans,
+information provided here is intended especially for developers.
+
+=== 10 ===
+
+Added isexport param to rb_source_dp_certification::rb_display_link_program_icon.
+Added isexport param to rb_source_dp_certification_history::rb_display_link_program_icon.
+Added isexport param to rb_source_dp_program::rb_display_link_program_icon.
+Added isexport param to rb_source_dp_program_recurring::rb_display_link_program_icon.
+totara_plan_renderer::totara_print_approval_form() now outputs h3's instead of h2's
+rb_source_dp_program::rb_display_program_previous_completion() outputs additional information
+rb_source_dp_certification::rb_display_historylink() outputs additional information

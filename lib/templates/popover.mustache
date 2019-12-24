@@ -1,0 +1,76 @@
+{{!
+/*
+ * This file is part of Totara LMS
+ *
+ * Copyright (C) 2017 onwards Totara Learning Solutions LTD
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @copyright 2017 onwards Totara Learning Solutions LTD
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @author    Brian Barnes <brian.barnes@totaralearning.com>
+ * @package   core
+ */
+}}
+{{!
+
+    @template core/popover
+
+    The popover template.
+
+    Classes required for JS (in this template):
+    * popover__content. This is the body content for the popover (although this can be changed in )
+    * popover__template. The template of the popover.
+
+    Data attributes required for JS:
+    * data-enhanced. Whether this has been enhanced by JS
+    * data-title. The title for the popover
+
+    Context variables required for this template:
+    * title string The title for the popover. This is optional.
+    * contentraw string sanitised text for displaying inside the popover. Either this or template and templatecontext will be present
+    * contenttemplate string The name of the template which will be displayed inside the popover
+    * contenttemplatecontext object if using a template, this contains the context for it.
+
+    Example context (json):
+    {
+        "title": "hi there",
+        "contenttemplate": "core/notification_info",
+        "contenttemplatecontext": {
+            "message": "hello there"
+        }
+    }
+}}
+<div class="popover__wrapper" data-enhanced="false" data-title="{{title}}" data-component="/core/output/popover">
+    <div class="popover__content">
+        {{#contenttemplatecontext}}
+            {{> &&contenttemplate}}
+        {{/contenttemplatecontext}}
+        {{^contenttemplatecontext}}
+            {{{contentraw}}}
+        {{/contenttemplatecontext}}
+    </div>
+    <div class="popover__template">
+        <div class="popover" role="tooltip">
+            <div class="arrow"></div>
+            <h3 class="popover-title"></h3>
+            <div class="popover-content"></div>
+        </div>
+    </div>
+</div>
+{{#js}}
+require(['core/popover'], function (Popover) {
+    Popover.scan();
+});
+{{/js}}

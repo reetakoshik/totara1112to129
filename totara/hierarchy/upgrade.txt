@@ -1,0 +1,37 @@
+This files describes API changes in Totara Hierarchies,
+information provided here is intended especially for developers.
+
+=== 11.7 ===
+
+* The scheduled task update_competency_task did not scale so it had to be refactored. The refactoring breaks backwards compatibility
+  for the method competency_cron_aggregate_evidence(). This method was replaced by a new method called aggregate_competency_evidence_items() which behaviour
+  is different to the previous one. Previously there was one big query and loop which went through all competency/user combinations.
+  Now all evidence items for a particular user and framework/depth combination are loaded and then passed to this method for aggregation.
+  Additionally the method competency_cron_evidence_items() was replaced with a private method run_evidence_type_aggregation_methods(). The old method was deprecated
+  in favour of the new one.
+
+=== 10 ===
+
+The following files have been deprecated and should no longer be linked to:
+* totara/hierarchy/prefix/competency/assign/save.phpy
+* totara/hierarchy/prefix/competency/course/evidence.php
+* totara/hierarchy/prefix/competency/evidenceitem/course.php
+* totara/hierarchy/prefix/competency/item/view.php
+* totara/hierarchy/prefix/competency/template/delete.php
+* totara/hierarchy/prefix/competency/template/edit.php
+* totara/hierarchy/prefix/competency/template/edit_form.php
+* totara/hierarchy/prefix/competency/template/find_competency.php
+* totara/hierarchy/prefix/competency/template/index.php
+* totara/hierarchy/prefix/competency/template/remove_assignment.php
+* totara/hierarchy/prefix/competency/template/save_competency.php
+* totara/hierarchy/prefix/competency/template/view.php
+* totara/hierarchy/prefix/goal/update-scalevalue.php
+* totara/hierarchy/prefix/organisation/assigncompetencytemplate/assign.php
+* totara/hierarchy/prefix/organisation/assigncompetencytemplate/find.php
+* totara/hierarchy/prefix/position/assigncompetencytemplate/assign.php
+
+* totara/hierarchy/prefix/competency/template/lib.php has been deprecated and should no longer be included anywhere.
+* totara_hierarchy_renderer::mygoals_company_table() has changed adding a label for goal status
+* totara_hierarchy_renderer::mygoals_personal_table() has changed adding a label for goal status
+
+* Added an optional timeproficient column to mdl_comp_record and mdl_comp_record_history which can be used to record when a user becomes proficient in a competency

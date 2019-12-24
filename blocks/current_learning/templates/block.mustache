@@ -1,0 +1,85 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+
+    @template block_current_learning/block
+
+    The block template.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * learningitems array The learning items
+    * pagination array Pagination data
+
+    Example context (json):
+    {
+        "learningitems": [
+            {
+                "component": "core_course",
+                "type": "course",
+                "id": "24",
+                "shortname": "Outlook basics",
+                "fullname": "Outlook basics",
+                "description": "",
+                "url_view": "/course/view.php?id=1",
+                "progress": {
+                    "summary": "",
+                    "percentage": null
+                },
+                "dueinfo": {
+                    "duetext": "due on 25 Oct",
+                    "tooltip": "Course due 12:00am on 25 Oct 2016",
+                    "state": "label-info",
+                    "alert": false
+                },
+                "duetext": "1477350000",
+                "template": "block_current_learning\/course_row"
+            }
+        ],
+        "pagination": {
+            "totalitems": 1,
+            "itemsperpage": 10,
+            "currentpage": 1,
+            "pages": [
+                {
+                    "page": 1,
+                    "link": "",
+                    "active": "active"
+                }
+            ],
+            "text": "Displaying 1 - 1 of 1 results",
+            "onepage": 1,
+            "nextclass": "disabled",
+            "previousclass": "disabled"
+        }
+    }
+}}
+{{> block_current_learning/main_content}}
+{{> block_current_learning/paging}}
+{{#js}}
+require(['block_current_learning/current_learning', 'theme_roots/bootstrap'], function (current_learning) {
+    current_learning.init({{{contextdata}}});
+});
+{{/js}}
+

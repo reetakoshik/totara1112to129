@@ -1,0 +1,97 @@
+// This file is part of Totara LMS
+//
+// Copyright (C) 2016 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <ht    tp://www.gnu.org/licenses/>.
+//
+// @copyright 2016 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Joby Harding <joby.harding@totaralearning.com>
+// @package   theme_roots
+
+// Tables.
+@moodle-table-striped: true;
+@moodle-table-hover: true;
+
+// Calendar.
+@calendar-event-course-color: #ffd3bd; // Pale red.
+@calendar-event-global-color: #d6f8cd; // Pale green.
+@calendar-event-group-color:  #fee7ae; // Pale yellow.
+@calendar-event-user-color:   #dce7ec; // Pale blue.
+
+// Dock.
+@dock-width: 36px;
+@dock-title-margin: 0;
+@dock-panel-width: (@grid-float-breakpoint / 2);
+@dock-title-font-size: 12px;
+@dock-border-style: solid;
+@dock-border-color: @panel-default-border;
+@dock-border-width: 1px;
+@dock-border: @dock-border-width @dock-border-style @dock-border-color;
+
+// Totara Menu
+@totara-menu-border-color: #ddd;
+@totara-menu-border-width: 1px;
+@totara-menu-border-style: solid;
+@totara-menu-border: @totara-menu-border-width @totara-menu-border-style @totara-menu-border-color;
+
+@totara-menu-padding-vertical: @navbar-padding-vertical;
+@totara-menu-padding-horizontal: @navbar-padding-horizontal;
+
+@totara-menu-bg: @body-bg;
+
+@totara-menu-link-color: @navbar-default-link-color;
+@totara-menu-link-hover-color: @navbar-default-link-hover-color;
+@totara-menu-link-active-color: @navbar-default-link-active-color;
+
+@totara-menu-link-hover-bg: @navbar-default-link-active-bg;
+@totara-menu-link-active-bg: @navbar-default-link-active-bg;
+
+@totara-menu-dropdown-text-indent: (@totara-menu-padding-horizontal * 2);
+
+// Add Bootstrap colours to flexible icons.
+@ft-var-default-color: @gray;
+@ft-var-success-color: @brand-primary;
+@ft-var-warning-color: @brand-warning;
+@ft-var-danger-color: @brand-danger;
+@ft-var-info-color: @brand-info;
+@ft-var-disabled-color: @btn-link-disabled-color;
+
+// Use Bootstrap 4 platform fonts
+@font-family-sans-serif:  -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+@font-family-serif:       Georgia, "Times New Roman", Times, serif;
+@font-family-monospace:   Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+@font-family-base:        @font-family-sans-serif;
+
+@nav-tabs-background-color: #fff;
+
+// Override the default @form-group-margin-bottom variable to give double the default spacing:
+@form-group-margin-bottom: 30px;
+
+//
+// Blocks - Basis custom variables.
+//
+@block-header-padding-vertical: (@padding-large-vertical * 1.5);
+@block-border-color: #c8cfd6;
+@block-actions-color: #6a7884;
+@block-actions-bg: #fff;
+@block-actions-border-radius: 6px;
+
+@progress-bar-inverted-color: @gray-light;
+@progress-bar-bg: @brand-info;
+
+@modal-inner-padding: 5px;
+@modal-outer-padding: 15px;
+@modal-border-radius: 4px;
+@modal-backdrop-bg: rgba(0, 0, 0, 0.2);

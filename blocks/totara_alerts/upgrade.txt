@@ -1,0 +1,7 @@
+This files describes API changes in /blocks/totara_alerts,
+information provided here is intended especially for developers.
+
+=== 11.0 ===
+
+* block_totara_alerts_renderer::display_alerts() has changed
+* block_totara_alerts_renderer::display_alert() has changed

@@ -1,0 +1,69 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Andrew McGhie <andrew.mcghie@totaralearning.com>
+}}
+{{!
+
+    @template core/recent_activity_note
+
+    This template generates how a recent activity entry should be displayed
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * There are no required variables as they are all optoinal,
+        However every variable with the exception of extratext is recomended
+
+    Other context variables for following partials:
+    * user ['url' => string, 'name' => string] The user that the recent activity is linked to
+    * date string A string that is the date for the recent activity
+    * extratext string Some extra text to display with the note
+    * link ['url' => string, 'text' => string] A link that the not can link to
+
+    Example context (json):
+      {
+        'user': {
+            'url': 'http://mysite.com/user',
+            'name': 'John Smith'
+        },
+        'date': '9 Oct, 14:27',
+        'extratext': Added,
+        'link': {
+            'url': 'http://mysite.com/coursemodual',
+            'text': 'Anouncements'
+        }
+      }
+}}
+<div class="recent-activity">
+    <div class="head">
+        {{#user}}<span class="name"><a href="{{url}}">{{name}}</a></span>{{/user}}
+        {{#date}}<span class="date">{{date}}</span>{{/date}}
+        {{#extratext}}<span>{{extratext}}</span>{{/extratext}}
+    </div>
+    <div class="info">
+        {{#link}}
+            {{#url}}<a href="{{{url}}}">{{text}}</a>{{/url}}
+            {{^url}}<span>{{text}}</span>{{/url}}
+        {{/link}}
+    </div>
+</div>

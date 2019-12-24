@@ -1,0 +1,7 @@
+This file describes API changes in block community search,
+information provided here is intended for developers.
+
+=== 11 ===
+
+* Hub functionality (includes this block) has been deprecated and will be removed entirely in the next major version.
+* \block_community_renderer::restore_confirmation_box() expects stored_file parameter instead of string file name

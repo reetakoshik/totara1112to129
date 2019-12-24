@@ -1,0 +1,254 @@
+/**
+ * Tour step must sit above all other UI components.
+ * The backdrop is the lowest point in the tour.
+ * Everything else is in the container, and the target background should be at the same z-index.
+ * ----- moodle
+ *  ---- step backdrop
+ *   --- step container
+ *   --- step target background
+ */
+@flexitour-base-zindex: 1040;
+
+// The backdrop is the backdrop used in 'modal' step display.
+div[data-flexitour="backdrop"] {
+    background-color: @modal-backdrop-bg;
+    opacity: @modal-backdrop-opacity;
+
+    // The backdrop needs to have a lower z-index than everything else in the tour, but higher than everything else in Moodle.
+    z-index: @flexitour-base-zindex;
+}
+
+// The step-background is used to highlight the region targetted in the step.
+div[data-flexitour="step-background-fader"],
+div[data-flexitour="step-background"] {
+    border-radius: @border-radius-large;
+
+    // The step container, and the target background should be at the same z-index.
+    z-index: @flexitour-base-zindex + 1;
+}
+
+span[data-flexitour="container"],
+div[data-flexitour="step-background-fader"],
+[data-flexitour="step-backdrop"] > td,
+[data-flexitour="step-backdrop"] {
+    // The step container, and the target background should be at the same z-index.
+    z-index: @flexitour-base-zindex + 2;
+}
+
+span[data-flexitour="container"] {
+    .modal-dialog {
+        /**
+         * Remove all margins to:
+         * 1) ensure that the arrow touches the target; and
+         * 2) ensure that the focus border touches the modal.
+         */
+        margin: 0;
+    }
+
+    div[data-role="arrow"] {
+        border-width: @popover-arrow-outer-width;
+    }
+
+    div[data-role="arrow"],
+    div[data-role="arrow"]:after {
+        position: absolute;
+        display: block;
+        width: 0;
+        height: 0;
+        border-color: transparent;
+        border-style: solid;
+        border-width: @popover-arrow-width;
+    }
+
+    // We need to know the opposite sides for arrow placement.
+    //    $opposites:
+    //    (
+    //        top: bottom,
+    //    bottom: top,
+    //    left: right,
+    //    right: left,
+    //);
+
+    // These are the next leading side and allow for placement half-way along the step dialogue.
+    //    $sides:
+    //    (
+    //        top: left,
+    //    bottom: left,
+    //    left: top,
+    //    right: top,
+    //);
+
+    // Expand SCSS. Less language
+    // doesn't feature map data types.
+
+    // $direction: top;
+    // $opposite: bottom;
+    // $side: left;
+    &[x-placement="top"],
+    &[x-placement="top-start"] {
+        margin-bottom: @popover-arrow-width;
+        div[data-role="arrow"] {
+            bottom: -@popover-arrow-outer-width;
+            left: 50%;
+            margin-left: -@popover-arrow-outer-width;
+            border-bottom-width: 0;
+            border-top-color: @popover-arrow-outer-color;
+        }
+        div[data-role="arrow"]:after {
+            bottom: 1px;
+            margin-left: -@popover-arrow-width;
+            content: " ";
+            border-bottom-width: 0;
+            border-top-color: @popover-arrow-color;
+        }
+    }
+
+    &[x-placement="top"],
+    &[x-placement="top-start"] {
+        margin-bottom: @popover-arrow-width;
+        div[data-role="arrow"] {
+            bottom: -@popover-arrow-outer-width;
+            left: 50%;
+            margin-left: -@popover-arrow-outer-width;
+            border-bottom-width: 0;
+            border-top-color: @popover-arrow-outer-color;
+        }
+        div[data-role="arrow"]:after {
+            bottom: 1px;
+            margin-left: -@popover-arrow-width;
+            content: " ";
+            border-bottom-width: 0;
+            border-top-color: @popover-arrow-color;
+        }
+    }
+
+    // $direction: bottom;
+    // $opposite: top;
+    // $side: left;
+    &[x-placement="bottom"],
+    &[x-placement="bottom-start"] {
+        margin-top: @popover-arrow-width;
+        div[data-role="arrow"] {
+            top: -@popover-arrow-outer-width;
+            left: 50%;
+            margin-left: -@popover-arrow-outer-width;
+            border-top-width: 0;
+            border-bottom-color: @popover-arrow-outer-color;
+        }
+        div[data-role="arrow"]:after {
+            top: 1px;
+            margin-left: -@popover-arrow-width;
+            content: " ";
+            border-top-width: 0;
+            border-bottom-color: @popover-arrow-color;
+        }
+    }
+
+    &[x-placement="bottom"],
+    &[x-placement="bottom-start"] {
+        margin-top: @popover-arrow-width;
+        div[data-role="arrow"] {
+            top: -@popover-arrow-outer-width;
+            left: 50%;
+            margin-left: -@popover-arrow-outer-width;
+            border-top-width: 0;
+            border-bottom-color: @popover-arrow-outer-color;
+        }
+        div[data-role="arrow"]:after {
+            top: 1px;
+            margin-left: -@popover-arrow-width;
+            content: " ";
+            border-top-width: 0;
+            border-bottom-color: @popover-arrow-color;
+        }
+    }
+
+    // $direction: left;
+    // $opposite: right;
+    // $side: top;
+    &[x-placement="left"],
+    &[x-placement="left-start"] {
+        margin-right: @popover-arrow-width;
+        div[data-role="arrow"] {
+            right: -@popover-arrow-outer-width;
+            top: 50%;
+            margin-top: -@popover-arrow-outer-width;
+            border-right-width: 0;
+            border-left-color: @popover-arrow-outer-color;
+        }
+        div[data-role="arrow"]:after {
+            right: 1px;
+            margin-top: -@popover-arrow-width;
+            content: " ";
+            border-right-width: 0;
+            border-left-color: @popover-arrow-color;
+        }
+    }
+
+    &[x-placement="left"],
+    &[x-placement="left-start"] {
+        margin-right: @popover-arrow-width;
+        div[data-role="arrow"] {
+            right: -@popover-arrow-outer-width;
+            top: 50%;
+            margin-top: -@popover-arrow-outer-width;
+            border-right-width: 0;
+            border-left-color: @popover-arrow-outer-color;
+        }
+        div[data-role="arrow"]:after {
+            right: 1px;
+            margin-top: -@popover-arrow-width;
+            content: " ";
+            border-right-width: 0;
+            border-left-color: @popover-arrow-color;
+        }
+    }
+
+    // $direction: right;
+    // $opposite: left;
+    // $side: top;
+    &[x-placement="right"],
+    &[x-placement="right-start"] {
+        margin-left: @popover-arrow-width;
+        div[data-role="arrow"] {
+            left: -@popover-arrow-outer-width;
+            top: 50%;
+            margin-top: -@popover-arrow-outer-width;
+            border-left-width: 0;
+            border-right-color: @popover-arrow-outer-color;
+        }
+        div[data-role="arrow"]:after {
+            left: 1px;
+            margin-top: -@popover-arrow-width;
+            content: " ";
+            border-left-width: 0;
+            border-right-color: @popover-arrow-color;
+        }
+    }
+
+    &[x-placement="right"],
+    &[x-placement="right-start"] {
+        margin-left: @popover-arrow-width;
+        div[data-role="arrow"] {
+            left: -@popover-arrow-outer-width;
+            top: 50%;
+            margin-top: -@popover-arrow-outer-width;
+            border-left-width: 0;
+            border-right-color: @popover-arrow-outer-color;
+        }
+        div[data-role="arrow"]:after {
+            left: 1px;
+            margin-top: -@popover-arrow-width;
+            content: " ";
+            border-left-width: 0;
+            border-right-color: @popover-arrow-color;
+        }
+    }
+
+    // Totara: This is specfic to theme Boost which we don't include.
+    // Hack the bone! Hack the bone!
+    //[data-region="drawer"] [data-flexitour="container"] {
+    //    /*rtl:ignore*/
+    //    margin-left: -15px;
+    //    width: $drawer-width - 10px;
+}

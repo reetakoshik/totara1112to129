@@ -1,0 +1,96 @@
+//This file is part of Totara LMS
+//
+//Copyright (C) 2017 onwards Totara Learning Solutions LTD
+//
+//This program is free software; you can redistribute it and/or modify
+//it under the terms of the GNU General Public License as published by
+//the Free Software Foundation; either version 3 of the License, or
+//(at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//                          MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+//@author Andrew McGhie <andrew.mcghie@totaralearning.com>
+//@package block_totara_featured_links
+
+@padding-vertical: 4px;
+@padding-small-vertical: 10px;
+@block-totara-featured-links-heading-color: #fff;
+@font-size-h4: ceil((14px * 1.25));
+@block-totara-featured-links-title-font-weight: bold;
+
+// Default Tile.
+.block-totara-featured-links-layout > div .block-totara-featured-links-content {
+    position: absolute;
+
+    width: 100%;
+    box-sizing: border-box;
+    max-height: 100%;
+
+    overflow: hidden;
+
+    background: rgba(0, 0, 0, .5);
+    color: @block-totara-featured-links-heading-color;
+
+    &.block-totara-featured-links-content-top {
+        top: 0;
+        bottom: auto;
+    }
+    &.block-totara-featured-links-content-bottom {
+        top: auto;
+        bottom: 0;
+    }
+
+    h3 {
+        font-size: @font-size-h4;
+        margin-bottom: @padding-vertical;
+        font-weight: @block-totara-featured-links-title-font-weight;
+    }
+    p {
+        margin-bottom: @padding-vertical;
+    }
+    padding: @padding-small-vertical;
+
+}
+
+// Gallery tile.
+.block-totara-featured-links-gallery-images {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    text-align: center;
+    div {
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: 50%;
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        &:before {
+            content: '';
+            display: inline-block;
+            height: 100%;
+            vertical-align: middle;
+        }
+    }
+}
+
+.block-totara-featured-links-content-gallery {
+    z-index: 3;
+}
+
+// Course tile
+.block-totara-featured-links-content.block-totara-featured-links-course .progress {
+    margin-bottom: 0;
+}

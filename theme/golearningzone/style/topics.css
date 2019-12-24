@@ -1,0 +1,113 @@
+.course-content ul.topics li.section {
+	padding: 0;
+    margin: 20px 0;
+    border: none;
+   	border-top: 1px solid #fff;
+    background-color: #f8f8f8;
+}
+
+.course-content ul.topics li.section .content, 
+.course-content ul.weeks li.section .content,
+ul.topics li .content {
+	margin: 0;
+	padding: 0;
+}
+
+ul.topics li.section .content > * {
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+ul.topics li.section .content .visibleifjs {
+	display: initial;
+}
+
+ul.topics li .content h3 {
+	padding: 25px 10px 10px 5px;
+	background-color: #fff;
+	height: 74px;
+	border-bottom: 3px solid #f3f3f3;
+	box-sizing: border-box;
+}
+
+
+.course-content ul.topics li.section .content ul.section {
+	margin: 0;
+    padding: 0;
+}
+
+.course-content ul.topics li.section .content ul.section li.activity {
+	padding: 20px;
+	border-bottom: 1px solid #e5e5e5;
+	border-top: 1px solid #fff;
+}
+
+@media(max-width: 768px) {
+	.course-content ul.topics li.section .content ul.section li.activity {
+		padding: 7px;
+	}
+}
+
+.course-content ul.topics li.section .content ul.section li.activity > div {
+	position: relative;
+}
+
+.course-content ul.topics li.section .content ul.section li.activity:last-child {
+	border-bottom: none;
+}
+
+.course-content ul.topics li.section .content ul.section li.activity .activity-name {
+	font-size: 14px;
+	margin-bottom: 5px;
+	text-transform: capitalize;
+	font-weight: bold;
+	line-height: 14px;
+}
+
+.course-content ul.topics li.section .content ul.section li.activity .activity-description {
+	font-size: 13px;
+	line-height: 14px;
+}
+
+.course-content ul.topics li.section .content ul.section li.activity .activity-description iframe {
+	max-width: 100%;
+}
+
+.course-content ul.topics li.section .content ul.section li.activity .ft-fw.activityicon {
+	font-size: 70px;
+	line-height: 60px;
+}
+
+.course-content ul.topics li.section .content ul.section li.activity .ft-fw.activityicon .ft-state-default,
+.course-content ul.topics li.section .content ul.section li.activity .ft-fw.activityicon .ft-state-success,
+.course-content ul.topics li.section .content ul.section li.activity .ft-fw.activityicon .ft-state-warning,
+.course-content ul.topics li.section .content ul.section li.activity .ft-fw.activityicon .ft-state-danger,
+.course-content ul.topics li.section .content ul.section li.activity .ft-fw.activityicon .ft-state-info,
+.course-content ul.topics li.section .content ul.section li.activity .ft-fw.activityicon .ft-state-disabled {
+  display: none;
+}
+
+.section .activity .mod-indent-outer {
+	padding-left: 0;
+}
+
+.path-course-view .section .activity .actions,
+.path-course-view .ft-stack-main,
+.path-course-view .ft-stack-suffix {
+	position: static;
+	left: initial;
+	margin: initial;
+}
+
+.show {
+	display: initial !important;
+}
+
+div.show {
+	display: block !important;
+}
+
+/*quiz submenu fix*/
+.moodle-actionmenu[data-enhanced].show .menu.align-tr-tr {
+	top: 20px !important;
+}

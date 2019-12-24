@@ -1,0 +1,24 @@
+{{> theme_golearningzone/head}}
+    <body {{{body_attributes}}} 
+            {{#palette}} 
+                data-palette="{{palette}}" 
+            {{/palette}}
+            {{#bg_image}}
+                style="background-image: url('{{bg_image}}');"
+            {{/bg_image}} 
+        >
+        {{{standard_top_of_body_html}}}
+        <div class="container">
+            <div id="page" class="container-fluid">
+                <div id="page-content" class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        {{{main_content}}}
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+            </div>
+        </div>
+        {{{standard_end_of_body_html}}}
+    </body>
+</html>

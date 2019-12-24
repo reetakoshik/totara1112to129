@@ -1,0 +1,48 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2015 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template core/form/multifield_validation
+
+    Totara form notification template.
+
+    The purpose of this template is to render a form notification without borders.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * notifyid Id for the notification
+    * message A cleaned string (use clean_text()) to display.
+    * level Alert text level to use. E.g. success, info, danger, etc.
+    * iconlevel Icon level to use. E.g. success, info, error, etc.
+    * announce Whether the notification should be announced to screen readers.
+    * alerticon flex icon context
+
+    Example context (json):
+    { "message": "Your pants are on fire!", "announce": 1, "level": "danger", "iconlevel": "error"}
+}}
+
+<div id="{{notifyid}}"{{# announce }} role="alert"{{/ announce }}>
+    <div class="alert-icon"><span class="text-{{level}}">{{#alerticon}}{{#context}}{{> &&template }}{{/context}}{{/alerticon}}</span></div>
+    <div class="alert-message text-{{level}}">{{{ message }}}</div>
+</div>
+

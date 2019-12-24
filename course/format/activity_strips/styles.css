@@ -1,0 +1,51 @@
+.course-content ul.topics {margin:0;}
+.course-content ul.topics li.section {list-style: none;margin:0 0 5px 0;padding:0;}
+.course-content ul.topics li.section .content {margin:0 40px;}
+.course-content ul.topics li.section .left,
+.course-content ul.topics li.section .right {width:40px;padding: 0 6px;}
+.course-content ul.topics li.section .right img.icon { padding: 0 0 4px 0;}
+.course-content ul.topics li.section .left {padding-top:22px;text-align: right;}
+.jsenabled .course-content ul.topics li.section .left,
+.jsenabled .course-content ul.topics li.section .right {width:auto;}
+.course-content ul.topics li.section .left .section-handle img.icon { padding:0; vertical-align: baseline; }
+.course-content ul.topics li.section .section_action_menu .textmenu,
+.course-content ul.topics li.section .section_action_menu .menu-action-text { white-space: nowrap; }
+
+
+.course-content ul.topics li.section .section-collapser {
+  	display: block;
+	height: 20px;
+	width: 20px;
+	float: right;
+	overflow: hidden;
+	background: lightgray;
+	margin: 0;
+	padding: 0;
+	font-size: 23px;
+	text-align: center;
+	border-radius: 10px;
+	color: white;
+	line-height: 18px;
+	cursor: pointer;
+}
+
+.dir-rtl .course-content ul.topics li.section .section-collapser {
+	float: left;
+}
+
+.course-content ul.topics.activity_strips #section-1 {
+	margin-top: 0;
+}
+
+.course-content ul.topics.activity_strips #section-0 {
+	// margin: 0;
+}
+
+form.twofa-form label {
+	min-width: 100px;
+}
+
+form.twofa-form h2 {
+	margin: 5px 0;
+}
+

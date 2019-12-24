@@ -1,0 +1,7 @@
+This files describes API changes in Totara Seminar Report Sources,
+information provided here is intended especially for developers.
+
+=== 9.2 ===
+
+* rb_source_facetoface_interest::rb_display_link_f2f() has been deprecated, please use 'seminar_name_link' with displayfunc to display a linked seminar name for a column option.
+* rb_source_facetoface_sessions::rb_display_link_f2f() has been deprecated, please use 'seminar_name_link' with displayfunc to display a linked seminar name for a column option.

@@ -1,0 +1,6 @@
+This files describes API changes for code that uses the question API,
+information provided here is intended especially for developers.
+
+=== 10.0 ===
+
+* log in button when viewing a course as a guest is now a link styled as a button

@@ -1,0 +1,13 @@
+This file describes API changes for 'theme_roots'.
+
+=== 11.8 ===
+
+* z-index for Totara dialogs has been updated to match Bootstrap 3 levels
+
+=== 10.0 ===
+
+* Ensured body and link text colour contrast ratio is at least 3:1 (WCAG 2.0 A compliant)
+
+=== 9.2 ===
+
+* New text truncation utility .text-truncate added in less/bootswatch/bootswatch.less

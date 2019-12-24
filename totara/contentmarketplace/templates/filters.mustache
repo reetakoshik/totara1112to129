@@ -1,0 +1,78 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Michael Dunstan <michael.dunstan@androgogic.com>
+   @package totara_contentmarketplace
+}}
+{{!
+    @template totara_contentmarketplace/filters
+
+    Content Marketplace explorer filters
+
+    Example context (json):
+    {
+        "filters": [
+            {
+                "name": "avaliablity",
+                "label": "Avaliablity",
+                "showcounts": true,
+                "template": "totara_contentmarketplace/filter_radios",
+                "options": [
+                    {
+                        "htmlid": "tcm-filter-avaliablity-0",
+                        "label": "All",
+                        "value": "all",
+                        "checked": true
+                    },
+                    {
+                        "htmlid": "tcm-filter-avaliablity-1",
+                        "label": "Subscription",
+                        "value": "subscribed",
+                        "checked": false
+                    },
+                    {
+                        "htmlid": "tcm-filter-avaliablity-2",
+                        "label": "Collection",
+                        "value": "collection",
+                        "checked": false
+                    }
+                ]
+            }
+        ]
+    }
+
+}}
+<div class="content block-content tcm-search-filters-wrapper">
+    <div class="tcm-search-filters-loading">
+        <span class="tcm-loading-icon">{{#pix}} y/loading, core, loading, core {{/pix}}</span>
+        {{#str}} loading_filters, totara_contentmarketplace {{/str}}
+    </div>
+    <div class="tcm-search-filters">
+        {{#filters}}
+            <fieldset class="tcm-search-filter tcm-search-filter-name-{{name}} {{#showcounts}}tcm-search-filter-with-counts{{/showcounts}}"
+                      data-filter-name="{{name}}"
+                      data-filter-module="{{module}}"
+                      data-filter-showcounts="{{#showcounts}}ture{{/showcounts}}{{^showcounts}}false{{/showcounts}}">
+                <legend class="tf_element_title"><span class="legend" data-element-label>{{ label }}</span></legend>
+                <div class="tf_element_input tcm-filter-input">
+                    {{#template}}{{> &&template }}{{/template}}
+                </div>
+            </fieldset>
+        {{/filters}}
+    </div>
+</div>

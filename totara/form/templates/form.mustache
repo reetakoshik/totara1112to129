@@ -1,0 +1,537 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Petr Skoda <petr.skoda@totaralms.com>
+   @package totara_form
+}}
+{{!
+
+    @template totara_form/form
+
+    This template generates Totara form.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+     * formid string id of this form
+     * action string action url
+     * idsuffix string suffix used for all form ids
+     * cssclass string extra css class identifying form by its php class name
+     * phpclass string
+     * sesskey string
+     * failedsubmission bool true if any errors present
+     * requiredpresent bool
+     * items array contained form items included via dynamic partial from form_item_template
+
+    Other context variables for following partials:
+     * totara_form/validation_errors
+
+    Example context (json):
+        {
+            "formid":"tf_fid_totara_form_form_testform_element_compilation",
+            "action":"#",
+            "idsuffix":"totara_form_form_testform_element_compilation",
+            "phpclass":"totara_form\\form\\testform\\element_compilation",
+            "sesskey":"Bn59unK78N",
+            "cssclass":"totara_form__form__testform__element_compilation",
+            "items": [
+                {
+                    "form_item_template":"totara_form\/element_checkbox",
+                    "name__checkbox":true,
+                    "name":"checkbox",
+                    "id":"tfiid_checkbox_totara_form_form_testform_element_compilation",
+                    "label":"Checkbox",
+                    "frozen":false,
+                    "amdmodule":"totara_form\/form_element_checkbox",
+                    "required":false,
+                    "checkedvalue":"checked",
+                    "uncheckedvalue":"empty",
+                    "checked":false,
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\checkbox",
+                    "elementid":"tfiid_checkbox_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/element_checkboxes",
+                    "name__checkboxes":true,
+                    "name":"checkboxes",
+                    "id":"tfiid_checkboxes_totara_form_form_testform_element_compilation",
+                    "label":"Checkboxes",
+                    "frozen":false,
+                    "options": [
+                        {"value":"1","oid":"tfiid_checkboxes_totara_form_form_testform_element_compilation___chb_0","text":"Yes","checked":false},
+                        {"value":"0","oid":"tfiid_checkboxes_totara_form_form_testform_element_compilation___chb_1","text":"No","checked":false},
+                        {"value":"2","oid":"tfiid_checkboxes_totara_form_form_testform_element_compilation___chb_2","text":"-1","checked":false},
+                        {"value":"3","oid":"tfiid_checkboxes_totara_form_form_testform_element_compilation___chb_3","text":"Maybe","checked":false}
+                    ],
+                    "amdmodule":"totara_form\/form_element_checkboxes",
+                    "size":false,
+                    "required":false,
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\checkboxes",
+                    "elementid":"tfiid_checkboxes_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/element_datetime",
+                    "name__datetime":true,
+                    "name":"datetime",
+                    "id":"tfiid_datetime_totara_form_form_testform_element_compilation",
+                    "label":"Date and time",
+                    "frozen":false,
+                    "amdmodule":"totara_form\/form_element_datetime",
+                    "required":false,
+                    "placeholder":false,
+                    "isodate":"",
+                    "showtz":false,
+                    "tz":"99",
+                    "timezones":[
+                        {"value":"Africa\/Abidjan","text":"Africa\/Abidjan","selected":false},
+                        {"value":"Australia\/Perth","text":"Australia\/Perth","selected":false},
+                        {"value":"Australia\/Sydney","text":"Australia\/Sydney","selected":false},
+                        {"value":"Pacific\/Auckland","text":"Pacific\/Auckland","selected":false},
+                        {"value":"UTC","text":"UTC","selected":false},
+                        {"value":99,"text":"Pacific\/Auckland (my timezone)","selected":true}
+                    ],
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\datetime",
+                    "elementid":"tfiid_datetime_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/element_editor_atto",
+                    "name__editor":true,
+                    "name":"editor",
+                    "id":"tfiid_editor_totara_form_form_testform_element_compilation",
+                    "label":"Editor",
+                    "frozen":false,
+                    "amdmodule":"totara_form\/form_element_editor_atto",
+                    "fixedformat":true,
+                    "formats":[{"value":"1","text":"HTML format","selected":true}],
+                    "text":"",
+                    "format":"1",
+                    "itemid":false,
+                    "required":false,
+                    "rows":"15",
+                    "cols":"80",
+                    "fptemplates":"[]",
+                    "requiredstrings":"json_encoded required strings",
+                    "jsmodules":"json encoded modules",
+                    "yuimodules":"json_encoded yui modules",
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":
+                    "totara_form\\form\\element\\editor",
+                    "elementid":"tfiid_editor_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/element_email",
+                    "name__email":true,
+                    "name":"email",
+                    "id":"tfiid_email_totara_form_form_testform_element_compilation",
+                    "label":"Email",
+                    "frozen":false,
+                    "amdmodule":"totara_form\/form_element_email",
+                    "maxlength":false,
+                    "placeholder":false,
+                    "required":false,
+                    "size":false,
+                    "value":"",
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\email",
+                    "elementid":"tfiid_email_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/element_filemanager",
+                    "name__filemanager":true,
+                    "name":"filemanager",
+                    "id":"tfiid_filemanager_totara_form_form_testform_element_compilation",
+                    "label":"File manager",
+                    "frozen":false,
+                    "amdmodule":"totara_form\/form_element_filemanager",
+                    "accept":false,
+                    "maxfiles":"-1",
+                    "required":false,
+                    "value":"848992974",
+                    "maxbytes":"67108864",
+                    "fmoptions":"json_encoded file manager options}",
+                    "client_id":"577066a9cda75278619063",
+                    "restrictions":"Maximum size for new files: 67108864",
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\filemanager",
+                    "elementid":"tfiid_filemanager_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/element_filepicker",
+                    "name__filepicker":true,
+                    "name":"filepicker",
+                    "id":"tfiid_filepicker_totara_form_form_testform_element_compilation",
+                    "label":"File picker",
+                    "frozen":false,
+                    "amdmodule":"totara_form\/form_element_filepicker",
+                    "accept":false,
+                    "required":false,
+                    "value":"589459888",
+                    "maxbytes":"67108864",
+                    "fpoptions":"json_encoded file picker options",
+                    "displaymaxsize":"64MB",
+                    "currentfile":"",
+                    "client_id":"577066a9d5c05415709436",
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\filepicker",
+                    "elementid":"tfiid_filepicker_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/element_hidden",
+                    "name__hidden":true,
+                    "name":"hidden",
+                    "id":"tfiid_hidden_totara_form_form_testform_element_compilation",
+                    "frozen":true,
+                    "amdmodule":"totara_form\/form_element_hidden",
+                    "value":"Invisible",
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\hidden",
+                    "elementid":"tfiid_hidden_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/element_multiselect",
+                    "name__multiselect":true,
+                    "name":"multiselect",
+                    "id":"tfiid_multiselect_totara_form_form_testform_element_compilation",
+                    "label":"Multiselect",
+                    "frozen":false,
+                    "options": [
+                        {"value":"red","text":"Red","selected":false},
+                        {"value":"orange","text":"Orange","selected":false},
+                        {"value":"yellow","text":"Yellow","selected":false},
+                        {"value":"green","text":"Green","selected":false},
+                        {"value":"blue","text":"Blue","selected":false}
+                    ],
+                    "amdmodule":"totara_form\/form_element_multiselect",
+                    "size":false,
+                    "required":false,
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\multiselect",
+                    "elementid":"tfiid_multiselect_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/element_number",
+                    "name__number":true,
+                    "name":"number",
+                    "id":"tfiid_number_totara_form_form_testform_element_compilation",
+                    "label":"Number",
+                    "frozen":false,
+                    "amdmodule":"totara_form\/form_element_number",
+                    "maxlength":false,
+                    "placeholder":false,
+                    "required":false,
+                    "size":false,
+                    "max":false,
+                    "min":false,
+                    "step":"1",
+                    "value":"",
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\number",
+                    "elementid":"tfiid_number_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/element_passwordunmask",
+                    "name__passwordunmask":true,
+                    "name":"passwordunmask",
+                    "id":"tfiid_passwordunmask_totara_form_form_testform_element_compilation",
+                    "label":"Password unmask",
+                    "frozen":false,
+                    "amdmodule":"totara_form\/form_element_passwordunmask",
+                    "maxlength":false,
+                    "placeholder":false,
+                    "required":false,
+                    "size":false,
+                    "value":"",
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\passwordunmask",
+                    "elementid":"tfiid_passwordunmask_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/element_radios",
+                    "name__radios":true,
+                    "name":"radios",
+                    "id":"tfiid_radios_totara_form_form_testform_element_compilation",
+                    "label":"Radios",
+                    "frozen":false,
+                    "options": [
+                        {"value":"true","oid":"tfiid_radios_totara_form_form_testform_element_compilation___rd_0","text":"Agree","checked":false},
+                        {"value":"false","oid":"tfiid_radios_totara_form_form_testform_element_compilation___rd_1","text":"Disagree","checked":false}
+                    ],
+                    "amdmodule":"totara_form\/form_element_radios",
+                    "required":false,
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\radios",
+                    "elementid":"tfiid_radios_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/element_select",
+                    "name__select":true,
+                    "name":"select",
+                    "id":"tfiid_select_totara_form_form_testform_element_compilation",
+                    "label":"Select",
+                    "frozen":false,
+                    "options":[
+                        {"value":"apple","text":"Apple","selected":true},
+                        {"value":"orange","text":"Orange","selected":false},
+                        {"value":"pear","text":"Pear","selected":false},
+                        {"value":"raspberry","text":"Raspberry","selected":false},
+                        {"value":"persimmon","text":"Persimmon","selected":false}
+                    ],
+                    "amdmodule":"totara_form\/form_element_select",
+                    "size":false,
+                    "required":false,
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\select",
+                    "elementid":"tfiid_select_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/element_static_html",
+                    "name__statichtml":true,
+                    "name":"statichtml",
+                    "id":"tfiid_statichtml_totara_form_form_testform_element_compilation",
+                    "label":"Static HTML",
+                    "frozen":false,
+                    "amdmodule":"totara_form\/form_element_static_html",
+                    "html":"<div style=\"background-color:#002a80;color:#FFF;padding:6px;\">Static HTML test<\/div>",
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\static_html",
+                    "elementid":"tfiid_statichtml_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/element_tel",
+                    "name__tel":true,
+                    "name":"tel",
+                    "id":"tfiid_tel_totara_form_form_testform_element_compilation",
+                    "label":"Tel",
+                    "frozen":false,
+                    "amdmodule":"totara_form\/form_element_tel",
+                    "maxlength":false,
+                    "placeholder":false,
+                    "required":false,
+                    "size":false,
+                    "value":"",
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\tel",
+                    "elementid":"tfiid_tel_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/element_text",
+                    "name__text":true,
+                    "name":"text",
+                    "id":"tfiid_text_totara_form_form_testform_element_compilation",
+                    "label":"Text",
+                    "frozen":false,
+                    "amdmodule":"totara_form\/form_element_text",
+                    "maxlength":false,
+                    "placeholder":false,
+                    "required":false,
+                    "size":false,
+                    "value":"",
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\text",
+                    "elementid":"tfiid_text_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/element_textarea",
+                    "name__textarea":true,
+                    "name":"textarea",
+                    "id":"tfiid_textarea_totara_form_form_testform_element_compilation",
+                    "label":"Textarea",
+                    "frozen":false,
+                    "amdmodule":"totara_form\/form_element_textarea",
+                    "maxlength":false,
+                    "size":false,
+                    "cols":false,
+                    "rows":false,
+                    "wrap":false,
+                    "required":false,
+                    "placeholder":false,
+                    "value":"",
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\textarea",
+                    "elementid":"tfiid_textarea_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/element_url",
+                    "name__url":true,
+                    "name":"url",
+                    "id":"tfiid_url_totara_form_form_testform_element_compilation",
+                    "label":"URL",
+                    "frozen":false,
+                    "amdmodule":"totara_form\/form_element_url",
+                    "maxlength":false,
+                    "placeholder":false,
+                    "required":false,
+                    "size":false,
+                    "value":"",
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\url",
+                    "elementid":"tfiid_url_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/element_yesno",
+                    "name__yesno":true,
+                    "name":"yesno",
+                    "id":"tfiid_yesno_totara_form_form_testform_element_compilation",
+                    "label":"Yes or No",
+                    "frozen":false,
+                    "options":[
+                        {"value":"1","oid":"tfiid_yesno_totara_form_form_testform_element_compilation___rd_0","text":"Yes","checked":false},
+                        {"value":"0","oid":"tfiid_yesno_totara_form_form_testform_element_compilation___rd_1","text":"No","checked":false}
+                    ],
+                    "amdmodule":"totara_form\/form_element_yesno",
+                    "required":false,
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\yesno",
+                    "elementid":"tfiid_yesno_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/element_hidden",
+                    "name__form_select":true,
+                    "name":"form_select",
+                    "id":"tfiid_form_select_totara_form_form_testform_element_compilation",
+                    "frozen":true,
+                    "amdmodule":"totara_form\/form_element_hidden",
+                    "value":"totara_form\\form\\testform\\element_compilation",
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\hidden",
+                    "elementid":"tfiid_form_select_totara_form_form_testform_element_compilation",
+                    "elementclassification":"element"
+                },{
+                    "form_item_template":"totara_form\/group_buttons",
+                    "name__actionbuttonsgroup":true,
+                    "name":"actionbuttonsgroup",
+                    "id":"tfiid_actionbuttonsgrouptotara_form_form_testform_element_compilation",
+                    "items":[
+                        {
+                            "form_item_template":"totara_form\/element_action_button",
+                            "name__submitbutton":true,
+                            "name":"submitbutton",
+                            "id":"tfiid_submitbutton_totara_form_form_testform_element_compilation",
+                            "frozen":false,
+                            "value":"Save changes",
+                            "formnovalidate":false,
+                            "errors_has_items":false,
+                            "errors":[],
+                            "helphtml":false,
+                            "elementtype":"totara_form\\form\\element\\action_button",
+                            "elementid":"tfiid_submitbutton_totara_form_form_testform_element_compilation",
+                            "elementclassification":"element"
+                        }
+                    ],
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\group\\buttons",
+                    "elementid":"tfiid_actionbuttonsgrouptotara_form_form_testform_element_compilation",
+                    "elementclassification":"group"
+                }
+            ],
+            "failedsubmission":false,
+            "requiredpresent":false,
+            "actions":[],
+            "actionjson":[],
+            "actionsjson":"[]",
+            "errors_has_items":false,
+            "errors":[],
+            "helphtml":false
+        }
+}}
+<form data-totara-form
+      data-element-id="{{formid}}"
+      id="{{formid}}"
+      autocomplete="off" action="{{action}}"
+      method="post"
+      accept-charset="utf-8"
+      class="totara_form {{cssclass}} clearfix">
+    {{> totara_form/validation_errors}}
+    {{#requiredpresent}}{{> totara_form/required_note}}{{/requiredpresent}}
+    <div>
+        {{#items}}
+            <div data-item-classification="{{elementclassification}}"
+                 data-element-type="{{elementtype}}"
+                 data-element-id="{{elementid}}"
+                 data-element-template="{{form_item_template}}"
+                 data-element-frozen="{{frozen}}"
+                {{#amdmodule}} data-element-amd-module="{{.}}"{{/amdmodule}}
+                 class="nostyles">
+                {{> &&form_item_template }}
+            </div>
+        {{/items}}
+    </div>
+    <div style="display: none;">
+        <input type="hidden" name="___tf_formclass" value="{{phpclass}}">
+        <input type="hidden" name="___tf_idsuffix" value="{{idsuffix}}">
+        <input type="hidden" name="___tf_reload" value="">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+    </div>
+</form>
+{{#js}}
+require(['jquery', 'totara_form/form'], function ($, Form) {
+    Form.init({
+        id: '{{formid}}',
+        actionsConfig: {{{actionsjson}}}
+    });
+});
+{{/js}}

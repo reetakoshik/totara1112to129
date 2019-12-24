@@ -1,0 +1,2781 @@
+{
+  "total": 82137,
+  "hits": [
+    {
+      "id": 1868492,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2017-05-05T10:37:28+00:00",
+      "delivery": {
+        "duration": 45,
+        "mode": "self-paced"
+      },
+      "description": "<p>Accidents can happen at any time and regardless of how many precautions are taken. When an accident happens, how you respond could be the difference between life and death. In this four-module course, you will learn about what to do in an emergency, including initial responses to injury situations, first aid guidelines, and best practices.</p>\n\n<p>The course also covers the AHA’s 2010 Guidelines for Cardiopulmonary Resuscitation (CPR) and Emergency Cardiovascular Care (ECC), including both full and hands-only CPR. Note that this course does not qualify students for first aid certification; it is meant to be used as a review between certifications.</p>\n\n<p>Estimated duration: 45 minutes</p>",
+      "image": "\/totara\/contentmarketplace\/contentmarketplaces\/goone\/tests\/behat\/fixtures\/image.jpg",
+      "items": [],
+      "items_count": 23,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "USD",
+        "price": 0,
+        "tax": 0,
+        "tax_included": false
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "reviews": {
+        "count": 3,
+        "rating": 5
+      },
+      "tags": [
+        "Australia",
+        "Compliance"
+      ],
+      "title": "Basic First Aid",
+      "type": "course",
+      "updated_time": "2017-06-09T04:04:21+00:00"
+    },
+    {
+      "id": 1873868,
+      "assessable": true,
+      "collections": [],
+      "created_time": "2017-05-08T15:38:37+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Many people would rather die than stand in front of a microphone. It doesn’t have to be that way. This brief course will show that anyone can become a polished public speaker with practice. We've designed it for the person who wants to feel confident while powerfully delivering a message to any audience, large or small.</p>\n\n<p>In an introductory video presentation a voice coach shares her secret to success in public speaking. An article provides some practical tips. The course concludes with a quiz based on both the video and the article.</p>",
+      "image": "\/totara\/contentmarketplace\/contentmarketplaces\/goone\/tests\/behat\/fixtures\/image.jpg",
+      "items": [],
+      "items_count": 3,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "USD",
+        "price": 0,
+        "tax": 0,
+        "tax_included": false
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "reviews": {
+        "count": 1,
+        "rating": 5
+      },
+      "tags": [
+      ],
+      "title": "How to Master Public Speaking",
+      "type": "course",
+      "updated_time": "2017-05-08T15:38:37+00:00"
+    },
+    {
+      "id": 29271,
+      "assessable": true,
+      "collections": [],
+      "created_time": "2015-08-21T22:03:23+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Suppose someone you work with or someone you love were to have a seizure. Would you know what was happening? Moreover, would you know what to do? In this six-module course you’ll learn the general steps to take when someone is having a seizure, and the specific first aid steps for tonic-clonic, complex partial, absence, and tonic/atonic seizures. You’ll also learn what to do if a seizure occurs in water and how to help someone who is having a seizure while in a wheelchair.</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>A short quiz follows each module, and a final assessment concludes the course.</p>",
+      "image": "\/totara\/contentmarketplace\/contentmarketplaces\/goone\/tests\/behat\/fixtures\/image.jpg",
+      "items": [],
+      "items_count": 12,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "USD",
+        "price": 0,
+        "tax": 0,
+        "tax_included": false
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+      ],
+      "title": "Seizure First Aid",
+      "type": "course",
+      "updated_time": "2017-11-24T08:02:40+00:00"
+    },
+    {
+      "id": 1916572,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2017-05-19T16:34:57+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>This course, intended for those who are either interviewing for a position with a new company or for a new role with their current employer, covers the fundamentals—the steps to take before, during, and after your interview.  Though many of the tips offered may feel “salesy”, the suggested approach is relevant to candidates in all spheres of business. After all, an interview is an exercise in sales – with you as the product! The course also includes two excellent TED talks, one on the topic of self-confidence, and another on the use of powerful body language, both critical to interview success. A short quiz follows each module.</p>",
+      "image": "\/totara\/contentmarketplace\/contentmarketplaces\/goone\/tests\/behat\/fixtures\/image.jpg",
+      "items": [],
+      "items_count": 9,
+      "language": "en",
+      "portal_collection": 4,
+      "pricing": {
+        "currency": "USD",
+        "price": 0,
+        "tax": 0,
+        "tax_included": false
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+      ],
+      "title": "Interviewing 101",
+      "type": "course",
+      "updated_time": "2017-05-19T16:34:57+00:00"
+    },
+    {
+      "id": 1881379,
+      "assessable": false,
+      "collections": [
+        4
+      ],
+      "created_time": "2017-05-10T20:44:16+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Until recently, epilepsy was thought of as a childhood disorder. Today, it is evident that epilepsy in people aged 75 years and older is more prevalent than in children under 10. Epilepsy is the third most common neurological disorder in the over 75 year age group, following stroke and dementia. Both of the latter  are associated with an increased incidence of epilepsy. As the world population ages, it can be predicted that there will be an increase in the numbers of older people living with epilepsy. Medical sources have estimated that by the year 2025, 50% of new-onset seizures will be in older persons.</p>\n\n<p> </p>\n\n<p>This four-module course takes a thorough look at the realities of epilepsy in old age. Useful to caregivers and elderly people with epilepsy who want to know more about their condition, some of the topics explored include the causes of epilepsy in the elderly, the different types of treatments available, and safety measures for older people with epilepsy.</p>\n\n<p> </p>",
+      "image": "\/totara\/contentmarketplace\/contentmarketplaces\/goone\/tests\/behat\/fixtures\/image.jpg",
+      "items": [],
+      "items_count": 9,
+      "language": "en",
+      "portal_collection": true,
+      "pricing": {
+        "currency": "USD",
+        "price": 0,
+        "tax": 0,
+        "tax_included": false
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "reviews": {
+        "count": 1,
+        "rating": 5
+      },
+      "tags": [
+      ],
+      "title": "Epilepsy and the Older Person",
+      "type": "course",
+      "updated_time": "2017-05-10T20:44:16+00:00"
+    },
+    {
+      "id": 1000,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2015-08-26T08:06:00+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1000</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 65,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 89,
+        "tax": 10,
+        "tax_included": false
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [],
+      "title": "Learning Object 1000",
+      "type": "course",
+      "updated_time": "2017-07-30T01:29:21+00:00"
+    },
+    {
+      "id": 1001,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:06:27+00:00",
+      "delivery": {
+        "duration": 5,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1001</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 24,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 18,
+        "tax": 10,
+        "tax_included": false
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [],
+      "title": "Learning Object 1001",
+      "type": "course",
+      "updated_time": "2017-07-30T01:29:23+00:00"
+    },
+    {
+      "id": 1002,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2015-08-26T08:10:02+00:00",
+      "delivery": {
+        "duration": 60,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1002</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 9,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 5,
+        "tax": 10,
+        "tax_included": false
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [],
+      "title": "Learning Object 1002",
+      "type": "course",
+      "updated_time": "2017-07-30T01:29:25+00:00"
+    },
+    {
+      "id": 1003,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:06:27+00:00",
+      "delivery": {
+        "duration": 90,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1003</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 7,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 5,
+        "tax": 10,
+        "tax_included": false
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [],
+      "title": "Learning Object 1003",
+      "type": "course",
+      "updated_time": "2017-07-30T01:29:29+00:00"
+    },
+    {
+      "id": 1004,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2015-09-22T09:39:40+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1004</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 18,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 5,
+        "tax": 10,
+        "tax_included": false
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [],
+      "title": "Learning Object 1004",
+      "type": "course",
+      "updated_time": "2017-07-30T01:29:31+00:00"
+    },
+    {
+      "id": 1005,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:06:27+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1005</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 13,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 89,
+        "tax": 10,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Academics",
+        "Maths \u0026 Science"
+      ],
+      "title": "Learning Object 1005",
+      "type": "course",
+      "updated_time": "2018-09-19T10:06:27+00:00"
+    },
+    {
+      "id": 1006,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1006</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Personal Development"
+      ],
+      "title": "Learning Object 1006",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 1007,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1007</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 45,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Design"
+      ],
+      "title": "Learning Object 1007",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 1008,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1008</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 25,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Business",
+        "Industry Specific",
+        "Teacher Training",
+        "Compliance"
+      ],
+      "title": "Learning Object 1008",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 1009,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1009</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 25,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Business",
+        "Management and Leadership"
+      ],
+      "title": "Learning Object 1009",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:29+00:00"
+    },
+    {
+      "id": 1010,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1010</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 25,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Academics",
+        "Personal Development"
+      ],
+      "title": "Learning Object 1010",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:29+00:00"
+    },
+    {
+      "id": 1011,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1011</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 25,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Business",
+        "Development"
+      ],
+      "title": "Learning Object 1011",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:39+00:00"
+    },
+    {
+      "id": 1012,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1012</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 125,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Business",
+        "Management and Leadership"
+      ],
+      "title": "Learning Object 1012",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:29+00:00"
+    },
+    {
+      "id": 1013,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1013</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 25,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Personal Development",
+        "Lifestyle"
+      ],
+      "title": "Learning Object 1013",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:29+00:00"
+    },
+    {
+      "id": 1014,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1014</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 45,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Personal Development",
+        "Music"
+      ],
+      "title": "Learning Object 1014",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:40+00:00"
+    },
+    {
+      "id": 1015,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1015</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 55,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Digital Literary \u0026 IT Skills",
+        "IT \u0026 Software"
+      ],
+      "title": "Learning Object 1015",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:40+00:00"
+    },
+    {
+      "id": 1016,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1016</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 25,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Academics",
+        "Personal Development",
+        "Language"
+      ],
+      "title": "Learning Object 1016",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:30+00:00"
+    },
+    {
+      "id": 1017,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1017</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "USD",
+        "price": 0,
+        "tax": 0,
+        "tax_included": false
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Personal Development"
+      ],
+      "title": "Learning Object 1017",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:41+00:00"
+    },
+    {
+      "id": 1018,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1018</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 30,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Business",
+        "Management and Leadership"
+      ],
+      "title": "Learning Object 1018",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:41+00:00"
+    },
+    {
+      "id": 1019,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1019</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 105,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Digital Literary \u0026 IT Skills",
+        "IT \u0026 Software"
+      ],
+      "title": "Learning Object 1019",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:41+00:00"
+    },
+    {
+      "id": 1020,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1020</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 25,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Business",
+        "Management and Leadership"
+      ],
+      "title": "Learning Object 1020",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:42+00:00"
+    },
+    {
+      "id": 1021,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1021</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Business",
+        "Management and Leadership"
+      ],
+      "title": "Learning Object 1021",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:42+00:00"
+    },
+    {
+      "id": 1022,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1022</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "USD",
+        "price": 0,
+        "tax": 0,
+        "tax_included": false
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Personal Development"
+      ],
+      "title": "Learning Object 1022",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:32+00:00"
+    },
+    {
+      "id": 1023,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1023</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 25,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Business",
+        "Development"
+      ],
+      "title": "Learning Object 1023",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:32+00:00"
+    },
+    {
+      "id": 1024,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1024</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "es",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 45,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Design"
+      ],
+      "title": "Learning Object 1024",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:33+00:00"
+    },
+    {
+      "id": 1025,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1025</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 35,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Digital Literary \u0026 IT Skills",
+        "IT \u0026 Software"
+      ],
+      "title": "Learning Object 1025",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:33+00:00"
+    },
+    {
+      "id": 1026,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1026</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 25,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Personal Development"
+      ],
+      "title": "Learning Object 1026",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:33+00:00"
+    },
+    {
+      "id": 1027,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1027</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 45,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Personal Development",
+        "Health \u0026 Fitness"
+      ],
+      "title": "Learning Object 1027",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:43+00:00"
+    },
+    {
+      "id": 1028,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1028</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 95,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Digital Literary \u0026 IT Skills",
+        "IT \u0026 Software"
+      ],
+      "title": "Learning Object 1028",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:43+00:00"
+    },
+    {
+      "id": 1029,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1029</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 75,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Personal Development"
+      ],
+      "title": "Learning Object 1029",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:44+00:00"
+    },
+    {
+      "id": 1030,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1030</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 25,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Business",
+        "Management and Leadership"
+      ],
+      "title": "Learning Object 1030",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:44+00:00"
+    },
+    {
+      "id": 1031,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1031</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 50,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Personal Development",
+        "Health \u0026 Fitness"
+      ],
+      "title": "Learning Object 1031",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:34+00:00"
+    },
+    {
+      "id": 1032,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1032</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 80,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Personal Development"
+      ],
+      "title": "Learning Object 1032",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:34+00:00"
+    },
+    {
+      "id": 1033,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1033</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 55,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Personal Development"
+      ],
+      "title": "Learning Object 1033",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:35+00:00"
+    },
+    {
+      "id": 1034,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1034</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 25,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Business",
+        "Management and Leadership"
+      ],
+      "title": "Learning Object 1034",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:35+00:00"
+    },
+    {
+      "id": 1035,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1035</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 55,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Academics",
+        "Personal Development",
+        "Language"
+      ],
+      "title": "Learning Object 1035",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:35+00:00"
+    },
+    {
+      "id": 1036,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1036</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 25,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Digital Literary \u0026 IT Skills",
+        "IT \u0026 Software"
+      ],
+      "title": "Learning Object 1036",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:35+00:00"
+    },
+    {
+      "id": 1037,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1037</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 80,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Business",
+        "Management and Leadership"
+      ],
+      "title": "Learning Object 1037",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:46+00:00"
+    },
+    {
+      "id": 1038,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1038</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 25,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Academics",
+        "Personal Development",
+        "Language"
+      ],
+      "title": "Learning Object 1038",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:46+00:00"
+    },
+    {
+      "id": 1039,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1039</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "USD",
+        "price": 50,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [],
+      "title": "Learning Object 1039",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:47+00:00"
+    },
+    {
+      "id": 1040,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1040</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "USD",
+        "price": 0,
+        "tax": 0,
+        "tax_included": false
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Digital Literary \u0026 IT Skills",
+        "IT \u0026 Software"
+      ],
+      "title": "Learning Object 1040",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:37+00:00"
+    },
+    {
+      "id": 1041,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1041</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "USD",
+        "price": 0,
+        "tax": 0,
+        "tax_included": false
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Business",
+        "Personal Development",
+        "Industry Specific",
+        "Photography"
+      ],
+      "title": "Learning Object 1041",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:47+00:00"
+    },
+    {
+      "id": 1042,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1042</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "de",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 40,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Business",
+        "Management and Leadership"
+      ],
+      "title": "Learning Object 1042",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:37+00:00"
+    }
+  ],
+  "facets": {
+    "instance": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": 1866847,
+          "doc_count": 59,
+          "name": "GO1 Content"
+        },
+        {
+          "key": 101,
+          "doc_count": 20463,
+          "name": "Content provider 101"
+        },
+        {
+          "key": 102,
+          "doc_count": 9832,
+          "name": "Content provider 102"
+        },
+        {
+          "key": 103,
+          "doc_count": 8043,
+          "name": "Content provider 103"
+        },
+        {
+          "key": 104,
+          "doc_count": 2438,
+          "name": "Content provider 104"
+        },
+        {
+          "key": 105,
+          "doc_count": 264,
+          "name": "Content provider 105"
+        },
+        {
+          "key": 106,
+          "doc_count": 250,
+          "name": "Content provider 106"
+        },
+        {
+          "key": 107,
+          "doc_count": 105,
+          "name": "Content provider 107"
+        }
+      ]
+    },
+    "language": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": "en",
+          "doc_count": 72155
+        },
+        {
+          "key": "es",
+          "doc_count": 2765
+        },
+        {
+          "key": "pt",
+          "doc_count": 1780
+        },
+        {
+          "key": "de",
+          "doc_count": 1249
+        },
+        {
+          "key": "fr",
+          "doc_count": 1067
+        },
+        {
+          "key": "ja",
+          "doc_count": 747
+        },
+        {
+          "key": "zh",
+          "doc_count": 642
+        },
+        {
+          "key": "it",
+          "doc_count": 445
+        },
+        {
+          "key": "ru",
+          "doc_count": 348
+        },
+        {
+          "key": "tr",
+          "doc_count": 203
+        },
+        {
+          "key": "hu",
+          "doc_count": 98
+        },
+        {
+          "key": "en-gb",
+          "doc_count": 94
+        },
+        {
+          "key": "am",
+          "doc_count": 75
+        },
+        {
+          "key": "nl",
+          "doc_count": 70
+        },
+        {
+          "key": "cs",
+          "doc_count": 67
+        },
+        {
+          "key": "ko",
+          "doc_count": 64
+        },
+        {
+          "key": "th",
+          "doc_count": 44
+        },
+        {
+          "key": "hi",
+          "doc_count": 33
+        },
+        {
+          "key": "pl",
+          "doc_count": 29
+        },
+        {
+          "key": "ur",
+          "doc_count": 28
+        },
+        {
+          "key": "te",
+          "doc_count": 23
+        },
+        {
+          "key": "he",
+          "doc_count": 18
+        },
+        {
+          "key": "el",
+          "doc_count": 9
+        },
+        {
+          "key": "id",
+          "doc_count": 9
+        },
+        {
+          "key": "vi",
+          "doc_count": 9
+        },
+        {
+          "key": "fa",
+          "doc_count": 7
+        },
+        {
+          "key": "ro",
+          "doc_count": 6
+        },
+        {
+          "key": "nb",
+          "doc_count": 5
+        },
+        {
+          "key": "sv",
+          "doc_count": 5
+        },
+        {
+          "key": "ar",
+          "doc_count": 4
+        },
+        {
+          "key": "da",
+          "doc_count": 4
+        },
+        {
+          "key": "fi",
+          "doc_count": 4
+        },
+        {
+          "key": "mr",
+          "doc_count": 4
+        },
+        {
+          "key": "az",
+          "doc_count": 3
+        },
+        {
+          "key": "hr",
+          "doc_count": 3
+        },
+        {
+          "key": "tl",
+          "doc_count": 3
+        },
+        {
+          "key": "uk",
+          "doc_count": 3
+        },
+        {
+          "key": "af",
+          "doc_count": 2
+        },
+        {
+          "key": "bg",
+          "doc_count": 2
+        },
+        {
+          "key": "et",
+          "doc_count": 2
+        },
+        {
+          "key": "lv",
+          "doc_count": 2
+        },
+        {
+          "key": "ms",
+          "doc_count": 2
+        },
+        {
+          "key": "sk",
+          "doc_count": 2
+        },
+        {
+          "key": "sq",
+          "doc_count": 1
+        },
+        {
+          "key": "ta",
+          "doc_count": 1
+        },
+        {
+          "key": "uz",
+          "doc_count": 1
+        }
+      ]
+    },
+    "tag": {
+      "doc_count_error_upper_bound": 6,
+      "sum_other_doc_count": 3823,
+      "buckets": [
+        {
+          "key": "Communication",
+          "doc_count": 93,
+          "type": "premium"
+        },
+        {
+          "key": "Communication Skills",
+          "doc_count": 37,
+          "type": "premium"
+        },
+        {
+          "key": "Compliance",
+          "doc_count": 8846,
+          "type": "premium"
+        },
+        {
+          "key": "Customer Service",
+          "doc_count": 55,
+          "type": "premium"
+        },
+        {
+          "key": "Finance",
+          "doc_count": 1507,
+          "type": "premium"
+        },
+        {
+          "key": "GO1 Premium",
+          "doc_count": 243,
+          "type": "premium"
+        },
+        {
+          "key": "Health and Safety",
+          "doc_count": 61,
+          "type": "premium"
+        },
+        {
+          "key": "Human Resources",
+          "doc_count": 632,
+          "type": "premium"
+        },
+        {
+          "key": "Leadership",
+          "doc_count": 33,
+          "type": "premium"
+        },
+        {
+          "key": "Management",
+          "doc_count": 31,
+          "type": "premium"
+        },
+        {
+          "key": "Management and Leadership",
+          "doc_count": 7482,
+          "type": "premium"
+        },
+        {
+          "key": "MicroLearn",
+          "doc_count": 32,
+          "type": "premium"
+        },
+        {
+          "key": "Performance Management and Development",
+          "doc_count": 35,
+          "type": "premium"
+        },
+        {
+          "key": "Personal Development",
+          "doc_count": 13754,
+          "type": "premium"
+        },
+        {
+          "key": "Professional Development",
+          "doc_count": 117,
+          "type": "premium"
+        },
+        {
+          "key": "Project Management",
+          "doc_count": 153,
+          "type": "premium"
+        },
+        {
+          "key": "Sales",
+          "doc_count": 3313,
+          "type": "premium"
+        },
+        {
+          "key": "Technology",
+          "doc_count": 20540,
+          "type": "premium"
+        },
+        {
+          "key": "3D + Animation",
+          "doc_count": 602,
+          "type": "marketplace"
+        },
+        {
+          "key": "Academics",
+          "doc_count": 3443,
+          "type": "marketplace"
+        },
+        {
+          "key": "Accounting and Auditing",
+          "doc_count": 31,
+          "type": "marketplace"
+        },
+        {
+          "key": "Alabama",
+          "doc_count": 136,
+          "type": "marketplace"
+        },
+        {
+          "key": "Alabama Insurance Continuing Education",
+          "doc_count": 28,
+          "type": "marketplace"
+        },
+        {
+          "key": "Alaska",
+          "doc_count": 107,
+          "type": "marketplace"
+        },
+        {
+          "key": "All",
+          "doc_count": 214,
+          "type": "marketplace"
+        },
+        {
+          "key": "Android",
+          "doc_count": 31,
+          "type": "marketplace"
+        },
+        {
+          "key": "Application Development and Middleware",
+          "doc_count": 54,
+          "type": "marketplace"
+        },
+        {
+          "key": "Applying NERC Standards",
+          "doc_count": 28,
+          "type": "marketplace"
+        },
+        {
+          "key": "Arizona",
+          "doc_count": 40,
+          "type": "marketplace"
+        },
+        {
+          "key": "Arkansas",
+          "doc_count": 105,
+          "type": "marketplace"
+        },
+        {
+          "key": "Arkansas Insurance Continuing Education",
+          "doc_count": 28,
+          "type": "marketplace"
+        },
+        {
+          "key": "Arts \u0026 Humanities",
+          "doc_count": 137,
+          "type": "marketplace"
+        },
+        {
+          "key": "Audio + Music",
+          "doc_count": 368,
+          "type": "marketplace"
+        },
+        {
+          "key": "Australia",
+          "doc_count": 36,
+          "type": "marketplace"
+        },
+        {
+          "key": "Banking \u0026 Financial Compliance",
+          "doc_count": 54,
+          "type": "marketplace"
+        },
+        {
+          "key": "Bookkeeping and Accounting",
+          "doc_count": 30,
+          "type": "marketplace"
+        },
+        {
+          "key": "Business",
+          "doc_count": 24566,
+          "type": "marketplace"
+        },
+        {
+          "key": "Business Skills",
+          "doc_count": 8292,
+          "type": "marketplace"
+        },
+        {
+          "key": "CAD",
+          "doc_count": 397,
+          "type": "marketplace"
+        },
+        {
+          "key": "California Insurance Continuing Education",
+          "doc_count": 43,
+          "type": "marketplace"
+        },
+        {
+          "key": "Career Training",
+          "doc_count": 214,
+          "type": "marketplace"
+        },
+        {
+          "key": "Certifications",
+          "doc_count": 492,
+          "type": "marketplace"
+        },
+        {
+          "key": "Cloud \u0026 Virtual",
+          "doc_count": 39,
+          "type": "marketplace"
+        },
+        {
+          "key": "Colorado Insurance Continuing Education",
+          "doc_count": 29,
+          "type": "marketplace"
+        },
+        {
+          "key": "Combined Cycle Technologies Series",
+          "doc_count": 39,
+          "type": "marketplace"
+        },
+        {
+          "key": "Communications",
+          "doc_count": 41,
+          "type": "marketplace"
+        },
+        {
+          "key": "Competency Development",
+          "doc_count": 185,
+          "type": "marketplace"
+        },
+        {
+          "key": "Computer_Science",
+          "doc_count": 96,
+          "type": "marketplace"
+        },
+        {
+          "key": "Computers",
+          "doc_count": 136,
+          "type": "marketplace"
+        },
+        {
+          "key": "Computer Science",
+          "doc_count": 326,
+          "type": "marketplace"
+        },
+        {
+          "key": "Connecticut Insurance Continuing Education",
+          "doc_count": 29,
+          "type": "marketplace"
+        },
+        {
+          "key": "Construction Safety Training",
+          "doc_count": 89,
+          "type": "marketplace"
+        },
+        {
+          "key": "Corporate Compliance",
+          "doc_count": 43,
+          "type": "marketplace"
+        },
+        {
+          "key": "CPA CPE",
+          "doc_count": 133,
+          "type": "marketplace"
+        },
+        {
+          "key": "CPDforMe.com.au",
+          "doc_count": 58,
+          "type": "marketplace"
+        },
+        {
+          "key": "Data Center and Virtualization",
+          "doc_count": 78,
+          "type": "marketplace"
+        },
+        {
+          "key": "Data Science",
+          "doc_count": 28,
+          "type": "marketplace"
+        },
+        {
+          "key": "Delaware Insurance Continuing Education",
+          "doc_count": 31,
+          "type": "marketplace"
+        },
+        {
+          "key": "Design",
+          "doc_count": 4192,
+          "type": "marketplace"
+        },
+        {
+          "key": "Design and Media Arts",
+          "doc_count": 37,
+          "type": "marketplace"
+        },
+        {
+          "key": "Developer",
+          "doc_count": 982,
+          "type": "marketplace"
+        },
+        {
+          "key": "Development",
+          "doc_count": 6622,
+          "type": "marketplace"
+        },
+        {
+          "key": "Digital Literary \u0026 IT Skills",
+          "doc_count": 5337,
+          "type": "marketplace"
+        },
+        {
+          "key": "Distribution System Training",
+          "doc_count": 72,
+          "type": "marketplace"
+        },
+        {
+          "key": "Distribution System Training Series",
+          "doc_count": 39,
+          "type": "marketplace"
+        },
+        {
+          "key": "Distribution Training",
+          "doc_count": 68,
+          "type": "marketplace"
+        },
+        {
+          "key": "Education",
+          "doc_count": 30,
+          "type": "marketplace"
+        },
+        {
+          "key": "Education + Elearning",
+          "doc_count": 230,
+          "type": "marketplace"
+        },
+        {
+          "key": "Electrician CE",
+          "doc_count": 33,
+          "type": "marketplace"
+        },
+        {
+          "key": "Engagement and Retention",
+          "doc_count": 171,
+          "type": "marketplace"
+        },
+        {
+          "key": "Engineering",
+          "doc_count": 63,
+          "type": "marketplace"
+        },
+        {
+          "key": "Engineering PDH",
+          "doc_count": 3411,
+          "type": "marketplace"
+        },
+        {
+          "key": "Environmental Health and Safety",
+          "doc_count": 418,
+          "type": "marketplace"
+        },
+        {
+          "key": "Ethics",
+          "doc_count": 43,
+          "type": "marketplace"
+        },
+        {
+          "key": "Ethics \u0026 Code of Conduct",
+          "doc_count": 30,
+          "type": "marketplace"
+        },
+        {
+          "key": "Ethics \u0026 Compliance",
+          "doc_count": 52,
+          "type": "marketplace"
+        },
+        {
+          "key": "Financial Services Education",
+          "doc_count": 223,
+          "type": "marketplace"
+        },
+        {
+          "key": "Firm Element",
+          "doc_count": 120,
+          "type": "marketplace"
+        },
+        {
+          "key": "Florida",
+          "doc_count": 115,
+          "type": "marketplace"
+        },
+        {
+          "key": "Food and Beverage Programs",
+          "doc_count": 498,
+          "type": "marketplace"
+        },
+        {
+          "key": "Food and Beverage ProgramsAlcohol Seller\/Server Education",
+          "doc_count": 72,
+          "type": "marketplace"
+        },
+        {
+          "key": "Food Safety Manager Certification - Online Training",
+          "doc_count": 262,
+          "type": "marketplace"
+        },
+        {
+          "key": "General Business Skills",
+          "doc_count": 33,
+          "type": "marketplace"
+        },
+        {
+          "key": "General Safety",
+          "doc_count": 69,
+          "type": "marketplace"
+        },
+        {
+          "key": "Generation Training",
+          "doc_count": 109,
+          "type": "marketplace"
+        },
+        {
+          "key": "Georgia",
+          "doc_count": 139,
+          "type": "marketplace"
+        },
+        {
+          "key": "Georgia Insurance Continuing Education",
+          "doc_count": 31,
+          "type": "marketplace"
+        },
+        {
+          "key": "Georgia Real Estate Continuing Education",
+          "doc_count": 36,
+          "type": "marketplace"
+        },
+        {
+          "key": "Georgia Tech Masters in CS",
+          "doc_count": 32,
+          "type": "marketplace"
+        },
+        {
+          "key": "HACCP Training",
+          "doc_count": 146,
+          "type": "marketplace"
+        },
+        {
+          "key": "Health \u0026 Fitness",
+          "doc_count": 2203,
+          "type": "marketplace"
+        },
+        {
+          "key": "Health \u0026 Safety (EHS)",
+          "doc_count": 100,
+          "type": "marketplace"
+        },
+        {
+          "key": "HR",
+          "doc_count": 56,
+          "type": "marketplace"
+        },
+        {
+          "key": "HR, Ethics and Compliance",
+          "doc_count": 131,
+          "type": "marketplace"
+        },
+        {
+          "key": "HR Compliance",
+          "doc_count": 52,
+          "type": "marketplace"
+        },
+        {
+          "key": "HVAC Contractor CE",
+          "doc_count": 282,
+          "type": "marketplace"
+        },
+        {
+          "key": "HVACR- Contractor",
+          "doc_count": 99,
+          "type": "marketplace"
+        },
+        {
+          "key": "HVACR- Technician",
+          "doc_count": 100,
+          "type": "marketplace"
+        },
+        {
+          "key": "Idaho",
+          "doc_count": 104,
+          "type": "marketplace"
+        },
+        {
+          "key": "Illinois",
+          "doc_count": 114,
+          "type": "marketplace"
+        },
+        {
+          "key": "Indiana",
+          "doc_count": 119,
+          "type": "marketplace"
+        },
+        {
+          "key": "Industrial Maintenance",
+          "doc_count": 107,
+          "type": "marketplace"
+        },
+        {
+          "key": "Industrial Skills",
+          "doc_count": 552,
+          "type": "marketplace"
+        },
+        {
+          "key": "Industry Specific",
+          "doc_count": 12996,
+          "type": "marketplace"
+        },
+        {
+          "key": "Insurance Continuing Education",
+          "doc_count": 1156,
+          "type": "marketplace"
+        },
+        {
+          "key": "Insurance Education",
+          "doc_count": 1418,
+          "type": "marketplace"
+        },
+        {
+          "key": "Insurance Pre-Licensing and Exam Prep",
+          "doc_count": 201,
+          "type": "marketplace"
+        },
+        {
+          "key": "Iowa",
+          "doc_count": 104,
+          "type": "marketplace"
+        },
+        {
+          "key": "Iowa Insurance Continuing Education",
+          "doc_count": 29,
+          "type": "marketplace"
+        },
+        {
+          "key": "IT",
+          "doc_count": 708,
+          "type": "marketplace"
+        },
+        {
+          "key": "IT \u0026 Software",
+          "doc_count": 3393,
+          "type": "marketplace"
+        },
+        {
+          "key": "IT and Software Skills",
+          "doc_count": 666,
+          "type": "marketplace"
+        },
+        {
+          "key": "Kansas",
+          "doc_count": 104,
+          "type": "marketplace"
+        },
+        {
+          "key": "Kentucky",
+          "doc_count": 111,
+          "type": "marketplace"
+        },
+        {
+          "key": "Language",
+          "doc_count": 1003,
+          "type": "marketplace"
+        },
+        {
+          "key": "Language Learning",
+          "doc_count": 39,
+          "type": "marketplace"
+        },
+        {
+          "key": "Law CPD",
+          "doc_count": 48,
+          "type": "marketplace"
+        },
+        {
+          "key": "Legal Careers",
+          "doc_count": 80,
+          "type": "marketplace"
+        },
+        {
+          "key": "Life Skills",
+          "doc_count": 94,
+          "type": "marketplace"
+        },
+        {
+          "key": "Lifestyle",
+          "doc_count": 1418,
+          "type": "marketplace"
+        },
+        {
+          "key": "Louisiana",
+          "doc_count": 136,
+          "type": "marketplace"
+        },
+        {
+          "key": "Maine",
+          "doc_count": 103,
+          "type": "marketplace"
+        },
+        {
+          "key": "Marketing",
+          "doc_count": 3437,
+          "type": "marketplace"
+        },
+        {
+          "key": "Maryland",
+          "doc_count": 106,
+          "type": "marketplace"
+        },
+        {
+          "key": "Maryland Insurance Continuing Education",
+          "doc_count": 31,
+          "type": "marketplace"
+        },
+        {
+          "key": "Maths \u0026 Science",
+          "doc_count": 57,
+          "type": "marketplace"
+        },
+        {
+          "key": "Medical and Fitness Careers",
+          "doc_count": 71,
+          "type": "marketplace"
+        },
+        {
+          "key": "Michigan",
+          "doc_count": 30,
+          "type": "marketplace"
+        },
+        {
+          "key": "Microsoft Excel",
+          "doc_count": 32,
+          "type": "marketplace"
+        },
+        {
+          "key": "Minnesota",
+          "doc_count": 105,
+          "type": "marketplace"
+        },
+        {
+          "key": "Mississippi",
+          "doc_count": 103,
+          "type": "marketplace"
+        },
+        {
+          "key": "Missouri",
+          "doc_count": 114,
+          "type": "marketplace"
+        },
+        {
+          "key": "Montana",
+          "doc_count": 111,
+          "type": "marketplace"
+        },
+        {
+          "key": "Montana Insurance Continuing Education",
+          "doc_count": 29,
+          "type": "marketplace"
+        },
+        {
+          "key": "Music",
+          "doc_count": 1376,
+          "type": "marketplace"
+        },
+        {
+          "key": "NATE",
+          "doc_count": 31,
+          "type": "marketplace"
+        },
+        {
+          "key": "Nebraska",
+          "doc_count": 105,
+          "type": "marketplace"
+        },
+        {
+          "key": "NERC Continuing Education",
+          "doc_count": 153,
+          "type": "marketplace"
+        },
+        {
+          "key": "Networking Solutions",
+          "doc_count": 231,
+          "type": "marketplace"
+        },
+        {
+          "key": "Network Security",
+          "doc_count": 50,
+          "type": "marketplace"
+        },
+        {
+          "key": "Nevada",
+          "doc_count": 114,
+          "type": "marketplace"
+        },
+        {
+          "key": "Nevada Insurance Continuing Education",
+          "doc_count": 32,
+          "type": "marketplace"
+        },
+        {
+          "key": "New Hampshire",
+          "doc_count": 104,
+          "type": "marketplace"
+        },
+        {
+          "key": "New Jersey",
+          "doc_count": 114,
+          "type": "marketplace"
+        },
+        {
+          "key": "New Jersey Insurance Continuing Education",
+          "doc_count": 38,
+          "type": "marketplace"
+        },
+        {
+          "key": "New Mexico",
+          "doc_count": 106,
+          "type": "marketplace"
+        },
+        {
+          "key": "New York",
+          "doc_count": 112,
+          "type": "marketplace"
+        },
+        {
+          "key": "North Carolina",
+          "doc_count": 115,
+          "type": "marketplace"
+        },
+        {
+          "key": "North Carolina Insurance Continuing Education",
+          "doc_count": 35,
+          "type": "marketplace"
+        },
+        {
+          "key": "North Dakota",
+          "doc_count": 106,
+          "type": "marketplace"
+        },
+        {
+          "key": "North Dakota Insurance Continuing Education",
+          "doc_count": 32,
+          "type": "marketplace"
+        },
+        {
+          "key": "NSW",
+          "doc_count": 50,
+          "type": "marketplace"
+        },
+        {
+          "key": "Occupational Health \u0026 Safety Training - OSHA",
+          "doc_count": 209,
+          "type": "marketplace"
+        },
+        {
+          "key": "Office Productivity",
+          "doc_count": 2076,
+          "type": "marketplace"
+        },
+        {
+          "key": "Ohio",
+          "doc_count": 109,
+          "type": "marketplace"
+        },
+        {
+          "key": "Ohio Insurance Continuing Education",
+          "doc_count": 38,
+          "type": "marketplace"
+        },
+        {
+          "key": "Oklahoma",
+          "doc_count": 132,
+          "type": "marketplace"
+        },
+        {
+          "key": "Onboarding",
+          "doc_count": 49,
+          "type": "marketplace"
+        },
+        {
+          "key": "Operations",
+          "doc_count": 64,
+          "type": "marketplace"
+        },
+        {
+          "key": "Oregon",
+          "doc_count": 106,
+          "type": "marketplace"
+        },
+        {
+          "key": "Pennsylvania",
+          "doc_count": 115,
+          "type": "marketplace"
+        },
+        {
+          "key": "Pennsylvania Insurance Continuing Education",
+          "doc_count": 48,
+          "type": "marketplace"
+        },
+        {
+          "key": "Personal Development and Lifestyle",
+          "doc_count": 102,
+          "type": "marketplace"
+        },
+        {
+          "key": "Photography",
+          "doc_count": 1766,
+          "type": "marketplace"
+        },
+        {
+          "key": "Power and Utilities",
+          "doc_count": 447,
+          "type": "marketplace"
+        },
+        {
+          "key": "Professional Skills",
+          "doc_count": 49,
+          "type": "marketplace"
+        },
+        {
+          "key": "QLD",
+          "doc_count": 37,
+          "type": "marketplace"
+        },
+        {
+          "key": "Real Estate Continuing Education",
+          "doc_count": 247,
+          "type": "marketplace"
+        },
+        {
+          "key": "Real Estate Education",
+          "doc_count": 431,
+          "type": "marketplace"
+        },
+        {
+          "key": "Routing and Switching",
+          "doc_count": 49,
+          "type": "marketplace"
+        },
+        {
+          "key": "Safety",
+          "doc_count": 2154,
+          "type": "marketplace"
+        },
+        {
+          "key": "Science",
+          "doc_count": 188,
+          "type": "marketplace"
+        },
+        {
+          "key": "Security",
+          "doc_count": 44,
+          "type": "marketplace"
+        },
+        {
+          "key": "Server\/OS Technologies",
+          "doc_count": 78,
+          "type": "marketplace"
+        },
+        {
+          "key": "Server Infrastructure",
+          "doc_count": 46,
+          "type": "marketplace"
+        },
+        {
+          "key": "Social Media and Digital Marketing",
+          "doc_count": 46,
+          "type": "marketplace"
+        },
+        {
+          "key": "Social Science",
+          "doc_count": 163,
+          "type": "marketplace"
+        },
+        {
+          "key": "South Carolina",
+          "doc_count": 115,
+          "type": "marketplace"
+        },
+        {
+          "key": "South Dakota",
+          "doc_count": 108,
+          "type": "marketplace"
+        },
+        {
+          "key": "System Protection Technology",
+          "doc_count": 75,
+          "type": "marketplace"
+        },
+        {
+          "key": "Teacher Training",
+          "doc_count": 629,
+          "type": "marketplace"
+        },
+        {
+          "key": "Tennessee",
+          "doc_count": 113,
+          "type": "marketplace"
+        },
+        {
+          "key": "Test Prep",
+          "doc_count": 443,
+          "type": "marketplace"
+        },
+        {
+          "key": "Texas",
+          "doc_count": 131,
+          "type": "marketplace"
+        },
+        {
+          "key": "Texas Insurance Continuing Education",
+          "doc_count": 49,
+          "type": "marketplace"
+        },
+        {
+          "key": "Trades and Engineering",
+          "doc_count": 3739,
+          "type": "marketplace"
+        },
+        {
+          "key": "Transmission System Operations",
+          "doc_count": 39,
+          "type": "marketplace"
+        },
+        {
+          "key": "Transmission Training",
+          "doc_count": 97,
+          "type": "marketplace"
+        },
+        {
+          "key": "Underground Storage Tank (UST) Training",
+          "doc_count": 145,
+          "type": "marketplace"
+        },
+        {
+          "key": "Utah",
+          "doc_count": 108,
+          "type": "marketplace"
+        },
+        {
+          "key": "Video",
+          "doc_count": 645,
+          "type": "marketplace"
+        },
+        {
+          "key": "Virginia",
+          "doc_count": 119,
+          "type": "marketplace"
+        },
+        {
+          "key": "Virginia Insurance Continuing Education",
+          "doc_count": 29,
+          "type": "marketplace"
+        },
+        {
+          "key": "Washington",
+          "doc_count": 29,
+          "type": "marketplace"
+        },
+        {
+          "key": "Washington Insurance Continuing Education",
+          "doc_count": 29,
+          "type": "marketplace"
+        },
+        {
+          "key": "Web",
+          "doc_count": 576,
+          "type": "marketplace"
+        },
+        {
+          "key": "Web Development",
+          "doc_count": 66,
+          "type": "marketplace"
+        },
+        {
+          "key": "West Virginia",
+          "doc_count": 106,
+          "type": "marketplace"
+        },
+        {
+          "key": "Workplace success",
+          "doc_count": 58,
+          "type": "marketplace"
+        },
+        {
+          "key": "Wyoming",
+          "doc_count": 97,
+          "type": "marketplace"
+        }
+      ]
+    }
+  }
+}

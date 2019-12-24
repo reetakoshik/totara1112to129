@@ -1,0 +1,12 @@
+{
+    "require": {
+        "validator/livr": "dev-master"
+    },
+    "autoload": {
+        "files": [
+        	"UserPositionCommand.php", 
+        	"Validator.php", 
+        	"X.php"
+       	]
+    }
+}

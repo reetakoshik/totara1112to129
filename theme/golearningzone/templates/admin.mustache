@@ -1,0 +1,42 @@
+{{> theme_golearningzone/head}}
+    <body   {{{body_attributes}}} 
+            {{#palette}} 
+                data-palette="{{palette}}" 
+            {{/palette}}
+            {{#bg_image}}
+                style="background-image: url('{{bg_image}}');"
+            {{/bg_image}}
+        >
+        {{{standard_top_of_body_html}}}
+        {{{header}}}
+        <div class="container text-left">
+            <div id="page" class="container-fluid">
+                {{{breadcrumbs}}}
+                <div id="page-content">
+                    <div class="row">
+                        {{ #side-pre }}
+                            <div class="col-md-3">
+                                {{{ side-pre }}}
+                            </div>
+                        {{ /side-pre }}
+                        <div class="col-md-9">
+                            {{{course_content_header}}}
+                            {{{main_content}}}
+                            {{{course_content_footer}}}
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+        {{{footer}}}
+        {{{standard_end_of_body_html}}}
+        <script src="{{siteurl}}/theme/golearningzone/js/panel.js"></script>
+        <script>
+            window.onload = function() {
+                new PanelWrapper().init();
+                new Header().init();
+                new Layout().init();
+            };
+        </script>
+    </body>
+</html>

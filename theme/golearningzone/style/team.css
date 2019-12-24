@@ -1,0 +1,49 @@
+.path-my .reportbuilder-table .user_namewithlinks ul {
+    overflow: hidden;
+    max-width: 300px;
+}
+
+.dir-ltr.path-my .reportbuilder-table .user_namewithlinks .text-wrapper {
+    margin-left: 70px;
+    margin-top: -65px;
+    width: calc(100% - 70px);
+}
+.dir-rtl.path-my .reportbuilder-table .user_namewithlinks .text-wrapper {
+    margin-right: 70px;
+    margin-top: -65px;
+    width: calc(100% - 70px);
+}
+
+.dir-rtl.path-my .reportbuilder-table .user_namewithlinks ul {
+    margin-left: 0;
+}
+
+.path-my .reportbuilder-table .user_namewithlinks ul li {
+	float: none;
+    list-style-type: none;
+    display: inline;
+    overflow: hidden;
+}
+
+.path-my .reportbuilder-table .user_namewithlinks li:first-child a,
+.path-my .reportbuilder-table .user_namewithlinks li a {
+	border: none;
+	font-size: 12px;
+    line-height: 16px;
+    padding: 0;
+    text-decoration: underline;
+}
+
+.path-my table .userpicture {
+	height: 60px;
+	width: 60px;
+    min-height: 60px;
+    text-indent: -9999px;
+}
+
+.path-my #team_members .user_namewithlinks .name {
+	font-size: 16pt;
+    font-weight: normal;
+    text-transform: capitalize;
+	padding: 0;
+}

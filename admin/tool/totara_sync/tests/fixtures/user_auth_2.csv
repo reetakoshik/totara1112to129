@@ -1,0 +1,3 @@
+"idnumber","timemodified","username","deleted","firstname","lastname","email","auth"
+1,0,upload1,0,Upload,User 1,upload1@email.com,manual
+2,0,upload2,0,Upload,User 2,upload2@email.com,shibboleth

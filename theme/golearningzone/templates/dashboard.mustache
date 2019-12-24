@@ -1,0 +1,51 @@
+{{> theme_golearningzone/head}}
+    <body   {{{body_attributes}}} 
+            {{#palette}} 
+                data-palette="{{palette}}" 
+            {{/palette}}
+            {{#bg_image}}
+                style="background-image: url('{{bg_image}}');"
+            {{/bg_image}}
+        >
+        {{{standard_top_of_body_html}}}
+        {{{header}}}
+        <div class="container text-left">
+            <div id="page" class="container-fluid {{#is_editing}}editing_on{{/is_editing}}">
+                {{{breadcrumbs}}}
+                <div id="page-content">
+                    <div class="row">
+                        {{{ first }}}
+                    </div>
+                    <div class="row">
+                        {{{ second-left }}}
+                        {{{ second-right }}}
+                    </div>
+                    <div class="row">
+                        {{{ third-left }}}
+                        {{{ third-center }}}
+                        {{{ third-right }}}
+                    </div>
+                    <div class="row">
+                        {{{ fourth-left }}}
+                        {{{ fourth-center }}}
+                        {{{ fourth-right }}}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 region">
+                            {{{ side-pre }}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{{main_content}}}
+        </div>
+        {{{footer}}}
+        {{{standard_end_of_body_html}}}
+        <script>
+            window.onload = function() {
+                new Header().init();
+                new Layout().init();
+            }
+        </script>
+    </body>
+</html>

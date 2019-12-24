@@ -1,0 +1,7 @@
+This files describes API changes in /blocks/totara_report_table,
+information provided here is intended especially for developers.
+
+=== 11.0 ===
+* The CSS class names below have been replaced with the following:
+    - "instantreportwait" => "block_totara_report_table_instant_wait"
+    - "rb-loading" => "block_totara_report_table_loading"

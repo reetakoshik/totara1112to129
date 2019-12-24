@@ -1,0 +1,135 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2017 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Kevin Hottinger <kevin.hottinger@totaralearning.com>
+   @package totara_form
+}}
+{{!
+
+    @template totara_form/group_wizard
+
+    This template generates Totara form group wizard.
+
+    Classes required for JS:
+    * tf_wizard_progress
+    * tf_wizard_progress_bar_item
+    * tf_wizard_progress_bar_item_jumpable
+
+    Data attributes required for JS:
+    * jump-to-stage
+
+    Context variables required for this template:
+     * id: string id of this item
+     * name: string name of this item
+     * currentstage: string current stage name
+     * nextstage: string next stage name
+     * wizardstageprogress: string containing current stage out of stages
+     * previousstage: string previous stage name
+     * stagenumber: int current stage number
+     * numberofstages: int number of stages
+     * isonlaststage: bool on last stage?
+     * form_item_template: string this template, used for dynamic partials
+     * frozen: bool
+     * amdmodule: string
+     * items: array containing stage items
+     * items.iscurrentstage: bool on current stage?
+     * items.isbeforecurrentstage: bool before current stage?
+     * items.preventjumpahead: bool jump ahead not allowed
+     * items.name: string stage name
+     * items.title: string stage title
+     * items.islaststage: bool last stage?
+     * items.elementclassification: string 'group' or 'element'
+     * items.elementtype: element type
+     * items.elementid: element id
+
+    Example context (json):
+      There is no example for this template.
+}}
+
+<div id="{{id}}" class="tf_group totara_form_group_wizard" data-element-name="{{name}}">
+    <input type="hidden" name="{{name}}__changestage" value="" />
+    <input type="hidden" name="{{name}}__currentstage" value="{{currentstage}}" />
+    <input type="hidden" name="{{name}}__nextstage" value="{{nextstage}}" />
+    <input type="hidden" name="{{name}}__prevstage" value="{{previousstage}}" />
+
+    <div class="tf_wizard_progress"
+         role="progressbar"
+         aria-valuenow="{{stagenumber}}"
+         aria-valuemin="1"
+         aria-valuemax="{{numberofstages}}">
+
+        <div class="tf_wizard_progress_stagetext">
+            {{wizardstageprogress}}
+        </div>
+
+        <ol class="tf_wizard_progress_bar">
+            {{#items}}<li
+                {{#iscurrentstage}}
+                    class="tf_wizard_progress_bar_item tf_wizard_progress_bar_item_current"
+                {{/iscurrentstage}}
+                {{#isbeforecurrentstage}}
+                    class="tf_wizard_progress_bar_item tf_wizard_progress_bar_item_jumpable"
+                {{/isbeforecurrentstage}}
+                {{#isaftercurrentstage}}{{#preventjumpahead}}
+                    class="tf_wizard_progress_bar_item tf_wizard_progress_bar_item_disabled"
+                {{/preventjumpahead}}
+                {{^preventjumpahead}}
+                    class="tf_wizard_progress_bar_item tf_wizard_progress_bar_item_jumpable"
+                {{/preventjumpahead}}
+                {{/isaftercurrentstage}}
+                data-jump-to-stage="{{name}}">
+                <a href="#" class="tf_wizard_progress_bar_item_link">
+                    <span class="tf_wizard_progress_bar_item_text">{{title}}</span>
+                    {{^islaststage}}
+                    <div class="tf_wizard_progress_bar_arrow"></div>
+                    {{/islaststage}}
+                </a>
+            </li>{{/items}}
+        </ol>
+    </div>
+
+    <div class="tf_wizard_stages">
+        {{#items}}
+            <div data-item-classification="{{elementclassification}}"
+                 data-element-type="{{elementtype}}"
+                 data-element-id="{{elementid}}"
+                 data-element-template="{{form_item_template}}"
+                 data-element-frozen="{{frozen}}"
+                 {{#amdmodule}}data-element-amd-module="{{.}}"{{/amdmodule}}
+                 class="nostyles">
+                {{> &&form_item_template }}
+            </div>
+        {{/items}}
+    </div>
+
+    <div class="tf_group totara_form_group_buttons clearfix">
+        {{^isonlaststage}}<input type="button"
+                                 name="changestage"
+                                 value="{{wizardnextbtn}}"
+                                 class="btn btn_next btn_primary"
+                                 data-jump-to-stage="{{next_stage_data_attr}}"/>{{/isonlaststage}}
+        {{#isonlaststage}}<input type="submit"
+                                 name="submitbutton"
+                                 value="{{wizardsubmitbtn}}"
+                                 class="btn btn_next btn_primary"/>{{/isonlaststage}}
+        <input type="submit"
+               name="cancelbutton"
+               value="{{wizardcancelbtn}}"
+               class="btn-secondary"/>
+    </div>
+</div>

@@ -1,0 +1,155 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2015 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template totara_hierarchy/mygoals_company_table
+
+    Create a toolbars area for a table.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+
+    Example context (json):
+    {
+        "data": {
+            "table": {
+                "body": [
+                    {
+                        "cells": [
+                            {
+                                "abbr": null,
+                                "cellid": null,
+                                "cellscope": null,
+                                "colspan": null,
+                                "rowspan": null,
+                                "column": "0",
+                                "content": "<a href=\"#\">Goal 9</a>",
+                                "cellattributes": null,
+                                "cellclasses": null,
+                                "cellstyle": null,
+                                "header": false,
+                                "lastcol": false
+                            },
+                            {
+                                "abbr": null,
+                                "cellid": null,
+                                "cellscope": null,
+                                "colspan": null,
+                                "rowspan": null,
+                                "column": "1",
+                                "content": "<form action=\"#\" method=\"get\"><input type=\"hidden\" name=\"nojs\" value=\"1\" /><input type=\"hidden\" name=\"scope\" value=\"2\" /><input type=\"hidden\" name=\"userid\" value=\"2\" /><input type=\"hidden\" name=\"goalitemid\" value=\"44\" /><input type=\"hidden\" name=\"sesskey\" value=\"uq16iYKsb1\" /><select id=\"company-goal-44\" class=\"select company_scalevalue_selector\" data-goalid=\"44\" name=\"scalevalueid\"><option value=\"3\">Goal Completed</option><option value=\"2\">Goal In Progress</option><option selected=\"selected\" value=\"1\">Goal Assigned</option></select><noscript><input type=\"submit\" id=\"update-73\" value=\"Update\" /></noscript></form>",
+                                "cellattributes": null,
+                                "cellclasses": null,
+                                "cellstyle": null,
+                                "header": false,
+                                "lastcol": false
+                            },
+                            {
+                                "abbr": null,
+                                "cellid": null,
+                                "cellscope": null,
+                                "colspan": null,
+                                "rowspan": null,
+                                "column": "2",
+                                "content": "Individually by: Admin User <a class=\"action-icon\" href=\"#\"><img class=\"smallicon\" alt=\"Delete\" title=\"Delete\" src=\"__WWWROOT__/theme/image.php?theme=__THEME__&amp;amp;component=core&amp;amp;image=t%2Fdelete\" /></a>",
+                                "cellattributes": null,
+                                "cellclasses": null,
+                                "cellstyle": null,
+                                "header": false,
+                                "lastcol": true
+                            }
+                        ],
+                        "divider": false,
+                        "lastrow": true,
+                        "rowattributes": [
+
+                        ],
+                        "rowclasses": "company_row",
+                        "rowid": null,
+                        "rowstyle": null
+                    }
+                ],
+                "caption": null,
+                "cellpadding": null,
+                "cellspacing": null,
+                "columns": 3,
+                "has_head": true,
+                "has_body": true,
+                "head": [
+                    {
+                        "abbr": null,
+                        "cellid": null,
+                        "cellscope": "col",
+                        "colspan": null,
+                        "rowspan": null,
+                        "column": "0",
+                        "content": "Name",
+                        "cellattributes": null,
+                        "cellclasses": null,
+                        "cellstyle": null,
+                        "header": true,
+                        "lastcol": false
+                    },
+                    {
+                        "abbr": null,
+                        "cellid": null,
+                        "cellscope": "col",
+                        "colspan": null,
+                        "rowspan": null,
+                        "column": "1",
+                        "content": "Status",
+                        "cellattributes": null,
+                        "cellclasses": null,
+                        "cellstyle": null,
+                        "header": true,
+                        "lastcol": false
+                    },
+                    {
+                        "abbr": null,
+                        "cellid": null,
+                        "cellscope": "col",
+                        "colspan": null,
+                        "rowspan": null,
+                        "column": "2",
+                        "content": "Assigned via",
+                        "cellattributes": null,
+                        "cellclasses": null,
+                        "cellstyle": null,
+                        "header": true,
+                        "lastcol": true
+                    }
+                ],
+                "id": null,
+                "summary": null,
+                "tableattributes": [
+
+                ],
+                "tableclasses": "company_table fullwidth generaltable",
+                "width": null
+            }
+        }
+    }
+}}
+<div id="company_goals_table" class="individual">
+    {{#data}}{{>core/table}}{{/data}}
+</div>

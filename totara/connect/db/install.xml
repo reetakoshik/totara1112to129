@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="totara/connect/db" VERSION="20161017" COMMENT="XMLDB file for Totara Connect server"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="totara_connect_clients" COMMENT="List of client systems registered with this server">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="status" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="0 means ok, anything else means do not talk with the client system"/>
+        <FIELD NAME="clientidnumber" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="Unique client ID, used in client requests"/>
+        <FIELD NAME="clientsecret" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="Shared secret, used in client requests"/>
+        <FIELD NAME="clienttype" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="LMS or Social"/>
+        <FIELD NAME="clienturl" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Web address of the client system"/>
+        <FIELD NAME="clientname" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Name of the client system"/>
+        <FIELD NAME="clientcomment" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Comment related to this client system"/>
+        <FIELD NAME="serversecret" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="Shared secret, used by the client in each server request"/>
+        <FIELD NAME="cohortid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Optional cohort restriction, if specified only cohort members are synced, all other users are completely ignored"/>
+        <FIELD NAME="syncprofilefields" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Send user profile fields data to clients"/>
+        <FIELD NAME="addnewcohorts" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Automatically add all new cohorts"/>
+        <FIELD NAME="addnewcourses" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Automatically add all new courses"/>
+        <FIELD NAME="syncjobs" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Send job assignments data to clients"/>
+        <FIELD NAME="allowpluginsepservices" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Allow clients to access any plugin services"/>
+        <FIELD NAME="apiversion" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The API version used for communication with this client"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="cohortid" TYPE="foreign" FIELDS="cohortid" REFTABLE="cohort" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="clientidnumber" UNIQUE="true" FIELDS="clientidnumber"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="totara_connect_sso_sessions" COMMENT="List of all SSO sessions on client systems connect to this server">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="clientid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="sid" TYPE="char" LENGTH="128" NOTNULL="true" SEQUENCE="false" COMMENT="Session id of the user session on the TC server"/>
+        <FIELD NAME="ssotoken" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="Token identifying SSO session on TC client"/>
+        <FIELD NAME="active" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Set to 1 after client fetches user data via get_sso_user"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="clientid" TYPE="foreign" FIELDS="clientid" REFTABLE="totara_connect_clients" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="ssotoken" UNIQUE="true" FIELDS="ssotoken"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="totara_connect_client_cohorts" COMMENT="List of cohorts synced to a client, the members are restricted by totara_connect_clients.cohortid if specified">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="clientid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="cohortid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="clientid" TYPE="foreign" FIELDS="clientid" REFTABLE="totara_connect_clients" REFFIELDS="id"/>
+        <KEY NAME="cohortid" TYPE="foreign" FIELDS="cohortid" REFTABLE="cohort" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="clientid-cohortid" UNIQUE="true" FIELDS="clientid, cohortid" COMMENT="Prevent duplicates"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="totara_connect_client_courses" COMMENT="List of courses synced to a client, the enrolled users are restricted by totara_connect_clients.cohortid if specified">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="clientid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="clientid" TYPE="foreign" FIELDS="clientid" REFTABLE="totara_connect_clients" REFFIELDS="id"/>
+        <KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="clientid-courseid" UNIQUE="true" FIELDS="clientid, courseid" COMMENT="Prevent duplicates"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="totara_connect_client_pos_frameworks" COMMENT="List of position frameworks synced to a client">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="clientid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="fid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="clientid" TYPE="foreign" FIELDS="clientid" REFTABLE="totara_connect_clients" REFFIELDS="id"/>
+        <KEY NAME="fid" TYPE="foreign" FIELDS="fid" REFTABLE="pos_framework" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="clientid-fid" UNIQUE="true" FIELDS="clientid, fid" COMMENT="Prevent duplicates"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="totara_connect_client_org_frameworks" COMMENT="List of organisation frameworks synced to a client">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="clientid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="fid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="clientid" TYPE="foreign" FIELDS="clientid" REFTABLE="totara_connect_clients" REFFIELDS="id"/>
+        <KEY NAME="fid" TYPE="foreign" FIELDS="fid" REFTABLE="org_framework" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="clientid-fid" UNIQUE="true" FIELDS="clientid, fid" COMMENT="Prevent duplicates"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

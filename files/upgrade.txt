@@ -1,0 +1,6 @@
+This files describes API changes in /files/*,
+information provided here is intended especially for developers.
+
+=== 10 ===
+
+* core_files_renderer::fm_print_generallayout flex-icon use for upload rather than CSS loaded image.

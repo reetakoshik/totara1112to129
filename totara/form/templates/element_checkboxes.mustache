@@ -1,0 +1,87 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Petr Skoda <petr.skoda@totaralms.com>
+   @package totara_form
+}}
+{{!
+
+    @template totara_form/element_checkboxes
+
+    This template generates Totara form checkboxes element.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+     * form_item_template string this template, used for dynamic partials
+     * name__xxxx bool true where xxxx is the name of this form item
+     * name string name of this item
+     * id string id of this item
+     * label string
+     * frozen bool
+     * required bool
+     * options array list of options
+       * oid string
+       * value string
+       * text string
+       * checked bool
+
+    Other context variables for following partials:
+     * totara_form/help_button
+     * totara_form/validation_errors
+
+    Example context (json):
+      {
+          "form_item_template": "totara_form\/element_checkboxes",
+          "name__checkboxes": true,
+          "name": "checkboxes",
+          "id": "tfiid_checkboxes_totara_form_form_testform_element_compilation",
+          "label": "Checkboxes",
+          "frozen": false,
+          "options": [
+              {"value":"1","oid":"tfiid_checkboxes_totara_form_form_testform_element_compilation___chb_0","text":"Yes","checked":false,"optionhelphtml":false},
+              {"value":"0","oid":"tfiid_checkboxes_totara_form_form_testform_element_compilation___chb_1","text":"No","checked":false,"optionhelphtml":false},
+              {"value":"2","oid":"tfiid_checkboxes_totara_form_form_testform_element_compilation___chb_2","text":"-1","checked":false,"optionhelphtml":false},
+              {"value":"3","oid":"tfiid_checkboxes_totara_form_form_testform_element_compilation___chb_3","text":"Maybe","checked":false,"optionhelphtml":false}],
+          "amdmodule": "totara_form\/form_element_checkboxes",
+          "size": false,
+          "required": false,
+          "errors_has_items": false,
+          "errors": [],
+          "helphtml": false,
+          "elementtype": "totara_form\\form\\element\\checkboxes",
+          "elementid": "tfiid_checkboxes_totara_form_form_testform_element_compilation",
+          "elementclassification": "element"
+      }
+}}
+<div class="tf_element totara_form_element_checkboxes">
+    <div class="tf_element_title"><span class="legend" data-element-label>{{label}}{{#required}}{{> totara_form/required_suffix}}{{/required}}</span>{{> totara_form/help_button}}</div>
+    <div id="{{id}}" class="tf_element_input" {{#required}}data-required="true"{{/required}}>{{> totara_form/validation_errors}}
+        {{^frozen}}<input type="hidden" name="{{name}}[-1]" value="" />{{/frozen}}
+        {{#options}}
+            <div class="totara_form_element_checkboxes_checkbox{{#horizontal}} totara_form_element_checkboxes_checkbox_inline{{/horizontal}}">
+                <input type="checkbox" id="{{oid}}" {{#frozen}}disabled data-{{/frozen}}name="{{name}}[]" value="{{value}}" {{#checked}}checked{{/checked}} />
+                <label for="{{oid}}">{{{text}}}</label>{{#optionhelphtml}}{{{.}}}{{/optionhelphtml}}
+            </div>
+        {{/options}}
+    </div>
+</div>

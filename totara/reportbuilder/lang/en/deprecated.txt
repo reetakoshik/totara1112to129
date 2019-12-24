@@ -1,0 +1,3 @@
+allreports,totara_reportbuilder
+error:reporturlnotset,totara_reportbuilder
+isrelativetotoday,totara_reportbuilder

@@ -1,0 +1,59 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2015 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template totara_core/course_progress_bar
+
+    Active users admin notification.
+
+    This template displays an course progress bar.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * pbar Array of progress bar values
+    * statustext A string that provides the status description
+
+    Example context (json):
+    {
+        "pbar": {
+            "id": "progressbar_test",
+            "width": 0,
+            "progress": 1,
+            "popover": {
+              "title": "title",
+              "contentraw": "blah blah blah",
+              "contenttemplate": "",
+              "contenttemplatecontext": false
+            }
+        },
+        "statustext": "progressbar_status"
+    }
+
+}}
+{{#pbar}}
+    {{> core/progress_bar }}
+{{/pbar}}
+{{^pbar}}
+    <span class="label label-default">{{statustext}}</span>
+{{/pbar}}
+

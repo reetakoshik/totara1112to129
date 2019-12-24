@@ -1,0 +1,130 @@
+// This file is part of Totara LMS
+//
+// Copyright (C) 2016 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @package   theme_roots
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @copyright 2015 Bas Brands <www.sonsbeekmedia.nl>
+// @author    Bas Brands
+// @author    David Scotson
+// @author    Joby Harding <joby.harding@totaralearning.com>
+
+// Plugins can either add theme specific sheet such as less/roots.less file.
+// Or they may use one less/styles.less for all themes, but then they
+// need to define defaults for all used variables, otherwise grunt will
+// fail building the legacy plugin styles.css file.
+// Do not forget to add plugin styles.css excludes into this theme config.php
+// for all plugins imported here.
+@import "admin/tool/customlang/less/roots.less";
+@import "admin/tool/sitepolicy/less/roots.less";
+@import "blocks/site_main_menu/less/roots.less";
+@import "blocks/current_learning/less/roots.less";
+@import "blocks/search_forums/less/roots.less";
+@import "blocks/totara_dashboard/less/roots.less";
+@import "blocks/totara_featured_links/less/roots.less";
+@import "blocks/totara_recent_learning/less/roots.less";
+@import "blocks/totara_report_graph/less/roots.less";
+@import "blocks/totara_report_table/less/roots.less";
+@import "blocks/totara_stats/less/roots.less";
+@import "mod/feedback/less/roots.less";
+@import "report/participation/less/roots.less";
+@import "report/progress/less/roots.less";
+@import "totara/appraisal/less/roots.less";
+@import "totara/cohort/less/roots.less";
+@import "totara/feedback360/less/roots.less";
+@import "totara/form/less/roots.less";
+@import "totara/hierarchy/less/roots.less";
+@import "totara/job/less/roots.less";
+@import "totara/plan/less/roots.less";
+@import "totara/program/less/roots.less";
+@import "totara/reportbuilder/less/roots.less";
+@import "totara/customfield/less/roots.less";
+@import "blocks/last_course_accessed/less/roots.less";
+
+// Flexible icons.
+@import "base/less/flexible-icons.less";
+
+// Bootstrap 3.
+@import "bootstrap3/bootstrap.less";
+
+// Theme level Bootstrap overrides and extension.
+@import "bootswatch/bootswatch.less";
+@import "bootswatch/variables.less";
+
+// Override Bootstrap defaults.
+@import "totara/bootstrapoverride.less";
+
+// Roll back nameclashes.
+@import "totara/undo.less";
+
+// Core styles
+@import "totara/core.less";
+@import "totara/admin.less";
+@import "totara/calendar.less";
+@import "totara/course.less";
+@import "totara/completion.less";
+@import "totara/filemanager.less";
+@import "totara/message.less";
+@import "totara/question.less";
+@import "totara/user.less";
+@import "totara/userprofile.less";
+@import "totara/login.less";
+@import "totara/tags.less";
+@import "totara/badges.less";
+@import "totara/new.less";
+@import "totara/blocks.less";
+@import "totara/forms.less";
+@import "totara/modules.less";
+@import "totara/modal.less";
+@import "totara/chat.less";
+@import "totara/reports.less";
+@import "totara/backup-restore.less";
+@import "totara/tables.less";
+@import "totara/buttons.less";
+@import "totara/navs.less";
+@import "totara/enrolment.less";
+@import "totara/responsive.less";
+@import "totara/debug.less";
+@import "totara/dock.less";
+@import "totara/grade.less";
+@import "totara/editor.less";
+@import "totara/tool_usertours.less";
+@import "totara/progressbar.less";
+@import "totara/popover.less";
+@import "totara/form-notification.less";
+
+//
+// Modules
+//
+@import "totara/totara-menu.less";
+@import "totara/totara-dialog.less";
+
+//
+// JQuery
+//
+@import "totara/totara_jquery/totara_jquery_datatables.less";
+@import "totara/totara_jquery/totara_jquery_treeview.less";
+@import "totara/totara_jquery/totara_jquery_ui_dialog.less";
+
+// Variables last
+@import "totara/variables.less";
+
+// Popover
+@import "totara/popover_region.less";
+@import "totara/message_popup.less";
+
+// Search
+@import "totara/search.less";

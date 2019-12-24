@@ -1,0 +1,6 @@
+idnumber,useridnumber,timemodified,deleted,fullname,manageridnumber,managerjobassignmentidnumber
+managerjaid1,manager1,0,0,Manager1 JA1,,
+managerjaid2,manager1,0,0,Manager1 JA2,,
+learnerjaid1,learner1,0,0,Learner1 JA1,,
+learnerjaid2,learner1,0,0,Learner1 JA2,manager1,managerjaid2
+learnerjaid3,learner1,0,0,Learner1 JA3,,

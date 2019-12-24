@@ -1,0 +1,8 @@
+This files describes API changes in /blocks/last_course_accessed,
+information provided here is intended especially for developers.
+
+=== 11.3 ===
+
+* String helpers are no longer used in the following templates, string data is passed via context data:
+** grade/templates/weight_field.mustache
+** grade/templates/weight_override_field.mustache

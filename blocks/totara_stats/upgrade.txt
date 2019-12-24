@@ -1,0 +1,7 @@
+This files describes API changes in /blocks/totara_stats,
+information provided here is intended especially for developers.
+
+=== 11.0 ===
+
+* block_totara_stats_renderer::display_stats_list() has changed
+* block_totara_stats_renderer::display_stats_list_item() has been deprecated

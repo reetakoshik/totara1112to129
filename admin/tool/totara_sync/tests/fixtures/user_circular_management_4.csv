@@ -1,0 +1,5 @@
+"idnumber","timemodified","deleted","username","firstname","lastname","email", "manageridnumber"
+"imp001","0","0","import001","Import","User001","imp001b@local.host",
+"imp002","0","0","import002","Import","User002","imp002b@local.host","imp001"
+"imp003","0","0","import003","Import","User003","imp003b@local.host","imp004"
+"imp004","0","0","import004","Import","User004","imp004b@local.host","imp005"

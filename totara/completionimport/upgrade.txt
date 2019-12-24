@@ -1,0 +1,32 @@
+This files describes API changes in Totara Completion Import,
+information provided here is intended especially for developers.
+
+=== 11.4 ===
+
+* totara_compl_import_cert.certificationid has been added as a field.
+* totara_compl_import_course.courseid has been added as a field.
+* get_shortnameoridnumber() has been deprecated.
+
+=== 11 ===
+
+* create_evidence_item() added eighth argument $evidencefields
+
+=== 10 ===
+
+* The index totacompimpocour_evi_ix on the table totara_compl_import_course was changed to allow
+non-unique values. This was done to allow compatibility with SQL Server given that the evidenceid field
+can contain multiple null values. Non-unique values, other than null, should still not be added to
+the evidenceid field in this table.
+
+* The index totacompimpocert_evi_ix on the table totara_compl_import_cert was changed to allow
+non-unique values. This was done to allow compatibility with SQL Server given that the evidenceid field
+can contain multiple null values. Non-unique values, other than null, should still not be added to
+the evidenceid field in this table.
+
+Deprecations:
+
+* class csv_iterator has been deprecated, please use \totara_completionimport\import_csv::import() instead.
+* check_fields_exist() has been deprecated, please import csv data using \totara_completionimport\import_csv::import(),
+where this validation is done internally.
+* import_csv() has been deprecated, please use \totara_completionimport\import_csv::import() instead.
+* import_completions() has been deprecated, please use \totara_completionimport\import_csv::import() instead.

@@ -1,0 +1,56 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Andrew McGhie <andrew.mcghie@totaralearning.com>
+   @package block_totara_featured_links
+}}
+{{!
+
+    @template block_totara_featured_links/element_audience_list
+
+    This template generates Featured Links list that holds the audiences that can see the tile in the visibility form.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+     * name string name of this item
+     * items array a array of data for rendering items in the list
+     * deleteicon flex icon context
+
+    Other context variables for following partials:
+     * none
+
+    Example context (json):
+      {
+        "name": "examplename",
+        "items": [
+            {"name": "name_of_the_cohort", "num_learners": 2, "cohortid": 3},
+            {"name": "example", "num_learners": 1, "cohortid": 4}
+        ]
+      }
+}}
+
+<ul id="{{name}}" class="unlist">
+    {{#items}}
+        {{> block_totara_featured_links/element_audience_list_item}}
+    {{/items}}
+</ul>

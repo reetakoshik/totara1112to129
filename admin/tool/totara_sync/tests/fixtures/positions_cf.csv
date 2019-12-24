@@ -1,0 +1,12 @@
+idnumber,fullname,frameworkidnumber,timemodified,customfield_cftext,customfield_cflocation,customfield_cfurl,typeidnumber
+pos1,Position 1,posfw1,1,Totara HQ,"150 Willis Street, Wellington, New Zealand",,PosType
+pos2,Position 2,posfw1,1,Empire State Building,"350 5th Avenue, New York, NY",,PosType
+pos3,Position 3,posfw1,1,Mr President,"1600 Pennsylvania Avenue, NY",,PosType
+pos4,Position 4,posfw1,1,Her Majesty,"Buckingham Palace, London, England",http://www.buckinghampalace.co.uk,PosType
+pos5,Position 5,posfw1,1,Eiffel Tower,"Champ De Mars, 5 Avenue Anatole, Paris, France",,PosType
+pos6,Position 6,posfw2,1,Stonehenge,"Off A344 Road, Amesbury, Wiltshire, England",http://www.stonehenge.co.uk,PosType
+pos7,Position 7,posfw2,1,Weta Workshop,"Miramar, Wellington, NZ",,PosType
+pos8,Position 8,posfw2,1,"Liberty Island, New York, NY",The Statue of Liberty,,PosType
+pos9,Position 9,posfw2,1,The U.K. Prime Minister,"10 Downing Street, London, England",,PosType
+pos10,Position 10,posfw2,1,Xavier,"2005 Sooke Rd, Victoria, BC V9B 5Y2",,PosType
+pos11,Position 11,posfw2,1,URL Hacker,"Hacking Street, London, England","<script>console.log('gotcha')</script>",PosType

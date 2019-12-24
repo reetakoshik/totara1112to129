@@ -1,0 +1,7 @@
+placeholder:coursename,totara_coursecatalog
+placeholder:coursepageurl,totara_coursecatalog
+placeholder:dayssincecompletion,totara_coursecatalog
+placeholder:daysuntildeadline,totara_coursecatalog
+placeholder:firstname,totara_coursecatalog
+placeholder:lastname,totara_coursecatalog
+placeholder:managername,totara_coursecatalog

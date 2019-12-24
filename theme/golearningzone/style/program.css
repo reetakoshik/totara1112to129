@@ -1,0 +1,234 @@
+.path-totara-program .notifymessage {
+	margin-left: -15px;
+	margin-right: -15px;
+    width: calc(100% + 30px);
+    margin-top: -15px;
+    padding: 25px 15px;
+    color: white;
+}
+
+.path-totara-program .notifymessage p {
+	font-size: 16pt;
+}
+
+.path-totara-program #progressbar {
+	margin: 0 -15px;
+    padding: 15px;
+    background-color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.path-totara-program #progressbar .item {
+	text-align: left;
+	font-weight: bold;
+	max-width: 45%;
+}
+
+.path-totara-program #progressbar:before {
+	display: block;
+	float: left;
+	font-family: "FontAwesome";
+    content: "\f073";
+    font-size: 36pt;
+    margin: 0 10px 0 0;
+}
+
+.dir-rtl.path-totara-program #progressbar:before {
+	margin: 0 0 0 10px;
+	float: right;
+}
+
+/*.path-totara-program #progressbar .plan_highlight {
+	position: absolute;
+    left: 60%;
+    top: 10%;
+}*/
+
+.dir-rtl.path-totara-program #progressbar .plan_highlight {
+    right: 60%;
+    left: auto;
+}
+
+.path-totara-program .alert {
+	display: inline-block;
+    margin: 8px 0 0 0;
+    border-radius: 0;
+    border: 0;
+    padding: 15px 50px;
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+.path-totara-program .summary {
+	margin: 0 -15px;
+    padding: 15px;
+    background-color: #f8f8f8;
+}
+
+.path-totara-program .display-program {
+	border: none;
+    margin: 0 -15px;
+    padding: 15px 15px 0 15px;
+    background-color: white;
+    border-radius: 0;
+}
+
+.path-totara-program .display-program h3 {
+	font-weight: normal;
+    margin: 12px 0;
+}
+
+.path-totara-program .generaltable {
+	margin: 0
+}
+
+.path-totara-program .ui-widget .generaltable {
+	min-width: auto;
+	margin: 0;
+}
+
+.path-totara-program .generaltable th {
+	text-transform: initial;
+}
+   
+.path-totara-program .generaltable > tbody > tr {
+	background-color: #f8f8f8;
+}
+
+.path-totara-program .generaltable > tbody > tr > td {
+	vertical-align: middle;
+}
+
+.path-totara-program .generaltable > tbody > tr > td:first-child img {
+	max-width: 20px;
+    margin: 10px 15px;
+}
+
+.path-totara-program .nextsetoperator {
+	padding: 15px;
+	background-color: white;
+	margin: 0 -15px;
+	border-bottom: 3px solid #f8f8f8;
+	text-align: center;
+}
+
+.path-totara-program .nextsetoperator .operator-then {
+	background-size: 22px;
+    padding-right: 40px;
+    line-height: 36px;
+    font-size: 36px;
+    background-position: right 5px;
+    height: auto;
+    display: inline-block;
+}
+
+.dir-rtl.path-totara-program .nextsetoperator .operator-then {
+	background-position: left 5px;
+	padding-left: 40px;
+	padding-right: 0;
+}
+
+.path-totara-program .panel {
+	padding-bottom: 0;
+}
+
+.dir-rtl img.totara_progress_bar_medium {
+	-webkit-transform: rotate(180deg);
+	-moz-transform: rotate(180deg);
+	-ms-transform: rotate(180deg);
+	-o-transform: rotate(180deg);
+	transform: rotate(180deg);
+	background: white url('[[pix:totara_core|progressbar_back-medium]]') no-repeat top left;
+}
+
+.generaltable td.launchcourse,
+.generaltable th.launchcourse {
+	text-align: center;
+}
+
+@media(max-width: 500px) {
+	.path-totara-program .notifymessage,
+	.path-totara-program .display-program,
+	.path-totara-program .nextsetoperator,
+	.path-totara-program #progressbar,
+	.path-totara-program .summary {
+		margin: inherit;
+	}
+
+	.path-totara-program .notifymessage,
+	.path-totara-program .generaltable {
+		width: 100%;
+	}
+
+	.certifpath {
+		padding: 15px;
+	}
+	.nocontent {
+		padding-left: 15px;
+		padding-right: 15px;
+	}
+
+	.generaltable td.markcomplete,
+	.generaltable th.markcomplete,
+	.generaltable td.status,
+	.generaltable th.status {
+		text-align: center;
+	}
+}
+
+.path-totara-program .display-program table td.status .coursecompletionstatus {
+	margin-top: 10px;
+	display: block;
+}
+
+.path-totara-program .display-program table td.markcomplete a {
+	display: block;
+}
+
+.path-totara-program .display-program table span.coursecompletionstatus span.completion-complete, 
+.path-totara-program .display-program table span.coursecompletionstatus span.completion-completeviarpl,
+.path-totara-program .display-program table span.coursecompletionstatus span.completion-inprogress, 
+.path-totara-program .display-program table span.coursecompletionstatus span.completion-notyetstarted {
+	margin: initial;
+}
+
+.path-totara-program .display-program table .singlebutton div {
+	margin: 0;
+}
+
+#page-totara-program-required .dp-summary-widget-description {
+	display: none;
+}
+
+.totara_progress_bar_medium {
+  display: none;
+}
+
+.path-totara-program .coursecompletionstatus {
+	display: inline-block;
+	vertical-align: -1px;
+	margin: 0 2px;
+	height: 14px;
+}
+
+.pc-table-wrapper {
+	overflow-x: auto;
+	margin-left: -15px;
+	margin-right: -15px;
+}
+
+.generaltable td.status .progress {
+	margin: 0;
+	display: inline-block;
+}
+
+@media (min-width: 768px) {
+	.generaltable th.markcomplete,
+	.generaltable td.markcomplete {
+		text-align: left;
+	}
+	.generaltable td.markcomplete a {
+		padding-left: 50px;
+	}
+}

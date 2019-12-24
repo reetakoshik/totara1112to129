@@ -1,0 +1,47 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2015 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+
+    @template totara_core/my_team_nav
+
+    'My Team' Navigation.
+
+    This template displays a team icon, a count for the number of team members and links to the My Team page.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * numberinteam A integer denoting the team size.
+    * href A string that contains a link to a page.
+
+    Example context (json):
+    {
+        "numberinteam": "completed",
+        "href": "http://example.com"
+    }
+
+}}
+<a href="{{href}}" title="{{#str}}viewmyteam,totara_core{{/str}}">
+    {{#pix}}teammembers,totara_core{{/pix}}
+    {{#str}}viewmyteam,totara_core{{/str}}</a>
+<span>{{numberinteamstring}}</span>

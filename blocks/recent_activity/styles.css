@@ -1,0 +1,10 @@
+.block_recent_activity .activitydate {
+    font-weight: bold;
+}
+.block_recent_activity .activityhead {
+    margin-bottom: 20px;
+}
+
+.block_recent_activity.block .content h3.sectionname {
+    font-size: 24px;
+}

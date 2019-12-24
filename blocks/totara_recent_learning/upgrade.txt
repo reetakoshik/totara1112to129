@@ -1,0 +1,5 @@
+This files describes API changes in the recent learning block and APIs,
+information provided here is intended especially for developers.
+
+=== 11 ===
+* Changed HTML from a table to a list, adding mustache templates

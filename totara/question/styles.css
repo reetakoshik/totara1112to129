@@ -1,0 +1,142 @@
+#id_availablechoices .question-rating-scale-header {
+    display: inline-block;
+    width: 180px;
+}
+
+table.generaltable.question-review-table .r0 {
+    background-color: #e6e6e6;
+}
+
+.generaltable.question-review-table td.cell {
+    background-color: transparent;
+}
+
+.question-review-title {
+    font-weight: bold;
+    padding: 2px 2px;
+}
+
+.question-review-answer {
+    min-height: 40px;
+}
+
+.question-review-answer a {
+    float: left;
+}
+
+.question-review-name {
+    max-width: 30%;
+    min-width: 15%;
+}
+
+.question-rating-slider-container {
+    width: 74%;
+}
+
+.dir-ltr .question-rating-slider-container {
+    float: right;
+}
+
+.dir-rtl .question-rating-slider-container {
+    float: left;
+}
+
+.question-rating-scale-checkbox {
+    float: left;
+    min-width: 30px;
+}
+
+.question-rating-scale-static {
+    float: left;
+    min-width: 180px;
+}
+
+#question-review-item {
+    padding: 0 0 10px 0;
+    margin-top: 0;
+}
+
+#question-review-item legend {
+    visibility: hidden;
+}
+
+#question fieldset.fgroup {
+    margin: 0;
+}
+
+#question:nth-of-type(1) legend:empty {
+    visibility: hidden;
+}
+
+.review-multifield .fitem_ftextarea {
+    /* stylelint-disable declaration-no-important */
+    margin-top: -10px !important;
+    /* stylelint-enable */
+}
+
+select.aggregateselector[multiple] {
+    height: 150px;
+    max-width: 335px;
+}
+
+.totara-question-review-item-title h3 {
+    float: left;
+    margin-right: 30px;
+}
+.dir-rtl .totara-question-review-item-title h3 {
+    float: right;
+    margin-left: 30px;
+}
+.totara-question-review-extralinks {
+    font-size: 14px;
+    float: right;
+    margin-top: 25px;
+}
+
+.mform .totara-question-review-extralinks a {
+    color: #008287;
+    text-decoration: underline;
+}
+
+.totara-question-review-delete {
+    margin-left: 1em;
+    border-left: 1px solid;
+    padding-left: 1em;
+    float: right;
+}
+
+.totara-question-review-delete:first-child {
+    margin-left: 0;
+    border-left: none;
+    padding-left: 0;
+}
+
+/* global mform styles provide unsuitable indentation for this mix of
+   fieldsets/non-fieldset elements. we'll tweak that with some of our own. */
+.totara-question-group fieldset {
+    padding-bottom: 15px;
+}
+.totara-question-group fieldset fieldset {
+    padding-bottom: 0;
+}
+.totara-question-group .fitem_actionbuttons {
+    margin-top: 30px;
+}
+.totara-question-group .fitem.femptylabel {
+    margin-bottom: 0;
+}
+.totara-question-group .fcontainer {
+    padding-left: 30px;
+}
+/* slightly increase specificity by chaining last selector */
+.totara-question-group .totara-question-nonfieldset-item .fitem.fitem {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.path-totara-appraisal .totara-question-group .totara-question-nonfieldset-item .fitemtitle.fitemtitle {
+    padding-left: 0;
+}
+/* The label has some padding applied by default that we are missing when we don't use it. */
+.path-totara-feedback360 .totara-question-nonfieldset-item .fitem .totara-question-without-label {
+    padding-left: 15px;
+}

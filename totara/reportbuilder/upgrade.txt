@@ -1,0 +1,74 @@
+This file describes API changes in reportbuilder,
+information provided here is intended especially for developers.
+
+=== 10.0 ===
+
+* Added add_cohort_user_* calls to the add_user_* functions in the base source.
+  If add_user_* and add_cohort_user_* are both called within a custom source it will cause an SQL error.
+
+* add_cohort_user_fields_to_columns has had its second parameter renamed to $join to better
+  describe the what it is. The function is identical to before the change however the default is
+  now 'ausercohort'.
+
+* add_cohort_user_fields_to_columns and add_cohort_fields_to_filters have 2 new parameters
+  $groupname and $addtypetoheading.
+
+* add_cohort_user_tables_to_joinlist has a new parameter $alias to allow multiple instances
+  of cohort tables to be added to a single report source.
+
+* rb_display_orderedlist_to_newline() is now deprecated
+
+* Added rb_session_roles_content class in totara/reportbuilder/classes/rb_base_content.php
+  to allow Seminar report content to be restricted by an event role in
+  facetoface_events, facetoface_sessions and facetoface_summary reports
+* Removed unused $graphrecord and $isexport parameters from totara/reportbuilder/classes/local/graph::__construct()
+* Added isexport param to rb_base_source::rb_display_link_program_icon.
+* rb_display_orderedlist_to_newline() is now deprecated
+* rb_display_certif_renewalstatus has been moved in to a new auto-loading style of
+  display function (\totara_certification\rb\display\certif_renewalstatus) to use this
+  function $this->usedcomponents[] = 'totara_certification'; must be set in the
+  constructor for the report source.
+
+* The sql_group_concat function has been deprecated, use $DB->sql_group_concat_unique function instead.
+
+* add_tag_fields_to_columns, add_tag_fields_to_filters and add_tag_tables_to_joinlist have all been deprecated and
+  replaced with add_core_fields_to_columns, add_core_tag_fields_to_filters and add_core_tag_tables_to_joinlist
+  done to match the new tag collections.
+
+* view_all_reports_link() renderer method now requires argument $embedded
+
+* rb_base_source::rb_display_user_email() has been deprecated, use the
+  totara/reportbuilder/classes/rb/display/user_email class instead.
+
+* rb_base_source::rb_display_user_email_unobscured() has been deprecated, use the
+  totara/reportbuilder/classes/rb/display/user_email_unobscured class instead.
+
+=== 11.0 ===
+
+* Triggering of "\totara_reportbuilder\event\report_updated" event for deletion of scheduled reports has been
+  deprecated. Use "\totara_reportbuilder\event\scheduled_report_deleted" event instead.
+* Display method rb_display_deleted_status has been deprecated and replaced by
+  totara/reportbuilder/classes/rb/display/user_status.php
+
+=== 11.2 ===
+
+* Added 'selectionlimit' option to manager field filters. "{$CFG->totara_reportbuilder_filter_selected_managers_limit}"
+  introduced to limit the number of selected managers in the report builder job assignment filter dialog.
+  Default value is 25, to make it unlimited, set it to 0.
+
+=== 11.7 ===
+
+* Added a new filter option 'help' which accepts array of ['string', 'component'] to override default filter help popup
+  language string, note it follows rules of addHelpButton, so if you supply string named 'myhelpstring' the system
+  would look for 'myhelpstring' and 'myhelpstring_help'.
+
+=== 11.12 ===
+
+* reportbuilder_get_embedded_report_object() has been deprecated. Please consider calling
+  reportbuilder::get_embedded_report_class() and creating embedded report objects directly instead.
+* rb_base_source::is_ignored() has been deprecated. Please use rb_base_source::is_source_ignored()
+  static method instead.
+* rb_base_embedded::is_ignored() has been deprecated. Please use rb_base_embedded::is_report_ignored()
+  static method instead.
+* unused renderer methods totara_reportbuilder_renderer::user_generated_reports_table() and
+  totara_reportbuilder_renderer::embedded_reports_table() have been deprecated.

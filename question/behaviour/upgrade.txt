@@ -1,0 +1,11 @@
+This files describes API changes for question behaviour plugins,
+information provided here is intended especially for developers.
+
+=== 10 ===
+
+1) The standard behaviours that use a 'Check' button have all been changed so
+   that they only show the button when the question is active. Your behaviour
+   may inherit this behaviour, because the change was made in the base class,
+   and this is probably good for consistency. However, if your question behaviour
+   uses the Check button, your probably want to test it carefully, and you will
+   probably have to update your unit tests. See MDL-53304 for more details.

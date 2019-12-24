@@ -1,0 +1,11 @@
+This files describes API changes in Totara Job,
+information provided here is intended especially for developers.
+
+=== 11.3 ===
+
+* totara/job/templates/job_management_listing.mustache Icon helpers are no longer used, icon data is passed via context data.
+
+=== 10 ===
+
+* Added new property 'totarasync' to the \totara_job\job_assignment class. This is for determining
+whether a job assignment can be updated by HR Import or not. Default is 0.

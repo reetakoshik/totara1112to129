@@ -1,0 +1,187 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template totara_hierarchy/competency_view_evidence
+
+    Create a toolbars area for a table.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+
+    Example context (json):
+    {
+        "linkedevidence": {
+            "table": {
+                "body": [
+                    {
+                        "cells": [
+                            {
+                                "abbr": null,
+                                "cellid": null,
+                                "cellscope": null,
+                                "colspan": null,
+                                "rowspan": null,
+                                "column": "0",
+                                "content": "<a href=\"#\">Test course: S</a>",
+                                "cellattributes": null,
+                                "cellclasses": null,
+                                "cellstyle": null,
+                                "header": false,
+                                "lastcol": false
+                            },
+                            {
+                                "abbr": null,
+                                "cellid": null,
+                                "cellscope": null,
+                                "colspan": null,
+                                "rowspan": null,
+                                "column": "1",
+                                "content": "<select data-id=\"1\" id=\"menulinktype\" class=\"select menulinktype\" name=\"linktype\"><option value=\"1\">Mandatory</option><option selected=\"selected\" value=\"0\">Optional</option></select>",
+                                "cellattributes": [
+                                    {
+                                        "name": "style",
+                                        "value": "text-align: center;"
+                                    }
+                                ],
+                                "cellclasses": null,
+                                "cellstyle": null,
+                                "header": false,
+                                "lastcol": false
+                            },
+                            {
+                                "abbr": null,
+                                "cellid": null,
+                                "cellscope": null,
+                                "colspan": null,
+                                "rowspan": null,
+                                "column": "2",
+                                "content": "<a title=\"Remove\" href=\"#\"><img class=\"iconsmall\" alt=\"Remove\" title=\"Remove\" src=\"__WWWROOT__/theme/image.php?theme=__THEME__&amp;amp;component=core&amp;amp;image=t%2Fdelete\" /></a>",
+                                "cellattributes": [
+                                    {
+                                        "name": "style",
+                                        "value": "text-align: center;"
+                                    }
+                                ],
+                                "cellclasses": null,
+                                "cellstyle": null,
+                                "header": false,
+                                "lastcol": true
+                            }
+                        ],
+                        "divider": false,
+                        "lastrow": true,
+                        "rowattributes": [
+
+                        ],
+                        "rowclasses": "r0",
+                        "rowid": null,
+                        "rowstyle": null
+                    }
+                ],
+                "caption": null,
+                "cellpadding": null,
+                "cellspacing": null,
+                "columns": 3,
+                "has_head": true,
+                "has_body": true,
+                "head": [
+                    {
+                        "abbr": null,
+                        "cellid": null,
+                        "cellscope": "col",
+                        "colspan": null,
+                        "rowspan": null,
+                        "column": "0",
+                        "content": "Name",
+                        "cellattributes": null,
+                        "cellclasses": null,
+                        "cellstyle": null,
+                        "header": true,
+                        "lastcol": false
+                    },
+                    {
+                        "abbr": null,
+                        "cellid": null,
+                        "cellscope": "col",
+                        "colspan": null,
+                        "rowspan": null,
+                        "column": "1",
+                        "content": "Link type",
+                        "cellattributes": null,
+                        "cellclasses": null,
+                        "cellstyle": null,
+                        "header": true,
+                        "lastcol": false
+                    },
+                    {
+                        "abbr": null,
+                        "cellid": null,
+                        "cellscope": "col",
+                        "colspan": null,
+                        "rowspan": null,
+                        "column": "2",
+                        "content": "Options",
+                        "cellattributes": null,
+                        "cellclasses": null,
+                        "cellstyle": null,
+                        "header": true,
+                        "lastcol": true
+                    }
+                ],
+                "id": "list-evidence",
+                "summary": null,
+                "tableattributes": [
+
+                ],
+                "tableclasses": "generaltable boxaligncenter",
+                "width": null
+            }
+        },
+        "canedit": true,
+        "formaction": "#",
+        "evidencestring": "Assign course completions",
+        "id": "3",
+        "returnurl": "#",
+        "sesskey": "uq16iYKsb1"
+    }
+}}
+<div id="evidence-list-container">
+    <h2>{{#str}}evidenceitems, totara_hierarchy{{/str}}</h2>
+    {{#linkedevidence}}{{>core/table}}{{/linkedevidence}}
+</div>
+<div class="buttons">
+    {{#canedit}}
+        <div class="singlebutton">
+            <form action="{{formaction}}" method="get">
+                <div>
+                    <input type="submit" id="show-evidence-dialog" value="{{evidencestring}}" />
+                    <input type="hidden" name="id" value="{{id}}" />
+                    <input type="hidden" name="nojs" value="1" />
+                    <input type="hidden" name="returnurl" value="{{returnurl}}" />
+                    <input type="hidden" name="s" value="{{sesskey}}" />
+                </div>
+            </form>
+        </div>
+    {{/canedit}}
+</div>

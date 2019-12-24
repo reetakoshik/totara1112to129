@@ -1,0 +1,6 @@
+This files describes API changes in /blocks/settings,
+information provided here is intended especially for developers.
+
+=== 10 ===
+* block_settings_renderer::settings_tree() has changed
+* block_settings_renderer::navigation_node() has changed

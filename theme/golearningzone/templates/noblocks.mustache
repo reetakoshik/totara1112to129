@@ -1,0 +1,39 @@
+{{> theme_golearningzone/head}}
+    <body   {{{body_attributes}}} 
+            {{#palette}} 
+                data-palette="{{palette}}" 
+            {{/palette}}
+            {{#bg_image}}
+                style="background-image: url('{{bg_image}}');"
+            {{/bg_image}}
+        >
+        {{{standard_top_of_body_html}}}
+        {{{header}}}
+        <div class="container text-left">
+            <div id="page" class="container-fluid" >
+                {{{breadcrumbs}}}
+                <div id="page-content">
+                    <div class="row">
+                        <div class="col-md-12">
+                            {{{main_content}}}
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+        {{{footer}}}
+        {{{standard_end_of_body_html}}}
+        <script src="/theme/golearningzone/js/panel.js"></script>
+        <script>
+            window.onload = function() {
+                new Header().init();
+                new Layout().init();
+                /* 
+                    It would be good to add panel also for this layout 
+                    but totara/coursecatalog/courses.php in the desing doesn't have it
+                */
+                // new PanelWrapper().init();
+            }
+        </script>
+    </body>
+</html>

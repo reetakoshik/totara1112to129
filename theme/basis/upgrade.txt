@@ -1,0 +1,13 @@
+This file describes API changes for 'theme_basis'.
+
+=== 11.5 ===
+
+* Changed totara/core/templates/totara_menu.mustache, adding aria menu attributes
+
+=== 10.0 ===
+
+* Ensured block action icons conform to WCAG AA contrast for text and background
+
+=== 9.2 ===
+
+* Additional grid classes added to template 'theme_basis/page_footer_nav' for a 4 column layout for small devices

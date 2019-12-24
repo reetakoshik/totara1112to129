@@ -1,0 +1,18 @@
+This files describes API changes in /blocks/current_learning,
+information provided here is intended especially for developers.
+
+=== 11.5 ===
+
+* course_row.mustache, program_row.mustache and program_singlecourse_row.mustache templates have changed, adding tab
+    index where a bootstrab tooltip is available
+
+=== 11.3 ===
+
+* Icon helpers are no longer used in the following templates, icon data is passed via context data:
+** blocks/current_learning/templates/main_content.mustache
+
+=== 11.1 ===
+
+* Updated course_row.mustache
+* Updated program_row.mustache
+* Updated program_singlecourse_row.mustache

@@ -1,0 +1,111 @@
+[data-palette="red"] .forgetpass a,
+[data-palette="red"] .ui-dialog-titlebar,
+[data-palette="red"] .ui-dialog-titlebar-close,
+[data-palette="red"] .ui-dialog-titlebar-close:hover,
+[data-palette="red"] h2,
+[data-palette="red"] .mform .helptooltip a,
+[data-palette="red"] .mform .helptooltip a:hover,
+[data-palette="red"] .ui-dialog-content #column-checkboxes input[type="checkbox"] + label:before,
+[data-palette="red"] .custom-blocks .block div.content .duration,
+[data-palette="red"] .theme-color,
+[data-palette="red"] header .action-totara-alerts .alerts-list .total_link,
+[data-palette="red"] header .action-totara-alerts .alerts-list .total_link:hover,
+[data-palette="red"].path-totara-program .display-program h3,
+[data-palette="red"] ul.topics li .content h3,
+[data-palette="red"].path-course .block:not(.block-introduction):not(.block-outcomes) div.header h2 {
+	color: rgba([[setting:red_r]], [[setting:red_g]], [[setting:red_b]], 1);
+}
+
+[data-palette="red"] .qnbutton.blocked,
+[data-palette="red"] .qnbutton.notyetanswered,
+[data-palette="red"] .qnbutton.requiresgrading,
+[data-palette="red"] .qnbutton.invalidanswer,
+[data-palette="red"] header #totaramenu-legacy ul li a:hover,
+[data-palette="red"] header #totaramenu-legacy ul ul li a:hover,
+[data-palette="red"] header #totaramenu ul li a:hover,
+[data-palette="red"] header #totaramenu ul ul li a:hover,
+[data-palette="red"] button, 
+[data-palette="red"] .btn,
+[data-palette="red"] input.form-submit,
+[data-palette="red"] input[type="button"],
+[data-palette="red"] input[type="submit"],
+[data-palette="red"] input[type="submit"][disabled],
+[data-palette="red"] input[type="reset"],
+[data-palette="red"] .link-as-button,
+[data-palette="red"] .qnbutton,
+[data-palette="red"] .moodle-actionmenu[data-enhanced].show .menu > li:hover,
+[data-palette="red"] .moodle-actionmenu[data-enhanced].show .menu > li a:hover,
+[data-palette="red"] .rememberpass input[type="checkbox"]:not(checked) + label:after,
+[data-palette="red"] input.form-submit, 
+[data-palette="red"] input#id_submitbutton, 
+[data-palette="red"] input#id_submitbutton2, 
+[data-palette="red"].path-admin .buttons input[type="submit"], 
+[data-palette="red"] td.submit input,
+[data-palette="red"] .custom-blocks .block div.header,
+[data-palette="red"] .course-content ul.topics li.section .section-collapser,
+[data-palette="red"] header .action-totara-alerts .alerts-list .header-list-top,
+[data-palette="red"] header .action-totara-alerts span.items-count,
+[data-palette="red"] header .action-totara-alerts-sm span.items-count,
+[data-palette="red"] .ui-dialog .ui-dialog-buttonpane button,
+[data-palette="red"].path-totara-program .notifymessage,
+[data-palette="red"] header .tooltip .tooltiptext {
+	background-color: rgba([[setting:red_r]], [[setting:red_g]], [[setting:red_b]], 1);
+}
+
+[data-palette="red"] .editing_on .region > * { 
+	background-color: rgba([[setting:red_r]], [[setting:red_g]], [[setting:red_b]], 0.3);
+}
+
+[data-palette="red"] button:hover,
+[data-palette="red"] .btn:hover,
+[data-palette="red"] input.form-submit:hover,
+[data-palette="red"] input[type="button"]:hover,
+[data-palette="red"] input[type="submit"]:hover,
+[data-palette="red"] input[type="reset"]:hover,
+[data-palette="red"] .link-as-button:hover,
+[data-palette="red"] .ui-dialog .ui-dialog-buttonpane button:hover,
+[data-palette="red"] button:focus,
+[data-palette="red"] .btn:focus,
+[data-palette="red"] input.form-submit:focus,
+[data-palette="red"] input[type="button"]:focus,
+[data-palette="red"] input[type="submit"]:focus,
+[data-palette="red"] input[type="reset"]:focus,
+[data-palette="red"] .link-as-button:focus,
+[data-palette="red"] .qnbutton:hover,
+[data-palette="red"] .qnbutton:focus,
+[data-palette="red"] input.form-submit:hover, 
+[data-palette="red"] input#id_submitbutton:hover, 
+[data-palette="red"] input#id_submitbutton2:hover, 
+[data-palette="red"].path-admin .buttons input[type="submit"]:hover, 
+[data-palette="red"] td.submit input:hover,
+[data-palette="red"] input.form-submit:focus, 
+[data-palette="red"] input#id_submitbutton:focus, 
+[data-palette="red"] input#id_submitbutton2:focus, 
+[data-palette="red"].path-admin .buttons input[type="submit"]:focus, 
+[data-palette="red"] td.submit input:focus {
+	background-color: rgba([[setting:red_r]], [[setting:red_g]], [[setting:red_b]], 0.7);
+}
+
+[data-palette="red"] .nav-tabs > li.active > a,
+[data-palette="red"] .nav-tabs > li.active > a:hover,
+[data-palette="red"] #dialog-tabs .tabs li.ui-tabs-active.ui-state-active a,
+[data-palette="red"] #dialog-tabs .tabs li.ui-tabs-active.ui-state-active a:hover {
+  border-top: 3px solid rgba([[setting:red_r]], [[setting:red_g]], [[setting:red_b]], 1);
+}
+
+[data-palette="red"] .yui3-calendar-grid {
+	border: 1px solid rgba([[setting:red_r]], [[setting:red_g]], [[setting:red_b]], 1);
+}
+
+[data-palette="red"] .custom-blocks .block div.content {
+	border-top: 1px solid rgba([[setting:red_r]], [[setting:red_g]], [[setting:red_b]], 1);
+}
+
+[data-palette="red"] header .action-totara-alerts .alerts-list .header-list-top .triangle-left,
+[data-palette="red"] header .action-totara-alerts .alerts-list .header-list-top .triangle-right {
+	border-color: rgba([[setting:red_r]], [[setting:red_g]], [[setting:red_b]], 1);
+}
+
+[data-palette="red"] header .tooltip-bottom:after {
+	border-bottom-color: rgba([[setting:red_r]], [[setting:red_g]], [[setting:red_b]], 1);
+}

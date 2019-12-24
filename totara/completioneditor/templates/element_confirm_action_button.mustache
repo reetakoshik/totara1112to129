@@ -1,0 +1,57 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Nathan Lewis <nathan.lewis@totaralearning.com>
+   @package totara_completioneditor
+}}
+{{!
+
+    @template totara_completioneditor/element_confirm_action_button
+
+    This template generates Totara form action button with confirm dialog.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+     * form_item_template string this template, used for dynamic partials
+     * name__xxxx bool true where xxxx is the name of this form item
+     * name string name of this item
+     * id string id of this item
+     * value string text on the button
+     * frozen bool
+     * formnovalidate bool true for button that is not "final submission"
+     * dialogtitle string the title of the dialog
+     * dialogmessage string the content of the dialog
+     * yesbuttonlabel string text on the "yes" button in the dialog
+     * nobuttonlabel string text on the "no" button in the dialog
+
+    Other context variables for following partials:
+     * none
+
+    Example context (json):
+      There is no example for this template as its just a husk, please refer to the form template.
+}}
+<div class="tf_element totara_completioneditor_element_action_button">
+    {{> totara_form/validation_errors}}{{> totara_form/help_button}}
+    <input type="submit" id="{{id}}" {{#frozen}}disabled data-{{/frozen}}name="{{name}}" value="{{value}}" {{#formnovalidate}}formnovalidate{{/formnovalidate}}
+           data-dialogtitle="{{dialogtitle}}" data-dialogmessage="{{dialogmessage}}" data-yesbuttonlabel="{{yesbuttonlabel}}" data-nobuttonlabel="{{nobuttonlabel}}" />
+</div>

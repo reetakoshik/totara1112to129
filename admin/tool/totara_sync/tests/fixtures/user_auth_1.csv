@@ -1,0 +1,7 @@
+"idnumber","timemodified","username","deleted","firstname","lastname","email","auth"
+1,0,upload1,0,Upload,User 1,upload1@email.com,manual
+2,0,upload2,0,Upload,User 2,upload2@email.com,MANUAL
+3,0,upload3,0,Upload,User 3,upload3@email.com,
+4,0,upload4,0,Upload,User 4,upload4@email.com,shibboleth
+5,0,upload5,0,Upload,User 5,upload5@email.com,Shibboleth
+6,0,upload6,0,Upload,User 6,upload6@email.com,DOES-NOT-EXIST

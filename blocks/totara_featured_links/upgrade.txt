@@ -1,0 +1,7 @@
+This files describes code changes in the Totara Featured Links block.
+Information provided here is intended especially for developers.
+
+=== 11.3 ===
+
+* Icon helpers are no longer used in the following templates, icon data is passed via context data:
+** blocks/totara_featured_links/templates/element_audience_list_item.mustache

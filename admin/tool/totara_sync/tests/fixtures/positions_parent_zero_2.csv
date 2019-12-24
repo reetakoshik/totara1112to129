@@ -1,0 +1,7 @@
+idnumber,fullname,frameworkidnumber,parentidnumber,timemodified
+0,Department Manager,PF1,,0
+11,Team Leader 1,PF1,0,0
+21,Position 1,PF1,11,0
+2,Team Leader 2,PF1,0,0
+12,Position 2,PF1,2,0
+22,Position 3,PF1,,0

@@ -1,0 +1,6 @@
+This files describes API changes in /mod/folder - activity module,
+information provided here is intended especially for developers.
+
+=== 10 ===
+
+* Made action button structure consistent when viewing folder

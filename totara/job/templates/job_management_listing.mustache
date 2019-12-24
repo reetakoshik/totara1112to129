@@ -1,0 +1,80 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Sam Hemelryk <sam.hemelryk@totaralearning.com>
+   @package totara_job
+}}
+{{!
+
+    @template totara_job/job_management_listing
+
+    Lists the job assignments a user has an allows them to be sorted.
+    Please note that this template includes its own JS for storing.
+    It uses the resort_job_assignments external API via AJAX.
+
+    Classes required for JS:
+    * editjoblink
+
+    Data attributes required for JS:
+    * div[data-enhance="job-management-listing"] On the container.
+    * div[data-userid="7"] On the container.
+    * a[data-id="7"] On the link for editing a job assignment
+    * a[data-action="up"] On the up arrow.
+    * a[data-action="down"] On the down arrow.
+
+    Context variables required for this template:
+     * userid - The id of the user whose job assignments ids we are viewing.
+     * canadd - True if we can add a new job assignment.
+     * canedit - True if we can edit this users job assignments.
+     * jobcount - The number of job assignments the user has.
+     * hasjobs - True if the user has one or more job assignments.
+     * jobs - An array of job assignments.
+         * id - The id of the job assignment.
+         * idnumber - The idnumber of the job assignment.
+         * sortorder - The sortorder of the job assignment.
+         * fullname - The fullname of the job assignment.
+         * shortname - The shortname of the job assignment.
+         * editurl - The URL that is used to edit the job assignment.
+         * icon_movedown - flex icon context
+         * icon_moveup - flex icon context
+         * icon_delete - flex icon context
+
+    Example context (json):
+      {"jobcount":3,"hasjobs":true,"jobs":[{"id":"41","idnumber":"Two","sortorder":"0","fullname":"Two","shortname":"Two"},{"id":"40","idnumber":"One","sortorder":"1","fullname":"One","shortname":"One"},{"id":"42","idnumber":"Three","sortorder":"2","fullname":"Three","shortname":"Three"}],"canedit":true,"canadd":true,"userid":"2"}
+}}
+<div class="totara-job-management-listing" data-enhance="job-management-listing" data-enhanced="false" data-userid="{{userid}}" data-jobcount="{{jobcount}}" data-canedit="{{canedit}}" data-allowmultiple="{{allowmultiple}}">
+    {{#hasjobs}}
+    <ul class="joblist unlist">
+    {{#jobs}}
+        <li><a class="editjoblink" href="{{editurl}}" title="{{#str}}editjobassignment,totara_job{{/str}}" data-id="{{id}}" data-sortorder="{{sortorder}}">{{{fullname}}}</a>
+            {{#canedit}}<span class="pull-right">
+                <a href="#" data-action="down" title="{{#str}}movedown,core{{/str}}">{{#icon_movedown}}{{#context}}{{> &&template }}{{/context}}{{/icon_movedown}}</a>
+                <a href="#" data-action="up" data-function="move" title="{{#str}}moveup,core{{/str}}">{{#icon_moveup}}{{#context}}{{> &&template }}{{/context}}{{/icon_moveup}}</a>
+                <a href="#" data-action="delete" data-function="move" title="{{#str}}delete,core{{/str}}">{{#icon_delete}}{{#context}}{{> &&template }}{{/context}}{{/icon_delete}}</a>
+            </span>{{/canedit}}</li>
+    {{/jobs}}
+    </ul>
+    {{/hasjobs}}
+    <div class="nojobassignments">{{#str}}nojobassignments,totara_job{{/str}}</div>
+    {{#canadd}}<div class="addjobassignment"><a class="addjoblink" href="{{addurl}}" title="{{#str}}jobassignmentadd,totara_job{{/str}}">{{#str}}jobassignmentadd,totara_job{{/str}}</a></div>{{/canadd}}
+</div>
+{{#js}}
+require(['totara_job/job_management_listing'], function(Listing){
+    Listing.init('{{userid}}');
+});
+{{/js}}

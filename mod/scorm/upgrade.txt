@@ -1,0 +1,11 @@
+This files describes API changes in the mod_scorm code,
+information provided here is intended especially for developers.
+
+== 11.8 ==
+
+* New capabilities 'mod/scorm:view' and 'mod/scorm:launch' were added.
+
+=== 10 ===
+
+* Group and groupings support has now been enabled.
+

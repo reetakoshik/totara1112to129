@@ -1,0 +1,101 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2015 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template theme_basis/page_footer_nav
+
+    Creates the footer navigation.
+
+    IDs required for JS:
+    * none
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * menuitems Array The menu items
+    * subnav Array Items to display in sub-navigation bar
+    * subnav_has_items Boolean True if subnav is not empty
+
+    Example context (json):
+    {
+        "menuitems": [
+            {
+                "class_name": "mylearning",
+                "class_isfirst": false,
+                "class_islast": false,
+                "class_isselected": true,
+                "linktext": "My Learning",
+                "url": "http://example.com",
+                "target": "_self",
+                "haschildren": true,
+                "children": [
+                    {
+                        "class_name": "mybookings",
+                        "class_isfirst": true,
+                        "class_islast": false,
+                        "class_isselected": false,
+                        "linktext": "My Learning",
+                        "url": "http://example.com",
+                        "target": "_self",
+                        "haschildren": false,
+                        "children": []
+                    }
+                ]
+            }
+        ],
+        "subnav": [
+            {
+                "class_name": "mybookings",
+                "class_isfirst": true,
+                "class_islast": false,
+                "class_isselected": false,
+                "linktext": "My Learning",
+                "url": "http://example.com",
+                "target": "_self",
+                "haschildren": false,
+                "children": []
+            }
+        ],
+        "subnav_has_items": true
+    }
+}}
+<div class="row">
+    <nav class="page-footer-nav">
+        {{#menuitems_has_items}}
+        <ul class="page-footer-nav-list">
+            {{#menuitems}}
+            <li class="page-footer-nav-item col-xs-6 col-sm-3 col-md-2 text-truncate"><a class="page-footer-nav-item-link" href="{{url}}" target="{{target}}">{{{linktext}}}</a>
+                {{#haschildren}}
+                <ul class="page-footer-nav-list">
+                    {{#children}}
+                    <li class="page-footer-nav-item text-truncate">
+                        <a class="page-footer-nav-item-link" target="{{target}}" href="{{url}}">{{{linktext}}}</a>
+                    </li>
+                    {{/children}}
+                </ul>
+                {{/haschildren}}
+            </li>
+            {{/menuitems}}
+        </ul>
+        {{/menuitems_has_items}}
+    </nav>
+</div>

@@ -1,0 +1,3 @@
+<?php
+$definitions = array(
+);

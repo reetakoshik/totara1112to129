@@ -1,0 +1,15 @@
+This files describes API changes in /blocks/* - activity modules,
+information provided here is intended especially for developers.
+
+=== 10 ===
+
+* New block_base::display_with_border_by_default() method to set whether the block type should be displayed with a border by default.
+* New block_base::display_with_border() method that returns true  if the block instance should be displayed with a border.
+* The collapsed class was removed from the navigation block to make it compatible with aria.
+* New aria attributes were added on the navigation block [aria-expanded="false"].
+* The tree JS handling were moved from YUI to AMD module (Jquery).
+* lib/templates/block.mustache context object has changed, the property ->accessible_skip_from has been deprecated and will be removed in a future release.
+* lib/templates/block.mustache context object has changed, the property ->accessible_skip_to has been deprecated and will be removed in a future release.
+* lib/templates/block.mustache context object has changed, the property ->accessible_skip has been added and has the attributes ->id and ->title
+* block_base::config_save has been deprecated and now throws an exception.
+* block_manager::get_required_by_theme_block_types() is no longer static.

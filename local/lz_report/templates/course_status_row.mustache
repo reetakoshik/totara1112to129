@@ -1,0 +1,34 @@
+<div class="status-row-inner" style="display: none;">
+    <div style="margin: 5px;">
+         <b>{{completion-requirements}}: </b><span>{{criteriastr}}</span>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>{{header.criteria_group}}</th>
+                <th>{{header.criteria}}</th>
+                <th>{{header.requirement}}</th>
+                <th>{{header.status}}</th>
+                <th>{{header.complete}}</th>
+                <th>{{header.completion_date}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#rows}}
+                <tr>
+                    <td>{{{criteria_group}}}</td>
+                    <td>{{{criteria}}}</td>
+                    <td>{{{requirement}}}</td>
+                    <td>{{{status}}}</td>
+                    <td>{{{complete}}}</td>
+                    <td>{{{completion_date}}}</td>
+                </tr>
+            {{/rows}}
+            {{^rows}}
+                <tr>
+                    <td>{{empty_message}}</td>
+                </tr>
+            {{/rows}}
+        </tbody>
+    </table>
+</div>

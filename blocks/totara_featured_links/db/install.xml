@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="blocks/totara_featured_links/db" VERSION="20170220" COMMENT="XMLDB file for Totara featured links block"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="block_totara_featured_links_tiles" COMMENT="Defines tiles for Totara featured links blocks">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="This is the tileid"/>
+        <FIELD NAME="blockid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="This is the block id that the tile belongs to"/>
+        <FIELD NAME="type" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="This is the type of tile. Basically a namespace to a class that extends base"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="The order which the tile will be displayed in the block uses blockid-sortorder"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The tile that the tile was created"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="The last time that the tile was modified"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The user that created the tile or is the owner of the tile"/>
+        <FIELD NAME="dataraw" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The raw Json encoded data about how to display the tile"/>
+        <FIELD NAME="visibility" TYPE="int" LENGTH="4" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="What the base visibility option is"/>
+        <FIELD NAME="audienceaggregation" TYPE="int" LENGTH="4" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="The aggregation of the audience rules ie AND or OR"/>
+        <FIELD NAME="presetsraw" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The comma separated strings that refer to the preset rules that apply to the tile"/>
+        <FIELD NAME="presetsaggregation" TYPE="int" LENGTH="4" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="The aggregation of the preset rules ie the logic to combine them"/>
+        <FIELD NAME="overallaggregation" TYPE="int" LENGTH="4" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="The aggregation for the section ie matches audience and preset"/>
+        <FIELD NAME="tilerules" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="This is where the data for the tile specific rules go in. Can be pretty much anything you want."/>
+        <FIELD NAME="audienceshowing" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="This field holds whether the audience rules are to be applied"/>
+        <FIELD NAME="presetshowing" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="This field holds whether the preset rules are to be applied"/>
+        <FIELD NAME="tilerulesshowing" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="This field holds whether the tile defined rules are to be applied"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="id" TYPE="primary" FIELDS="id" COMMENT="The tile id"/>
+        <KEY NAME="blockid" TYPE="foreign" FIELDS="blockid" REFTABLE="block_instances" REFFIELDS="id" COMMENT="Id for the block that the tile is in"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id" COMMENT="The user who created the tile"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>

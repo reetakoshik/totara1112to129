@@ -1,0 +1,17 @@
+idnumber,useridnumber,timemodified,deleted,fullname,startdate,enddate,orgidnumber,posidnumber,manageridnumber,managerjobassignmentidnumber,appraiseridnumber
+nonexistentposition,user1,0,0,A Full Name,,,orgx,notrealpos,manager2,jaidx,
+nonexistentorganisation,user2,0,0,A Full Name,,,notrealorg,posx,manager2,jaidx,
+nonexistentmanager,user3,0,0,A Full Name,,,orgx,posx,notrealmanager,notreal,
+nonexistentappraiser,user4,0,0,A Full Name,,,orgx,posx,manager2,jaidx,notrealappraiser
+nonexistentanything,user5,0,0,A Full Name,,,notrealorg,notrealpos,notrealmanager,notreal,notrealappraiser
+jaidy,user6,0,0,This is already users second idnumber,,,,,,,
+newjaid,user8,0,0,Valid and uses most fields,1426820400,,orgz,posy,manager5,jaidy,appraiserx
+newjaid,user9,0,0,,1426820400,,orgz,posy,manager3,newjaid,appraiserx
+jaidx,user10,0,0,,1426820400,,orgz,posy,manager3,newjaid,appraiserx
+,user11,0,0,No jaid,1426820400,,orgz,posy,manager3,newjaid,appraiserx
+jaidx,user12,0,0,,1426820400,,orgz,posy,manager4,notreal,appraiserx
+newjaid,manager3,0,0,New Job Assignment,,,,,,,
+jaidx,user13,0,0,Has No Totara Sync,1426820400,,orgz,posy,manager3,newjaid,appraiserx
+jaidy,user14,0,0,First entry,,,,,,,
+jaidy,user14,0,0,Second entry,1426820400,,orgz,posy,manager3,newjaid,appraiserx
+newjaid,user15,0,0,New Job Assignment,,,,,manager2,,

@@ -1,0 +1,10 @@
+This files describes API changes in Totara Connect Client,
+information provided here is intended especially for developers.
+
+=== 10 ===
+
+* Added new service protocol version 2 with following new APIs:
+  - sync of positions
+  - sync of organisations
+  - sync of job assignments and custom user profile fields
+  - support for SEP service calls to methods defined in plugins

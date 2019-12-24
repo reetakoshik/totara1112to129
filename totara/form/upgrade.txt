@@ -1,0 +1,20 @@
+This file describes API changes in Totara forms,
+information provided here is intended especially for developers.
+
+=== 11.1 ===
+
+* totara/form/templates/element_checkboxes.mustache has changed to use "data-required" instead of "required" HTML attribute
+* Checkboxes now validate clientside
+* utc10 date field now uses polyfil date pickers in desktop browsers
+
+=== 10 ===
+
+* totara/form/templates/element_filemanager.mustache flex-icon used for upload rather than CSS loaded image
+* totara/form/templates/element_filepicker.mustache flex-icon used for upload rather than CSS loaded image
+* \totara_form\form\element\checkboxes and \totara_form\form\element\radios now display vertically by default. A new
+  attribute 'horizontal' has been added to both for optional horizontal display and there have been minor changes
+  to totara_form/element_checkboxes and totara_form/element_radios templates to accommodate this
+
+=== 9.2 ===
+
+* \totara_form\model::get_current_data(null) now returns all current data

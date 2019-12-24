@@ -1,0 +1,134 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template core/progress_bar
+
+    Progress bar.
+
+    Classes required for JS (in this template):
+    * progressbar__text. Contains the readable text.
+
+    Data attributes required for JS:
+    * popover.id if a popover element is supplied to this object
+
+    Context variables required for this template:
+    * id string The HTML id of this component. This has a default value supplied by the supporting class.
+        This is required for JavaScript to work correctly
+    * progress integer How much of the progress bar should be filled (as a percentage)
+
+    Example context (json):
+    {
+        "id": "progressbar_test",
+        "width": 0,
+        "progress": 1,
+        "popover": {
+          "title": "title",
+          "contentraw": "blah blah blah",
+          "contenttemplate": "",
+          "contenttemplatecontext": false
+        }
+    }
+}}
+<div class="progressbar_container"{{#width}} style="width: {{width}}px;"{{/width}} id="{{id}}">
+    <h2 id="{{id}}_status"></h2>
+    <div class="progress progress-striped active">
+        <div id="{{id}}_bar" class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{progress}}" style="width:{{progress}}%">
+            <span class="progressbar__text">{{progresstext}}</span>
+        </div>
+    </div>
+    {{#popover}}{{> core/popover}}{{/popover}}
+    <p id="{{id}}_estimate"></p>
+</div>
+
+{{! We must not use the JS helper otherwise this gets executed too late. }}
+<script type="text/javascript">
+(function() {
+    var el = document.getElementById('{{id}}'),
+        progressBar = document.getElementById('{{id}}_bar'),
+        statusIndicator = document.getElementById('{{id}}_status'),
+        estimateIndicator = document.getElementById('{{id}}_estimate');
+
+    /**
+     * Updates visibility of heading and estimate if they're empty
+     */
+    function checkText() {
+        if (statusIndicator.textContent === '') {
+            statusIndicator.style.display = 'none';
+        } else {
+            statusIndicator.style.display = '';
+        }
+
+        if (estimateIndicator.textContent === '') {
+            estimateIndicator.style.display = 'none';
+        } else {
+            estimateIndicator.style.display = '';
+        }
+    }
+
+    /**
+     * Updates display of progress bar text based on the size of the text
+     */
+    function checkInvert(percent) {
+        var progressBarText = progressBar.getElementsByClassName('progressbar__text')[0];
+        if (percent < 50) {
+            el.classList.add('progress-invert');
+        } else {
+            el.classList.remove('progress-invert');
+        }
+    }
+
+    checkText();
+    checkInvert(parseInt(progressBar.attributes['aria-valuenow'].value, 10));
+
+    el.addEventListener('update', function(e) {
+        var msg = e.detail.message,
+            percent = e.detail.percent,
+            estimate = e.detail.estimate;
+
+        statusIndicator.textContent = msg;
+        if (typeof require === 'function') {
+            // requireJS has been loaded - get the appropriate string
+            require(['core/str'], function (strlib) {
+                strlib.get_string('xpercent', 'core', percent).done(function (str) {
+                    progressBar.getElementsByClassName('progressbar__text')[0].textContent = str;
+                    checkInvert(percent);
+                })
+            })
+        } else {
+            // requireJS is not available
+            progressBar.getElementsByClassName('progressbar__text')[0].textContent = percent + '%';
+            checkInvert(percent);
+        }
+
+        if (percent === 100) {
+            el.classList.add('progress-success');
+            estimateIndicator.textContent = '';
+        } else {
+            if (estimate) {
+                estimateIndicator.textContent = estimate;
+            } else {
+                estimateIndicator.textContent = '';
+            }
+            el.classList.remove('progress-success');
+        }
+
+        checkText();
+        progressBar.setAttribute('aria-valuenow', percent);
+        progressBar.style.width = percent + '%';
+    });
+})();
+</script>

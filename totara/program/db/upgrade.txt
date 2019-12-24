@@ -1,0 +1,8 @@
+This files describes API changes in /totara/program/*,
+information provided here is intended especially for developers.
+
+=== 10.0 ===
+
+* Added a new 'managersubject' column to the prog_message table. This contains a customisable string to be used as the subject for the managers copy of program emails.
+
+* Added a new 'timecreated' column to the prog_completions table. This records when the record was created, which was previously stored in the 'timestarted' column. The 'timestarted' now stores the time at which the user takes their first action in the program.

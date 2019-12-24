@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="totara/userdata/db" VERSION="20180206" COMMENT="XMLDB file for user data management"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="totara_userdata_purge_type" COMMENT="List of available user data purge types">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userstatus" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Type is suitable for this user status only. Cannot be changed after creation, 0 means active, 1 deleted and 2 suspended"/>
+        <FIELD NAME="fullname" TYPE="char" LENGTH="1333" NOTNULL="true" SEQUENCE="false" COMMENT="Human readable name, mutlilang supported"/>
+        <FIELD NAME="idnumber" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Unique plain text identifier"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="HTML text with description of purging type"/>
+        <FIELD NAME="allowmanual" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Allow use for manual purging"/>
+        <FIELD NAME="allowdeleted" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Allow selection for purging after deletion"/>
+        <FIELD NAME="allowsuspended" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Allow selection for purging after suspension"/>
+        <FIELD NAME="usercreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Who added this type"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="When was this type added"/>
+        <FIELD NAME="timechanged" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Updated only when user indicates that purges should be reapplied."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="idnumber" UNIQUE="true" FIELDS="idnumber"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="totara_userdata_purge_type_item" COMMENT="Purge type items and their settings, each purge type has records for all items available at the time of saving changes">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="purgetypeid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="component" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="Plugin name or subsystem, e.g. mod_glossary, core_user"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="Class name without namespace, e.g. comment, post, completion"/>
+        <FIELD NAME="purgedata" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="0 means item skipped during purging, 1 means data to be purged"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The time when item was added to the purge type, this might be interesting for newly introduced items in preexisting types."/>
+        <FIELD NAME="timechanged" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Last time when the purge field was changed"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="purgetypeid" TYPE="foreign" FIELDS="purgetypeid" REFTABLE="totara_userdata_purge_type" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="purgetypeid-component-name" UNIQUE="true" FIELDS="purgetypeid, component, name"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="totara_userdata_user" COMMENT="Extension of user table for tracking of selected purging types for each user - 1 to 1 mapping to user table">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="usercontextid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="User context id, we need the value here because user deletion removes user context record"/>
+        <FIELD NAME="suspendedpurgetypeid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timesuspended" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Best guess when user was actually deleted"/>
+        <FIELD NAME="timesuspendedpurged" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Last time the user was purged with the selected type, resets to null after type change"/>
+        <FIELD NAME="deletedpurgetypeid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timedeleted" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Best guess when user was actually suspended"/>
+        <FIELD NAME="timedeletedpurged" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Last time the user was purged with the selected type, resets to null after type change"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="suspendedpurgetypeid" TYPE="foreign" FIELDS="suspendedpurgetypeid" REFTABLE="totara_userdata_purge_type" REFFIELDS="id"/>
+        <KEY NAME="deletedpurgetypeid" TYPE="foreign" FIELDS="deletedpurgetypeid" REFTABLE="totara_userdata_purge_type" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="userid" UNIQUE="true" FIELDS="userid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="totara_userdata_purge" COMMENT="List of all user data purges and their result">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="purgetypeid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="origin" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" COMMENT="suspended, deleted or manual keyword matching totara_userdata_purge_type allowxxxx columns, use other keyword for custom code"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The target user"/>
+        <FIELD NAME="usercontextid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="User context id, we need the value here because user deletion removes user context record"/>
+        <FIELD NAME="contextid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Context restriction will be used for resetting user data in one course or activity, null means the whole system"/>
+        <FIELD NAME="usercreated" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The time of creation of this purge, in case of manual purges this is the time when user requested the purge"/>
+        <FIELD NAME="timestarted" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Start of purge process, this happens in scheduled task or ad-hoc task"/>
+        <FIELD NAME="timefinished" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="End of purge or time when marked as timed out"/>
+        <FIELD NAME="result" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="null means not finished, -1 completed ok, -2 means error, -3 means skipped, -4 cancelled, -5 timed out"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="purgetypeid" TYPE="foreign" FIELDS="purgetypeid" REFTABLE="totara_userdata_purge_type" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="totara_userdata_purge_item" COMMENT="Items of each user data purge and their result">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="purgeid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="component" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="Plugin name or subsystem, e.g. mod_glossary, core_user"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="Class name without namespace, e.g. comment, post, completion"/>
+        <FIELD NAME="timestarted" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Start time of purging method"/>
+        <FIELD NAME="timefinished" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="End time of purging method or time when marked as timed out"/>
+        <FIELD NAME="result" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="null means not finished, -1 completed ok, -2 means error, -3 means skipped, -4 cancelled, -5 timed out"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="purgeid" TYPE="foreign" FIELDS="purgeid" REFTABLE="totara_userdata_purge" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="totara_userdata_export_type" COMMENT="List of available user data export types">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="fullname" TYPE="char" LENGTH="1333" NOTNULL="true" SEQUENCE="false" COMMENT="Human readable name, mutlilang supported"/>
+        <FIELD NAME="idnumber" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Unique plain text identifier"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="HTML text with description of purging type"/>
+        <FIELD NAME="allowself" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Allow selection for self export"/>
+        <FIELD NAME="includefiledir" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Include file contents in export archive"/>
+        <FIELD NAME="usercreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Who added this type"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="When was this type added"/>
+        <FIELD NAME="timechanged" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Updated after very update"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="idnumber" UNIQUE="true" FIELDS="idnumber"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="totara_userdata_export_type_item" COMMENT="Export type items and their settings, each export type has records for all items available at the time of saving changes">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="exporttypeid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="component" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="Plugin name or subsystem, e.g. mod_glossary, core_user"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="Class name without namespace, e.g. comment, post, completion"/>
+        <FIELD NAME="exportdata" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="0 means item skipped during export, 1 means data to be exported"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The time when item was added to the export type, this might be interesting for newly introduced items in preexisting types."/>
+        <FIELD NAME="timechanged" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Last time when the export field was changed"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="exporttypeid" TYPE="foreign" FIELDS="exporttypeid" REFTABLE="totara_userdata_export_type" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="exporttypeid-component-name" UNIQUE="true" FIELDS="exporttypeid, component, name"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="totara_userdata_export" COMMENT="List of all user data exports and their result">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="exporttypeid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="origin" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" COMMENT="self keyword matching totara_userdata_purge_type allowxxxx columns, use other keyword for custom code"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The target user"/>
+        <FIELD NAME="contextid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Context restriction will be used for exporting user data from one course or activity, null means the whole system"/>
+        <FIELD NAME="usercreated" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Usually the user that request the export"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time when user requested the export"/>
+        <FIELD NAME="timestarted" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Start of export process, this happens in ad-hoc task"/>
+        <FIELD NAME="timefinished" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="End of export or time when marked as timed out, this is also used to export old files"/>
+        <FIELD NAME="result" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="null means not finished, -1 completed ok, -2 means error, -3 means skipped, -4 cancelled, -5 timed out"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="exporttypeid" TYPE="foreign" FIELDS="exporttypeid" REFTABLE="totara_userdata_export_type" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="totara_userdata_export_item" COMMENT="Items of each user data export and their result">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="exportid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="component" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="Plugin name or subsystem, e.g. mod_glossary, core_user"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="Class name without namespace, e.g. comment, post, completion"/>
+        <FIELD NAME="timestarted" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Start time of purging method"/>
+        <FIELD NAME="timefinished" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="End time of purging method or time when marked as timed out"/>
+        <FIELD NAME="result" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="null means not finished, -1 completed ok, -2 means error, -3 means skipped, -4 cancelled, -5 timed out"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="exportid" TYPE="foreign" FIELDS="exportid" REFTABLE="totara_userdata_export" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>

@@ -1,0 +1,5 @@
+This files describes API changes in /blocks/totara_my_learning_nav,
+information provided here is intended especially for developers.
+
+=== 11.0 ===
+* block_totara_my_learning_nav_renderer::my_learning_nav() has changed

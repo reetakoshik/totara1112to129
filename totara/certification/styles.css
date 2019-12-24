@@ -1,0 +1,67 @@
+/* Certification details edit */
+p.subheader {
+    font-weight: bold;
+    font-size: 15px;
+}
+
+/* #page-course-search - copy of neighbouring fields */
+.coursebox .learningcomptype {
+    font-size: 1em;
+    margin-bottom: 5px;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    float: left;
+    width: 15%;
+}
+
+.coursebox .learningcomptype .name {
+    margin-bottom: 3px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 13px;
+}
+
+/* edit_content.php */
+#edit-program-content.program #programcontent #id_sameascert_rc {
+    margin-bottom: 14px;
+    margin-left: 10px;
+}
+
+#programcontent legend#certifpath.ftoggler {
+    font-size: 1.5em;
+}
+
+/* totara/plan/record/certifications.php - allow titles to fold, hide certifpath col */
+#page-totara-plan-record-certifications table#plan_certifications th {
+    white-space: normal;
+}
+
+#page-totara-plan-record-certifications .certif_completion_certifpath {
+    display: none;
+}
+
+/* totara/completionimport/viewreport.php */
+#page-admin-totara-completionimport-viewreport table#completionimport_course th,
+#page-admin-totara-completionimport-viewreport table#completionimport_certification th {
+    white-space: normal;
+}
+
+#page-totara-certification-edit_completion .certification_completion_section {
+    margin: 15px 0;
+}
+
+#page-totara-certification-edit_completion .certification_completion_section td,
+#page-totara-certification-edit_completion .certification_completion_section th {
+    border-left: 1px solid #2e2e2e;
+}
+
+.dir-ltr #page-totara-certification-edit_completion .certification_completion_section td:first-child,
+.dir-ltr #page-totara-certification-edit_completion .certification_completion_section th:first-child {
+    border-left: 0 solid;
+}
+
+.dir-rtl #page-totara-certification-edit_completion .certification_completion_section td:last-child,
+.dir-rtl #page-totara-certification-edit_completion .certification_completion_section th:last-child {
+    border-right: 0 solid;
+}

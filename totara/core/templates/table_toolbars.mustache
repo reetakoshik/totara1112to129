@@ -1,0 +1,76 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template totara_core/table_toolbars
+
+    Create a toolbars area for a table.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * toolbars_has_items If there are items
+    * postion Postition top or bottom
+    * toolbars Array of left and right items
+
+    Example context (json):
+    {
+        "toolbars_has_items": true
+        "postion": "top"
+        "toolbars": [
+            {
+                "left_content_has_items": true,
+                "left_content": [
+                    "My toolbar"
+                ],
+                "right_content_has_items": true,
+                "right_content": [
+                    "<form action="#" method="get"><input type="submit" value="Create Course"></form>"
+                ]
+            }
+        ]
+    }
+}}
+{{#toolbars_has_items}}
+<div class="totara-toolbar totara-toolbar-{{postion}}">
+    {{#toolbars}}
+        {{#left_content_has_items}}
+        <div class="toolbar-left-table">
+            {{#left_content}}
+            <div class="toolbar-cell">
+                {{{.}}}
+            </div>
+            {{/left_content}}
+        </div>
+        {{/left_content_has_items}}
+        {{#right_content_has_items}}
+            <div class="toolbar-right-table">
+                {{#right_content}}
+                    <div class="toolbar-cell">
+                        {{{.}}}
+                    </div>
+                {{/right_content}}
+            </div>
+        {{/right_content_has_items}}
+    {{/toolbars}}
+</div>
+{{/toolbars_has_items}}

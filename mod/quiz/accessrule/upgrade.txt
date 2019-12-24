@@ -1,0 +1,4 @@
+This files describes API changes for quiz access rule plugins,
+information provided here is intended especially for developers.
+
+Overview of this plugin type at http://docs.moodle.org/dev/Quiz_access_rules

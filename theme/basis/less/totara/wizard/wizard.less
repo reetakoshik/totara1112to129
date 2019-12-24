@@ -1,0 +1,67 @@
+//
+// This file is part of Totara LMS
+//
+// Copyright (C) 2017 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @copyright 2017 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Kevin Hottinger <kevin.hottinger@totaralearning.com>
+// @package   theme_basis
+
+// Include theme component variables
+@import "wizard_variables.less";
+
+.tf_wizard_progress {
+    font-size: @wizard-progress-bar-font-size;
+}
+
+// List container
+.tf_wizard_progress_bar {
+    text-transform: uppercase;
+}
+
+// Current state
+.tf_wizard_progress_bar_item_current {
+    background: @wizard-bar-background-active;
+    box-shadow: 1px 2px 1px @wizard-active-shadow-color;
+    margin-right: 1px;
+
+    &::after {
+        border: 2px solid @wizard-active-bar-top-color;
+        content: '';
+        left: 0;
+        position: absolute;
+        top: -4px;
+        width: 100%;
+    }
+
+    .tf_wizard_progress_bar_arrow {
+        &::after,
+        &::before {
+            border-left: 2em solid @wizard-bar-background-active;
+        }
+
+        // Current state shadows
+        &::after {
+            box-shadow: 2px 0 1px @wizard-active-shadow-color;
+        }
+
+        &::before {
+            box-shadow: 1px 0 0 @wizard-active-shadow-color;
+        }
+    }
+
+}

@@ -1,0 +1,105 @@
+{{!
+ This file is part of Totara LMS
+
+ Copyright (C) 2010 onwards Totara Learning Solutions LTD
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+ @author Brian Barnes <brian.barnes@totaralms.com
+ @package user
+
+}}
+{{!
+    @template core_user/course_participants
+
+    Course participants template.
+
+    The purpose of this template is to render a user when looking at the participants.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * bulkoperations A boolean stating whether to show the bulk operations or not
+    * id The id of the current user
+    * bulklabel The translated string that is read by screen readers and associated with the select user checkbox
+    * email An object containing the email label text and email link
+    * location An object containing the label and location of the user
+    * lastaccessed An object containing the label and time that a user last accessed the course
+    * idnumber An Object containing the label and idnumber (not the database id) of the current user
+    * phone An Object containg the label and number of the users phone number
+    * phone2 An Object containg the label and number of the users second phone number
+    * department An Object containing the label and value of the users department
+    * institution An Object containing the label and value of the users institution
+    * info An Array of label value pairs containing any further information to be displayed here
+    * links An Array of url text pairs containing the links to be displayed on the page
+
+    Example context (json):
+    {
+        "bulkoperations": true,
+        "id": 1,
+        "bulklabel": "Select user for bulk operations",
+        "email": {"label": "Email address", "link": "<a href=\"#\">user4@example.com</a>"},
+        "location": {"label": "City/town", "location": "Wellington, New Zealand"},
+        "lastaccessed": {"label": "Last Access", "time": "Tuesday, 22 September 2015, 2:58 PM (36 mins 30 secs)"},
+        "links": [
+            {"url": "http://example.com", "text": "google"},
+            {"url": "http://example.com", "text": "My Learning"}
+        ]
+    }
+}}
+
+<h4 class="username">{{name}}</h4>
+{{#bulkoperations}}
+<input type="checkbox" class="usercheckbox" name="user{{id}}" id="user{{id}}"{{#selectall}} checked="checked"{{/selectall}} />
+<label for="user{{id}}" class="accesshide">{{bulklabel}}</label>
+{{/bulkoperations}}
+{{{image}}}
+<div class="info">
+    {{#email}}
+        <div class="email">{{label}}{{{link}}}</div>
+    {{/email}}
+    {{#location}}
+        <div class="city">{{label}}{{location}}</div>
+    {{/location}}
+    {{#lastaccessed}}
+        <div class="lastaccessed">{{label}}{{time}}</div>
+    {{/lastaccessed}}
+    {{#idnumber}}
+        <div class="idnumber">{{label}}{{number}}</div>
+    {{/idnumber}}
+    {{#phone}}
+        <div class="phone">{{label}}{{number}}</div>
+    {{/phone}}
+    {{#phone2}}
+        <div class="phone2">{{label}}{{number}}</div>
+    {{/phone2}}
+    {{#department}}
+        <div class="department">{{label}}{{value}}</div>
+    {{/department}}
+    {{#institution}}
+        <div class="institution">{{label}}{{value}}</div>
+    {{/institution}}
+    {{#info}}
+        <div class="none">{{label}}{{{value}}}</div>
+    {{/info}}
+</div>
+<ul class="userlinks">
+    {{#links}}
+    <li><a href="{{{url}}}">{{text}}</a></li>
+    {{/links}}
+</ul>

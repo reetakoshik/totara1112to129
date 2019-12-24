@@ -1,0 +1,14 @@
+This files describes API changes for code that uses the audience API,
+information provided here is intended especially for developers.
+
+=== 11.3 ===
+
+* Icon helpers are no longer used in the following templates, icon data is passed via context data:
+** totara/cohort/templates/editing_ruleset.mustache
+
+=== 11.0 ===
+
+* Converted CSS to LESS
+
+* rb_source_cohort_associations::rb_display_programcompletionlink() has been deprecated, use the totara/cohort/classes/rb/display/cohortassociationduedate class instead.
+* rb_source_cohort_associations_visible::rb_display_programcompletionlink() has been deprecated with no replacement: program completion is for enrolled audience, NOT visible audiences.

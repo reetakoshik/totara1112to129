@@ -1,0 +1,2 @@
+allreports,totara_reportbuilder
+isrelativetotoday,totara_reportbuilder

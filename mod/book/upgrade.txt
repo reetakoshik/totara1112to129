@@ -1,0 +1,10 @@
+This files describes API changes in the book code,
+information provided here is intended especially for developers.
+
+=== 10 ===
+
+* The following functions, previously used (exclusively) by upgrade steps are not available
+  anymore because of the upgrade cleanup performed for this version. See MDL-51580 for more info:
+    - mod_book_migrate_moddata_dir_to_legacy()
+    - mod_book_migrate_all_areas()
+    - mod_book_migrate_area()
