@@ -54,3 +54,4 @@ if ($maturity == MATURITY_EVERGREEN) {
 } else {
     $TOTARA->release = "{$TOTARA->version} (Build: {$TOTARA->build})";
 }
+// checking update with jankins
