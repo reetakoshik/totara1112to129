@@ -1,7 +1,0 @@
-This files describes API changes in /availability/*.
-The information here is intended only for developers.
-
-=== 10 ===
-
-* Condition plugins must replace the CSS selector "#fitem_id_availabilityconditionsjson" with ".availability-field".
-  This selector is often used in your plugin's yui/src/form/js/form.js file.

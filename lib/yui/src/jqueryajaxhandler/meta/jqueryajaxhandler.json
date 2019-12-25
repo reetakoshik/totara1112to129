@@ -1,7 +1,0 @@
-{
-  "moodle-core-jqueryajaxhandler": {
-    "requires": [
-        "base"
-    ]
-  }
-}

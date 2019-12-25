@@ -1,9 +1,0 @@
-#catalogcourses,
-#catalogprograms,
-#catalogcertifications {
-    min-width: 80%;
-}
-
-#catalogcourses .toolbar-right-table .singlebutton {
-    display: inline-block;
-}

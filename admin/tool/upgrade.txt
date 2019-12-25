@@ -1,4 +1,0 @@
-This files describes API changes in /admin/tool/* - plugins,
-information provided here is intended especially for developers.
-
-See http://docs.moodle.org/dev/Admin_tools for more details and explanation.

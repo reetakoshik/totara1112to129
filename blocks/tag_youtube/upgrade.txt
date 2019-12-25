@@ -1,2 +1,0 @@
-This files describes API changes in the block tag_youtube code,
-information provided here is intended especially for developers.

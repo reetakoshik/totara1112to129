@@ -1,3 +1,0 @@
-<!ELEMENT root (childnode)>
-<!ELEMENT childnode (#PCDATA)>
-<!ENTITY entitytext SYSTEM "test.txt">

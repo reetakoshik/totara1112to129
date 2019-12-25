@@ -1,2 +1,0 @@
-setting_core_enhancedcatalog,totara_flavour
-setting_core_enhancedcatalog_desc,totara_flavour

@@ -1,2 +1,0 @@
-This file describes API changes in core filter API and plugins,
-information provided here is intended especially for developers.

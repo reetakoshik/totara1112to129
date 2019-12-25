@@ -1,2 +1,0 @@
-This files describes API changes in /mod/chat/*,
-information provided here is intended especially for developers.

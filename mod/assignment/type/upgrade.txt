@@ -1,2 +1,0 @@
-This file describes changes in the assignment type API and DB structures.
-Information provided here is intended especially for developers.
