@@ -6,7 +6,8 @@ Feature: Advanced editing of users
 
   Scenario: Add a new user from admin tree
     Given I log in as "admin"
-    And I navigate to "Add a new user" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
+    And I press "Add a new user"
     When I set the following fields to these values:
       | Username                        | user1             |
       | New password                    | A.New.Pw.123      |
@@ -14,12 +15,14 @@ Feature: Advanced editing of users
       | Surname                         | One               |
       | Email address                   | u1@example.com    |
     And I press "Create user"
+    And I follow "User One"
     Then I should see "User details"
     And I should see "u1@example.com"
 
   Scenario: Cancel adding of a new user from admin tree
     Given I log in as "admin"
-    And I navigate to "Add a new user" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
+    And I press "Add a new user"
     When I set the following fields to these values:
       | Username                        | user1             |
       | New password                    | A.New.Pw.123      |
@@ -34,7 +37,7 @@ Feature: Advanced editing of users
 
   Scenario: Add a new user from all users
     Given I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I press "Add a new user"
     When I set the following fields to these values:
       | Username                        | user1             |
@@ -50,7 +53,7 @@ Feature: Advanced editing of users
 
   Scenario: Cancel adding of a new user from all users
     Given I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I press "Add a new user"
     When I set the following fields to these values:
       | Username                        | user1             |
@@ -69,7 +72,7 @@ Feature: Advanced editing of users
       | username | firstname | lastname | email                |
       | user1    | User      | One      | user1@example.com |
     And I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "Edit" "link" in the "User One" "table_row"
     When I set the following fields to these values:
       | Username      | u1             |
@@ -85,7 +88,7 @@ Feature: Advanced editing of users
       | username | firstname | lastname | email             |
       | user1    | User      | One      | user1@example.com |
     And I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "Edit" "link" in the "User One" "table_row"
     When I set the following fields to these values:
       | Username      | u1             |
@@ -101,7 +104,7 @@ Feature: Advanced editing of users
       | username | firstname | lastname | email             |
       | user1    | User      | One      | user1@example.com |
     And I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "User One" "link" in the "User One" "table_row"
     And I follow "Edit profile"
     When I set the following fields to these values:
@@ -116,7 +119,7 @@ Feature: Advanced editing of users
       | username | firstname | lastname | email             |
       | user1    | User      | One      | user1@example.com |
     And I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "User One" "link" in the "User One" "table_row"
     And I follow "Edit profile"
     When I set the following fields to these values:

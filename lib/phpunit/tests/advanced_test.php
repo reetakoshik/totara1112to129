@@ -29,6 +29,8 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Test advanced_testcase extra features.
  *
+ * Totara: resetAfterTest() is deprecated and transactions are not used for state reset.
+ *
  * @package    core
  * @category   phpunit
  * @copyright  2012 Petr Skoda {@link http://skodak.org}
@@ -38,7 +40,6 @@ class core_phpunit_advanced_testcase extends advanced_testcase {
 
     public function test_debugging() {
         global $CFG;
-        $this->resetAfterTest();
 
         debugging('hokus');
         $this->assertDebuggingCalled();
@@ -83,8 +84,6 @@ class core_phpunit_advanced_testcase extends advanced_testcase {
 
     public function test_set_user() {
         global $USER, $DB, $SESSION;
-
-        $this->resetAfterTest();
 
         $this->assertEquals(0, $USER->id);
         $this->assertSame($_SESSION['USER'], $USER);
@@ -131,8 +130,6 @@ class core_phpunit_advanced_testcase extends advanced_testcase {
     public function test_set_admin_user() {
         global $USER;
 
-        $this->resetAfterTest();
-
         $this->setAdminUser();
         $this->assertEquals($USER->id, 2);
         $this->assertTrue(is_siteadmin());
@@ -140,8 +137,6 @@ class core_phpunit_advanced_testcase extends advanced_testcase {
 
     public function test_set_guest_user() {
         global $USER;
-
-        $this->resetAfterTest();
 
         $this->setGuestUser();
         $this->assertEquals($USER->id, 1);
@@ -151,17 +146,10 @@ class core_phpunit_advanced_testcase extends advanced_testcase {
     public function test_database_reset() {
         global $DB;
 
-        $this->resetAfterTest();
-
-        $this->preventResetByRollback();
-
         $this->assertEquals(1, $DB->count_records('course')); // Only frontpage in new site.
 
-        // This is weird table - id is NOT a sequence here.
-        $this->assertEquals(0, $DB->count_records('context_temp'));
-        $DB->import_record('context_temp', array('id'=>5, 'path'=>'/1/2', 'depth'=>2));
-        $record = $DB->get_record('context_temp', array());
-        $this->assertEquals(5, $record->id);
+        // Totara: we use real temporary table for context_temp since Totara 12,
+        //         there are no problematic tables with non-incrementing ids any more.
 
         $this->assertEquals(0, $DB->count_records('user_preferences'));
         $originaldisplayid = $DB->insert_record('user_preferences', array('userid'=>2, 'name'=> 'phpunittest', 'value'=>'x'));
@@ -178,7 +166,6 @@ class core_phpunit_advanced_testcase extends advanced_testcase {
         $this->resetAllData();
 
         $this->assertEquals(1, $DB->count_records('course')); // Only frontpage in new site.
-        $this->assertEquals(0, $DB->count_records('context_temp')); // Only frontpage in new site.
 
         $numcourses = $DB->count_records('course');
         $course = $this->getDataGenerator()->create_course();
@@ -214,7 +201,6 @@ class core_phpunit_advanced_testcase extends advanced_testcase {
     public function test_change_detection() {
         global $DB, $CFG, $COURSE, $SITE, $USER;
 
-        $this->preventResetByRollback();
         self::resetAllData(true);
 
         // Database change.
@@ -325,8 +311,6 @@ class core_phpunit_advanced_testcase extends advanced_testcase {
     public function test_load_dataset() {
         global $DB;
 
-        $this->resetAfterTest();
-
         $this->assertFalse($DB->record_exists('user', array('id'=>5)));
         $this->assertFalse($DB->record_exists('user', array('id'=>7)));
         $dataset = $this->createXMLDataSet(__DIR__.'/fixtures/sample_dataset.xml');
@@ -396,8 +380,6 @@ class core_phpunit_advanced_testcase extends advanced_testcase {
     public function test_message_processors_reset() {
         global $DB;
 
-        $this->resetAfterTest(true);
-
         // Get all processors first.
         $processors1 = get_message_processors();
 
@@ -421,9 +403,6 @@ class core_phpunit_advanced_testcase extends advanced_testcase {
     }
 
     public function test_message_redirection() {
-        $this->preventResetByRollback(); // Messaging is not compatible with transactions...
-        $this->resetAfterTest(false);
-
         $user1 = $this->getDataGenerator()->create_user();
         $user2 = $this->getDataGenerator()->create_user();
 
@@ -471,7 +450,7 @@ class core_phpunit_advanced_testcase extends advanced_testcase {
         $this->assertGreaterThanOrEqual($mid1, $mid2);
 
         $messages = $sink->get_messages();
-        $this->assertInternalType('array', $messages);
+        $this->assertIsArray($messages);
         $this->assertCount(2, $messages);
         $this->assertEquals($mid1, $messages[0]->id);
         $this->assertEquals($message1->userto->id, $messages[0]->useridto);
@@ -485,18 +464,18 @@ class core_phpunit_advanced_testcase extends advanced_testcase {
         // Test resetting.
         $sink->clear();
         $messages = $sink->get_messages();
-        $this->assertInternalType('array', $messages);
+        $this->assertIsArray($messages);
         $this->assertCount(0, $messages);
 
         message_send($message1);
         $messages = $sink->get_messages();
-        $this->assertInternalType('array', $messages);
+        $this->assertIsArray($messages);
         $this->assertCount(1, $messages);
 
         // Test closing.
         $sink->close();
         $messages = $sink->get_messages();
-        $this->assertInternalType('array', $messages);
+        $this->assertIsArray($messages);
         $this->assertCount(1, $messages, 'Messages in sink are supposed to stay there after close');
 
         // Test debugging is enabled again.
@@ -541,48 +520,15 @@ class core_phpunit_advanced_testcase extends advanced_testcase {
         message_send($message1);
         $this->assertEquals(1, $sink->count());
 
-        // Test if sink can be carried over to next test.
+        // Test if sink is terminated after reset.
         $this->assertTrue(phpunit_util::is_redirecting_messages());
-        return $sink;
-    }
 
-    /**
-     * @depends test_message_redirection
-     */
-    public function test_message_redirection_noreset($sink) {
-        $this->preventResetByRollback(); // Messaging is not compatible with transactions...
-        $this->resetAfterTest();
-
-        $this->assertTrue(phpunit_util::is_redirecting_messages());
-        $this->assertEquals(1, $sink->count());
-
-        $message = new \core\message\message();
-        $message->courseid          = 1;
-        $message->component         = 'moodle';
-        $message->name              = 'instantmessage';
-        $message->userfrom          = get_admin();
-        $message->userto            = get_admin();
-        $message->subject           = 'message subject 1';
-        $message->fullmessage       = 'message body';
-        $message->fullmessageformat = FORMAT_MARKDOWN;
-        $message->fullmessagehtml   = '<p>message body</p>';
-        $message->smallmessage      = 'small message';
-        $message->notification      = 0;
-
-        message_send($message);
-        $this->assertEquals(2, $sink->count());
-    }
-
-    /**
-     * @depends test_message_redirection_noreset
-     */
-    public function test_message_redirection_reset() {
-        $this->assertFalse(phpunit_util::is_redirecting_messages(), 'Test reset must stop message redirection.');
+        self::resetAllData();
+        $this->assertFalse(phpunit_util::is_redirecting_messages());
     }
 
     public function test_set_timezone() {
         global $CFG;
-        $this->resetAfterTest();
 
         $this->assertSame('Australia/Perth', $CFG->timezone);
         $this->assertSame('Australia/Perth', date_default_timezone_get());
@@ -628,8 +574,6 @@ class core_phpunit_advanced_testcase extends advanced_testcase {
 
     public function test_locale_reset() {
         global $CFG;
-
-        $this->resetAfterTest();
 
         // If this fails self::resetAllData(); must be updated.
         $this->assertSame('en_AU.UTF-8', get_string('locale', 'langconfig'));
@@ -678,7 +622,7 @@ class core_phpunit_advanced_testcase extends advanced_testcase {
      */
     public function test_core_user_email_addresses() {
         global $USER;
-        $this->resetAfterTest();
+
         $this->setGuestUser();
         $this->assertSame('root@localhost', $USER->email);
 
@@ -695,18 +639,8 @@ class core_phpunit_advanced_testcase extends advanced_testcase {
         $this->assertInstanceOf('core_string_manager_standard', $sm);
         $this->assertSame('en', current_language());
 
-        // Test resetAfterTest must be enabled.
         $en = '%A, %d %B %Y, %I:%M %p';
         $us = '%A, %B %d, %Y, %I:%M %p';
-
-        try {
-            $this->overrideLangString('strftimedaydatetime', 'langconfig', $us);
-        } catch (moodle_exception $ex) {
-            $this->assertInstanceOf('coding_exception', $ex);
-            $this->assertSame('Coding error detected, it must be fixed by a programmer: Enable restAfterTest to use string overriding', $ex->getMessage());
-        }
-
-        $this->resetAfterTest();
 
         $dateformat = get_string('strftimedaydatetime', 'langconfig');
         $this->assertSame($en, $dateformat);
@@ -722,13 +656,9 @@ class core_phpunit_advanced_testcase extends advanced_testcase {
             $this->assertInstanceOf('coding_exception', $ex);
             $this->assertSame('Coding error detected, it must be fixed by a programmer: Cannot override non-existent string', $ex->getMessage());
         }
-    }
 
-    /**
-     * Totara - make sure tha lang strings reset back.
-     * @depends test_override_lang_string
-     */
-    public function test_override_lang_string_reset() {
+        // Totara - make sure tha lang strings reset back.
+        self::resetAllData();
         $en = '%A, %d %B %Y, %I:%M %p';
         $dateformat = get_string('strftimedaydatetime', 'langconfig');
         $this->assertSame($en, $dateformat);

@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of Totara LMS
+ * This file is part of Totara Learn
  *
  * Copyright (C) 2010 onwards Totara Learning Solutions LTD
  *
@@ -20,8 +20,7 @@
  * @author Simon Coggins <simon.coggins@totaralms.com>
  * @author Eugene Venter <eugene@catalyst.net.nz>
  * @author Alastair Munro <alastair.munro@totaralms.com>
- * @package totara
- * @subpackage reportbuilder
+ * @package totara_reportbuilder
  */
 
 /**
@@ -35,9 +34,9 @@ require_once($CFG->libdir . '/tablelib.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->libdir . '/totaratablelib.php');
 require_once($CFG->dirroot . '/totara/core/lib.php');
+require_once($CFG->dirroot . '/totara/reportbuilder/classes/rb_config.php');
 require_once($CFG->dirroot . '/totara/reportbuilder/classes/rb_base_source.php');
 require_once($CFG->dirroot . '/totara/reportbuilder/classes/rb_base_content.php');
-require_once($CFG->dirroot . '/totara/reportbuilder/classes/rb_base_preproc.php');
 require_once($CFG->dirroot . '/totara/reportbuilder/classes/rb_base_embedded.php');
 require_once($CFG->dirroot . '/totara/reportbuilder/classes/rb_join.php');
 require_once($CFG->dirroot . '/totara/reportbuilder/classes/rb_column.php');
@@ -122,17 +121,32 @@ class reportbuilder {
     const FILTER = 1;
     const FILTERALL = 2;
 
+    /**
+     * Used to represent the different methods of getting records and counts for this report
+     * @since Totara 12.4
+     */
+    const FETCHMETHOD_DATABASE_RECOMMENDATION = 0;
+    const FETCHMETHOD_STANDARD_RECORDSET = 1;
+    const FETCHMETHOD_COUNTED_RECORDSET = 2;
+
     /** Disable global restrictions in report */
     const GLOBAL_REPORT_RESTRICTIONS_DISABLED = 0;
     /** Use site-wide global restrictions in report */
     const GLOBAL_REPORT_RESTRICTIONS_ENABLED = 1;
 
     /**
-     * Custom uniqueid setting to apply during reportbuiler instantiation
+     * Custom uniqueid setting to apply during reportbuilder instantiation
      * It should be set by @see reportbuilder::overrideuniqueid() before every new reportbuilder call with custom uniqueid
      * @var string
      */
     private static $overrideuniquid = null;
+
+    /**
+     * Internal flag for detection of incorrect constructor use,
+     * this will be removed after we make constructor protected and type hinted.
+     * @var bool
+     */
+    private static $preventpublicconstructor = true;
 
     /** @var rb_base_source */
     public $src;
@@ -143,7 +157,7 @@ class reportbuilder {
     /** @var rb_column[] */
     public $columns;
 
-    public $fullname, $shortname, $source, $hidden, $searchcolumns, $filters, $filteroptions, $requiredcolumns;
+    public $fullname, $shortname, $source, $hidden, $searchcolumns, $filters, $filteroptions, $requiredcolumns, $initialdisplay;
     public $_filtering, $contentoptions, $contentmode, $embeddedurl, $description;
     public $_id, $recordsperpage, $defaultsortcolumn, $defaultsortorder;
     private $_joinlist, $_base, $_params, $_sid;
@@ -155,14 +169,14 @@ class reportbuilder {
     /**
      * @var bool Does report instance use GROUP BY statement (aggregation)?
      */
-    public $grouped;
+    public $grouped = false;
 
     /**
      * @var bool Indicates that report instance is grouped internally and not only because user selected custom aggregation for column
      */
-    protected $pregrouped;
+    protected $pregrouped = false;
 
-    public $reportfor, $embedded, $toolbarsearch;
+    public $reportfor, $embedded, $embedobj, $toolbarsearch;
 
     public $hidetoolbar = false;
 
@@ -189,12 +203,18 @@ class reportbuilder {
     protected $baseurl = null;
 
     /**
+     * Caching data for display methods, use display class name as key.
+     * This is intended to prevent repeated DB requests in display methods.
+     * @var array
+     */
+    public $displaycache = array();
+
+    /**
      * @var bool $cache Cache state for current report
      */
     public $cache;
 
     /**
-     *
      * @var bool $cacheignore If true cache will be ignored during report preparation
      */
     public $cacheignore = false;
@@ -205,7 +225,6 @@ class reportbuilder {
     protected $ignoreparams = null;
 
     /**
-     *
      * @var bool Set for next created instance ignore params overriding default/page settings
      */
     protected static $overrideignoreparams = null;
@@ -215,14 +234,20 @@ class reportbuilder {
      */
     public $cacheschedule;
 
-    /** @var string|bool name of caching table if used and up-to-date, false if not present */
+    /**
+     * @var string|bool name of caching table if used and up-to-date, false if not present
+     */
     protected $cachetable = null;
 
     /**
-     *
      * @var bool $ready State variable. True when reportbuilder finished construction.
      */
     protected $ready = false;
+
+    /**
+     * @var bool $usercanaccess true means user many access report, this is used for performacne only
+     */
+    protected $usercanaccess;
 
     /**
      * Please use {@link reportbuilder::can_display_total_count()}
@@ -242,118 +267,233 @@ class reportbuilder {
     public $useclonedb;
 
     /**
-     * Constructor for reportbuilder object
+     * Sets how data and counts are collected for the report.
+     * Values:
+     *   - FETCHMETHOD_COUNTED_RECORDSET: Counted recordsets will be used, allowing counts to be collected when counting records.
+     *   - FETCHMETHOD_STANDARD_RECORDSET: A standard recordset will be used to get data, and a separate query will be executed to get counts.
+     *   - FETCHMETHOD_DATABASE_RECOMMENDATION: Use the system default, which if not set uses the database recommendation (recommended)
      *
-     * Generates a new reportbuilder report instance.
-     *
-     * Requires either a valid ID or shortname as parameters.
-     *
-     * Note: If a report is embedded then it is now guaranteed to have its embedded object loaded.
-     * Previously, embedded reports were required to create the embedded object and pass it to this constructor in the
-     * $embed_deprecated parameter. Now, this constructor will create the embedded object. The data required by the embedded
-     * object should be passed in the $embeddata parameter.
-     *
-     * Note: If a report is embedded and it implements is_capable (all embedded reports SHOULD implement this, but are
-     * not required to) then is_capable will be called: If the user does not have access then an exception is thrown. If
-     * the function is not implemented then a debug warning is generated and an exception will NOT be thrown.
-     *
-     * @param integer $id ID of the report to generate
-     * @param string $shortname Shortname of the report to generate
-     * @param stdClass|bool $embed_deprecated Object containing settings for an embedded report - see note above
-     * @param integer $sid Saved search ID if displaying a saved search
-     * @param integer $reportfor User ID of user who is viewing the report
-     *                           (or null to use the current user)
-     * @param bool $nocache Force no cache usage. Only works if cache for current report is enabled
-     *                       and generated
-     * @param array $embeddata data to be passed to the embedded object constructor
-     * @param rb_global_restriction_set $globalrestrictionset global report restrictions info
-     *
+     * Don't access this property outside of the Report Builder API.
+     * It should be considered private. It is public only because of the report form requirements.
+     * @internal
+     * @var int
      */
-    public function __construct($id=null, $shortname=null, $embed_deprecated=false, $sid=null, $reportfor=null,
-            $nocache = false, $embeddata = array(), rb_global_restriction_set $globalrestrictionset = null) {
-        global $USER, $DB, $CFG;
+    private $fetchmethod = null;
 
-        $report = false;
-        if ($id != null) {
-            // look for existing report by id
-            $report = $DB->get_record('report_builder', array('id' => $id), '*', IGNORE_MISSING);
-        } else if ($shortname != null) {
-            // look for existing report by shortname
-            $report = $DB->get_record('report_builder', array('shortname' => $shortname), '*', IGNORE_MISSING);
-        } else {
-            // either id or shortname is required
-            print_error('noshortnameorid', 'totara_reportbuilder');
+    /**
+     * Factory method for creating instance of report (both user and embedded reports ids are allowed).
+     *
+     * NOTE: embedded reports often require extra embedded init data, developers must make sure
+     *       that the report does not leak sensitive information when embedded data is not supplied here!
+     *
+     * @param int $id report id
+     * @param rb_config|null $config
+     * @param bool $checkaccess true mans verify that report can be access by current user or the user specified in reportfor
+     *
+     * @return reportbuilder
+     */
+    public static function create(int $id, rb_config $config = null, bool $checkaccess = true) {
+        global $DB;
+
+        $report = $DB->get_record('report_builder', ['id' => $id], '*', IGNORE_MISSING);
+        if (!$report) {
+            print_error('reportwithidnotfound', 'totara_reportbuilder', $id);
+        }
+
+        if ($config == null) {
+            $config = new rb_config();
+        }
+
+        self::$preventpublicconstructor = false;
+
+        return new reportbuilder($report, $config, $checkaccess);
+    }
+
+    /**
+     * Factory method for creating an instance of an embedded report,
+     * the report is created automatically if it does not exist yet.
+     *
+     * This is the only correct way to display embedded report on it's page.
+     *
+     * @param string $name name of embedded report
+     * @param rb_config|null $config
+     * @param bool $checkaccess true mans verify that report can be access by current user or the user specified in reportfor
+     *
+     * @return reportbuilder
+     */
+    public static function create_embedded(string $name, rb_config $config = null, bool $checkaccess = true) {
+        global $DB;
+
+        if (is_numeric($name)) {
+            throw new coding_exception('Embedded report name cannot be a number');
+        }
+
+        $report = $DB->get_record('report_builder', ['shortname' => $name, 'embedded' => 1], '*', IGNORE_MISSING);
+
+        if ($config == null) {
+            $config = new rb_config();
         }
 
         // Handle if report not found in db.
         $embed = null;
         if (!$report) {
-            // Determine if this is an embedded report with a missing embedded record.
-            if ($embed_deprecated) {
-                $embed = $embed_deprecated;
-            } else if ($shortname !== null) {
-                if ($embedclass = self::get_embedded_report_class($shortname)) {
-                    $embed = new $embedclass($embeddata);
+            if ($embedclass = self::get_embedded_report_class($name)) {
+                $embed = new $embedclass($config->get_embeddata());
+                if ($embed) {
+                    // Maybe this is the first time we have run it, so try to create it.
+                    if (!$id = reportbuilder_create_embedded_record($name, $embed, $error)) {
+                        print_error('error:creatingembeddedrecord', 'totara_reportbuilder', '', $error);
+                    }
+                    $report = $DB->get_record('report_builder', ['id' => $id]);
                 }
-            }
-            if ($embed) {
-                // This is an embedded report - maybe this is the first time we have run it, so try to create it.
-                if (! $id = reportbuilder_create_embedded_record($shortname, $embed, $error)) {
-                    print_error('error:creatingembeddedrecord', 'totara_reportbuilder', '', $error);
-                }
-                $report = $DB->get_record('report_builder', array('id' => $id));
             }
         }
 
         if (!$report) {
-            print_error('reportwithidnotfound', 'totara_reportbuilder', '', $id);
+            print_error('reportwithnamenotfound', 'totara_reportbuilder', $name);
         }
 
-        // If this is an embedded report then load the embedded report object.
-        $embedgrrsupport = true;
-        if ($report->embedded && !$embed) {
-            $embedclass = self::get_embedded_report_class($report->shortname);
-            if ($embedclass) {
-                $embed = new $embedclass($embeddata);
-                $embedgrrsupport = $embed->embedded_global_restrictions_supported();
+        self::$preventpublicconstructor = false;
+
+        return new reportbuilder($report, $config, $checkaccess);
+    }
+
+    /**
+     * Constructor for the reportbuilder object.
+     *
+     * NOTE: do not use directly in code, use create() and create_embedded() factory methods instead.
+     *
+     * @param \stdClass $report report record
+     * @param rb_config $config report configuration
+     * @param bool $checkaccess true mans verify that report can be access by current user or the user specified in reportfor
+     */
+    public function __construct($report, $config = null, $checkaccess = true) {
+        global $DB;
+
+        if (!is_object($report)) {
+            debugging("From Totara 12, report constructor must not be called directly, use reportbuilder::create() instead.", DEBUG_DEVELOPER);
+            if (!$report) {
+                throw new coding_exception('Report id must be specified!');
+            }
+
+            $report = $DB->get_record('report_builder', array('id' => $report), '*', MUST_EXIST);
+
+            $args = func_get_args();
+
+            $config = new rb_config();
+            if (!empty($args[3])) {
+                $config->set_sid((int)$args[3]);
+            }
+            if (!empty($args[4])) {
+                $config->set_reportfor($args[4]);
+            }
+            if (!empty($args[5])) {
+                $config->set_nocache(true);
+            }
+            if (!empty($args[6])) {
+                $config->set_embeddata($args[6]);
+            }
+            if (!empty($args[7])) {
+                $config->set_global_restriction_set($args[7]);
+            }
+            $checkaccess = true;
+
+        } else {
+            if (self::$preventpublicconstructor) {
+                throw new coding_exception('New reportbuilder constructor cannot be called directly, use reportbuilder::create() instead.');
+            }
+            self::$preventpublicconstructor = true;
+
+            if ($config === null) {
+                throw new coding_exception('Missing report config');
+            } else if (!is_object($config) or !($config instanceof rb_config)) {
+                throw new coding_exception('Invalid report config object supplied');
+            }
+
+            if (!is_bool($checkaccess)) {
+                throw new coding_exception('Invalid report constructor checkaccess value');
             }
         }
 
-        // Load restriction set.
-        if (!empty($CFG->enableglobalrestrictions) and $globalrestrictionset !== null && $embedgrrsupport) {
-            $this->globalrestrictionset = $globalrestrictionset;
-            $nocache = true; // Caching cannot work together with restrictions, sorry.
-            $usesourcecache = false; // Cannot use the source cache if we have a restrictionset.
-        } else {
-            $this->globalrestrictionset = null;
-            $usesourcecache = true; // There is no restrictionset so we can use the sourcecache.
-        }
+        // No more changes in rb_config instance.
+        $config->finalise();
 
         $this->_id = $report->id;
         $this->source = $report->source;
-        $this->src = self::get_source_object($this->source, $usesourcecache, true, $this->globalrestrictionset);
         $this->shortname = $report->shortname;
         $this->fullname = $report->fullname;
         $this->hidden = $report->hidden;
         $this->initialdisplay = $report->initialdisplay;
         $this->toolbarsearch = $report->toolbarsearch;
         $this->description = $report->description;
-        $this->embedded = $report->embedded;
         $this->globalrestriction = $report->globalrestriction;
         $this->contentmode = $report->contentmode;
-        // Store the embedded URL for embedded reports only.
-        if ($report->embedded && $embed) {
-            $this->embeddedurl = $embed->url;
-        }
-        $this->embedobj = $embed;
         $this->recordsperpage = $report->recordsperpage;
         $this->defaultsortcolumn = $report->defaultsortcolumn;
         $this->defaultsortorder = $report->defaultsortorder;
         $this->showtotalcount = (!empty($report->showtotalcount) && !empty(get_config('totara_reportbuilder', 'allowtotalcount')));
-        $this->_sid = $sid;
+        $this->useclonedb = $report->useclonedb;
+        $this->embedded = $report->embedded;
+        $this->cache = $report->cache;
+
+        // Use config settings.
+        $this->_sid = $config->get_sid();
+        $this->reportfor = $config->get_reportfor();
+        $this->cacheignore = $config->get_nocache();
+        $this->globalrestrictionset = $config->get_global_restriction_set();
 
         // Assign a unique identifier for this report.
         $this->uniqueid = $report->id;
+
+        // If this is an embedded report then load the embedded report object.
+        if ($this->embedded) {
+            if ($embedclass = self::get_embedded_report_class($this->shortname)) {
+                $embed = new $embedclass($config->get_embeddata());
+                if (!$embed) {
+                    throw new coding_exception('Embedded report definition not found');
+                }
+                $this->embedobj = $embed;
+                $this->embeddedurl = $this->embedobj->url;
+                unset($embed);
+            }
+        }
+
+        $this->initialise();
+        $this->ready = true;
+
+        if ($checkaccess) {
+            if (!$this->can_access()) {
+                throw new moodle_exception('nopermission', 'totara_reportbuilder');
+            }
+        }
+    }
+
+    /**
+     * Initialises the report with the configuration settings required.
+     */
+    private function initialise() {
+        global $CFG, $DB;
+
+        if ($this->is_ready()) {
+            throw new coding_exception('This report instance cannot be initialised any more.');
+        }
+
+        // Set default fetch method for this report.
+        $this->fetchmethod = self::get_default_fetch_method();
+
+        // Load restriction set.
+        if (!empty($CFG->enableglobalrestrictions)) {
+            if ($this->embedobj and !$this->embedobj->embedded_global_restrictions_supported()) {
+                $usesourcecache = true; // There is no restrictionset so we can use the sourcecache.
+            } else {
+                $this->cacheignore = true; // Caching cannot work together with restrictions, sorry.
+                $usesourcecache = false; // Cannot use the source cache if we have a restrictionset.
+            }
+        } else {
+            $usesourcecache = true; // There is no restrictionset so we can use the sourcecache.
+        }
+
+        $this->src = self::get_source_object($this->source, $usesourcecache, true, $this->globalrestrictionset);
 
         // If uniqueid was overridden, apply it here and reset.
         if (isset(self::$overrideuniquid)) {
@@ -367,57 +507,23 @@ class reportbuilder {
             self::$overrideignoreparams = null;
         }
 
-        // Assume no grouping initially.
-        $this->grouped = false;
-        $this->pregrouped = false;
-
-        $this->cacheignore = $nocache;
         if ($this->src->cacheable) {
-            $this->cache = $report->cache;
             $this->cacheschedule = $DB->get_record('report_builder_cache', array('reportid' => $this->_id), '*', IGNORE_MISSING);
         } else {
             $this->cache = 0;
             $this->cacheschedule = false;
         }
 
-        $this->useclonedb = $report->useclonedb;
-
-        // Determine who is viewing or receiving the report.
-        // Used for access and content restriction checks.
-        if (isset($reportfor)) {
-            $this->reportfor = $reportfor;
-        } else {
-            $this->reportfor = $USER->id;
-        }
-
-        if ($sid) {
+        if ($this->_sid) {
             $this->restore_saved_search();
         }
 
         $this->_paramoptions = $this->src->paramoptions;
 
-        if ($embed) {
-            $this->_embeddedparams = $embed->embeddedparams;
+        if ($this->embedobj) {
+            $this->_embeddedparams = $this->embedobj->embeddedparams;
         }
         $this->_params = $this->get_current_params();
-
-        // Run the embedded report's capability checks.
-        if ($embed) {
-            if (defined('REPORTBUIDLER_MANAGE_REPORTS_PAGE')) {
-                // The is_capable is intended for report viewing only!
-                require_capability('totara/reportbuilder:manageembeddedreports', context_system::instance());
-                if (!method_exists($embed, 'is_capable')) {
-                    debugging("Missing is_capable() method in embedded report {$embed->fullname}", DEBUG_DEVELOPER);
-                }
-            } else if (method_exists($embed, 'is_capable')) {
-                if (!$embed->is_capable($this->reportfor, $this)) {
-                    print_error('nopermission', 'totara_reportbuilder');
-                }
-            } else {
-                debugging('This report doesn\'t implement is_capable().
-                    Sidebar filters will only use form submission rather than instant filtering.', DEBUG_DEVELOPER);
-            }
-        }
 
         // Allow sources to modify itself based on params.
         $this->src->post_params($this);
@@ -431,10 +537,12 @@ class reportbuilder {
                 $this->requiredcolumns[$key] = $column;
             }
         }
-        if (!empty($embed->requiredcolumns)) {
-            foreach ($embed->requiredcolumns as $column) {
-                $key = $column->type . '-' . $column->value;
-                $this->requiredcolumns[$key] = $column;
+        if ($this->embedobj) {
+            if (!empty($this->embedobj->requiredcolumns)) {
+                foreach ($this->embedobj->requiredcolumns as $column) {
+                    $key = $column->type . '-' . $column->value;
+                    $this->requiredcolumns[$key] = $column;
+                }
             }
         }
 
@@ -484,10 +592,52 @@ class reportbuilder {
         $this->src->post_config($this);
         if ($colkeys != array_keys($this->columns) or $reqkeys != array_keys($this->requiredcolumns)) {
             throw new coding_exception('Report source ' . get_class($this->src) .
-                                            '::post_config() must not change report columns!');
+                                       '::post_config() must not change report columns!');
+        }
+    }
+
+    /**
+     * Can report user access this report?
+     *
+     * NOTE: the result is cached for performance reasons.
+     *
+     * @return bool
+     */
+    public function can_access() {
+        if (isset($this->usercanaccess)) {
+            return $this->usercanaccess;
         }
 
-        $this->ready = true;
+        if ($this->needs_require_login() and $this->reportfor <= 0) {
+            $this->usercanaccess = false;
+            return $this->usercanaccess;
+        }
+
+        if ($this->embedobj) {
+            $this->usercanaccess = true;
+            // Run the embedded report's capability checks.
+            if (method_exists($this->embedobj, 'is_capable')) {
+                if (!$this->embedobj->is_capable($this->reportfor, $this)) {
+                    $this->usercanaccess = false;
+                }
+            } else {
+                debugging('This report doesn\'t implement is_capable(). Sidebar filters will only use form submission rather than instant filtering.', DEBUG_DEVELOPER);
+                $this->usercanaccess = false;
+            }
+
+        } else {
+            $this->usercanaccess = self::is_capable($this->_id, $this->reportfor);
+        }
+
+        return $this->usercanaccess;
+    }
+
+    /**
+     * Return if reportbuilder is ready to work.
+     * @return bool
+     */
+    public function is_ready() {
+        return $this->ready;
     }
 
     /**
@@ -496,15 +646,6 @@ class reportbuilder {
      */
     public function can_display_total_count() {
         return $this->showtotalcount;
-    }
-
-
-    /**
-     * Return if reportbuilder is ready to work.
-     * @return bool
-     */
-    public function is_ready() {
-        return $this->ready;
     }
 
     /**
@@ -538,6 +679,9 @@ class reportbuilder {
      * It should not be called when data will not be generated (e.g. report setup/config pages).
      */
     public function handle_pre_display_actions() {
+        if (!$this->can_access()) {
+            throw new moodle_exception('nopermission', 'totara_reportbuilder');
+        }
         $this->src->pre_display_actions();
     }
 
@@ -553,40 +697,36 @@ class reportbuilder {
         // Get any required js files that are specified by the source.
         $js = $this->src->get_required_jss();
 
-        // Only include show/hide code for tabular reports.
-        $graph = (substr($this->source, 0, strlen('graphical_feedback_questions')) == 'graphical_feedback_questions');
-        if (!$graph) {
-            $code[] = TOTARA_JS_DIALOG;
-            $jsdetails = new stdClass();
-            $jsdetails->initcall = 'M.totara_reportbuilder_showhide.init';
-            $jsdetails->jsmodule = array('name' => 'totara_reportbuilder_showhide',
-                'fullpath' => '/totara/reportbuilder/showhide.js');
-            $jsdetails->args = array('hiddencols' => $this->js_get_hidden_columns());
-            $jsdetails->strings = array(
-                'totara_reportbuilder' => array('showhidecolumns'),
-                'moodle' => array('ok')
-            );
-            $js[] = $jsdetails;
+        $code[] = TOTARA_JS_DIALOG;
+        $jsdetails = new stdClass();
+        $jsdetails->initcall = 'M.totara_reportbuilder_showhide.init';
+        $jsdetails->jsmodule = array('name' => 'totara_reportbuilder_showhide',
+            'fullpath' => '/totara/reportbuilder/showhide.js');
+        $jsdetails->args = array('hiddencols' => $this->js_get_hidden_columns());
+        $jsdetails->strings = array(
+            'totara_reportbuilder' => array('showhidecolumns'),
+            'moodle' => array('ok')
+        );
+        $js[] = $jsdetails;
 
-            // Add saved search.js.
-            $jsdetails = new stdClass();
-            $jsdetails->initcall = 'M.totara_reportbuilder_savedsearches.init';
-            $jsdetails->jsmodule = array('name' => 'totara_reportbuilder_savedsearches',
-                'fullpath' => '/totara/reportbuilder/saved_searches.js');
-            $jsdetails->strings = array(
-                'totara_reportbuilder' => array('managesavedsearches'),
-                'form' => array('close')
-            );
-            $js[] = $jsdetails;
+        // Add saved search.js.
+        $jsdetails = new stdClass();
+        $jsdetails->initcall = 'M.totara_reportbuilder_savedsearches.init';
+        $jsdetails->jsmodule = array('name' => 'totara_reportbuilder_savedsearches',
+            'fullpath' => '/totara/reportbuilder/saved_searches.js');
+        $jsdetails->strings = array(
+            'totara_reportbuilder' => array('managesavedsearches'),
+            'form' => array('close')
+        );
+        $js[] = $jsdetails;
 
-            $jsdetails = new \stdClass();
-            $jsdetails->initcall = 'M.totara_reportbuilder_export.init';
-            $jsdetails->jsmodule = array(
-                'name' => 'totara_reportbuilder_export',
-                'fullpath' => '/totara/reportbuilder/js/export.js'
-            );
-            $js[] = $jsdetails;
-        }
+        $jsdetails = new \stdClass();
+        $jsdetails->initcall = 'M.totara_reportbuilder_export.init';
+        $jsdetails->jsmodule = array(
+            'name' => 'totara_reportbuilder_export',
+            'fullpath' => '/totara/reportbuilder/js/export.js'
+        );
+        $js[] = $jsdetails;
 
         local_js($code);
         foreach ($js as $jsdetails) {
@@ -651,32 +791,7 @@ class reportbuilder {
     }
 
     /**
-     * Searches for and returns an instance of the specified preprocessor class
-     * for a particular activity group
-     *
-     * @param string $preproc The name of the preproc class to return
-     *                       (excluding the rb_preproc prefix)
-     * @param integer $groupid The group id to create the preprocessor for
-     * @return object An instance of the preproc. Returns false if
-     *                the preproc can't be found
-     */
-    static function get_preproc_object($preproc, $groupid) {
-        $sourcepaths = self::find_source_dirs();
-        foreach ($sourcepaths as $sourcepath) {
-            $classfile = $sourcepath . 'rb_preproc_' . $preproc . '.php';
-            if (is_readable($classfile)) {
-                include_once($classfile);
-                $classname = 'rb_preproc_' . $preproc;
-                if (class_exists($classname)) {
-                    return new $classname($groupid);
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Custom uniqueid setting to apply during reportbuiler instantiation.
+     * Custom uniqueid setting to apply during reportbuilder instantiation.
      *
      * Call this method right before every reportbuilder instantiation that requires custom uniqueid.
      *
@@ -746,6 +861,16 @@ class reportbuilder {
             return self::$sourceobjects[$USER->id][$source];
         }
 
+        // Check if the current source class is already included and cached.
+        // No need to check $usecache here as we are not skipping restriction checks.
+        if (isset(self::$cache_sourceclasses[$source])) {
+            $instance = new self::$cache_sourceclasses[$source](null, $globalrestrictionset);
+            if (!$globalrestrictionset) {
+                self::$sourceobjects[$USER->id][$source] = $instance;
+            }
+            return $instance;
+        }
+
         $sourcepaths = self::find_source_dirs();
         foreach ($sourcepaths as $sourcepath) {
             $classfile = $sourcepath . 'rb_source_' . $source . '.php';
@@ -762,49 +887,6 @@ class reportbuilder {
             }
         }
 
-        // if exact match not found, look for match with group suffix
-        // of the form: [sourcename]_grp_[grp_id]
-        // if found, call the base source passing the groupid as an argument
-        if (preg_match('/^(.+)_grp_([0-9]+)$/', $source, $matches)) {
-            $basesource = $matches[1];
-            $groupid = $matches[2];
-            foreach ($sourcepaths as $sourcepath) {
-                $classfile = $sourcepath . 'rb_source_' . $basesource . '.php';
-                if (is_readable($classfile)) {
-                    include_once($classfile);
-                    $classname = 'rb_source_' . $basesource;
-                    if (class_exists($classname)) {
-                        $instance = new $classname($groupid, $globalrestrictionset);
-                        if (!$globalrestrictionset) {
-                            self::$sourceobjects[$USER->id][$source] = $instance;
-                        }
-                        return $instance;
-                    }
-                }
-            }
-        }
-
-        // if still not found, look for match with group suffix
-        // of the form: [sourcename]_grp_all
-        // if found, call the base source passing a groupid of 0 as an argument
-        if (preg_match('/^(.+)_grp_all$/', $source, $matches)) {
-            $basesource = $matches[1];
-            foreach ($sourcepaths as $sourcepath) {
-                $classfile = $sourcepath . 'rb_source_' . $basesource . '.php';
-                if (is_readable($classfile)) {
-                    include_once($classfile);
-                    $classname = 'rb_source_' . $basesource;
-                    if (class_exists($classname)) {
-                        $instance = new $classname(0, $globalrestrictionset);
-                        if (!$globalrestrictionset) {
-                            self::$sourceobjects[$USER->id][$source] = $instance;
-                        }
-                        return $instance;
-                    }
-                }
-            }
-        }
-
         // Source not found.
         if ($exception) {
             throw new ReportBuilderException("Source '$source' not found");
@@ -813,10 +895,52 @@ class reportbuilder {
         return false;
     }
 
+    /**
+     * Searches for and returns a class name from the report source.
+     *
+     * Given a report source name, it finds the class and includes its library.
+     * The class name is cached and returned, or false if something went wrong.
+     *
+     * @param string $source The name of the source class to return
+     *                       (excluding the rb_source prefix)
+     *
+     * @return string|boolean Returns false if the source can't be found
+     */
+    public static function get_source_class(string $source) {
+        if (isset(self::$cache_sourceclasses[$source])) {
+            return self::$cache_sourceclasses[$source];
+        }
+
+        $sourcepaths = self::find_source_dirs();
+        foreach ($sourcepaths as $sourcepath) {
+            $classfile = $sourcepath . 'rb_source_' . $source . '.php';
+            if (is_readable($classfile)) {
+                include_once($classfile);
+                $classname = 'rb_source_' . $source;
+                if (class_exists($classname)) {
+                    if (is_subclass_of($classname, 'rb_base_source')) {
+                        self::$cache_sourceclasses[$source] = $classname;
+                        return $classname;
+                    } else {
+                        debugging('All report source classes should extend rb_base_source', DEBUG_DEVELOPER);
+                        return false;
+                    }
+                } else {
+                    debugging('Report source class was not found in ' . $classfile, DEBUG_DEVELOPER);
+                    return false;
+                }
+            }
+        }
+
+        // File or class not found.
+        return false;
+    }
+
     protected static $reportrecordcache = null;
 
     protected static $cache_userpermittedreports = null;
     protected static $cache_userpermittedreports_userid = null;
+    protected static $cache_sourceclasses = null;
 
     /**
      * Retreives or creates a cached array of data objects for reports,
@@ -858,6 +982,7 @@ class reportbuilder {
         self::$reportrecordcache = null;
         self::$cache_userpermittedreports = null;
         self::$cache_userpermittedreports_userid = null;
+        self::$cache_sourceclasses = null;
     }
 
     /**
@@ -873,22 +998,24 @@ class reportbuilder {
         }
 
         self::$cache_userpermittedreports_userid = $USER->id;
-        $alluserreports = reportbuilder::get_user_generated_reports();
 
-        if (!$alluserreports) {
-            self::$cache_userpermittedreports = array();
-            return self::$cache_userpermittedreports;
-        }
-
+        $visiblesources = [];
         self::$cache_userpermittedreports = reportbuilder::get_permitted_reports($USER->id, false);
-        foreach (self::$cache_userpermittedreports as $id => $unused) {
-            if (!isset($alluserreports[$id])) {
-                unset(self::$cache_userpermittedreports[$id]);
+        foreach (self::$cache_userpermittedreports as $id => $report) {
+            if (in_array($report->source, $visiblesources)) {
+                continue;
             }
+            $sourceclass = self::get_source_class($report->source);
+            // Deprecated method is used here to ensure backwards compatibility.
+            // This should be replaced with a direct call to $sourceclass::is_source_ignored() in the future.
+            if ($report->embedded || !$sourceclass || self::is_source_class_ignored($report->source)) {
+                unset(self::$cache_userpermittedreports[$id]);
+                continue;
+            }
+            $visiblesources[] = $report->source;
         }
 
         return self::$cache_userpermittedreports;
-
     }
 
     /**
@@ -917,6 +1044,31 @@ class reportbuilder {
             }
         }
         return $reports;
+    }
+
+    /**
+     * Function that loops through all the embedded reports and generates the ones that are missing.
+     * This used to be done as a part of get_user_permitted_reports(), but for performance benefit
+     * it should be called from a limited number of places, like the embedded reports page.
+     */
+    public static function generate_embedded_reports() {
+        global $DB;
+
+        $embedrecords = $DB->get_records_menu('report_builder', ['embedded' => 1], '', 'shortname,1');
+        $embedobjects = reportbuilder_get_all_embedded_reports();
+        $error = null;
+
+        foreach ($embedobjects as $embedobject) {
+            // Check if the embedded report already exists or not (to make it safely re-runnable).
+            if (!isset($embedrecords[$embedobject->shortname])) {
+                $error = null;
+                // If the result is false, then the report could not be generated.
+                if (!reportbuilder_create_embedded_record($embedobject->shortname, $embedobject, $error)) {
+                    // This is horrible but it is how the report builder_create_embedded_record was designed.
+                    debugging('Embedded report generation failed with the error: ' . $error, DEBUG_DEVELOPER);
+                }
+            }
+        }
     }
 
     /**
@@ -983,8 +1135,7 @@ class reportbuilder {
                 // The embedded report did not exist within the database, its new or this is the first time anyone has seen it.
                 // Trigger its creation.
                 $error = null;
-                $embedclass = self::get_embedded_report_class($object->shortname);
-                $id = reportbuilder_create_embedded_record($object->shortname, new $embedclass([]), $error);
+                $id = reportbuilder_create_embedded_record($object->shortname, $object, $error);
                 // If $id is false then the report could not be generated.
                 // There is no warning for this currently unfortunately.
                 if ($id) {
@@ -1006,15 +1157,16 @@ class reportbuilder {
                 $report->nextreport = $cache[$report->id]->nextreport;
             }
 
-            $src = self::get_source_object($report->source, true, false);
-
+            $sourceclass = self::get_source_class($report->source);
             // If we can't find the reports source or this source is ignored, do not show it anywhere.
             // Deprecated method is used here to ensure backwards compatibility.
-            // This should be replaced with a direct call to $src::is_source_ignored() in the future.
-            if (!$src || self::is_source_class_ignored($report->source)) {
+            // This should be replaced with a direct call to $sourceclass::is_source_ignored() in the future.
+            if (!$sourceclass || self::is_source_class_ignored($report->source)) {
                 unset($reports[$report->id]);
                 continue;
             }
+            // Source object will be initialised from the cached $sourceclass.
+            $src = self::get_source_object($report->source, true, false);
             $report->sourcetitle = $src->sourcetitle;
             $report->sourceobject = $src;
         }
@@ -1029,8 +1181,6 @@ class reportbuilder {
      *               to be used in a select element.
      */
     public static function get_source_list($includenonselectable = false) {
-        global $DB;
-
         $output = array();
 
         foreach (self::find_source_dirs() as $dir) {
@@ -1054,24 +1204,8 @@ class reportbuilder {
                     }
 
                     $src = self::get_source_object($source);
-                    $sourcename = $src->sourcetitle;
-                    $preproc = $src->preproc;
-
                     if ($src->selectable || $includenonselectable) {
-                        if ($src->grouptype == 'all') {
-                            $sourcestr = $source . '_grp_all';
-                            $output[$sourcestr] = $sourcename;
-                        } else if ($src->grouptype != 'none') {
-                            // Create a source for every group that's based on this source's preprocessor.
-                            $groups = $DB->get_records('report_builder_group', array('preproc' => $preproc));
-                            foreach ($groups as $group) {
-                                $sourcestr = $source . '_grp_' . $group->id;
-                                $output[$sourcestr] = $sourcename . ': ' . $group->name;
-                            }
-                        } else {
-                            // Otherwise, just create a single source.
-                            $output[$source] = $sourcename;
-                        }
+                        $output[$source] = $src->sourcetitle;
                     }
                 }
                 closedir($dh);
@@ -1759,6 +1893,11 @@ class reportbuilder {
             }
             $columnoption = $this->columnoptions[$key];
 
+            // Debugging message for any developer using a deprecated column.
+            if ($columnoption->deprecated && (!defined('BEHAT_SITE_RUNNING') || !BEHAT_SITE_RUNNING)) {
+                debugging("Column {$key} is a deprecated column in source " . get_class($this->src), DEBUG_DEVELOPER);
+            }
+
             if (!empty($columnoption->columngenerator)) {
                 /* Rather than putting the column into the list, we call the generator and it
                  * will supply an array of columns (0 or more) that should be included. We pass
@@ -1854,7 +1993,7 @@ class reportbuilder {
             $key = $option->type . '-' . $option->value;
 
             if ($this->embedobj && $embeddedheading = $this->embedobj->get_embedded_heading($option->type, $option->value)) {
-                // Use heading from embedded source, but do not add the type because embeded report has own default!
+                // Use heading from embedded source, but do not add the type because embedded report has own default!
                 $out[$key] = format_string($embeddedheading);
                 continue;
             } else {
@@ -1867,7 +2006,7 @@ class reportbuilder {
                 }
             }
 
-            // There may be more than one type of data (for exmaple, users), for example columns,
+            // There may be more than one type of data (for example, users)
             // so add the type to the heading to differentiate the types - if required.
             if (isset($option->addtypetoheading) && $option->addtypetoheading) {
                 $type = $this->get_type_heading($option->type);
@@ -1887,14 +2026,8 @@ class reportbuilder {
      * @return string
      */
     public function get_type_heading($type) {
-        // Are we handling a 'group' source?
-        if (preg_match('/^(.+)_grp_([0-9]+|all)$/', $this->source, $matches)) {
-            // Use original source name (minus any suffix).
-            $sourcename = $matches[1];
-        } else {
-            // Standard source.
-            $sourcename = $this->source;
-        }
+        // Standard source.
+        $sourcename = $this->source;
 
         $langstr = 'type_' . $type;
         if (get_string_manager()->string_exists($langstr, 'rb_source_' . $sourcename)) {
@@ -2406,7 +2539,7 @@ class reportbuilder {
      *                            will also be included
      * @return array Array of results from the report_builder table
      */
-    public static function get_permitted_reports($userid=NULL, $showhidden=false) {
+    public static function get_permitted_reports($userid = null, $showhidden = false) {
         global $DB, $USER;
 
         // check access for specified user, or the current user if none set
@@ -2470,6 +2603,77 @@ class reportbuilder {
         return $permitted_reports;
     }
 
+    /**
+     * Check if the user can view at least one report.
+     *
+     * This method is similar to get_permitted_reports(), but instead of collecting all report data
+     * and storing it, we loop through the data until we find a report that the user can access.
+     *
+     * @param int $userid The user to check which reports they have access to
+     *
+     * @return bool
+     */
+    public static function has_reports($userid = null) {
+        global $DB, $USER;
+
+        // Check access for specified user, or the current user if none set.
+        $foruser = isset($userid) ? $userid : $USER->id;
+        // Get array of all reports with enabled plugins and whether they passed or failed each enabled plugin.
+        $enabled_plugins = \reportbuilder::get_reports_plugins_access($foruser);
+        // Get basic reports list.
+        $reports = $DB->get_records('report_builder', ['hidden' => 0], 'fullname ASC');
+
+        if ($reports) {
+            foreach ($reports as $report) {
+                if (!$sourceclass = self::get_source_class($report->source)) {
+                    // No point of going any further if we are't able to find the class for 'ignored' check.
+                    continue;
+                }
+                // Calls to deprecated is_source_class_ignored method are used here to ensure backwards compatibility.
+                // These should be replaced with the direct calls to $sourceclass::is_source_ignored() in the future.
+                if ($report->accessmode == REPORT_BUILDER_ACCESS_MODE_NONE) {
+                    if (!self::is_source_class_ignored($report->source)) {
+                        return true;
+                    }
+                } else if ($report->accessmode == REPORT_BUILDER_ACCESS_MODE_ANY) {
+                    if (!empty($enabled_plugins) && isset($enabled_plugins[$report->id])) {
+                        foreach ($enabled_plugins[$report->id] as $plugin => $value) {
+                            if ($value == 1) {
+                                if (!self::is_source_class_ignored($report->source)) {
+                                    return true;
+                                }
+                            }
+                        }
+                        continue;
+                    } else {
+                        // Bad data - set to "any plugin passing", but no plugins actually have settings to check for this report.
+                        continue;
+                    }
+                } else if ($report->accessmode == REPORT_BUILDER_ACCESS_MODE_ALL) {
+                    if (!empty($enabled_plugins) && isset($enabled_plugins[$report->id])) {
+                        $status = true;
+                        foreach ($enabled_plugins[$report->id] as $plugin => $value) {
+                            if ($value == 0) {
+                                // Failed in some expected plugin, reject.
+                                $status = false;
+                                break;
+                            }
+                        }
+                        if ($status) {
+                            if (!self::is_source_class_ignored($report->source)) {
+                                return true;
+                            }
+                        }
+                    } else {
+                        // Bad data - set to "all plugins passing", but no plugins actually have settings to check for this report.
+                        continue;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
 
     /**
      * Get the value of the specified parameter, or null if not found
@@ -3518,6 +3722,57 @@ class reportbuilder {
     }
 
     /**
+     * Returns the fetch method this report should use.
+     *
+     * @return int One of self::FETCHMETHOD_*
+     */
+    private function get_fetch_method() {
+        global $DB;
+
+        $value = $this->fetchmethod;
+
+        if ($value === self::FETCHMETHOD_STANDARD_RECORDSET) {
+            return self::FETCHMETHOD_STANDARD_RECORDSET;
+        }
+        if ($value === self::FETCHMETHOD_COUNTED_RECORDSET) {
+            return self::FETCHMETHOD_COUNTED_RECORDSET;
+        }
+
+        $default = self::get_default_fetch_method();
+        if ($default === self::FETCHMETHOD_STANDARD_RECORDSET) {
+            return self::FETCHMETHOD_STANDARD_RECORDSET;
+        }
+        if ($default === self::FETCHMETHOD_COUNTED_RECORDSET) {
+            return self::FETCHMETHOD_COUNTED_RECORDSET;
+        }
+
+        if ($DB->recommends_counted_recordset()) {
+            return self::FETCHMETHOD_COUNTED_RECORDSET;
+        }
+
+        return self::FETCHMETHOD_STANDARD_RECORDSET;
+    }
+
+    /**
+     * Returns the default fetch method for report builder reports.
+     *
+     * @return int One of self::FETCHMETHOD_*
+     */
+    public static function get_default_fetch_method() {
+        $default = get_config('totara_reportbuidler', 'defaultfetchmethod');
+        if ($default !== false) {
+            $default = (int)$default;
+            if ($default === self::FETCHMETHOD_STANDARD_RECORDSET) {
+                return self::FETCHMETHOD_STANDARD_RECORDSET;
+            }
+            if ($default === self::FETCHMETHOD_COUNTED_RECORDSET) {
+                return self::FETCHMETHOD_COUNTED_RECORDSET;
+            }
+        }
+        return self::FETCHMETHOD_DATABASE_RECOMMENDATION;
+    }
+
+    /**
      * Is report caching enabled and cache is ready and not cache is not ignored
      *
      * @return bool
@@ -4081,6 +4336,10 @@ class reportbuilder {
     function get_full_count() {
         global $CFG;
 
+        if (!$this->can_access()) {
+            throw new moodle_exception('nopermission', 'totara_reportbuilder');
+        }
+
         // Don't do the calculation if the results are initially hidden.
         if ($this->is_initially_hidden()) {
             return 0;
@@ -4122,6 +4381,10 @@ class reportbuilder {
     public function get_filtered_count($nocache = false) {
         global $CFG;
 
+        if (!$this->can_access()) {
+            throw new moodle_exception('nopermission', 'totara_reportbuilder');
+        }
+
         // Don't do the calculation if the results are initially hidden.
         if ($this->is_initially_hidden()) {
             return 0;
@@ -4154,6 +4417,10 @@ class reportbuilder {
      * @return void No return but initiates save dialog
      */
     function export_data($format) {
+        if (!$this->can_access()) {
+            throw new moodle_exception('nopermission', 'totara_reportbuilder');
+        }
+
         // Release session lock and make sure abort is not ignored.
         \core\session\manager::write_close();
         ignore_user_abort(false);
@@ -4194,7 +4461,11 @@ class reportbuilder {
      * @return string|void No return value but prints the current data table
      */
     public function display_table($return = false) {
-        global $SESSION, $DB, $OUTPUT, $PAGE;
+        global $SESSION, $OUTPUT, $PAGE;
+
+        if (!$this->can_access()) {
+            throw new moodle_exception('nopermission', 'totara_reportbuilder');
+        }
 
         $initiallyhidden = $this->is_initially_hidden();
 
@@ -4349,17 +4620,10 @@ class reportbuilder {
             $table->pagesize($perpage, $this->get_filtered_count());
             $table->set_no_records_message(get_string('initialdisplay_pending', 'totara_reportbuilder'));
         } else {
+            $records = $this->get_data_for_table($table);
+            $count = $this->get_filtered_count();
 
-            // Get the ORDER BY sql snippet and page start, needed for the records and the graph.
-            $order = $this->get_report_sort($table);
-            $pagestart = $table->get_page_start();
-
-            // Get the recordset!
-            list($sql, $params, $cache) = $this->build_query(false, true);
-            // This also sets the filtered count so that when we use it later it doesn't execute the query again!
-            $records = $this->get_counted_recordset_sql($sql . $order, $params, $pagestart, $perpage, true);
-
-            $table->pagesize($perpage, $this->get_filtered_count());
+            $table->pagesize($perpage, $count);
             $table->add_toolbar_pagination('right', 'both');
             if ($this->is_report_filtered()) {
                 $table->set_no_records_message(get_string('norecordswithfilter', 'totara_reportbuilder'));
@@ -4367,7 +4631,8 @@ class reportbuilder {
                 $table->set_no_records_message(get_string('norecordsinreport', 'totara_reportbuilder'));
             }
 
-            $count = $this->get_filtered_count();
+            $require_complete_graph = ($count <= $perpage);
+
             $location = 0;
             foreach ($records as $record) {
                 $record_data = $this->src->process_data_row($record, 'html', $this);
@@ -4383,7 +4648,7 @@ class reportbuilder {
                     $table->add_data($record_data);
                 }
 
-                if ($graph and $pagestart == 0) {
+                if ($graph and !$require_complete_graph) {
                     $graph->add_record($record);
                 }
             }
@@ -4391,14 +4656,17 @@ class reportbuilder {
             // Close the recordset.
             $records->close();
 
-            if ($graph and ($pagestart != 0 or $perpage == $graph->count_records())) {
-                $graph = new \totara_reportbuilder\local\graph($this);
-                if ($records = $DB->get_recordset_sql($sql.$order, $params, 0, $graph->get_max_records())) {
-                    foreach ($records as $record) {
-                        $graph->add_record($record);
-                    }
-                    $records->close();
+            if ($graph and $require_complete_graph) {
+                $records = $this->get_data(
+                    $this->get_report_sort($table),
+                    0,
+                    $graph->get_max_records(),
+                    self::FETCHMETHOD_STANDARD_RECORDSET
+                );
+                foreach ($records as $record) {
+                    $graph->add_record($record);
                 }
+                $records->close();
             }
         }
 
@@ -4462,6 +4730,7 @@ class reportbuilder {
      *
      * Wrapped into a separate function so that we can ensure that all errors given when producing the data are friendly.
      *
+     * @deprecated since Totara 12.4 as it is no longer needed. See get_data_for_table();
      * @since Totara 2.7.29, 2.9.21, 9.9, 10
      * @throws moodle_exception If the report query fails a moodle_exception with a friendly message is generated instead
      *      of a dml_read_exception.
@@ -4495,6 +4764,67 @@ class reportbuilder {
 
         if ($setfilteredcount) {
             $this->set_filtered_count($recordset->get_count_without_limits());
+        }
+
+        return $recordset;
+    }
+
+    /**
+     * Returns a recordset containing data ready to be used in the given Totara Table.
+     *
+     * @since Totara 12.4
+     * @param totara_table $table
+     * @return moodle_recordset|counted_recordset
+     */
+    private function get_data_for_table(totara_table $table): moodle_recordset {
+        $orderby = $this->get_report_sort($table);
+        $limitfrom = $table->get_page_start();
+        if ($limitfrom === '') {
+            $limitfrom = 0;
+        }
+
+        $limitnum = $table->get_page_size();
+        if ($limitnum === '') {
+            $limitnum = 0;
+        }
+        return $this->get_data($orderby, (int)$limitfrom, (int)$limitnum);
+    }
+
+    /**
+     * Gets data for this report.
+     *
+     * @since Totara 12.4
+     * @param string $orderby
+     * @param int $limitfrom
+     * @param int $limitnum
+     * @param int $method One of self::FETCHMETHOD_USE_*
+     * @return moodle_recordset|counted_recordset
+     */
+    private function get_data(string $orderby = '', int $limitfrom = 0, int $limitnum = 0, int $method = null): moodle_recordset {
+        list($sql, $params, $cache) = $this->build_query(false, true);
+        $sql .= $orderby;
+
+        if ($method === null) {
+            $method = $this->get_fetch_method();
+        }
+
+        try {
+            $reportdb = $this->get_report_db();
+            if ($method === self::FETCHMETHOD_COUNTED_RECORDSET) {
+                // This also sets the filtered count so that when we use it later it doesn't execute the query again!
+                $recordset = $reportdb->get_counted_recordset_sql($sql, $params, $limitfrom, $limitnum, $count);
+                $this->set_filtered_count($count);
+            } else {
+                $recordset = $reportdb->get_recordset_sql($sql, $params, $limitfrom, $limitnum);
+            }
+        } catch (dml_exception $e) {
+            // We are wrapping this exception to provide a more user friendly error message.
+            if ($this->is_cached()) {
+                $message = 'error:problemobtainingcachedreportdata';
+            } else {
+                $message = 'error:problemobtainingreportdata';
+            }
+            throw new moodle_exception($message, 'totara_reportbuilder', '', $e->getMessage(), $e->debuginfo);
         }
 
         return $recordset;
@@ -4877,25 +5207,43 @@ class reportbuilder {
      * Parses the column options data for this source into a data structure
      * suitable for an HTML select pulldown
      *
-     * @return array An array with $type-$value as key and $name as value
+     * @return array An array with $type-$value as key and an object with
+     *               a name and any additional properties as value
      */
-    function get_columns_select() {
+    public function get_columns_select() {
         $columns = $this->columnoptions;
-        $ret = array();
+        $result = [];
         if (!isset($this->columnoptions)) {
-            return $ret;
+            return $result;
         }
 
+        $deprecated_section = get_string('type_deprecated', 'totara_reportbuilder');
+        $deprecated = [];
         foreach ($columns as $column) {
             // don't include unselectable columns
             if (!$column->selectable) {
                 continue;
             }
+
             $section = $this->get_type_heading($column->type);
             $key = $column->type . '-' . $column->value;
-            $ret[$section][$key] = format_string($column->name);
+            if ($column->deprecated) {
+                $deprecated[$key] = new stdClass();
+                $deprecated[$key]->name = get_string('deprecated', 'totara_reportbuilder', format_string($column->name));
+                $deprecated[$key]->attributes = ['deprecated' => true, 'issubquery' => $column->issubquery];
+            } else {
+                $result[$section][$key] = new stdClass();
+                $result[$section][$key]->name = format_string($column->name);
+                $result[$section][$key]->attributes = ['deprecated' => false, 'issubquery' => $column->issubquery];
+            }
         }
-        return $ret;
+
+        // Add deprecated column options into their own group at the end of all options.
+        if (!empty($deprecated)) {
+            $result[$deprecated_section] = $deprecated;
+        }
+
+        return $result;
     }
 
     /**
@@ -5170,246 +5518,6 @@ class reportbuilder {
         return true;
     }
 
-
-    /**
-     * Return HTML to display the results of a feedback activity
-     */
-    function print_feedback_results() {
-        global $DB, $OUTPUT;
-
-        if ($this->is_initially_hidden()) {
-            return get_string('initialdisplay_pending', 'totara_reportbuilder');
-        }
-
-        // get paging parameters
-        define('DEFAULT_PAGE_SIZE', $this->recordsperpage);
-        define('SHOW_ALL_PAGE_SIZE', 9999);
-        $spage     = optional_param('spage', 0, PARAM_INT);                    // which page to show
-        $perpage   = optional_param('perpage', DEFAULT_PAGE_SIZE, PARAM_INT);
-        $countfiltered = $this->get_filtered_count();
-
-        $out = '';
-        $groupid = $this->src->groupid;
-        $out .= $OUTPUT->box_start();
-
-        if (!$groupid) {
-            $out .= get_string('activitygroupnotfound', 'totara_reportbuilder');
-        }
-        $questionstable = "report_builder_fbq_{$groupid}_q";
-        $optionstable = "report_builder_fbq_{$groupid}_opt";
-        $answerstable = "report_builder_fbq_{$groupid}_a";
-
-        $questions = $DB->get_records($questionstable, null, 'sortorder');
-        $options = $DB->get_records($optionstable, null, 'qid, sortorder');
-        $grouped_options = array();
-        foreach ($options as $option) {
-            $grouped_options[$option->qid][] = $option;
-        }
-
-        // get first column and use as heading
-        $columns = $this->columns;
-        if (count($columns) > 0) {
-            $primary_field = current($columns);
-            if ($primary_field->required == true) {
-                $primary_field = null;
-            }
-
-            // get any extra (none required) columns
-            $additional_fields = array();
-            while($col = next($columns)) {
-                if ($col->required == false) {
-                    $additional_fields[] = $col;
-                }
-            }
-        }
-
-        // get data
-        list($sql, $params) = $this->build_query(false, true);
-
-        $baseid = $this->grouped ? 'min(base.id)' : 'base.id';
-
-        // use default sort data if set
-        if (isset($this->defaultsortcolumn)) {
-            if (isset($this->defaultsortorder) &&
-                $this->defaultsortorder == SORT_DESC) {
-                $order = 'DESC';
-            } else {
-                $order = 'ASC';
-            }
-
-            // see if sort element is in columns array
-            $set = false;
-            foreach ($this->columns as $col) {
-                if ($col->type . '_' . $col->value == $this->defaultsortcolumn) {
-                    $set = true;
-                }
-            }
-            if ($set) {
-                $sort = " ORDER BY {$this->defaultsortcolumn} {$order}, {$baseid}";
-            } else {
-                $sort = " ORDER BY {$baseid}";
-            }
-        } else {
-            $sort = " ORDER BY {$baseid}";
-        }
-        $reportdb = $this->get_report_db();
-        $data = $reportdb->get_records_sql($sql . $sort, $params, $spage * $perpage, $perpage);
-        $first = true;
-
-        foreach ($data as $item) {
-            // dividers between feedback results
-            if ($first) {
-                $pagingbar = new paging_bar($countfiltered, $spage, $perpage, $this->report_url());
-                $pagingbar->pagevar = 'spage';
-                $out .= $OUTPUT->render($pagingbar);
-
-                $first = false;
-            } else {
-                $out .= html_writer::empty_tag('hr', array('class' => 'feedback-separator'));
-            }
-
-            if (isset($primary_field)) {
-                // Print primary heading.
-                $primaryheading = $primary_field->heading;
-                $primaryvalue = $this->src->format_column_data($primary_field, 'html', $item, $this);
-                $out .= $OUTPUT->heading($primaryheading . ': ' . $primaryvalue, 2);
-            }
-
-            if (isset($additional_fields)) {
-                // Print secondary details.
-                foreach ($additional_fields as $additional_field) {
-                    $addheading = $additional_field->heading;
-                    $addvalue = $this->src->format_column_data($additional_field, 'html', $item, $this);
-                    $out .= html_writer::tag('strong', $addheading . ': '. $addvalue) . html_writer::empty_tag('br');
-                }
-            }
-
-            // print count of number of results
-            $out .= html_writer::tag('p', get_string('resultsfromfeedback', 'totara_reportbuilder', $item->responses_number));
-
-            // display answers
-            foreach ($questions as $question) {
-                $qnum = $question->sortorder;;
-                $qname = $question->name;
-                $qid = $question->id;
-                $out .= $OUTPUT->heading('Q' . $qnum . ': ' . $qname, 3);
-
-                switch($question->typ) {
-                case 'dropdown':
-                case 'dropdownrated':
-                case 'check':
-                case 'radio':
-                case 'radiorated':
-                    // if it's an option based question, display bar chart if there are options
-                    if (!array_key_exists($qid, $grouped_options)) {
-                        break;
-                    }
-                    $out .= $this->get_feedback_option_answer($qid, $grouped_options[$qid], $item);
-                    break;
-                case 'textarea':
-                case 'textfield':
-                    // if it's a text based question, print all answers in a text field
-                    $out .= $this->get_feedback_standard_answer($qid, $item);
-                    break;
-                case 'numeric':
-                default:
-                }
-
-            }
-        }
-
-        $pagingbar = new paging_bar($countfiltered, $spage, $perpage, $this->report_url());
-        $pagingbar->pagevar = 'spage';
-        $out .= $OUTPUT->render($pagingbar);
-
-        $out .= $OUTPUT->box_end();
-
-        return $out;
-    }
-
-    function get_feedback_standard_answer($qid, $item) {
-        $out = '';
-        $count = 'q' . $qid . '_count';
-        $answer = 'q' . $qid . '_list';
-        if (isset($item->$count)) {
-            $out .= html_writer::tag('p', get_string('numresponses', 'totara_reportbuilder', $item->$count));
-        }
-        if (isset($item->$answer) && $item->$answer != '') {
-            $responses = str_replace(array('<br />'), array("\n"), $item->$answer);
-            $out .= html_writer::tag('textarea', $responses, array('rows' => '6', 'cols' => '100'));
-        }
-        return $out;
-    }
-
-    function get_feedback_option_answer($qid, $options, $item) {
-        $out = '';
-        $count = array();
-        $perc = array();
-        // group answer counts and percentages
-        foreach ($options as $option) {
-            $oid = $option->sortorder;
-            $countname = 'q' . $qid . '_' . $oid . '_sum';
-            $percname = 'q' . $qid . '_' . $oid . '_perc';
-            if (isset($item->$countname)) {
-                $count[$oid] = $item->$countname;
-            } else {
-                $count[$oid] = null;
-            }
-            if (isset($item->$percname)) {
-                $perc[$oid] = $item->$percname;
-            } else {
-                $perc[$oid] = null;
-            }
-        }
-        $maxcount = max($count);
-        $maxbarwidth = 100; // percent
-
-        $numresp = 'q' . $qid . '_total';
-        if (isset($item->$numresp)) {
-            $out .= html_writer::tag('p', get_string('numresponses', 'totara_reportbuilder', $item->$numresp));
-        }
-
-        $table =- new html_table();
-        $table->attributes['class'] = 'feedback-table';
-        foreach ($options as $option) {
-            $cells = array();
-            $oid = $option->sortorder;
-            $cell = new html_table_cell($oid);
-            $cell->attributes['class'] = 'feedback-option-number';
-            $cells[] = $cell;
-            $cell = new html_table_cell($option->name);
-            $cell->attributes['class'] = 'feedback-option-name';
-            $cells[] = $cell;
-            $barwidth = $perc[$oid];
-            $spacewidth = 100 - $barwidth;
-            $innertable = new html_table();
-            $innertable->attributes['class'] = 'feedback-bar-chart';
-            $innercells = array();
-            $cell = new html_table_cell('');
-            $cell->attributes['class'] = 'feedback-bar-color';
-            $cell->attributes['width'] = $barwidth.'%';
-            $innercells[] = $cell;
-            $cell = new html_table_cell('');
-            $cell->attributes['class'] = 'feedback-bar-blank';
-            $cell->attributes['width'] = $spacewidth.'%';
-            $innercells[] = $cell;
-            $innertable->data[] = new html_table_row($innercells);
-            $cell = new html_table_cell(html_writer::table($innertable));
-            $cell->attributes['class'] = 'feedback-option-chart';
-            $cells[] = $cell;
-            $content = $count[$oid];
-            if (isset($perc[$oid])) {
-                $content .= ' (' . $perc[$oid] . '%)';
-            }
-            $cell = new html_table_cell($content);
-            $cell->attributes['class'] = 'feedback-option-count';
-            $cells[] = $cell;
-            $table->data[] = new html_table_row($cells);
-        }
-        $out .= html_writer::table($table);
-        return $out;
-    }
-
     /**
      * Determines if this report currently has any active filters or not
      *
@@ -5525,7 +5633,7 @@ class reportbuilder {
      * Calls to this method should be replaced with direct calls to is_source_ignored() once
      * deprecated is_ignored() is completely removed from the code base.
      *
-     * @deprecated since Totara 11.12
+     * @deprecated since Totara 12.3
      *
      * @param string $source
      *
@@ -5552,7 +5660,7 @@ class reportbuilder {
      * Calls to this method should be replaced with direct calls to is_report_ignored() once
      * deprecated is_ignored() is completely removed from the code base.
      *
-     * @deprecated since Totara 11.12
+     * @deprecated since Totara 12.3
      *
      * @param string $classname
      *
@@ -5712,23 +5820,6 @@ function sql_table_from_select($table, $select, array $params) {
 }
 
 /**
- * Returns the proper SQL to aggregate a field by joining with a specified delimiter
- *
- *
- */
-function sql_group_concat($field, $delimiter=', ', $unique=false) {
-    global $DB;
-
-    debugging('sql_group_concat() is deprecated. Use DB->sql_group_concat_unique() instead.', DEBUG_DEVELOPER);
-
-    if ($unique) {
-        return $DB->sql_group_concat_unique($field, $delimiter);
-    } else {
-        return $DB->sql_group_concat($field, $delimiter);
-    }
-}
-
-/**
  * Schedule reporting cache
  *
  * @global object $DB
@@ -5780,23 +5871,6 @@ function reportbuilder_fix_schedule($reportid) {
         $DB->update_record('report_builder_cache', $cache);
     }
     return true;
-}
-
-/**
- * Returns reports that the current user can view
- *
- * @param boolean showhidden If true include hidden reports
- *
- * @deprecated since Totara 2.9 - use reportbuilde::get_user_permitted_reports() instead
- *
- * @return array Array of report records
- */
-function reportbuilder_get_reports($showhidden=false) {
-    global $reportbuilder_permittedreports;
-    if (!isset($reportbuilder_permittedreports) || !is_array($reportbuilder_permittedreports)) {
-        $reportbuilder_permittedreports = reportbuilder::get_permitted_reports(null,$showhidden);
-    }
-    return $reportbuilder_permittedreports;
 }
 
 /**
@@ -5871,7 +5945,9 @@ function reportbuilder_set_status($reportcache, $flag = RB_CACHE_FLAG_CHANGED) {
 }
 
 /**
- * Report cache (re-)generation
+ * Report cache (re-)generation.
+ *
+ * NOTE: calling code must make sure current user is allowed to regenerate the cache.
  *
  * @int $reportid Report id
  * @return bool Is cache generated
@@ -5904,11 +5980,8 @@ function reportbuilder_generate_cache($reportid) {
 
     try {
         // Instantiate.
-        if ($rawreport->embedded) {
-            $report = reportbuilder_get_embedded_report($rawreport->shortname, array(), true, 0);
-        } else {
-            $report = new reportbuilder($reportid, null, false, null, null, true);
-        }
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($reportid, $config, false); // No permission check here, it is the responsibility of calling code.
 
         // Get caching query.
         list($query, $params) = $report->build_create_cache_query();
@@ -6031,7 +6104,17 @@ function reportbuilder_send_scheduled_report($sched) {
         }
     }
 
-    $report = reportbuilder_get_schduled_report($sched, $reportrecord);
+    try {
+        $report = reportbuilder_get_schduled_report($sched, $reportrecord);
+    } catch (moodle_exception $e) {
+        if ($e->errorcode === "nopermission") {
+            mtrace("Error: Scheduled report {$sched->id} could not be created because user is not allowed to access it");
+            return false;
+        } else {
+            mtrace("Error: Scheduled report {$sched->id} could not be created, unknown exception: " . get_class($e));
+            return false;
+        }
+    }
     $tempfile = reportbuilder_export_schduled_report($sched, $report, $writerclassname);
     if (!$tempfile) {
         mtrace("Error: Scheduled report {$sched->id} could not be created");
@@ -6144,7 +6227,12 @@ function reportbuilder_get_schduled_report(stdClass $sched, stdClass $reportreco
         $reportrecord, rb_global_restriction_set::get_user_all_restrictions_ids($sched->userid, true)
     );
 
-    return new reportbuilder($sched->reportid, null, false, $sched->savedsearchid, $sched->userid, false, array('userid' => $sched->userid), $allrestr);
+    $config = new rb_config();
+    $config->set_sid($sched->savedsearchid)
+        ->set_reportfor($sched->userid)
+        ->set_embeddata(['userid' => $sched->userid])
+        ->set_global_restriction_set($allrestr);
+    return reportbuilder::create($sched->reportid, $config);
 }
 
 /**
@@ -6285,7 +6373,7 @@ function reportbuilder_get_report_url($report) {
  * calls the class passing in any data provided. The object created
  * by that call is returned, or false if something went wrong.
  *
- * @deprecated since Totara 11.12
+ * @deprecated since Totara 12.3
  *
  * @param string $embedname Shortname of embedded report
  *                          e.g. X from rb_X_embedded.php
@@ -6309,6 +6397,8 @@ function reportbuilder_get_embedded_report_object($embedname, $data=array()) {
  * This function is an alias to "new reportbuilder()", for use within embedded report pages. The embedded object
  * will be created within the reportbuilder constructor.
  *
+ * @deprecated since Totara 12
+ *
  * @param string $embedname Shortname of embedded report
  *                          e.g. X from rb_X_embedded.php
  * @param array $data Associative array of data needed by source (optional)
@@ -6320,15 +6410,21 @@ function reportbuilder_get_embedded_report_object($embedname, $data=array()) {
  */
 function reportbuilder_get_embedded_report($embedname, $data = array(), $nocache = false, $sid = 'nosidsupplied',
         rb_global_restriction_set $globalrestrictionset = null) {
+    debugging('Function reportbuilder_get_embedded_report is deprecated since Totara 12. Please use reportbuilder::create_embedded() instead.', DEBUG_DEVELOPER);
     if ($sid === 'nosidsupplied') {
         debugging('Call to reportbuilder_get_embedded_report without supplying $sid is probably an error - if you
             want to save searches on your embedded report then you must pass in $sid here, otherwise pass 0 to remove
             this warning', DEBUG_DEVELOPER);
         $sid = 0;
     }
-    return new reportbuilder(null, $embedname, false, $sid, null, $nocache, $data, $globalrestrictionset);
-}
 
+    $config = new rb_config();
+    $config->set_sid($sid)
+        ->set_nocache($nocache)
+        ->set_embeddata($data)
+        ->set_global_restriction_set($globalrestrictionset);
+    return reportbuilder::create_embedded($embedname, $config);
+}
 
 /**
  * Returns an array of all embedded reports found in the filesystem, sorted by name
@@ -6516,9 +6612,9 @@ function reportbuilder_create_embedded_record($shortname, $embed, &$error) {
         $todb->initialdisplay = $embed->initialdisplay;
     }
 
-    try {
-        $transaction = $DB->start_delegated_transaction();
+    $transaction = $DB->start_delegated_transaction();
 
+    try {
         $newid = $DB->insert_record('report_builder', $todb);
         // Add columns.
         $so = 1;
@@ -6568,8 +6664,7 @@ function reportbuilder_create_embedded_record($shortname, $embed, &$error) {
             $classname = $option . '_content';
             if (class_exists('rb_' . $classname)) {
                 foreach ($settings as $name => $value) {
-                    if (!reportbuilder::update_setting($newid, $classname, $name,
-                        $value)) {
+                    if (!reportbuilder::update_setting($newid, $classname, $name, $value)) {
                             throw new moodle_exception('Error inserting content restrictions');
                         }
                 }
@@ -6580,8 +6675,7 @@ function reportbuilder_create_embedded_record($shortname, $embed, &$error) {
             $classname = $option . '_access';
             if (class_exists($classname)) {
                 foreach ($settings as $name => $value) {
-                    if (!reportbuilder::update_setting($newid, $classname, $name,
-                        $value)) {
+                    if (!reportbuilder::update_setting($newid, $classname, $name, $value)) {
                             throw new moodle_exception('Error inserting access restrictions');
                         }
                 }
@@ -6590,7 +6684,6 @@ function reportbuilder_create_embedded_record($shortname, $embed, &$error) {
 
         // Thanks to is_capable() we cannot get the instance of report here and trigger the event,
         // if necessary we could add a new event class here later.
-        //$report = new reportbuilder($newid, null, false, null, null, false, $embed->embeddedparams);
         //\totara_reportbuilder\event\report_created::create_from_report($report, true)->trigger();
 
         $transaction->allow_commit();
@@ -6903,4 +6996,3 @@ function reportbuilder_clone_report(reportbuilder $report, $clonename) {
 
     return $cloneid;
 }
-

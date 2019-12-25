@@ -125,6 +125,8 @@ class totara_customfield_renderer extends plugin_renderer_base {
     public function get_admin_page($prefix) {
         switch ($prefix) {
             case 'program':
+                return 'programcustomfields';
+                break;
             case 'course':
                 return 'coursecustomfields';
                 break;
@@ -262,9 +264,11 @@ class totara_customfield_renderer extends plugin_renderer_base {
         $activated = array();
         $inactive = array();
 
+        $systemcontext = context_system::instance();
+
         $row[] = new tabobject('course', new moodle_url('/totara/customfield/index.php', array('prefix' => 'course')),
             get_string('courses'));
-        if (totara_feature_visible('programs') || totara_feature_visible('certifications')) {
+        if ((totara_feature_visible('programs') || totara_feature_visible('certifications')) && has_capability('totara/core:programmanagecustomfield', $systemcontext)) {
             $row[] = new tabobject('program', new moodle_url('/totara/customfield/index.php', array('prefix' => 'program')),
                 get_string('programscerts', 'totara_program'));
         }

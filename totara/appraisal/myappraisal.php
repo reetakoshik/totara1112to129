@@ -292,7 +292,7 @@ if ($preview) {
     $urlparams['preview'] = $preview;
 }
 $pageurl = new moodle_url('/totara/appraisal/myappraisal.php', $urlparams);
-$PAGE->set_totara_menu_selected('appraisals');
+$PAGE->set_totara_menu_selected('\totara_appraisal\totara\menu\appraisal');
 if ($role == appraisal::ROLE_LEARNER) {
     $PAGE->navbar->add(get_string('myappraisals', 'totara_appraisal'), new moodle_url('/totara/appraisal/index.php'));
 } else {

@@ -1,4 +1,4 @@
-@block @block_navigation
+@block @block_navigation @javascript
 Feature: Displaying the link to the Participants page
   In order to see the course / site participants
   As a student / admin respectively
@@ -37,6 +37,7 @@ Feature: Displaying the link to the Participants page
 
   Scenario: Site participants link is displayed to admins
     When I log in as "admin"
+    And I expand "Site pages" node
     Then "Participants" "link" should exist in the "Navigation" "block"
     And I click on "Participants" "link" in the "Navigation" "block"
     And I should see "Participants"
@@ -46,8 +47,9 @@ Feature: Displaying the link to the Participants page
   @javascript
   Scenario: Site participants link is not displayed to students (MDL-55667)
     Given I log in as "admin"
-    And I set the following administration settings values:
-      | defaultfrontpageroleid | Student (student) |
+    And I follow "Edit settings"
+    And I set the field "Default frontpage role" to "Student (student)"
+    And I click on "Save changes" "button"
     And I log out
     When I log in as "student2"
     And I expand "Site pages" node

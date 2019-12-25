@@ -35,7 +35,7 @@ use hierarchy_goal\userdata\company_purge;
  * @group totara_hierarchy
  * Class userdata_goal_company_test
 */
-class userdata_goal_company_test extends advanced_testcase {
+class totara_hierarchy_userdata_goal_company_testcase extends advanced_testcase {
 
     /**
      * Setup the test data for company goals userdata.

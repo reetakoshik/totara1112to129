@@ -32,5 +32,11 @@ $icons = array(
                     'classes' => 'fa-list-alt',
                 ),
         ),
-
+    'mod_lesson|e/copy' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-clone',
+                ),
+        ),
 );

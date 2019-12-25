@@ -275,5 +275,223 @@ function xmldb_totara_reportbuilder_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2017120800, 'totara', 'reportbuilder');
     }
 
+    if ($oldversion < 2018041100) {
+
+        // Deprecated content option "hide currently unavailable content" has been removed in the UI via TL-16893.
+        // This upgrade deals with removing redundant database entries.
+        $sql = "DELETE FROM {report_builder_settings}
+                      WHERE type = 'prog_availability_content'
+                        AND name = 'enable'";
+        $DB->execute($sql, array());
+
+        // Get reports that use the program or certification source that still have content options.
+        // This should only be custom content options that have been added.
+        $sql = "SELECT DISTINCT rb.id
+                  FROM {report_builder_settings} rbs
+                  JOIN {report_builder} rb
+                    ON rb.id = rbs.reportid
+                 WHERE (rb.source = 'program' OR rb.source = 'certification')
+                   AND rbs.name = 'enable'
+                   AND rbs.value = '1'";
+        $reportstoexclude = $DB->get_fieldset_sql($sql);
+
+        if ($reportstoexclude) {
+            list($sql, $reportstoexclude_params) = $DB->get_in_or_equal($reportstoexclude, SQL_PARAMS_QM, 'param', false);
+            $reportstoexclude_sql = 'AND id ' . $sql;
+        } else {
+            $reportstoexclude_sql = '';
+            $reportstoexclude_params = array();
+        }
+
+        // Update all reports using the program or certification source to not use any content options as there should
+        // be none. (other than reports with custom content options detected via $reportstoexclude, so let's exclude those).
+        $sql = "UPDATE {report_builder}
+                   SET contentmode = 0
+                 WHERE (source = 'program' OR source = 'certification')
+                 $reportstoexclude_sql";
+        $DB->execute($sql, $reportstoexclude_params);
+
+        // Reportbuilder savepoint reached.
+        upgrade_plugin_savepoint(true, 2018041100, 'totara', 'reportbuilder');
+    }
+
+    if ($oldversion < 2018051700) {
+        // Dropping unused preprocessor tables.
+        $tables = ['report_builder_group', 'report_builder_group_assign', 'report_builder_preproc_track'];
+        foreach ($tables as $table) {
+            $table = new xmldb_table($table);
+            if ($dbman->table_exists($table)) {
+                $dbman->drop_table($table);
+            }
+        }
+
+        // Reportbuilder savepoint reached.
+        upgrade_plugin_savepoint(true, 2018051700, 'totara', 'reportbuilder');
+    }
+
+    if ($oldversion < 2018111900) {
+        // Fully separate certification reports from programs.
+
+        $sources = array('certification', 'certification_completion', 'certification_membership', 'certification_overview');
+        $types = array('prog' => 'certif', 'program_completion' => 'certif_completion', 'progcompletion' => 'certcompletion');
+
+        foreach ($sources as $source) {
+            foreach ($types as $oldtype => $newtype) {
+                // Fix columns.
+                $sql = "SELECT DISTINCT c.value
+                          FROM {report_builder_columns} c
+                          JOIN {report_builder} r ON r.id = c.reportid
+                         WHERE r.source = :source AND c.type = :type";
+                $values = $DB->get_recordset_sql($sql, array('source' => $source, 'type' => $oldtype));
+                foreach ($values as $value) {
+                    $value = $value->value;
+                    reportbuilder_rename_data('columns', $source, $oldtype, $value, $newtype, $value);
+                }
+                // Fix filters.
+                $sql = "SELECT DISTINCT f.value
+                          FROM {report_builder_filters} f
+                          JOIN {report_builder} r ON r.id = f.reportid
+                         WHERE r.source = :source AND f.type = :type";
+                $values = $DB->get_recordset_sql($sql, array('source' => $source, 'type' => $oldtype));
+                foreach ($values as $value) {
+                    $value = $value->value;
+                    reportbuilder_rename_data('filters', $source, $oldtype, $value, $newtype, $value);
+                    totara_reportbuilder_migrate_saved_searches($source, $oldtype, $value, $newtype, $value);
+                }
+            }
+        }
+
+        // Savepoint reached.
+        upgrade_plugin_savepoint(true, 2018111900, 'totara', 'reportbuilder');
+    }
+
+    // Note: upgrade based on totara_reportbuilder_migrate_saved_searches().
+    if ($oldversion < 2018112202) {
+
+        // First switch over any columns/filters.
+        totara_reportbuilder_migrate_column_names(['enrolltype' => 'enrolmenttype'], 'course_completion');
+        totara_reportbuilder_migrate_filter_names(['enrolltype' => 'enrolmenttype'], 'course_completion');
+
+        // Then get all the saved searches for the course completion report source.
+        $sql = "SELECT rbs.*
+                  FROM {report_builder_saved} rbs
+                  JOIN {report_builder} rb
+                    ON rb.id = rbs.reportid
+                 WHERE rb.source = 'course_completion'";
+        $savedsearches = $DB->get_records_sql($sql);
+
+        // Get all available enrolment options, then add on any existing ones to be safe.
+        $options = explode(',', $CFG->enrol_plugins_enabled);
+        foreach ($DB->get_records_sql('SELECT DISTINCT enrol FROM {enrol}') as $opt) {
+            if (!in_array($opt->enrol, $options)) {
+                $options[] = $opt->enrol;
+            }
+        }
+
+        // Loop through them all and json_decode course_completion-enrolltype
+        foreach ($savedsearches as $saved) {
+            if (empty($saved->search)) {
+                continue;
+            }
+
+            $search = unserialize($saved->search);
+
+            if (!is_array($search)) {
+                continue;
+            }
+
+            // Check for any filters that will need to be updated.
+            $update = false;
+            $newkey = 'course_completion-enrolmenttype';
+            foreach ($search as $key => $info) {
+                list($type, $value) = explode('-', $key);
+
+                /**
+                 * Constants for filter types.
+                 *    const RB_FILTER_CONTAINS = 0;
+                 *    const RB_FILTER_DOESNOTCONTAIN = 1;
+                 *    const RB_FILTER_ISEQUALTO = 2;
+                 *    const RB_FILTER_STARTSWITH = 3;
+                 *    const RB_FILTER_ENDSWITH = 4;
+                 *    const RB_FILTER_ISEMPTY = 5;
+                 *    const RB_FILTER_ISNOTEMPTY = 6;
+                 */
+                if ($type == 'course_completion' && $value == 'enrolltype') {
+                    if (!isset($info['operator']) || !isset($info['value'])) {
+                        continue;
+                    }
+
+                    $update = true;
+                    $filter = $info['value'];
+
+                    $newopts = [];
+                    $newinfo = [];
+                    switch ($info['operator']) {
+                        case 0: // contains
+                            $newinfo['operator'] = 1; // Any.
+                            foreach ($options as $option) {
+                                $newopts[$option] = preg_match("/{$filter}/", $option);
+                            }
+                            break;
+                        case 1: // does not contain
+                            $newinfo['operator'] = 3; // Not any.
+                            foreach ($options as $option) {
+                                $newopts[$option] = preg_match("/{$filter}/", $option);
+                            }
+                            break;
+                        case 2: // is equal to
+                            $newinfo['operator'] = 1; // Any.
+                            foreach ($options as $option) {
+                                $newopts[$option] = $info['value'] == $option;
+                            }
+                            break;
+                        case 3: // startswith
+                            $newinfo['operator'] = 1; // Any.
+                            foreach ($options as $option) {
+                                $newopts[$option] = preg_match("/^{$filter}/", $option);
+                            }
+                            break;
+                        case 4: // ends with
+                            $newinfo['operator'] = 1; // Any.
+                            foreach ($options as $option) {
+                                $newopts[$option] = preg_match("/{$filter}$/", $option);
+                            }
+                            break;
+                        case 5: // is empty
+                            $newinfo['operator'] = 3; // Not Any.
+                            foreach ($options as $option) {
+                                $newopts[$option] = true;
+                                // This is actually impossible... it would always have returned no one, probably safe to ignore?
+                            }
+                            break;
+                        case 6: // is not empty
+                            $newinfo['operator'] = 1; // Any.
+                            foreach ($options as $option) {
+                                $newopts[$option] = true;
+                            }
+                            break;
+                    }
+
+                    $newinfo['value'] = $newopts;
+                    $search[$newkey] = $newinfo;
+                }
+            }
+
+            if ($update) {
+                // Remove the out-dated search before updating.
+                unset($search['course_completion-enrolltype']);
+
+                // Re-encode and update the database.
+                $todb = new \stdClass;
+                $todb->id = $saved->id;
+                $todb->search = serialize($search);
+                $DB->update_record('report_builder_saved', $todb);
+            }
+        }
+
+        // Savepoint reached.
+        upgrade_plugin_savepoint(true, 2018112202, 'totara', 'reportbuilder');
+    }
+
     return true;
 }

@@ -234,6 +234,7 @@ class format_weeks extends format_base {
         static $courseformatoptions = false;
         if ($courseformatoptions === false) {
             $courseconfig = get_config('moodlecourse');
+            // Totara: Keep numsections.
             $courseformatoptions = array(
                 'numsections' => array(
                     'default' => $courseconfig->numsections,
@@ -250,6 +251,7 @@ class format_weeks extends format_base {
             );
         }
         if ($foreditform && !isset($courseformatoptions['coursedisplay']['label'])) {
+            // Totara: Keep maxsections and numsections.
             $courseconfig = get_config('moodlecourse');
             $sectionmenu = array();
             $max = $courseconfig->maxsections;
@@ -307,6 +309,7 @@ class format_weeks extends format_base {
     public function create_edit_form_elements(&$mform, $forsection = false) {
         $elements = parent::create_edit_form_elements($mform, $forsection);
 
+        // Totara: Keep numsections.
         // Increase the number of sections combo box values if the user has increased the number of sections
         // using the icon on the course page beyond course 'maxsections' or course 'maxsections' has been
         // reduced below the number of sections already set for the course on the site administration course
@@ -318,11 +321,12 @@ class format_weeks extends format_base {
             $numsections = $numsections[0];
             if ($numsections > $maxsections) {
                 $element = $mform->getElement('numsections');
-                for ($i = $maxsections+1; $i <= $numsections; $i++) {
+                for ($i = $maxsections + 1; $i <= $numsections; $i++) {
                     $element->addOption("$i", $i);
                 }
             }
         }
+
         return $elements;
     }
 
@@ -350,6 +354,7 @@ class format_weeks extends format_base {
                     if (array_key_exists($key, $oldcourse)) {
                         $data[$key] = $oldcourse[$key];
                     } else if ($key === 'numsections') {
+                        // Totara: Keep maxsections and numsections.
                         // If previous format does not have the field 'numsections'
                         // and $data['numsections'] is not set,
                         // we fill it with the maximum section number from the DB
@@ -364,6 +369,7 @@ class format_weeks extends format_base {
             }
         }
         $changed = $this->update_format_options($data);
+        // Totara: Keep numsections.
         if ($changed && array_key_exists('numsections', $data)) {
             // If the numsections was decreased, try to completely delete the orphaned sections (unless they are not empty).
             $numsections = (int)$data['numsections'];
@@ -484,6 +490,9 @@ class format_weeks extends format_base {
         if ($mform->elementExists($fieldnames['numsections'])) {
             $numsections = $mform->getElementValue($fieldnames['numsections']);
             $numsections = $mform->getElement($fieldnames['numsections'])->exportValue($numsections);
+        } else if ($this->get_courseid()) {
+            // For existing courses get the number of sections.
+            $numsections = $this->get_last_section_number();
         } else {
             // Fallback to the default value for new courses.
             $numsections = get_config('moodlecourse', $fieldnames['numsections']);
@@ -501,6 +510,29 @@ class format_weeks extends format_base {
      */
     public function supports_news() {
         return true;
+    }
+
+    /**
+     * Returns whether this course format allows the activity to
+     * have "triple visibility state" - visible always, hidden on course page but available, hidden.
+     *
+     * @param stdClass|cm_info $cm course module (may be null if we are displaying a form for adding a module)
+     * @param stdClass|section_info $section section where this module is located or will be added to
+     * @return bool
+     */
+    public function allow_stealth_module_visibility($cm, $section) {
+        // Allow the third visibility state inside visible sections or in section 0.
+        return !$section->section || $section->visible;
+    }
+
+    public function section_action($section, $action, $sr) {
+        global $PAGE;
+
+        // Call the parent method and return the new content for .section_availability element.
+        $rv = parent::section_action($section, $action, $sr);
+        $renderer = $PAGE->get_renderer('format_weeks');
+        $rv['section_availability'] = $renderer->section_availability($this->get_section($section));
+        return $rv;
     }
 }
 

@@ -35,7 +35,7 @@ use hierarchy_goal\userdata\personal_purge;
  * @group totara_hierarchy
  * Class userdata_goal_personal_test
  */
-class userdata_goal_personal_test extends advanced_testcase {
+class totara_hierarchy_userdata_goal_personal_testcase extends advanced_testcase {
 
     /**
      * Setup the test data for personal goals userdata.

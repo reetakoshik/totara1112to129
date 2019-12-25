@@ -71,10 +71,10 @@ class core_completion_progressinfo_testcase extends externallib_advanced_testcas
         // Verify progress info structure
         $completion = new completion_info($course);
 
-        $verify_info = \totara_core\progressinfo::from_data(\totara_core\progressinfo::AGGREGATE_ALL, 0, 0);
-        $verify_act = $verify_info->add_criteria(COMPLETION_CRITERIA_TYPE_ACTIVITY, \totara_core\progressinfo::AGGREGATE_ALL, 0, 0);
-        $verify_act->add_criteria($cmdata->id, \totara_core\progressinfo::AGGREGATE_ALL, 1, 0);
-        $verify_act->add_criteria($cmforum->id, \totara_core\progressinfo::AGGREGATE_ALL, 1, 0);
+        $verify_info = \totara_core\progressinfo\progressinfo::from_data(\totara_core\progressinfo\progressinfo::AGGREGATE_ALL, 0, 0);
+        $verify_act = $verify_info->add_criteria(COMPLETION_CRITERIA_TYPE_ACTIVITY, \totara_core\progressinfo\progressinfo::AGGREGATE_ALL, 0, 0);
+        $verify_act->add_criteria($cmdata->id, \totara_core\progressinfo\progressinfo::AGGREGATE_ALL, 1, 0);
+        $verify_act->add_criteria($cmforum->id, \totara_core\progressinfo\progressinfo::AGGREGATE_ALL, 1, 0);
 
         $progressinfo = $completion->get_progressinfo();
         $this->assertEquals($verify_info, $progressinfo);
@@ -124,6 +124,7 @@ class core_completion_progressinfo_testcase extends externallib_advanced_testcas
 
         $cgen->enable_completion_tracking($course1);
 
+        $todate = time() + WEEKSECS;
         $completioncriteria = array();
         $completioncriteria[COMPLETION_CRITERIA_TYPE_ACTIVITY] = array(
             'elements' => array($data, $forum, $assign));
@@ -134,8 +135,8 @@ class core_completion_progressinfo_testcase extends externallib_advanced_testcas
             'elements' => array($teacherrole->id, $editteacherrole->id),
             'aggregationmethod' => COMPLETION_AGGREGATION_ALL);
         $completioncriteria[COMPLETION_CRITERIA_TYPE_SELF] = 1;
-        $completioncriteria[COMPLETION_CRITERIA_TYPE_DATE] = 1493726400;
-        $completioncriteria[COMPLETION_CRITERIA_TYPE_DURATION] = 86400;
+        $completioncriteria[COMPLETION_CRITERIA_TYPE_DATE] = $todate;
+        $completioncriteria[COMPLETION_CRITERIA_TYPE_DURATION] = DAYSECS;
         $completioncriteria[COMPLETION_CRITERIA_TYPE_GRADE] = 50.0;
         $cgen->set_completion_criteria($course1, $completioncriteria);
 
@@ -159,28 +160,30 @@ class core_completion_progressinfo_testcase extends externallib_advanced_testcas
         $completion = new \completion_info($course1);
 
         // Verify the progressinfo structure
-        $verify_info = \totara_core\progressinfo::from_data(\totara_core\progressinfo::AGGREGATE_ALL, 0, 0);
+        $verify_info = \totara_core\progressinfo\progressinfo::from_data(\totara_core\progressinfo\progressinfo::AGGREGATE_ALL, 0, 0);
 
-        $verify_act = $verify_info->add_criteria(COMPLETION_CRITERIA_TYPE_ACTIVITY, \totara_core\progressinfo::AGGREGATE_ALL, 0, 0);
-        $verify_act->add_criteria($cmdata->id, \totara_core\progressinfo::AGGREGATE_ALL, 1, 0);
-        $verify_act->add_criteria($cmforum->id, \totara_core\progressinfo::AGGREGATE_ALL, 1, 0);
-        $verify_act->add_criteria($cmassign->id, \totara_core\progressinfo::AGGREGATE_ALL, 1, 0);
+        $verify_act = $verify_info->add_criteria(COMPLETION_CRITERIA_TYPE_ACTIVITY, \totara_core\progressinfo\progressinfo::AGGREGATE_ALL, 0, 0);
+        $verify_act->add_criteria($cmdata->id, \totara_core\progressinfo\progressinfo::AGGREGATE_ALL, 1, 0);
+        $verify_act->add_criteria($cmforum->id, \totara_core\progressinfo\progressinfo::AGGREGATE_ALL, 1, 0);
+        $verify_act->add_criteria($cmassign->id, \totara_core\progressinfo\progressinfo::AGGREGATE_ALL, 1, 0);
 
-        $verify_course = $verify_info->add_criteria(COMPLETION_CRITERIA_TYPE_COURSE, \totara_core\progressinfo::AGGREGATE_ANY, 0, 0);
-        $verify_course->add_criteria($course2->id, \totara_core\progressinfo::AGGREGATE_ALL, 1, 0);
-        $verify_course->add_criteria($course3->id, \totara_core\progressinfo::AGGREGATE_ALL, 1, 0);
+        $verify_course = $verify_info->add_criteria(COMPLETION_CRITERIA_TYPE_COURSE, \totara_core\progressinfo\progressinfo::AGGREGATE_ANY, 0, 0);
+        $verify_course->add_criteria($course2->id, \totara_core\progressinfo\progressinfo::AGGREGATE_ALL, 1, 0);
+        $verify_course->add_criteria($course3->id, \totara_core\progressinfo\progressinfo::AGGREGATE_ALL, 1, 0);
 
-        $verify_role = $verify_info->add_criteria(COMPLETION_CRITERIA_TYPE_ROLE, \totara_core\progressinfo::AGGREGATE_ALL, 0, 0,
+        $verify_role = $verify_info->add_criteria(COMPLETION_CRITERIA_TYPE_ROLE, \totara_core\progressinfo\progressinfo::AGGREGATE_ALL, 0, 0,
             array('roles' => 'Editing Trainer, Trainer'));
-        $verify_role->add_criteria($teacherrole->id, \totara_core\progressinfo::AGGREGATE_ALL, 1, 0);
-        $verify_role->add_criteria($editteacherrole->id, \totara_core\progressinfo::AGGREGATE_ALL, 1, 0);
+        $verify_role->add_criteria($teacherrole->id, \totara_core\progressinfo\progressinfo::AGGREGATE_ALL, 1, 0);
+        $verify_role->add_criteria($editteacherrole->id, \totara_core\progressinfo\progressinfo::AGGREGATE_ALL, 1, 0);
 
-        $verify_info->add_criteria(COMPLETION_CRITERIA_TYPE_SELF, \totara_core\progressinfo::AGGREGATE_ALL, 1, 0);
-        $verify_info->add_criteria(COMPLETION_CRITERIA_TYPE_DATE, \totara_core\progressinfo::AGGREGATE_ALL, 1, 0,
-            array('date' => '02 May 2017'));
-        $verify_info->add_criteria(COMPLETION_CRITERIA_TYPE_DURATION, \totara_core\progressinfo::AGGREGATE_ALL, 1, 0,
+        $verify_info->add_criteria(COMPLETION_CRITERIA_TYPE_SELF, \totara_core\progressinfo\progressinfo::AGGREGATE_ALL, 1, 0);
+
+        $format = get_string('strfdateshortmonth', 'langconfig');
+        $verify_info->add_criteria(COMPLETION_CRITERIA_TYPE_DATE, \totara_core\progressinfo\progressinfo::AGGREGATE_ALL, 1, 0,
+            array('date' => userdate($todate, $format, null, false)));
+        $verify_info->add_criteria(COMPLETION_CRITERIA_TYPE_DURATION, \totara_core\progressinfo\progressinfo::AGGREGATE_ALL, 1, 0,
             array('duration' => '1 days'));
-        $verify_info->add_criteria(COMPLETION_CRITERIA_TYPE_GRADE, \totara_core\progressinfo::AGGREGATE_ALL, 1, 0,
+        $verify_info->add_criteria(COMPLETION_CRITERIA_TYPE_GRADE, \totara_core\progressinfo\progressinfo::AGGREGATE_ALL, 1, 0,
             array('grade' => '50.00'));
 
         $progressinfo = $completion->get_progressinfo();
@@ -189,8 +192,6 @@ class core_completion_progressinfo_testcase extends externallib_advanced_testcas
 
     public function test_course_completion_criteria_progress_calculation() {
         global $DB;
-
-        $this->resetAfterTest(false);
 
         $generator = $this->getDataGenerator();
         /** @var core_completion_generator $comp_generator */
@@ -208,7 +209,7 @@ class core_completion_progressinfo_testcase extends externallib_advanced_testcas
 
         $managerroleid = $DB->get_field('role', 'id', ['shortname' => 'manager']);
 
-        $tomorrow = time() + 86400;
+        $tomorrow = time() + DAYSECS;
 
         // Now add criteria to the course.
         $comp_generator->set_completion_criteria($course, [
@@ -341,7 +342,7 @@ class core_completion_progressinfo_testcase extends externallib_advanced_testcas
 
         // Check progress info.
         $progressinfo = $completioninfo->get_progressinfo();
-        self::assertInstanceOf('\totara_core\progressinfo', $progressinfo);
+        self::assertInstanceOf('\totara_core\progressinfo\progressinfo', $progressinfo);
         self::assertSame(0, $progressinfo->get_weight());
         self::assertSame(0.0, $progressinfo->get_score());
         self::assertEquals('', $progressinfo->get_customdata());
@@ -352,8 +353,7 @@ class core_completion_progressinfo_testcase extends externallib_advanced_testcas
 
         $cache = cache::make('totara_core', 'completion_progressinfo');
         $cachekey = "{$course->id}_{$learner->id}";
-        $cachedata = $cache->get($cachekey);
-        self::assertFalse($cachedata);
+        $cache->delete($cachekey);
 
         $completion = new completion_completion(['userid' => $learner->id, 'course' => $course->id]);
         self::assertFalse($completion->is_complete());
@@ -392,15 +392,8 @@ class core_completion_progressinfo_testcase extends externallib_advanced_testcas
         self::assertTrue($completion->is_complete());
         self::assertSame(100, $completion->get_percentagecomplete());
         self::assertSame(100, $completion->get_progressinfo()->get_percentagecomplete());
-    }
 
-    /**
-     * @depends test_course_completion_criteria_progress_calculation
-     */
-    public function test_advanced_all_course_completion_criteria_progress_calculation() {
-        global $DB;
-
-        $this->resetAfterTest(false);
+        // test advanced all course completion criteria progress calculation
 
         $generator = $this->getDataGenerator();
         /** @var core_completion_generator $comp_generator */
@@ -478,7 +471,7 @@ class core_completion_progressinfo_testcase extends externallib_advanced_testcas
 
         // Check progress info.
         $progressinfo = $completioninfo->get_progressinfo();
-        self::assertInstanceOf('\totara_core\progressinfo', $progressinfo);
+        self::assertInstanceOf('\totara_core\progressinfo\progressinfo', $progressinfo);
         self::assertSame(0, $progressinfo->get_weight());
         self::assertSame(0.0, $progressinfo->get_score());
         self::assertEquals('', $progressinfo->get_customdata());
@@ -550,16 +543,8 @@ class core_completion_progressinfo_testcase extends externallib_advanced_testcas
         self::assertTrue($completion->is_complete());
         self::assertSame(100, $completion->get_percentagecomplete());
         self::assertSame(100, $completion->get_progressinfo()->get_percentagecomplete());
-    }
 
-    /**
-     * @depends test_course_completion_criteria_progress_calculation
-     * @depends test_advanced_all_course_completion_criteria_progress_calculation
-     */
-    public function test_advanced_any_course_completion_criteria_progress_calculation() {
-        global $DB;
-
-        $this->resetAfterTest();
+        // test advanced any course completion criteria progress calculation
 
         $generator = $this->getDataGenerator();
         /** @var core_completion_generator $comp_generator */
@@ -637,7 +622,7 @@ class core_completion_progressinfo_testcase extends externallib_advanced_testcas
 
         // Check progress info.
         $progressinfo = $completioninfo->get_progressinfo();
-        self::assertInstanceOf('\totara_core\progressinfo', $progressinfo);
+        self::assertInstanceOf('\totara_core\progressinfo\progressinfo', $progressinfo);
         self::assertSame(0, $progressinfo->get_weight());
         self::assertSame(0.0, $progressinfo->get_score());
         self::assertEquals('', $progressinfo->get_customdata());
@@ -767,8 +752,7 @@ class core_completion_progressinfo_testcase extends externallib_advanced_testcas
 
         $cache = cache::make('totara_core', 'completion_progressinfo');
         $cachekey = "{$course->id}_{$learner->id}";
-        $cachedata = $cache->get($cachekey);
-        self::assertFalse($cachedata);
+        $cache->delete($cachekey);
 
         $completion = new completion_completion(['userid' => $learner->id, 'course' => $course->id]);
         self::assertFalse($completion->is_complete());
@@ -798,10 +782,10 @@ class core_completion_progressinfo_testcase extends externallib_advanced_testcas
     }
 
     /**
-     * @param \totara_core\progressinfo $progressinfo
+     * @param \totara_core\progressinfo\progressinfo $progressinfo
      * @return int
      */
-    private function dive_count(\totara_core\progressinfo $progressinfo) {
+    private function dive_count(\totara_core\progressinfo\progressinfo $progressinfo) {
         $count = $progressinfo->count_criteria();
         if ($count > 0) {
             foreach ($progressinfo->get_all_criteria() as $criterion) {
@@ -812,13 +796,13 @@ class core_completion_progressinfo_testcase extends externallib_advanced_testcas
     }
 
     public function test_get_criteria_invalid_key() {
-        $progressinfo = \totara_core\progressinfo::from_data();
+        $progressinfo = \totara_core\progressinfo\progressinfo::from_data();
         $criteria = $progressinfo->get_criteria('not_that_droid');
         self::assertFalse($criteria);
     }
 
     public function test_search_criteria() {
-        $progressinfo = \totara_core\progressinfo::from_data();
+        $progressinfo = \totara_core\progressinfo\progressinfo::from_data();
         $crit_1 = $progressinfo->add_criteria('1');
         $crit_2 = $progressinfo->add_criteria('2');
         $crit_4 = $progressinfo->add_criteria('4');
@@ -828,83 +812,83 @@ class core_completion_progressinfo_testcase extends externallib_advanced_testcas
         }
 
         $result = $progressinfo->search_criteria(1);
-        self::assertInternalType('array', $result);
+        self::assertIsArray($result);
         self::assertCount(4, $result);
 
         $result = $progressinfo->search_criteria('1');
-        self::assertInternalType('array', $result);
+        self::assertIsArray($result);
         self::assertCount(4, $result);
 
         $result = $progressinfo->search_criteria(true);
-        self::assertInternalType('array', $result);
+        self::assertIsArray($result);
         self::assertCount(4, $result);
 
         $result = $progressinfo->search_criteria(2);
-        self::assertInternalType('array', $result);
+        self::assertIsArray($result);
         self::assertCount(1, $result);
 
         $result = $progressinfo->search_criteria(4);
-        self::assertInternalType('array', $result);
+        self::assertIsArray($result);
         self::assertCount(4, $result);
 
         $result = $progressinfo->search_criteria(5);
-        self::assertInternalType('array', $result);
+        self::assertIsArray($result);
         self::assertCount(0, $result);
     }
 
     public function test_replace_criteria() {
-        $progressinfo = \totara_core\progressinfo::from_data();
-        $crit_1 = $progressinfo->add_criteria('1', \totara_core\progressinfo::AGGREGATE_ANY);
-        $crit_1a = \totara_core\progressinfo::from_data(\totara_core\progressinfo::AGGREGATE_ALL);
-        $crit_2 = $progressinfo->add_criteria('2', \totara_core\progressinfo::AGGREGATE_ANY);
-        $crit_2_1 = $progressinfo->add_criteria('3', \totara_core\progressinfo::AGGREGATE_ANY);
-        $crit_2_1a = \totara_core\progressinfo::from_data(\totara_core\progressinfo::AGGREGATE_ALL);
+        $progressinfo = \totara_core\progressinfo\progressinfo::from_data();
+        $crit_1 = $progressinfo->add_criteria('1', \totara_core\progressinfo\progressinfo::AGGREGATE_ANY);
+        $crit_1a = \totara_core\progressinfo\progressinfo::from_data(\totara_core\progressinfo\progressinfo::AGGREGATE_ALL);
+        $crit_2 = $progressinfo->add_criteria('2', \totara_core\progressinfo\progressinfo::AGGREGATE_ANY);
+        $crit_2_1 = $progressinfo->add_criteria('3', \totara_core\progressinfo\progressinfo::AGGREGATE_ANY);
+        $crit_2_1a = \totara_core\progressinfo\progressinfo::from_data(\totara_core\progressinfo\progressinfo::AGGREGATE_ALL);
 
         $crit = $progressinfo->get_criteria(1);
-        self::assertSame(\totara_core\progressinfo::AGGREGATE_ANY, $crit->get_agg_method());
+        self::assertSame(\totara_core\progressinfo\progressinfo::AGGREGATE_ANY, $crit->get_agg_method());
 
         $progressinfo->replace_criteria(1, $crit_1a);
 
         $crit = $progressinfo->get_criteria(1);
-        self::assertSame(\totara_core\progressinfo::AGGREGATE_ALL, $crit->get_agg_method());
+        self::assertSame(\totara_core\progressinfo\progressinfo::AGGREGATE_ALL, $crit->get_agg_method());
 
         $crits = $progressinfo->search_criteria(3);
         self::assertCount(1, $crits);
         $crit = reset($crits);
-        self::assertSame(\totara_core\progressinfo::AGGREGATE_ANY, $crit->get_agg_method());
+        self::assertSame(\totara_core\progressinfo\progressinfo::AGGREGATE_ANY, $crit->get_agg_method());
 
         $progressinfo->replace_criteria(3, $crit_2_1a);
 
         $crits = $progressinfo->search_criteria(3);
         self::assertCount(1, $crits);
         $crit = reset($crits);
-        self::assertSame(\totara_core\progressinfo::AGGREGATE_ALL, $crit->get_agg_method());
+        self::assertSame(\totara_core\progressinfo\progressinfo::AGGREGATE_ALL, $crit->get_agg_method());
     }
 
     public function test_attach_criteria() {
-        $progressinfo = \totara_core\progressinfo::from_data();
-        $crit = \totara_core\progressinfo::from_data(\totara_core\progressinfo::AGGREGATE_ALL);
+        $progressinfo = \totara_core\progressinfo\progressinfo::from_data();
+        $crit = \totara_core\progressinfo\progressinfo::from_data(\totara_core\progressinfo\progressinfo::AGGREGATE_ALL);
 
-        self::assertInstanceOf('\totara_core\progressinfo', $progressinfo->attach_criteria(1, $crit));
+        self::assertInstanceOf('\totara_core\progressinfo\progressinfo', $progressinfo->attach_criteria(1, $crit));
         // Only once.
         self::assertFalse($progressinfo->attach_criteria(1, $crit));
     }
 
     public function test_set_agg_method() {
-        $progressinfo = \totara_core\progressinfo::from_data();
-        $progressinfo->set_agg_method(\totara_core\progressinfo::AGGREGATE_NONE);
-        self::assertSame(\totara_core\progressinfo::AGGREGATE_NONE, $progressinfo->get_agg_method());
-        $progressinfo->set_agg_method(\totara_core\progressinfo::AGGREGATE_ALL);
-        self::assertSame(\totara_core\progressinfo::AGGREGATE_ALL, $progressinfo->get_agg_method());
-        $progressinfo->set_agg_method(\totara_core\progressinfo::AGGREGATE_ANY);
-        self::assertSame(\totara_core\progressinfo::AGGREGATE_ANY, $progressinfo->get_agg_method());
+        $progressinfo = \totara_core\progressinfo\progressinfo::from_data();
+        $progressinfo->set_agg_method(\totara_core\progressinfo\progressinfo::AGGREGATE_NONE);
+        self::assertSame(\totara_core\progressinfo\progressinfo::AGGREGATE_NONE, $progressinfo->get_agg_method());
+        $progressinfo->set_agg_method(\totara_core\progressinfo\progressinfo::AGGREGATE_ALL);
+        self::assertSame(\totara_core\progressinfo\progressinfo::AGGREGATE_ALL, $progressinfo->get_agg_method());
+        $progressinfo->set_agg_method(\totara_core\progressinfo\progressinfo::AGGREGATE_ANY);
+        self::assertSame(\totara_core\progressinfo\progressinfo::AGGREGATE_ANY, $progressinfo->get_agg_method());
 
         self::expectException('coding_exception');
         $progressinfo->set_agg_method(-1);
     }
 
     public function test_is_enabled() {
-        $progressinfo = \totara_core\progressinfo::from_data(\totara_core\progressinfo::AGGREGATE_NONE, 0);
+        $progressinfo = \totara_core\progressinfo\progressinfo::from_data(\totara_core\progressinfo\progressinfo::AGGREGATE_NONE, 0);
         self::assertFalse($progressinfo->is_enabled());
         $progressinfo->set_weight(1);
         self::assertFalse($progressinfo->is_enabled());

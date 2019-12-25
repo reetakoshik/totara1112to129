@@ -141,4 +141,78 @@ class core_requirejs {
         return $jsfiles;
     }
 
+    /**
+     * Returns configuration data for requirejs,
+     * this method replaces previous /lib/requirejs/moodle-config.js template.
+     *
+     * @since Totara 12
+     *
+     * @param int $jsrev js caching revision
+     * @return array JS object with requirejs configuration
+     */
+    public static function get_config_data($jsrev) {
+        global $CFG;
+        // NOTE: slasharguments are now always enabled in Totara.
+
+        // Get jquery versions.
+        $plugins = [];
+        require("{$CFG->dirroot}/lib/jquery/plugins.php");
+        $jquery = str_replace('.min.js', '.min', $plugins['jquery']['files'][0]);
+        $jqueryui = str_replace('.min.js', '.min', $plugins['ui']['files'][0]);
+        unset($plugins);
+
+        $config = [];
+        $config['baseUrl'] = "{$CFG->wwwroot}/lib/requirejs.php/{$jsrev}/";
+
+        // We only support AMD modules with an explicit define() statement.
+        $config['enforceDefine'] = true;
+        $config['skipDataMain'] = true;
+        $config['waitSeconds'] = 0;
+
+        // Path exceptions.
+        $config['paths'] = [];
+        $config['paths']['jquery'] = "{$CFG->wwwroot}/lib/javascript.php/{$jsrev}/lib/jquery/{$jquery}";
+        $config['paths']['jqueryui'] = "{$CFG->wwwroot}/lib/javascript.php/{$jsrev}/lib/jquery/{$jqueryui}";
+        $config['paths']['jqueryprivate'] = "{$CFG->wwwroot}/lib/javascript.php/{$jsrev}/lib/requirejs/jquery-private";
+
+        // Custom jquery config map.
+        $config['map'] = [];
+        // '*' means all modules will get 'jqueryprivate' for their 'jquery' dependency.
+        $config['map']['*'] = ['jquery' => 'jqueryprivate'];
+        // 'jquery-private' wants the real jQuery module
+        // though. If this line was not here, there would
+        // be an unresolvable cyclic dependency.
+        $config['map']['jqueryprivate'] = ['jquery' => 'jquery'];
+
+        // Add bundle for all Totara AMD modules, this replaces old fragile 'core/first' workaround.
+        $config['bundles'] = [];
+        $config['bundles']['core/bundle'] = [];
+        foreach (core_requirejs::find_all_amd_modules() as $modulename => $unused) {
+            $config['bundles']['core/bundle'][] = $modulename;
+        }
+
+        return $config;
+    }
+
+    /**
+     * Returns configuration file content for requirejs in Totara,
+     * previously the configuration was included in page markup.
+     *
+     * @since Totara 12
+     *
+     * @param int $jsrev js caching revision
+     * @return string content of JS file to be served as configuration.
+     */
+    public static function get_config_file_content($jsrev) {
+        $config = self::get_config_data($jsrev);
+
+        // Encode the result as js file setting require global as config for requirejs.
+        if ($jsrev > 0) {
+            $config = json_encode($config, JSON_UNESCAPED_SLASHES);
+        } else {
+            $config = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        }
+
+        return "var require = {$config};";
+    }
 }

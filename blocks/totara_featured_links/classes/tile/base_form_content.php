@@ -25,6 +25,7 @@ namespace block_totara_featured_links\tile;
 
 defined('MOODLE_INTERNAL') || die();
 
+use totara_form\form\element\hidden;
 use \totara_form\form\element\select;
 use \totara_form\form\element\number;
 use \totara_form\form\group\section;
@@ -49,27 +50,41 @@ abstract class base_form_content extends base_form {
         $maingroup = $this->model->add(new section('maingroup', get_string('content_edit', 'block_totara_featured_links')));
         $maingroup->set_collapsible(false);
 
-        /** @var \block_totara_featured_links\tile\base[] $classes */
+        /** @var base[] $classes */
         $classes = \core_component::get_namespace_classes('tile', 'block_totara_featured_links\tile\base');
         $class_options = [];
         foreach ($classes as $class_str) {
             $class_arr = explode('\\', $class_str);
             $plugin_name = $class_arr[0];
             $class_name = $class_arr[count($class_arr) - 1];
+            $ismetatile = is_subclass_of($class_str, meta_tile::class);
+            if (!empty($this->get_parameters()['parentid']) && $ismetatile) {
+                continue;
+            }
             $class_options[$plugin_name.'-'.$class_name] = $class_str::get_name();
         }
 
         $tile_types = $this->model->add(new select('type', get_string('tile_types', 'block_totara_featured_links'), $class_options));
         $tile_types->add_validator(new is_subclass_of_tile_base());
 
-        $position = $this->model->add(new number('sortorder', get_string('tile_position', 'block_totara_featured_links')), 100);
-        $max = $DB->count_records('block_totara_featured_links_tiles', ['blockid' => $this->get_parameters()['blockinstanceid']]);
+        $position = $this->model->add(new number('sortorder', get_string('tile_position', 'block_totara_featured_links')), PHP_INT_MAX);
+
+        $parentid = isset($this->get_parameters()['parentid']) ? $this->get_parameters()['parentid'] : 0;
+        $max = $DB->count_records(
+            'block_totara_featured_links_tiles',
+            [
+                'blockid' => $this->get_parameters()['blockinstanceid'],
+                'parentid' => $parentid
+            ]
+        );
         if ($DB->count_records('block_totara_featured_links_tiles', ['id' => $this->get_parameters()['tileid']]) == 0) {
             $max++;
         }
         $position->set_attribute('max', max(1, $max));
         $position->set_attribute('min', 1);
         $position->set_attribute('required', true);
+
+        $this->model->add(new hidden('parentid', PARAM_INT));
 
         $this->specific_definition($maingroup);
 

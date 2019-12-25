@@ -88,8 +88,8 @@ trait export_trait {
     protected function add_export_joins() {
         $join = $this->exportjoin;
 
-        $this->add_user_table_to_joinlist($this->joinlist, $join, 'userid');
-        $this->add_user_table_to_joinlist($this->joinlist, $join, 'usercreated', 'usercreated');
+        $this->add_core_user_tables($this->joinlist, $join, 'userid');
+        $this->add_core_user_tables($this->joinlist, $join, 'usercreated', 'usercreated');
     }
 
     /**
@@ -106,6 +106,7 @@ trait export_trait {
             array(
                 'addtypetoheading' => ($join !== 'base'),
                 'joins' => array($join),
+                'displayfunc' => 'integer'
             )
         );
 
@@ -127,6 +128,7 @@ trait export_trait {
             "$join.contextid",
             array(
                 'joins' => array($join),
+                'displayfunc' => 'integer'
             )
         );
 
@@ -181,8 +183,8 @@ trait export_trait {
             )
         );
 
-        $this->add_user_fields_to_columns($this->columnoptions);
-        $this->add_user_fields_to_columns($this->columnoptions, 'usercreated', 'usercreated', true);
+        $this->add_core_user_columns($this->columnoptions);
+        $this->add_core_user_columns($this->columnoptions, 'usercreated', 'usercreated', true);
 
         // A bit of hackery to get links to user info page instead of profile.
         foreach ($this->columnoptions as $columnotion) {
@@ -266,8 +268,8 @@ trait export_trait {
             )
         );
 
-        $this->add_user_fields_to_filters($this->filteroptions);
-        $this->add_user_fields_to_filters($this->filteroptions, 'usercreated', true);
+        $this->add_core_user_filters($this->filteroptions);
+        $this->add_core_user_filters($this->filteroptions, 'usercreated', true);
     }
 
     /**

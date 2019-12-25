@@ -98,7 +98,7 @@ class booking_requests_rejected extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/facetoface/attendees.php', array('s' => $this->other['sessionid']));
+        return new \moodle_url('/mod/facetoface/attendees/view.php', array('s' => $this->other['sessionid']));
     }
 
     /**

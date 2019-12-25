@@ -12,7 +12,7 @@ Feature: Block edit test block
     And I add the "Featured Links" block
     And I click on "Add Tile" "link"
     And I set the following fields to these values:
-     | URL | www.example.com |
+     | URL | https://www.example.com |
      | textbody | default description |
     And I click on "Save changes" "button"
 
@@ -49,8 +49,8 @@ Feature: Block edit test block
     When I click on "div.block-totara-featured-links-edit div.moodle-actionmenu" "css_element"
     And I click on "Edit" "link" in the "Featured Links" "block"
     And I set the following fields to these values:
-      | Title    | Some Heading |
-      | textbody | some body |
+      | Title    | Some Heading           |
+      | textbody | some body              |
       | URL      | http://www.example.com |
     And I press "Cancel"
     And I am on site homepage
@@ -58,14 +58,31 @@ Feature: Block edit test block
     And I should not see "Some Heading"
     And I should not see "some body"
 
+  Scenario: Selecting icons
+    When I click on "div.block-totara-featured-links-edit div.moodle-actionmenu" "css_element"
+    And I click on "Edit" "link" in the "Featured Links" "block"
+    And I set the following fields to these values:
+      | Title    | Some Heading           |
+      | textbody | some body              |
+      | URL      | http://www.example.com |
+    Then "Clear" "text" in the "//div[span[@class='icon-picker-delete-icon']]" "xpath_element" should not be visible
+    When I click on "//span[@id='show-iconPicker-dialog']" "xpath_element"
+    And I click on "//li[contains(@class, 'icon-picker-item')][5]" "xpath_element"
+    And I click on "OK" "button"
+
+    Then "Remove" "text" in the "//div[span[@class='icon-picker-delete-icon']]" "xpath_element" should be visible
+
+    When I click on "Save changes" "button"
+    Then ".block-totara-featured-links-icon" "css_element" should exist
+
   Scenario: Check that the background appearance uses the right classes
     When I click on "div.block-totara-featured-links-edit div.moodle-actionmenu" "css_element"
     And I click on "Edit" "link" in the "Featured Links" "block"
     And I set the following fields to these values:
-      | Title       | title       |
-      | Description | description |
-      | URL         | /           |
-      | Fill tile   | 1           |
+      | Title       | title                  |
+      | Description | description            |
+      | URL         | http://www.example.com |
+      | Fill tile   | 1                      |
     And I click on "Save changes" "button"
 
     Then ".background-cover" "css_element" should exist

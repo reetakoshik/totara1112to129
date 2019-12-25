@@ -24,10 +24,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 class rb_source_upgrade_log extends rb_base_source {
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
-
     public function __construct($groupid, rb_global_restriction_set $globalrestrictionset = null) {
         if ($groupid instanceof rb_global_restriction_set) {
             throw new coding_exception('Wrong parameter orders detected during report source instantiation.');
@@ -62,7 +58,7 @@ class rb_source_upgrade_log extends rb_base_source {
     protected function define_joinlist() {
         $joinlist = array();
 
-        $this->add_user_table_to_joinlist($joinlist, 'base', 'userid');
+        $this->add_core_user_tables($joinlist, 'base', 'userid');
 
         return $joinlist;
     }
@@ -74,42 +70,42 @@ class rb_source_upgrade_log extends rb_base_source {
                 'type',
                 get_string('coltype', 'rb_source_upgrade_log'),
                 'base.type',
-                array('displayfunc' => 'upgradelogtype')
+                array('displayfunc' => 'upgrade_log_type')
             ),
             new rb_column_option(
                 'upgrade_log',
                 'plugin',
                 get_string('colplugin', 'rb_source_upgrade_log'),
                 'base.plugin',
-                array('dbdatatype' => 'char', 'outputformat' => 'text')
+                array('dbdatatype' => 'char', 'outputformat' => 'text', 'displayfunc' => 'plaintext')
             ),
             new rb_column_option(
                 'upgrade_log',
                 'version',
                 get_string('colversion', 'rb_source_upgrade_log'),
                 'base.version',
-                array()
+                array('displayfunc' => 'plaintext')
             ),
             new rb_column_option(
                 'upgrade_log',
                 'targetversion',
                 get_string('coltargetversion', 'rb_source_upgrade_log'),
                 'base.targetversion',
-                array()
+                array('displayfunc' => 'plaintext')
             ),
             new rb_column_option(
                 'upgrade_log',
                 'info',
                 get_string('colinfo', 'rb_source_upgrade_log'),
                 'base.info',
-                array('dbdatatype' => 'char', 'outputformat' => 'text')
+                array('dbdatatype' => 'char', 'outputformat' => 'text', 'displayfunc' => 'plaintext')
             ),
             new rb_column_option(
                 'upgrade_log',
                 'details',
                 get_string('coldetails', 'rb_source_upgrade_log'),
                 'base.details',
-                array('dbdatatype' => 'text')
+                array('dbdatatype' => 'text', 'displayfunc' => 'plaintext')
             ),
             new rb_column_option(
                 'upgrade_log',
@@ -127,7 +123,7 @@ class rb_source_upgrade_log extends rb_base_source {
             ),
         );
 
-        $this->add_user_fields_to_columns($columnoptions);
+        $this->add_core_user_columns($columnoptions);
 
         return $columnoptions;
     }
@@ -204,7 +200,7 @@ class rb_source_upgrade_log extends rb_base_source {
             array()
         );
 
-        $this->add_user_fields_to_filters($filteroptions);
+        $this->add_core_user_filters($filteroptions);
 
         return $filteroptions;
     }
@@ -286,7 +282,17 @@ class rb_source_upgrade_log extends rb_base_source {
         return $defaultfilters;
     }
 
+    /**
+     * Display backtrace
+     *
+     * @deprecated Since Totara 12.0
+     * @param $value
+     * @param $row
+     * @param bool $isexport
+     * @return string
+     */
     public function rb_display_backtrace($value, $row, $isexport = false) {
+        debugging('rb_source_upgrade_log::rb_display_backtrace has been deprecated since Totara 12.0', DEBUG_DEVELOPER);
         if ($value === '' or $value === null) {
             return '';
         }
@@ -297,7 +303,17 @@ class rb_source_upgrade_log extends rb_base_source {
         return '<pre>' . s($value) . '</pre>';
     }
 
+    /**
+     * Display upgrade log type
+     *
+     * @deprecated Since Totara 12.0
+     * @param $value
+     * @param $row
+     * @param bool $isexport
+     * @return string
+     */
     public function rb_display_upgradelogtype($value, $row, $isexport = false) {
+        debugging('rb_source_upgrade_log::rb_display_upgradelogtype has been deprecated since Totara 12.0. Use upgrade_log_type::display', DEBUG_DEVELOPER);
         if ($value == 0) {
             return get_string('normal');
         } else if ($value == 1) {

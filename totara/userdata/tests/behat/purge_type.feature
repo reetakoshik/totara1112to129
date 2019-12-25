@@ -22,7 +22,7 @@ Feature: Manage user data purge types
 
   Scenario: Create user data purge type
     Given I log in as "manager"
-    And I navigate to "Purge types" node in "Site administration > Users > User data management"
+    And I navigate to "Purge types" node in "Site administration > User data management"
 
     When I press "Add purge type"
     And I set the "User status restriction" Totara form field to "Active"
@@ -45,7 +45,7 @@ Feature: Manage user data purge types
     And I should see "User picture"
     And I should see "Preferences"
 
-    And I navigate to "Purge types" node in "Site administration > Users > User data management"
+    And I navigate to "Purge types" node in "Site administration > User data management"
     When I press "Add purge type"
     And I set the "User status restriction" Totara form field to "Suspended"
     And I press "Continue"
@@ -67,7 +67,7 @@ Feature: Manage user data purge types
     And I should see "User picture"
     And I should see "Preferences"
 
-    And I navigate to "Purge types" node in "Site administration > Users > User data management"
+    And I navigate to "Purge types" node in "Site administration > User data management"
     When I press "Add purge type"
     And I set the "User status restriction" Totara form field to "Deleted"
     And I press "Continue"
@@ -95,7 +95,7 @@ Feature: Manage user data purge types
 
   Scenario: Update user data purge type
     Given I log in as "manager"
-    And I navigate to "Purge types" node in "Site administration > Users > User data management"
+    And I navigate to "Purge types" node in "Site administration > User data management"
     And I press "Add purge type"
     And I set the "User status restriction" Totara form field to "Active"
     And I press "Continue"
@@ -133,7 +133,7 @@ Feature: Manage user data purge types
 
   Scenario: Duplicate user data purge type
     Given I log in as "manager"
-    And I navigate to "Purge types" node in "Site administration > Users > User data management"
+    And I navigate to "Purge types" node in "Site administration > User data management"
     And I press "Add purge type"
     And I set the "User status restriction" Totara form field to "Active"
     And I press "Continue"
@@ -168,7 +168,7 @@ Feature: Manage user data purge types
 
   Scenario: Delete user data purge type
     Given I log in as "manager"
-    And I navigate to "Purge types" node in "Site administration > Users > User data management"
+    And I navigate to "Purge types" node in "Site administration > User data management"
     And I press "Add purge type"
     And I set the "User status restriction" Totara form field to "Active"
     And I press "Continue"

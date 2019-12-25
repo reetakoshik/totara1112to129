@@ -11,8 +11,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-
+// We need some constants.
 require_once($CFG->dirroot.'/mod/facetoface/lib.php');
+
+use \mod_facetoface\signup\state\{booked, requestedadmin, waitlisted, declined};
 
 /**
 * Extend the base plugin class
@@ -27,11 +29,12 @@ class totara_message_workflow_facetoface extends totara_message_workflow_plugin_
      * @param object $msg
      */
     function onaccept($eventdata, $msg) {
-        global $DB, $CFG;
+        global $DB;
 
         // Load course
         $userid = $eventdata['userid'];
         $session = $eventdata['session'];
+        $seminarevent = new \mod_facetoface\seminar_event($session->id);
         $facetoface = $eventdata['facetoface'];
         if (!$course = $DB->get_record('course', array('id' => $facetoface->course))) {
             print_error('error:coursemisconfigured', 'facetoface');
@@ -41,50 +44,15 @@ class totara_message_workflow_facetoface extends totara_message_workflow_plugin_
             print_error('error:incorrectcoursemodule', 'facetoface');
             return false;
         }
-        $form = new stdClass();
-        $form->s = $session->id;
-        $form->requests = array($userid => 2);  // 2 = approve, 1 = decline
-
-        // Approve requests
-        $errors = facetoface_approve_requests($form);
-
-        // If there are any errors return false;
-        if (is_array($errors)) {
-            $sql = "SELECT d.id as dateid, s.id, s.capacity, d.timestart, d.timefinish, d.roomid,
-                           d.sessiontimezone, s.cancelledstatus, s.registrationtimestart, s.registrationtimefinish
-                      FROM {facetoface_sessions} s
-                      JOIN {facetoface_sessions_dates} d ON s.id = d.sessionid
-                     WHERE s.facetoface = :fid AND d.sessionid = :sid
-                  ORDER BY d.timestart";
-            $session = $DB->get_record_sql($sql, array('fid' => $facetoface->id, 'sid' => $session->id));
-            $bookingfull = !facetoface_session_has_capacity($session, context_module::instance($cm->id));
-            $status = null;
-            $timenow = time();
-            if ($session->timestart < $timenow) {
-                $status = get_string('sessionover', 'mod_facetoface');
-            } else {
-                if (!empty($session->cancelledstatus)) {
-                    $status = get_string('bookingsessioncancelled', 'mod_facetoface');
-                } else if ($bookingfull) {
-                    $status = get_string('bookingfull', 'mod_facetoface');
-                } else if (!empty($session->registrationtimestart) && $session->registrationtimestart > $timenow) {
-                    $status = get_string('registrationnotopen', 'mod_facetoface');
-                } else if (!empty($session->registrationtimefinish) && $timenow > $session->registrationtimefinish) {
-                    $status = get_string('registrationclosed', 'mod_facetoface');
-                } else {
-                    $status = get_string('bookingopen', 'mod_facetoface');
-                }
-            }
-            if ($CFG->enableavailability) {
-                if (!get_fast_modinfo($cm->course)->get_cm($cm->id)->available) {
-                    $status = get_string('bookingrestricted', 'mod_facetoface');
-                }
-            }
-            $this->set_notification_errors($errors, $userid, $status);
+        $signup = \mod_facetoface\signup::create($userid, $seminarevent);
+        if ($signup->can_switch(booked::class, waitlisted::class, requestedadmin::class)) {
+            $signup->switch_state(booked::class, waitlisted::class, requestedadmin::class);
+            totara_set_notification(get_string('attendancerequestsupdated', 'mod_facetoface'), null, ['class' => 'notifysuccess']);
+        } else {
+            $errors = $signup->get_failures(booked::class, waitlisted::class, requestedadmin::class);
+            totara_set_notification(current($errors), null, ['class' => 'notifyproblem']);
             return false;
         }
-
-        totara_set_notification(get_string('attendancerequestsupdated', 'mod_facetoface'), null, array('class' => 'notifysuccess'));
 
         // issue notification that registration has been accepted
         return $this->acceptreject_notification($userid, $facetoface, $session, 'status_approved');
@@ -99,7 +67,6 @@ class totara_message_workflow_facetoface extends totara_message_workflow_plugin_
      */
     function onreject($eventdata, $msg) {
         global $DB;
-
         // can manipulate the language by setting $SESSION->lang temporarily
         // Load course
         $userid = $eventdata['userid'];
@@ -113,19 +80,17 @@ class totara_message_workflow_facetoface extends totara_message_workflow_plugin_
             print_error('error:incorrectcoursemodule', 'facetoface');
             return false;
         }
-        $form = new stdClass();
-        $form->s = $session->id;
-        $form->requests = array($userid => 1);  // 2 = approve, 1 = decline
-        error_log(var_export($form, true));
-
-        // Decline requests
-        $errors = facetoface_approve_requests($form);
-        if (is_array($errors)) {
-            $this->set_notification_errors($errors, $userid);
+        $seminarevent = new \mod_facetoface\seminar_event($session->id);
+        $signup = \mod_facetoface\signup::create($userid, $seminarevent);
+        if (!$signup->can_switch(declined::class)) {
+            // Return false here for the compability with the old behaviour, no point to sending email if the target,
+            // user is not able to switch state.
+            $errors = $signup->get_failures(declined::class);
+            totara_set_notification(current($errors), null, ['class' => 'notifyproblem']);
             return false;
         }
-
-        totara_set_notification(get_string('attendancerequestsupdated', 'mod_facetoface'), null, array('class' => 'notifysuccess'));
+        $signup->switch_state(declined::class);
+        totara_set_notification(get_string('attendancerequestsupdated', 'mod_facetoface'), null, ['class' => 'notifysuccess']);
 
         // issue notification that registration has been declined
         return $this->acceptreject_notification($userid, $facetoface, $session, 'status_declined');
@@ -159,29 +124,5 @@ class totara_message_workflow_facetoface extends totara_message_workflow_plugin_
         $newevent->icon        = 'facetoface-regular';
         $newevent->msgtype     = TOTARA_MSG_TYPE_FACE2FACE;
         return tm_alert_send($newevent);
-    }
-
-    /**
-     * Display error detail information to user approval.
-     *
-     * @param $errors a list of errors from facetoface_aprrove_requests
-     * @param $userid attendee id
-     * @param null $status signup session status
-     */
-    private function set_notification_errors($errors, $userid, $status = null) {
-        global $DB;
-
-        $user = $DB->get_record('user', ['id' => $userid]);
-        $fullname  = fullname($user);
-        $errormsgs = $status ? [$status] : [];
-        foreach ($errors as $uid => $error) {
-            $string = "error:{$error}";
-            if ($user) {
-                $errormsgs[] = get_string($string, 'mod_facetoface', $fullname);
-            } else {
-                $errormsgs[] = get_string($string, 'mod_facetoface', $userid);
-            }
-        }
-        totara_set_notification(\html_writer::alist($errormsgs), null, array('class' => 'notifyproblem'));
     }
 }

@@ -763,7 +763,7 @@ class mod_quiz_userdata_attempts_testcase extends advanced_testcase {
                 $this->assertArrayHasKey('feedback', $attempt);
                 $this->assertArrayHasKey('questions', $attempt);
                 $this->assertNotEmpty($attempt['questions']);
-                $this->assertInternalType('array', $attempt['questions']);
+                $this->assertIsArray($attempt['questions']);
                 foreach ($attempt['questions'] as $question) {
                     $this->assertArrayHasKey('question', $question);
                     $this->assertNotEmpty($question['question']);
@@ -812,7 +812,7 @@ class mod_quiz_userdata_attempts_testcase extends advanced_testcase {
             if ($attempt['id'] == $quizattemptid) {
                 $this->assertArrayHasKey('questions', $attempt);
                 $this->assertNotEmpty($attempt['questions']);
-                $this->assertInternalType('array', $attempt['questions']);
+                $this->assertIsArray($attempt['questions']);
                 foreach ($attempt['questions'] as $question) {
                     $this->assertArrayHasKey($key, $question);
                     if (is_array($value) && is_array($question[$key])) {

@@ -110,6 +110,10 @@ class behat_totara_program extends behat_base {
         }
 
         $progcontent->save_content();
+
+        // Purge the completion caches
+        totara_program\progress\program_progress_cache::purge_progressinfo_caches();
+        completion_info::purge_progress_caches();
     }
 
     /**

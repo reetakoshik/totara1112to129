@@ -62,13 +62,17 @@ trait block_testing {
         $this->getDataGenerator()->create_user(['country' => 'AU']);
 
         $rid = $this->create_report('user', 'Test user report 1', true);
-        $report = new \reportbuilder($rid, null, false, null, null, true);
+        $config = new \rb_config();
+        $config->set_nocache(true);
+        $report = \reportbuilder::create($rid, $config);
         // First up delete all columns.
         $this->add_column($report, 'user', 'username', null, 'countdistinct', null, 0);
         $this->add_column($report, 'user', 'country', null, null, null, 0);
         $this->add_graph($rid, 'pie', 0, 500, 'user-country', '', ['user-username'], '');
 
-        $report = new \reportbuilder($rid, null, false, null, null, true);
+        $config = new \rb_config();
+        $config->set_nocache(true);
+        $report = \reportbuilder::create($rid, $config);
 
         // Assert graph.
         $newgraphs = $DB->get_records('report_builder_graph', array('reportid' => $rid));

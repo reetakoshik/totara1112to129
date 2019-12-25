@@ -70,7 +70,7 @@
 
 <div{{#attributes}} {{name}}="{{value}}"{{/attributes}}>
 
-    {{#header}}
+    {{#header}}{{^no_header}}
         <div class="header">
             <div class="title">
                 <div class="block_action"></div>
@@ -82,9 +82,9 @@
                 {{/controls}}
             </div>
         </div>
-    {{/header}}
+    {{/no_header}}{{/header}}
 
-    <div class="content" data-movetext="true">
+    <div class="content">
         {{{content}}}
 
         {{#footer}}

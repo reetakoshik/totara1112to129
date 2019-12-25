@@ -11,7 +11,7 @@ Feature: User profile fields set as unique can be used via HR Import.
       | csvdateformat           | d/m/Y  |
 
     # Create a user checkbox custom field set as unique.
-    And I navigate to "User profile fields" node in "Site administration > Users > Accounts"
+    And I navigate to "User profile fields" node in "Site administration > Users"
     And I set the following fields to these values:
       | datatype   | checkbox |
     And I set the following fields to these values:
@@ -81,18 +81,18 @@ Feature: User profile fields set as unique can be used via HR Import.
     Then I should see "Unique textinput test"
 
     # Configure HR Import for csv.
-    When I navigate to "General settings" node in "Site administration > HR Import"
+    When I navigate to "Default settings" node in "Site administration > HR Import"
     And I set the following fields to these values:
-      | File Access | Upload Files |
+      | File access | Upload Files |
     And I press "Save changes"
     And I navigate to "Manage elements" node in "Site administration > HR Import > Elements"
     And I "Enable" the "User" HR Import element
     And I navigate to "User" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source                        | CSV                               |
+      | CSV                           | 1                                 |
       | Empty string behaviour in CSV | Empty strings erase existing data |
     And I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
     When I navigate to "CSV" node in "Site administration > HR Import > Sources > User"
     And I click on "Unique checkbox test" "checkbox"
     And I click on "Unique date (no timezone) test" "checkbox"
@@ -120,7 +120,7 @@ Feature: User profile fields set as unique can be used via HR Import.
     And I should not see "However, there have been some problems"
 
     # Confirm the custom field data is saved against the user.
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Upload User 1"
     And I should see "Unique checkbox test"
     And the "Unique checkbox test" "checkbox" should be disabled
@@ -146,7 +146,7 @@ Feature: User profile fields set as unique can be used via HR Import.
     And I should not see "However, there have been some problems"
 
     # Confirm the custom field empty data is saved against the user.
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Upload User 1"
     And I should not see "Unique checkbox test"
 
@@ -172,8 +172,3 @@ Feature: User profile fields set as unique can be used via HR Import.
     When I navigate to "Run HR Import" node in "Site administration > HR Import"
     And I press "Run HR Import"
     Then I should see "Running HR Import cron...Done!"
-    And I should not see "However, there have been some problems"
-
-    # Confirm the new user is added.
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
-    Then I should see "Upload User 2"

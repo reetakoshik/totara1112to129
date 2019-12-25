@@ -1,4 +1,4 @@
-@javascript @tool @tool_sitepolicy @totara
+@javascript @tool @tool_sitepolicy @totara @language_packs
 Feature: Sitepolicy version navigation
   As an admin
   I must be able to view available sitepolicies
@@ -112,7 +112,7 @@ Feature: Sitepolicy version navigation
       | 1        | 0            | 0           | Draft 1     | en        |            | Draft 1 statement     | 2          | d1-Consent statement | Yes         | No           | first     |
       | 1        | 2            | 0           | All multi   | nl,en     | nl,en      | All multi statement   | 2          | am-Consent statement | Yes         | No           | first     |
     And I log in as "admin"
-    And I navigate to "Language packs" node in "Site administration > Language"
+    And I navigate to "Language packs" node in "Site administration > Localisation"
     And I set the field "Available language packs" to "nl"
     And I press "Install selected language pack(s)"
     And I wait until "Language pack 'nl' was successfully installed" "text" exists

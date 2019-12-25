@@ -32,17 +32,9 @@ require_once($CFG->dirroot.'/totara/core/dialogs/dialog_content.class.php');
 define('TOTARA_JS_DIALOG',         1);
 define('TOTARA_JS_TREEVIEW',       2);
 define('TOTARA_JS_DATEPICKER',     3);
-/**
- * TOTARA_JS_PLACEHOLDER - loads the jQuery placeholder library
- * @deprecated since 10.0
- */
-define('TOTARA_JS_PLACEHOLDER',    4);
 define('TOTARA_JS_ICON_PREVIEW',   5);
 define('TOTARA_JS_UI',             6);
-/**
- * @deprecated deprecated since 9.0
- */
-define('TOTARA_JS_DATATABLES',     7);
+
 /**
  * Load appropriate JS and CSS files for lightbox
  *
@@ -125,23 +117,11 @@ function local_js($options = array()) {
 
     }
 
-    // if placeholder enabled
-    if (in_array(TOTARA_JS_PLACEHOLDER, $options)) {
-        debugging('TOTARA_JS_PLACEHOLDER has been deprecated since Totara 10 as placeholders are implemented correctly in all supported browsers');
-        $PAGE->requires->js('/totara/core/js/lib/' . $directory . '/jquery.placeholder' . $min . '.js');
-        $PAGE->requires->js('/totara/core/js/lib/' . $directory . '/load.placeholder' . $min . '.js');
-    }
-
     // If Icon preview is enabled
     if (in_array(TOTARA_JS_ICON_PREVIEW, $options)) {
 
         $PAGE->requires->js('/totara/core/js/icon.preview.js');
 
-    }
-
-    if (in_array(TOTARA_JS_DATATABLES, $options)) {
-        debugging('TOTARA_JS_DATATABLES has been deprecated and may cause unexpected results - please convert your JS to an AMD version', DEBUG_DEVELOPER);
-        $PAGE->requires->js('/totara/core/js/lib/jquery.dataTables' . $min . '.js');
     }
 }
 
@@ -235,7 +215,7 @@ function build_treeview($elements, $error_string, $hierarchy = null, $disabledli
                 }
             }
 
-            $addbutton_html = '<img src="'.$OUTPUT->pix_url('t/'.$buttons['addbutton']).'" class="addbutton" />';
+            $addbutton_html = '<img src="'.$OUTPUT->image_url('t/'.$buttons['addbutton']).'" class="addbutton" />';
 
             // Make disabled elements non-draggable and greyed out
             if (array_key_exists($element->id, $disabledlist)){
@@ -267,7 +247,7 @@ function build_treeview($elements, $error_string, $hierarchy = null, $disabledli
 
     // Add hidden button images that can later be used/cloned by js TODO: add tooltip get_string
     foreach ($buttons as $classname => $pic) {
-        $html .= '<img id="'.$classname.'_ex" src="'.$OUTPUT->pix_url('t/'.$pic).'"
+        $html .= '<img id="'.$classname.'_ex" src="'.$OUTPUT->image_url('t/'.$pic).'"
             class="'.$classname.'" style="display: none;" />';
     }
 
@@ -358,7 +338,7 @@ function build_category_treeview($list, $parents, $load_string) {
 
         // Add hidden button images that can later be used/cloned by js TODO: add tooltip get_string
         foreach ($buttons as $classname => $pic) {
-            $html .= '<img id="'.$classname.'_ex" src="'.$OUTPUT->pix_url('t/'.$pic).'"
+            $html .= '<img id="'.$classname.'_ex" src="'.$OUTPUT->image_url('t/'.$pic).'"
                 class="'.$classname.'" style="display: none;" />';
         }
     }
@@ -520,22 +500,6 @@ function build_nojs_jobassignmentpicker($url, $urlparams) {
         print_error('nopositionsassigned', 'totara_hierarchy');
     }
     return $html;
-}
-
-/*
- * Create a non-javascript position picker page, allowing the user to select which
- * position to use to assign an item
- *
- * @deprecated since 9.0
- * @param string $url URL to take the user to when they click a position link
- * @params array $urlparams array of url parameters to pass along with URL
- * @return string HTML to print the position picker list
- */
-function build_nojs_positionpicker($url, $urlparams) {
-
-    debugging('build_nojs_positionpicker has been deprecated from 9.0. Use build_nojs_jobassignmentpicker instead.', DEBUG_DEVELOPER);
-
-    return build_nojs_jobassignmentpicker($url, $urlparams);
 }
 
 /**

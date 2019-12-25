@@ -15,8 +15,7 @@ Feature: A teacher can use activity completion to track a student progress
       | user | course | role |
       | teacher1 | C1 | editingteacher |
     And I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
 
   Scenario: Require survey view
     Given I add a "Survey" to section "1" and I fill the form with:

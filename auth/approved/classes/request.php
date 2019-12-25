@@ -397,6 +397,9 @@ final class request {
         }
         $record->profilefields = json_encode($profilefields);
 
+        // Add extra data in json format.
+        $record->extradata = empty($data->extradata) ? '' : json_encode($data->extradata);
+
         return $record;
     }
 
@@ -762,5 +765,22 @@ final class request {
         }
 
         return false;
+    }
+
+    /**
+     * Deserialise the extradata field.
+     *
+     * @param int $id
+     * @return array
+     */
+    public static function get_extradata($id): array {
+        global $DB;
+
+        $extradata = $DB->get_field('auth_approved_request', 'extradata', ['id' => $id]);
+        if (empty($extradata)) {
+            return [];
+        }
+
+        return json_decode($extradata, true);
     }
 }

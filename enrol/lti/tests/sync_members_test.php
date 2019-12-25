@@ -40,7 +40,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2016 Jun Pataleta <jun@moodle.com>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class sync_members_testcase extends advanced_testcase {
+class enrol_lti_sync_members_testcase extends advanced_testcase {
     /** @var dummy_sync_members_task $task */
     protected $task;
 
@@ -237,6 +237,7 @@ class sync_members_testcase extends advanced_testcase {
     public function test_sync_profile_images() {
         $task = $this->task;
         list($totalcount, $enrolledcount) = $task->sync_member_information($this->tool, $this->consumer, $this->members);
+        $this->assertDebuggingNotCalled(); // Totara: make sure there are no hidden problems.
         $membercount = count($this->members);
         $this->assertCount(10, $this->members);
         $this->assertEquals($membercount, $totalcount);

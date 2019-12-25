@@ -103,7 +103,7 @@ class core_user_external extends external_api {
                             'preferences' => new external_multiple_structure(
                                 new external_single_structure(
                                     array(
-                                        'type'  => new external_value(PARAM_ALPHANUMEXT, 'The name of the preference'),
+                                        'type'  => new external_value(PARAM_RAW, 'The name of the preference'),
                                         'value' => new external_value(PARAM_RAW, 'The value of the preference')
                                     )
                                 ), 'User preferences', VALUE_OPTIONAL),
@@ -342,7 +342,7 @@ class core_user_external extends external_api {
                 'preferences' => new external_multiple_structure(
                     new external_single_structure(
                         array(
-                            'type'  => new external_value(PARAM_ALPHANUMEXT, 'The name of the preference'),
+                            'type'  => new external_value(PARAM_RAW, 'The name of the preference'),
                             'value' => new external_value(PARAM_RAW, 'The value of the preference')
                         )
                     ), 'User preferences', VALUE_DEFAULT, array()
@@ -497,7 +497,7 @@ class core_user_external extends external_api {
                             'preferences' => new external_multiple_structure(
                                 new external_single_structure(
                                     array(
-                                        'type'  => new external_value(PARAM_ALPHANUMEXT, 'The name of the preference'),
+                                        'type'  => new external_value(PARAM_RAW, 'The name of the preference'),
                                         'value' => new external_value(PARAM_RAW, 'The value of the preference')
                                     )
                                 ), 'User preferences', VALUE_OPTIONAL),
@@ -1084,8 +1084,8 @@ class core_user_external extends external_api {
             'preferences' => new external_multiple_structure(
                 new external_single_structure(
                     array(
-                        'name'  => new external_value(PARAM_ALPHANUMEXT, 'The name of the preferences'),
-                        'value' => new external_value(PARAM_RAW, 'The value of the custom field'),
+                        'name'  => new external_value(PARAM_RAW, 'The name of the preferences'),
+                        'value' => new external_value(PARAM_RAW, 'The value of the preference'),
                     )
             ), 'Users preferences', VALUE_OPTIONAL)
         );

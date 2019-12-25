@@ -47,8 +47,8 @@ class menuitem_sortorder extends \core\event\base {
     /**
      * Create instance of event.
      *
-     * @param $itemid
-     * @param $action moveup/movedown
+     * @param int $itemid
+     * @param bool $action moveup/movedown
      * @return menuitem_sortorder
      */
     public static function create_from_item($itemid, $action) {

@@ -14,7 +14,7 @@ Feature: Test use of images in organisations and organisation custom fields
     # Add images to the private files block to use later
     And I click on "Dashboard" in the totara menu
     And I press "Customise this page"
-    And I select "Private files" from the "Add a block" singleselect
+    And I add the "Private files" block
     And I follow "Manage private files..."
     And I upload "totara/hierarchy/tests/behat/fixtures/learninglogo1.jpg" file to "Files" filemanager
     And I upload "totara/hierarchy/tests/behat/fixtures/learninglogo2.jpg" file to "Files" filemanager
@@ -26,7 +26,7 @@ Feature: Test use of images in organisations and organisation custom fields
     And I should see "learninglogo4.jpg"
 
     # Create text area custom field for Organisation type
-    When I navigate to "Manage types" node in "Site administration > Hierarchies > Organisations"
+    When I navigate to "Manage types" node in "Site administration > Organisations"
     And I press "Add a new type"
     And I set the following fields to these values:
     | Type full name | Organisation type 1 |
@@ -56,7 +56,7 @@ Feature: Test use of images in organisations and organisation custom fields
     Then I should see "Custom file 1"
 
     # Create organisation using the organisation type
-    When I navigate to "Manage organisations" node in "Site administration > Hierarchies > Organisations"
+    When I navigate to "Manage organisations" node in "Site administration > Organisations"
     And I follow "Test Org Framework"
     And I press "Add new organisation"
     And I set the following fields to these values:
@@ -104,7 +104,8 @@ Feature: Test use of images in organisations and organisation custom fields
 
     # Also check reports
     When I am on site homepage
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Name   | Test Organisations |
       | Source | Organisations      |

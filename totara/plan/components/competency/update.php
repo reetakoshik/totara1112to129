@@ -30,6 +30,7 @@ require_once($CFG->dirroot.'/totara/plan/lib.php');
 check_learningplan_enabled();
 
 require_login();
+require_sesskey();
 $context = context_system::instance();
 $PAGE->set_context($context);
 ///
@@ -80,7 +81,7 @@ $plan = new development_plan($id);
 $componentname = 'competency';
 $component = $plan->get_component($componentname);
 
-if (!$plan->can_update()) {
+if (!$plan->can_update() && !$plan->can_request_approval()) {
     print_error('error:cannotupdateitems', 'totara_plan');
 }
 

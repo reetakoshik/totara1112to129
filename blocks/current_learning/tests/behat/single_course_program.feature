@@ -10,21 +10,21 @@ Feature: Check to see that programs with only a single course are displayed as e
       | username | firstname | lastname | email |
       | user001 | fn_001 | ln_001 | user001@example.com |
     And the following "courses" exist:
-      | fullname   | shortname | format | enablecompletion | completionstartonenrol |
-      | Course 1   | C1        | topics | 1                | 1                      |
+      | fullname   | shortname | format | enablecompletion |
+      | Course 1   | C1        | topics | 1                |
     And I log in as "admin"
     And I set the following administration settings values:
       | menulifetime | 0 |
     And I set self completion for "Course 1" in the "Miscellaneous" category
-    And I click on "Programs" in the totara menu
-    And I press "Create Program"
+    And I navigate to "Manage programs" node in "Site administration > Programs"
+    And I press "Add a new program"
     And I set the following fields to these values:
       | Full name  | Test Single Course Program |
       | Short name | testsinglecourseprog       |
     And I press "Save changes"
 
     # Add Courseset 1 with Course 1.
-    And I click on "Content" "link"
+    And I switch to "Content" tab
     And I click on "addcontent_ce" "button"
     And I click on "Miscellaneous" "link" in the "addmulticourse" "totaradialogue"
     And I click on "Course 1" "link" in the "addmulticourse" "totaradialogue"

@@ -43,12 +43,6 @@ $strunsuspend = get_string('unsuspenduser', 'admin');
 $strunlock = get_string('unlockaccount', 'admin');
 $strconfirm = get_string('confirm');
 
-if (empty($CFG->loginhttps)) {
-    $securewwwroot = $CFG->wwwroot;
-} else {
-    $securewwwroot = str_replace('http:','https:',$CFG->wwwroot);
-}
-
 $returnurl = new moodle_url('/admin/user.php', array('sort' => $sort, 'dir' => $dir, 'perpage' => $perpage, 'page'=>$page));
 
 // The $user variable is also used outside of these if statements.
@@ -235,7 +229,7 @@ if (!$users) {
         if (has_capability('moodle/user:update', $context)) {
             // prevent editing of admins by non-admins
             if (is_siteadmin($USER) or !is_siteadmin($user)) {
-                $buttons[] = html_writer::link(new moodle_url($securewwwroot.'/user/editadvanced.php', array('id'=>$user->id, 'course'=>$site->id, 'returnurl'=>$returnurl->out_as_local_url(false))), $OUTPUT->flex_icon('settings', array('alt' => $stredit)), array('title'=>$stredit));
+                $buttons[] = html_writer::link(new moodle_url('/user/editadvanced.php', array('id'=>$user->id, 'course'=>$site->id, 'returnurl'=>$returnurl->out_as_local_url(false))), $OUTPUT->flex_icon('settings', array('alt' => $stredit)), array('title'=>$stredit));
             }
         }
 
@@ -307,7 +301,7 @@ if (!empty($table)) {
     echo $OUTPUT->paging_bar($usercount, $page, $perpage, $baseurl);
 }
 if (has_capability('moodle/user:create', $context)) {
-    $url = new moodle_url($securewwwroot . '/user/editadvanced.php', array('id' => -1, 'returnto'=>'allusers'));
+    $url = new moodle_url('/user/editadvanced.php', array('id' => -1, 'returnto'=>'allusers'));
     echo $OUTPUT->single_button($url, get_string('addnewuser'), 'get');
 }
 

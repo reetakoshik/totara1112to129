@@ -25,7 +25,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $hidden = empty($CFG->enableconnectserver);
 
-$ADMIN->add('accounts', new admin_category('totaraconnect', new lang_string('server', 'totara_connect'), $hidden));
+$ADMIN->add('users', new admin_category('totaraconnect', new lang_string('server', 'totara_connect'), $hidden));
 
 $settingspage = new admin_settingpage('totaraconnectsettings',
     new lang_string('settingspage', 'totara_connect'),

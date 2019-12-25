@@ -143,11 +143,9 @@ function testing_initdataroot($dataroot, $framework) {
 
     umask(0);
 
-    // Totara: create the dataroot dir if necessary.
-    $varname = $framework . '_dataroot';
-    $datarootdir = $CFG->{$varname} . '/' . $framework;
-    if (!file_exists($datarootdir)) {
-        mkdir($datarootdir, $CFG->directorypermissions, true);
+    // Totara: create the dataroot dir if necessary, make sure the framework subdir is present too.
+    if (!file_exists($dataroot . '/' . $framework)) {
+        mkdir($dataroot . '/' . $framework, $CFG->directorypermissions, true);
     }
 
     $filename = $dataroot . '/' . $framework . 'testdir.txt';

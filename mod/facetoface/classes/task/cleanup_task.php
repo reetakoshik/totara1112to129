@@ -22,6 +22,11 @@
  */
 
 namespace mod_facetoface\task;
+use mod_facetoface\room;
+use mod_facetoface\asset;
+use mod_facetoface\seminar_event;
+use mod_facetoface\signup_helper;
+use mod_facetoface\signup;
 
 /**
  * Send facetoface notifications
@@ -62,38 +67,20 @@ class cleanup_task extends \core\task\scheduled_task {
                    AND fss.statuscode <> :sessioncancelled";
         $params = array(
             'lastcron'      => $lastcron,
-            'usercancelled' => MDL_F2F_STATUS_USER_CANCELLED,
-            'sessioncancelled' => MDL_F2F_STATUS_SESSION_CANCELLED
+            'usercancelled' => \mod_facetoface\signup\state\user_cancelled::get_code(),
+            'sessioncancelled' => \mod_facetoface\signup\state\event_cancelled::get_code()
         );
 
         $rs = $DB->get_recordset_sql($sql, $params);
         $timenow = time();
 
         foreach ($rs as $user) {
-            $session = facetoface_get_session($user->sessionid);
-            $error = null; // Passed by reference.
-            $safetocancel = true;
-            if ($user->deleted) {
-                $reason = get_string('userdeletedcancel', 'facetoface');
-            } else {
-                $reason = get_string('usersuspendedcancel', 'facetoface');
-                // Check if it is safe to cancel the user.
-                if (!empty($session->sessiondates) && facetoface_has_session_started($session, $timenow) && facetoface_is_session_in_progress($session, $timenow)) {
-                    // Session in progress.
-                    $safetocancel = false;
-                } else if (!empty($session->sessiondates) && facetoface_has_session_started($session, $timenow)) {
-                    // Session is over, don't remove user's records.
-                    $safetocancel = false;
-                } else if (facetoface_is_user_on_waitlist($session, $user->id)) {
-                    // Session is wait-listed.
-                    $safetocancel = true;
-                } else {
-                    // Booking open.
-                    $safetocancel = true;
-                }
-            }
-            if ($safetocancel) {
-                facetoface_user_cancel($session, $user->id, false, $error, $reason);
+            $seminarevent = new seminar_event($user->sessionid);
+            $signup = signup::create($user->id, $seminarevent);
+            $reason = $user->deleted ? get_string('userdeletedcancel', 'facetoface') : get_string('usersuspendedcancel', 'facetoface');
+
+            if (signup_helper::can_user_cancel($signup)) {
+                signup_helper::user_cancel($signup, $reason);
             }
         }
         $rs->close();
@@ -119,7 +106,8 @@ class cleanup_task extends \core\task\scheduled_task {
         // Transactions do not help here with anything.
         foreach ($roomids as $roomid) {
             // Do a proper room removal including files and custom fields.
-            facetoface_delete_room($roomid);
+            $room = new room($roomid);
+            $room->delete();
         }
     }
 
@@ -150,7 +138,8 @@ class cleanup_task extends \core\task\scheduled_task {
 
         foreach ($assetids as $assetid) {
             // Do a proper asset removal including files and custom fields.
-            facetoface_delete_asset($assetid);
+            $asset = new asset($assetid);
+            $asset->delete();
         }
     }
 }

@@ -1,5 +1,5 @@
-@block @block_private_files @_file_upload
-Feature: The private files block allows users to store files privately in totara
+@block @block_private_files @_file_upload @javascript
+Feature: The private files block allows users to store files privately in totara on front page.
   In order to store a private file in moodle
   As a teacher
   I can upload the file to my private files area using the private files block from the front page
@@ -22,7 +22,6 @@ Feature: The private files block allows users to store files privately in totara
     When I am on site homepage
     Then "Private files" "block" should not exist
 
-  @javascript
   Scenario: Upload a file to the private files block from the frontpage
     Given I log in as "teacher1"
     And I am on site homepage

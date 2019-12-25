@@ -66,8 +66,11 @@ $reportrecord = $DB->get_record('report_builder', array('shortname' => 'course_m
 $globalrestrictionset = rb_global_restriction_set::create_from_page_parameters($reportrecord);
 
 // Load report.
-$data = array('courseid' => $courseid);
-if (!$report = reportbuilder_get_embedded_report('course_membership', $data, false, $sid, $globalrestrictionset)) {
+$config = (new rb_config())
+    ->set_sid($sid)
+    ->set_embeddata(['courseid' => $courseid])
+    ->set_global_restriction_set($globalrestrictionset);
+if (!$report = reportbuilder::create_embedded('course_membership', $config)) {
     print_error('error:couldnotgenerateembeddedreport', 'totara_reportbuilder');
 }
 

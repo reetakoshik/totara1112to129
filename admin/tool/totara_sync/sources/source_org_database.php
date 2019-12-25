@@ -104,7 +104,7 @@ class totara_sync_source_org_database extends totara_sync_source_org {
     }
 
     function import_data($temptable) {
-        global $CFG, $DB; // Careful using this in here as we have 2 database connections
+        global $DB; // Careful using this in here as we have 2 database connections
 
         // Get database config
         $dbtype = $this->config->{'database_dbtype'};
@@ -129,13 +129,6 @@ class totara_sync_source_org_database extends totara_sync_source_org {
             }
         }
 
-        // Same for customfields
-        foreach ($this->customfields as $name => $value) {
-            if (!empty($this->config->{'import_'.$name})) {
-                $fields[] = $name;
-            }
-        }
-
         // Sort out field mappings
         $fieldmappings = array();
         foreach ($fields as $i => $f) {
@@ -152,6 +145,13 @@ class totara_sync_source_org_database extends totara_sync_source_org {
                 $fields[$i] = $fieldmappings[$f];
             }
         }
+
+        // Custom fields are made unique as it is permitted to have one column for customfields
+        // with the same shortname for example (possible if each field has a different type).
+        $fields = array_merge(
+            $fields,
+            $this->get_unique_mapped_customfields()
+        );
 
         // Check the table exists in the database.
         try {
@@ -181,10 +181,8 @@ class totara_sync_source_org_database extends totara_sync_source_org {
         ///
         /// Populate temp sync table from remote database
         ///
-        $now = time();
         $datarows = array();  // holds rows of data
         $rowcount = 0;
-        $csvdateformat = (isset($CFG->csvdateformat)) ? $CFG->csvdateformat : get_string('csvdateformatdefault', 'totara_core');
 
         $columns = implode(', ', $fields);
         $fetch_sql = 'SELECT ' . $columns . ' FROM ' . $db_table;
@@ -205,70 +203,32 @@ class totara_sync_source_org_database extends totara_sync_source_org {
                 }
             }
 
-            // The condition must use a combination of isset and !== '' because it needs to process 0 as a valid parentidnumber.
-            $dbrow['parentidnumber'] = isset($dbrow['parentidnumber']) && $dbrow['parentidnumber'] !== '' ? $dbrow['parentidnumber'] : '';
-            $dbrow['parentidnumber'] = $dbrow['parentidnumber'] === $dbrow['idnumber'] ? '' : $dbrow['parentidnumber'];
-
             // Treat nulls in the 'deleted' database column as not deleted.
             if (!empty($this->config->import_deleted)) {
                 $dbrow['deleted'] = empty($dbrow['deleted']) ? 0 : $dbrow['deleted'];
             }
 
-            if ($this->config->{'import_typeidnumber'} == '0') {
-                unset($dbrow['typeidnumber']);
-            } else {
-                $dbrow['typeidnumber'] = !empty($dbrow['typeidnumber']) ? $dbrow['typeidnumber'] : '0';
-            }
-
             if (empty($extdbrow['timemodified'])) {
-                $dbrow['timemodified'] = $now; // This should probably be 0, but it causes repeated sync_item calls to parents.
+                $dbrow['timemodified'] = 0;
             } else {
                 //try to parse the contents - if parse fails assume a unix timestamp and leave unchanged
-                $parsed_date = totara_date_parse_from_format($csvdateformat, trim($extdbrow['timemodified']), true);
+                $parsed_date = totara_date_parse_from_format(
+                    $this->get_csv_date_format(),
+                    trim($extdbrow['timemodified']),
+                    true
+                );
                 if ($parsed_date) {
                     $dbrow['timemodified'] = $parsed_date;
                 }
             }
             // Custom fields are special - needs to be json-encoded
-            if (!empty($this->customfields)) {
-                $cfield_data = array();
-                foreach (array_keys($this->customfields) as $cf) {
-                    if (!empty($this->config->{'import_'.$cf})) {
-                        if (!empty($this->config->{'fieldmapping_'.$cf})) {
-                            $dbvalue = trim($extdbrow[$this->config->{'fieldmapping_'.$cf}]);
-                            $value = is_null($dbvalue) ? null : trim($dbvalue);
-                        } else {
-                            $value = is_null($extdbrow[$cf]) ? null : trim($extdbrow[$cf]);
-                        }
-                        if (!empty($value)) {
-                            //get shortname and check if we need to do field type processing
-                            $shortname = str_replace("customfield_", "", $cf);
-                            $datatype = $DB->get_field('org_type_info_field', 'datatype', array('shortname' => $shortname));
-                            switch ($datatype) {
-                                case 'datetime':
-                                    //try to parse the contents - if parse fails assume a unix timestamp and leave unchanged
-                                    $parsed_date = totara_date_parse_from_format($csvdateformat, $value, true);
-                                    if ($parsed_date) {
-                                        $value = $parsed_date;
-                                    }
-                                    break;
-                                case 'date':
-                                    //try to parse the contents - if parse fails assume a unix timestamp and leave unchanged
-                                    $parsed_date = totara_date_parse_from_format($csvdateformat, $value, true, 'UTC');
-                                    if ($parsed_date) {
-                                        $value = $parsed_date;
-                                    }
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        $cfield_data[$cf] = $value;
-                        unset($dbrow[$cf]);
+            if (!empty($this->hierarchy_customfields)) {
+                $dbrow['customfields'] = $this->get_customfield_json($extdbrow);
+                foreach ($this->hierarchy_customfields as $hierarchy_customfield) {
+                    if ($this->is_importing_customfield($hierarchy_customfield)) {
+                        unset($dbrow[$hierarchy_customfield->get_default_fieldname()]);
                     }
                 }
-                $dbrow['customfields'] = json_encode($cfield_data);
-                unset($cfield_data);
             }
 
             $datarows[] = $dbrow;
@@ -310,4 +270,10 @@ class totara_sync_source_org_database extends totara_sync_source_org {
         return $this->get_common_db_notifications();
     }
 
+    /**
+     * @return bool False as database sources do not use files.
+     */
+    function uses_files() {
+        return false;
+    }
 }

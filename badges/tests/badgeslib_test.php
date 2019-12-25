@@ -239,7 +239,7 @@ class core_badges_badgeslib_testcase extends advanced_testcase {
 
         // Make sure the first user has no badges.
         $result = badges_get_user_badges($user1->id);
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(0, $result);
 
         // Check that the second user has the expected 11 badges.

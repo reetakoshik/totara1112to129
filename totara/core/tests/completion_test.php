@@ -33,10 +33,12 @@ require_once($CFG->dirroot . '/completion/criteria/completion_criteria_activity.
 class totara_core_completion_testcase extends advanced_testcase {
     protected $users, $courses, $modules, $now;
 
-
-
     protected function tearDown() {
         $this->users = null;
+        $this->courses = null;
+        $this->modules = null;
+        $this->now = null;
+
         parent::tearDown();
     }
 

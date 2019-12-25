@@ -198,13 +198,48 @@ function xmldb_totara_program_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2018010800, 'totara', 'program');
     }
 
-    if ($oldversion < 2018022701) {
+    if ($oldversion < 2018031501) {
 
         // We need to fix a regression from TL-15995. See TL-16826 for details.
         // The wrong plugin name was used, 'totara_totara_program'. We need to remove it.
         set_config('version', null, 'totara_totara_program');
 
-        upgrade_plugin_savepoint(true, 2018022701, 'totara', 'program');
+        upgrade_plugin_savepoint(true, 2018031501, 'totara', 'program');
+    }
+
+    if ($oldversion < 2018112202) {
+        // Enable legacy program assignments by default on upgrade
+        set_config('enablelegacyprogramassignments', 1);
+
+        upgrade_plugin_savepoint(true, 2018112202, 'totara', 'program');
+    }
+
+    if ($oldversion < 2018112203) {
+        // Remove records from prog_completion, prog_completion_history
+        // and prog_compeltion_log if the program has been deleted
+        $completionsql = 'DELETE FROM {prog_completion}
+                    WHERE programid NOT IN
+                    (SELECT id FROM {prog})';
+
+        $completionhistsql = 'DELETE from {prog_completion_history}
+                    WHERE programid NOT IN
+                    (SELECT id FROM {prog})';
+
+        $completionlogsql = 'DELETE FROM {prog_completion_log}
+                    WHERE programid NOT IN
+                    (SELECT id FROM {prog})';
+
+        $DB->execute($completionsql);
+        $DB->execute($completionhistsql);
+        $DB->execute($completionlogsql);
+
+        upgrade_plugin_savepoint(true, 2018112203, 'totara', 'program');
+    }
+
+    if ($oldversion < 2018112204) {
+        totara_program_remove_orphaned_courseset_completions();
+
+        upgrade_plugin_savepoint(true, 2018112204, 'totara', 'program');
     }
 
     return true;

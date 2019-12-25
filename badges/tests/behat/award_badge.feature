@@ -7,7 +7,8 @@ Feature: Award badges
   @javascript
   Scenario: Award profile badge
     Given I log in as "admin"
-    And I navigate to "Add a new badge" node in "Site administration > Badges"
+    And I navigate to "Manage badges" node in "Site administration > Badges"
+    And I click on "Add a new badge" "button"
     And I set the following fields to these values:
       | Name | Profile Badge |
       | Description | Test badge description |
@@ -45,7 +46,8 @@ Feature: Award badges
       | teacher | teacher | 1 | teacher1@example.com |
       | student | student | 1 | student1@example.com |
     And I log in as "admin"
-    And I navigate to "Add a new badge" node in "Site administration > Badges"
+    And I navigate to "Manage badges" node in "Site administration > Badges"
+    And I click on "Add a new badge" "button"
     And I set the following fields to these values:
       | Name | Site Badge |
       | Description | Site badge description |
@@ -86,7 +88,7 @@ Feature: Award badges
       | student1 | C1 | student |
       | student2 | C1 | student |
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "Add a new badge" node in "Course administration > Badges"
     And I follow "Add a new badge"
     And I set the following fields to these values:
@@ -128,7 +130,7 @@ Feature: Award badges
       | teacher1 | C1 | editingteacher |
       | student1 | C1 | student |
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "Edit settings" node in "Course administration"
     And I set the following fields to these values:
       | Enable completion tracking | Yes |
@@ -156,8 +158,7 @@ Feature: Award badges
     And I follow "Profile" in the user menu
     And I click on "Course 1" "link" in the "region-main" "region"
     Then I should not see "badges"
-    And I am on homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "Not completed: Test assignment name. Select to mark as complete." "link"
     And I follow "Profile" in the user menu
     And I click on "Course 1" "link" in the "region-main" "region"
@@ -165,7 +166,7 @@ Feature: Award badges
     And I log out
     # Ensure the badge is still awarded and visible after the course has been deleted.
     When I log in as "admin"
-    And I navigate to "Manage courses and categories" node in "Site administration > Courses"
+    And I navigate to "Courses and categories" node in "Site administration > Courses"
     And I click on "Miscellaneous" "text" in the ".category-listing" "css_element"
     And I go to the courses management page
     And I click on category "Miscellaneous" in the management interface
@@ -194,7 +195,7 @@ Feature: Award badges
       | teacher1 | C1 | editingteacher |
       | student1 | C1 | student |
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "Edit settings" node in "Course administration"
     And I set the following fields to these values:
       | Enable completion tracking | Yes |
@@ -228,8 +229,7 @@ Feature: Award badges
     And I follow "Profile" in the user menu
     And I click on "Course 1" "link" in the "region-main" "region"
     Then I should not see "badges"
-    And I am on homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "Not completed: Test assignment name. Select to mark as complete." "link"
     And I log out
     # Completion cron won't mark the whole course completed unless the
@@ -245,7 +245,7 @@ Feature: Award badges
     And I log out
     # Ensure the badge is still awarded and visible after the course has been deleted.
     When I log in as "admin"
-    And I navigate to "Manage courses and categories" node in "Site administration > Courses"
+    And I navigate to "Courses and categories" node in "Site administration > Courses"
     And I click on "Miscellaneous" "text" in the ".category-listing" "css_element"
     And I go to the courses management page
     And I click on category "Miscellaneous" in the management interface
@@ -277,7 +277,7 @@ Feature: Award badges
       | student1 | C1 | student |
       | student2 | C1 | student |
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     # Create course badge 1.
     And I navigate to "Add a new badge" node in "Course administration > Badges"
     And I follow "Add a new badge"
@@ -360,7 +360,7 @@ Feature: Award badges
       | student1 | C1 | student |
       | student2 | C1 | student |
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "Add a new badge" node in "Course administration > Badges"
     And I follow "Add a new badge"
     And I set the following fields to these values:
@@ -390,4 +390,3 @@ Feature: Award badges
     When I press "Revoke badge"
     And I follow "Course Badge"
     Then I should see "Recipients (0)"
-

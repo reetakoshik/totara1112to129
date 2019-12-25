@@ -57,14 +57,16 @@ $PAGE->set_context($context);
 
 if ($category) {
     $showall = 0;
-    $PAGE->set_pagelayout('report');
+    //$PAGE->set_pagelayout('report');
+    $PAGE->set_pagelayout('noblocks');
     $PAGE->set_context($context);
     $PAGE->set_url('/cohort/index.php', array('contextid' => $context->id));
     $PAGE->set_title($strcohorts);
     $PAGE->set_heading($COURSE->fullname);
 } else {
     $params = array('contextid' => $context->id, 'showall' => $showall);
-    admin_externalpage_setup('cohorts', '', $params, '', array('pagelayout'=>'report'));
+    //admin_externalpage_setup('cohorts', '', $params, '', array('pagelayout'=>'report'));
+    admin_externalpage_setup('cohorts', '', $params, '', array('pagelayout'=>'noblocks'));
 }
 
 if ($showall) {
@@ -78,7 +80,8 @@ $shortname = 'cohort_admin';
 $reportrecord = $DB->get_record('report_builder', array('shortname' => $shortname));
 $globalrestrictionset = rb_global_restriction_set::create_from_page_parameters($reportrecord);
 
-$report = reportbuilder_get_embedded_report($shortname, $data, false, $sid, $globalrestrictionset);
+$config = (new rb_config())->set_global_restriction_set($globalrestrictionset)->set_embeddata($data)->set_sid($sid);
+$report = reportbuilder::create_embedded($shortname, $config);
 if (!empty($format)) {
     $report->export_data($format);
     die;

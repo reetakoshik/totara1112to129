@@ -48,11 +48,12 @@ $returnurl = new moodle_url('/totara/reportbuilder/savedsearches.php', array('id
 
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url('/totara/reportbuilder/savedsearches.php', array('id' => $id, 'sid' => $sid));
-$PAGE->set_totara_menu_selected('myreports');
+$PAGE->set_totara_menu_selected('\totara_core\totara\menu\myreports');
 
 $output = $PAGE->get_renderer('totara_reportbuilder');
 
-$report = new reportbuilder($id, null, false, $sid);
+$config = (new rb_config())->set_sid($sid);
+$report = reportbuilder::create($id, $config);
 
 // Get info about the saved search we are dealing with.
 if ($sid) {
@@ -63,7 +64,7 @@ if ($sid) {
     }
 }
 
-if (!$report->is_capable($id)) {
+if (!reportbuilder::is_capable($id)) {
     print_error('nopermission', 'totara_reportbuilder');
 }
 
@@ -86,26 +87,68 @@ if ($action === 'delete') {
         $transaction->allow_commit();
         redirect($returnurl);
     }
-    $messageend = '';
-    // Is this saved search being used in any scheduled reports?
-    if ($scheduled = $DB->get_records('report_builder_schedule', array('savedsearchid' => $sid))) {
-        // Display a message and list of scheduled reports using this saved search.
-        ob_start();
-        totara_print_scheduled_reports(false, false, array("rbs.savedsearchid = ?", array($sid)));
-        $out = ob_get_contents();
-        ob_end_clean();
-
-        $messageend = get_string('savedsearchinscheduleddelete', 'totara_reportbuilder', $out) . str_repeat(html_writer::empty_tag('br'), 2);
-    }
 
     echo $output->heading(get_string('savedsearches', 'totara_reportbuilder'), 1);
 
-    $messageend .= get_string('savedsearchconfirmdelete', 'totara_reportbuilder', format_string($search->name));
+    // Is this saved search being used in any scheduled reports?
+    if ($scheduledreports = $DB->get_records('report_builder_schedule', array('savedsearchid' => $sid))) {
+        $table = new html_table();
+        $table->id = 'scheduled_reports';
+        $table->attributes['class'] = 'generaltable';
+        $headers = array();
+        $headers[] = get_string('format', 'totara_reportbuilder');
+        $headers[] = get_string('schedule', 'totara_reportbuilder');
+        $headers[] = get_string('createdby', 'totara_reportbuilder');
+        $table->head = $headers;
+
+        foreach ($scheduledreports as $sched) {
+            $cells = array();
+
+            // Format column.
+            $format = \totara_core\tabexport_writer::normalise_format($sched->format);
+            $allformats = \totara_core\tabexport_writer::get_export_classes();
+            if (isset($allformats[$format])) {
+                $classname = $allformats[$format];
+                $sched->format = $classname::get_export_option_name();
+            } else {
+                $sched->format = get_string('error');
+            }
+            $cells[] = new html_table_cell($sched->format);
+
+            // Schedule column.
+            if (isset($sched->frequency) && isset($sched->schedule)) {
+                $schedule = new scheduler($sched, array('nextevent' => 'nextreport'));
+                $formatted = $schedule->get_formatted();
+            } else {
+                $formatted = get_string('schedulenotset', 'totara_reportbuilder');
+            }
+            $sched->schedule = $formatted;
+
+            $cells[] = new html_table_cell($sched->schedule);
+
+            // Created by column.
+            $createdby = $sched->userid == $USER->id ? get_string('you', 'totara_reportbuilder') : '';
+            $cells[] = new html_table_cell($createdby);
+
+            $row = new html_table_row($cells);
+            $table->data[] = $row;
+        }
+
+        $langstr = count($scheduledreports) == 1 ? 'savedsearchinscheduleddelete' : 'savedsearchinscheduleddeleteplural';
+        $message = html_writer::tag('p', get_string($langstr, 'totara_reportbuilder', count($scheduledreports)));
+        $message .= get_string('savedsearchinscheduleddeletereportname', 'totara_reportbuilder', format_string($report->fullname));
+        $message .= html_writer::empty_tag('br');
+        $message .= get_string('savedsearchinscheduleddeletesearchname', 'totara_reportbuilder', format_string($search->name));
+
+        $message .= $OUTPUT->render($table);
+    } else {
+        $message = get_string('savedsearchconfirmdelete', 'totara_reportbuilder', format_string($search->name));
+    }
 
     // Prompt to delete.
     $params = array('id' => $id, 'sid' => $sid, 'action' => 'delete', 'confirm' => 'true', 'sesskey' => $USER->sesskey);
     $confirmurl = new moodle_url('/totara/reportbuilder/savedsearches.php', $params);
-    echo $output->confirm($messageend, $confirmurl, $returnurl);
+    echo $output->confirm($message, $confirmurl, $returnurl);
     die;
 }
 

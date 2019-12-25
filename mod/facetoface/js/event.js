@@ -188,7 +188,7 @@ M.totara_f2f_room = M.totara_f2f_room || {
                     buttons: buttonsObj,
                     title: '<h2>'+ M.util.get_string('bookingconflict', 'facetoface') +'</h2>',
                 },
-                M.cfg.wwwroot + '/mod/facetoface/attendees/booking_conflict_results.php?datetimestart=' + datetimestart +
+                M.cfg.wwwroot + '/mod/facetoface/attendees/ajax/booking_conflict.php?datetimestart=' + datetimestart +
                 '&datetimefinish=' + datetimefinish +
                 '&s=' + M.totara_f2f_room.config.sessionid +
                 '&sesskey=' + M.cfg.sesskey,
@@ -520,7 +520,7 @@ M.totara_f2f_room = M.totara_f2f_room || {
             }
             load_assets();
 
-            // Create new room dialog handler.
+            // Create new asset dialog handler.
             var editcustomassethandler = new totaraDialog_handler_form();
             editcustomassethandler.every_load = function() {
                 totaraDialog_handler_form.prototype.every_load.call(this);
@@ -535,7 +535,7 @@ M.totara_f2f_room = M.totara_f2f_room || {
                     if ($input.val().length > 0) {
                         ids = $input.val().split(',');
                     }
-                    if (ids.indexOf(elem.id) === -1) {
+                    if (ids.indexOf(elem.id.toString()) === -1) {
                         ids.push(elem.id);
                     }
                     $input.val(ids.toString());

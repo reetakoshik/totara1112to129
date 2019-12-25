@@ -62,11 +62,9 @@
     <ul class="joblist unlist">
     {{#jobs}}
         <li><a class="editjoblink" href="{{editurl}}" title="{{#str}}editjobassignment,totara_job{{/str}}" data-id="{{id}}" data-sortorder="{{sortorder}}">{{{fullname}}}</a>
-            {{#canedit}}<span class="pull-right">
-                <a href="#" data-action="down" title="{{#str}}movedown,core{{/str}}">{{#icon_movedown}}{{#context}}{{> &&template }}{{/context}}{{/icon_movedown}}</a>
-                <a href="#" data-action="up" data-function="move" title="{{#str}}moveup,core{{/str}}">{{#icon_moveup}}{{#context}}{{> &&template }}{{/context}}{{/icon_moveup}}</a>
-                <a href="#" data-action="delete" data-function="move" title="{{#str}}delete,core{{/str}}">{{#icon_delete}}{{#context}}{{> &&template }}{{/context}}{{/icon_delete}}</a>
-            </span>{{/canedit}}</li>
+            {{#canedit}}<span class="pull-right"><a href="#" data-action="down" title="{{#str}}movedown,core{{/str}}">{{#icon_movedown}}{{#context}}{{> &&template}}{{/context}}{{/icon_movedown}}</a>
+                <a href="#" data-action="up" data-function="move" title="{{#str}}moveup,core{{/str}}">{{#icon_moveup}}{{#context}}{{> &&template}}{{/context}}{{/icon_moveup}}</a>
+                <a href="#" data-action="delete" data-function="move" title="{{#str}}delete,core{{/str}}">{{#icon_delete}}{{#context}}{{> &&template}}{{/context}}{{/icon_delete}}</a></span>{{/canedit}}</li>
     {{/jobs}}
     </ul>
     {{/hasjobs}}

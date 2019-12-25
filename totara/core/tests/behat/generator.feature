@@ -16,7 +16,7 @@ Feature: Test Totara core generators
     And I log in as "admin"
     # Unfortunately new custom fields are popping up in auth plugin settings.
     And I confirm new default admin settings
-    And I navigate to "User profile fields" node in "Site administration > Users > Accounts"
+    And I navigate to "User profile fields" node in "Site administration > Users"
     Then I should see "Pokus 1"
     And I should see "Pokus 2"
     And I should see "Pokus 3"

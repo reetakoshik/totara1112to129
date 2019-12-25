@@ -93,7 +93,7 @@ class totara_cohort_position_custom_fields_testcase extends advanced_testcase {
         $this->postype1 = $DB->insert_record('pos_type', $newtype);
 
         // Check the record was created correctly.
-        $this->assertInternalType('int', $this->postype1);
+        $this->assertIsInt($this->postype1);
 
         // Assign the type position to pos1.
         $this->assertTrue($DB->set_field('pos', 'typeid', $this->postype1, array('id' => $this->pos1->id)));

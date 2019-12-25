@@ -40,7 +40,7 @@ class tool_xmldb_instal_xml_testcase extends advanced_testcase {
             $this->assertInstanceOf('xmldb_structure', $structure);
 
             $xml = $structure->xmlOutput();
-            $this->assertInternalType('string', $xml);
+            $this->assertIsString($xml);
             $this->assertNotEmpty($xml);
 
             // If for any reason you want to bulk save XML files in the correct format just comment this.

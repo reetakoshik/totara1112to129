@@ -17,7 +17,7 @@ Feature: Test competencies can be related
 
   Scenario: Relate competencies to each other
     Given I log in as "admin"
-    And I navigate to "Manage competencies" node in "Site administration > Hierarchies > Competencies"
+    And I navigate to "Manage competencies" node in "Site administration > Competencies"
     And I follow "framework 1"
     And I follow "comp 1"
     And I click on "Assign related competencies" "button"
@@ -27,7 +27,7 @@ Feature: Test competencies can be related
     Then I should see "comp 2"
     And I should not see "comp 3"
 
-    When I navigate to "Manage competencies" node in "Site administration > Hierarchies > Competencies"
+    When I navigate to "Manage competencies" node in "Site administration > Competencies"
     And I follow "framework 1"
     And I follow "comp 2"
     Then I should see "comp 1"

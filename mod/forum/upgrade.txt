@@ -1,15 +1,24 @@
 This files describes API changes in /mod/forum/*,
 information provided here is intended especially for developers.
 
-=== 11.3 ===
+=== 12 ===
 
-* String helpers are no longer used in the following templates, string data is passed via context data:
-** mod/forum/templates/forum_post_email_htmlemail_body.mustache
-** mod/forum/templates/forum_post_email_textemail.mustache
-** mod/forum/templates/forum_post_emaildigestbasic_htmlemail.mustache
-** mod/forum/templates/forum_post_emaildigestbasic_textemail.mustache
-** mod/forum/templates/forum_post_emaildigestfull_textemail.mustache
-
+ * String helpers are no longer used in the following templates, string data is passed via context data:
+  ** mod/forum/templates/forum_post_email_htmlemail_body.mustache
+  ** mod/forum/templates/forum_post_email_textemail.mustache
+  ** mod/forum/templates/forum_post_emaildigestbasic_htmlemail.mustache
+  ** mod/forum/templates/forum_post_emaildigestbasic_textemail.mustache
+  ** mod/forum/templates/forum_post_emaildigestfull_textemail.mustache
+ * External function get_forums_by_courses now returns and additional field "istracked" that indicates if the user
+   is tracking the related forum.
+ * External function can_add_discussion now returns two additional fields:
+   "canpindiscussions" that indicates if the user can add pinned discussions.
+   "cancreateattachment" that indicates if the user can add attachments to the discussion.
+* The legacy forum.js file has been removed, this includes the js functions:
+    forum_produce_subscribe_link, forum_produce_tracking_link, lockoptions_timetoitems,
+    lockoptions_timefromitems, lockoptions, lockoption, unlockoption
+* The template mod_forum/big_search_form has been updated.
+* mod_forum_renderer::render_big_search_form has been updated to include the newly created mod_forum/big_search_form AMD module
 
 === 10 ===
 

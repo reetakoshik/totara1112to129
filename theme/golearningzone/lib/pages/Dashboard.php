@@ -9,7 +9,7 @@ class Dashboard extends Base
     use ThemeTrait;
 
     public function render()
-    {
+    {  
         $blocksSizes = $this->calculateBlocksSizes();
         $template = 'theme_golearningzone/dashboard';
         $params = $this->getDefaultPageValues() + [
@@ -111,9 +111,9 @@ class Dashboard extends Base
         $renderer = $this->renderer;
         $block = $renderer->blocks($name);
 
-        if (!$width || !$block) {
-            return '';
-        }
+         if (!$width || !$block) {
+             return '';
+         }
 
         return $renderer->render_from_template(
             'theme_golearningzone/front_page_block_wrapper',

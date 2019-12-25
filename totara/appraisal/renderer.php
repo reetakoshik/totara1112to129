@@ -1290,9 +1290,8 @@ class totara_appraisal_renderer extends plugin_renderer_base {
         if ($show_assignedvia) {
             $table->head[] = get_string('assignedvia', 'totara_core');
         }
-        $table->head[] = get_string('currentstage', 'totara_appraisal');
         if ($show_stage_edit) {
-            $table->head[] = get_string('edit_current_stage', 'totara_appraisal');
+            $table->head[] = get_string('currentstageinprogress', 'totara_appraisal');
         }
         $out = $this->output->container(html_writer::table($table), 'clearfix', 'assignedusers');
         return $out;

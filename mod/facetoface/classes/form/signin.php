@@ -64,7 +64,7 @@ class signin extends \moodleform {
         }
 
         if (count($select) == 1) {
-            $mform->addElement('hidden', 'format');
+            $mform->addElement('hidden', 'format', key($select));
             $mform->setType('format', PARAM_PLUGIN);
         } else {
             $group[] = $mform->createElement('select', 'format', get_string('exportformat', 'totara_core'), $select);

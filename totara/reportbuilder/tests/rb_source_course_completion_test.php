@@ -62,13 +62,14 @@ class totara_reportbuilder_rb_source_course_completion_testcase extends advanced
 
         $rid = $this->create_report('course_completion', 'Test course report');
 
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
         $this->add_column($report, 'course', 'fullname', null, null, null, 0);
         $this->add_column($report, 'course', 'name_and_summary', null, null, null, 0);
         $this->add_column($report, 'course_completion', 'status', null, null, null, 0);
         $this->add_column($report, 'user', 'institution', null, null, null, 0);
 
-        $report = new reportbuilder($rid);
+        $report = reportbuilder::create($rid);
         list($sql, $params, $cache) = $report->build_query();
 
         $records = $DB->get_records_sql($sql, $params);
@@ -91,12 +92,13 @@ class totara_reportbuilder_rb_source_course_completion_testcase extends advanced
 
         $this->delete_columns($report);
 
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
         $this->add_column($report, 'course', 'name_and_summary', null, null, null, 0);
         $this->add_column($report, 'course_completion', 'status', null, null, null, 0);
         $this->add_column($report, 'user', 'institution', null, 'countdistinct', null, 0);
 
-        $report = new reportbuilder($rid);
+        $report = reportbuilder::create($rid);
         list($sql, $params, $cache) = $report->build_query();
 
         $records = $DB->get_records_sql($sql, $params);
@@ -127,7 +129,7 @@ class totara_reportbuilder_rb_source_course_completion_testcase extends advanced
         $todb->sortorder = 1;
         $DB->insert_record('report_builder_filters', $todb);
 
-        $report = new reportbuilder($rid);
+        $report = reportbuilder::create($rid);
         $filters = $report->get_filters();
         $this->assertCount(1, $filters);
         /** @var rb_filter_text $filter */
@@ -137,7 +139,7 @@ class totara_reportbuilder_rb_source_course_completion_testcase extends advanced
         $this->assertSame('fullname', $filter->value);
         $filter->set_data(array('operator' => 2, 'value' => 'Name0'));
 
-        $report = new reportbuilder($rid);
+        $report = reportbuilder::create($rid);
         list($sql, $params, $cache) = $report->build_query(false, true);
 
         $records = $DB->get_records_sql($sql, $params);
@@ -172,7 +174,7 @@ class totara_reportbuilder_rb_source_course_completion_testcase extends advanced
         $todb->sortorder = 2;
         $DB->insert_record('report_builder_filters', $todb);
 
-        $report = new reportbuilder($rid);
+        $report = reportbuilder::create($rid);
         $filters = $report->get_filters();
         $this->assertCount(2, $filters);
         foreach ($filters as $filter) {
@@ -181,7 +183,7 @@ class totara_reportbuilder_rb_source_course_completion_testcase extends advanced
             }
         }
 
-        $report = new reportbuilder($rid);
+        $report = reportbuilder::create($rid);
         list($sql, $params, $cache) = $report->build_query(false, true);
 
         $records = $DB->get_records_sql($sql, $params);
@@ -192,7 +194,7 @@ class totara_reportbuilder_rb_source_course_completion_testcase extends advanced
 
         $this->enable_caching($report->_id);
 
-        $report = new reportbuilder($rid);
+        $report = reportbuilder::create($rid);
         list($sql, $params, $cache) = $report->build_query(false, true);
         $this->assertNotEmpty($cache);
 

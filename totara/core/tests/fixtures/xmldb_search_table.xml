@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="lib/db" VERSION="20171127" COMMENT="XMLDB file for testing of full text search indexing"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
+>
+    <TABLES>
+        <TABLE NAME="test_table_search" COMMENT="Just a test table">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true"/>
+                <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="high" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+                <FIELD NAME="low" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="course" UNIQUE="false" FIELDS="course"/>
+                <INDEX NAME="high" UNIQUE="false" FIELDS="high" HINTS="full_text_search"/>
+                <INDEX NAME="low" UNIQUE="false" FIELDS="low" HINTS="full_text_search"/>
+            </INDEXES>
+        </TABLE>
+    </TABLES>
+</XMLDB>

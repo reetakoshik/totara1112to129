@@ -41,15 +41,16 @@ class totara_reportbuilder_tabexport_source_testcase extends advanced_testcase {
 
         $expected = array();
         $expected[] = array('User ID', 'User First Name', 'User Last Name');
-        $expected[] = array($user->id, $user->firstname, $user->lastname);
-        $expected[] = array($admin->id, $admin->firstname, $admin->lastname);
-        $expected[] = array($guest->id, $guest->firstname, $guest->lastname);
+        $expected[] = array((int)$user->id, $user->firstname, $user->lastname);
+        $expected[] = array((int)$admin->id, $admin->firstname, $admin->lastname);
+        $expected[] = array((int)$guest->id, $guest->firstname, $guest->lastname);
 
         $rid = $this->create_report('user', 'Test user report 1');
         $DB->set_field('report_builder', 'defaultsortcolumn', 'user_id', array('id' => $rid));
         $DB->set_field('report_builder', 'defaultsortorder', SORT_DESC, array('id' => $rid));
 
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
         $this->add_column($report, 'user', 'id', null, null, null, 0);
         $this->add_column($report, 'user', 'firstname', null, null, null, 0);
         $this->add_column($report, 'user', 'lastname', null, null, null, 0);
@@ -57,7 +58,7 @@ class totara_reportbuilder_tabexport_source_testcase extends advanced_testcase {
         $DB->set_field('report_builder', 'defaultsortcolumn', 'user_id', array('id' => $report->_id));
         $DB->set_field('report_builder', 'defaultsortorder', SORT_DESC, array('id' => $report->_id));
 
-        $report = new reportbuilder($rid);
+        $report = reportbuilder::create($rid);
 
         $source = new \totara_reportbuilder\tabexport_source($report);
         $source->set_format('html');
@@ -85,7 +86,7 @@ class totara_reportbuilder_tabexport_source_testcase extends advanced_testcase {
         $result = reportbuilder_generate_cache($rid);
         $this->assertTrue($result);
 
-        $report = new reportbuilder($rid);
+        $report = reportbuilder::create($rid);
 
         $source = new \totara_reportbuilder\tabexport_source($report);
         $source->set_format('html');

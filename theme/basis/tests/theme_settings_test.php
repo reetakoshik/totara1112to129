@@ -46,5 +46,7 @@ class theme_basis_site_logo_testcase extends advanced_testcase {
 
         $logolib = new site_logo();
         $this->assertEquals($expected, $logolib->export_for_template($OUTPUT));
+
+        $this->assertDebuggingCalled('The class theme_roots\output\site_logo has been deprecated since 12.0. Use totara\core\classes\output\masthead_logo.php instead.');
     }
 }

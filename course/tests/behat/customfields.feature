@@ -10,7 +10,7 @@ Feature: Course customfields can be created and populated
     # Add images to the private files block to use later
     And I click on "Dashboard" in the totara menu
     And I press "Customise this page"
-    And I select "Private files" from the "Add a block" singleselect
+    And I add the "Private files" block
     And I follow "Manage private files..."
     When I upload "totara/program/tests/fixtures/leaves-blue.png" file to "Files" filemanager
     And I upload "totara/program/tests/fixtures/leaves-green.png" file to "Files" filemanager

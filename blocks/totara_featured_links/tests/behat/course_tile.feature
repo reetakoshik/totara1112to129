@@ -111,7 +111,7 @@ Feature: The course tile should work as expected
     And I click on "OK" "button" in the "Select course" "totaradialogue"
     And I click on "Save changes" "button"
 
-    When I navigate to "Manage courses and categories" node in "Site administration > Courses"
+    When I navigate to "Courses and categories" node in "Site administration > Courses"
     And I follow "Miscellaneous"
     And I click on "//*[@title='Delete']" "xpath_element"
     And I click on "Delete" "button"
@@ -140,7 +140,7 @@ Feature: The course tile should work as expected
     And the following "course enrolments" exist:
       | user     | course   | role |
       | admin | course1  | student |
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I follow "Course 1"
     And I navigate to "Course completion" node in "Course administration"
     And I expand all fieldsets

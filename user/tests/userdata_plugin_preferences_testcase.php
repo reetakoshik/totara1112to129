@@ -118,8 +118,6 @@ abstract class core_user_userdata_plugin_preferences_testcase extends advanced_t
 
     public function test_export_of_active_users() {
 
-        $this->resetAfterTest(false);
-
         $generator = $this->getDataGenerator();
         $usera = $generator->create_user(['username' => 'a']);
         $userb = $generator->create_user(['username' => 'b']);
@@ -162,25 +160,14 @@ abstract class core_user_userdata_plugin_preferences_testcase extends advanced_t
             }
         }
 
-        return [$usera, $userb, $class, $preferences, $context];
-    }
-
-    /**
-     * @depends test_export_of_active_users
-     */
-    public function test_count_of_active_users($data) {
-
-        $this->resetAfterTest(true);
-
-        list($usera, $userb, $class, $preferences, $context) = $data;
         $preferencecount = count($preferences);
 
         $count = forward_static_call([$class, 'execute_count'], new target_user($usera), $context);
-        self::assertInternalType('integer', $count);
+        self::assertIsInt($count);
         self::assertSame($preferencecount, $count);
 
         $count = forward_static_call([$class, 'execute_count'], new target_user($userb), $context);
-        self::assertInternalType('integer', $count);
+        self::assertIsInt($count);
         self::assertSame($preferencecount, $count);
     }
 
@@ -259,8 +246,6 @@ abstract class core_user_userdata_plugin_preferences_testcase extends advanced_t
     }
 
     public function test_export_of_suspended_users() {
-        $this->resetAfterTest(false);
-
         $generator = $this->getDataGenerator();
         $usera = $generator->create_user(['username' => 'a']);
         $userb = $generator->create_user(['username' => 'b']);
@@ -319,24 +304,14 @@ abstract class core_user_userdata_plugin_preferences_testcase extends advanced_t
         self::assertArrayNotHasKey('control_c', $export->data);
         self::assertArrayNotHasKey('control_d', $export->data);
 
-        return [$usera, $userb, $class, $preferences, $context];
-    }
-
-    /**
-     * @depends test_export_of_suspended_users
-     */
-    public function test_count_of_suspended_users($data) {
-        $this->resetAfterTest(true);
-
-        list($usera, $userb, $class, $preferences, $context) = $data;
         $preferencecount = count($preferences);
 
         $count = forward_static_call([$class, 'execute_count'], new target_user($usera), $context);
-        self::assertInternalType('integer', $count);
+        self::assertIsInt($count);
         self::assertSame($preferencecount, $count);
 
         $count = forward_static_call([$class, 'execute_count'], new target_user($userb), $context);
-        self::assertInternalType('integer', $count);
+        self::assertIsInt($count);
         self::assertSame($preferencecount, $count);
     }
 
@@ -414,8 +389,6 @@ abstract class core_user_userdata_plugin_preferences_testcase extends advanced_t
     }
 
     public function test_export_of_deleted_users() {
-        $this->resetAfterTest(false);
-
         $generator = $this->getDataGenerator();
         $usera = $generator->create_user(['username' => 'a']);
         $userb = $generator->create_user(['username' => 'b']);
@@ -457,24 +430,14 @@ abstract class core_user_userdata_plugin_preferences_testcase extends advanced_t
         // Deleted user preferences cannot be exported, we expect that have been removed.
         self::assertSame(item::RESULT_STATUS_SKIPPED, $export);
 
-        return [$usera, $userb, $class, $preferences, $context];
-    }
-
-    /**
-     * @depends test_export_of_deleted_users
-     */
-    public function test_count_of_deleted_users($data) {
-        $this->resetAfterTest(true);
-
-        list($usera, $userb, $class, $preferences, $context) = $data;
         $preferencecount = count($preferences);
 
         $count = forward_static_call([$class, 'execute_count'], new target_user($usera), $context);
-        self::assertInternalType('integer', $count);
+        self::assertIsInt($count);
         self::assertSame($preferencecount, $count);
 
         $count = forward_static_call([$class, 'execute_count'], new target_user($userb), $context);
-        self::assertInternalType('integer', $count);
+        self::assertIsInt($count);
         self::assertSame($preferencecount, $count);
     }
 

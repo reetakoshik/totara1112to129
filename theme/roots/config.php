@@ -30,6 +30,7 @@ $THEME->name = 'roots';
 $THEME->parents = array('base');
 $THEME->yuicssmodules = array();
 $THEME->enable_dock = true;
+$THEME->enable_hide = true;
 $THEME->sheets = array('totara');
 
 // We need to include the Less files directly
@@ -78,31 +79,31 @@ $THEME->layouts = array(
     // Standard layout with blocks, this is recommended for most pages with general information.
     'standard' => array(
         'file' => 'default.php',
-        'regions' => array('side-pre', 'side-post'),
+        'regions' => array('top', 'bottom', 'side-pre', 'side-post'),
         'defaultregion' => 'side-pre',
     ),
     // Main course page.
     'course' => array(
         'file' => 'default.php',
-        'regions' => array('side-pre', 'side-post'),
+        'regions' => array('top', 'bottom', 'side-pre', 'side-post'),
         'defaultregion' => 'side-pre',
         'options' => array('langmenu' => true),
     ),
     'coursecategory' => array(
         'file' => 'default.php',
-        'regions' => array('side-pre', 'side-post'),
+        'regions' => array('top', 'bottom', 'side-pre', 'side-post'),
         'defaultregion' => 'side-pre',
     ),
     // Part of course, typical for modules - default page layout if $cm specified in require_login().
     'incourse' => array(
         'file' => 'default.php',
-        'regions' => array('side-pre', 'side-post'),
+        'regions' => array('top', 'bottom', 'side-pre', 'side-post'),
         'defaultregion' => 'side-pre',
     ),
     // The site home page.
     'frontpage' => array(
         'file' => 'default.php',
-        'regions' => array('side-pre', 'side-post'),
+        'regions' => array('top', 'main', 'bottom', 'side-pre', 'side-post'),
         'defaultregion' => 'side-pre',
         'options' => array('nonavbar' => true),
     ),
@@ -119,27 +120,27 @@ $THEME->layouts = array(
     // and badges.
     'mydashboard' => array(
         'file' => 'default.php',
-        'regions' => array('side-pre', 'side-post'),
+        'regions' => array('top', 'bottom', 'side-pre', 'side-post'),
         'defaultregion' => 'side-pre',
     ),
     // The dashboard layout differs from the one above in that it includes a central block region.
     // It is used by Totara dashboards.
     'dashboard' => array(
         'file' => 'dashboard.php',
-        'regions' => array('main', 'side-pre', 'side-post'),
+        'regions' => array('top', 'bottom', 'main', 'side-pre', 'side-post'),
         'defaultregion' => 'main',
         'options' => array('langmenu' => true),
     ),
     // My public page.
     'mypublic' => array(
         'file' => 'default.php',
-        'regions' => array('side-pre', 'side-post'),
+        'regions' => array('top', 'bottom', 'side-pre', 'side-post'),
         'defaultregion' => 'side-pre',
     ),
     'login' => array(
         'file' => 'default.php',
         'regions' => array(),
-        'options' => array('langmenu' => true, 'nocustommenu' => true, 'nonavbar' => true),
+        'options' => array('langmenu' => true, 'nototaramenu' => true, 'nonavbar' => true),
     ),
 
     // Pages that appear in pop-up windows - no navigation, no blocks, no header.
@@ -180,13 +181,13 @@ $THEME->layouts = array(
     // The pagelayout used for reports.
     'report' => array(
         'file' => 'default.php',
-        'regions' => array('side-pre'),
+        'regions' => array('top', 'bottom', 'side-pre'),
         'defaultregion' => 'side-pre',
     ),
     // The pagelayout used for safebrowser and securewindow.
     'secure' => array(
-        'file' => 'default.php',
-        'regions' => array('side-pre', 'side-post'),
+        'file' => 'secure.php',
+        'regions' => array('top', 'bottom', 'side-pre', 'side-post'),
         'defaultregion' => 'side-pre'
     ),
     'noblocks' => array(

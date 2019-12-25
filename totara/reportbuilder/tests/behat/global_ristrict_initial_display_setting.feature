@@ -6,7 +6,8 @@ Feature: Global restriction initial display setting
 
   Scenario: Enable global restriction initial display
     Given I log in as "admin"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | Site Logs |
       | Source      | Site Logs |
@@ -25,7 +26,7 @@ Feature: Global restriction initial display setting
     And I set the following administration settings values:
       | Restrict initial display in all report builder reports | 1 |
 
-    And I navigate to "Manage user reports" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
     And I follow "Site Logs"
     When I switch to "Performance" tab
     Then I should see "'Restrict initial display in all report builder reports' setting has been enabled."

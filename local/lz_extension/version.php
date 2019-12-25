@@ -1,8 +1,8 @@
 <?php
 
-$plugin->version  = 2019060300;
-$plugin->requires = 2016120509; 
+$plugin->version  = 2019111400;
+$plugin->requires = 2015111607; 
 $plugin->cron     = 0;
-$plugin->release = '1.1 (Build: 2019012501)';
+$plugin->release = '12.5 (Build: 2019111400)';
 $plugin->maturity = MATURITY_STABLE;
 $plugin->component = 'local_lz_extension';

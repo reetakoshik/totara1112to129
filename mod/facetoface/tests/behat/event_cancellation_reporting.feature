@@ -25,9 +25,7 @@ Feature: Seminar event cancellation reporting
       | learner3 | C1     | student        |
 
     And I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
 
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test Seminar |
@@ -62,10 +60,10 @@ Feature: Seminar event cancellation reporting
     Given I click on "Attendees" "link"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Learner One, learner1@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I click on "Learner Two, learner2@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     And I press "Confirm"
@@ -73,22 +71,19 @@ Feature: Seminar event cancellation reporting
 
     Given I log out
     And I log in as "learner3"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Sign-up"
     And I press "Sign-up"
 
     Given I log out
     And I log in as "learner1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Cancel booking"
     And I press "Yes"
 
     Given I log out
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I click on "Cancel event" "link" in the "10:00 AM - 4:00 PM Pacific/Auckland" "table_row"
     And I press "Yes"
@@ -96,7 +91,7 @@ Feature: Seminar event cancellation reporting
 
   # ----------------------------------------------------------------------------
   Scenario: mod_facetoface_cancel_700: viewing “seminars: event attendees report”
-    When I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    When I navigate to "Manage embedded reports" node in "Site administration > Reports"
     And I set the field "report-name" to "Seminars: Event attendees"
     And I press "id_submitgroupstandard_addfilter"
     And I follow "Seminars: Event attendees"
@@ -107,6 +102,7 @@ Feature: Seminar event cancellation reporting
     And I should see "20" in the "Test Seminar" "table_row"
     When I click on "Attendees" "link" in the "Test Seminar" "table_row"
 
+    And I click on "Cancellations" "link"
     And I should see "User cancellation" in the "Learner One" "table_row"
     And I should see "Event cancellation" in the "Learner Two" "table_row"
     And I should see "Event cancellation" in the "Learner Three" "table_row"
@@ -114,7 +110,8 @@ Feature: Seminar event cancellation reporting
 
   # ----------------------------------------------------------------------------
   Scenario: mod_facetoface_cancel_701: using "seminar sign ups" source in custom report
-    Given I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | fullname | Custom test event report |
       | source   | Seminar Sign-ups         |

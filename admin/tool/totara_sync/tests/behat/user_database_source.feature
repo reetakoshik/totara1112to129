@@ -4,17 +4,17 @@ Feature: Test the user database source.
   Background:
     Given I am on a totara site
     When I log in as "admin"
-    And I navigate to "General settings" node in "Site administration > HR Import"
+    And I navigate to "Default settings" node in "Site administration > HR Import"
     And I set the following fields to these values:
-      | File Access | Upload Files |
+      | File access | Upload Files |
     And I press "Save changes"
     And I navigate to "Manage elements" node in "Site administration > HR Import > Elements"
     And I "Enable" the "User" HR Import element
     And I navigate to "User" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source | External Database |
+      | External Database | 1 |
     And I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
 
   Scenario: Test table exists check for the user database source
     # Create the external database.

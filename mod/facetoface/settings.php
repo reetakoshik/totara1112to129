@@ -28,10 +28,10 @@ defined('MOODLE_INTERNAL') || die();
 
 $ADMIN->add('root', new admin_category('modfacetofacefolder', new lang_string('modulenameplural', 'mod_facetoface'), $module->is_enabled() === false), 'courses');
 
-$eventreporturl = new moodle_url('/mod/facetoface/eventreport.php');
+$eventreporturl = new moodle_url('/mod/facetoface/reports/events.php');
 $ADMIN->add('modfacetofacefolder', new admin_externalpage('modfacetofaceeventreport', new lang_string('eventsreport', 'mod_facetoface'), $eventreporturl, 'mod/facetoface:viewallsessions'));
 
-$sessionreporturl = new moodle_url('/mod/facetoface/sessionreport.php');
+$sessionreporturl = new moodle_url('/mod/facetoface/reports/sessions.php');
 $ADMIN->add('modfacetofacefolder', new admin_externalpage('modfacetofacesessionreport', new lang_string('sessionsreport', 'mod_facetoface'), $sessionreporturl, 'mod/facetoface:viewallsessions', true));
 
 $settings = new admin_settingpage($section, get_string('globalsettings', 'mod_facetoface'), 'totara/core:modconfig', $module->is_enabled() === false);
@@ -75,9 +75,6 @@ if ($ADMIN->fulltree) { // Improve performance.
         new lang_string('setting:managerselect_caption', 'facetoface'),
         new lang_string('setting:managerselect_format', 'facetoface'), 0));
 
-    $settings->add(new admin_setting_configcheckbox('facetoface_allowschedulingconflicts', new lang_string('setting:allowschedulingconflicts_caption', 'facetoface'),
-        new lang_string('setting:allowschedulingconflicts', 'facetoface'), 0));
-
     $settings->add(new admin_setting_configtext('facetoface_export_userprofilefields', new lang_string('exportuserprofilefields', 'facetoface'), new lang_string('exportuserprofilefields_desc', 'facetoface'), 'firstname,lastname,idnumber,institution,department,email', PARAM_TEXT));
 
     $settings->add(new admin_setting_configtext('facetoface_export_customprofilefields', new lang_string('exportcustomprofilefields', 'facetoface'), new lang_string('exportcustomprofilefields_desc', 'facetoface'), '', PARAM_TEXT));
@@ -100,14 +97,31 @@ if ($ADMIN->fulltree) { // Improve performance.
     $calendarfilters = $customfields;
     $settings->add(new admin_setting_configmultiselect('facetoface_calendarfilters', new lang_string('setting:calendarfilterscaption', 'facetoface'), new lang_string('setting:calendarfilters', 'facetoface'), array('room', 'building', 'address'), $calendarfilters));
 
+    // Show previous event within time period.
+    $settings->add(
+        new admin_setting_configselect(
+            'facetoface_previouseventstimeperiod',
+            new lang_string('previouseventstimeperiod', 'mod_facetoface'),
+            new lang_string('previouseventstimeperiod_help', 'mod_facetoface'),
+            0,
+            array(
+                0 => new lang_string('showallpreviousevents', 'mod_facetoface'),
+                1000 => new lang_string('numdays', '', 1000),
+                365 => new lang_string('numdays', '', 365),
+                180 => new lang_string('numdays', '', 180),
+                150 => new lang_string('numdays', '', 150),
+                120 => new lang_string('numdays', '', 120),
+                90 => new lang_string('numdays', '', 90),
+                60 => new lang_string('numdays', '', 60),
+                30 => new lang_string('numdays', '', 30)
+            )
+        )
+    );
+
     $settings->add(new admin_setting_heading('facetoface_notifications_header', get_string('notificationsheading', 'facetoface'), ''));
 
     $settings->add(new admin_setting_configcheckbox('facetoface_notificationdisable', new lang_string('setting:notificationdisable_caption', 'facetoface'),
         new lang_string('setting:notificationdisable', 'facetoface'), 0));
-
-    $settings->add(new admin_setting_configtext('facetoface_fromaddress', new lang_string('setting:fromaddress_caption', 'facetoface'),
-        new lang_string('setting:fromaddress', 'facetoface'), new lang_string('setting:fromaddressdefault', 'facetoface'),
-        PARAM_EMAIL, 30));
 
     $settings->add(new admin_setting_pickroles('facetoface_session_rolesnotify', new lang_string('setting:sessionrolesnotify_caption', 'facetoface'),
         new lang_string('setting:sessionrolesnotify', 'facetoface'), array('editingteacher')));
@@ -147,9 +161,36 @@ if ($ADMIN->fulltree) { // Improve performance.
 $settings = new admin_settingpage('modfacetofacactivitydefaults', get_string('activitydefaults', 'mod_facetoface'), 'totara/core:modconfig', $module->is_enabled() === false);
 $ADMIN->add('modfacetofacefolder', $settings);
 if ($ADMIN->fulltree) {
-    $settings->add(new admin_setting_configcheckbox('facetoface_multiplesessions', get_string('setting:multiplesessions_caption', 'facetoface'), get_string('setting:multiplesessions', 'facetoface'), 0));
+    $settings->add(new admin_setting_heading('facetoface_signupworkflow_header', new lang_string('signupworkflowheader', 'facetoface'), ''));
 
-    $settings->add(new admin_setting_heading('facetoface_signupapproval_header', new lang_string('setting:signupapproval_header', 'facetoface'), ''));
+    $amounts = [];
+    for ($i = 1; $i <= 10; $i++) {
+        $amounts[$i] = $i;
+    }
+    $amounts[0] = new lang_string('multisignupamount_unlimited', 'facetoface');
+    $settings->add(new admin_setting_configselect('facetoface_multisignupamount',
+        new lang_string('multisignupamount', 'facetoface'),
+        new lang_string('multisignupamount_help', 'facetoface'),
+        2,
+        $amounts
+    ));
+
+    $options = [];
+    $options['multisignuprestrict_fully'] = new lang_string('status_fully_attended', 'facetoface');
+    $options['multisignuprestrict_partially'] = new lang_string('status_partially_attended', 'facetoface');
+    $options['multisignuprestrict_noshow'] = new lang_string('status_no_show', 'facetoface');
+    $settings->add(new admin_setting_configmulticheckbox('facetoface_multisignup_restrict',
+        new lang_string('multisignuprestrict', 'facetoface'),
+        new lang_string('multisignuprestrict_help', 'facetoface'),
+        ['multisignuprestrict_fully' => 0,
+         'multisignuprestrict_partially' => 1,
+         'multisignuprestrict_noshow' => 1],
+        $options
+    ));
+
+    $settings->add(new admin_setting_configcheckbox('facetoface_waitlistautoclean',
+        new lang_string('waitlistautoclean', 'mod_facetoface'),
+        new lang_string('waitlistautoclean_help', 'mod_facetoface'), 1));
 
     $settings->add(new admin_setting_configtextarea('facetoface_termsandconditions', new lang_string('setting:termsandconditions_caption', 'facetoface'),
         new lang_string('setting:termsandconditions_format', 'facetoface'), new lang_string('setting:termsandconditions_default', 'facetoface')));
@@ -186,6 +227,15 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configtext('facetoface/defaultminbookings',
         new lang_string('setting:defaultminbookings', 'facetoface'),
         new lang_string('setting:defaultminbookings_help', 'facetoface'), 0, PARAM_INT));
+    require_once($CFG->dirroot.'/lib/csvlib.class.php');
+    $delimiters = \mod_facetoface\import_helper::csv_get_delimiter_list();
+    $settings->add(new admin_setting_configselect('facetoface/defaultcsvdelimiter',
+            new lang_string('defaultcsvdelimiter', 'mod_facetoface'),
+            '',
+            'comma',
+            $delimiters
+        )
+    );
 
 }
 

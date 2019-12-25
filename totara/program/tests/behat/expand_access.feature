@@ -20,7 +20,8 @@ Feature: Users can expand the program info
   Scenario: Allow not logged in users to expand program when forcelogin disabled
     Given I log in as "admin"
     Given I set the following administration settings values:
-      | forcelogin | 0 |
+      | forcelogin  | 0        |
+      | catalogtype | enhanced |
     And I log out
     And I click on "Programs" in the totara menu
     And I click on ".rb-display-expand" "css_element"
@@ -30,7 +31,8 @@ Feature: Users can expand the program info
   Scenario: Allow guest account to expand program when forcelogin enabled
     Given I log in as "admin"
     And I set the following administration settings values:
-      | Guest login button | Show |
+      | Guest login button | Show     |
+      | catalogtype        | enhanced |
     And I log out
     And I click on "#guestlogin input[type=submit]" "css_element"
     And I click on "Programs" in the totara menu
@@ -41,7 +43,8 @@ Feature: Users can expand the program info
   Scenario: Allow user to expand program when forcelogin enabled
     Given I log in as "admin"
     And I set the following administration settings values:
-      | Guest login button | Show |
+      | Guest login button | Show     |
+      | catalogtype        | enhanced |
     And I log out
     And I click on "#guestlogin input[type=submit]" "css_element"
     And I log in as "student1"

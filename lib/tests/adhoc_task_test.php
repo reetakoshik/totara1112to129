@@ -37,6 +37,13 @@ require_once(__DIR__ . '/fixtures/task_fixtures.php');
  */
 class core_adhoc_task_testcase extends advanced_testcase {
 
+    protected function setUp() {
+        global $DB;
+        parent::setup();
+
+        $DB->delete_records('task_adhoc');
+    }
+
     /**
      * Test basic adhoc task execution.
      */

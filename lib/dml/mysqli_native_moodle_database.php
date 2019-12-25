@@ -380,21 +380,6 @@ class mysqli_native_moodle_database extends moodle_database {
     }
 
     /**
-     * Is this database compatible with compressed row format?
-     * This feature is necessary for support of large number of text
-     * columns in InnoDB/XtraDB database.
-     *
-     * @deprecated since Totara 10.2
-     *
-     * @param bool $cached use cached result
-     * @return bool true if table can be created or changed to compressed row format.
-     */
-    public function is_compressed_row_format_supported($cached = true) {
-        // Totara: we require database that supports Compressed and Dynamic row formats, this is tested in environment.
-        return true;
-    }
-
-    /**
      * Check the database to see if innodb_file_per_table is on.
      *
      * @return bool True if on otherwise false.
@@ -442,23 +427,6 @@ class mysqli_native_moodle_database extends moodle_database {
     }
 
     /**
-     * Determine if the row format should be set to compressed, dynamic, or default.
-     *
-     * Terrible kludge. If we're using utf8mb4 AND we're using InnoDB, we need to specify row format to
-     * be either dynamic or compressed (default is compact) in order to allow for bigger indexes (MySQL
-     * errors #1709 and #1071).
-     *
-     * @deprecated since Totara 10.2
-     *
-     * @param  string $engine The database engine being used. Will be looked up if not supplied.
-     * @param  string $collation The database collation to use. Will look up the current collation if not supplied.
-     * @return string An sql fragment to add to sql statements.
-     */
-    public function get_row_format_sql($engine = null, $collation = null) {
-        return "ROW_FORMAT=Compressed";
-    }
-
-    /**
      * Returns localised database type name
      * Note: can be used before connect()
      * @return string
@@ -474,6 +442,48 @@ class mysqli_native_moodle_database extends moodle_database {
      */
     public function get_configuration_help() {
         return get_string('nativemysqlihelp', 'install');
+    }
+
+    /**
+     * Returns the language used for full text search.
+     *
+     * NOTE: admin must run admin/cli/fts_rebuild_indexes.php after change of lang!
+     *
+     * @since Totara 12
+     *
+     * @return string
+     */
+    public function get_ftslanguage() {
+        $dbcollation = $this->get_dbcollation();
+        if (!empty($this->dboptions['ftslanguage'])) {
+            $sc = $this->dboptions['ftslanguage'];
+            // Make sure that the charset matches!
+            if (strpos($sc, 'utf8mb4_') === 0 and strpos($dbcollation, 'utf8mb4_') === 0) {
+                return $sc;
+            }
+            if (strpos($sc, 'utf8_') === 0 and strpos($dbcollation, 'utf8_') === 0) {
+                return $sc;
+            }
+        }
+        // Guess the right value, we expect they are using a variant of _cs_as.
+        if ($dbcollation === 'utf8_bin') {
+            return 'utf8_unicode_ci';
+        }
+        if ($dbcollation === 'utf8mb4_bin') {
+            return 'utf8mb4_unicode_ci';
+        }
+        if (substr($dbcollation, -3) === '_ci') {
+            // This is not a supported collation, but anyway.
+            return $dbcollation;
+        }
+        if (substr($dbcollation, -6) === '_as_cs') {
+            return substr($dbcollation, 0, -6) . '_ai_ci';
+        }
+        if (substr($dbcollation, -3) === '_cs') {
+            return substr($dbcollation, 0, -3) . '_ci';
+        }
+        // No more guessing, use the same collation.
+        return $dbcollation;
     }
 
     /**
@@ -712,7 +722,7 @@ class mysqli_native_moodle_database extends moodle_database {
                     continue;
                 }
                 if (!isset($indexes[$res->Key_name])) {
-                    $indexes[$res->Key_name] = array('unique'=>empty($res->Non_unique), 'columns'=>array());
+                    $indexes[$res->Key_name] = array('unique'=>empty($res->Non_unique), 'columns'=>array(), 'fulltextsearch'=>($res->Index_type==='FULLTEXT'));
                 }
                 $indexes[$res->Key_name]['columns'][$res->Seq_in_index-1] = $res->Column_name;
             }
@@ -1797,6 +1807,36 @@ class mysqli_native_moodle_database extends moodle_database {
     }
 
     /**
+     * Returns the driver specific syntax for the beginning of a word boundary.
+     *
+     * @since Totara 12.4
+     * @return string or empty if not supported
+     */
+    public function sql_regex_word_boundary_start(): string {
+        $version = $this->mysqli->server_info;
+        // ICU expression library in MySQL 8 has new word boundary markers.
+        if (version_compare($version, '8.0.4', '>=')) {
+            return '\\b';
+        }
+        return '[[:<:]]';
+    }
+
+    /**
+     * Returns the driver specific syntax for the end of a word boundary.
+     *
+     * @since Totara 12.4
+     * @return string or empty if not supported
+     */
+    public function sql_regex_word_boundary_end(): string {
+        $version = $this->mysqli->server_info;
+        // ICU expression library in MySQL 8 has new word boundary markers.
+        if (version_compare($version, '8.0.4', '>=')) {
+            return '\\b';
+        }
+        return '[[:>:]]';
+    }
+
+    /**
      * Returns the SQL to be used in order to an UNSIGNED INTEGER column to SIGNED.
      *
      * @deprecated since 2.3
@@ -2024,5 +2064,51 @@ class mysqli_native_moodle_database extends moodle_database {
         $count = $recordset->get_count_without_limits();
 
         return $recordset;
+    }
+
+    /**
+     * Build a natural language search subquery using database specific search functions.
+     *
+     * @since Totara 12
+     *
+     * @param string $table        database table name
+     * @param array  $searchfields ['field_name'=>weight, ...] eg: ['high'=>3, 'medium'=>2, 'low'=>1]
+     * @param string $searchtext   natural language search text
+     * @return array [sql, params[]]
+     */
+    protected function build_fts_subquery(string $table, array $searchfields, string $searchtext): array {
+        $mode = 'NATURAL LANGUAGE MODE';
+        if ($this->get_fts_mode($searchtext) === self::SEARCH_MODE_BOOLEAN) {
+            $mode = 'BOOLEAN MODE';
+        }
+
+        $params = array();
+        $score = array();
+
+        foreach ($searchfields as $field => $weight) {
+            $paramname = $this->get_unique_param('fts');
+            $params[$paramname] = $searchtext;
+            $score[] = "(MATCH ({$field}) AGAINST (:{$paramname} IN {$mode}))*{$weight}";
+        }
+
+        $scoresum = implode(' + ', $score);
+        $sql = "SELECT id, {$scoresum} AS score
+                  FROM {{$table}}
+                HAVING score > 0";
+
+        return array("({$sql})", $params);
+    }
+
+    /**
+     * Returns false as MySQL testing showed that for the queries tested 2 queries was faster than a counted recordset.
+     *
+     * Overridden despite the value matching the default as we know based upon performance testing that false is the correct result.
+     * For results on performance testing of paginated results see parent class.
+     *
+     * @since Totara 12.4
+     * @return bool
+     */
+    public function recommends_counted_recordset(): bool {
+        return false;
     }
 }

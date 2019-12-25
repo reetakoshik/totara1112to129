@@ -38,12 +38,14 @@ class totara_reportbuilder_post_config_visibility_where_testcase extends advance
 
     public function test_post_config_visibility_where() {
         $this->resetAfterTest(true);
+        $this->setAdminUser();
 
         $user = $this->getDataGenerator()->create_user();
 
         // Create report. We use the user report, because we know it must include the visibility required columns.
         $rid = $this->create_report('program', 'Test program report 1');
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
 
         // Save a copy of all the required columns.
         $allrequiredcolumns = $report->requiredcolumns;
@@ -70,7 +72,7 @@ class totara_reportbuilder_post_config_visibility_where_testcase extends advance
         list($wheresql, $params) = $report->post_config_visibility_where('program', 'base', $user->id); // No exception.
         $this->assertGreaterThan(0, strpos($wheresql, 'base.visible = :tcvwnormalvisible'));
         $this->assertGreaterThan(0, strpos($wheresql, 'base.visible = :tcvwnormalvisiblenone'));
-        $this->assertGreaterThan(0, strpos($wheresql, 'ra.contextid = ctx.id'));
+        $this->assertGreaterThan(0, strpos($wheresql, 'hascapabilitycontext.id = ctx.id'));
         $this->assertGreaterThan(0, strpos($wheresql, 'base.availablefrom = 0 OR base.availablefrom < :timefrom'));
         $this->assertGreaterThan(0, strpos($wheresql, 'base.availableuntil = 0 OR base.availableuntil > :timeuntil'));
 
@@ -78,7 +80,7 @@ class totara_reportbuilder_post_config_visibility_where_testcase extends advance
         list($wheresql, $params) = $report->post_config_visibility_where('certification', 'base', $user->id);
         $this->assertGreaterThan(0, strpos($wheresql, 'base.visible = :tcvwnormalvisible'));
         $this->assertGreaterThan(0, strpos($wheresql, 'base.visible = :tcvwnormalvisiblenone'));
-        $this->assertGreaterThan(0, strpos($wheresql, 'ra.contextid = ctx.id'));
+        $this->assertGreaterThan(0, strpos($wheresql, 'hascapabilitycontext.id = ctx.id'));
         $this->assertGreaterThan(0, strpos($wheresql, 'base.availablefrom = 0 OR base.availablefrom < :timefrom'));
         $this->assertGreaterThan(0, strpos($wheresql, 'base.availableuntil = 0 OR base.availableuntil > :timeuntil'));
 

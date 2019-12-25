@@ -12,9 +12,7 @@ Feature: Correct results are shown in the recent activity screen
       | Course short name | C1      |
     And I enrol "user1" user as "Teacher"
     And I enrol "user2" user as "Student"
-    And I am on site homepage
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Forum" to section "1" and I fill the form with:
       | name | TestForum1 |
     And I add a "Forum" to section "2" and I fill the form with:
@@ -29,7 +27,7 @@ Feature: Correct results are shown in the recent activity screen
     And "(//a[./@href][contains(text(), 'TestForum2')])[2]" "xpath_element" should appear after "//span[contains(text(), \"Added\")]" "xpath_element"
     And "(//a[./@href][contains(text(), 'TestForum3')])[2]" "xpath_element" should appear after "//span[contains(text(), \"Added\")]" "xpath_element"
     And I should see "Removed Modules"
-    And "(//span[contains(text(), 'TestForum1')])[2]" "xpath_element" should appear after "//span[contains(text(), \"Deleted\")]" "xpath_element"
+    And "(//span[contains(text(), 'TestForum1')])[3]" "xpath_element" should appear after "//span[contains(text(), \"Deleted\")]" "xpath_element"
 
   @javascript
   Scenario: Rename should add an update
@@ -39,8 +37,7 @@ Feature: Correct results are shown in the recent activity screen
     And "(//a[./@href][contains(text(), 'TestForumChanged')])[3]" "xpath_element" should appear after "//span[contains(text(), \"Updated\")]" "xpath_element"
     And I should not see "TestForum2"
     # Name is preserved.
-    When I am on site homepage
-    And I follow "Course 1"
+    When I am on "Course 1" course homepage
     And I delete "TestForumChanged" activity
     And I follow "Go to full activity report"
     Then "(//span[contains(text(), 'TestForumChanged')])[2]" "xpath_element" should appear after "//span[contains(text(), \"Added\")]" "xpath_element"
@@ -52,8 +49,7 @@ Feature: Correct results are shown in the recent activity screen
     When I add a new discussion to "TestForum2" forum with:
       | Subject | Post |
       | Message | This is the body |
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Go to full activity report"
     Then I should see "Post"
     And I should see "Admin User"
@@ -293,7 +289,7 @@ Feature: Correct results are shown in the recent activity screen
     When I click on "C1" "link"
     And I click on "Test quiz 1" "link"
     And I click on "Edit quiz" "button"
-    And I click on "Add" "link"
+    And I click on "Add" "link" in the "div#region-main" "css_element"
     And I click on "a new question" "link"
     And I click on "True/False" "text"
     And I click on "Add" "button" in the ".chooserdialogue-mod_quiz-questionchooser" "css_element"
@@ -304,8 +300,7 @@ Feature: Correct results are shown in the recent activity screen
 
     And I log out
     And I log in as "user2"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "Test quiz 1" "link"
     And I click on "Attempt quiz now" "button"
     And I click on "True" "text"
@@ -314,8 +309,7 @@ Feature: Correct results are shown in the recent activity screen
     And I click on "Submit all and finish" "button" in the "Confirmation" "dialogue"
     And I log out
     And I log in as "admin"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
 
     Then I should see "New Quiz responses:" in the "Recent activity" "block"
     When I click on "Test quiz 1" "link" in the "Recent activity" "block"
@@ -334,8 +328,7 @@ Feature: Correct results are shown in the recent activity screen
     And I click on "Overview" "link"
     And I log out
     And I log in as "user2"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "Test feedback 1" "link"
     And I click on "Answer the questions..." "link"
     And I set the field "newQuestion" to "newAnswer"
@@ -343,8 +336,7 @@ Feature: Correct results are shown in the recent activity screen
     And I click on "Continue" "button"
     And I log out
     And I log in as "admin"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
 
     Then I should see "New Feedback response:" in the "Recent activity" "block"
     When I click on "Test feedback 1" "link" in the "Recent activity" "block"
@@ -352,7 +344,8 @@ Feature: Correct results are shown in the recent activity screen
     Then I should see "newAnswer"
 
     # Check Folder
-    When I click on "Folder name" "link"
+    When I click on "C1" "link"
+    And I click on "Folder name" "link"
     And I click on "Edit" "button"
     And I upload "course/tests/fixtures/example.txt" file to "Files" filemanager
     And I click on "Save changes" "button"
@@ -365,16 +358,14 @@ Feature: Correct results are shown in the recent activity screen
     # Check assignments
     And I log out
     And I log in as "user2"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "Test assignment 1" "link"
     And I click on "Add submission" "button"
     And I upload "course/tests/fixtures/example.txt" file to "File submissions" filemanager
     And I click on "Save changes" "button"
     And I log out
     And I log in as "admin"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
 
     Then I should see "Assignments submitted:" in the "Recent activity" "block"
     When I click on "Test assignment 1" "link" in the "Recent activity" "block"
@@ -392,8 +383,7 @@ Feature: Correct results are shown in the recent activity screen
     And I click on "Continue" "button"
     And I log out
     And I log in as "user2"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "Workshop 1" "link"
     And I click on "Start preparing your submission" "button"
     And I set the following fields to these values:
@@ -402,8 +392,7 @@ Feature: Correct results are shown in the recent activity screen
     And I click on "Save changes" "button"
     And I log out
     And I log in as "admin"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
 
     Then I should see "Workshop submissions:" in the "Recent activity" "block"
     And I should not see "Workshop assessments:" in the "Recent activity" "block"
@@ -437,8 +426,7 @@ Feature: Correct results are shown in the recent activity screen
     # Check Survey
     And I log out
     And I log in as "user2"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "Test survey name" "link"
     And I set the field "q45_1" to "1"
     And I set the field "q46_1" to "1"
@@ -464,8 +452,7 @@ Feature: Correct results are shown in the recent activity screen
     And I click on "Continue" "button"
     And I log out
     And I log in as "admin"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
 
     Then I should see "New survey responses:"
     When I click on "Test survey name" "link" in the "Recent activity" "block"

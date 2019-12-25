@@ -227,5 +227,4 @@ facetoface_handler.prototype._save = function() {
     this._dialog._request(url, {object: this, method: '_update'});
 }
 
-// TODO: T-11233 need to figure out a better way to share this common code between this and the formpicker.
 facetoface_handler.prototype._update = facetoface_handler_responsefunc;

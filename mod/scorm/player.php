@@ -169,7 +169,7 @@ if ($scorm->popup != 1 || $displaymode == 'popup') {
     // Redirect back to the correct section if one section per page is being used.
     $exiturl = course_get_url($course, $cm->sectionnum);
 
-    $exitlink = html_writer::link($exiturl, $strexit, array('title' => $strexit));
+    $exitlink = html_writer::link($exiturl, $strexit, array('title' => $strexit , 'class'=> 'btn'));
     $PAGE->set_button($exitlink);
 }
 
@@ -183,6 +183,11 @@ $PAGE->requires->data_for_js('scormplayerdata', Array('launch' => false,
                                                        'popupoptions' => $scorm->options), true);
 $PAGE->requires->js('/mod/scorm/request.js', true);
 $PAGE->requires->js('/lib/cookies.js', true);
+
+if (get_config('scorm', 'sessionkeepalive')) {
+    // Totara: try to prevent session timeouts in idle open windows.
+    core\session\manager::keepalive('networkdropped', 'mod_scorm', $CFG->sessiontimeout / 10);
+}
 
 if (file_exists($CFG->dirroot.'/mod/scorm/datamodels/'.$scorm->version.'.js')) {
     $PAGE->requires->js('/mod/scorm/datamodels/'.$scorm->version.'.js', true);

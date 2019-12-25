@@ -71,7 +71,7 @@
 <div class="tf_element totara_form_element_checkbox">
     {{^frozen}}<input type="hidden" name="{{name}}" value="{{uncheckedvalue}}" />{{/frozen}}
     <div class="tf_element_title"><label class="legend" for="{{id}}">{{label}}{{#required}}{{> totara_form/required_suffix}}{{/required}}</label>{{> totara_form/help_button}}</div>
-    <div class="tf_element_input">{{> totara_form/validation_errors}}<input type="checkbox" id="{{id}}" {{#frozen}}disabled data-{{/frozen}}name="{{name}}"value="{{checkedvalue}}"
+    <div class="tf_element_input">{{> totara_form/validation_errors}}<input type="checkbox" id="{{id}}" {{#frozen}}disabled data-{{/frozen}}name="{{name}}" value="{{checkedvalue}}"
                                                                             data-value-unchecked="{{uncheckedvalue}}" {{#checked}}checked{{/checked}} {{#required}}required{{/required}}
-    /><span class="tf_loading" style="display: none;">{{#pix}} i/loading, core, {{#str}}loading, totara_core{{/str}}{{/pix}}</span></div>
+    /><span class="tf_loading" style="display: none;">{{#pix}} i/loading, core, loading, totara_core{{/pix}}</span></div>
 </div>

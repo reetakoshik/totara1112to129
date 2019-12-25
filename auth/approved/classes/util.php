@@ -44,7 +44,7 @@ final class util {
         }
 
         try {
-            $report = new \reportbuilder($reportid);
+            $report = \reportbuilder::create($reportid, null, true);
         } catch (\moodle_exception $e) {
             // Most likely the silly acess control in constructor,
             // oh well..
@@ -119,7 +119,8 @@ final class util {
     public static function render_request_details_view($requestid) {
         global $DB;
 
-        $report = reportbuilder_get_embedded_report('auth_approved_request_details', array('requestid' => $requestid), true, 0);
+        $config = (new \rb_config())->set_embeddata(['requestid' => $requestid])->set_nocache(true);
+        $report = \reportbuilder::create_embedded('auth_approved_request_details', $config);
         if (!$report) {
             return '';
         }

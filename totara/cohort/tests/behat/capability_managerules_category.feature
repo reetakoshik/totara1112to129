@@ -32,7 +32,7 @@ Feature: User with totara/cohort:managerules can manage audience rules in catego
   Scenario: Try to change rules that require totara/cohort:managerules permission in category context
     Given I log in as "catman"
     And "Administration" "block" should be visible
-    And I navigate to "Manage courses and categories" node in "Site administration > Courses"
+    And I navigate to "Courses and categories" node in "Site administration > Courses"
     And I follow "CategoryOne"
     And I navigate to "Audiences" node in "Category: CategoryOne"
     And I follow "Cat1 Audience"

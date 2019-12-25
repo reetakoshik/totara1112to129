@@ -12,9 +12,7 @@ Feature: Edit quiz settings - detect missing required gradepass
       | fullname | shortname | category | enablecompletion |
       | Course 1 | C1        | 0        | 1                |
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
 
   Scenario: Verify no error when adding and editing a quiz without completion.
     Given I navigate to "Edit settings" node in "Course administration"

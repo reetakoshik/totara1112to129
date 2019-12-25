@@ -25,9 +25,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 class rb_source_appraisal extends rb_base_source {
-    public $base, $joinlist, $columnoptions, $filteroptions, $paramoptions;
-    public $contentoptions, $defaultcolumns, $defaultfilters, $embeddedparams;
-    public $sourcetitle, $shortname;
+    use \totara_job\rb\source\report_trait;
+
+    public $shortname;
 
     public function __construct($groupid, rb_global_restriction_set $globalrestrictionset = null) {
         if ($groupid instanceof rb_global_restriction_set) {
@@ -147,8 +147,8 @@ class rb_source_appraisal extends rb_base_source {
             )
         );
 
-        $this->add_user_table_to_joinlist($joinlist, 'base', 'userid');
-        $this->add_job_assignment_tables_to_joinlist($joinlist, 'base', 'userid', 'INNER');
+        $this->add_core_user_tables($joinlist, 'base', 'userid');
+        $this->add_totara_job_tables($joinlist, 'base', 'userid');
 
         return $joinlist;
     }
@@ -199,7 +199,7 @@ class rb_source_appraisal extends rb_base_source {
                      "ELSE 'statusdraft' " .
                 "END",
                 array('joins' => array('appraisal', 'activestage'),
-                      'displayfunc' => 'status',
+                      'displayfunc' => 'appraisal_user_status',
                       'defaultheading' => get_string('userappraisalstatusheading', 'rb_source_appraisal'))
             ),
             new rb_column_option(
@@ -209,6 +209,7 @@ class rb_source_appraisal extends rb_base_source {
                 'activestage.name',
                 array('joins' => 'activestage',
                       'defaultheading' => get_string('userappraisalactivestagenameheading', 'rb_source_appraisal'),
+                      'displayfunc' => 'format_string',
                       'dbdatatype' => 'char',
                       'outputformat' => 'text')
             ),
@@ -229,6 +230,7 @@ class rb_source_appraisal extends rb_base_source {
                 'appraisal.name',
                 array('joins' => 'appraisal',
                       'defaultheading' => get_string('appraisalnameheading', 'rb_source_appraisal'),
+                      'displayfunc' => 'format_string',
                       'dbdatatype' => 'char',
                       'outputformat' => 'text')
             ),
@@ -238,7 +240,7 @@ class rb_source_appraisal extends rb_base_source {
                 get_string('appraisalstatuscolumn', 'rb_source_appraisal'),
                 'appraisal.status',
                 array('joins' => 'appraisal',
-                      'displayfunc' => 'appraisalstatus',
+                      'displayfunc' => 'appraisal_status',
                       'defaultheading' => get_string('appraisalstatusheading', 'rb_source_appraisal'))
             ),
             new rb_column_option(
@@ -285,8 +287,8 @@ class rb_source_appraisal extends rb_base_source {
             )
         );
 
-        $this->add_user_fields_to_columns($columnoptions);
-        $this->add_job_assignment_fields_to_columns($columnoptions);
+        $this->add_core_user_columns($columnoptions);
+        $this->add_totara_job_columns($columnoptions);
 
         return $columnoptions;
     }
@@ -316,8 +318,8 @@ class rb_source_appraisal extends rb_base_source {
             ),
         );
 
-        $this->add_user_fields_to_filters($filteroptions);
-        $this->add_job_assignment_fields_to_filters($filteroptions, 'base', 'userid');
+        $this->add_core_user_filters($filteroptions);
+        $this->add_totara_job_filters($filteroptions, 'base', 'userid');
 
         return $filteroptions;
     }
@@ -359,23 +361,28 @@ class rb_source_appraisal extends rb_base_source {
     /**
      * Convert status code string to human readable string.
      *
+     * @deprecated Since Totara 12.0
      * @param string $status status code string
      * @param object $row other fields in the record (unused)
      *
      * @return string
      */
     public function rb_display_status($status, $row) {
+        debugging('rb_source_appraisal::rb_display_status has been deprecated since Totara 12.0. Use totara_appraisal\rb\display\appraisal_user_status::display', DEBUG_DEVELOPER);
         return get_string($status, 'rb_source_appraisal');
     }
 
     /**
      * Convert appraisal status code string to human readable string.
+     *
+     * @deprecated Since Totara 12.0
      * @param string $status status code string
      * @param object $row other fields in the record (unused)
      *
      * @return string
      */
     public function rb_display_appraisalstatus($status, $row) {
+        debugging('rb_source_appraisal::rb_display_appraisalstatus has been deprecated since Totara 12.0. Use totara_appraisal\rb\display\appraisal_status::display', DEBUG_DEVELOPER);
         global $CFG;
         require_once($CFG->dirroot.'/totara/appraisal/lib.php');
 

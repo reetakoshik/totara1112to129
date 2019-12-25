@@ -44,7 +44,6 @@ class refresh_cache_task extends \core\task\scheduled_task {
     public function execute() {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/totara/reportbuilder/lib.php');
-        require_once($CFG->dirroot . '/totara/reportbuilder/groupslib.php');
         require_once($CFG->dirroot . '/totara/core/lib/scheduler.php');
 
         if (isset($CFG->enablereportcaching) && $CFG->enablereportcaching == 0) {

@@ -212,51 +212,6 @@ class cohort_rule_sqlhandler_date_usercustomfield_no_timezone extends cohort_rul
 }
 
 /**
- * @deprecated Since v9.0
- *
- * This class was deprecated as part of the multiple jobs patch and replaced with
- * the cohort_rule_sqlhandler_date_alljobassignments class, please use that instead.
- */
-class cohort_rule_sqlhandler_date_posstarted extends cohort_rule_sqlhandler_date_alljobassignments {
-
-    public function __construct(){
-        debugging('Class cohort_rule_sqlhandler_date_posstarted has been replaced and is now deprecated.
-            Please use the cohort_rule_sqlhandler_date_alljobassignments class instead', DEBUG_DEVELOPER);
-        parent::__construct('positionassignmentdate');
-    }
-}
-
-/**
- * @deprecated Since v9.0
- *
- * This class was deprecated as part of the multiple jobs patch and replaced with
- * the cohort_rule_sqlhandler_date_alljobassignments class, please use that instead.
- */
-class cohort_rule_sqlhandler_date_postimevalidfrom extends cohort_rule_sqlhandler_date_alljobassignments {
-
-    public function __construct(){
-        debugging('Class cohort_rule_sqlhandler_date_postimevalidfrom has been replaced and is now deprecated.
-            Please use the cohort_rule_sqlhandler_date_alljobassignments class instead', DEBUG_DEVELOPER);
-        parent::__construct('startdate');
-    }
-}
-
-/**
- * @deprecated Since v9.0
- *
- * This class was deprecated as part of the multiple jobs patch and replaced with
- * the cohort_rule_sqlhandler_date_alljobassignments class, please use that instead.
- */
-class cohort_rule_sqlhandler_date_postimevalidto extends cohort_rule_sqlhandler_date_alljobassignments {
-
-    public function __construct(){
-        debugging('Class cohort_rule_sqlhandler_date_postimevalidto has been replaced and is now deprecated.
-            Please use the cohort_rule_sqlhandler_date_alljobassignments class instead', DEBUG_DEVELOPER);
-        parent::__construct('enddate');
-    }
-}
-
-/**
  * SQL snippet for comparing dates across all a users job assignments
  */
 class cohort_rule_sqlhandler_date_alljobassignments extends cohort_rule_sqlhandler_date {

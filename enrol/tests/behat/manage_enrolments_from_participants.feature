@@ -19,7 +19,7 @@ Feature: Manage enrollments from participants page
       | student2 | C1 | student |
       | teacher1 | C1 | editingteacher |
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to course participants
 
   Scenario: Check the participants link when "All partipants" selected
@@ -33,3 +33,15 @@ Feature: Manage enrollments from participants page
     When I click on "Edit" "link" in the "region-main" "region"
     Then I should see "Enrolled users" in the "#region-main" "css_element"
     And the field "Role" matches value "Student"
+
+  @javascript
+  Scenario: Add and remove roles from course enrolments page
+    Given I navigate to "Enrolled users" node in "Course administration > Users"
+    And I click on "Assign roles" "link" in the "Student 1" "table_row"
+    And I click on "Non-editing teacher" "button"
+    Then I should see "Non-editing teacher" in the "Student 1" "table_row"
+    And I should not see "Non-editing teacher" in the "Student 2" "table_row"
+
+    When I click on "Unassign role Non-editing teacher" "link" in the "Student 1" "table_row"
+    And I click on "Remove" "button"
+    Then I should not see "Non-editing teacher" in the "Student 1" "table_row"

@@ -17,38 +17,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Totara navigation edit page.
- *
- * @package    totara
+ * @package    totara_coursecatalogue
  * @subpackage navigation
  * @author     Oleg Demeshev <oleg.demeshev@totaralms.com>
  */
 
 namespace totara_coursecatalog\totara\menu;
 
-use \totara_core\totara\menu\menu as menu;
-
-class findlearning extends \totara_core\totara\menu\item {
+/**
+ * Old style list of places where to look for courses, certifications, programs, etc.
+ *
+ * This container is displayed only if grid catalogue is NOT active.
+ */
+class findlearning extends \totara_core\totara\menu\container {
 
     protected function get_default_title() {
-        return get_string('findlearning', 'totara_coursecatalog');
-    }
-
-    protected function get_default_url() {
         global $CFG;
 
-        if (!empty($CFG->enhancedcatalog)) {
-            return '/totara/coursecatalog/courses.php';
+        if ($CFG->catalogtype === 'totara') {
+            return get_string('findlearningdisabled', 'totara_coursecatalog');
         } else {
-            return '/course/index.php';
+            return get_string('findlearning', 'totara_coursecatalog');
         }
+    }
+
+    public function is_disabled() {
+        global $CFG;
+        return ($CFG->catalogtype === 'totara');
     }
 
     public function get_default_sortorder() {
         return 70000;
-    }
-
-    public function get_default_visibility() {
-        return menu::SHOW_WHEN_REQUIRED;
     }
 }

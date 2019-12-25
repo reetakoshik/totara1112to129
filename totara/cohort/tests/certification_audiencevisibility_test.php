@@ -145,17 +145,17 @@ class totara_cohort_certification_audiencevisibility_testcase extends reportcach
         $paramscert3 = array('fullname' => 'Visenrandmemb', 'summary' => '', 'visible' => 0,
                                 'audiencevisible' => COHORT_VISIBLE_AUDIENCE);
         $paramscert4 = array('fullname' => 'Visnousers', 'summary' => '', 'audiencevisible' => COHORT_VISIBLE_NOUSERS);
+
+        list($actperiod, $winperiod, $recerttype) = $this->program_generator->get_random_certification_setting();
+        $paramscert1['certifid'] = $this->program_generator->create_certification_settings(0, $actperiod, $winperiod, $recerttype);
+        $paramscert2['certifid'] = $this->program_generator->create_certification_settings(0, $actperiod, $winperiod, $recerttype);
+        $paramscert3['certifid'] = $this->program_generator->create_certification_settings(0, $actperiod, $winperiod, $recerttype);
+        $paramscert4['certifid'] = $this->program_generator->create_certification_settings(0, $actperiod, $winperiod, $recerttype);
+
         $this->certif1 = $this->getDataGenerator()->create_program($paramscert1); // Visibility all.
         $this->certif2 = $this->getDataGenerator()->create_program($paramscert2); // Visibility enrolled users only.
         $this->certif3 = $this->getDataGenerator()->create_program($paramscert3); // Visibility enrolled users and members.
         $this->certif4 = $this->getDataGenerator()->create_program($paramscert4); // Visibility no users.
-
-        // Convert these programs in certifications.
-        list($actperiod, $winperiod, $recerttype) = $this->program_generator->get_random_certification_setting();
-        $this->program_generator->create_certification_settings($this->certif1->id, $actperiod, $winperiod, $recerttype);
-        $this->program_generator->create_certification_settings($this->certif2->id, $actperiod, $winperiod, $recerttype);
-        $this->program_generator->create_certification_settings($this->certif3->id, $actperiod, $winperiod, $recerttype);
-        $this->program_generator->create_certification_settings($this->certif4->id, $actperiod, $winperiod, $recerttype);
 
         // Assign capabilities for user8, and user9.
         $syscontext = context_system::instance();
@@ -363,14 +363,14 @@ class totara_cohort_certification_audiencevisibility_testcase extends reportcach
         }
 
         // Make the test toggling the new catalog.
-        for ($i = 0; $i < 2; $i++) {
-            // Toggle enhanced catalog.
-            set_config('enhancedcatalog', $i);
-            $this->assertEquals($i, $CFG->enhancedcatalog);
+        foreach (['moodle', 'enhanced'] as $catalogtype) {
+            set_config('catalogtype', $catalogtype);
+            $this->assertEquals($catalogtype, $CFG->catalogtype);
+            $enhancedcatalog = ($catalogtype === 'enhanced');
 
             // Test #1: Login as $user and see what certifications he can see.
             self::setUser($this->{$user});
-            if ($CFG->enhancedcatalog) {
+            if ($enhancedcatalog) {
                 $content = $this->get_report_result('catalogcertifications', array(), false, array());
             } else {
                 $programrenderer = $PAGE->get_renderer('totara_program');
@@ -395,12 +395,12 @@ class totara_cohort_certification_audiencevisibility_testcase extends reportcach
                 $this->assertTrue($isviewable);
 
                 // Test #3: Try to do a search for certifications.
-                if ($CFG->enhancedcatalog) {
+                if ($enhancedcatalog) {
                     $this->assertCount(1, $search);
                     $r = array_shift($search);
-                    $this->assertEquals($this->{$certification}->fullname, $r->prog_progexpandlink);
+                    $this->assertEquals($this->{$certification}->fullname, $r->certif_progexpandlink);
                 } else {
-                    $this->assertInternalType('int', strpos($search, $this->{$certification}->fullname));
+                    $this->assertIsInt(strpos($search, $this->{$certification}->fullname));
                 }
             }
 
@@ -414,10 +414,10 @@ class totara_cohort_certification_audiencevisibility_testcase extends reportcach
                 $this->assertFalse($isviewable);
 
                 // Test #3: Try to do a search for certifications.
-                if ($CFG->enhancedcatalog) {
+                if ($enhancedcatalog) {
                     $this->assertCount(0, $search);
                 } else {
-                    $this->assertInternalType('int', strpos($search, 'No programs were found'));
+                    $this->assertIsInt(strpos($search, 'No programs were found'));
                 }
             }
 
@@ -446,10 +446,10 @@ class totara_cohort_certification_audiencevisibility_testcase extends reportcach
         global $PAGE, $CFG;
         $visible = false;
 
-        if ($CFG->enhancedcatalog) { // New catalog.
+        if ($CFG->catalogtype === 'enhanced') { // Enhanced catalog.
             $search = array();
             if (is_array($content)) {
-                $search = totara_search_for_value($content, 'prog_progexpandlink', TOTARA_SEARCH_OP_EQUAL,
+                $search = totara_search_for_value($content, 'certif_progexpandlink', TOTARA_SEARCH_OP_EQUAL,
                                                     $certification->fullname);
                 $visible = !empty($search);
             }
@@ -469,13 +469,11 @@ class totara_cohort_certification_audiencevisibility_testcase extends reportcach
         // Create certifications with old visibility.
         $paramsprogram1 = array('fullname' => 'certif5', 'summary' => '', 'visible' => 1);
         $paramsprogram2 = array('fullname' => 'certif6', 'summary' => '', 'visible' => 0);
+        list($actperiod, $winperiod, $recerttype) = $this->program_generator->get_random_certification_setting();
+        $paramsprogram1['certifid'] = $this->program_generator->create_certification_settings(0, $actperiod, $winperiod, $recerttype);
+        $paramsprogram2['certifid'] = $this->program_generator->create_certification_settings(0, $actperiod, $winperiod, $recerttype);
         $this->certif5 = $this->getDataGenerator()->create_program($paramsprogram1); // Visible.
         $this->certif6 = $this->getDataGenerator()->create_program($paramsprogram2); // Invisible.
-
-        // Convert these programs in certifications.
-        list($actperiod, $winperiod, $recerttype) = $this->program_generator->get_random_certification_setting();
-        $this->program_generator->create_certification_settings($this->certif5->id, $actperiod, $winperiod, $recerttype);
-        $this->program_generator->create_certification_settings($this->certif6->id, $actperiod, $winperiod, $recerttype);
 
         // Assign users to the certifications.
         $this->getDataGenerator()->assign_program($this->certif5->id, array($this->user1->id));
@@ -509,6 +507,10 @@ class totara_cohort_certification_audiencevisibility_testcase extends reportcach
         // Available to students until tomorrow.
         $paramsprogram9 = array('fullname' => 'certif9', 'summary' => '', 'availablefrom' => $earlier,
                                 'availableuntil' => $tomorrow );
+        list($actperiod, $winperiod, $recerttype) = $this->program_generator->get_random_certification_setting();
+        $paramsprogram7['certifid'] = $this->program_generator->create_certification_settings(0, $actperiod, $winperiod, $recerttype);
+        $paramsprogram8['certifid'] = $this->program_generator->create_certification_settings(0, $actperiod, $winperiod, $recerttype);
+        $paramsprogram9['certifid'] = $this->program_generator->create_certification_settings(0, $actperiod, $winperiod, $recerttype);
         $this->certif7 = $this->getDataGenerator()->create_program($paramsprogram7);
         $this->certif8 = $this->getDataGenerator()->create_program($paramsprogram8);
         $this->certif9 = $this->getDataGenerator()->create_program($paramsprogram9);
@@ -517,12 +519,6 @@ class totara_cohort_certification_audiencevisibility_testcase extends reportcach
         // available to not available, we need to manually change it to available (since it was automatically calculated
         // as unavailable when created, due to the actual date being outside the given from-until).
         $DB->set_field('prog', 'available', AVAILABILITY_TO_STUDENTS, array('id' => $this->certif8->id));
-
-        // Convert these programs in certifications.
-        list($actperiod, $winperiod, $recerttype) = $this->program_generator->get_random_certification_setting();
-        $this->program_generator->create_certification_settings($this->certif7->id, $actperiod, $winperiod, $recerttype);
-        $this->program_generator->create_certification_settings($this->certif8->id, $actperiod, $winperiod, $recerttype);
-        $this->program_generator->create_certification_settings($this->certif9->id, $actperiod, $winperiod, $recerttype);
 
         // Assign users to the programs.
         $this->getDataGenerator()->assign_program($this->certif7->id, array($this->user1->id, $this->user2->id));

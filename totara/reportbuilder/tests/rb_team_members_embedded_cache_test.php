@@ -115,9 +115,15 @@ class totara_reportbuilder_rb_team_members_embedded_cache_testcase extends repor
         if ($usecache) {
             $this->enable_caching($this->report_builder_data['id']);
         }
+
         $useridalias = reportbuilder_get_extrafield_alias('user', 'namewithlinks', 'email');
-        $result = $this->get_report_result($this->report_builder_data['shortname'], array(), $usecache);
-        $this->assertCount(0, $result);
+
+        try {
+            $result = $this->get_report_result($this->report_builder_data['shortname'], array(), $usecache);
+            $this->fail('Exception expected');
+        } catch (moodle_exception $e) {
+            $this->assertSame('nopermission', $e->errorcode);
+        }
 
         $this->setUser($this->users[0]);
         $result = $this->get_report_result($this->report_builder_data['shortname'], array(), $usecache);
@@ -140,10 +146,11 @@ class totara_reportbuilder_rb_team_members_embedded_cache_testcase extends repor
 
     public function test_is_capable() {
         $this->resetAfterTest();
+        $this->setAdminUser();
 
         // Set up report and embedded object for is_capable checks.
         $shortname = $this->report_builder_data['shortname'];
-        $report = reportbuilder_get_embedded_report($shortname, array(), false, 0);
+        $report = reportbuilder::create_embedded($shortname);
         $embeddedobject = $report->embedobj;
         $userid = $this->users[1]->id;
 

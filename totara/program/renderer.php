@@ -41,6 +41,14 @@ class totara_program_renderer extends plugin_renderer_base {
     const COURSECAT_SHOW_PROGRAMS_EXPANDED_WITH_CAT = 30;
 
     /**
+     * Whether a category content is being initially rendered with children. This is mainly used by the
+     * totara_program_renderer::corsecat_tree() to render the appropriate action for the Expand/Collapse all link on
+     * page load.
+     * @var bool
+     */
+    protected $categoryexpandedonload = false;
+
+    /**
     * Generates HTML for a cancel button which is displayed on program
     * management edit screens
     *
@@ -86,8 +94,9 @@ class totara_program_renderer extends plugin_renderer_base {
     * @return str HTML fragment
     */
     public function render_current_status($data) {
+        global $CFG;
 
-        $programstatusclass = $data->statusclass;
+        $programstatusclass = $data->notification_state;
         $programstatusstring = get_string($data->statusstr, 'totara_program');
 
         if (($data->statusstr === 'notduetostartuntil') or ($data->statusstr === 'nolongeravailabletolearners')) {
@@ -107,6 +116,10 @@ class totara_program_renderer extends plugin_renderer_base {
             $coursevisibilityinfo .= html_writer::end_tag('span');
 
             $notification = $programstatusstring . $learnerinfo . $coursevisibilityinfo;
+        }
+
+        if (!empty($data->expired) && !$CFG->enablelegacyprogramassignments) {
+            $notification .= '<br/>' . get_string('ifreactivatinglearnerupdate', 'totara_program');
         }
 
         $out = $this->output->notification($notification, $programstatusclass);
@@ -285,7 +298,7 @@ class totara_program_renderer extends plugin_renderer_base {
 
             $out .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => "id", 'value' => $program->id));
             $out .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => "sesskey", 'value' => sesskey()));
-            $out .= html_writer::empty_tag('input', array('type' => 'submit', 'name' => "savechanges", 'value' => get_string('savechanges'), 'class' => 'savechanges-overview program-savechanges'));
+            $out .= html_writer::empty_tag('input', array('type' => 'submit', 'name' => "savechanges", 'value' => get_string('savechanges'), 'class' => 'savechanges-overview program-savechanges programEditContentFrm'));
         }
 
         $out .= html_writer::end_tag('form');
@@ -456,9 +469,12 @@ class totara_program_renderer extends plugin_renderer_base {
     /**
     * Generates the HTML to display the set_completion page
     *
+    * @param object $data object containing data to set default values in due date dialog
+    * @param int $programid
+    *
     * @return string HTML Fragment
     */
-    public function display_set_completion($programid = null) {
+    public function display_set_completion($programid = null, $data = null) {
         $out = '';
         $out .= html_writer::start_tag('fieldset');
         $out .= html_writer::start_tag('span', array('class' => 'legend')) . get_string('completeby', 'totara_program') . html_writer::end_tag('span');
@@ -473,26 +489,34 @@ class totara_program_renderer extends plugin_renderer_base {
             $minutes[$i] = sprintf("%02d", $i);
         }
 
+        $selectedhour = isset($data->hour) ? $data->hour : '';
+        $selectedmin = isset($data->minute) ? $data->minute : '';
+        $selecteddate = isset($data->date) ? $data->date : '';
+
+        $periodvalue = isset($data->period) ? $data->period : 0;
+        $numbervalue = isset($data->num) ? $data->num : 1;
+        $instanceid = isset($data->instance) ? $data->instance : '';
+
         $out .= html_writer::start_tag('span', array('class' => 'datepicker-wrapper'));
         $out .= html_writer::label(get_string('date', 'moodle'), 'completiontime', false, array('class' => 'accesshide'));
-        $out .= html_writer::empty_tag('input', array('class' => 'completiontime', 'type' => 'text', 'name' => "completiontime", 'placeholder' => get_string('datepickerlongyearplaceholder', 'totara_core')));
+        $out .= html_writer::empty_tag('input', array('class' => 'completiontime', 'type' => 'text', 'name' => "completiontime", 'placeholder' => get_string('datepickerlongyearplaceholder', 'totara_core'), 'value' => $selecteddate));
         $out .= html_writer::end_tag('span');
 
         // Matching display of time in RTL to what is done in lib/form/datetimeselector.php.
         if (right_to_left()) {
             $out .= ' '.get_string('datepickerattime', 'totara_core'). ' ';
             $out .= html_writer::label(get_string('minute', 'moodle'), 'completiontimeminute', false, array('class' => 'accesshide'));
-            $out .= html_writer::select($minutes, 'completiontimeminute', array(0 => '00'), false, array('name' => 'completiontimeminute', 'class' => 'completiontimeminute'));
+            $out .= html_writer::select($minutes, 'completiontimeminute', $selectedmin, false, array('name' => 'completiontimeminute', 'class' => 'completiontimeminute'));
             $out .= ':';
             $out .= html_writer::label(get_string('hour', 'moodle'), 'completiontimehour', false, array('class' => 'accesshide'));
-            $out .= html_writer::select($hours, 'completiontimehour', array(0 => '00'), false, array('name' => 'completiontimehour', 'class' => 'completiontimehour'));
+            $out .= html_writer::select($hours, 'completiontimehour', $selectedhour, false, array('name' => 'completiontimehour', 'class' => 'completiontimehour'));
         } else {
             $out .= ' '.get_string('datepickerattime', 'totara_core'). ' ';
             $out .= html_writer::label(get_string('hour', 'moodle'), 'completiontimehour', false, array('class' => 'accesshide'));
-            $out .= html_writer::select($hours, 'completiontimehour', array(0 => '00'), false, array('name' => 'completiontimehour', 'class' => 'completiontimehour'));
+            $out .= html_writer::select($hours, 'completiontimehour', $selectedhour, false, array('name' => 'completiontimehour', 'class' => 'completiontimehour'));
             $out .= ':';
             $out .= html_writer::label(get_string('minute', 'moodle'), 'completiontimeminute', false, array('class' => 'accesshide'));
-            $out .= html_writer::select($minutes, 'completiontimeminute', array(0 => '00'), false, array('name' => 'completiontimeminute', 'class' => 'completiontimeminute'));
+            $out .= html_writer::select($minutes, 'completiontimeminute', $selectedmin, false, array('name' => 'completiontimeminute', 'class' => 'completiontimeminute'));
         }
 
         $out .= ' ' . html_writer::start_tag('button', array('class' => 'fixeddate')) .
@@ -506,10 +530,10 @@ class totara_program_renderer extends plugin_renderer_base {
 
         $out .= html_writer::start_tag('div', array('id' => 'prog-completion-relative-date'));
         $out .= html_writer::tag('span', get_string('completewithin', 'totara_program'));
-        $out .= program_utilities::print_duration_selector($prefix = '', $periodelementname = 'timeperiod', $periodvalue = '', $numberelementname = 'timeamount', $numbervalue = '1', $includehours = false);
+        $out .= program_utilities::print_duration_selector($prefix = '', $periodelementname = 'timeperiod', $periodvalue, $numberelementname = 'timeamount', $numbervalue, $includehours = false);
         $out .= ' ' . get_string('of', 'totara_program') . ' ';
         $out .= $this->completion_events_dropdown("eventtype", $programid);
-        $out .= html_writer::empty_tag('input', array('id' => 'instance', 'type' => 'hidden', 'name' => "instance", 'value' => ''));
+        $out .= html_writer::empty_tag('input', array('id' => 'instance', 'type' => 'hidden', 'name' => "instance", 'value' => $instanceid));
         $out .= html_writer::link('#', '', array('id' => 'instancetitle', 'onclick' => 'handle_completion_selection()'));
         $out .= html_writer::start_tag('button', array('class' => 'relativeeventtime')) . get_string('settimerelativetoevent', 'totara_program') . html_writer::end_tag('button');
         $out .= html_writer::end_tag('div');
@@ -575,7 +599,7 @@ class totara_program_renderer extends plugin_renderer_base {
         $out = '';
         $now = time();
         if (!empty($duedate)) {
-            $out .= html_writer::empty_tag('br') . html_writer::start_tag('span', array('class' => 'plan_highlight'));
+            $out .= html_writer::empty_tag('br');
 
             if ($duedate < $now) {
                     $out .= $this->notification(get_string('overdue', 'totara_plan'), 'notifyproblem');
@@ -587,7 +611,6 @@ class totara_program_renderer extends plugin_renderer_base {
                     $out .= $this->notification(get_string('dueinxdays', 'totara_plan', $days), 'notifynotice');
                 }
             }
-            $out .= html_writer::end_tag('span');
         }
         return $out;
     }
@@ -633,6 +656,8 @@ class totara_program_renderer extends plugin_renderer_base {
             $classes[] = 'loaded';
             if (!empty($categorycontent)) {
                 $classes[] = 'with_children';
+                // Category content loaded with children.
+                $this->categoryexpandedonload = true;
                 $has_children = true;
             }
         }
@@ -811,6 +836,8 @@ class totara_program_renderer extends plugin_renderer_base {
      * @return string
      */
     protected function coursecat_tree(programcat_helper $chelper, $coursecat, $type = 'program', $depth = 0) {
+        // Reset the category expanded flag for this program/certification category tree first.
+        $this->categoryexpandedonload = false;
         $categorycontent = $this->coursecat_category_content($chelper, $coursecat, $depth, $type);
         if (empty($categorycontent)) {
             return '';
@@ -818,8 +845,6 @@ class totara_program_renderer extends plugin_renderer_base {
 
         // Generate an id and the required JS call to make this a nice widget.
         $id = html_writer::random_id('course_category_tree');
-        $this->page->requires->js_init_call('M.util.init_toggle_class_on_click',
-                        array($id, '.category.with_children.loaded > .info .name', 'collapsed', '.category.with_children.loaded'));
 
         $content = '';
         $attributes = $chelper->get_and_erase_attributes('course_category_tree clearfix');
@@ -832,22 +857,23 @@ class totara_program_renderer extends plugin_renderer_base {
                 'expand-all',
             );
 
+            // Check if the category content contains subcategories with children's content loaded.
+            if ($this->categoryexpandedonload) {
+                $classes[] = 'collapse-all';
+                $linkname = get_string('collapseall');
+            } else {
+                $linkname = get_string('expandall');
+            }
+
+
             // Show the collapse/expand.
             $content .= html_writer::start_tag('div', array('class' => 'collapsible-actions'));
-            $content .= html_writer::link('#', $this->render(new \core\output\flex_icon('collapsed')) . get_string('expandall'),
-                array('class' => implode(' ', $classes)));
+            $content .= html_writer::link('#', $linkname, array('class' => implode(' ', $classes)));
             $content .= html_writer::end_tag('div');
             $this->page->requires->strings_for_js(array('collapseall', 'expandall'), 'moodle');
         }
 
         $content .= html_writer::tag('div', $categorycontent, array('class' => 'content'));
-
-        if ($coursecat->get_children_count() && $chelper->get_subcat_depth() != 1) {
-            $content .= html_writer::start_tag('div', array('class' => 'controls'));
-            $content .= html_writer::tag('div', get_string('collapseall'), array('class' => 'addtoall expandall'));
-            $content .= html_writer::tag('div', get_string('expandall'), array('class' => 'removefromall collapseall'));
-            $content .= html_writer::end_tag('div');
-        }
 
         $content .= html_writer::end_tag('div');
 
@@ -861,44 +887,53 @@ class totara_program_renderer extends plugin_renderer_base {
      *
      * @param int|stdClass|coursecat $category
      * @param string $viewtype 'program' or 'certification'
-     * @param bool $subcategoryforajax true if we want to render just a subcategory for ajax
+     * @param bool $subcategoryforajax true if we want to render just a subcategory for ajax. @deprecated 12.0 No longer used by internal code.
      * @return html string
      */
-    public function program_category($category, $viewtype = 'program', $subcategoryforajax = false) {
+    public function program_category($category, $viewtype = 'program', $subcategoryforajax = null) {
         global $CFG;
         require_once($CFG->libdir . '/coursecatlib.php');
+
+        if ($subcategoryforajax) {
+            debugging('The $subcategoryforajax parameter in totara_program_renderer::program_category has been deprecated.',
+                DEBUG_DEVELOPER);
+        }
+
         $coursecat = coursecat::get(is_object($category) ? $category->id : $category);
         $site = get_site();
         $output = '';
 
-        if (!$subcategoryforajax) {
-            $this->include_js();
+        $label = ($viewtype == 'program') ? get_string('programs', 'totara_program') :
+                                            get_string('certifications', 'totara_certification');
 
-            $this->page->set_button($this->program_search_form($viewtype, '', 'navbar'));
-            $label = ($viewtype == 'program') ? get_string('programcategories', 'totara_program') :
-                                                get_string('certifcategories', 'totara_certification');
-            if (!$coursecat->id) {
-                if (can_edit_in_category()) {
-                    // Add 'Manage' button instead of program search form.
-                    $titlebutton = ($viewtype == 'program' ? get_string('manageprograms', 'admin') :
-                                                             get_string('managecertifications', 'totara_certification'));
-                    $managebutton = $this->single_button(new moodle_url('/totara/program/manage.php', array('viewtype' => $viewtype)),
-                                    $titlebutton, 'get');
-                    $this->page->set_button($managebutton);
-                }
-                if (coursecat::count_all() == 1) {
-                    // There exists only one category in the system, do not display link to it.
-                    $coursecat = coursecat::get_default();
-                    $strfulllistofprograms = get_string('fulllistofprograms', 'totara_program');
-                    $this->page->set_title("$site->shortname: $strfulllistofprograms");
-                } else {
-                    $this->page->set_title($label);
-                    $this->page->navbar->add($label, new moodle_url('/totara/program/index.php', array('viewtype' => $viewtype)));
-                }
+        if (can_edit_in_category()) {
+            // Add 'Manage' button instead of program search form.
+            $titlebutton = ($viewtype == 'program' ? get_string('manageprograms', 'admin') :
+                get_string('managecertifications', 'totara_certification'));
+            $managebutton = $this->single_button(new moodle_url('/totara/program/manage.php', array('viewtype' => $viewtype)),
+                $titlebutton, 'get');
+            $this->page->set_button($managebutton);
+        }
+
+        if (!$coursecat->id) {
+            if (coursecat::count_all() == 1) {
+                // There exists only one category in the system, do not display link to it.
+                $coursecat = coursecat::get_default();
+                $strfulllistofprograms = get_string('fulllistofprograms', 'totara_program');
+                $this->page->set_title("$site->shortname: $strfulllistofprograms");
             } else {
-                $this->page->set_title("$site->shortname: ". $coursecat->get_formatted_name());
+                $this->page->set_title($label);
+                $this->page->navbar->add($label, new moodle_url('/totara/program/index.php', array('viewtype' => $viewtype)));
+            }
+        } else {
+            $title = $site->shortname;
+            if (coursecat::count_all() > 1) {
+                $title .= ": ". $coursecat->get_formatted_name();
+            }
+            $this->page->set_title($title);
 
-                // Print the category selector.
+            // Print the category selector.
+            if (coursecat::count_all() > 1) {
                 $output .= html_writer::start_tag('div', array('class' => 'categorypicker'));
                 $select = new single_select(new moodle_url('/totara/program/index.php', array('viewtype' => $viewtype)), 'categoryid',
                                 coursecat::make_categories_list(), $coursecat->id, null, 'switchcategory');
@@ -910,7 +945,7 @@ class totara_program_renderer extends plugin_renderer_base {
 
         // Print current category description.
         $chelper = new programcat_helper();
-        if (!$subcategoryforajax and $description = $chelper->get_category_formatted_description($coursecat)) {
+        if ($description = $chelper->get_category_formatted_description($coursecat)) {
             $output .= $this->box($description, array('class' => 'generalbox info'));
         }
 
@@ -933,60 +968,47 @@ class totara_program_renderer extends plugin_renderer_base {
         $programdisplayoptions['limit'] = $perpage;
         $catdisplayoptions['limit'] = $perpage;
         $hasitems = ($viewtype == 'program') ? prog_has_programs($coursecat) : certif_has_certifications($coursecat);
-        if ($browse === 'categories' || !$hasitems && $coursecat->id != 0) {
+        if (($browse === 'certifications' || $browse === 'programs') || !$coursecat->has_children()) {
+            $programdisplayoptions['offset'] = $page * $perpage;
+            $programdisplayoptions['paginationurl'] = new moodle_url($baseurl, array('browse' => $viewtype, 'viewtype' => $viewtype));
+            $catdisplayoptions['nodisplay'] = true;
+            $catdisplayoptions['viewmoreurl'] = new moodle_url($baseurl, array('browse' => 'categories', 'viewtype' => $viewtype));
+            $catdisplayoptions['viewmoretext'] = new lang_string('viewallsubcategories');
+        } else if ($browse === 'categories' || !$hasitems) {
             $programdisplayoptions['nodisplay'] = true;
             $catdisplayoptions['offset'] = $page * $perpage;
             $catdisplayoptions['paginationurl'] = new moodle_url($baseurl, array('browse' => $browse, 'viewtype' => $viewtype));
             $programdisplayoptions['viewmoreurl'] = new moodle_url($baseurl, array('viewtype' => $viewtype));
             $programdisplayoptions['viewmoretext'] = new lang_string("viewall{$viewtype}s", "totara_{$viewtype}");
         } else {
-            $browse = ($viewtype === 'certification' ? 'certifications' : 'programs');
-            if (!$coursecat->has_children()) {
-                $programdisplayoptions['offset'] = $page * $perpage;
-                $programdisplayoptions['paginationurl'] = new moodle_url($baseurl, array('browse' => $browse, 'viewtype' => $viewtype));
-                $catdisplayoptions['nodisplay'] = true;
-                $catdisplayoptions['viewmoreurl'] = new moodle_url($baseurl, array('browse' => 'categories', 'viewtype' => $viewtype));
-                $catdisplayoptions['viewmoretext'] = new lang_string('viewallsubcategories');
-            } else {
-                // We have a category that has both subcategories and programs, display pagination separately.
-                $programdisplayoptions['offset'] = $page * $perpage;
-                $programdisplayoptions['paginationurl'] = new moodle_url($baseurl, array('browse' => $browse, 'viewtype' => $viewtype));
-                $catdisplayoptions['viewmoreurl'] = new moodle_url($baseurl, array('browse' => 'categories', 'viewtype' => $viewtype, 'page' => 1));
-            }
+            // We have a category that has both subcategories and programs, display pagination separately.
+            $programdisplayoptions['offset'] = $page * $perpage;
+            $programdisplayoptions['paginationurl'] = new moodle_url($baseurl, array('browse' => $browse, 'viewtype' => $viewtype));
+            $catdisplayoptions['viewmoreurl'] = new moodle_url($baseurl, array('browse' => 'categories', 'viewtype' => $viewtype, 'page' => 1));
         }
         $chelper->set_programs_display_options($programdisplayoptions)->set_categories_display_options($catdisplayoptions);
+        // Add search form.
+        $output .= $this->program_search_form($viewtype);
 
         // Display program category tree.
         $depth = $subcategoryforajax ? $coursecat->depth : 0;
         $output .= $this->coursecat_tree($chelper, $coursecat, $viewtype, $depth);
 
-        if (!$subcategoryforajax) {
-            // Add program search form (if we are inside category it was already added to the navbar).
-            if (!$coursecat->id) {
-                $output .= $this->program_search_form($viewtype);
-            }
+        // Add action buttons.
+        $output .= $this->container_start('buttons');
+        $context = get_category_or_system_context($coursecat->id);
 
-            // Add action buttons.
-            $output .= $this->container_start('buttons');
-            $context = get_category_or_system_context($coursecat->id);
-            if ($viewtype == 'program' && has_capability('totara/program:createprogram', $context)) {
-                // Print link to create a new program, for the 1st available category.
-                if ($coursecat->id) {
-                    $url = new moodle_url('/totara/program/add.php', array('category' => $coursecat->id, 'returnto' => 'category'));
-                } else {
-                    $url = new moodle_url('/totara/program/add.php', array('category' => $CFG->defaultrequestcategory, 'returnto' => 'topcat'));
-                }
-                $output .= $this->single_button($url, get_string('addnewprogram', 'totara_program'), 'get');
-            } else if (has_capability('totara/certification:createcertification', $context)) {
-                if ($coursecat->id) {
-                    $url = new moodle_url('/totara/certification/add.php', array('category' => $coursecat->id, 'returnto' => 'category'));
-                } else {
-                    $url = new moodle_url('/totara/certification/add.php', array('category' => $CFG->defaultrequestcategory, 'returnto' => 'topcat'));
-                }
-                $output .= $this->single_button($url, get_string('addnewcertification', 'totara_certification'), 'get');
-            }
-            $output .= $this->container_end();
+        $params = ['category' => !empty($coursecat->id) ? $coursecat->id : $CFG->defaultrequestcategory];
+        $params['returnto'] = ($coursecat->id) ? 'category' : 'topcat';
+        if ($viewtype == 'program' && has_capability('totara/program:createprogram', $context)) {
+            // Print link to create a new program, for the 1st available category.
+            $url = new moodle_url('/totara/program/add.php', $params);
+            $output .= $this->single_button($url, get_string('addnewprogram', 'totara_program'), 'get');
+        } else if (has_capability('totara/certification:createcertification', $context)) {
+            $url = new moodle_url('/totara/certification/add.php', $params);
+            $output .= $this->single_button($url, get_string('addnewcertification', 'totara_certification'), 'get');
         }
+        $output .= $this->container_end();
 
         return $output;
     }
@@ -1051,14 +1073,19 @@ class totara_program_renderer extends plugin_renderer_base {
         }
         $searchurl = new moodle_url('/totara/program/search.php');
 
-        $output = html_writer::start_tag('form', array('id' => $formid, 'action' => $searchurl, 'method' => 'get'));
+        $form = array('id' => $formid, 'action' => $searchurl, 'method' => 'get', 'class' => "form-inline", 'role' => 'form');
+        $output = html_writer::start_tag('form', $form);
         $output .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'viewtype', 'value' => $type));
-        $output .= html_writer::start_tag('fieldset', array('class' => 'coursesearchbox invisiblefieldset'));
-        $output .= html_writer::tag('label', $strsearchprograms . ': ', array('for' => $inputid));
-        $output .= html_writer::empty_tag('input', array('type' => 'text', 'id' => $inputid,
-                        'size' => $inputsize, 'name' => 'search', 'value' => s($value)));
-        $output .= html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('go')));
-        $output .= html_writer::end_tag('fieldset');
+        $output .= html_writer::start_div('input-group');
+        $output .= html_writer::tag('label', $strsearchprograms, array('for' => $inputid, 'class' => 'sr-only'));
+        $search = array('type' => 'text', 'id' => $inputid, 'size' => $inputsize, 'name' => 'search',
+            'class' => 'form-control', 'value' => $value, 'placeholder' => $strsearchprograms);
+        $output .= html_writer::empty_tag('input', $search);
+        $button = array('type' => 'submit', 'class' => 'btn btn-default');
+        $output .= html_writer::start_span('input-group-btn');
+        $output .= html_writer::tag('button', get_string('go'), $button);
+        $output .= html_writer::end_span();
+        $output .= html_writer::end_div(); // Close form-group.
         $output .= html_writer::end_tag('form');
 
         return $output;
@@ -1244,15 +1271,12 @@ class totara_program_renderer extends plugin_renderer_base {
             $program = new program_in_list($program);
         }
         $content = '';
-        $classes = trim('coursebox clearfix '. $additionalclasses);
-        if ($chelper->get_show_programs() >= self::COURSECAT_SHOW_PROGRAMS_EXPANDED) {
-            $nametag = 'h3';
-        } else {
+        $classes = trim('panel panel-default coursebox clearfix '. $additionalclasses);
+        if ($chelper->get_show_programs() < self::COURSECAT_SHOW_PROGRAMS_EXPANDED) {
             $classes .= ' collapsed';
-            $nametag = 'div';
         }
         $content .= html_writer::start_tag('div', array('class' => $classes, 'data-programid' => $program->id));
-        $content .= html_writer::start_tag('div', array('class' => 'info'));
+        $content .= html_writer::start_tag('div', array('class' => 'panel-heading info'));
 
         $programname = format_string($program->fullname);
         $programicon = totara_get_icon($program->id, TOTARA_ICON_TYPE_PROGRAM);
@@ -1260,7 +1284,7 @@ class totara_program_renderer extends plugin_renderer_base {
         $programnamelink = html_writer::link(new moodle_url('/totara/program/view.php', array('id' => $program->id)),
                         $programname, array('class' => $dimmed,
                         'style' => "background-image:url({$programicon})"));
-        $content .= html_writer::tag($nametag, $programnamelink, array('class' => 'name'));
+        $content .= html_writer::tag('div', $programnamelink, array('class' => 'name'));
 
         // If we display program in collapsed form but the program has summary, display the link to the info page.
         $content .= html_writer::start_tag('div', array('class' => 'moreinfo'));
@@ -1269,6 +1293,7 @@ class totara_program_renderer extends plugin_renderer_base {
                 $url = new moodle_url('/totara/program/info.php', array('id' => $program->id));
                 $image = $this->output->flex_icon('info-circle');
                 $content .= html_writer::link($url, $image, array('title' => $this->strings->summary));
+                $this->include_js();
             }
         }
         $content .= html_writer::end_tag('div');
@@ -1461,7 +1486,7 @@ class totara_program_renderer extends plugin_renderer_base {
  */
 class programcat_helper extends coursecat_helper {
     /** @var string [none, collapsed, expanded] how (if) display programs list */
-    protected $showprograms = 20; /* totara_program_renderer::COURSECAT_SHOW_PROGRAMS_EXPANDED */
+    protected $showprograms = 10; /* totara_program_renderer::COURSECAT_SHOW_PROGRAMS_EXPANDED */
     /** @var array options to display programs list */
     protected $programsdisplayoptions = array();
 

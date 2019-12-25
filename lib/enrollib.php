@@ -532,6 +532,22 @@ function enrol_add_course_navigation(navigation_node $coursenode, $course) {
 }
 
 /**
+ * Returns rounded current time for a database query
+ *
+ * @return array containing [ round_up, round_down ]
+ */
+function enrol_round_time_for_query() {
+    // The sql query must use the following fomula:
+    //  timestart < roundUp(now) AND roundDown(now) < timeend
+    // Otherwise users cannot see their courses right after they are enrolled
+    $now = time();
+    // Rounding helps caching in DB.
+    $now1 = $now + (99 - $now % 100);   // = ...99
+    $now2 = $now - ($now % 100);        // = ...00
+    return array($now1, $now2);
+}
+
+/**
  * Returns list of courses current $USER is enrolled in and can access
  *
  * - $fields is an array of field names to ADD
@@ -541,9 +557,11 @@ function enrol_add_course_navigation(navigation_node $coursenode, $course) {
  * @param string|array $fields
  * @param string $sort
  * @param int $limit max number of courses
+ * @param array $courseids the list of course ids to filter by
  * @return array
  */
-function enrol_get_my_courses($fields = NULL, $sort = 'visible DESC,sortorder ASC', $limit = 0) {
+function enrol_get_my_courses($fields = NULL, $sort = 'visible DESC,sortorder ASC',
+                              $limit = 0, $courseids = []) {
     global $DB, $USER, $CFG;
     require_once($CFG->dirroot . '/totara/coursecatalog/lib.php');
 
@@ -609,6 +627,12 @@ function enrol_get_my_courses($fields = NULL, $sort = 'visible DESC,sortorder AS
     $wheres .= " AND {$visibilitysql} ";
     $params = array_merge($params, $visibilityparams);
 
+    if (!empty($courseids)) {
+        list($courseidssql, $courseidsparams) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED);
+        $wheres = sprintf("%s AND c.id %s", $wheres, $courseidssql);
+        $params = array_merge($params, $courseidsparams);
+    }
+
     //note: we can not use DISTINCT + text fields due to Oracle and MS limitations, that is why we have the subselect there
     $sql = "SELECT $coursefields $ccselect
               FROM {course} c
@@ -623,8 +647,9 @@ function enrol_get_my_courses($fields = NULL, $sort = 'visible DESC,sortorder AS
     $params['userid']  = $USER->id;
     $params['active']  = ENROL_USER_ACTIVE;
     $params['enabled'] = ENROL_INSTANCE_ENABLED;
-    $params['now1']    = round(time(), -2); // improves db caching
-    $params['now2']    = $params['now1'];
+    list($now1, $now2) = enrol_round_time_for_query();
+    $params['now1']    = $now1; // improves db caching
+    $params['now2']    = $now2;
 
     $courses = $DB->get_records_sql($sql, $params, 0, $limit);
 
@@ -751,7 +776,7 @@ function enrol_user_sees_own_courses($user = null) {
 }
 
 /**
- * Returns list of courses user is enrolled into without any capability checks
+ * Returns list of courses user is enrolled into with capability checks
  * - $fields is an array of fieldnames to ADD
  *   so name the fields you really need, which will
  *   be added and uniq'd
@@ -813,8 +838,9 @@ function enrol_get_all_users_courses($userid, $onlyactive = false, $fields = NUL
 
     if ($onlyactive) {
         $subwhere = "WHERE ue.status = :active AND e.status = :enabled AND ue.timestart < :now1 AND (ue.timeend = 0 OR ue.timeend > :now2)";
-        $params['now1']    = round(time(), -2); // improves db caching
-        $params['now2']    = $params['now1'];
+        list($now1, $now2) = enrol_round_time_for_query();
+        $params['now1']    = $now1; // improves db caching
+        $params['now2']    = $now2;
         $params['active']  = ENROL_USER_ACTIVE;
         $params['enabled'] = ENROL_INSTANCE_ENABLED;
     } else {
@@ -829,8 +855,8 @@ function enrol_get_all_users_courses($userid, $onlyactive = false, $fields = NUL
     $visibilitysql = '';
     $visibilityparams = array();
     if ($onlyactive) {
-    // Take into account the visibility of the courses.
-    list($visibilitysql, $visibilityparams) = totara_visibility_where($userid, 'c.id', 'c.visible', 'c.audiencevisible');
+        // Take into account the visibility of the courses.
+        list($visibilitysql, $visibilityparams) = totara_visibility_where($userid, 'c.id', 'c.visible', 'c.audiencevisible');
         $visibilitysql = "AND {$visibilitysql}";
     }
 
@@ -1327,10 +1353,10 @@ function get_enrolled_join(context $context, $useridcolumn, $onlyactive = false,
         }
 
         if ($onlyactive || $onlysuspended) {
-            $now = round(time(), -2); // Rounding helps caching in DB.
+            list($now1, $now2) = enrol_round_time_for_query(); // Rounding helps caching in DB.
             $params = array_merge($params, array($prefix . 'enabled' => ENROL_INSTANCE_ENABLED,
                     $prefix . 'active' => ENROL_USER_ACTIVE,
-                    $prefix . 'now1' => $now, $prefix . 'now2' => $now));
+                    $prefix . 'now1' => $now1, $prefix . 'now2' => $now2));
         }
     }
 
@@ -2437,7 +2463,11 @@ abstract class enrol_plugin {
         $participants->close();
 
         // now clean up all remainders that were not removed correctly
-        $DB->delete_records('groups_members', array('itemid'=>$instance->id, 'component'=>'enrol_'.$name));
+        if ($gms = $DB->get_records('groups_members', array('itemid' => $instance->id, 'component' => 'enrol_' . $name))) {
+            foreach ($gms as $gm) {
+                groups_remove_member($gm->groupid, $gm->userid);
+            }
+        }
         $DB->delete_records('role_assignments', array('itemid'=>$instance->id, 'component'=>'enrol_'.$name));
         $DB->delete_records('user_enrolments', array('enrolid'=>$instance->id));
 
@@ -3082,5 +3112,52 @@ abstract class enrol_plugin {
             }
         }
         return $errors;
+    }
+
+    /**
+     * Translate the expirynotify/notifyall database fields into the expirynotify form field.
+     * @since Totara 11.13, 12.4, 13.0
+     *
+     * @param stdClass $fields
+     */
+    final protected static function fixup_expirynotify_from_database(&$fields) {
+        // Merge these two settings to one value for the single selection element.
+        if ($fields instanceof \stdClass) {
+            if ($fields->notifyall && $fields->expirynotify) {
+                $fields->expirynotify = 2;
+            }
+            unset($fields->notifyall);
+        } else {
+            throw new coding_exception('Invalid parameter type');
+        }
+    }
+
+    /**
+     * Translate the expirynotify form field into the expirynotify/notifyall database fields
+     * @since Totara 11.13, 12.4, 13.0
+     *
+     * @param array|stdClass $fields
+     */
+    final protected static function fixup_expirynotify_to_database(&$fields) {
+        // In the form we are representing 2 db columns with one field.
+        if ($fields instanceof \stdClass) {
+            if ($fields->expirynotify == 2) {
+                $fields->expirynotify = 1;
+                $fields->notifyall = 1;
+            } else {
+                $fields->notifyall = 0;
+            }
+        } else if (is_array($fields)) {
+            if (!empty($fields) && !empty($fields['expirynotify'])) {
+                if ($fields['expirynotify'] == 2) {
+                    $fields['expirynotify'] = 1;
+                    $fields['notifyall'] = 1;
+                } else {
+                    $fields['notifyall'] = 0;
+                }
+            }
+        } else {
+            throw new coding_exception('Invalid parameter type');
+        }
     }
 }

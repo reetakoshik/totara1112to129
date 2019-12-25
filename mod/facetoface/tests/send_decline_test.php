@@ -27,10 +27,8 @@ global $CFG;
 require_once("{$CFG->dirroot}/mod/facetoface/lib.php");
 require_once("{$CFG->dirroot}/mod/facetoface/notification/lib.php");
 
-/**
- * Class mod_facetoface_send_decline_testcase
- */
 class mod_facetoface_send_decline_testcase extends advanced_testcase {
+
 	/**
 	 * Setting up the database environment for the
 	 * test case. The steps are:
@@ -55,7 +53,7 @@ class mod_facetoface_send_decline_testcase extends advanced_testcase {
 		$generator = $this->getDataGenerator()->get_plugin_generator("mod_facetoface");
 		$facetoface = $generator->create_instance((object)[
 			'course' => $course->id,
-            'approvaloptions' => 'approval_manager'
+            'approvaltype' => mod_facetoface\seminar::APPROVAL_MANAGER
 		]);
 
 		$time = time() + (DAYSECS * 2);
@@ -84,29 +82,26 @@ class mod_facetoface_send_decline_testcase extends advanced_testcase {
 		$user = $this->getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($user->id, $course->id);
 
-        $this->create_signup($user, $session, $facetoface, $course);
+        $this->create_signup($user, $session);
         return [$facetoface, $session, $user];
 	}
 
     /**
-     * @param stdClass $learner
-     * @param stdClass $event
-     * @param stdClass $facetoface
-     * @param stdClass $course
+     * @param stdClass $user
+     * @param stdClass $session
      */
-	private function create_signup(stdClass $learner, stdClass $event, stdClass $facetoface, stdClass $course): void {
+	private function create_signup(stdClass $user, stdClass $session): void {
 	    /** @var mod_facetoface_generator $generator */
 	    $generator = $this->getDataGenerator()->get_plugin_generator('mod_facetoface');
 	    $refClass = new ReflectionClass($generator);
 
 	    $method = $refClass->getMethod("create_job_assignment_if_not_exists");
 	    $method->setAccessible(true);
-	    $method->invoke($generator, $learner);
+	    $method->invoke($generator, $user);
 
-	    $discountcode = 'disc1';
-	    $notificationtype = MDL_F2F_BOTH;
-	    $statuscode = MDL_F2F_STATUS_REQUESTED;
-	    facetoface_user_signup($event, $facetoface, $course, $discountcode, $notificationtype, $statuscode, $learner->id);
+	    $seminarevent = new \mod_facetoface\seminar_event($session->id);
+        $signup = \mod_facetoface\signup::create($user->id, $seminarevent);
+        \mod_facetoface\signup_helper::signup($signup);
 	}
 
     /**
@@ -129,14 +124,12 @@ class mod_facetoface_send_decline_testcase extends advanced_testcase {
         list($facetoface, $session, $user) = $this->create_facetoface_with_session_signup();
 
 		$attendee = facetoface_get_attendee($session->id, $user->id);
-		facetoface_update_signup_status(
-			$attendee->submissionid,
-			MDL_F2F_STATUS_DECLINED,
-			$USER->id
-		);
+		$signup = \mod_facetoface\signup::create($user->id, new \mod_facetoface\seminar_event($session->id));
+		$signup->switch_state(\mod_facetoface\signup\state\declined::class);
 
 		$this->redirectMessages();
-		facetoface_send_decline_notice($facetoface, $session, $user->id);
+		\mod_facetoface\notice_sender::decline($signup);
+
 		$records = $DB->get_records("facetoface_notification_hist", ['sessionid' => $session->id, 'ical_method' => 'REQUEST']);
 
 		$this->assertEmpty($records);

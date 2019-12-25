@@ -62,11 +62,11 @@ $PAGE->set_url(new moodle_url('/totara/plan/components/objective/edit.php', arra
 $plan = new development_plan($planid);
 
 $ownplan = ($USER->id == $plan->userid);
-$menuitem = ($ownplan) ? 'learningplans' : 'myteam';
+$menuitem = ($ownplan) ? '\totara_plan\totara\menu\learningplans' : '\totara_core\totara\menu\myteam';
 $PAGE->set_totara_menu_selected($menuitem);
 
 // Permission checks.
-if (!$plan->can_update()) {
+if (!$plan->can_update() && !$plan->can_request_approval()) {
     print_error('error:nopermissions', 'totara_plan');
 }
 

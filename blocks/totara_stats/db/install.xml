@@ -20,6 +20,8 @@
         <INDEX NAME="user-time-type" UNIQUE="false" FIELDS="userid, timestamp, eventtype"/>
         <INDEX NAME="time" UNIQUE="false" FIELDS="timestamp"/>
         <INDEX NAME="time-type" UNIQUE="false" FIELDS="timestamp, eventtype"/>
+        <INDEX NAME="userid-eventtype-data2" UNIQUE="false" FIELDS="userid, eventtype, data2"/>
+        <INDEX NAME="eventtype-data2" UNIQUE="false" FIELDS="eventtype, data2"/>
       </INDEXES>
     </TABLE>
   </TABLES>

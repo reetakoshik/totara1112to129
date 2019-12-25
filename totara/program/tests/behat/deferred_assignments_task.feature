@@ -36,19 +36,15 @@ Feature: Deferred assignments task for programs
 
   Scenario: Deferred assignments task assigns users when their position has been added
     Given I log in as "admin"
-    And I click on "Programs" in the totara menu
-    And I follow "Program One"
+    And I am on "Program One" program homepage
     And I press "Edit program details"
     And I switch to "Assignments" tab
-    And I select "Positions" from the "Add a new" singleselect
-    And I click on "Add" "button" in the "#category_select" "css_element"
-    And I press "Add position to program"
-    And I click on "Position One" "link" in the "Add position to program" "totaradialogue"
-    And I click on "Ok" "button" in the "Add position to program" "totaradialogue"
-    And I press "Save changes"
+    And I set the field "Add a new" to "Positions"
+    And I click on "Position One" "link" in the "Add positions to program" "totaradialogue"
+    And I click on "Ok" "button" in the "Add positions to program" "totaradialogue"
     # Run the task now to clear any flags that might have been set already
     And I run the scheduled task "\totara_program\task\assignments_deferred_task"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "fn_001 ln_001" "link"
     And I click on "Job2" "link"
     And I press "Choose position"
@@ -57,8 +53,7 @@ Feature: Deferred assignments task for programs
     And I press "Update job assignment"
     And I log out
     And I log in as "user001"
-    And I click on "Programs" in the totara menu
-    And I follow "Program One"
+    And I am on "Program One" program homepage
     # The task has not been run since the position was updated, so won't be assigned yet.
     Then I should not see "Hold position of 'Position One'"
     When I run the scheduled task "\totara_program\task\assignments_deferred_task"
@@ -67,19 +62,15 @@ Feature: Deferred assignments task for programs
 
   Scenario: Deferred assignments task assigns users when their organisation has been added
     Given I log in as "admin"
-    And I click on "Programs" in the totara menu
-    And I follow "Program One"
+    And I am on "Program One" program homepage
     And I press "Edit program details"
     And I switch to "Assignments" tab
-    And I select "Organisations" from the "Add a new" singleselect
-    And I click on "Add" "button" in the "#category_select" "css_element"
-    And I press "Add organisations to program"
+    And I set the field "Add a new" to "Organisations"
     And I click on "Organisation One" "link" in the "Add organisations to program" "totaradialogue"
     And I click on "Ok" "button" in the "Add organisations to program" "totaradialogue"
-    And I press "Save changes"
     # Run the task now to clear any flags that might have been set already
     And I run the scheduled task "\totara_program\task\assignments_deferred_task"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "fn_001 ln_001" "link"
     And I click on "Job2" "link"
     And I press "Choose organisation"
@@ -88,8 +79,7 @@ Feature: Deferred assignments task for programs
     And I press "Update job assignment"
     And I log out
     And I log in as "user001"
-    And I click on "Programs" in the totara menu
-    And I follow "Program One"
+    And I am on "Program One" program homepage
     # The task has not been run since the position was updated, so won't be assigned yet.
     Then I should not see "Member of organisation 'Organisation One'"
     When I run the scheduled task "\totara_program\task\assignments_deferred_task"

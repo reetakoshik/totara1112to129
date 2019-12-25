@@ -164,7 +164,7 @@ class edit_index_save extends XMLDBAction {
         }
         $hintsarr = array();
         foreach (explode(',', $hints) as $hint) {
-            $hint = preg_replace('/[^a-z]/', '', $hint);
+            $hint = preg_replace('/[^a-z_]/', '', $hint); // Totara: hint names may contain underscores.
             if ($hint === '') {
                 continue;
             }

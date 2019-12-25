@@ -26,7 +26,7 @@ Feature: Verify a learner cannot access a course they don't have access to via t
 
     # Hide the course.
     When I log in as "admin"
-    And I navigate to "Manage courses and categories" node in "Site administration > Courses"
+    And I navigate to "Courses and categories" node in "Site administration > Courses"
     And I click on "Hide" "link" in the "#course-listing" "css_element"
     And I log out
 

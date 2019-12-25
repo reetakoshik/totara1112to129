@@ -70,23 +70,22 @@ $canlaunch = has_capability('mod/scorm:launch', $contextmodule);
 
 $launch = false; // Does this automatically trigger a launch based on skipview.
 if ($canlaunch && $scorm->popup == 1) {
-    $orgidentifier = '';
-
     $scoid = 0;
     $orgidentifier = '';
 
     $result = scorm_get_toc($USER, $scorm, $cm->id, TOCFULLURL);
     // Set last incomplete sco to launch first.
     if (!empty($result->sco->id)) {
-        $scoid = $result->sco->id;
+        $sco = $result->sco;
     } else {
-        if ($sco = scorm_get_sco($scorm->launch, SCO_ONLY)) {
-            if (($sco->organization == '') && ($sco->launch == '')) {
-                $orgidentifier = $sco->identifier;
-            } else {
-                $orgidentifier = $sco->organization;
-            }
-            $scoid = $sco->id;
+        $sco = scorm_get_sco($scorm->launch, SCO_ONLY);
+    }
+    if (!empty($sco)) {
+        $scoid = $sco->id;
+        if (($sco->organization == '') && ($sco->launch == '')) {
+            $orgidentifier = $sco->identifier;
+        } else {
+            $orgidentifier = $sco->organization;
         }
     }
 
@@ -169,13 +168,13 @@ if (empty($launch) && ($scorm->displayattemptstatus == SCORM_DISPLAY_ATTEMPTSTAT
          $scorm->displayattemptstatus == SCORM_DISPLAY_ATTEMPTSTATUS_ENTRY)) {
     $attemptstatus = scorm_get_attempt_status($USER, $scorm, $cm);
 }
-echo $OUTPUT->box(format_module_intro('scorm', $scorm, $cm->id).$attemptstatus, 'container', 'intro');
+echo $OUTPUT->box(format_module_intro('scorm', $scorm, $cm->id).$attemptstatus, '', 'intro');
 
 // Check if SCORM available.
 list($available, $warnings) = scorm_get_availability_status($scorm);
 if (!$available) {
     $reason = current(array_keys($warnings));
-    echo $OUTPUT->box(get_string($reason, "scorm", $warnings[$reason]), "container");
+    echo $OUTPUT->box(get_string($reason, "scorm", $warnings[$reason]));
 }
 
 if ($canlaunch && $available && empty($launch)) {
@@ -187,7 +186,7 @@ if (!$canlaunch) {
 }
 
 if ($canlaunch && !empty($forcejs)) {
-    echo $OUTPUT->box(get_string("forcejavascriptmessage", "scorm"), "container forcejavascriptmessage");
+    echo $OUTPUT->box(get_string("forcejavascriptmessage", "scorm"), "forcejavascriptmessage");
 }
 
 if ($canlaunch && $scorm->popup == 1) {

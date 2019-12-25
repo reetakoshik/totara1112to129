@@ -1,0 +1,4 @@
+idnumber,fullname,frameworkidnumber,timemodified,customfield_cftext,typeidnumber,aggregationmethod
+comp1,Competency 1,compfw1,1,Some text,CompType,1
+comp2,Competency 2,compfw1,1,Other text,CompType,any
+comp3,Competency 3,compfw2,1,So much text,CompType,2

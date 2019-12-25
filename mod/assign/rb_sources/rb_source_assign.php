@@ -25,10 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 class rb_source_assign extends rb_base_source {
-
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $defaultcolumns, $defaultfilters, $requiredcolumns;
-    public $sourcetitle;
+    use \core_course\rb\source\report_trait;
 
     public function __construct($groupid, rb_global_restriction_set $globalrestrictionset = null) {
         if ($groupid instanceof rb_global_restriction_set) {
@@ -42,6 +39,7 @@ class rb_source_assign extends rb_base_source {
 
         $this->base = '{assign_submission}';
         $this->usedcomponents[] = 'mod_assign';
+        $this->usedcomponents[] = 'totara_cohort';
         $this->joinlist = $this->define_joinlist();
         $this->columnoptions = $this->define_columnoptions();
         $this->filteroptions = $this->define_filteroptions();
@@ -129,9 +127,9 @@ class rb_source_assign extends rb_base_source {
         );
 
         // join users, courses and categories
-        $this->add_user_table_to_joinlist($joinlist, 'base', 'userid');
-        $this->add_course_table_to_joinlist($joinlist, 'assign', 'course');
-        $this->add_course_category_table_to_joinlist($joinlist, 'course', 'category');
+        $this->add_core_user_tables($joinlist, 'base', 'userid');
+        $this->add_core_course_tables($joinlist, 'assign', 'course');
+        $this->add_core_course_category_tables($joinlist, 'course', 'category');
 
         return $joinlist;
     }
@@ -154,7 +152,8 @@ class rb_source_assign extends rb_base_source {
                 array(
                     'joins' => 'assign',
                     'dbdatatype' => 'char',
-                    'outputformat' => 'text'
+                    'outputformat' => 'text',
+                    'displayfunc' => 'format_string'
                 )
             ),
 
@@ -167,7 +166,8 @@ class rb_source_assign extends rb_base_source {
                 array(
                     'joins' => 'assign',
                     'dbdatatype' => 'text',
-                    'outputformat' => 'text'
+                    'outputformat' => 'text',
+                    'displayfunc' => 'editor_textarea'
                 )
             ),
 
@@ -176,12 +176,13 @@ class rb_source_assign extends rb_base_source {
                 'assignment',
                 'status',
                 get_string('submissionstatus', 'rb_source_assign'),
-                "CASE WHEN assign_grades.grade IS NOT NULL THEN 'graded'
+                "CASE WHEN assign_grades.grade >= 0 THEN 'graded'
                       WHEN base.status = '" . ASSIGN_SUBMISSION_STATUS_SUBMITTED . "' THEN 'submitted'
+                      WHEN base.status = '" . ASSIGN_SUBMISSION_STATUS_DRAFT . "' THEN 'draft'
                       ELSE 'notsubmitted' END",
                 array(
                     'joins' => 'assign_grades',
-                    'displayfunc' => 'submission_status',
+                    'displayfunc' => 'assign_submission_status',
                     'dbdatatype' => 'text',
                     'outputformat' => 'text'
                 )
@@ -194,7 +195,7 @@ class rb_source_assign extends rb_base_source {
                 get_string('gradescalevalues', 'rb_source_assign'),
                 'scale.scale',
                 array(
-                    'displayfunc' => 'scalevalues',
+                    'displayfunc' => 'assign_scale_values',
                     'joins' => 'scale'
                 )
             ),
@@ -206,10 +207,11 @@ class rb_source_assign extends rb_base_source {
                 get_string('submissiongrade', 'rb_source_assign'),
                 'assign_grades.grade',
                 array(
-                    'displayfunc' => 'submissiongrade',
-                    'joins' => 'assign_grades',
+                    'displayfunc' => 'assign_submission_grade',
+                    'joins' => array('assign_grades', 'assign'),
                     'extrafields' => array(
-                        'scale_values' => 'scale.scale'
+                        'scale_values' => 'scale.scale',
+                        'assign_grade' => 'assign.grade'
                     )
                 )
             ),
@@ -223,7 +225,8 @@ class rb_source_assign extends rb_base_source {
                 array(
                     'joins' => 'assign_comments',
                     'dbdatatype' => 'text',
-                    'outputformat' => 'text'
+                    'outputformat' => 'text',
+                    'displayfunc' => 'editor_textarea'
                 )
             ),
 
@@ -257,10 +260,11 @@ class rb_source_assign extends rb_base_source {
                 get_string('maxgrade', 'rb_source_assign'),
                 'grade_grades.rawgrademax',
                 array(
-                    'displayfunc' => 'maxgrade',
-                    'joins' => 'grade_grades',
+                    'displayfunc' => 'assign_max_grade',
+                    'joins' => array('grade_grades', 'assign'),
                     'extrafields' => array(
-                        'scale_values' => 'scale.scale'
+                        'scale_values' => 'scale.scale',
+                        'assign_grade' => 'assign.grade'
                     )
                 )
             ),
@@ -272,19 +276,20 @@ class rb_source_assign extends rb_base_source {
                 get_string('mingrade', 'rb_source_assign'),
                 'grade_grades.rawgrademin',
                 array(
-                    'displayfunc' => 'mingrade',
-                    'joins' => 'grade_grades',
+                    'displayfunc' => 'assign_min_grade',
+                    'joins' => array('grade_grades', 'assign'),
                     'extrafields' => array(
-                        'scale_values' => 'scale.scale'
+                        'scale_values' => 'scale.scale',
+                        'assign_grade' => 'assign.grade'
                     )
                 )
             )
         );
 
         // User, course and category fields.
-        $this->add_user_fields_to_columns($columnoptions);
-        $this->add_course_fields_to_columns($columnoptions);
-        $this->add_course_category_fields_to_columns($columnoptions);
+        $this->add_core_user_columns($columnoptions);
+        $this->add_core_course_columns($columnoptions);
+        $this->add_core_course_category_columns($columnoptions);
 
         return $columnoptions;
     }
@@ -350,9 +355,9 @@ class rb_source_assign extends rb_base_source {
         );
 
         // user, course and category filters
-        $this->add_user_fields_to_filters($filteroptions);
-        $this->add_course_fields_to_filters($filteroptions);
-        $this->add_course_category_fields_to_filters($filteroptions);
+        $this->add_core_user_filters($filteroptions);
+        $this->add_core_course_filters($filteroptions);
+        $this->add_core_course_category_filters($filteroptions);
 
         return $filteroptions;
     }
@@ -415,21 +420,27 @@ class rb_source_assign extends rb_base_source {
 
     /**
      * display the assignment type
+     *
+     * @deprecated Since Totara 12.0
      * @param string $field
      * @param object $record
      * @param boolean $isexport
      */
     public function rb_display_assignmenttype($field, $record, $isexport) {
+        debugging('rb_source_assign::rb_display_assignmenttype has been deprecated since Totara 12.0', DEBUG_DEVELOPER);
         return get_string("type{$field}", 'assignment');
     }
 
     /**
      * display the scale values
+     *
+     * @deprecated Since Totara 12.0
      * @param string $field
      * @param object $record
      * @param boolean $isexport
      */
     public function rb_display_scalevalues($field, $record, $isexport) {
+        debugging('rb_source_assign::rb_display_scalevalues has been deprecated since Totara 12.0. Use mod_assign\rb\display\assign_scale_values::display', DEBUG_DEVELOPER);
         // If there's no scale values, return an empty string.
         if (empty($field)) {
             return '';
@@ -443,11 +454,14 @@ class rb_source_assign extends rb_base_source {
 
     /**
      * Display the submission grade
+     *
+     * @deprecated Since Totara 12.0
      * @param string $field
      * @param object $record
      * @param boolean $isexport
      */
     public function rb_display_submissiongrade($field, $record, $isexport) {
+        debugging('rb_source_assign::rb_display_submissiongrade has been deprecated since Totara 12.0. Use mod_assign\rb\display\assign_submission_grade::display', DEBUG_DEVELOPER);
         // If there's no grade (yet), then return a string saying so.
         // If $field is 0, it is may be $mingrade or $grade.
         if ((integer)$field < 0 || empty($field)) {
@@ -467,11 +481,14 @@ class rb_source_assign extends rb_base_source {
 
     /**
      * Display the max grade
+     *
+     * @deprecated Since Totara 12.0
      * @param string $field
      * @param object $record
      * @param boolean $isexport
      */
     public function rb_display_maxgrade($field, $record, $isexport) {
+        debugging('rb_source_assign::rb_display_maxgrade has been deprecated since Totara 12.0. Use mod_assign\rb\display\assign_max_grade::display', DEBUG_DEVELOPER);
         // if there's no scale values, return the raw grade.
         if (empty($record->scale_values)) {
             return (integer)$field;
@@ -485,11 +502,14 @@ class rb_source_assign extends rb_base_source {
 
     /**
      * Display the min grade
+     *
+     * @deprecated Since Totara 12.0
      * @param string $field
      * @param object $record
      * @param boolean $isexport
      */
     public function rb_display_mingrade($field, $record, $isexport) {
+        debugging('rb_source_assign::rb_display_mingrade has been deprecated since Totara 12.0. Use mod_assign\rb\display\assign_min_grade::display', DEBUG_DEVELOPER);
         // If there's no scale values, return the raw grade.
         if (empty($record->scale_values)) {
             return (integer)$field;
@@ -498,15 +518,5 @@ class rb_source_assign extends rb_base_source {
         // If there are scale values, work out which scale value is the minimum.
         $v = explode(',', $record->scale_values);
         return $v[0];
-    }
-
-    /**
-     * Filter assignment types
-     * @return array
-     */
-    public function rb_filter_assignmenttype() {
-        global $CFG;
-        require_once("{$CFG->dirroot}/mod/assignment/lib.php");
-        return assignment_types();
     }
 }

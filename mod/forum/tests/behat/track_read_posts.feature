@@ -1,10 +1,8 @@
-@mod @mod_forum
+@mod @mod_forum @javascript
 Feature: A teacher can set one of 3 possible options for tracking read forum posts
   In order to ease the forum posts follow up
   As a user
   I need to distinct the unread posts from the read ones
-
-  #Totara: select options must be exact match!
 
   Background:
     Given the following "users" exist:
@@ -19,9 +17,7 @@ Feature: A teacher can set one of 3 possible options for tracking read forum pos
       | student1 | C1 | student |
       | student2 | C1 | student |
     And I log in as "admin"
-    And I am on site homepage
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
 
   Scenario: Tracking forum posts off
     Given I add a "Forum" to section "1" and I fill the form with:
@@ -34,7 +30,7 @@ Feature: A teacher can set one of 3 possible options for tracking read forum pos
       | Message | Test post message |
     And I log out
     When I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should not see "1 unread post"
     And I follow "Test forum name"
     And I should not see "Track unread posts"
@@ -50,7 +46,7 @@ Feature: A teacher can set one of 3 possible options for tracking read forum pos
       | Message | Test post message |
     And I log out
     When I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "1 unread post"
     And I follow "Test forum name"
     And I follow "Don't track unread posts"
@@ -75,7 +71,7 @@ Feature: A teacher can set one of 3 possible options for tracking read forum pos
       | Message | Test post message |
     And I log out
     When I log in as "student2"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should not see "1 unread post"
     And I follow "Test forum name"
     And I should not see "Track unread posts"
@@ -83,8 +79,7 @@ Feature: A teacher can set one of 3 possible options for tracking read forum pos
   Scenario: Tracking forum posts forced with user tracking on
     Given the following config values are set as admin:
       | forum_allowforcedreadtracking | 1 |
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Given I add a "Forum" to section "1" and I fill the form with:
       | Forum name | Test forum name |
       | Forum type | Standard forum for general use |
@@ -95,19 +90,18 @@ Feature: A teacher can set one of 3 possible options for tracking read forum pos
       | Message | Test post message |
     And I log out
     When I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "1 unread post"
     And I follow "1 unread post"
     And I should not see "Don't track unread posts"
     And I follow "Test post subject"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I should not see "1 unread post"
 
   Scenario: Tracking forum posts forced with user tracking off
     Given the following config values are set as admin:
       | forum_allowforcedreadtracking | 1 |
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Given I add a "Forum" to section "1" and I fill the form with:
       | Forum name | Test forum name |
       | Forum type | Standard forum for general use |
@@ -118,7 +112,7 @@ Feature: A teacher can set one of 3 possible options for tracking read forum pos
       | Message | Test post message |
     And I log out
     When I log in as "student2"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "1 unread post"
     And I follow "1 unread post"
     And I should not see "Don't track unread posts"
@@ -129,8 +123,7 @@ Feature: A teacher can set one of 3 possible options for tracking read forum pos
   Scenario: Tracking forum posts forced (with force disabled) with user tracking on
     Given the following config values are set as admin:
       | forum_allowforcedreadtracking | 1 |
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Given I add a "Forum" to section "1" and I fill the form with:
       | Forum name | Test forum name |
       | Forum type | Standard forum for general use |
@@ -143,7 +136,7 @@ Feature: A teacher can set one of 3 possible options for tracking read forum pos
       | forum_allowforcedreadtracking | 0 |
     And I log out
     When I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "1 unread post"
     And I follow "Test forum name"
     And I follow "Don't track unread posts"
@@ -160,8 +153,7 @@ Feature: A teacher can set one of 3 possible options for tracking read forum pos
   Scenario: Tracking forum posts forced (with force disabled) with user tracking off
     Given the following config values are set as admin:
       | forum_allowforcedreadtracking | 1 |
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Given I add a "Forum" to section "1" and I fill the form with:
       | Forum name | Test forum name |
       | Forum type | Standard forum for general use |
@@ -174,51 +166,10 @@ Feature: A teacher can set one of 3 possible options for tracking read forum pos
       | forum_allowforcedreadtracking | 0 |
     And I log out
     When I log in as "student2"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should not see "1 unread post"
     And I follow "Test forum name"
     And I should not see "Track unread posts"
-
-  Scenario: General forum posts should be marked as read if they are displayed in full
-    And I turn editing mode off
-    Given the following config values are set as admin:
-      | forum_shortpost               | 20|
-      | forum_longpost                | 50|
-      | forum_trackreadposts          | 1 |
-      | forum_allowforcedreadtracking | 1 |
-    And I am on site homepage
-    And I navigate to "Front page settings" node in "Site administration > Front page"
-    And I set the field "s__frontpage[]" to "Announcements"
-    And I set the field "s__frontpageloggedin[]" to "Announcements"
-    And I press "Save changes"
-    And I am on site homepage
-    And I reload the page
-    And "Site announcements" "link" should exist in the "Main menu" "block"
-    And I click on "Site announcements" "link"
-    And I navigate to "Edit settings" node in "Forum administration"
-    And I set the following fields to these values:
-      | Read tracking | Forced |
-    And I press "Save and display"
-    And I press "Add a new topic"
-    And I set the following fields to these values:
-      | Subject | Test post subject |
-      | Message | Test post message. Simply dummy text to mark post as read if they are displayed in full |
-    And I press "Post to forum"
-    And I log out
-    When I log in as "student2"
-    And I am on site homepage
-    Then I should see "Test post message...Read the rest of this topic" in the "div .unread" "css_element"
-    And I reload the page
-    And I should see "Test post message...Read the rest of this topic" in the "div .unread" "css_element"
-    And I click on "Site announcements" "link"
-    And I should see "1" in the "//table[@class='forumheaderlist']/tbody/tr[1]/td[count(//thead//tr/th[text()='Unread']/preceding-sibling::*)+2]" "xpath_element"
-    And I am on site homepage
-    When I click on "Read the rest of this topic" "link"
-    And I reload the page
-    Then I should see "Test post message. Simply dummy text to mark post as read if they are displayed in full" in the "div .read" "css_element"
-    And I click on "Site announcements" "link"
-    And I should see "0" in the "//table[@class='forumheaderlist']/tbody/tr[1]/td[count(//thead//tr/th[text()='Unread']/preceding-sibling::*)+2]" "xpath_element"
-    And I log out
 
   Scenario: Learning forum posts should be marked as read if they are displayed in full
     Given the following config values are set as admin:
@@ -226,9 +177,7 @@ Feature: A teacher can set one of 3 possible options for tracking read forum pos
       | forum_longpost                | 50|
       | forum_trackreadposts          | 1 |
       | forum_allowforcedreadtracking | 1 |
-    And I am on site homepage
-    And I follow "Course 1"
-    Given I add a "Forum" to section "1" and I fill the form with:
+    And I add a "Forum" to section "1" and I fill the form with:
       | Forum name    | Test forum name                |
       | Forum type    | Standard forum for general use |
       | Description   | Test forum description         |
@@ -238,7 +187,7 @@ Feature: A teacher can set one of 3 possible options for tracking read forum pos
       | Message | Test post message. Simply dummy text to mark post as read if they are displayed in full |
     And I log out
     When I log in as "student2"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "1 unread post"
     And I follow "Test forum name"
     And I should see "1" in the "//table[@class='forumheaderlist']/tbody/tr[1]/td[count(//thead//tr/th[text()='Unread']/preceding-sibling::*)+2]" "xpath_element"

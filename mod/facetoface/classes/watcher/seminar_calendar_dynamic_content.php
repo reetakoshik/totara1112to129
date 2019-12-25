@@ -24,6 +24,9 @@
 namespace mod_facetoface\watcher;
 
 use \mod_facetoface\hook\calendar_dynamic_content;
+use mod_facetoface\seminar_event;
+use mod_facetoface\signup;
+use mod_facetoface\signup_helper;
 
 /**
  * Class for managing Seminar upcoming events form hooks.
@@ -39,22 +42,24 @@ class seminar_calendar_dynamic_content {
      * @param calendar_dynamic_content $hook
      */
     public static function signup(calendar_dynamic_content $hook) {
-        global $USER, $PAGE, $DB;
+        global $USER, $PAGE;
 
-        if (!$session = facetoface_get_session($hook->event->uuid)) {
+        try {
+            $seminarevent = new seminar_event($hook->event->uuid);
+        } catch (dml_exception $e) {
             return;
         }
-
         $content = '';
         $class = 'pull-right';
 
-        if (facetoface_check_signup($session->facetoface, $session->id)) {
+        $signup = signup::create($USER->id, $seminarevent);
+
+        if (!($signup->get_state() instanceof signup\state\not_set)) {
             $class .= ' text-uppercase label label-default';
-            $content = get_string('booked', 'mod_facetoface');
-        } else if (facetoface_can_user_signup($session, $USER->id)) {
-            $facetoface = $DB->get_record('facetoface', array('id' => $session->facetoface), 'multiplesessions');
-            if (!facetoface_has_unarchived_signups($session->facetoface, $USER->id)
-                || $facetoface->multiplesessions) {
+            $content = $signup->get_state()->get_string();
+        } else if (signup_helper::can_signup($signup)) {
+            $seminar = $seminarevent->get_seminar();
+            if (!$seminar->has_unarchived_signups() || $seminar->get_multiplesessions()) {
 
                 $content = \html_writer::link(
                     new \moodle_url('/mod/facetoface/signup.php',
@@ -62,7 +67,7 @@ class seminar_calendar_dynamic_content {
                             'returnurl' => $PAGE->url,
                         )
                     ),
-                    get_string('signup', 'mod_facetoface'),
+                    signup_helper::expected_signup_state($signup)->get_action_label(),
                     array('class' => 'btn btn-default btn-sm')
                 );
             }

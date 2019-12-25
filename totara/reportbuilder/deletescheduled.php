@@ -35,7 +35,7 @@ $confirm = optional_param('confirm', '', PARAM_INT); // Delete confirmation hash
 
 $PAGE->set_context(context_user::instance($USER->id));
 $PAGE->set_url('/totara/reportbuilder/deletescheduled.php', array('id' => $id));
-$PAGE->set_totara_menu_selected('myreports');
+$PAGE->set_totara_menu_selected('\totara_core\totara\menu\myreports');
 
 if (!$scheduledreport = $DB->get_record('report_builder_schedule', array('id' => $id))) {
     print_error('error:invalidreportscheduleid', 'totara_reportbuilder');
@@ -63,7 +63,7 @@ if ($confirm == 1) {
         $DB->delete_records_select('report_builder_schedule_email_external', $select, array($scheduledreport->id));
         $DB->delete_records('report_builder_schedule', array('id' => $scheduledreport->id));
         \totara_reportbuilder\event\scheduled_report_deleted::create_from_schedule($scheduledreport)->trigger();
-        $report = new reportbuilder($scheduledreport->reportid);
+        $report = reportbuilder::create($scheduledreport->reportid, null, true);
 
         // @deprecated : Triggering of "\totara_reportbuilder\event\report_updated" event for deletion of scheduled
         // reports has been deprecated. Use "\totara_reportbuilder\event\scheduled_report_deleted" instead

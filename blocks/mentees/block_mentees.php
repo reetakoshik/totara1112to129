@@ -34,7 +34,7 @@ class block_mentees extends block_base {
     }
 
     function specialization() {
-        $this->title = isset($this->config->title) ? $this->config->title : '';
+        $this->title = '';
     }
 
     function instance_allow_multiple() {
@@ -77,7 +77,7 @@ class block_mentees extends block_base {
      * @return bool
      */
     public function instance_can_be_docked() {
-        return parent::instance_can_be_docked() && isset($this->config->title) && !empty($this->config->title);
+        return parent::instance_can_be_docked() && !empty($this->get_title());
     }
 }
 

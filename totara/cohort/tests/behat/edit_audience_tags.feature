@@ -14,7 +14,7 @@ Feature: Create and edit audience pages handle tags correctly
     And I press "Continue"
 
   Scenario: Verify audience tags work as expected
-    Given I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    Given I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Add new audience"
     And I set the following fields to these values:
       | Name | Example Audience                              |

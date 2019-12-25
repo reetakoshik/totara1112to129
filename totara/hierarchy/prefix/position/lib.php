@@ -32,28 +32,8 @@ require_once("{$CFG->dirroot}/totara/hierarchy/lib.php");
 require_once("{$CFG->dirroot}/totara/core/utils.php");
 require_once("{$CFG->dirroot}/completion/data_object.php");
 
-/** @deprecated since 9.0 */
-define('POSITION_TYPE_PRIMARY',         1);
-/** @deprecated since 9.0 */
-define('POSITION_TYPE_SECONDARY',       2);
-/** @deprecated since 9.0 */
-define('POSITION_TYPE_ASPIRATIONAL',    3);
-
-// List available position types
-/** @deprecated since 9.0 */
-global $POSITION_TYPES;
-$POSITION_TYPES = array(
-    POSITION_TYPE_PRIMARY       => 'primary',
-    POSITION_TYPE_SECONDARY     => 'secondary',
-    POSITION_TYPE_ASPIRATIONAL  => 'aspirational'
-);
-
-/** @deprecated since 9.0 */
-global $POSITION_CODES;
-$POSITION_CODES = array_flip($POSITION_TYPES);
-
 /**
- * Oject that holds methods and attributes for position operations.
+ * Object that holds methods and attributes for position operations.
  * @abstract
  */
 class position extends hierarchy {
@@ -465,15 +445,6 @@ class position extends hierarchy {
     }
 
     /**
-     * @deprecated since 9.0
-     * @param mixed $posassignment
-     * @throws coding_exception
-     */
-    public static function position_label($posassignment) {
-        throw new coding_exception('position::position_label as been deprecated since 9.0. Use job assignments and position::job_assignment_label instread.');
-    }
-
-    /**
      * Returns a string formatted:
      *
      *   "<job assignment full name> (<position name>)"
@@ -506,125 +477,3 @@ class position extends hierarchy {
     }
 
 }  // class
-
-/**
- * Position assignments
- * @deprecated since 9.0
- */
-class position_assignment {
-    public function __construct() {
-        throw new coding_exception('The class position_assignment has been deprecated since 9.0. Use the \totara_job\job_assignment class instead.');
-    }
-}
-
-
-/**
- * Calcuates if a user can edit a position assignment
- *
- * @deprecated since 9.0
- * @param int $userid The user ID of the position being edited
- * @return bool True if a user is allowed to edit assignment
- */
-function pos_can_edit_position_assignment($userid) {
-
-    debugging('pos_can_edit_position_assignment has been deprecated since 9.0. Use totara_job_can_edit_job_assignments instead.',
-        DEBUG_DEVELOPER);
-
-    return totara_job_can_edit_job_assignments($userid);
-}
-
-/**
- * Return the specified user's position and organisation ids, or 0 if not currently set
- *
- * @deprecated since 9.0
- * @param bool|int $userid ID of the user to get the data for (defaults to current user)
- * @param integer $type Position type (primary, secondary, etc) to get data for
- *
- * @return array Associative array with positionid and organisationid keys
- */
-function pos_get_current_position_data($userid = false, $type = POSITION_TYPE_PRIMARY) {
-    global $USER;
-
-    debugging('pos_get_current_position_data has been deprecated since 9.0. Use job assignment code instead.', DEBUG_DEVELOPER);
-
-    if ($userid === false) {
-        $userid = $USER->id;
-    }
-
-    $jobassignment = false;
-
-    // Position assignment types will be equivalent to sortorder in job assignments.
-    if ($type == POSITION_TYPE_PRIMARY) {
-        $jobassignment = \totara_job\job_assignment::get_first($userid, false);
-    } else if ($type == POSITION_TYPE_SECONDARY) {
-        $jobassignments = \totara_job\job_assignment::get_all($userid);
-        foreach($jobassignments as $thisjobassignment) {
-            if ($thisjobassignment->sortorder == 2) {
-                $jobassignment = $thisjobassignment;
-                break;
-            }
-        }
-    } // No other position assignment types supported position and organisation ids.
-
-    if (empty($jobassignment)) {
-        $positionid = 0;
-        $organisationid = 0;
-    } else {
-        $positionid = $jobassignment->positionid;
-        $organisationid = $jobassignment->organisationid;
-    }
-
-    return array('positionid' => $positionid, 'organisationid' => $organisationid);
-}
-
-/**
- * Return the specified user's most primary position assignment
- *
- * As of 9.0, this returns a job assignment instead of a position assignment (since those no longer exist).
- * Depending on what properties of the position assignment were being used, this change may not be backwards
- * compatible for all custom code.
- *
- * @deprecated since 9.0
- * @param integer $userid ID of the user to get the data for (defaults to current user)
- *
- * @return mixed position assignment object or false if none are available
- */
-function pos_get_most_primary_position_assignment($userid = false) {
-    global $USER;
-
-    debugging('pos_get_most_primary_position_assignment has been deprecated since 9.0. Use job assignment code instead.',
-        DEBUG_DEVELOPER);
-
-    if ($userid === false) {
-        $userid = $USER->id;
-    }
-
-    $jobassignment = \totara_job\job_assignment::get_first($userid);
-
-    if (isset($jobassignment)) {
-        return $jobassignment;
-    } else {
-        return false;
-    }
-}
-
-/**
- * Return all of a user's job assignments
- *
- * @deprecated since 9.0
- * @param bool $managerreqd If true then filter out any positions with no manager
- * @param bool|integer $userid ID of the user to get the data for (defaults to current user)
- *
- * @return array array of position assignment objects (potentially empty)
- */
-function get_position_assignments($managerreqd = false, $userid = false) {
-    global $USER;
-
-    debugging('get_position_assignments has been deprecated since 9.0. Use job assignment code instead.', DEBUG_DEVELOPER);
-
-    if (empty($userid)) {
-        $userid = $USER->id;
-    }
-
-    return \totara_job\job_assignment::get_all($userid, $managerreqd);
-}

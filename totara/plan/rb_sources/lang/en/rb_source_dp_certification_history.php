@@ -26,6 +26,7 @@ $string['sourcetitle'] = 'Record of Learning: Previous Certifications';
 
 $string['na'] = 'N/A'; // Abbreviation for not applicable.
 $string['progress'] = 'Progress';
+$string['progresspercentage'] = 'Progress (%)';
 $string['renewalstatus'] = 'Renewal status';
 $string['status'] = 'Status';
 

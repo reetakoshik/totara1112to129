@@ -29,14 +29,22 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_html_edit_form extends block_edit_form {
+
+    /**
+     * Enable general settings
+     *
+     * @return bool
+     */
+    protected function has_general_settings() {
+        return true;
+    }
+
     protected function specific_definition($mform) {
         global $CFG;
+        parent::specific_definition($mform);
 
         // Fields for editing HTML block title and contents.
-        $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
-
-        $mform->addElement('text', 'config_title', get_string('configtitle', 'block_html'));
-        $mform->setType('config_title', PARAM_TEXT);
+        $mform->addElement('header', 'configheader', get_string('customblocksettings', 'block'));
 
         $editoroptions = array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean'=>true, 'context'=>$this->block->context);
         $mform->addElement('editor', 'config_text', get_string('configcontent', 'block_html'), null, $editoroptions);

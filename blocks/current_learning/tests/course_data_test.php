@@ -213,8 +213,13 @@ class block_current_learning_course_data_testcase extends block_current_learning
         $learning_data = $this->get_learning_data($this->user1->id);
         $this->assertTrue($this->course_in_learning_data($this->course1->id, $learning_data));
 
-        // Create a program.
-        $program1 = $this->program_generator->create_program(array('fullname' => 'Program 1'));
+        // Create a certification.
+        list($actperiod, $winperiod, $recerttype) = $this->program_generator->get_random_certification_setting();
+        $data = [
+            'fullname' => 'Program 1',
+            'certifid' => $this->program_generator->create_certification_settings(0, $actperiod, $winperiod, $recerttype),
+        ];
+        $program1 = $this->program_generator->create_program($data);
 
         // Assign user to a program.
         $this->program_generator->assign_program($program1->id, array($this->user1->id));
@@ -239,8 +244,6 @@ class block_current_learning_course_data_testcase extends block_current_learning
         $progcontent->save_content();
 
         // Create certification from the program.
-        list($actperiod, $winperiod, $recerttype) = $this->program_generator->get_random_certification_setting();
-        $this->program_generator->create_certification_settings($program1->id, $actperiod, $winperiod, $recerttype);
 
         certif_create_completion($program1->id, $this->user1->id);
 

@@ -1,0 +1,429 @@
+<?php
+/*
+ * This file is part of Totara Learn
+ *
+ * Copyright (C) 2018 onwards Totara Learning Solutions LTD
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author Murali Nair <murali.nair@totaralearning.com>
+ * @package totara_appraisal
+ */
+global $CFG;
+require_once($CFG->dirroot.'/totara/appraisal/tests/appraisal_testcase.php');
+
+use \totara_job\job_assignment;
+
+/**
+ * Tests the sending of activation notifications for appraisals.
+ */
+abstract class totara_appraisal_messages_testcase extends appraisal_testcase {
+    /**
+     * {@inheritDoc}
+     */
+    public function setUp(): void {
+        parent::setUp();
+        $this->resetAfterTest();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function tearDown(): void {
+        parent::tearDown();
+    }
+
+    /**
+     * Sets up the test environment.
+     *
+     * @return \stdClass test execution context with these fields:
+     *      - [appraisal] appraisal: test appraisal
+     *      - [array] pre_activation_appraisees: list of tuples generated from
+     *        appraisee_details().
+     *      - [array] post_activation_appraisees: list of tuples generated from
+     *        appraisee_details().
+     *      - [totara_appraisal_generator] generator: appraisal generator.
+     *      - [array[string=>mixed]] restores: system configuration values to be
+     *        restored after the test.
+     *      - [phpunit_phpmailer_sink] sink: email sink.
+     *      - [array] tasks: cron tasks
+     *      - [array] subjects: message subjects.
+     */
+    final protected function setup_test_env(): \stdClass {
+        $generator = $this->getDataGenerator();
+        $manager = $generator->create_user(['username' => 'manager']);
+        $mgrjaid = job_assignment::create_default($manager->id)->id;
+
+        $pre_activation_appraisees = array_map(
+            function (int $i) use ($manager, $mgrjaid): array {
+                return $this->appraisee_details("bf$i", $manager, $mgrjaid);
+            },
+            range(0, 1) // 2 appraisees per manager assigned before activation
+        );
+
+        $post_activation_appraisees = array_map(
+            function (int $i) use ($manager, $mgrjaid): array {
+                return $this->appraisee_details("af$i", $manager, $mgrjaid);
+            },
+            range(0, 1) // 2 appraisees per manager assigned after activation
+        );
+
+        $appraisal_generator = $generator->get_plugin_generator('totara_appraisal');
+        $appraisal = $appraisal_generator->create_appraisal();
+
+        $appraisalid = $appraisal->id;
+        $roles = [
+            appraisal::ROLE_LEARNER => appraisal::ACCESS_CANANSWER,
+            appraisal::ROLE_MANAGER => appraisal::ACCESS_CANANSWER
+        ];
+        $stage = $appraisal_generator->create_stage($appraisalid);
+        $page = $appraisal_generator->create_page($stage->id);
+        $appraisal_generator->create_question($page->id, ['roles' => $roles]);
+
+        // Each appraisal has two activation messages.
+        $message_subjects = [
+            'fixed for all recipients even with placeholders: [appraisalname]',
+            'varies because of placeholder [appraisalname] for [userusername]'
+        ];
+        array_map(
+            function (string $subject) use ($appraisal_generator, $roles, $appraisalid): void {
+                $options = [
+                    'roles' => array_keys($roles),
+                    'name' => $subject
+                ];
+                $appraisal_generator->create_message($appraisalid, $options);
+            },
+            $message_subjects
+        );
+
+        $restores = $this->restorable_config_values();
+
+        return (object) [
+            'appraisal' => $appraisal,
+            'pre_activation_appraisees' => $pre_activation_appraisees,
+            'post_activation_appraisees' => $post_activation_appraisees,
+            'generator' => $appraisal_generator,
+            'restores' => $restores,
+            'sink' => $this->redirectEmails(),
+            'tasks' => [
+                new totara_appraisal\task\scheduled_messages(),
+                new totara_appraisal\task\update_learner_assignments_task(),
+                new totara_appraisal\task\cleanup_task()
+            ],
+            'subjects' => $message_subjects
+        ];
+    }
+
+    /**
+     * Cleans up the test environment after a test.
+     *
+     * @param \stdClass $context test context as generated by setup_test_env().
+     */
+    final protected function cleanup_test_env(
+        \stdClass $context
+    ): void {
+        $context->appraisal->close();
+        $context->sink->close();
+
+        foreach ($context->restores as $key => $value) {
+            set_config($key, $value);
+        }
+    }
+
+    /**
+     * Generates a (user, manager, cohort containing that user, appraisee ja)
+     * tuple.
+     *
+     * @param string name user name.
+     * @param \stdClass $manager manager details.
+     * @param int $mgrjaid manager job assignment id.
+     *
+     * @return array the tuple.
+     */
+    private function appraisee_details(
+        string $name,
+        \stdClass $manager,
+        int $mgrjaid
+    ): array {
+        $generator = $this->getDataGenerator();
+        $appraisee = $generator->create_user(['username' => $name]);
+        $appraiseeid = $appraisee->id;
+        $appraiseeja = job_assignment::create_default(
+            $appraiseeid, ['managerjaid' => $mgrjaid]
+        );
+
+        $cohorts = $generator->get_plugin_generator('totara_cohort');
+        $cohort = $cohorts->create_cohort(['name' => $name . '_cohort']);
+        $cohorts->cohort_assign_users($cohort->id, [$appraiseeid]);
+
+        return [$appraisee, $manager, $cohort, $appraiseeja];
+    }
+
+    /**
+     * Retrieves system configuration values that need to be restored after a
+     * test runs.
+     *
+     * @return array[string=>mixed] values that must be restored.
+     */
+    private function restorable_config_values(): array {
+        $keys = [
+            'dynamicappraisals',
+            'totara_job_allowmultiplejobs'
+        ];
+
+        return array_reduce(
+            $keys,
+            function (array $acc, string $key): array {
+                $acc[$key] = get_config(null, $key);
+                return $acc;
+            },
+            []
+        );
+    }
+
+    /**
+     * Convenience function assign a cohort to the test appraisal.
+     *
+     * @param \stdClass $context test context as generated by setup_test_env().
+     * @param \stdClass $cohort cohort details.
+     *
+     * @return \stdClass the test context.
+     */
+    final protected function assign_cohort_step(
+        \stdClass $context,
+        \stdClass $cohort
+    ): \stdClass {
+        $context->generator->create_group_assignment(
+            $context->appraisal, 'cohort', $cohort->id
+        );
+
+        return $context;
+    }
+
+    /**
+     * Activates the test appraisal.
+     *
+     * @param \stdClass $context test context as generated by setup_test_env().
+     * @param array[array] $emails expected notification emails; a list of (
+     *        recipient email, subject) tuples.
+     *
+     * @return \stdClass updated test context after email check.
+     */
+    final protected function activate_step(
+        \stdClass $context,
+        array $emails
+    ): \stdClass {
+        $context->appraisal->activate();
+        return $this->check_email_step($context, $emails);
+    }
+
+    /**
+     * Convenience function to run the specified cron tasks.
+     *
+     * @param \stdClass $context test context as generated by setup_test_env().
+     * @param array[array] $emails expected notification emails; a list of (
+     *        recipient email, subject) tuples.
+     *
+     * @return \stdClass updated test context after email check.
+     */
+    final protected function cron_step(
+        \stdClass $context,
+        array $emails
+    ): \stdClass {
+        foreach ($context->tasks as $task) {
+            $task->execute();
+        }
+
+        return $this->check_email_step($context, $emails);
+    }
+
+    /**
+     * Convenience function to simulate the pressing of the "update" button when
+     * assigning users after activation.
+     *
+     * @param \stdClass $context test context as generated by setup_test_env().
+     * @param array[array] $emails expected notification emails; a list of (
+     *        recipient email, subject) tuples.
+     *
+     * @return \stdClass updated test context after email check.
+     */
+    final protected function update_button_step(
+        \stdClass $context,
+        array $emails
+    ): \stdClass {
+        $context->appraisal->check_assignment_changes();
+        return $this->check_email_step($context, $emails);
+    }
+
+    /**
+     * Convenience function to simulate appraisees first viewing the appraisal.
+     *
+     * @param \stdClass $context test context as generated by setup_test_env().
+     * @param array list of appraisees that "view" the appraisal; each element
+     *        in this list is a tuple generated from appraisee_details().
+     * @param array[array] $emails expected notification emails; a list of (
+     *        recipient email, subject) tuples.
+     *
+     * @return \stdClass updated test context after email check.
+     */
+    final protected function view_appraisal_step(
+        \stdClass $context,
+        array $appraisees,
+        array $emails
+    ): \stdClass {
+        foreach ($appraisees as $tuple) {
+            [$appraisee, , , $appraiseeja] = $tuple;
+
+            appraisal_role_assignment::get_role(
+                $context->appraisal->id,
+                $appraisee->id,
+                $appraisee->id,
+                appraisal::ROLE_LEARNER
+            )->get_user_assignment()->with_job_assignment(
+                $appraiseeja->id
+            );
+        }
+
+        return $this->check_email_step($context, $emails);
+    }
+
+    /**
+     * Checks the correct emails are sent out.
+     *
+     * @param \stdClass $context test context as generated by setup_test_env().
+     * @param array[array] $emails expected notification emails; a list of (
+     *        recipient email, subject) tuples.
+     *
+     * @return \stdClass updated test context.
+     */
+    private function check_email_step(
+        \stdClass $context,
+        array $emails
+    ): \stdClass {
+        $actual = array_map(
+            function (\stdClass $email): array {
+                // The email body is not checked because it is mangled as HTML.
+                // It is difficult to compare with plaintext content, especially
+                // when the email process converts whitespace to <br>, escaped
+                // chars, etc.
+                return [$email->to, $email->subject];
+            },
+            $context->sink->get_messages()
+        );
+        $context->sink->clear();
+
+        $this->assertCount(count($emails), $actual, 'wrong email count');
+        array_map(
+            function (array $tuple) use ($emails): void {
+                $this->assertContains($tuple, $emails, "unknown email/subject");
+            },
+            $actual
+        );
+
+        return $context;
+    }
+
+    /**
+     * Generated the expected messages for the given manager.
+     *
+     * @param array $expected existing emails to be sent. This is needed to see
+     *        if a manager email has already been generated for bulk sending.
+     * @param \stdClass $context test context as generated by setup_test_env().
+     * @param \stdClass $appraisee appraisee details.
+     * @param \stdClass $manager manager details.
+     * @param bool $is_bulk indicates whether the system sends out emails all at
+     *        at once (eg a cron run) or if messages are sent at discrete points
+     *        in time (eg learner selects a job assignment). Ultimately, this
+     *        indicates whether "duplicate" emails are expected.
+     *
+     * @return array updated expected email list.
+     */
+    final protected function emails_for_manager(
+        array $expected,
+        \stdClass $context,
+        \stdClass $appraisee,
+        \stdClass $manager,
+        bool $is_bulk
+    ): array {
+        foreach ($this->resolved_subjects($context, $appraisee) as $subject) {
+            $manager_email = [$manager->email, $subject];
+
+            if (strpos($subject, 'varies') !== false) {
+                // Changing content always gets sent.
+                $expected[] = $manager_email;
+            } else if (!$is_bulk) {
+                // Fixed content but individual appraisee processing. Duplicates
+                // are possible.
+                $expected[] = $manager_email;
+            } else if ($is_bulk && !in_array($manager_email, $expected)) {
+                // No duplicates if fixed content is sent in a bulk run.
+                $expected[] = $manager_email;
+            }
+        }
+
+        return $expected;
+    }
+
+    /**
+     * Generated the expected messages for the given appraisee.
+     *
+     * @param \stdClass $context test context as generated by setup_test_env().
+     * @param \stdClass $appraisee appraisee details.
+     *
+     * @return array updated expected email list.
+     */
+    final protected function emails_for_appraisee(
+        \stdClass $context,
+        \stdClass $appraisee
+    ): array {
+        $email = $appraisee->email;
+
+        return array_map(
+            function (string $subject) use ($email): array {
+                return [$email, $subject];
+            },
+            $this->resolved_subjects($context, $appraisee)
+        );
+    }
+
+    /**
+     * Generates the final message subjects after resolving placeholders.
+     *
+     * @param \stdClass $context test context as generated by setup_test_env().
+     * @param \stdClass $appraisee appraisee details.
+     *
+     * @return string[] final message subjects.
+     */
+    private function resolved_subjects(
+        \stdClass $context,
+        \stdClass $appraisee
+    ): array {
+        $placeholders = [
+            '[appraisalname]' => $context->appraisal->name,
+            '[userusername]' => $appraisee->username
+        ];
+
+        return array_map(
+            function (string $template) use ($placeholders): string {
+                $subject = $template;
+                foreach ($placeholders as $key => $value) {
+                    $subject = str_replace($key, $value, $subject);
+                }
+
+                return $subject;
+            },
+            $context->subjects
+        );
+    }
+}

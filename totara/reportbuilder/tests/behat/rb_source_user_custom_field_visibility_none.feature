@@ -22,7 +22,7 @@ Feature: No visibility of user report source custom field values
       | moodle/user:viewalldetails | Allow      | BigBrother | System       |           |
 
     Given I log in as "admin"
-    And I navigate to "User profile fields" node in "Site administration > Users > Accounts"
+    And I navigate to "User profile fields" node in "Site administration > Users"
     And I set the following fields to these values:
       | datatype | checkbox |
     And I set the following fields to these values:
@@ -113,7 +113,7 @@ Feature: No visibility of user report source custom field values
       | Default value                | TestTextField default value |
     And I press "Save changes"
 
-    Given I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    Given I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Maxwell Smart"
     And I follow "Edit profile"
     And I expand all fieldsets
@@ -138,7 +138,7 @@ Feature: No visibility of user report source custom field values
       | TestTextField                      | agent86 text value             |
     And I press "Update profile"
 
-    Given I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    Given I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Agent 99"
     And I follow "Edit profile"
     And I expand all fieldsets
@@ -163,7 +163,7 @@ Feature: No visibility of user report source custom field values
       | TestTextField                      | agent99 text value             |
     And I press "Update profile"
 
-    Given I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    Given I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Kaos Inc"
     And I follow "Edit profile"
     And I expand all fieldsets
@@ -173,7 +173,8 @@ Feature: No visibility of user report source custom field values
 
 
   Scenario: rb_source_user_customfield002: view report with custom field value admin only visibility as various users
-    Given I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "Invisible user report"
     And I set the field "Source" to "User"
     And I press "Create report"

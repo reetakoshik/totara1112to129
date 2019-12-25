@@ -25,5 +25,11 @@
  * Totara workflow install hook.
  */
 function xmldb_contentmarketplace_goone_install() {
+    // Enable GO1 course create workflow on install.
+    $workflow = contentmarketplace_goone\workflow\core_course\coursecreate\contentmarketplace::instance();
+    $workflow->enable();
 
+    // Enable goone Explore marketplace workflow on install.
+    $workflow = contentmarketplace_goone\workflow\totara_contentmarketplace\exploremarketplace\goone::instance();
+    $workflow->enable();
 }

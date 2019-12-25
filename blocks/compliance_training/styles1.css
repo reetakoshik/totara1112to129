@@ -1,0 +1,413 @@
+table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+td {
+	border: 1px solid;
+}
+.zc-ref, #myChart-license-text{
+display:none;
+
+}
+.graphpanel .zc-rel.zc-top > div{display: none;}
+body {font-family: Arial;}
+
+/* Style the tab */
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+/*.generaltable>tbody>tr>td, .generaltable td{
+  padding: 0;
+  border: 1px solid;
+}
+.generaltable>tbody>tr>td p{ 
+    margin:0;
+  }*/
+.table>thead>tr>th{
+	    padding: 14px !important;
+		text-align:center;
+		color:#6C6E70;
+		text-transform: none;
+		    font-size: 14px;
+}
+.table >tbody>tr>td, .table td{
+ padding:0;
+ vertical-align:middle;
+ padding-left:14px;
+  
+}
+.table >tbody>tr>td p{ 
+    margin:0;
+    border: 1px solid;
+line-height: 35px;
+width:237px;
+  }
+.table >tbody>tr>td {line-height: 35px;}
+table > tbody > tr:hover {
+    background-color:#eee !important;
+}
+
+.organistionGrid .table{
+	margin-top:1em;
+	float: left;
+    width: 100%;
+	border:0;
+	}
+.organistionGrid .table-striped>tbody>tr:nth-of-type(odd) {
+    background-color: #E6E6E0;
+}	
+.zc-menu.zc-style{
+	display:none !important;
+}
+.zc-value-box tspan{
+	color:#000 !important;
+}
+
+body.dir-rtl .graphpanel {
+    direction: ltr;
+}
+
+.graphpanel {margin-bottom: 10px; /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#686868+0,ececec+100 */
+background: #686868; /* Old browsers */
+background: -moz-linear-gradient(top, #686868 0%, #ececec 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(top, #686868 0%,#ececec 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to bottom, #686868 0%,#ececec 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#686868', endColorstr='#ececec',GradientType=0 ); /* IE6-9 */
+border-radius:12px;
+padding:10px;
+}
+
+.panel-primary>.panel-heading.headerTabLabel{
+	background: #666;
+    color: #fff;
+    padding-bottom: 0;
+    padding-left:14px;
+    padding-right: 0;
+    border-bottom: 0;
+	}
+.panel-primary>.panel-heading.headerTabLabel a{
+	color:#fff;
+}
+.headerTabLabel .nav-tabs>li.active>a{
+	border-top:solid 3px #000;
+	color:#666;
+}
+.headerTabLabel .nav>li>a:hover, .headerTabLabel .nav>li>a:focus{
+	color:#666;
+	 border-radius: 12px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+.headerTabLabel .nav-tabs>li.active>a,  .headerTabLabel .nav-tabs>li.active>a:hover{
+	border-top: solid 3px #000;
+    background-color: #f8f8f8;
+    border: 0;
+    padding: 10px; 
+    border-radius: 12px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+.headerTabLabel  .nav>li {
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+}
+.headerTabLabel .nav-tabs>li>a{
+	   border:0;
+	   font-weight:bold;
+}
+#page-content .panel{
+	padding-left:0;
+	padding-right:0;
+	padding:0;
+	}
+#page-content{
+	margin-top:2em;
+	    margin-left: 15px;
+    margin-right: 15px;
+}
+#tab2primary h3, #tab1primary h3{
+	font-size:29px;
+	padding:20px 0 10px 0;
+	text-align:left;
+}
+.buttonCenter, .btnEnroll{
+	width:100px;
+	margin:0 auto;
+	background:#219779;
+ 	color:#fff;
+	border-radius: 8px;
+    box-shadow: 0 0px 10px #666;
+	}
+h4, .panel h2, .panel h3, .panel>p:first-child{
+	color: #666;
+}
+.buttonCenter a, .btnEnroll a{
+	color:#fff;
+	padding:10px 0;
+	text-decoration:none;
+	text-align: center;
+    display: block;
+	margin-top: 6px;
+    margin-bottom: 1em;
+	
+	border-radius:6px;
+	}
+.buttonCenter a:hover, .btnEnroll a:hover{
+	text-decoration:none;
+	}
+.buttonCenter:hover, .btnEnroll:hover{
+	background:#333;
+}
+.btnEnroll{
+	background:#666;
+	}
+.btnEnroll a{
+	margin:0;
+	padding:0;
+	}
+.subheadBot h4{
+	font-size:16px;
+	font-weight:normal;
+	text-align:left;
+	display:block;
+	margin-bottom:2em;
+	}
+.organistionGrid{
+	list-style-type:none;
+	margin:0;
+	padding:0;
+ }
+.organistionGrid li{
+	list-style-type:none;
+	margin:0;
+	padding:0;
+	}
+.radioLftThree{
+	float:left;
+	}
+.rhtColorGrid{
+	float:right;
+}
+.rhtColorGrid .redBtn, .rhtColorGrid .yellowBtn, .rhtColorGrid .greenBtn{
+	    width: 114px;
+     color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.24), 0 0 2px 0 rgba(0, 0, 0, 0.12);
+    background-color: #ca402b;
+    padding: 10px;
+    text-align: center;
+	font-size: 13px;
+	}
+.rhtColorGrid .redBtn{
+	background-color:#ca402b;
+}
+.rhtColorGrid .yellowBtn{
+	background-color:#e1c829;
+}
+.rhtColorGrid .greenBtn{
+	background-color:#63bb45;
+}
+.colRed{
+	background-color:#ca402b;
+	text-align:center;
+	color:#FFF;
+}
+.colYellow{
+	background-color:#e1c829;
+	text-align:center;
+	color:#FFF;
+}
+.colGreen{
+	background-color:#63bb45;
+	text-align:center;
+	color:#FFF;
+}
+.minHeightPanel{
+	min-height: 600px;
+    text-align: left;
+    padding: 20px 34px;
+	 
+	}
+
+/* css for radio button panel */ 
+
+ 
+label{
+	position: relative;
+	cursor: pointer;
+	color: #666; 
+	font-size:22px;
+}
+
+input[type="checkbox"], input[type="radio"]{
+	position: absolute;
+	right: 9000px;
+}
+
+/*Check box*/
+input[type="checkbox"] + .label-text:before{
+	content: "\f096";
+	font-family: "FontAwesome";
+	speak: none;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+	-webkit-font-smoothing:antialiased;
+	width: 1em;
+	display: inline-block;
+	margin-right: 5px;
+}
+
+input[type="checkbox"]:checked + .label-text:before{
+	content: "\f14a";
+	color: #2980b9;
+	/*animation: effect 250ms ease-in;*/
+}
+
+input[type="checkbox"]:disabled + .label-text{
+	color: #aaa;
+}
+
+input[type="checkbox"]:disabled + .label-text:before{
+	content: "\f0c8";
+	color: #ccc;
+}
+
+/*Radio box*/
+
+input[type="radio"] + .label-text:before{
+	content: "\f10c";
+	font-family: "FontAwesome";
+	speak: none;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+	-webkit-font-smoothing:antialiased;
+	width: 1em;
+	display: inline-block;
+	margin-right: 5px;
+}
+
+input[type="radio"]:checked + .label-text:before{
+	content: "\f192";
+	color: #63BB45;
+	/*animation: effect 250ms ease-in;*/
+}
+
+input[type="radio"]:disabled + .label-text{
+	color: #aaa;
+}
+
+input[type="radio"]:disabled + .label-text:before{
+	content: "\f111";
+	color: #ccc;
+}
+
+/*Radio Toggle*/
+
+.toggle input[type="radio"] + .label-text:before{
+	content: "\f204";
+	font-family: "FontAwesome";
+	speak: none;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+	-webkit-font-smoothing:antialiased;
+	width: 1em;
+	display: inline-block;
+	margin-right: 10px;
+}
+
+.toggle input[type="radio"]:checked + .label-text:before{
+	content: "\f205";
+	color: #63BB45;
+	/*animation: effect 250ms ease-in;*/
+}
+
+.toggle input[type="radio"]:disabled + .label-text{
+	color: #aaa;
+}
+
+.toggle input[type="radio"]:disabled + .label-text:before{
+	content: "\f204";
+	color: #ccc;
+}
+.radioLftThree span.label-text small{
+	font-size:14px;
+}
+
+
+@keyframes effect{
+	0%{transform: scale(0);}
+	25%{transform: scale(1.3);}
+	75%{transform: scale(1.4);}
+	100%{transform: scale(1);}
+}
+
+.circleround{
+	padding: 10px 16px;
+    border-radius: 20px;
+    background: #fff;
+    margin-right: 18px;
+	border:solid 1px #7AC8BB;
+}
+
+.circleround, .circleroundBg{
+	padding:6px 11px;
+    border-radius: 20px;
+    background: #fff;
+    margin-right: 18px;
+	border:solid 1px #7AC8BB;
+	color:#999;
+}
+.circleroundBg{
+	background:#999;
+	border:0;
+	color:#fff;
+}
+
+.graphpanel{
+}
+
+	
+ 

@@ -102,6 +102,7 @@ trait export_type_trait {
             "$join.id",
             array(
                 'joins' => array($join),
+                'displayfunc' => 'integer'
             )
         );
 
@@ -156,6 +157,7 @@ trait export_type_trait {
                 'dbdatatype' => 'text',
                 'outputformat' => 'text',
                 'joins' => array($join),
+                'displayfunc' => 'format_text'
             )
         );
 
@@ -177,7 +179,7 @@ trait export_type_trait {
             get_string('exportincludefiledir', 'totara_userdata'),
             "$join.includefiledir",
             array(
-                'displayfunc' => 'yes_no',
+                'displayfunc' => 'yes_or_no',
                 'joins' => array($join),
             )
         );

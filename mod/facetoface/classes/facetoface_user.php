@@ -52,27 +52,14 @@ class facetoface_user extends \core_user {
      * @return stdClass     The dummy user object
      */
     public static function get_facetoface_user() {
-        global $CFG;
 
         // Just return the cached user object.
         if (!empty(self::$facetofaceuser)) {
             return self::$facetofaceuser;
         }
 
-        if (!empty($CFG->facetoface_fromaddress)) {
-            $fromaddress = get_config(NULL, 'facetoface_fromaddress');
-            // Create and cache the dummy object.
-            self::$facetofaceuser = parent::get_dummy_user_record();
-            self::$facetofaceuser->id = self::FACETOFACE_USER;
-            self::$facetofaceuser->email = $fromaddress;
-            self::$facetofaceuser->firstname = $fromaddress;
-            self::$facetofaceuser->username = "facetoface";
-            self::$facetofaceuser->maildisplay = 1;
-        } else {
-            // Send support msg to admin user as an absolute last measure when nothing is set.
-            self::$facetofaceuser = get_admin();
-        }
-
+        self::$facetofaceuser = parent::get_noreply_user();
+        self::$facetofaceuser->maildisplay = 1;
         // Unset emailstop to make sure support message is sent.
         self::$facetofaceuser->emailstop = 0;
         return self::$facetofaceuser;

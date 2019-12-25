@@ -108,7 +108,7 @@ class update_competencies_task extends \core\task\scheduled_task {
      * Loop through each installed evidence type and run the
      * cron() method if it exists
      *
-     * @deprecated since Totara 11.7
+     * @deprecated since Totara 12.0
      *
      * @return void
      */
@@ -345,7 +345,7 @@ class update_competencies_task extends \core\task\scheduled_task {
     }
 
     /**
-     * @deprecated since Totara 11.7
+     * @deprecated since Totara 12.0
      *
      * @param   $timestarted    int         Time we started aggregating
      * @param   $depth          object      Depth level record

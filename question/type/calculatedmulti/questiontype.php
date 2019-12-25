@@ -229,33 +229,7 @@ class qtype_calculatedmulti extends qtype_calculated {
         return $strheader;
     }
 
-    public function comment_on_datasetitems($qtypeobj, $questionid, $questiontext,
-            $answers, $data, $number) {
-
-        $comment = new stdClass();
-        $comment->stranswers = array();
-        $comment->outsidelimit = false;
-        $comment->answers = array();
-
-        $answers = fullclone($answers);
-        foreach ($answers as $key => $answer) {
-            // Evaluate the equations i.e {=5+4).
-            $anssubstituted = $this->substitute_variables($answer->answer, $data);
-            $formulas = $this->find_formulas($anssubstituted);
-            $replaces = [];
-            foreach ($formulas as $formula) {
-                if ($formulaerrors = qtype_calculated_find_formula_errors($formula)) {
-                    $str = $formulaerrors;
-                } else {
-                    eval('$str = ' . $formula . ';');
-                }
-                $replaces[$formula] = $str;
-            }
-            $anstext = str_replace(array_keys($replaces), array_values($replaces), $anssubstituted);
-            $comment->stranswers[$key] = $anssubstituted.'<br/>'.$anstext;
-        }
-        return fullclone($comment);
-    }
+    // Totara: removed overridden comment_on_datasetitems() method.
 
     public function get_virtual_qtype() {
         return question_bank::get_qtype('multichoice');

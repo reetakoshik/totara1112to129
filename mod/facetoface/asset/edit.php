@@ -24,32 +24,33 @@
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/mod/facetoface/lib.php');
+require_once($CFG->dirroot . '/totara/customfield/fieldlib.php');
 
-$id = optional_param('id', 0, PARAM_INT);
+use mod_facetoface\asset;
 
 admin_externalpage_setup('modfacetofaceassets');
 
-if ($id) {
-    $asset = $DB->get_record('facetoface_asset', array('id' => $id, 'custom' => 0), '*', MUST_EXIST);
-} else {
-    $asset = false;
+$id = optional_param('id', 0, PARAM_INT);
+$asset = new asset($id);
+
+if ($asset->get_custom()) {
+    print_error(get_string('error:incorrectassetid', 'facetoface'));
 }
 
 $assetlisturl = new moodle_url('/mod/facetoface/asset/manage.php');
 
-$form = facetoface_process_asset_form($asset, false, false,
-    function() use ($assetlisturl, $id) {
-        if (!$id) {
-            $successstr = 'assetcreatesuccess';
-        } else {
-            $successstr = 'assetupdatesuccess';
-        }
-        totara_set_notification(get_string($successstr, 'facetoface'), $assetlisturl, array('class' => 'notifysuccess'));
-    },
-    function() use ($assetlisturl) {
-        redirect($assetlisturl);
-    }
-);
+$customdata = ['asset' => $asset, 'editoroptions' => $TEXTAREA_OPTIONS];
+$form = new \mod_facetoface\form\asset_edit(null, $customdata, 'post', '', array('class' => 'dialog-nobind'), true, null, 'mform_modal');
+
+if ($form->is_cancelled()) {
+    redirect($assetlisturl);
+}
+
+if ($data = $form->get_data()) {
+    $asset = \mod_facetoface\asset_helper::save($data);
+    $message = $id ? get_string('assetcreatesuccess', 'facetoface') : get_string('assetupdatesuccess', 'facetoface');
+    totara_set_notification($message, $assetlisturl, array('class' => 'notifysuccess'));
+}
 
 $url = new moodle_url('/admin/settings.php', array('section' => 'modsettingfacetoface'));
 

@@ -64,15 +64,7 @@ class posts extends item {
      * @return int result self::RESULT_STATUS_SUCCESS, self::RESULT_STATUS_ERROR or self::RESULT_STATUS_SKIPPED
      */
     protected static function purge(target_user $user, \context $context) {
-        global $DB, $CFG;
-
-        // Use the site language for the placeholder
-        // to be independent of any users language setting.
-        $stringmanager = get_string_manager();
-        $syslang = !empty($CFG->lang) ? $CFG->lang : 'en';
-
-        $placeholderpost = $stringmanager->get_string('deletedpost', 'forum', null, $syslang);
-        $placeholderdiscussion = $stringmanager->get_string('deleteddiscussion', 'forum', null, $syslang);
+        global $DB;
 
         $join = self::get_activities_join($context, 'forum', 'fd.forum');
 
@@ -86,23 +78,13 @@ class posts extends item {
         if (!empty($posts)) {
             list($sqlinorequal, $sqlinorequalparams) = $DB->get_in_or_equal(array_keys($posts), SQL_PARAMS_NAMED);
 
-            // Replace all subjects and contents in POSTS with placeholder.
+            // Mark all posts as deleted and empty the content
             $sql = "UPDATE {forum_posts}
-                         SET subject = :placeholder1, message = :placeholder2
-                       WHERE parent > 0 AND id $sqlinorequal";
-            $params = ['placeholder1' => $placeholderpost, 'placeholder2' => $placeholderpost];
-            $params = array_merge($params, $sqlinorequalparams);
-            $DB->execute($sql, $params);
+                         SET subject = '', message = '', deleted = 1
+                       WHERE id $sqlinorequal";
+            $DB->execute($sql, $sqlinorequalparams);
 
-            // Replace all subjects and contents in DISCUSSIONS with placehs̄older.
-            $sql = "UPDATE {forum_posts}
-                         SET subject = :placeholder1, message = :placeholder2
-                       WHERE parent = 0 AND id $sqlinorequal";
-            $params = ['placeholder1' => $placeholderdiscussion, 'placeholder2' => $placeholderdiscussion];
-            $params = array_merge($params, $sqlinorequalparams);
-            $DB->execute($sql, $params);
-
-            // Replace all names for DISCUSSIONS with placeholder.
+            // Empty all names of discussions
             $select = "
                 id IN (
                    SELECT discussion
@@ -110,7 +92,7 @@ class posts extends item {
                     WHERE parent = 0 AND id $sqlinorequal
                 )
             ";
-            $DB->set_field_select('forum_discussions', 'name', $placeholderdiscussion, $select, $sqlinorequalparams);
+            $DB->set_field_select('forum_discussions', 'name', '', $select, $sqlinorequalparams);
 
             $fs = get_file_storage();
             foreach ($posts as $post) {
@@ -151,7 +133,7 @@ class posts extends item {
                     FROM {forum_posts} fp
                     JOIN {forum_discussions} fd ON fp.discussion = fd.id
                     $join
-                   WHERE fp.userid = :userid";
+                   WHERE fp.userid = :userid AND fp.deleted <> 1";
 
         $params = ['userid' => $user->id];
         $posts = $DB->get_records_sql($sql, $params);
@@ -199,36 +181,20 @@ class posts extends item {
      * @return int amount of data or negative integer status code (self::RESULT_STATUS_ERROR or self::RESULT_STATUS_SKIPPED)
      */
     protected static function count(target_user $user, \context $context) {
-        global $DB, $CFG;
-
-        // Use the site language for the placeholder
-        // to be independent of any users language setting.
-        $stringmanager = get_string_manager();
-        $syslang = !empty($CFG->lang) ? $CFG->lang : 'en';
-
-        $placeholderpost = $stringmanager->get_string('deletedpost', 'forum', null, $syslang);
-        $placeholderdiscussion = $stringmanager->get_string('deleteddiscussion', 'forum', null, $syslang);
+        global $DB;
 
         $join = self::get_activities_join($context, 'forum', 'fd.forum');
 
-        // Query the posts but ignoring the posts where content was already replaced with placeholders.
-        $sql = "SELECT COUNT(fp.id)
-                    FROM {forum_posts} fp
-                    JOIN {forum_discussions} fd ON fp.discussion = fd.id
-                    $join
-                   WHERE fp.userid = :userid AND (
-                      (parent > 0 AND message != :placeholderpost1 AND subject != :placeholderpost2) OR
-                      (parent = 0 AND message != :placeholderdiscussion1 AND subject != :placeholderdiscussion2)
-                   )";
+        // Query the posts but ignoring already deleted posts
+        $sql = "
+            SELECT COUNT(fp.id)
+            FROM {forum_posts} fp
+            JOIN {forum_discussions} fd ON fp.discussion = fd.id
+                $join
+            WHERE fp.userid = :userid AND deleted <> 1
+         ";
 
-        $params = [
-            'userid' => $user->id,
-            'placeholderpost1' => $placeholderpost,
-            'placeholderpost2' => $placeholderpost,
-            'placeholderdiscussion1' => $placeholderdiscussion,
-            'placeholderdiscussion2' => $placeholderdiscussion
-        ];
-        $count = $DB->count_records_sql($sql, $params);
+        $count = $DB->count_records_sql($sql, ['userid' => $user->id]);
 
         return $count;
     }

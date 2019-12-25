@@ -59,13 +59,19 @@ class totara_hierarchy_userdata_competency_progress_testcase extends advanced_te
     /**
      * {@inheritdoc}
      */
-    public function setUp() {
+    protected function setUp() {
+        parent::setUp();
         // This is done here because COMPETENCY_EVIDENCE_TYPE_COURSE_COMPLETION is only defined when abstract.php
         // is included and that is only done in setUpBeforeClass(). Initializing $competencytype at the declaration
         // point makes the test will fail when it runs directly on the command line.
         $this->competencytype = COMPETENCY_EVIDENCE_TYPE_COURSE_COMPLETION;
     }
 
+    protected function tearDown() {
+        $this->competencytype = null;
+
+        parent::tearDown();
+    }
 
     /**
      * Generates test competencies, normal users and the user to be purged.

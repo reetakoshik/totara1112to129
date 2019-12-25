@@ -32,7 +32,7 @@ class mod_forum_external extends external_api {
     /**
      * Describes the parameters for get_forum.
      *
-     * @return external_external_function_parameters
+     * @return external_function_parameters
      * @since Moodle 2.5
      */
     public static function get_forums_by_courses_parameters() {
@@ -97,6 +97,10 @@ class mod_forum_external extends external_api {
                 $forum->numdiscussions = forum_count_discussions($forum, $cm, $course);
                 $forum->cmid = $forum->coursemodule;
                 $forum->cancreatediscussions = forum_user_can_post_discussion($forum, null, -1, $cm, $context);
+                $forum->istracked = forum_tp_is_tracked($forum);
+                if ($forum->istracked) {
+                    $forum->unreadpostscount = forum_tp_count_forum_unread_posts($cm, $course);
+                }
 
                 // Add the forum to the array to return.
                 $arrforums[$forum->id] = $forum;
@@ -144,6 +148,9 @@ class mod_forum_external extends external_api {
                     'numdiscussions' => new external_value(PARAM_INT, 'Number of discussions in the forum', VALUE_OPTIONAL),
                     'cancreatediscussions' => new external_value(PARAM_BOOL, 'If the user can create discussions', VALUE_OPTIONAL),
                     'lockdiscussionafter' => new external_value(PARAM_INT, 'After what period a discussion is locked', VALUE_OPTIONAL),
+                    'istracked' => new external_value(PARAM_BOOL, 'If the user is tracking the forum', VALUE_OPTIONAL),
+                    'unreadpostscount' => new external_value(PARAM_INT, 'The number of unread posts for tracked forums',
+                        VALUE_OPTIONAL),
                 ), 'forum'
             )
         );
@@ -152,7 +159,7 @@ class mod_forum_external extends external_api {
     /**
      * Describes the parameters for get_forum_discussion_posts.
      *
-     * @return external_external_function_parameters
+     * @return external_function_parameters
      * @since Moodle 2.7
      */
     public static function get_forum_discussion_posts_parameters() {
@@ -242,8 +249,7 @@ class mod_forum_external extends external_api {
         $allposts = forum_get_all_discussion_posts($discussion->id, $sort, $forumtracked);
 
         foreach ($allposts as $post) {
-
-            if (!forum_user_can_see_post($forum, $discussion, $post, null, $cm)) {
+            if (!forum_user_can_see_post($forum, $discussion, $post, null, $cm, false)) {
                 $warning = array();
                 $warning['item'] = 'post';
                 $warning['itemid'] = $post->id;
@@ -267,6 +273,23 @@ class mod_forum_external extends external_api {
             } else {
                 $post->children = array();
             }
+
+            if (!forum_user_can_see_post($forum, $discussion, $post, null, $cm)) {
+                // The post is available, but has been marked as deleted.
+                // It will still be available but filled with a placeholder.
+                $post->userid = null;
+                $post->userfullname = null;
+                $post->userpictureurl = null;
+
+                $post->subject = get_string('forumsubjectdeleted', 'mod_forum');
+                $post->message = get_string('forumbodydeleted', 'mod_forum');
+
+                $post->deleted = true;
+                $posts[] = $post;
+
+                continue;
+            }
+            $post->deleted = false;
 
             if (forum_is_author_hidden($post, $forum)) {
                 $post->userid = null;
@@ -338,7 +361,8 @@ class mod_forum_external extends external_api {
                                 'canreply' => new external_value(PARAM_BOOL, 'The user can reply to posts?'),
                                 'postread' => new external_value(PARAM_BOOL, 'The post was read'),
                                 'userfullname' => new external_value(PARAM_TEXT, 'Post author full name'),
-                                'userpictureurl' => new external_value(PARAM_URL, 'Post author picture.', VALUE_OPTIONAL)
+                                'userpictureurl' => new external_value(PARAM_URL, 'Post author picture.', VALUE_OPTIONAL),
+                                'deleted' => new external_value(PARAM_BOOL, 'This post has been removed.'),
                             ), 'post'
                         )
                     ),
@@ -350,7 +374,7 @@ class mod_forum_external extends external_api {
     /**
      * Describes the parameters for get_forum_discussions_paginated.
      *
-     * @return external_external_function_parameters
+     * @return external_function_parameters
      * @since Moodle 2.8
      */
     public static function get_forum_discussions_paginated_parameters() {
@@ -843,7 +867,8 @@ class mod_forum_external extends external_api {
         $post->messageformat = FORMAT_HTML;   // Force formatting for now.
         $post->messagetrust = trusttext_trusted($context);
         $post->itemid = $options['inlineattachmentsid'];
-        $post->attachments   = $options['attachmentsid'];
+        $post->attachments = $options['attachmentsid'];
+        $post->deleted = 0;
         $fakemform = $post->attachments;
         if ($postid = forum_add_new_post($post, $fakemform)) {
 
@@ -1143,6 +1168,8 @@ class mod_forum_external extends external_api {
 
         $result = array();
         $result['status'] = $status;
+        $result['canpindiscussions'] = has_capability('mod/forum:pindiscussions', $context);
+        $result['cancreateattachment'] = forum_can_create_attachment($forum, $context);
         $result['warnings'] = $warnings;
         return $result;
     }
@@ -1157,6 +1184,10 @@ class mod_forum_external extends external_api {
         return new external_single_structure(
             array(
                 'status' => new external_value(PARAM_BOOL, 'True if the user can add discussions, false otherwise.'),
+                'canpindiscussions' => new external_value(PARAM_BOOL, 'True if the user can pin discussions, false otherwise.',
+                    VALUE_OPTIONAL),
+                'cancreateattachment' => new external_value(PARAM_BOOL, 'True if the user can add attachments, false otherwise.',
+                    VALUE_OPTIONAL),
                 'warnings' => new external_warnings()
             )
         );

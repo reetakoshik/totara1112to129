@@ -71,15 +71,15 @@ Feature: Use user source to import job assignments data in HR sync
       | username14 | jaidy         | fullx    |           |            |            | orgz         | posz     |          |                   |            | 1          |
 
     # User source setup.
-    When I navigate to "General settings" node in "Site administration > HR Import"
+    When I navigate to "Default settings" node in "Site administration > HR Import"
     And I set the following fields to these values:
-        | File Access | Upload Files |
+        | File access | Upload Files |
     And I press "Save changes"
     And I navigate to "Manage elements" node in "Site administration > HR Import > Elements"
     And I "Enable" the "Job assignment" HR Import element
     And I navigate to "Job assignment" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source | CSV |
+      | CSV | 1 |
     And I press "Save changes"
 
     # Enable all job assignment fields.
@@ -147,11 +147,11 @@ Feature: Use user source to import job assignments data in HR sync
     And I should not see "User 'manager3' does not have a job assignment and was set to be assigned as manager."
 
     # User 5 - imports failed and had no previous job assignments, so none should exist now.
-    When I am on profile page for user "username5" 
+    When I am on profile page for user "username5"
     And I should see "This user has no job assignments"
 
     # User 7 - had nothing in import file, but did have existing which should be unchanged.
-    When I am on profile page for user "username7" 
+    When I am on profile page for user "username7"
     Then I should not see "Add job assignment"
     And I click on "fullx" "link"
     Then the following fields match these values:
@@ -172,7 +172,7 @@ Feature: Use user source to import job assignments data in HR sync
     And I should see "appx appx"
 
     # User 8 - Had no existing job assignment. One should have been created.
-    When I am on profile page for user "username8" 
+    When I am on profile page for user "username8"
     And I click on "Valid and uses most fields" "link"
     Then the following fields match these values:
       | Full name          | Valid and uses most fields |
@@ -190,7 +190,7 @@ Feature: Use user source to import job assignments data in HR sync
 
     # User 9 - Had two existing job assignments. First one should have been updated with new id number.
     # Empty strings don't erase, so Full Name should still be there.
-    When I am on profile page for user "username9" 
+    When I am on profile page for user "username9"
     And I click on "fullx" "link"
     Then the following fields match these values:
       | Full name          | fullx   |
@@ -210,7 +210,7 @@ Feature: Use user source to import job assignments data in HR sync
     And I should see "appx appx"
 
     # User 9 - and their second job assignment should have not changed.
-    When I am on profile page for user "username9" 
+    When I am on profile page for user "username9"
     And I click on "fully" "link"
     Then the following fields match these values:
       | Full name          | fully   |
@@ -225,7 +225,7 @@ Feature: Use user source to import job assignments data in HR sync
 
     # User 10 - Had two existing job assignments. First one should have been updated. Id number was also the same.
     # Empty strings don't erase, so Full Name should still be there.
-    When I am on profile page for user "username10" 
+    When I am on profile page for user "username10"
     And I click on "fullx" "link"
     Then the following fields match these values:
       | Full name          | fullx   |
@@ -245,7 +245,7 @@ Feature: Use user source to import job assignments data in HR sync
     And I should see "appx appx"
 
     # User 10 - and their second job assignment should have not changed.
-    When I am on profile page for user "username10" 
+    When I am on profile page for user "username10"
     And I click on "fully" "link"
     Then the following fields match these values:
       | Full name          | fully   |
@@ -322,11 +322,11 @@ Feature: Use user source to import job assignments data in HR sync
 
 
     # User 5 - imports failed and had no previous job assignments, so none should exist now.
-    When I am on profile page for user "username5" 
+    When I am on profile page for user "username5"
     And I should see "This user has no job assignments"
 
     # User 7 - had nothing in import file, but did have existing which should be unchanged.
-    When I am on profile page for user "username7" 
+    When I am on profile page for user "username7"
     Then I should not see "Add job assignment"
     And I click on "fullx" "link"
     Then the following fields match these values:
@@ -347,7 +347,7 @@ Feature: Use user source to import job assignments data in HR sync
     And I should see "appx appx"
 
     # User 8 - Had no existing job assignment. One should have been created.
-    When I am on profile page for user "username8" 
+    When I am on profile page for user "username8"
     And I click on "Valid and uses most fields" "link"
     Then the following fields match these values:
       | Full name          | Valid and uses most fields |
@@ -365,7 +365,7 @@ Feature: Use user source to import job assignments data in HR sync
 
     # User 9 - Had two existing job assignments. First one should have been updated with new id number.
     # Empty strings erased any existing values.
-    When I am on profile page for user "username9" 
+    When I am on profile page for user "username9"
     And I click on "Unnamed job assignment (ID: newjaid)" "link"
     Then the following fields match these values:
       | Full name          | Unnamed job assignment (ID: newjaid) |
@@ -382,7 +382,7 @@ Feature: Use user source to import job assignments data in HR sync
     And I should see "appx appx"
 
     # User 9 - and their second job assignment should have not changed.
-    When I am on profile page for user "username9" 
+    When I am on profile page for user "username9"
     And I click on "fully" "link"
     Then the following fields match these values:
       | Full name          | fully   |
@@ -397,7 +397,7 @@ Feature: Use user source to import job assignments data in HR sync
 
     # User 10 - Had two existing job assignments. First one should have been updated. Id number was also the same.
     # Empty strings erase any existing values.
-    When I am on profile page for user "username10" 
+    When I am on profile page for user "username10"
     And I click on "Unnamed job assignment (ID: jaidx)" "link"
     Then the following fields match these values:
       | Full name          | Unnamed job assignment (ID: jaidx) |
@@ -414,7 +414,7 @@ Feature: Use user source to import job assignments data in HR sync
     And I should see "appx appx"
 
     # User 10 - and their second job assignment should have not changed.
-    When I am on profile page for user "username10" 
+    When I am on profile page for user "username10"
     And I click on "fully" "link"
     Then the following fields match these values:
       | Full name          | fully   |
@@ -493,11 +493,11 @@ Feature: Use user source to import job assignments data in HR sync
     And I should not see "User 'manager3' does not have a job assignment and was set to be assigned as manager."
 
     # User 5 - imports failed and had no previous job assignments, so none should exist now.
-    When I am on profile page for user "username5" 
+    When I am on profile page for user "username5"
     And I should see "This user has no job assignments"
 
     # User 7 - had nothing in import file, but did have existing which should be unchanged.
-    When I am on profile page for user "username7" 
+    When I am on profile page for user "username7"
     And I click on "fullx" "link"
     Then the following fields match these values:
       | Full name          | fullx   |
@@ -517,7 +517,7 @@ Feature: Use user source to import job assignments data in HR sync
     And I should see "appx appx"
 
     # User 8 - Had no existing job assignment. One should have been created.
-    When I am on profile page for user "username8" 
+    When I am on profile page for user "username8"
     And I click on "Valid and uses most fields" "link"
     Then the following fields match these values:
       | Full name          | Valid and uses most fields |
@@ -534,7 +534,7 @@ Feature: Use user source to import job assignments data in HR sync
     And I should see "appx appx"
 
     # User 9 - Had two existing job assignments. Nothing in the CSV matched any of them, so no updates here.
-    When I am on profile page for user "username9" 
+    When I am on profile page for user "username9"
     And I click on "fullx" "link"
     Then the following fields match these values:
       | Full name          | fullx   |
@@ -554,7 +554,7 @@ Feature: Use user source to import job assignments data in HR sync
     And I should see "appx appx"
 
     # User 9 - and their second job assignment should have not changed.
-    When I am on profile page for user "username9" 
+    When I am on profile page for user "username9"
     And I click on "fully" "link"
     Then the following fields match these values:
       | Full name          | fully   |
@@ -569,7 +569,7 @@ Feature: Use user source to import job assignments data in HR sync
 
     # User 10 - Had two existing job assignments. First one should have been updated. Id number was also the same.
     # Empty strings don't erase, so Full Name should still be there.
-    When I am on profile page for user "username10" 
+    When I am on profile page for user "username10"
     And I click on "fullx" "link"
     Then the following fields match these values:
       | Full name          | fullx   |
@@ -589,7 +589,7 @@ Feature: Use user source to import job assignments data in HR sync
     And I should see "appx appx"
 
     # User 10 - and their second job assignment should have not changed.
-    When I am on profile page for user "username10" 
+    When I am on profile page for user "username10"
     And I click on "fully" "link"
     Then the following fields match these values:
       | Full name          | fully   |
@@ -668,11 +668,11 @@ Feature: Use user source to import job assignments data in HR sync
     And I should not see "User 'manager3' does not have a job assignment and was set to be assigned as manager."
 
     # User 5 - imports failed and had no previous job assignments, so none should exist now.
-    When I am on profile page for user "username5" 
+    When I am on profile page for user "username5"
     And I should see "This user has no job assignments"
 
     # User 7 - had nothing in import file, but did have existing which should be unchanged.
-    When I am on profile page for user "username7" 
+    When I am on profile page for user "username7"
     And I click on "fullx" "link"
     Then the following fields match these values:
       | Full name          | fullx   |
@@ -692,7 +692,7 @@ Feature: Use user source to import job assignments data in HR sync
     And I should see "appx appx"
 
     # User 8 - Had no existing job assignment. One should have been created.
-    When I am on profile page for user "username8" 
+    When I am on profile page for user "username8"
     And I click on "Valid and uses most fields" "link"
     Then the following fields match these values:
       | Full name          | Valid and uses most fields |
@@ -709,7 +709,7 @@ Feature: Use user source to import job assignments data in HR sync
     And I should see "appx appx"
 
     # User 9 - Had two existing job assignments. Nothing in the CSV matched any of them, so no updates here.
-    When I am on profile page for user "username9" 
+    When I am on profile page for user "username9"
     And I click on "fullx" "link"
     Then the following fields match these values:
       | Full name          | fullx   |
@@ -729,7 +729,7 @@ Feature: Use user source to import job assignments data in HR sync
     And I should see "appx appx"
 
     # User 9 - and their second job assignment should have not changed.
-    When I am on profile page for user "username9" 
+    When I am on profile page for user "username9"
     And I click on "fully" "link"
     Then the following fields match these values:
       | Full name          | fully   |
@@ -744,7 +744,7 @@ Feature: Use user source to import job assignments data in HR sync
 
     # User 10 - Had two existing job assignments. First one should have been updated. Id number was also the same.
     # Empty strings erase.
-    When I am on profile page for user "username10" 
+    When I am on profile page for user "username10"
     And I click on "Unnamed job assignment (ID: jaidx)" "link"
     Then the following fields match these values:
       | Full name          | Unnamed job assignment (ID: jaidx) |
@@ -761,7 +761,7 @@ Feature: Use user source to import job assignments data in HR sync
     And I should see "appx appx"
 
     # User 10 - and their second job assignment should have not changed.
-    When I am on profile page for user "username10" 
+    When I am on profile page for user "username10"
     And I click on "fully" "link"
     Then the following fields match these values:
       | Full name          | fully   |

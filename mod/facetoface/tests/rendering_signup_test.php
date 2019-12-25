@@ -22,66 +22,66 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
-global $CFG;
-require_once("{$CFG->dirroot}/mod/facetoface/lib.php");
 
+/**
+ * Class mod_facetoface_rendering_signup_testcase
+ */
 class mod_facetoface_rendering_signup_testcase extends advanced_testcase {
     /**
      * @return void
      */
     public function test_rendering_signup_with_deleted_jobassignment(): void {
-        global $USER, $DB;
-        $this->resetAfterTest(true);
+        global $PAGE, $CFG, $USER, $DB;
+        $PAGE->set_url("/");
+
         $this->setAdminUser();
+        $this->resetAfterTest();
 
         $gen = $this->getDataGenerator();
+
         $course = $gen->create_course([], ['createsections' => true]);
-
-        /** @var mod_facetoface_generator $f2fgen */
-        $f2fgen = $gen->get_plugin_generator('mod_facetoface');
-        $session = $f2fgen->create_session_for_course($course);
-
-        // Update facetoface to have job assignment on signup;
-        $f2f = $DB->get_record('facetoface', ['id' => $session->facetoface]);
-        $f2f->selectjobassignmentonsignup = 1;
-        $DB->update_record('facetoface', $f2f);
-
-        // Set config to allow job assignment on signup.
-        set_config('facetoface_selectjobassignmentonsignupglobal', 1, null);
-
         $user = $gen->create_user();
         $ja = \totara_job\job_assignment::create_default($user->id);
+        $gen->enrol_user($user->id, $course->id);
 
-        // Signup user to the session with the job assignment here.
-        facetoface_user_signup(
-            $session,
-            $f2f,
-            $course,
-            'a',
-            MDL_F2F_NOTIFICATION_MANUAL,
-            MDL_F2F_STATUS_BOOKED,
-            $user->id,
-            false,
-            $USER,
-            $ja
-        );
+        /** @var mod_facetoface_generator $f2fgen */
+        $f2fgen = $gen->get_plugin_generator("mod_facetoface");
+        $f2f = $f2fgen->create_instance((object)[
+            'course' => $course->id,
+            'selectjobassignmentonsignup' => 1
+        ]);
 
-        // Then we start hard deleting the job assignment of the user and start rendering the sign
-        // up page.
+        $f2f = new \mod_facetoface\seminar($f2f->id);
+        $event = new \mod_facetoface\seminar_event();
+        $event->set_facetoface($f2f->get_id())->save();
+
+        $session = new \mod_facetoface\seminar_session();
+        $session->set_timestart(time())
+            ->set_timefinish(time() + 3600)
+            ->set_sessionid($event->get_id());
+
+        $session->save();
+
+        $signup = new \mod_facetoface\signup();
+        $signup->set_sessionid($event->get_id())
+            ->set_userid($user->id)
+            ->set_jobassignmentid($ja->id)
+            ->save();
+
+        set_config('facetoface_selectjobassignmentonsignupglobal', 1, null);
+        \mod_facetoface\signup_helper::signup($signup);
+
+        // Hard deleting the job assignment here, so that the test check the rendering.
         $DB->delete_records('job_assignment', ['id' => $ja->id]);
 
-        // Start rendering the page.
-        $submissions = facetoface_get_user_submissions(
-            $f2f->id,
-            $user->id,
-            MDL_F2F_STATUS_REQUESTED,
-            MDL_F2F_STATUS_FULLY_ATTENDED,
-            $session->id
-        );
+        // Setting this created user in session, because we need this user to be acting as an actor
+        // to load self's record.
+        $this->setUser($user);
 
-        $session->bookedsession = reset($submissions);
-        $rendered = facetoface_print_session($session, false);
+        /** @var mod_facetoface_renderer $renderer */
+        $renderer = $PAGE->get_renderer('mod_facetoface');
+        $rendered = $renderer->render_seminar_event($event, false);
 
-        $this->assertContains(get_string("missingjobassignment", "facetoface"), $rendered);
+        $this->assertContains(get_string('missingjobassignment', 'mod_facetoface'), $rendered);
     }
 }

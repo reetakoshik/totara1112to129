@@ -1119,6 +1119,20 @@ class MoodleQuickForm_staticcallback extends MoodleQuickForm_static {
         parent::__construct($elementname, $elementlabel, '');
         $this->callback = $callback;
         $this->_text = html_writer::tag('em', get_string('notanswered', 'totara_question'));
+
+        if ($callback && $callback instanceof question_base) {
+            // For some strange reason, the same question is displayed independently
+            // for every associated role that needs to answer/view the question. if
+            // the role did not provide a "real" answer, then the question would oddly
+            // display as "not answered" but with no indication of the role responsible
+            // - since the label was blank.
+            // Of course, the best place to determine what text to be displayed
+            // would be the setText() method below. However, that would even get
+            // invoked if there was no answer in the first place!
+            if (empty(trim($callback->label))) {
+                $this->_text = '';
+            }
+        }
     }
 
     /**
@@ -1127,8 +1141,35 @@ class MoodleQuickForm_staticcallback extends MoodleQuickForm_static {
      * @return string
      */
     public function setText($text) {
-        // Allow zero values for ratings questions.
+        if ($this->callback instanceof question_base) {
+            // Same problem as in constructor; this time happens when questions
+            // with different permissions for different roles occur.
+            if (empty(trim($this->callback->label))) {
+                parent::setText('');
+                return;
+            }
+        }
+
+        // Return a "no response" value when an appraisal is completed but with
+        // unanswered questions.
+        //
+        // If the user didn't enter data for a question but "completed" the appraisal
+        // for example, then many questions return a kind of "no op" value for $text.
+        // Some questions return "", multichoice classes use the multichoice::ISANSWERED_TRUE
+        // value. If the question returns a null eg date question, then it won't even get to
+        // this method (that check is done in HTML_QuickForm_element::onQuickFormEvent and it
+        // is too risky to be changed). It is simple to check for "" but it is not easy to
+        // determine whether multichoice subclasses were answered or not. Luckily, the
+        // multichoice question has a fallback: it displays a "user selected nothing"
+        // message instead.
+        $no_response = false;
         if (empty($text) && $text !== '0') {
+            $no_response = true;
+        } else if (is_string($text) && trim($text) === '') {
+            $no_response = true;
+        }
+        if ($no_response) {
+            $this->_text = html_writer::tag('em', get_string('noresponse', 'totara_question'));
             return;
         }
         $this->_text = $text;

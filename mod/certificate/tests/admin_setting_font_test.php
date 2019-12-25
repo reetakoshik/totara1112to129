@@ -90,7 +90,7 @@ class mod_certificate_admin_setting_font_testcase extends advanced_testcase {
 
         $property = new ReflectionProperty($setting1, 'choices');
         $choices = $property->getValue($setting1);
-        $this->assertInternalType('array', $choices);
+        $this->assertIsArray($choices);
         // Not all systems scandir in the same order.
         sort($defaultfonts);
         sort($choices);

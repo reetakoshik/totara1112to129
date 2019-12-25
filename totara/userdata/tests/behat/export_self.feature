@@ -25,7 +25,7 @@ Feature: Own user data exporting
 
   Scenario: Export own user data
     Given I log in as "manager"
-    And I navigate to "Export types" node in "Site administration > Users > User data management"
+    And I navigate to "Export types" node in "Site administration > User data management"
 
     And I press "Add export type"
     And I set the following Totara form fields to these values:
@@ -41,7 +41,7 @@ Feature: Own user data exporting
       | Permitted use | User exporting own data  |
       | User          | core_user-picture        |
     And I press "Add"
-    And I navigate to "Settings" node in "Site administration > Users > User data management"
+    And I navigate to "Settings" node in "Site administration > User data management"
     And I set the field "Allow users to export their own data" to "1"
     And I press "Save changes"
     And I log out
@@ -76,11 +76,11 @@ Feature: Own user data exporting
     And I log out
 
     When I log in as "manager"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "User data" "link" in the "Bob1 Learner" "table_row"
     Then I should see "2" in the "Data export requests" "definition_exact"
 
-    When I navigate to "Export types" node in "Site administration > Users > User data management"
+    When I navigate to "Export types" node in "Site administration > User data management"
     And I click on "Edit" "link" in the "Picture exporting" "table_row"
     And I set the following Totara form fields to these values:
       | Permitted use |  |

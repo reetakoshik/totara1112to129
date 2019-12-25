@@ -74,6 +74,12 @@ class totara_program_generator extends component_generator_base {
             $fullname = "{$default_name} {$id}";
             echo "\nCREATE PROGRAM $fullname";
             $data = array('fullname' => $fullname);
+            // Randomly make some as a certification.
+            if ($this->certificationcount < $certstocreate) {
+                list($actperiod, $winperiod, $recerttype) = $this->get_random_certification_setting();
+                // Covert this program to a certification.
+                $data['certifid'] = $this->create_certification_settings(0, $actperiod, $winperiod, $recerttype);
+            }
             $prog = $this->create_program($data);
             // Add 1-$size coursesets, with 1-$size random courses in each.
             $coursesets = mt_rand(1, $size);
@@ -82,11 +88,8 @@ class totara_program_generator extends component_generator_base {
             }
             // Randomly make some as a certification
             if ($this->certificationcount < $certstocreate) {
-                list($actperiod, $winperiod, $recerttype) = $this->get_random_certification_setting();
-                // Covert this program to a certification.
-                $this->create_certification_settings($prog->id, $actperiod, $winperiod, $recerttype);
                 // Get a random course and assign as the recert path.
-                $this->add_courseset_to_program($prog->id, ($cs+1), 1, CERTIFPATH_RECERT);
+                $this->add_courseset_to_program($prog->id, ($cs + 1), 1, CERTIFPATH_RECERT);
                 $this->certificationcount++;
             }
             // Now do some random user assignments.
@@ -165,8 +168,8 @@ class totara_program_generator extends component_generator_base {
         $windowperiod = isset($data['windowperiod']) ? $data['windowperiod'] : '1 month';
         $recertifydatetype  = isset($data['recertifydatetype']) ? $data['recertifydatetype'] : CERTIFRECERT_EXPIRY;
 
+        $data['certifid'] = $this->create_certification_settings(0, $activeperiod, $windowperiod, $recertifydatetype);
         $program = $this->create_program($data);
-        $this->create_certification_settings($program->id, $activeperiod, $windowperiod, $recertifydatetype);
 
         return $program->id;
     }
@@ -212,6 +215,15 @@ class totara_program_generator extends component_generator_base {
 
         $todb = (object)$properties;
         $program = program::create($todb);
+
+        $event = \totara_program\event\program_created::create(
+            [
+                'objectid' => $program->id,
+                'context' => context_program::instance($program->id),
+                'other' => ['certifid' => $todb->certifid],
+            ]
+        );
+        $event->trigger();
 
         return $program;
     }
@@ -280,7 +292,9 @@ class totara_program_generator extends component_generator_base {
     }
 
     /**
-     * Add courseset to program
+     * Add courseset to program.
+     * Note: this method require enough courses to exist in the database,
+     * otherwise it will end up in an infinite loop.
      *
      * @param int $programid id Program id
      * @param int $coursesetnum number of courseset
@@ -348,6 +362,8 @@ class totara_program_generator extends component_generator_base {
         $programcontent = $program->get_content();
         $programcontent->setup_content($rawdata);
         $programcontent->save_content();
+
+        totara_program\progress\program_progress_cache::mark_program_cache_stale($programid);
     }
 
     /**
@@ -423,6 +439,8 @@ class totara_program_generator extends component_generator_base {
         $programcontent = $program->get_content();
         $programcontent->setup_content($rawdata);
         $programcontent->save_content();
+
+        totara_program\progress\program_progress_cache::mark_program_cache_stale($program->id);
     }
 
     /**
@@ -500,6 +518,8 @@ class totara_program_generator extends component_generator_base {
 
         $program = new program($programid);
         $program->update_learner_assignments(true);
+
+        totara_program\progress\program_progress_cache::mark_program_cache_stale($programid);
     }
 
     /**
@@ -544,6 +564,8 @@ class totara_program_generator extends component_generator_base {
             $program = new program($programid);
             $program->update_learner_assignments(true);
         }
+
+        totara_program\progress\program_progress_cache::mark_program_cache_stale($programid);
     }
 
     public function fix_program_sortorder($categoryid = 0) {
@@ -562,25 +584,31 @@ class totara_program_generator extends component_generator_base {
     /**
      * Create certification settings.
      *
+     * After calling this function, you MUST pass the resulting certifid to create_program!
+     *
      * @param int $programid Program id
      * @param string $activeperiod
      * @param string $windowperiod
      * @param int $recertifydatetype
+     * @return int certifid
      */
     public function create_certification_settings($programid, $activeperiod, $windowperiod, $recertifydatetype) {
         global $DB, $CFG;
         require_once($CFG->dirroot . '/totara/program/lib.php');
 
-        $certification_todb = new stdClass;
+        if (!empty($programid)) {
+            throw new coding_exception("This function no longer uses the programid property - call this first and pass the result to create_program");
+        }
+
+        $certification_todb = new stdClass();
         $certification_todb->learningcomptype = CERTIFTYPE_PROGRAM;
         $certification_todb->activeperiod = $activeperiod;
         $certification_todb->windowperiod = $windowperiod;
         $certification_todb->recertifydatetype = $recertifydatetype;
         $certification_todb->timemodified = time();
         $certifid = $DB->insert_record('certif', $certification_todb);
-        if ($certifid) {
-            $DB->set_field('prog', 'certifid', $certifid , array('id' => $programid));
-        }
+
+        return $certifid;
     }
 
     /**

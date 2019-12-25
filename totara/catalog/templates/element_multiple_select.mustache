@@ -1,0 +1,93 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Brian Barnes <brian.barnes@totaralearning.com>
+   @package totara_catalog
+}}
+{{!
+
+    @template totara_catalog/element_multiple_select
+
+    This template generates Totara form action button.
+
+    Classes required for JS:
+    * totara_catalog-multiple_select__addicon
+    * totara_catalog-multiple_select
+
+    Data attributes required for JS:
+    * data-name - Name of the multiple_select element
+
+    Context variables required for this template:
+    * id - the form element id
+    * legend - The label for the form element
+    * name - The programatic name of the control
+    * value - A JSON encoded array of the selected elements in order
+    * items - Array of currently selected icon fields
+       * id - id of a selected icon
+       * iconname - the human readable name of the icon field
+    * potentialicons - Array of currently selected icon fields
+       * id - id of the icon
+       * iconname - the human readable name of the icon field
+
+    Other context variables for following partials:
+    * totara_catalog/element_multiple_select__item
+
+    Example context (json):
+    {
+        "id": "elementid"
+        "legend": "Icon selector",
+        "name": "mutlipleselect",
+        "value": "",
+        "items": [
+            {"id": "one", "iconname": "name 1"},
+            {"id": "two", "iconname": "name 2"},
+        ],
+        "potentialicons":[
+            {"id": "one", "iconname": "name 1"},
+            {"id": "two", "iconname": "name 2"},
+            {"id": "three", "iconname": "name 3"}
+        ]
+    }
+      
+}}
+<div>
+    <fieldset id="{{id}}" class="tf_element totara_catalog-multiple_select" data-name="{{name}}">
+        <legend><span class="totara_catalog-multiple_select_legend">{{legend}}</span></legend>
+        <ol id="{{id}}_list" class="unlist totara_catalog-multiple_select__selected">
+            {{#items}}
+            {{> totara_catalog/element_multiple_select__item }}
+            {{/items}}
+        </ol>
+        <input type="hidden" name="{{name}}" value="{{value}}"/>
+
+        <label for="{{id}}_addicon" class="sr-only">{{#str}}add_another, totara_catalog{{/str}}</label>
+        <select id="{{id}}_addicon" class="totara_catalog-multiple_select__addicon">
+            <option value="">{{#str}}add_another, totara_catalog{{/str}}</option>
+            {{#potentialicons}}
+                {{#group}}
+                    <optgroup label="{{label}}">
+                        {{#options}}
+                            <option value="{{id}}">{{{iconname}}}</option>
+                        {{/options}}
+                    </optgroup>
+                {{/group}}
+                {{^group}}<option value="{{id}}">{{iconname}}</option>{{/group}}
+            {{/potentialicons}}
+        </select>
+    </fieldset>
+</div>

@@ -23,6 +23,8 @@
 
 namespace block_totara_featured_links;
 
+use block_totara_featured_links\tile\base;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -49,7 +51,7 @@ class external extends \external_api {
     /**
      * Removes a tile
      *
-     * @throws coding_exception
+     * @throws \coding_exception
      * @param int $tileid
      * @return bool
      */
@@ -59,7 +61,7 @@ class external extends \external_api {
         if (!$DB->record_exists('block_totara_featured_links_tiles', ['id' => $tileid])) {
             return false;
         }
-        $tile_instance = \block_totara_featured_links\tile\base::get_tile_instance($tileid);
+        $tile_instance = base::get_tile_instance($tileid);
         // Checks that the inputs are valid and the right capabilities exist.
         $context = \context_block::instance($tile_instance->blockid);
         \external_api::validate_context($context);
@@ -106,8 +108,10 @@ class external extends \external_api {
     /**
      * reorders the tiles to the ordering in the JSON array passes.
      * The JSON array must be of some strings that have the id of the tile row in the database last
-     * @throws coding_exception
+     *
+     * @throws \coding_exception
      * @param array $tiles
+     * @return void
      */
     public static function reorder_tiles($tiles) {
         global $DB;
@@ -123,7 +127,7 @@ class external extends \external_api {
                 throw new \coding_exception('Could not find the tile id form the element id passed please end the element id with the tile id');
             }
             $id = $matches[0];
-            $tile = \block_totara_featured_links\tile\base::get_tile_instance($id);
+            $tile = base::get_tile_instance($id);
 
             $tiles_to_sort[] = $tile;
         }

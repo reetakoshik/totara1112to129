@@ -4,9 +4,9 @@ Feature: Test HR Import with multiple database sources.
   Background:
     Given I am on a totara site
     When I log in as "admin"
-    And I navigate to "General settings" node in "Site administration > HR Import"
+    And I navigate to "Default settings" node in "Site administration > HR Import"
     And I set the following fields to these values:
-      | File Access | Upload Files |
+      | File access | Upload Files |
     And I press "Save changes"
 
     # Setup the organisation.
@@ -17,9 +17,9 @@ Feature: Test HR Import with multiple database sources.
     And I "Enable" the "Organisation" HR Import element
     And I navigate to "Organisation" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source | External Database |
+      | External Database | 1 |
     And I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
 
     # Setup the position.
     And the following "position" frameworks exist:
@@ -29,27 +29,27 @@ Feature: Test HR Import with multiple database sources.
     And I "Enable" the "Position" HR Import element
     And I navigate to "Position" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source | External Database |
+      | External Database | 1 |
     And I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
 
     # Setup the user.
     And I navigate to "Manage elements" node in "Site administration > HR Import > Elements"
     And I "Enable" the "User" HR Import element
     And I navigate to "User" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source | External Database |
+      | External Database | 1 |
     And I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
 
     # Setup the job assignments.
     And I navigate to "Manage elements" node in "Site administration > HR Import > Elements"
     And I "Enable" the "Job assignment" HR Import element
     And I navigate to "Job assignment" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source | External Database |
+      | External Database | 1 |
     And I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
 
   Scenario: Test all sources run successfully when there are no errors or warnings.
     #

@@ -18,6 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author Simon Player <simon.player@totaralearning.com>
+ * @author Alastair Munro <alastair.munro@totaralearning.com>
  * @package tool_totara_sync
  */
 
@@ -25,15 +26,21 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/admin/tool/totara_sync/lib.php');
+require_once($CFG->dirroot . '/admin/tool/totara_sync/tests/source_csv_testcase.php');
+require_once($CFG->dirroot . '/admin/tool/totara_sync/sources/source_pos_csv.php');
 
 /**
  * @group tool_totara_sync
  */
-class tool_totara_sync_pos_csv_emptyfields_setting_testcase extends advanced_testcase {
+class tool_totara_sync_pos_csv_emptyfields_setting_testcase extends totara_sync_csv_testcase {
 
-    private $filedir = null;
-    private $configcsv = array();
-    private $config = array();
+    protected $filedir = null;
+    protected $configcsv = array();
+    protected $config = array();
+
+    protected $elementname = 'pos';
+    protected $sourcename = 'totara_sync_source_pos_csv';
+    protected $source = null;
 
     protected $pos_framework_data1 = array(
         'id' => 1, 'fullname' => 'Postion Framework 1', 'shortname' => 'PFW1', 'idnumber' => '1', 'description' => 'Description 1',
@@ -48,7 +55,7 @@ class tool_totara_sync_pos_csv_emptyfields_setting_testcase extends advanced_tes
     protected $pos_data1 = array(
         'id' => 1, 'fullname' => 'Top Position', 'shortname' => 'toppos', 'idnumber' => '777', 'description' => 'Top level position', 'frameworkid' => 1,
         'path' => '/1', 'depthlevel' => 1, 'parentid' => 0, 'sortthread' => '01', 'visible' => 1, 'timevalidfrom' => 0, 'timevalidto' => 0,
-        'timecreated' => 0, 'timemodified' => 0, 'usermodified' => 2,
+        'timecreated' => 0, 'timemodified' => 0, 'usermodified' => 2, 'totarasync' => 1,
     );
 
     protected $type_data1 = array(
@@ -63,49 +70,36 @@ class tool_totara_sync_pos_csv_emptyfields_setting_testcase extends advanced_tes
         'param1' => 30, 'param2' => 2048, 'param3' => 0, 'param4' => '', 'param5' => '',
     );
 
-    private $importdata = array(
+    private $requiredfields = array('idnumber', 'fullname', 'frameworkidnumber', 'timemodified');
 
-        // Required fields.
-        "idnumber" => array(
-            "required" => true,
-            "tablefieldname" => "idnumber",
-            "newdata" => array("1"),
-            "editeddata" => array("1"), // Keep the same for this field.
-        ),
-        "fullname" => array(
-            "required" => true,
-            "tablefieldname" => "fullname",
-            "newdata" => array("pos1"),
-            "editeddata" => array("pos1-edited"),
-        ),
-        "frameworkidnumber" => array(
-            "required" => true,
-            "tablefieldname" => "frameworkid",
-            "newdata" => array(1),
-            "editeddata" => array(2)
-        ),
-        "timemodified" => array(
-            "required" => true,
-            "tablefieldname" => "timemodified",
-            "newdata" => array("0"),
-            "editeddata" => array("0"),
-        ),
 
-        // Additional fields.
-        "shortname" => array(
-            "required" => false,
-            "tablefieldname" => "shortname",
-            "newdata" => array("shortname"),
-            "editeddata" => array("shortname-edited"),
-            "default" => array("")
-        ),
-        "description" => array(
-            "required" => false,
-            "tablefieldname" => "description",
-            "newdata" => array("description"),
-            "editeddata" => array("description-edited"),
-            "default" => array("")
-        ),
+    // Expected data uses database field names rather than
+    // csv header names.
+    private $expected1 = array(
+        'idnumber' => 1,
+        'fullname' => 'Position 1',
+        'shortname' => 'pos1',
+        'frameworkid' => 1,
+        'timemodified' => 0,
+        'description' => 'Description'
+    );
+
+    private $expected1_edited = array(
+        'idnumber' => 1,
+        'fullname' => 'Position 1 edited',
+        'shortname' => 'pos1edited',
+        'frameworkid' => 2,
+        'timemodified' => 0,
+        'description' => 'Description edited'
+    );
+
+    private $expected2 = array(
+        'idnumber' => 1,
+        'fullname' => 'Position 1',
+        'shortname' => '',
+        'frameworkid' => 1,
+        'timemodified' => 0,
+        'description' => ''
     );
 
     protected function tearDown() {
@@ -117,7 +111,7 @@ class tool_totara_sync_pos_csv_emptyfields_setting_testcase extends advanced_tes
         $this->pos_data1 = null;
         $this->type_data1 = null;
         $this->customfield_textinput_data = null;
-        $this->importdata = null;
+        $this->source = null;
         parent::tearDown();
     }
 
@@ -128,6 +122,8 @@ class tool_totara_sync_pos_csv_emptyfields_setting_testcase extends advanced_tes
 
         $this->resetAfterTest(true);
         $this->setAdminUser();
+
+        $this->source = new $this->sourcename();
 
         $this->filedir = $CFG->dataroot . '/totara_sync';
         mkdir($this->filedir . '/csv/ready', 0777, true);
@@ -174,54 +170,22 @@ class tool_totara_sync_pos_csv_emptyfields_setting_testcase extends advanced_tes
         $this->config = array(
             'sourceallrecords' => '1',
             'allow_create' => '1',
-            'allow_delete' => '1',
+            'allow_delete' => '0',
             'allow_update' => '1',
         );
     }
 
-    public function set_config($config, $plugin) {
-        foreach ($config as $k => $v) {
-            set_config($k, $v, $plugin);
-        }
-    }
-
     public function importfields() {
-        $importfield = array();
+        $importfields = array();
 
-        foreach ($this->importdata as $field => $fielddata) {
-            $importfield['import_' . $field] = 1;
-        }
+        $importfields['import_idnumber'] = 1;
+        $importfields['import_fullname'] = 1;
+        $importfields['import_shortname'] = 1;
+        $importfields['import_frameworkidnumber'] = 1;
+        $importfields['import_timemodified'] = 1;
+        $importfields['import_description'] = 1;
 
-        return $importfield;
-    }
-
-    public function create_csv($usedata = "newdata") {
-        $csvdata = "";
-
-        // The header.
-        foreach ($this->importdata as $field => $fielddata) {
-            $csvdata .= '"' . $field . '",';
-        }
-        $csvdata = rtrim($csvdata, ",") . PHP_EOL;
-
-        // The data.
-        foreach ($this->importdata as $field => $fielddata) {
-
-            if ($usedata == 'emptydata' && $fielddata["required"]) {
-                $data =  $fielddata["newdata"][0];
-            } elseif ($usedata == 'emptydata' && !$fielddata["required"]) {
-                $data =  "";
-            } else {
-                $data =  $fielddata[$usedata][0];
-            }
-
-            $csvdata .= '"' . $data . '",';
-        }
-        $csvdata = rtrim($csvdata, ",");
-
-        // Create the file.
-        $filepath = $this->filedir . '/csv/ready/pos.csv';
-        file_put_contents($filepath, $csvdata);
+        return $importfields;
     }
 
     public function get_element() {
@@ -230,28 +194,13 @@ class tool_totara_sync_pos_csv_emptyfields_setting_testcase extends advanced_tes
         return $elements['pos'];
     }
 
-    function sync_add_positions() {
-        global $DB;
-
-        // Create the CSV file and run the sync.
-        $this->create_csv('newdata'); // Create and upload our CSV data file
-        $this->assertTrue($this->get_element()->sync()); // Run the sync.
-        $this->assertCount(2, $DB->get_records('pos')); // Check the correct count of positions.
-
-        // Now check each field is populated for position idnumber 1.
-        $pos = $this->get_position(1);
-        foreach ($this->importdata as $field => $fielddata) {
-            if ($fielddata["required"]) {
-                // For required fields we just want to check they are not empty/null.
-                $this->assertNotEquals('', $pos->{$fielddata['tablefieldname']});
-                $this->assertNotNull($pos->{$fielddata['tablefieldname']});
-            } else {
-                // Check the data matches the value in the CSV.
-                $this->assertEquals($fielddata["newdata"][0], $pos->{$fielddata['tablefieldname']}, 'Failed for field ' . $field);
-            }
-        }
-    }
-
+    /**
+     * Helper function to get a position given an idnumber.
+     *
+     * @param $idnumber
+     *
+     * @return stdClass An object containing the details of the position.
+     */
     public function get_position($idnumber) {
         global $DB;
 
@@ -268,7 +217,12 @@ class tool_totara_sync_pos_csv_emptyfields_setting_testcase extends advanced_tes
         return $pos;
     }
 
+    /**
+     * Test syncing positions when emptyfields setting is set to "Ignore" and all
+     * fields in the CSV are populated.
+     */
     public function test_sync_add_positions_emptyfields_setting_off_populated_fields() {
+        global $DB;
 
         // Adding positions.
         // The 'Empty fields remove data' setting is off.
@@ -276,15 +230,32 @@ class tool_totara_sync_pos_csv_emptyfields_setting_testcase extends advanced_tes
 
         // Set the config.
         $config = array_merge($this->configcsv, $this->importfields());
-        $this->set_config($config, 'totara_sync_source_pos_csv');
+        $this->set_source_config($config);
         $config = array_merge($this->config, array('csvsaveemptyfields' => false));
-        $this->set_config($config, 'totara_sync_element_pos');
+        $this->set_element_config($config);
 
-        // Create the CSV file and run the sync and test.
-        $this->sync_add_positions();
+        // Add the CSV file and run the sync.
+        $this->add_csv('position_empty_fields_1.csv', 'pos');
+
+        $this->assertTrue($this->get_element()->sync()); // Run the sync.
+        $this->assertCount(2, $DB->get_records('pos')); // Check the correct count of positions.
+
+        // Now check each field is populated for position idnumber 1.
+        $pos = $this->get_position(1);
+        foreach ($this->expected1 as $field => $value) {
+            if (in_array($field, $this->requiredfields)) {
+                // For required fields we just want to check they are not empty/null.
+                $this->assertNotEquals('', $pos->$field);
+                $this->assertNotNull($pos->$field);
+            } else {
+                // Check the data matches the value in the CSV.
+                $this->assertEquals($value, $pos->$field, 'Failed for field ' . $field);
+            }
+        }
     }
 
     public function test_sync_add_positions_emptyfields_setting_on_populated_fields() {
+        global $DB;
 
         // Adding positions.
         // The 'Empty fields remove data' setting is on.
@@ -292,53 +263,91 @@ class tool_totara_sync_pos_csv_emptyfields_setting_testcase extends advanced_tes
 
         // Set the config.
         $config = array_merge($this->configcsv, $this->importfields());
-        $this->set_config($config, 'totara_sync_source_pos_csv');
+        $this->set_source_config($config);
         $config = array_merge($this->config, array('csvsaveemptyfields' => true));
-        $this->set_config($config, 'totara_sync_element_pos');
+        $this->set_element_config($config);
 
-        // Create the CSV file and run the sync and test.
-        $this->sync_add_positions();
+        // Load the CSV file and run the sync.
+        $this->add_csv('position_empty_fields_1.csv', 'pos');
+
+        $this->assertTrue($this->get_element()->sync()); // Run the sync.
+        $this->assertCount(2, $DB->get_records('pos')); // Check the correct count of positions.
+
+        // Now check each field is populated for position idnumber 1.
+        $pos = $this->get_position(1);
+        foreach ($this->expected1 as $field => $value) {
+            if (in_array($field, $this->requiredfields)) {
+                // For required fields we just want to check they are not empty/null.
+                $this->assertNotEquals('', $pos->$field);
+                $this->assertNotNull($pos->$field);
+            } else {
+                // Check the data matches the value in the CSV.
+                $this->assertEquals($value, $pos->$field, 'Failed for field ' . $field);
+            }
+        }
     }
 
     public function test_sync_update_positions_emptyfields_setting_off_populated_fields() {
+        global $DB;
 
         // Updating positions.
         // The 'Empty fields remove data' setting is off.
         // All the fields in the CSV are populated. (not empty)
 
-        global $DB;
-
         // Set the config.
         $config = array_merge($this->configcsv, $this->importfields());
-        $this->set_config($config, 'totara_sync_source_pos_csv');
+        $this->set_source_config($config);
         $config = array_merge($this->config, array('csvsaveemptyfields' => false));
-        $this->set_config($config, 'totara_sync_element_pos');
+        $this->set_element_config($config);
 
-        //
-        // First lets add positions.
-        //
+        // First add a position we can update.
+        $position = array(
+            'id' => 2,
+            'fullname' => 'Position 1',
+            'shortname' => 'pos1',
+            'idnumber' => 1,
+            'description' => 'Description',
+            'frameworkid' => 1,
+            'path' => '/2',
+            'depthlevel' => 1,
+            'parentid' => 0,
+            'sortthread' => 02,
+            'visible' => 1,
+            'timevalidfrom' => 0,
+            'timevalidto' => 0,
+            'timecreated' => 0,
+            'timemodified' => 0,
+            'usermodified' => 2,
+            'totarasync' => 1
+        );
 
-        $this->sync_add_positions();
+        $this->loadDataSet($this->createArrayDataset(array(
+            'pos' => array($position)
+        )));
+
+        $this->assertCount(2, $DB->get_records('pos')); // Check the correct count of positions.
 
         //
         // Now lets update the positions.
         //
 
         // Create the CSV file and run the sync.
-        $this->create_csv('editeddata'); // Create and upload our CSV data file
+        // Add import file with edited data and run sync.
+        $this->add_csv('position_empty_fields_2.csv', 'pos');
+
         $this->assertTrue($this->get_element()->sync()); // Run the sync.
         $this->assertCount(2, $DB->get_records('pos')); // Check the correct count of positions.
 
         // Now check each field is populated for position idnumber 1.
         $pos = $this->get_position(1);
-        foreach ($this->importdata as $field => $fielddata) {
-            if ($fielddata["required"]) {
+        foreach ($this->expected1_edited as $field => $value) {
+            if (in_array($field, $this->requiredfields)) {
                 // For required fields we just want to check they are not empty/null.
-                $this->assertNotEquals('', $pos->{$fielddata['tablefieldname']});
-                $this->assertNotNull($pos->{$fielddata['tablefieldname']});
+                $this->assertNotEquals('', $pos->$field);
+                $this->assertNotNull($pos->$field);
             } else {
                 // Check the data matches the value in the CSV.
-                $this->assertEquals($fielddata["editeddata"][0], $pos->{$fielddata['tablefieldname']}, 'Failed for field ' . $field);
+                $this->assertEquals($value, $pos->$field, 'Failed for field ' . $field);
             }
         }
     }
@@ -353,82 +362,135 @@ class tool_totara_sync_pos_csv_emptyfields_setting_testcase extends advanced_tes
 
         // Set the config.
         $config = array_merge($this->configcsv, $this->importfields());
-        $this->set_config($config, 'totara_sync_source_pos_csv');
+        $this->set_source_config($config);
         $config = array_merge($this->config, array('csvsaveemptyfields' => true));
-        $this->set_config($config, 'totara_sync_element_pos');
+        $this->set_element_config($config);
 
-        //
-        // First lets add positions.
-        //
+        // First add a position we can update.
+        $position = array(
+            'id' => 2,
+            'fullname' => 'Position 1',
+            'shortname' => 'pos1',
+            'idnumber' => 1,
+            'description' => 'Description',
+            'frameworkid' => 1,
+            'path' => '/2',
+            'depthlevel' => 1,
+            'parentid' => 0,
+            'sortthread' => 02,
+            'visible' => 1,
+            'timevalidfrom' => 0,
+            'timevalidto' => 0,
+            'timecreated' => 0,
+            'timemodified' => 0,
+            'usermodified' => 2,
+            'totarasync' => 1
+        );
 
-        $this->sync_add_positions();
+        $this->loadDataSet($this->createArrayDataset(array(
+            'pos' => array($position)
+        )));
+
+        $this->assertCount(2, $DB->get_records('pos')); // Check the correct count of positions.
 
         //
         // Now lets update the positions.
         //
 
         // Create the CSV file and run the sync.
-        $this->create_csv('editeddata'); // Create and upload our CSV data file
+        $this->add_csv('position_empty_fields_2.csv', 'pos');
+
         $this->assertTrue($this->get_element()->sync()); // Run the sync.
         $this->assertCount(2, $DB->get_records('pos')); // Check the correct count of positions.
 
         // Now check each field is populated for position idnumber 1.
         $pos = $this->get_position(1);
-        foreach ($this->importdata as $field => $fielddata) {
-            if ($fielddata["required"]) {
+        foreach ($this->expected1_edited as $field => $value) {
+            if (in_array($field, $this->requiredfields)) {
                 // For required fields we just want to check they are not empty/null.
-                $this->assertNotEquals('', $pos->{$fielddata['tablefieldname']});
-                $this->assertNotNull($pos->{$fielddata['tablefieldname']});
+                $this->assertNotEquals('', $pos->$field);
+                $this->assertNotNull($pos->$field);
             } else {
                 // Check the data matches the value in the CSV.
-                $this->assertEquals($fielddata["editeddata"][0], $pos->{$fielddata['tablefieldname']}, 'Failed for field ' . $field);
+                $this->assertEquals($value, $pos->$field, 'Failed for field ' . $field);
             }
         }
     }
 
+
+    /**
+     * Test updating positions with empty values and
+     * the 'Empty fields remove data' setting is off.
+     * We expect that empty fields don't change the values.
+     */
     public function test_sync_update_positions_emptyfields_setting_off_empty_fields() {
 
-        // Updating positions.
-        // The 'Empty fields remove data' setting is off.
-        // All the fields in the CSV are empty.
 
         global $DB;
 
         // Set the config.
         $config = array_merge($this->configcsv, $this->importfields());
-        $this->set_config($config, 'totara_sync_source_pos_csv');
+        $this->set_source_config($config);
         $config = array_merge($this->config, array('csvsaveemptyfields' => false));
-        $this->set_config($config, 'totara_sync_element_pos');
+        $this->set_element_config($config);
 
-        //
-        // First lets add positions.
-        //
+        // First add a position we can update.
+        $position = array(
+            'id' => 2,
+            'fullname' => 'Position 1',
+            'shortname' => 'pos1',
+            'idnumber' => 1,
+            'description' => 'Description',
+            'frameworkid' => 1,
+            'path' => '/2',
+            'depthlevel' => 1,
+            'parentid' => 0,
+            'sortthread' => 02,
+            'visible' => 1,
+            'timevalidfrom' => 0,
+            'timevalidto' => 0,
+            'timecreated' => 0,
+            'timemodified' => 0,
+            'usermodified' => 2,
+            'totarasync' => 1
+        );
 
-        $this->sync_add_positions();
+        $this->loadDataSet($this->createArrayDataset(array(
+            'pos' => array($position)
+        )));
+        $this->assertCount(2, $DB->get_records('pos')); // Check the correct count of positions.
 
         //
         // Now lets update the positions.
         //
 
         // Create the CSV file and run the sync.
-        $this->create_csv('emptydata'); // Create and upload our CSV data file with empty fields.
+        $this->add_csv('position_empty_fields_3.csv', 'pos');
+
+        // Sync CSV with empty fields in non-required columns.
         $this->assertTrue($this->get_element()->sync()); // Run the sync.
         $this->assertCount(2, $DB->get_records('pos')); // Check the correct count of positions.
 
         // Now check each field is populated for position idnumber 1.
+        // None of the values in the fields should have changed.
         $pos = $this->get_position(1);
-        foreach ($this->importdata as $field => $fielddata) {
-            if ($fielddata["required"]) {
+        foreach ($this->expected1 as $field => $value) {
+            if (in_array($field, $this->requiredfields)) {
                 // For required fields we just want to check they are not empty/null.
-                $this->assertNotEquals('', $pos->{$fielddata['tablefieldname']});
-                $this->assertNotNull($pos->{$fielddata['tablefieldname']});
+                $this->assertNotEquals('', $pos->$field);
+                $this->assertNotNull($pos->$field);
             } else {
                 // Check the data matches the value in the CSV.
-                $this->assertEquals($fielddata["newdata"][0], $pos->{$fielddata['tablefieldname']}, 'Failed for field ' . $field);
+                $this->assertEquals($value, $pos->$field, 'Failed for field ' . $field);
             }
         }
     }
 
+    /**
+     * Test updating positions with empty values and
+     * the 'Empty fields remove data' setting is on.
+     * We expect that empty values in the CSV remove the value/reset values.
+     */
     public function test_sync_update_positions_emptyfields_setting_on_empty_fields() {
 
         // Updating positions.
@@ -439,63 +501,296 @@ class tool_totara_sync_pos_csv_emptyfields_setting_testcase extends advanced_tes
 
         // Set the config.
         $config = array_merge($this->configcsv, $this->importfields());
-        $this->set_config($config, 'totara_sync_source_pos_csv');
+        $this->set_source_config($config);
         $config = array_merge($this->config, array('csvsaveemptyfields' => true));
-        $this->set_config($config, 'totara_sync_element_pos');
+        $this->set_element_config($config);
 
-        //
-        // First lets add positions.
-        //
+        // First add a position we can update.
+        $position = array(
+            'id' => 2,
+            'fullname' => 'Position 1',
+            'shortname' => 'pos1',
+            'idnumber' => 1,
+            'description' => 'Description',
+            'frameworkid' => 1,
+            'path' => '/2',
+            'depthlevel' => 1,
+            'parentid' => 0,
+            'sortthread' => 02,
+            'visible' => 1,
+            'timevalidfrom' => 0,
+            'timevalidto' => 0,
+            'timecreated' => 0,
+            'timemodified' => 0,
+            'usermodified' => 2,
+            'totarasync' => 1
+        );
 
-        $this->sync_add_positions();
+        $this->loadDataSet($this->createArrayDataset(array(
+            'pos' => array($position)
+        )));
+        $this->assertCount(2, $DB->get_records('pos')); // Check the correct count of positions.
 
         //
         // Now lets update the positions.
         //
-
         // Create the CSV file and run the sync.
-        $this->create_csv('emptydata'); // Create and upload our CSV data file with empty fields.
+        $this->add_csv('position_empty_fields_3.csv', 'pos');
+
         $this->assertTrue($this->get_element()->sync()); // Run the sync.
         $this->assertCount(2, $DB->get_records('pos')); // Check the correct count of positions.
 
         // Now check each field is populated for position idnumber 1.
+        // shortname and description should be blank.
         $pos = $this->get_position(1);
-        foreach ($this->importdata as $field => $fielddata) {
-            if ($fielddata["required"]) {
+        foreach ($this->expected2 as $field => $value) {
+            if (in_array($field, $this->requiredfields)) {
                 // For required fields we just want to check they are not empty/null.
-                $this->assertNotEquals('', $pos->{$fielddata['tablefieldname']});
-                $this->assertNotNull($pos->{$fielddata['tablefieldname']});
+                $this->assertNotEquals('', $pos->$field);
+                $this->assertNotNull($pos->$field);
             } else {
                 // Check the data matches the value in the CSV.
-                $this->assertEquals($fielddata["default"][0], $pos->{$fielddata['tablefieldname']}, 'Failed for field ' . $field);
+                $this->assertEquals($value, $pos->$field, 'Failed for field ' . $field);
             }
         }
     }
 
-    public function test_sync_parent() {
-        // TODO:
-        // All data, (the parent and child) neesd to be in the CSV.
-        $this->markTestSkipped('HR Import position source hierarchy needs tests.');
-    }
+    public function test_sync_parent_with_emptyfields_setting_off() {
+        global $DB;
 
-    public function test_sync_type() {
-        // TODO: Special case. Can not be included in the $importdata fields to test as causes failures to other fields when changing the type.
-        $this->markTestSkipped('HR Import position source changing types needs tests.');
+        // Set the config.
+        $additional_fields = array('import_parentidnumber' => 1);
+        $config = array_merge($this->configcsv, $this->importfields(), $additional_fields);
+        $this->set_source_config($config);
+        $config = array_merge($this->config, array('csvsaveemptyfields' => 0));
+        $this->set_element_config($config);
 
-        $testdata = array(
-            "typeidnumber" => array(
-                "required" => false,
-                "tablefieldname" => "typeid",
-                "newdata" => array(1),
-                "editeddata" => array(1),
-                "default" => array(0)
-            ),
+        // Add positions (2 positions, one with a parent).
+        $position1 = array(
+            'id' => 2,
+            'fullname' => 'Position 1',
+            'shortname' => 'pos1',
+            'idnumber' => 'POS1',
+            'description' => 'Description 1',
+            'frameworkid' => 1,
+            'path' => '/2',
+            'depthlevel' => 1,
+            'parentid' => 0,
+            'sortthread' => '02',
+            'visible' => 1,
+            'timevalidfrom' => 0,
+            'timevalidto' => 0,
+            'timecreated' => 0,
+            'timemodified' => 0,
+            'usermodified' => 2,
+            'totarasync' => 1
         );
+        $position2 = array(
+            'id' => 3,
+            'fullname' => 'Position 2',
+            'shortname' => 'pos2',
+            'idnumber' => 'POS2',
+            'description' => 'Description 2',
+            'frameworkid' => 1,
+            'path' => '/2/3',
+            'depthlevel' => 2,
+            'parentid' => 2,
+            'sortthread' => '02.01',
+            'visible' => 1,
+            'timevalidfrom' => 0,
+            'timevalidto' => 0,
+            'timecreated' => 0,
+            'timemodified' => 0,
+            'usermodified' => 2,
+            'totarasync' => 1
+        );
+
+        $this->loadDataSet($this->createArrayDataset(array(
+            'pos' => array($position1, $position2)
+        )));
+        $this->assertCount(3, $DB->get_records('pos')); // Check the correct count of positions.
+
+        // Check that the import and parent was assigned correctly.
+        $position1 = $this->get_position('POS1');
+        $position2 = $this->get_position('POS2');
+        $this->assertEquals('Position 2', $position2->fullname);
+        $this->assertEquals($position1->id, $position2->parentid);
+        $this->assertEquals(2, $position2->depthlevel);
+
+        // Create CSV and sync.
+        $this->add_csv('position_empty_fields_4.csv', 'pos');
+
+        $this->assertCount(3, $DB->get_records('pos'));
+        $this->assertTrue($this->get_element()->sync());
+        $this->assertCount(3, $DB->get_records('pos'));
+
+        // Get the new record for Position 2 (it shouldn't have changed).
+        $position2 = $this->get_position('POS2');
+        $this->assertEquals($position1->id, $position2->parentid);
+        $this->assertEquals(2, $position2->depthlevel);
     }
 
-    public function test_custom_fields() {
-        // TODO:
-        $this->markTestSkipped('HR Import position source custom fields need tests.');
+    public function test_sync_parent_with_emptyfields_setting_on() {
+        global $DB;
+
+        // Set the config.
+        $additional_fields = array('import_parentidnumber' => 1);
+        $config = array_merge($this->configcsv, $this->importfields(), $additional_fields);
+        $this->set_source_config($config);
+        $config = array_merge($this->config, array('csvsaveemptyfields' => true));
+        $this->set_element_config($config);
+
+        // Add positions (2 positions, one with a parent).
+        $position1 = array(
+            'id' => 2,
+            'fullname' => 'Position 1',
+            'shortname' => 'pos1',
+            'idnumber' => 'POS1',
+            'description' => 'Description 1',
+            'frameworkid' => 1,
+            'path' => '/2',
+            'depthlevel' => 1,
+            'parentid' => 0,
+            'sortthread' => '02',
+            'visible' => 1,
+            'timevalidfrom' => 0,
+            'timevalidto' => 0,
+            'timecreated' => 0,
+            'timemodified' => 0,
+            'usermodified' => 2,
+            'totarasync' => 1
+        );
+        $position2 = array(
+            'id' => 3,
+            'fullname' => 'Position 2',
+            'shortname' => 'pos2',
+            'idnumber' => 'POS2',
+            'description' => 'Description 2',
+            'frameworkid' => 1,
+            'path' => '/2/3',
+            'depthlevel' => 2,
+            'parentid' => 2,
+            'sortthread' => '02.01',
+            'visible' => 1,
+            'timevalidfrom' => 0,
+            'timevalidto' => 0,
+            'timecreated' => 0,
+            'timemodified' => 0,
+            'usermodified' => 2,
+            'totarasync' => 1
+        );
+
+        $this->loadDataSet($this->createArrayDataset(array(
+            'pos' => array($position1, $position2)
+        )));
+        $this->assertCount(3, $DB->get_records('pos')); // Check the correct count of positions.
+
+        // Check that the import and parent was assigned correctly.
+        $position1 = $this->get_position('POS1');
+        $position2 = $this->get_position('POS2');
+        $this->assertEquals('Position 2', $position2->fullname);
+        $this->assertEquals($position1->id, $position2->parentid);
+
+        // Create CSV and sync.
+        $this->add_csv('position_empty_fields_4.csv', 'pos');
+
+        $this->assertCount(3, $DB->get_records('pos'));
+        $this->assertTrue($this->get_element()->sync());
+        $this->assertCount(3, $DB->get_records('pos'));
+
+        // Get the new record for Position 2.
+        $position2 = $this->get_position('POS2');
+        $this->assertEquals(0, $position2->parentid); // Parent ID should have been removed.
+        $this->assertEquals(1, $position2->depthlevel);
     }
 
+    public function test_empty_frameworkidnumber_ignore_emptyfields() {
+        global $DB;
+
+        $config = array_merge($this->configcsv, $this->importfields());
+        $this->set_source_config($config);
+        $config = array_merge($this->config, array('csvsaveemptyfields' => false));
+        $this->set_element_config($config);
+
+        $this->add_csv('position_empty_fields_5.csv', 'pos');
+
+        $this->assertTrue($this->get_element()->sync()); // Run the sync.
+
+        $position2 = $this->get_position('777');
+
+        // Check that the update change the record
+        $this->assertCount(1, $DB->get_records('pos')); // Check the correct count of positions.
+        $this->assertEquals('Position 2', $position2->fullname);
+        $this->assertEquals(1, $position2->frameworkid);
+    }
+
+    /**
+     * An exception is expected here as the file being imported contains an
+     * empty framework id which is not allowed.
+     *
+     * @expectedException moodle_exception
+     */
+    public function test_empty_frameworkidnumber_save_emptyfields() {
+        global $DB;
+
+        $config = array_merge($this->configcsv, $this->importfields());
+        $this->set_source_config($config);
+        $config = array_merge($this->config, array('csvsaveemptyfields' => true));
+        $this->set_element_config($config);
+
+        $this->add_csv('position_empty_fields_5.csv', 'pos');
+
+        $this->get_element()->sync(); // Run the sync.
+
+        $position2 = $this->get_position('777');
+
+        $this->assertCount(1, $DB->get_records('pos')); // Check the correct count of positions.
+        $this->assertEquals('Position 2', $position2->fullname);
+        $this->assertEquals(1, $position2->frameworkid);
+    }
+
+    /**
+     * Test creating a positions with an empty parent idnumber
+     */
+    public function test_create_pos_with_empty_parentidnumber() {
+        global $DB;
+
+        $extraimportfields = array('import_parentidnumber' => 1);
+        $config = array_merge($this->configcsv, $this->importfields(), $extraimportfields);
+        $this->set_source_config($config);
+        $config = array_merge($this->config, array('csvsaveemptyfields' => false));
+        $this->set_element_config($config);
+
+        $this->add_csv('position_empty_fields_6.csv', 'pos');
+
+        $this->get_element()->sync(); // Run the sync.
+
+        $position = $this->get_position('888');
+
+        $this->assertCount(2, $DB->get_records('pos')); // Check the correct count of positions.
+        $this->assertEquals('Position 8', $position->fullname);
+        $this->assertEquals(1, $position->frameworkid);
+        $this->assertEquals(0, $position->parentid);
+    }
+
+    /**
+     *  We expect an exception here as it is impossible to create a new item
+     *  with a blank framework id
+     *
+     *  @expectedException moodle_exception
+     */
+    public function test_create_pos_with_empty_frameworkidnumber() {
+        global $DB;
+
+        $config = array_merge($this->configcsv, $this->importfields());
+        $this->set_source_config($config);
+        $config = array_merge($this->config, array('csvsaveemptyfields' => false));
+        $this->set_element_config($config);
+
+        $this->add_csv('position_empty_fields_7.csv', 'pos');
+
+        $this->get_element()->sync(); // Run the sync.
+
+        // The sync will generate an exception so nothing else to check.
+    }
 }

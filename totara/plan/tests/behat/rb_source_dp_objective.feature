@@ -14,7 +14,8 @@ Feature: Verify the columns of the Record of Learning objectives report source.
       | learner1 | Learning Plan 1 | Objective 1 |
 
     When I log in as "admin"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | RoL Objectives                 |
       | Source      | Record of Learning: Objectives |
@@ -37,12 +38,12 @@ Feature: Verify the columns of the Record of Learning objectives report source.
 
   Scenario: Verify the objective date updated column is present and correct.
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob1 Learner1"
-    And I follow "Learning Plans"
+    And I click on "Learning Plans" "link" in the ".userprofile" "css_element"
     And I follow "Objectives (1)"
     And I set the field "menuproficiencies1" to "In Progress"
-    And I navigate to "Manage user reports" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
     And I follow "RoL Objectives"
     And I follow "View This Report"
     Then I should see "RoL Objectives: 1 record shown"

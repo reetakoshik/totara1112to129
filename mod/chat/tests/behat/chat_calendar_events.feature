@@ -22,8 +22,8 @@ Feature: Chat calendar entries
       | activity | name           | intro                 | course | idnumber | schedule |
       | chat     | Test chat name | Test chat description | C1     | chat1    | 0 |
     And I log in as "teacher1"
-    And I follow "Course 1"
-    When I navigate to "Calendar" node in "Site pages"
+    And I am on "Course 1" course homepage
+    When I follow "Go to calendar"
     Then I should not see "Test chat name"
 
   Scenario: Create a chat activity and publish the start date to the calendar
@@ -31,6 +31,6 @@ Feature: Chat calendar entries
       | activity | name           | intro                 | course | idnumber | schedule |
       | chat     | Test chat name | Test chat description | C1     | chat1    | 1 |
     And I log in as "teacher1"
-    And I follow "Course 1"
-    When I navigate to "Calendar" node in "Site pages"
+    And I am on "Course 1" course homepage
+    When I follow "Go to calendar"
     Then I should see "Test chat name"

@@ -36,16 +36,18 @@ $pageparams = [
     'debug' => $debug,
 ];
 
-$shortname = 'manage_embedded_reports';
+// Generate any missing embedded reports when we load this page.
+reportbuilder::generate_embedded_reports();
 
-if (!$report = reportbuilder_get_embedded_report($shortname, $pageparams, false, $sid)) {
+$config = (new rb_config())->set_sid($sid)->set_embeddata($pageparams);
+if (!$report = reportbuilder::create_embedded('manage_embedded_reports', $config)) {
     print_error('error:couldnotgenerateembeddedreport', 'totara_reportbuilder');
 }
 
 $url = new moodle_url('/totara/reportbuilder/manageembeddedreports.php', $pageparams);
 admin_externalpage_setup('rbmanageembeddedreports', '', null, $url);
 
-$PAGE->set_button($PAGE->button . $report->edit_button());
+$PAGE->set_button($report->edit_button() . $PAGE->button);
 
 /** @var totara_reportbuilder_renderer $renderer */
 $renderer = $PAGE->get_renderer('totara_reportbuilder');

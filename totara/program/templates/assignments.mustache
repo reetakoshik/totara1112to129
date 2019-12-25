@@ -1,0 +1,85 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2019 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Alastair Munro <alastair.munro@totaralearning.com>
+   @package totara_program
+}}
+{{!
+
+    @template totara_program/assignments
+
+    This template is for the program assignments page
+
+    ID elements required for JS:
+    * totara_program-assignment--add-users: the select that contains the assignment types to add
+
+    Classes required for JS:
+    * totara_program__assignments__results the container for the search results
+
+    Data attributes required for JS:
+    * data-core-autoinitialise: State of this JS auto initilise
+    * data-core-autoinitialise-amd: AMD to be linked to template
+    * data-totara_program-id: The id of program
+    * data-totara_program-canupdate: Whether the program can be updated (fed through to other templates)
+
+}}
+
+<div class="totara_program__assignments"
+    data-core-autoinitialise="true"
+    data-core-autoinitialise-amd="totara_program/assignments"
+    data-totara_program-id="{{programid}}"
+    data-totara_program-canupdate="{{canupdate}}">
+
+    <div class="totara_program__assignments__toolbar">
+        {{#canupdate}}
+            {{#has_categories}}
+                <div class="totara_program__assignments-add">
+                    <label for="totara_program-assignment--add-users" class="sr-only">
+                        {{#str}} addnew, totara_program {{/str}}
+                    </label>
+                    <select id="totara_program-assignment--add-users">
+                        <option value="">{{#str}} adddots, core {{/str}}</option>
+                        {{#categories}}
+                            <option value="{{value}}">{{text}}</option>
+                        {{/categories}}
+                    </select>
+                </div>
+            {{/has_categories}}
+        {{/canupdate}}
+
+        <div class="totara_program__assignments-search">
+            {{#assignment_search_template_data}}
+                {{> &&assignment_search_template_name}}
+            {{/assignment_search_template_data}}
+        </div>
+
+    </div>
+    <div class="totara_program__assignments__content">
+        <div class="totara_program__assignments__filters">
+            {{#assignment_filter_region_template_data}}
+                {{> &&assignment_filter_region_template_name}}
+            {{/assignment_filter_region_template_data}}
+        </div>
+        <div class="totara_program__assignments__results">
+            {{#assignment_table_template_data}}
+                {{> &&assignment_table_template_name}}
+            {{/assignment_table_template_data}}
+        </div>
+    </div>
+</div>
+

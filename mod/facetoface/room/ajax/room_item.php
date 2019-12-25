@@ -43,7 +43,7 @@ if (!$cm = get_coursemodule_from_instance('facetoface', $facetoface->id, $course
 
 $context = context_module::instance($cm->id);
 
-require_login($course, false, $cm);
+ajax_require_login($course, false, $cm);
 require_sesskey();
 require_capability('mod/facetoface:editevents', $context);
 
@@ -52,17 +52,17 @@ $PAGE->set_url('/mod/facetoface/room/ajax/room_item.php', array(
     'itemid' => $itemid
 ));
 
-$room = facetoface_get_room($itemid);
+$room = new \mod_facetoface\room($itemid);
 
 // Render room item.
 $out = '';
-if (!empty($room)) {
+if ($room->exists()) {
     $out = array(
-        'id' => $room->id,
-        'name' => $room->name,
-        'hidden' => $room->hidden,
-        'custom' => $room->custom,
-        'capacity' => $room->capacity
+        'id' => $room->get_id(),
+        'name' => $room->get_name(),
+        'hidden' => $room->get_hidden(),
+        'custom' => $room->get_custom(),
+        'capacity' => $room->get_capacity()
     );
 }
 

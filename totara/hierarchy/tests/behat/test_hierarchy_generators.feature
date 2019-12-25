@@ -10,7 +10,7 @@ Feature: The generators create the expected hierarchy elements
       | framework | fullname          | idnumber | description         |
       | FW001     | First position    | POS001   | This is a position  |
     When I log in as "admin"
-    And I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    And I navigate to "Manage positions" node in "Site administration > Positions"
     And I follow "Test position framework"
     And I click on "Edit" "link" in the "First position" "table_row"
     Then the following fields match these values:
@@ -27,7 +27,7 @@ Feature: The generators create the expected hierarchy elements
       | FW001     | First position    | POS001   |        | This is a position  |
       | FW001     | Second position   | POS002   | POS001 | Another position    |
     When I log in as "admin"
-    And I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    And I navigate to "Manage positions" node in "Site administration > Positions"
     And I follow "Test position framework"
     And I click on "Edit" "link" in the "Second position" "table_row"
     Then the following fields match these values:
@@ -44,7 +44,7 @@ Feature: The generators create the expected hierarchy elements
       | framework | fullname            | idnumber | description             |
       | FW002     | First organisation  | ORG001   | This is an organisation |
     When I log in as "admin"
-    And I navigate to "Manage organisations" node in "Site administration > Hierarchies > Organisations"
+    And I navigate to "Manage organisations" node in "Site administration > Organisations"
     And I follow "Test organisation framework"
     And I click on "Edit" "link" in the "First organisation" "table_row"
     Then the following fields match these values:
@@ -61,7 +61,7 @@ Feature: The generators create the expected hierarchy elements
       | FW002     | First organisation  | ORG001   |        | This is an organisation |
       | FW002     | Second organisation | ORG002   | ORG001 | Another organisation    |
     When I log in as "admin"
-    And I navigate to "Manage organisations" node in "Site administration > Hierarchies > Organisations"
+    And I navigate to "Manage organisations" node in "Site administration > Organisations"
     And I follow "Test organisation framework"
     And I click on "Edit" "link" in the "Second organisation" "table_row"
     Then the following fields match these values:
@@ -78,7 +78,7 @@ Feature: The generators create the expected hierarchy elements
       | framework | fullname            | idnumber | description             |
       | FW001     | First competency    | COMP001  | This is a competency    |
     When I log in as "admin"
-    And I navigate to "Manage competencies" node in "Site administration > Hierarchies > Competencies"
+    And I navigate to "Manage competencies" node in "Site administration > Competencies"
     And I follow "Test competency framework"
     And I click on "Edit" "link" in the "First competency" "table_row"
     Then the following fields match these values:
@@ -95,7 +95,7 @@ Feature: The generators create the expected hierarchy elements
       | FW001     | First competency    | COMP001  |         | This is a competency    |
       | FW001     | Second competency   | COMP002  | COMP001 | Another competency      |
     When I log in as "admin"
-    And I navigate to "Manage competencies" node in "Site administration > Hierarchies > Competencies"
+    And I navigate to "Manage competencies" node in "Site administration > Competencies"
     And I follow "Test competency framework"
     And I click on "Edit" "link" in the "Second competency" "table_row"
     Then the following fields match these values:
@@ -112,7 +112,7 @@ Feature: The generators create the expected hierarchy elements
       | framework | fullname            | idnumber | description             |
       | FW001     | First goal          | GOAL001  | This is a goal          |
     When I log in as "admin"
-    And I navigate to "Manage goals" node in "Site administration > Hierarchies > Goals"
+    And I navigate to "Manage goals" node in "Site administration > Goals"
     And I follow "Test goal framework"
     And I click on "Edit" "link" in the "First goal" "table_row"
     Then the following fields match these values:
@@ -129,7 +129,7 @@ Feature: The generators create the expected hierarchy elements
       | FW001     | First goal          | GOAL001  |         | This is a goal          |
       | FW001     | Second goal         | GOAL002  | GOAL001 | Another goal            |
     When I log in as "admin"
-    And I navigate to "Manage goals" node in "Site administration > Hierarchies > Goals"
+    And I navigate to "Manage goals" node in "Site administration > Goals"
     And I follow "Test goal framework"
     And I click on "Edit" "link" in the "Second goal" "table_row"
     Then the following fields match these values:

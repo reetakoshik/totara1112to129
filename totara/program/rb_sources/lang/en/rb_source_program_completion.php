@@ -47,5 +47,8 @@ $string['multiorgwhencompleted'] = 'Organisations when completed';
 $string['poswhencompletedbasic'] = 'Position when completed (basic)';
 $string['poswhencompleted'] = 'Position when completed';
 $string['multiposwhencompleted'] = 'Positions when completed';
+$string['programcompletionprogress'] = 'Progress';
+$string['programcompletionprogressnumeric'] = 'Progress';
+$string['programcompletionprogresspercentage'] = 'Progress (%)';
 
 $string['type_progcompletion'] = 'Program Completion';

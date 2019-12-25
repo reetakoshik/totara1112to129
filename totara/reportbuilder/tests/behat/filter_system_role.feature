@@ -17,7 +17,8 @@ Feature: Verify the User System Role filter.
       | learner3 | manager1 |
       | learner4 | manager1 |
     When I log in as "admin"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | My User Report |
       | Source      | User           |
@@ -29,7 +30,7 @@ Feature: Verify the User System Role filter.
     And I press "Save changes"
     Then I should see "Filters updated"
 
-    When I navigate to "Assign system roles" node in "Site administration > Users > Permissions"
+    When I navigate to "Assign system roles" node in "Site administration > Permissions"
     And I follow "Site Manager"
     And I set the field "Potential users" to "Bob1 Learner1 (learner1@example.com)"
     And I press "Add"
@@ -53,7 +54,7 @@ Feature: Verify the User System Role filter.
 
   Scenario: Verify User System User filter with no role selected returns no result.
 
-    Given I navigate to "Manage user reports" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage user reports" node in "Site administration > Reports"
     And I click on "View" "link" in the "User" "table_row"
 
     When I click on "Assigned" "radio"
@@ -93,7 +94,7 @@ Feature: Verify the User System Role filter.
 
   Scenario: Verify User System User filter with 'any role' option selected.
 
-    Given I navigate to "Manage user reports" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage user reports" node in "Site administration > Reports"
     And I click on "View" "link" in the "User" "table_row"
 
     When I click on "Assigned" "radio"
@@ -147,7 +148,7 @@ Feature: Verify the User System Role filter.
 
   Scenario: Verify User System Role filter with 'assigned' role works.
 
-    Given I navigate to "Manage user reports" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage user reports" node in "Site administration > Reports"
     And I click on "View" "link" in the "User" "table_row"
 
     # Check the Site Manager search result.
@@ -210,7 +211,7 @@ Feature: Verify the User System Role filter.
 
   Scenario: Verify User System Role filter with 'not assigned' role works.
 
-    Given I navigate to "Manage user reports" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage user reports" node in "Site administration > Reports"
     And I click on "View" "link" in the "User" "table_row"
 
     # Check the Site Manager search result.
@@ -274,7 +275,7 @@ Feature: Verify the User System Role filter.
   Scenario: Verify User System Role filter can be used in embedded reports using the user source.
 
     # Check you can't add the filter to the alerts report.
-    Given I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage embedded reports" node in "Site administration > Reports"
     And I click on "Settings" "link" in the "Alerts" "table_row"
     And I switch to "Filters" tab
     Then I should not see "User System Role" in the "newstandardfilter" "select"
@@ -288,7 +289,7 @@ Feature: Verify the User System Role filter.
     Then I should see "Filters updated"
 
     # Check the system roles are present in the filter menu.
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     Then I should see "Site Manager" in the "user-roleid" "select"
     And I should see "Course creator" in the "user-roleid" "select"
     And I should see "Staff Manager" in the "user-roleid" "select"
@@ -311,7 +312,7 @@ Feature: Verify the User System Role filter.
       | Dave1 Manager1  | manager1 |
 
     # Add teh filter to the team members embedded report.
-    When I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    When I navigate to "Manage embedded reports" node in "Site administration > Reports"
     And I set the field "report-name" to "Team"
     And I press "id_submitgroupstandard_addfilter"
     And I click on "Settings" "link" in the "Team Members" "table_row"

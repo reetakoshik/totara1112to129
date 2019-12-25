@@ -875,7 +875,7 @@ class coursecat implements renderable, cacheable_object, IteratorAggregate {
      *     who are enrolled in the course
      */
     protected static function ensure_users_enrolled($courseusers) {
-        global $DB;
+        global $DB, $CFG;
         // If the input array is too big, split it into chunks.
         $maxcoursesinquery = 20;
         if (count($courseusers) > $maxcoursesinquery) {
@@ -887,6 +887,9 @@ class coursecat implements renderable, cacheable_object, IteratorAggregate {
             return $rv;
         }
 
+        // Totara: for enrol_round_time_for_query()
+        require_once($CFG->dirroot . '/lib/enrollib.php');
+
         // Create a query verifying valid user enrolments for the number of courses.
         $sql = "SELECT DISTINCT e.courseid, ue.userid
           FROM {user_enrolments} ue
@@ -894,10 +897,10 @@ class coursecat implements renderable, cacheable_object, IteratorAggregate {
           WHERE ue.status = :active
             AND e.status = :enabled
             AND ue.timestart < :now1 AND (ue.timeend = 0 OR ue.timeend > :now2)";
-        $now = round(time(), -2); // Rounding helps caching in DB.
+        list($now1, $now2) = enrol_round_time_for_query(); // Rounding helps caching in DB.
         $params = array('enabled' => ENROL_INSTANCE_ENABLED,
             'active' => ENROL_USER_ACTIVE,
-            'now1' => $now, 'now2' => $now);
+            'now1' => $now1, 'now2' => $now2);
         $cnt = 0;
         $subsqls = array();
         $enrolled = array();
@@ -948,6 +951,7 @@ class coursecat implements renderable, cacheable_object, IteratorAggregate {
         }
 
         if ($checkvisibility and !empty($CFG->audiencevisibility)) {
+            require_once($CFG->dirroot . '/totara/coursecatalog/lib.php');
             // A hack to improve performance if audience visibility is in use. Not an ideal solution but
             // avoids less than optimal caches or changes to multiple function signatures.
             $fields[] = 'visibilityjoin.isvisibletouser AS totara_isvisibletouser';

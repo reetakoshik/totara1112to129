@@ -1,0 +1,6 @@
+alttext,theme_basis
+alttextdesc,theme_basis
+favicon,theme_basis
+favicondesc,theme_basis
+logo,theme_basis
+logodesc,theme_basis

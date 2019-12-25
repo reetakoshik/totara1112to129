@@ -72,11 +72,7 @@ class sqlsrv_native_moodle_database extends moodle_database {
         // the name used by 'extension_loaded()' is case specific! The extension
         // therefore *could be* mixed case and hence not found.
         if (!function_exists('sqlsrv_num_rows')) {
-            if (stripos(PHP_OS, 'win') === 0) {
-                return get_string('nativesqlsrvnodriver', 'install');
-            } else {
-                return get_string('nativesqlsrvnonwindows', 'install');
-            }
+            return get_string('nativesqlsrvnodriver', 'install');
         }
         return true;
     }
@@ -497,37 +493,52 @@ class sqlsrv_native_moodle_database extends moodle_database {
         $result = sqlsrv_query($this->sqlsrv, $sql);
         $this->query_end($result);
 
-        if ($result) {
-            $lastindex = '';
-            $unique = false;
-            $columns = array ();
+        if (!$result) {
+            return array();
+        }
 
-            while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
-                if ($lastindex and $lastindex != $row['index_name'])
-                    { // Save lastindex to $indexes and reset info
-                    $indexes[$lastindex] = array
-                     (
-                      'unique' => $unique,
-                      'columns' => $columns
-                     );
+        $fulltextsearch = false;
+        while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
+            if (preg_match('/^(.*)([^_]+)_fts$/', $row['index_name'], $matches)) {
+                $fulltextsearch = $matches[1];
+                continue;
 
-                    $unique = false;
-                    $columns = array ();
+            } else if (!isset($indexes[$row['index_name']])) {
+                $indexes[$row['index_name']] = array(
+                    'unique' => empty($row['is_unique']) ? false : true,
+                    'columns' => array($row['column_name']),
+                    'fulltextsearch' => false,
+                );
+
+            } else {
+                $indexes[$row['index_name']]['columns'][] = $row['column_name'];
+            }
+        }
+        $this->free_result($result);
+
+        if ($fulltextsearch !== false) {
+            // We need to find the fake full text search indices the slow way.
+            $sql = "SELECT ic.column_id, c.name AS column_name
+                            FROM sys.fulltext_indexes i
+                            JOIN sys.fulltext_index_columns ic ON i.object_id = ic.object_id
+                            JOIN sys.tables t ON i.object_id = t.object_id
+                            JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+                           WHERE t.name = '$tablename' ";
+
+            $this->query_start($sql, null, SQL_QUERY_AUX);
+            $result = sqlsrv_query($this->sqlsrv, $sql);
+            $this->query_end($result);
+
+            if ($result) {
+                while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
+                    $indexes[$fulltextsearch . $row['column_name'] . '_fts'] = array(
+                        'unique'  => false,
+                        'columns' => array($row['column_name']),
+                        'fulltextsearch'  => true,
+                    );
                 }
-                $lastindex = $row['index_name'];
-                $unique = empty($row['is_unique']) ? false : true;
-                $columns[] = $row['column_name'];
+                $this->free_result($result);
             }
-
-            if ($lastindex) { // Add the last one if exists
-                $indexes[$lastindex] = array
-                 (
-                  'unique' => $unique,
-                  'columns' => $columns
-                 );
-            }
-
-            $this->free_result($result);
         }
         return $indexes;
     }
@@ -1731,5 +1742,107 @@ class sqlsrv_native_moodle_database extends moodle_database {
         $count = $recordset->get_count_without_limits();
 
         return $recordset;
+    }
+
+    /**
+     * Build a natural language search subquery using database specific search functions.
+     *
+     * @since Totara 12
+     *
+     * @param string $table        database table name
+     * @param array  $searchfields ['field_name'=>weight, ...] eg: ['high'=>3, 'medium'=>2, 'low'=>1]
+     * @param string $searchtext   natural language search text
+     * @return array [sql, params[]]
+     */
+    protected function build_fts_subquery(string $table, array $searchfields, string $searchtext): array {
+        $language = $this->get_ftslanguage();
+        // Microsoft is using either language code numbers or names of languages.
+        if (is_number($language)) {
+            $language = intval($language);
+        } else {
+            $language = "'$language'";
+        }
+
+        $params = array();
+        $searchjoin = array();
+        $score = array();
+
+        $defaulttb = 'FREETEXTTABLE';
+        if ($this->get_fts_mode($searchtext) === self::SEARCH_MODE_BOOLEAN) {
+            $searchtext = "\"{$searchtext}\"";
+            $defaulttb = "CONTAINSTABLE";
+        }
+
+        foreach ($searchfields as $field => $weight) {
+            $paramname = $this->get_unique_param('fts');
+            $params[$paramname] = $searchtext;
+            $searchjoin[] = "LEFT JOIN {$defaulttb}({{$table}},{$field},:{$paramname},LANGUAGE $language) AS join_{$field} ON basesearch.id = join_{$field}.[KEY]";
+            $score[] = "COALESCE(join_{$field}.RANK,0)*{$weight}";
+        }
+
+        $searchjoins = implode("\n", $searchjoin);
+        $scoresum = implode(' + ', $score);
+        $sql = "SELECT basesearch.id, {$scoresum} AS score
+                  FROM {{$table}} basesearch
+                       {$searchjoins}
+                 WHERE {$scoresum} > 0";
+
+        return array("({$sql})", $params);
+    }
+
+    /**
+     * Wait for MS SQL Server to index table with full text search data.
+     *
+     * NOTE: this is intended mainly for testing purposes
+     *
+     * @param string $tablename
+     * @param int $maxtime
+     * @return bool success, false if not indexed in $maxtime
+     */
+    public function fts_wait_for_indexing(string $tablename, int $maxtime = 10) {
+        $prefix = $this->get_prefix();
+
+        $timestart = time();
+
+        $sql = "SELECT COUNT('x')
+                  FROM sys.fulltext_indexes i
+                  JOIN sys.fulltext_catalogs c ON (c.name = :catalog AND i.fulltext_catalog_id = c.fulltext_catalog_id)
+                  JOIN sys.tables t ON i.object_id = t.object_id
+                 WHERE t.name = :table AND i.has_crawl_completed = 0";
+        $params = array('catalog' => $prefix . 'search_catalog', 'table' => $prefix . $tablename);
+
+        while($this->count_records_sql($sql, $params)) {
+            if ($timestart + $maxtime < time()) {
+                return false;
+            }
+            sleep(1);
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns false as MSSQL testing showed that for the queries tested 2 queries was faster than a counted recordset.
+     *
+     * Overridden despite the value matching the default as we know based upon performance testing that false is the correct result.
+     * For results on performance testing of paginated results see parent class.
+     *
+     * @since Totara 12.4
+     * @return bool
+     */
+    public function recommends_counted_recordset(): bool {
+        return false;
+    }
+
+    /**
+     * Check if accent sensitivity is currently active or not.
+     *
+     * @since Totara 12
+     * @return bool
+     */
+    public function is_fts_accent_sensitive(): bool {
+        $sql = "SELECT fulltextcatalogproperty(:catalog, 'AccentSensitivity')";
+        $params = ['catalog' => $this->get_prefix() . 'search_catalog'];
+        return !empty($this->get_field_sql($sql, $params));
     }
 }

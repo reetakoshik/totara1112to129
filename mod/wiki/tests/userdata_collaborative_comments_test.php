@@ -90,8 +90,8 @@ class mod_wiki_userdata_collaborative_comments_test extends wiki_testcase {
 
         $contexts = collaborative_comments::get_compatible_context_levels();
 
-        $this->assertEquals($expected, $contexts,
-            "Collaborative wiki comments user_data item is expected to work with a wide range of contexts", .0, 10, true);
+        $this->assertEqualsCanonicalizing($expected, $contexts,
+            "Collaborative wiki comments user_data item is expected to work with a wide range of contexts");
     }
 
 
@@ -274,7 +274,7 @@ class mod_wiki_userdata_collaborative_comments_test extends wiki_testcase {
     protected function is_data_gone(stdClass $data, $user) {
         // Make id arrays friendly to insert into database query.
         $pageids = $this->normalize_ids($data->pages);
-        
+
         // Check no comments.
         $this->assertEmpty($this->get_comments($pageids, $user));
 

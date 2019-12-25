@@ -80,13 +80,14 @@ class frontend extends \core_availability\frontend {
         $audience_names = array();
 
         if (!empty($cm->availability)) {
-            $availability = json_decode($cm->availability);
             $ids = array();
-            foreach ($availability->c as $condition) {
-                if ($condition->type == 'audience') {
-                    $ids[$condition->cohort] = $condition->cohort;
+            self::for_each_condition_in_availability_json(
+                $cm->availability, function ($condition) use (&$ids) {
+                    if ($condition->type == 'audience') {
+                        $ids[$condition->cohort] = $condition->cohort;
+                    }
                 }
-            }
+            );
 
             if (!empty($ids)) {
                 list($insql, $params) = $DB->get_in_or_equal($ids);
@@ -108,6 +109,12 @@ class frontend extends \core_availability\frontend {
                     $name = format_string($cohort->name);
                     $audience_names[$cohort->id] = array('name' => $name);
                 }
+            }
+        } else {
+            $audience_names = $DB->get_records_sql('SELECT id, name FROM {cohort}');
+            foreach ($audience_names as $id => $value) {
+                $value->name = format_string($value->name);
+                $audience_names[$id] = $value;
             }
         }
 

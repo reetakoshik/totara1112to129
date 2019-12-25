@@ -27,8 +27,7 @@ Feature: Seminar Signup Role Approval Trainer Role
     And I press "Save changes"
     And I click on "s__facetoface_approvaloptions[approval_role_4]" "checkbox"
     And I press "Save changes"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
+    And I am on "Classroom Connect Course" course homepage
     And I turn editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test seminar name        |
@@ -56,13 +55,13 @@ Feature: Seminar Signup Role Approval Trainer Role
 
   Scenario: Student gets approved through role approval
     When I log in as "jimmy"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
-    And I should see "Sign-up"
-    And I follow "Sign-up"
+    And I am on "Classroom Connect Course" course homepage
+    And I should see "Request approval"
+    And I follow "Request approval"
     Then I should see "Trainer"
     And I should see "Benny Ben"
     And I press "Request approval"
+    And I run all adhoc tasks
     And I log out
 
     # Staying in same scenario to prevent re-load of data.

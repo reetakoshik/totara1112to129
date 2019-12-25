@@ -288,7 +288,7 @@ function totaraDialog(title, buttonid, config, default_url, handler) {
                 return;
             }
             // Check this is not a help popup link
-            if ($(this).parent().is('span.helplink')) {
+            if ($(this).parent().is('span.helplink') || $(this).parent().is('span.helptooltip')) {
                 return;
             }
 

@@ -114,7 +114,7 @@ final class messages_helper extends chat_userdata_helper {
     protected function parse_message(stdClass $message) {
         $text = trim($message->message);
 
-        if ($message->system) {
+        if ($message->issystem) {
             $text = $this->parse_system_message($text);
         } else {
             $text = $this->parse_special_message($text);

@@ -163,4 +163,7 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('scorm/protectpackagedownloads', get_string('protectpackagedownloads', 'scorm'),
                                                     get_string('protectpackagedownloads_desc', 'scorm'), 1)); // Totara: definitely on by default!
 
+    // Totara: automatically keep user session alive when SCORM player is open in active web browser.
+    $settings->add(new admin_setting_configcheckbox('scorm/sessionkeepalive', get_string('sessionkeepalive', 'scorm'),
+        get_string('sessionkeepalive_desc', 'scorm'), 0));
 }

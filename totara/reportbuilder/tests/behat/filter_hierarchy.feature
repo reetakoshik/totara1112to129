@@ -28,7 +28,7 @@ Feature: Single hierarchy report filter
       | user3 | org1b        |
       | user4 | org2z        |
     And I log in as "admin"
-    And I navigate to "Manage organisations" node in "Site administration > Hierarchies > Organisations"
+    And I navigate to "Manage organisations" node in "Site administration > Organisations"
     And I click on "Org Fram" "link"
     And I set the field "jump" to "Move"
     And I click on "Organisation 1a" "option"
@@ -37,7 +37,8 @@ Feature: Single hierarchy report filter
     And I set the field "newparent" to "Organisation 1z"
     And I click on "Move" "button"
     And I click on "Continue" "button"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | User report |
       | Source      | User        |
@@ -75,9 +76,9 @@ Feature: Single hierarchy report filter
     And the field "job_assignment-allorganisations_op" matches value "<type>"
     And the field "job_assignment-allorganisations_child" matches value "<includesub>"
 
-  Examples:
-    | type                 | includesub | u1      | u2      | u3      | u4      | u5      | organisation               |
-    | Any of the selected  | 0          | see     | not see | not see | not see | not see | Organisation 1z  |
-    | None of the selected | 0          | not see | see     | see     | see     | see     | Organisation 1z  |
-    | Any of the selected  | 1          | see     | see     | see     | not see | not see | Organisation 1z  |
-    | None of the selected | 1          | not see | not see | not see | see     | see     | Organisation 1z  |
+    Examples:
+      | type                    | includesub | u1      | u2      | u3      | u4      | u5      | organisation     |
+      | Any of the selected     | 0          | see     | not see | not see | not see | not see | Organisation 1z  |
+      | Not any of the selected | 0          | not see | see     | see     | see     | see     | Organisation 1z  |
+      | Any of the selected     | 1          | see     | see     | see     | not see | not see | Organisation 1z  |
+      | Not any of the selected | 1          | not see | not see | not see | see     | see     | Organisation 1z  |

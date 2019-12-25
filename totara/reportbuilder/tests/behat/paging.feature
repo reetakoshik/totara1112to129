@@ -49,7 +49,8 @@ Feature: Test that paging in report builder works correctly
       | user38   | User      | 38-Test  | user38@example.com    |
       | user39   | User      | 39-Test  | user39@example.com    |
     And I log in as "admin"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "Custom user report"
     And I set the field "Source" to "User"
     When I press "Create report"
@@ -158,7 +159,7 @@ Feature: Test that paging in report builder works correctly
 
     When I set the following administration settings values:
       | Allow reports to show total count | 1 |
-    And I navigate to "Manage user reports" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
     And I follow "Custom user report"
     And I click on "Performance" "link" in the ".tabtree" "css_element"
     Then I should see "Filters Performance Settings"

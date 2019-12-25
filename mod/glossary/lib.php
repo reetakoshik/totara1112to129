@@ -1238,7 +1238,7 @@ function glossary_print_entry_icons($course, $cm, $glossary, $entry, $mode='',$h
 
     $return = '<span class="commands">';
     // Differentiate links for each entry.
-    $altsuffix = ': '.strip_tags(format_text($entry->concept));
+    $altsuffix = strip_tags(format_text($entry->concept));
 
     if (!$entry->approved) {
         $output = true;
@@ -1251,8 +1251,7 @@ function glossary_print_entry_icons($course, $cm, $glossary, $entry, $mode='',$h
         $return .= '<a class="icon" title="' . get_string('disapprove', 'glossary').
                    '" href="approve.php?newstate=0&amp;eid='.$entry->id.'&amp;mode='.$mode.
                    '&amp;hook='.urlencode($hook).'&amp;sesskey='.sesskey().
-                   '"><img src="'.$OUTPUT->pix_url('t/block').'" class="smallicon" alt="'.
-                   get_string('disapprove','glossary').$altsuffix.'" /></a>';
+                   '">' . $OUTPUT->pix_icon('t/block', get_string('disapprove', 'glossary')) . '</a>';
     }
 
     $iscurrentuser = ($entry->userid == $USER->id);
@@ -1265,15 +1264,15 @@ function glossary_print_entry_icons($course, $cm, $glossary, $entry, $mode='',$h
                 $output = true;
                 $return .= '<a class="icon" title="'.get_string('exporttomainglossary','glossary') . '" ' .
                     'href="exportentry.php?id='.$entry->id.'&amp;prevmode='.$mode.'&amp;hook='.urlencode($hook).'">' .
-                    '<img src="'.$OUTPUT->pix_url('export', 'glossary').'" class="smallicon" ' .
-                    'alt="'.get_string('exporttomainglossary','glossary').$altsuffix.'" /></a>';
+                    $OUTPUT->pix_icon('export', get_string('exporttomainglossary', 'glossary'), 'glossary') . '</a>';
             }
         }
 
+        $icon = 't/delete';
+        $iconcomponent = 'moodle';
         if ( $entry->sourceglossaryid ) {
-            $icon = $OUTPUT->pix_url('minus', 'glossary');   // graphical metaphor (minus) for deleting an imported entry
-        } else {
-            $icon = $OUTPUT->pix_url('t/delete');
+            $icon = 'minus';   // graphical metaphor (minus) for deleting an imported entry
+            $iconcomponent = 'glossary';
         }
 
         //Decide if an entry is editable:
@@ -1284,14 +1283,11 @@ function glossary_print_entry_icons($course, $cm, $glossary, $entry, $mode='',$h
             $output = true;
             $url = "deleteentry.php?id=$cm->id&amp;mode=delete&amp;entry=$entry->id&amp;prevmode=$mode&amp;hook=".urlencode($hook);
             $return .= "<a class='icon' title=\"" . get_string("delete") . "\" " .
-                       "href=\"$url\"><img src=\"";
-            $return .= $icon;
-            $return .= "\" class=\"smallicon\" alt=\"" . get_string("delete") .$altsuffix."\" /></a>";
+                       "href=\"$url\">" . $OUTPUT->pix_icon($icon, get_string('deleteentrya', 'mod_glossary', $altsuffix), $iconcomponent) . '</a>';
 
             $url = "edit.php?cmid=$cm->id&amp;id=$entry->id&amp;mode=$mode&amp;hook=".urlencode($hook);
             $return .= "<a class='icon' title=\"" . get_string("edit") . "\" href=\"$url\">" .
-                       "<img src=\"" . $OUTPUT->pix_url('t/edit') . "\" class=\"smallicon\" " .
-                       "alt=\"" . get_string("edit") .$altsuffix. "\" /></a>";
+                       $OUTPUT->pix_icon('t/edit', get_string('editentrya', 'mod_glossary', $altsuffix)) . '</a>';
         } elseif ( $importedentry ) {
             $return .= "<font size=\"-1\">" . get_string("exportedentry","glossary") . "</font>";
         }
@@ -1334,7 +1330,6 @@ function glossary_print_entry_icons($course, $cm, $glossary, $entry, $mode='',$h
         $return .= '<div>'.$comment->output(true).'</div>';
         $output = true;
     }
-    $return .= '<hr>';
 
     //If we haven't calculated any REAL thing, delete result ($return)
     if (!$output) {
@@ -1378,11 +1373,12 @@ function  glossary_print_entry_lower_section($course, $cm, $glossary, $entry, $m
             echo '<tr valign="top"><td class="icons">'.$icons.'</td></tr>';
         }
         if (!empty($entry->rating)) {
-            echo '<tr valign="top"><td class="ratings">';
+            echo '<tr valign="top"><td class="ratings p-t-1">';
             glossary_print_entry_ratings($course, $entry);
             echo '</td></tr>';
         }
         echo '</table>';
+        echo "<hr>\n";
     }
 }
 
@@ -2065,7 +2061,7 @@ function glossary_print_sorting_links($cm, $mode, $sortkey = '',$sortorder = '')
              $neworder = '&amp;sortorder=asc';
              $newordertitle = get_string('changeto', 'glossary', $asc);
          }
-         $icon = " <img src=\"".$OUTPUT->pix_url($sortorder, 'glossary')."\" class=\"icon\" alt=\"$newordertitle\" />";
+         $icon = " " . $OUTPUT->pix_icon($sortorder, $newordertitle, 'glossary');
      } else {
          if ( $sortkey != 'CREATION' and $sortkey != 'UPDATE' and
                $sortkey != 'FIRSTNAME' and $sortkey != 'LASTNAME' ) {
@@ -2074,7 +2070,7 @@ function glossary_print_sorting_links($cm, $mode, $sortkey = '',$sortorder = '')
          } else {
              $newordertitle = $desc;
              $neworder = '&amp;sortorder=desc';
-             $icon = ' <img src="'.$OUTPUT->pix_url('asc', 'glossary').'" class="icon" alt="'.$newordertitle.'" />';
+             $icon = " " . $OUTPUT->pix_icon('asc', $newordertitle, 'glossary');
          }
      }
      $ficon     = '';
@@ -3885,7 +3881,7 @@ function glossary_get_entries_by_search($glossary, $context, $query, $fullsearch
     $count = $DB->count_records_sql("SELECT COUNT(DISTINCT(ge.id)) $sqlfrom $sqlwhere", $params);
 
     $query = "$sqlwrapheader $sqlselect $sqlfrom $sqlwhere $sqlwrapfooter $sqlorderby";
-    $entries = $DB->get_recordset_sql($query, $params, $from, $limit);
+    $entries = $DB->get_records_sql($query, $params, $from, $limit);
 
     return array($entries, $count);
 }

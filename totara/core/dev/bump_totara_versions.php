@@ -25,7 +25,7 @@ define('CLI_SCRIPT', true);
 require(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir.'/clilib.php');
 
-define('MOODLE_COMMIT', '45f418c1fb6b133e024cc09b346936e80b125078'); // 3.2.9 - Totara 10 and 11
+define('MOODLE_DEFAULT_TAG', 'v3.3.7'); // The upstream release that Totara 10 and 11 are based on.
 
 list($options, $unrecognized) = cli_get_params(
     array(
@@ -86,29 +86,40 @@ list($moodleplugins, $totaraplugins) = dev_get_totara_and_moodle_plugins();
 if ($options['diffupstream']) {
     cli_heading('List of changed upstream plugin versions');
 
+    $exitcode = 0;
+
     foreach ($moodleplugins as $component => $fulldir) {
 
-        $upstreamversion = (string)dev_get_plugin_version_upstream($fulldir);
+        $tag = dev_get_plugin_backported($fulldir);
+        if (!$tag) {
+            $tag = MOODLE_DEFAULT_TAG;
+        }
+
+        $upstreamversion = (string)dev_get_plugin_version_upstream($fulldir, $tag);
         $ourversion = (string)dev_get_plugin_version($fulldir);
 
         if ($upstreamversion === $ourversion) {
-            continue;
-        }
+            if (!file_exists("$fulldir/db/totara_postupgrade.php")) {
+                continue;
+            }
+            $error = 'error, missing .01 bump (postupgrade present)';
+            $exitcode = 1;
 
-        $error = 'error';
-        if ($ourversion > $upstreamversion and $ourversion < floor($upstreamversion) + 1) {
-            $error = 'looks ok';
-        }
-        if ($component === 'tool_uploadcourse' and $upstreamversion === '2016120500' and $ourversion === '2016120501') {
-            $error = '   warning (potential problem from TL-15012)';
-        }
-        if (file_exists("$fulldir/db/totara_postupgrade.php")) {
-            $error .= ' (postupgrade present)';
+        } else {
+            $error = 'error';
+            if ($ourversion > $upstreamversion and $ourversion < floor($upstreamversion) + 1) {
+                $error = 'looks ok';
+            } else {
+                $exitcode = 1;
+            }
+            if (file_exists("$fulldir/db/totara_postupgrade.php")) {
+                $error .= ' (postupgrade present)';
+            }
         }
 
         cli_writeln(str_pad($component, 40, ' ', STR_PAD_RIGHT) . ' ' . $upstreamversion . ' ==> ' . $ourversion . ' ' . $error);
     }
-    die;
+    exit($exitcode);
 }
 
 cli_heading('List of ' . count($totaraplugins) . ' Totara plugins');
@@ -177,12 +188,21 @@ function dev_get_plugin_version($fulldir) {
     return $plugin->version;
 }
 
-function dev_get_plugin_version_upstream($fulldir) {
+function dev_get_plugin_backported($fulldir) {
+    $plugin = new stdClass();
+    $plugin->backported = null;
+    $module = $plugin;
+    include($fulldir.'/version.php');
+
+    return $plugin->backported;
+}
+
+function dev_get_plugin_version_upstream($fulldir, $tag = MOODLE_DEFAULT_TAG) {
     $plugin = new stdClass();
     $plugin->version = null;
     $module = $plugin;
 
-    $versioncontent = dev_get_upstream_file_content("$fulldir/version.php");
+    $versioncontent = dev_get_upstream_file_content("$fulldir/version.php", $tag);
     if ($versioncontent === false) {
         return null;
     }
@@ -270,11 +290,12 @@ function dev_get_maturity() {
  * Is the given file part of upstream Moodle?
  *
  * @param string $file
+ * @param string $tag optional upstream release tag
  * @return bool
  */
-function dev_is_upstream_file($file) {
+function dev_is_upstream_file($file, $tag = MOODLE_DEFAULT_TAG) {
     global $CFG;
-    $tag = MOODLE_COMMIT;
+
     $cwd = getcwd();
     chdir($CFG->dirroot);
     $file = substr($file, strlen($CFG->dirroot) +1);
@@ -287,11 +308,12 @@ function dev_is_upstream_file($file) {
  * Get content of upstream file
  *
  * @param string $file
+ * @param string $tag optional upstream release tag
  * @return string|false
  */
-function dev_get_upstream_file_content($file) {
+function dev_get_upstream_file_content($file, $tag = MOODLE_DEFAULT_TAG) {
     global $CFG;
-    $tag = MOODLE_COMMIT;
+
     $cwd = getcwd();
     chdir($CFG->dirroot);
     $file = substr($file, strlen($CFG->dirroot) +1);

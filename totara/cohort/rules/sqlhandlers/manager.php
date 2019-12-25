@@ -56,21 +56,6 @@ class cohort_rule_sqlhandler_hasreports extends cohort_rule_sqlhandler {
 }
 
 /**
- * @deprecated Since v9.0
- *
- * This class was deprecated as part of the multiple jobs patch and replaced with
- * the cohort_rule_sqlhandler_allstaff class, please use that instead.
- */
-class cohort_rule_sqlhandler_reportsto extends cohort_rule_sqlhandler_allstaff {
-
-    public function __construct(){
-        debugging('Class cohort_rule_sqlhandler_reportsto has been replaced and is now deprecated.
-            Please use the cohort_rule_sqlhandler_allstaff class instead', DEBUG_DEVELOPER);
-        parent::__construct();
-    }
-}
-
-/**
  * A rule for determining whether or not a user reports to another user in any of their respective job assignments.
  */
 class cohort_rule_sqlhandler_allstaff extends cohort_rule_sqlhandler {

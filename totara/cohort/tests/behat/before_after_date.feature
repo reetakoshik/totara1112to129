@@ -21,7 +21,7 @@ Feature: Apply audience membership rules using before and after criteria for cus
     And I log in as "admin"
     And I set the following administration settings values:
       | timezone | Europe/Kiev |
-    And I navigate to "User profile fields" node in "Site administration > Users > Accounts"
+    And I navigate to "User profile fields" node in "Site administration > Users"
     And I select "Date/Time" from the "Create a new profile field" singleselect
     And I set the following fields to these values:
       | shortname  | joindate  |
@@ -35,7 +35,7 @@ Feature: Apply audience membership rules using before and after criteria for cus
     Given I log in as "siteman1"
 
     # Add before criteria.
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "audience1"
     And I follow "Rule sets"
     And I select "Join Date" from the "addrulesetmenu" singleselect
@@ -64,7 +64,7 @@ Feature: Apply audience membership rules using before and after criteria for cus
     And I press "Update profile"
 
     # Check before criteria was not changed.
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "audience1"
     And I follow "Rule sets"
     And I should see "is before 19/11/2016, 17:30"
@@ -78,7 +78,7 @@ Feature: Apply audience membership rules using before and after criteria for cus
     And I log in as "siteman1"
 
     # Check before criteria is still set in user default time zone.
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "audience1"
     When I follow "Rule sets"
     Then I should see "is before 19/11/2016, 17:30"
@@ -86,7 +86,7 @@ Feature: Apply audience membership rules using before and after criteria for cus
   Scenario: Check custom fields dates of before and after criteria rule
     Given I log in as "siteman1"
 
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "audience1"
     And I follow "Rule sets"
     And I select "Join Date" from the "addrulesetmenu" singleselect
@@ -103,7 +103,7 @@ Feature: Apply audience membership rules using before and after criteria for cus
     And I press "Approve changes"
 
     # User on the same date as "before and on" should be included (In T10 this should be changed).
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Sam Student1"
     And I follow "Edit profile"
     And I expand all fieldsets
@@ -114,7 +114,7 @@ Feature: Apply audience membership rules using before and after criteria for cus
       | profile_field_joindate[year]    | 2016     |
     And I press "Update profile"
 
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Sal Student2"
     And I follow "Edit profile"
     And I expand all fieldsets
@@ -125,7 +125,7 @@ Feature: Apply audience membership rules using before and after criteria for cus
       | profile_field_joindate[year]    | 2016     |
     And I press "Update profile"
 
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Sad Student3"
     And I follow "Edit profile"
     And I expand all fieldsets
@@ -137,7 +137,7 @@ Feature: Apply audience membership rules using before and after criteria for cus
     And I press "Update profile"
 
     And I run the scheduled task "\totara_cohort\task\update_cohort_task"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "audience1"
     And I follow "Members"
     And I should see "Sam Student1"
@@ -147,7 +147,7 @@ Feature: Apply audience membership rules using before and after criteria for cus
     # Enable time, change to 00:05 and user should not be included anymore.
     And I log out
     And I log in as "admin"
-    And I navigate to "User profile fields" node in "Site administration > Users > Accounts"
+    And I navigate to "User profile fields" node in "Site administration > Users"
     And I click on "Edit" "link" in the "Join Date" "table_row"
     And I set the following fields to these values:
       | Include time? | 1 |
@@ -155,7 +155,7 @@ Feature: Apply audience membership rules using before and after criteria for cus
     And I log out
     And I log in as "siteman1"
 
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Sam Student1"
     And I follow "Edit profile"
     And I expand all fieldsets
@@ -164,7 +164,7 @@ Feature: Apply audience membership rules using before and after criteria for cus
       | profile_field_joindate[minute] | 05 |
     And I press "Update profile"
 
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Sad Student3"
     And I follow "Edit profile"
     And I expand all fieldsets
@@ -174,7 +174,7 @@ Feature: Apply audience membership rules using before and after criteria for cus
     And I press "Update profile"
 
     And I run the scheduled task "\totara_cohort\task\update_cohort_task"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "audience1"
     And I follow "Members"
     And I should not see "Sam Student1"
@@ -182,7 +182,7 @@ Feature: Apply audience membership rules using before and after criteria for cus
     And I should see "Sad Student3"
 
     # Users "on and after" should be included on date and after.
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "audience1"
     And I follow "Rule sets"
     And I click on "Edit" "link" in the "ul.cohort-editing_ruleset" "css_element"

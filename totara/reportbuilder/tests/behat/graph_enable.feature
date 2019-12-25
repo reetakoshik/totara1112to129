@@ -17,7 +17,8 @@ Feature: Graphs in Report builder
       | learner4 | Learner4  | US      |
       | learner5 | Learner5  | AU      |
       | learner6 | Learner6  | CZ      |
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | My user report |
       | Source      | User           |
@@ -31,7 +32,7 @@ Feature: Graphs in Report builder
 
   Scenario: Enable/Disable report graph setting and display report with graph and/or without graph
     Given I am on a totara site
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable report builder graphs" to "Show"
     And I press "Save changes"
 
@@ -52,7 +53,7 @@ Feature: Graphs in Report builder
 
   Scenario: Enable report graph setting and display report without graph
     Given I am on a totara site
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable report builder graphs" to "Show"
     And I press "Save changes"
 
@@ -84,7 +85,7 @@ Feature: Graphs in Report builder
 
     # Now disable the global report graph.
     And I click on "Home" in the totara menu
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "report builder graphs" to "Disable"
     And I press "Save changes"
 
@@ -129,7 +130,7 @@ Feature: Graphs in Report builder
 
     # Now disable the global report graph.
     And I click on "Home" in the totara menu
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable report builder graphs" to "Disable"
     And I press "Save changes"
 

@@ -6,7 +6,7 @@ Feature: Test I can manage custom fields for company goal types
 
   Scenario: Test I can create and sort company goal type custom fields
     When I log in as "admin"
-    And I navigate to "Manage company goal types" node in "Site administration > Hierarchies > Goals"
+    And I navigate to "Manage company goal types" node in "Site administration > Goals"
     And I press "Add a new company goal type"
     And I set the following fields to these values:
       | Type full name      | Development goals |

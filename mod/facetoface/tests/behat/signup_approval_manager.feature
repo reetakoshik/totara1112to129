@@ -38,9 +38,7 @@ Feature: Seminar Signup Manager Approval
     And I click on "s__facetoface_approvaloptions[approval_none]" "checkbox"
     And I click on "s__facetoface_approvaloptions[approval_self]" "checkbox"
     And I press "Save changes"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
-    And I turn editing mode on
+    And I am on "Classroom Connect Course" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name                | Classroom Connect       |
       | Description         | Classroom Connect Tests |
@@ -61,17 +59,62 @@ Feature: Seminar Signup Manager Approval
     And I press "OK"
     And I set the following fields to these values:
       | capacity              | 10   |
-  And I press "Save changes"
+    And I press "Save changes"
 
   Scenario: Student signs up with no manager assigned
     When I log out
     When I log in as "sally"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
-    And I should see "Sign-up"
-    And I follow "Sign-up"
+    And I am on "Classroom Connect Course" course homepage
+    And I should see "More info"
+    And I follow "More info"
     And I should see "Manager Approval"
     And I should see "This seminar requires manager approval, you are currently not assigned to a manager in the system. Please contact the site administrator."
+
+  Scenario: Student signs up with two managers assigned with manager select enabled and manager approval required
+    # Add two more managers
+    And the following "users" exist:
+      | username    | firstname | lastname | email              |
+      | tammy       | Tammy     | Tam      | tammy@example.com  |
+      | yummy       | Yummy     | Yum      | yummy@example.com  |
+      | funny       | Funny     | Fun      | funny@example.com  |
+    And the following job assignments exist:
+      | user  | fullname | idnumber | manager |
+      | sally | jajaja1  | 1        | tammy   |
+      | sally | jajaja2  | 2        | yummy   |
+    And I set the following administration settings values:
+      | facetoface_managerselect | 1 |
+    And I log out
+
+    And I log in as "sally"
+    And I am on "Classroom Connect Course" course homepage
+    And I follow "Request approval"
+    And I should see "Manager Approval"
+    And I press "Request approval"
+    Then I should see "Your request was sent to your manager for approval."
+    And I run all adhoc tasks
+    And I log out
+
+    And I log in as "tammy"
+    And I click on "Dashboard" in the totara menu
+    And I click on "View all tasks" "link"
+    And I should see "This is to advise that Sally Sal has requested to be booked into the following course" in the "td.message_values_statement" "css_element"
+    And I click on "mod/facetoface/attendees" "link" in the "td.message_values_statement" "css_element"
+    Then I should see "Tammy Tam" in the "Sally Sal" "table_row"
+    Then I should see "Yummy Yum" in the "Sally Sal" "table_row"
+    And I log out
+
+    And I log in as "yummy"
+    And I click on "Dashboard" in the totara menu
+    And I click on "View all tasks" "link"
+    And I should see "This is to advise that Sally Sal has requested to be booked into the following course" in the "td.message_values_statement" "css_element"
+    And I click on "mod/facetoface/attendees" "link" in the "td.message_values_statement" "css_element"
+    Then I should see "Tammy Tam" in the "Sally Sal" "table_row"
+    Then I should see "Yummy Yum" in the "Sally Sal" "table_row"
+    And I log out
+
+    And I log in as "funny"
+    And I click on "Dashboard" in the totara menu
+    And I should not see "View all tasks"
 
   Scenario: Student signs up with no manager assigned with manager select enabled and manager approval required
     When I navigate to "Global settings" node in "Site administration > Seminars"
@@ -79,10 +122,9 @@ Feature: Seminar Signup Manager Approval
     And I press "Save changes"
     And I log out
     And I log in as "sally"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
-    And I should see "Sign-up"
-    And I follow "Sign-up"
+    And I am on "Classroom Connect Course" course homepage
+    And I should see "Request approval"
+    And I follow "Request approval"
     And I should see "Manager Approval"
     And I press "Request approval"
     Then I should see "This seminar requires manager approval, please select a manager to request approval"
@@ -91,13 +133,14 @@ Feature: Seminar Signup Manager Approval
     And I click on "Cassy Cas" "link" in the "Select manager" "totaradialogue"
     And I click on "OK" "button" in the "Select manager" "totaradialogue"
     And I press "Request approval"
-    Then I should see "Your request was sent to your manager for approval"
+    Then I should see "Your request was sent to your manager for approval."
+    And I run all adhoc tasks
 
     When I log out
     And I log in as "manager"
     And I click on "Dashboard" in the totara menu
     And I click on "View all tasks" "link"
-    And I should see "Sally Sal" in the "td.user_namelink" "css_element"
+    And I should see "This is to advise that Sally Sal has requested to be booked into the following course" in the "td.message_values_statement" "css_element"
     And I click on "Attendees" "link"
 
     Then I should see "Sally Sal"
@@ -108,34 +151,34 @@ Feature: Seminar Signup Manager Approval
   Scenario: Student gets approved through manager approval
     When I log out
     And I log in as "jimmy"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
-    And I should see "Sign-up"
-    And I follow "Sign-up"
+    And I am on "Classroom Connect Course" course homepage
+    And I should see "Request approval"
+    And I follow "Request approval"
     And I should see "Manager Approval"
     And I should see "Cassy Cas"
     And I press "Request approval"
+    And I run all adhoc tasks
     And I log out
 
     And I log in as "manager"
     And I click on "Dashboard" in the totara menu
     Then I should see "Seminar booking request"
     And I click on "View all tasks" "link"
-    And I should see "Jimmy Jim" in the "td.user_namelink" "css_element"
+    And I should see "This is to advise that Jimmy Jim has requested to be booked into the following course" in the "td.message_values_statement" "css_element"
     And I click on "Attendees" "link" in the "1 January 2020" "table_row"
     Then I should see "Jimmy Jim" in the ".lastrow" "css_element"
 
     When I click on "requests[8]" "radio" in the ".lastrow .lastcol" "css_element"
     And I click on "Update requests" "button"
     Then I should not see "Jimmy Jim"
+    And I run all adhoc tasks
 
     When I log out
     And I log in as "jimmy"
     And I click on "Dashboard" in the totara menu
     Then I should see "Seminar booking confirmation"
 
-    When I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
+    When I am on "Classroom Connect Course" course homepage
     And I follow "View all events"
     Then I should see "Booked" in the "1 January 2020" "table_row"
 
@@ -149,10 +192,9 @@ Feature: Seminar Signup Manager Approval
     And I press "Save changes"
     And I log out
     And I log in as "jimmy"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
-    And I should see "Sign-up"
-    And I follow "Sign-up"
+    And I am on "Classroom Connect Course" course homepage
+    And I should see "Request approval"
+    And I follow "Request approval"
     And I should see "Manager Approval"
     And I should see "Cassy Cas"
 
@@ -161,26 +203,60 @@ Feature: Seminar Signup Manager Approval
     And I click on "OK" "button" in the "Select manager" "totaradialogue"
 
     And I press "Request approval"
+    And I run all adhoc tasks
     And I log out
 
     And I log in as "timmy"
     And I click on "Dashboard" in the totara menu
     Then I should see "Seminar booking request"
     And I click on "View all tasks" "link"
-    And I should see "Jimmy Jim" in the "td.user_namelink" "css_element"
+    And I should see "This is to advise that Jimmy Jim has requested to be booked into the following course" in the "td.message_values_statement" "css_element"
     And I click on "Attendees" "link" in the "1 January 2020" "table_row"
     Then I should see "Jimmy Jim" in the ".lastrow" "css_element"
 
     When I click on "requests[8]" "radio" in the ".lastrow .lastcol" "css_element"
     And I click on "Update requests" "button"
     Then I should not see "Jimmy Jim"
+    And I run all adhoc tasks
 
     When I log out
     And I log in as "jimmy"
     And I click on "Dashboard" in the totara menu
     Then I should see "Seminar booking confirmation"
 
-    When I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
+    When I am on "Classroom Connect Course" course homepage
     And I follow "View all events"
     Then I should see "Booked" in the "1 January 2020" "table_row"
+
+  Scenario: Trainer is given permission to approve any bookings
+    And I log out
+    When I log in as "jimmy"
+    And I am on "Classroom Connect Course" course homepage
+    And I should see "Request approval"
+    And I follow "Request approval"
+    And I should see "Manager Approval"
+    And I should see "Cassy Cas"
+    And I press "Request approval"
+    And I run all adhoc tasks
+    And I log out
+    When I log in as "trainer"
+    And I am on "Classroom Connect Course" course homepage
+    And I follow "View all events"
+    And I follow "Attendees"
+    Then I should not see "Approval required" in the ".tabtree" "css_element"
+
+    And I log out
+    And I log in as "admin"
+    And the following "permission overrides" exist:
+      | capability                       | permission | role    | contextlevel | reference |
+      | mod/facetoface:approveanyrequest | Allow      | teacher | Course       | CCC       |
+    And I log out
+    When I log in as "trainer"
+    And I am on "Classroom Connect Course" course homepage
+    And I follow "View all events"
+    And I follow "Attendees"
+    And I follow "Approval required"
+    And I click on "input[value='2']" "css_element" in the "Jimmy Jim" "table_row"
+    And I press "Update requests"
+    Then I should see "Attendance requests updated"
+    And I should not see "Jimmy Jim"

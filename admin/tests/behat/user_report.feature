@@ -8,7 +8,7 @@ Feature: Verify functionality of user report.
       | learner1 | Bob1      | Learner1 | bob1.learner1@example.com | 0           |
 
     And I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
 
   Scenario: Verify expected users are in user report
     Then I should see "Browse list of users: 3 records shown"
@@ -133,7 +133,7 @@ Feature: Verify functionality of user report.
     Then I should see "An email should have been sent to your address at bob2.learner2@example.com"
 
     When I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I set the field "user-deleted" to "any value"
     And I click on "Search" "button" in the ".fitem_actionbuttons" "css_element"
     Then the "reportbuilder-table" table should contain the following:
@@ -173,7 +173,7 @@ Feature: Verify functionality of user report.
     Then I should see "Invalid login, please try again"
 
     When I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     Then the "reportbuilder-table" table should contain the following:
       | User's Fullname | Username | User's Email              | User Status |
       | Bob1 Learner1   | learner1 | bob1.learner1@example.com | Active      |
@@ -206,7 +206,7 @@ Feature: Verify functionality of user report.
     And the following config values are set as admin:
       | enableglobalrestrictions | 1 |
 
-    When I navigate to "Assign system roles" node in "Site administration > Users > Permissions"
+    When I navigate to "Assign system roles" node in "Site administration > Permissions"
     And I follow "Site Manager"
     And I set the field "Potential users" to "Bob1 Learner1 (bob1.learner1@example.com)"
     And I press "Add"
@@ -215,7 +215,7 @@ Feature: Verify functionality of user report.
     Then I should see "Bob1 Learner1 (bob1.learner1@example.com)" in the "#removeselect" "css_element"
     And I should see "Bob3 Learner3 (bob3.learner3@example.com)" in the "#removeselect" "css_element"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I press "Edit this report"
     Then I should see "Edit Report 'Browse list of users'"
 
@@ -225,7 +225,7 @@ Feature: Verify functionality of user report.
     Then I should see "Report Updated"
 
     When I click on "Home" in the totara menu
-    And I navigate to "Global report restrictions" node in "Site administration > Reports > Report builder"
+    And I navigate to "Global report restrictions" node in "Site administration > Reports"
     And I press "New restriction"
     And I set the following fields to these values:
       | Name   | User Report Restriction |
@@ -253,7 +253,7 @@ Feature: Verify functionality of user report.
 
     # Learner1 should not have any restrictions on what data it can see.
     When I log in as "learner1"
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     Then I should see "Browse list of users: 6 records shown"
     And the "reportbuilder-table" table should contain the following:
       | User's Fullname | Username | User's Email              | User Status |
@@ -265,7 +265,7 @@ Feature: Verify functionality of user report.
 
     # Learner3 should be restricted to a report containing only learner1 and 2.
     When I log in as "learner3"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     Then I should see "Browse list of users: 2 records shown"
     And the "reportbuilder-table" table should contain the following:
       | User's Fullname | Username | User's Email              | User Status |

@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/totara/hierarchy/prefix/position/lib.php');
 
-class event_user_position_test extends advanced_testcase {
+class totara_core_event_user_position_testcase extends advanced_testcase {
 
     public function test_job_assignment_updated_event() {
         global $DB;
@@ -100,6 +100,42 @@ class event_user_position_test extends advanced_testcase {
         $this->assertSame(\core\event\base::LEVEL_OTHER, $data['edulevel']);
         $this->assertSame($user->id, $data['relateduserid']);
         $this->assertSame($jobassignment->id, $data['objectid']);
+        $this->assertEventContextNotUsed($event);
+    }
+
+    public function test_job_assignment_deleted_event() {
+        $this->resetAfterTest();
+        $sink = $this->redirectEvents();
+
+        $user = $this->getDataGenerator()->create_user();
+        $data = array(
+            'userid' => $user->id,
+            'fullname' => 'ja1',
+            'shortname' => 'ja1',
+            'idnumber' => 'ja1',
+        );
+        $jobassignment = \totara_job\job_assignment::create($data);
+        $oldjaid = $jobassignment->id;
+
+        // Delete JA which must trigger event of deleting.
+        \totara_job\job_assignment::delete($jobassignment);
+
+        $events = $sink->get_events();
+        $sink->clear();
+
+        // Search for our job_assignment_deleted event.
+        foreach ($events as $event) {
+            $eventdata = $event->get_data();
+            if ($eventdata['eventname'] == '\totara_job\event\job_assignment_deleted') {
+                break;
+            }
+        }
+        $context = \context_system::instance();
+        $this->assertEquals($context, $event->get_context());
+        $this->assertSame('d', $eventdata['crud']);
+        $this->assertSame(\core\event\base::LEVEL_OTHER, $eventdata['edulevel']);
+        $this->assertSame($user->id, $eventdata['relateduserid']);
+        $this->assertSame($oldjaid, $eventdata['objectid']);
         $this->assertEventContextNotUsed($event);
     }
 }

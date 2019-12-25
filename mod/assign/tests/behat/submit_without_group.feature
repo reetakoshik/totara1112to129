@@ -45,9 +45,10 @@ Feature: Submit assignment without group
       | student3 | GC32  |
     # Student 1 can only submit assignment in course 2.
     When I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Allow default group"
     Then I should not see "Not a member of any group"
+    And I should not see "This assignment requires submission in groups. You are not a member of any group"
     And I should see "Nothing has been submitted for this assignment"
     And I press "Add submission"
     And I set the following fields to these values:
@@ -58,11 +59,11 @@ Feature: Submit assignment without group
     And I should see "Submitted"
     And I follow "Course 1"
     And I follow "Require group membership"
-    And I should see "Not a member of any group"
+    And I should see "None" in the "Group" "table_row"
+    And I should see "This assignment requires submission in groups. You are not a member of any group"
     And I should see "Nothing has been submitted for this assignment"
     And I should not see "Add submission"
-    And I am on homepage
-    And I follow "Course 2"
+    And I am on "Course 2" course homepage
     And I follow "Require group membership"
     And I should not see "Not a member of any group"
     And I should see "Nothing has been submitted for this assignment"
@@ -76,7 +77,7 @@ Feature: Submit assignment without group
     And I log out
     # Student 2 should see submitted.
     And I log in as "student2"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Allow default group"
     And I should see "Submitted"
     And I am on homepage
@@ -86,7 +87,7 @@ Feature: Submit assignment without group
     And I log out
     # Teacher should see student 1 and student 2 has submitted assignment.
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Allow default group"
     And I should see "1" in the "Groups" "table_row"
     And I should not see "The setting 'Require group to make submission\' is enabled and some users are either not a member of any group, or are a member of more than one group, so are unable to make submissions."
@@ -106,7 +107,7 @@ Feature: Submit assignment without group
     And I should not see "Submitted" in the "Student 1" "table_row"
     And I should not see "Submitted" in the "Student 2" "table_row"
     And I am on homepage
-    And I follow "Course 2"
+    And I am on "Course 2" course homepage
     And I follow "Require group membership"
     And I should see "1" in the "Groups" "table_row"
     And I should not see "The setting 'Require group to make submission' is enabled and some users are either not a member of any group, or are a member of more than one group, so are unable to make submissions."
@@ -118,14 +119,15 @@ Feature: Submit assignment without group
     And I log out
     # Test student 3 (in multiple groups) should not be able to submit.
     And I log in as "student3"
-    And I follow "Course 3"
+    And I am on "Course 3" course homepage
     And I follow "Require group membership"
-    And I should see "Member of more than one group"
+    And I should see "Multiple" in the "Group" "table_row"
+    And I should see "The assignment requires submission in groups. You are a member of more than one group."
     And I should see "Nothing has been submitted for this assignment"
     And I should not see "Add submission"
     And I log out
     And I log in as "teacher1"
-    And I follow "Course 3"
+    And I am on "Course 3" course homepage
     And I follow "Require group membership"
     And I should see "The setting 'Require group to make submission' is enabled and some users are either not a member of any group, or are a member of more than one group, so are unable to make submissions."
     And I navigate to "View all submissions" in current page administration

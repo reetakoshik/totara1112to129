@@ -27,6 +27,7 @@ require_once($CFG->dirroot.'/admin/tool/totara_sync/sources/classes/source.org.c
 require_once($CFG->dirroot.'/admin/tool/totara_sync/lib.php');
 
 class totara_sync_source_org_csv extends totara_sync_source_org {
+    use \tool_totara_sync\internal\source\csv_trait;
 
     function get_filepath() {
         $path = '/csv/ready/org.csv';
@@ -35,7 +36,6 @@ class totara_sync_source_org_csv extends totara_sync_source_org {
     }
 
     function config_form(&$mform) {
-        global $CFG, $OUTPUT;
 
         $filepath = $this->get_filepath();
 
@@ -50,120 +50,19 @@ class totara_sync_source_org_csv extends totara_sync_source_org {
             return false;
         }
 
-        // Add some source file details
-        $mform->addElement('header', 'fileheader', get_string('filedetails', 'tool_totara_sync'));
-        $mform->setExpanded('fileheader');
-        if (get_config('totara_sync', 'fileaccess') == FILE_ACCESS_DIRECTORY) {
-             $mform->addElement('static', 'nameandloc', get_string('nameandloc', 'tool_totara_sync'), html_writer::tag('strong', $filepath));
-        } else {
-             $link = "{$CFG->wwwroot}/admin/tool/totara_sync/admin/uploadsourcefiles.php";
-             $mform->addElement('static', 'uploadfilelink', get_string('uploadfilelink', 'tool_totara_sync', $link));
-        }
-
-        $encodings = core_text::get_encodings();
-        $mform->addElement('select', 'csvorgencoding', get_string('csvencoding', 'tool_totara_sync'), $encodings);
-        $mform->setType('csvorgencoding', PARAM_ALPHANUMEXT);
-        $default = $this->get_config('csvorgencoding');
-        $default = (!empty($default) ? $default : 'UTF-8');
-        $mform->setDefault('csvorgencoding', $default);
-
-        $delimiteroptions = array(
-            ',' => get_string('comma', 'tool_totara_sync'),
-            ';' => get_string('semicolon', 'tool_totara_sync'),
-            ':' => get_string('colon', 'tool_totara_sync'),
-            '\t' => get_string('tab', 'tool_totara_sync'),
-            '|' => get_string('pipe', 'tool_totara_sync')
-        );
-
-        $mform->addElement('select', 'delimiter', get_string('delimiter', 'tool_totara_sync'), $delimiteroptions);
-        $default = $this->config->delimiter;
-        if (empty($default)) {
-            $default = ',';
-        }
-        $mform->setDefault('delimiter', $default);
-
+        $this->config_form_add_csv_details($mform);
         parent::config_form($mform);
     }
 
     function config_save($data) {
-        // Make sure we use a tab character for the delimiter, if a tab is selected.
-        $this->set_config('delimiter', $data->{'delimiter'} == '\t' ? "\t" : $data->{'delimiter'});
-        $this->set_config('csvorgencoding', $data->{'csvorgencoding'});
-
+        $this->config_save_csv_file_details($data);
         parent::config_save($data);
     }
 
     function import_data($temptable) {
         global $CFG, $DB;
 
-        $fileaccess = get_config('totara_sync', 'fileaccess');
-        if ($fileaccess == FILE_ACCESS_DIRECTORY) {
-            if (!$this->filesdir) {
-                throw new totara_sync_exception($this->get_element_name(), 'populatesynctablecsv', 'nofilesdir');
-            }
-            $filepath = $this->get_filepath();
-            if (!file_exists($filepath)) {
-                throw new totara_sync_exception($this->get_element_name(), 'populatesynctablecsv', 'nofiletosync', $filepath, null, 'warn');
-            }
-            $filemd5 = md5_file($filepath);
-            while (true) {
-                // Ensure file is not currently being written to
-                sleep(2);
-                $newmd5 = md5_file($filepath);
-                if ($filemd5 != $newmd5) {
-                    $filemd5 = $newmd5;
-                } else {
-                    break;
-                }
-            }
-
-            // See if file is readable
-            if (!$file = is_readable($filepath)) {
-                throw new totara_sync_exception($this->get_element_name(), 'populatesynctablecsv', 'cannotreadx', $filepath);
-            }
-
-            // Move file to store folder
-            $storedir = $this->filesdir . '/csv/store';
-            if (!totara_sync_make_dirs($storedir)) {
-                throw new totara_sync_exception($this->get_element_name(), 'populatesynctablecsv', 'cannotcreatedirx', $storedir);
-            }
-
-            $storefilepath = $storedir . '/' . time() . '.' . basename($filepath);
-
-            rename($filepath, $storefilepath);
-        } else if ($fileaccess == FILE_ACCESS_UPLOAD) {
-            $fs = get_file_storage();
-            $systemcontext = context_system::instance();
-            $fieldid = get_config('totara_sync', 'sync_org_itemid');
-
-            // Check the file exists
-            if (!$fs->file_exists($systemcontext->id, 'totara_sync', 'org', $fieldid, '/', '')) {
-                throw new totara_sync_exception($this->get_element_name(), 'populatesynctablecsv', 'nofileuploaded', $this->get_element_name(), null, 'warn');
-            }
-
-            // Get the file
-            $fsfiles = $fs->get_area_files($systemcontext->id, 'totara_sync', 'org', $fieldid, 'id DESC', false);
-            $fsfile = reset($fsfiles);
-
-            // Set up the temp dir
-            $tempdir = $CFG->tempdir . '/totarasync/csv';
-            check_dir_exists($tempdir, true, true);
-
-            // Create temporary file (so we know the filepath)
-            $fsfile->copy_content_to($tempdir.'/org.php');
-            $itemid = $fsfile->get_itemid();
-            $fs->delete_area_files($systemcontext->id, 'totara_sync', 'org', $itemid);
-            $storefilepath = $tempdir.'/org.php';
-
-        }
-
-        $encoding = $this->get_config('csvorgencoding');
-        $storefilepath = totara_sync_clean_csvfile($storefilepath, $encoding, $fileaccess, $this->get_element_name());
-
-        // Open file from store for processing
-        if (!$file = fopen($storefilepath, 'r')) {
-            throw new totara_sync_exception($this->get_element_name(), 'populatesynctablecsv', 'cannotopenx', $storefilepath);
-        }
+        $file = $this->open_csv_file();
 
         // Map CSV fields.
         $fields = fgetcsv($file, 0, $this->config->delimiter);
@@ -179,27 +78,18 @@ class totara_sync_source_org_csv extends totara_sync_source_org {
             }
         }
 
-        foreach (array_keys($this->customfields) as $f) {
-            if (empty($this->config->{'import_'.$f})) {
-                continue;
-            }
-            if (empty($this->config->{'fieldmapping_'.$f})) {
-                $fieldmappings[$f] = $f;
-            } else {
-                $fieldmappings[$this->config->{'fieldmapping_'.$f}] = $f;
+        $customfields = $this->get_mapped_customfields();
+
+        // Check field integrity for custom fields.
+        if ($missingcustomfields = array_diff($customfields, $fields)) {
+            foreach($missingcustomfields as $missingcustomfield) {
+                // This will stop iterating on the first one,
+                // but it's a start if we want to log all missing fields in the future.
+                throw new \totara_sync_exception($this->get_element_name(), 'importdata', 'csvnotvalidmissingfieldx', $missingcustomfield);
             }
         }
 
-        // Check field integrity for custom fields.
-        foreach ($this->customfields as $cf => $name) {
-            if (empty($this->config->{'import_'. $cf}) || in_array($cf, $fieldmappings)) {
-                // Disabled or mapped fields can be ignored.
-                continue;
-            }
-            if (!in_array($cf, $fields)) {
-                throw new totara_sync_exception($this->get_element_name(), 'importdata', 'csvnotvalidmissingfieldx', $cf);
-            }
-        }
+        $fieldmappings = array_merge($fieldmappings, $customfields);
 
         // Throw an exception if fields contain invalid characters
         foreach ($fields as $field) {
@@ -213,35 +103,34 @@ class totara_sync_source_org_csv extends totara_sync_source_org {
         }
 
         // Ensure necessary fields are present
-        foreach ($fieldmappings as $f => $m) {
-            if (!in_array($f, $fields)) {
-                if ($m == 'typeidnumber') {
-                    // typeidnumber field can be optional if no custom fields specified
-                    $customfieldspresent = false;
-                    foreach ($fields as $ff) {
-                        if (preg_match('/^customfield_/', $ff)) {
-                            $customfieldspresent = true;
-                            break;
-                        }
-                    }
-                    if (!$customfieldspresent) {
-                        // No typeidnumber and no customfields; this is not a problem then ;)
-                        continue;
-                    }
+        foreach ($fieldmappings as $field => $mapping) {
+            if (!in_array($field, $fields) && !in_array($mapping, $customfields)) {
+                // typeidnumber field can be optional if no custom fields specified
+                if (($field == 'typeidnumber') && empty($customfields)) {
+                    continue;
                 }
-                if ($f == $m) {
-                    throw new totara_sync_exception($this->get_element_name(), 'mapfields', 'csvnotvalidmissingfieldx', $f);
+
+                if ($field == $mapping) {
+                    throw new totara_sync_exception(
+                        $this->get_element_name(),
+                        'mapfields',
+                        'csvnotvalidmissingfieldx',
+                        $field
+                    );
                 } else {
-                    throw new totara_sync_exception($this->get_element_name(), 'mapfields', 'csvnotvalidmissingfieldxmappingx', (object)array('field' => $f, 'mapping' => $m));
+                    throw new totara_sync_exception(
+                        $this->get_element_name(),
+                        'mapfields',
+                        'csvnotvalidmissingfieldxmappingx',
+                        (object)['field' => $field, 'mapping' => $mapping]
+                    );
                 }
             }
         }
         // Finally, perform CSV to db field mapping
         foreach ($fields as $index => $field) {
-            if (!preg_match('/^customfield_/', $field)) {
-                if (in_array($field, array_keys($fieldmappings))) {
-                    $fields[$index] = $fieldmappings[$field];
-                }
+            if (in_array($field, array_keys($fieldmappings))) {
+                $fields[$index] = $fieldmappings[$field];
             }
         }
 
@@ -253,7 +142,9 @@ class totara_sync_source_org_csv extends totara_sync_source_org {
         $fieldcount = new stdClass();
         $fieldcount->headercount = count($fields);
         $fieldcount->rownum = 0;
-        $csvdateformat = (isset($CFG->csvdateformat)) ? $CFG->csvdateformat : get_string('csvdateformatdefault', 'totara_core');
+
+        // Convert setting into a boolean.
+        $csvsaveemptyfields = isset($this->element->config->csvsaveemptyfields) && $this->element->config->csvsaveemptyfields == 1;
 
         while ($csvrow = fgetcsv($file, 0, $this->config->delimiter)) {
             $fieldcount->rownum++;
@@ -274,9 +165,6 @@ class totara_sync_source_org_csv extends totara_sync_source_org {
             }
             $csvrow = array_combine($fields, $csvrow);  // nice associative array
 
-            // Encode and clean the data.
-            $csvrow = totara_sync_clean_fields($csvrow);
-
             // Set up a db row
             $row = array();
 
@@ -287,9 +175,28 @@ class totara_sync_source_org_csv extends totara_sync_source_org {
                 }
             }
 
-            // The condition must use a combination of isset and !== '' because it needs to process 0 as a valid parentidnumber.
-            $row['parentidnumber'] = isset($row['parentidnumber']) && $row['parentidnumber'] !== '' ? $row['parentidnumber'] : '';
-            $row['parentidnumber'] = $row['parentidnumber'] === $row['idnumber'] ? '' : $row['parentidnumber'];
+            $row = $this->clean_fields($row);
+
+            // Empty string from file
+            if (isset($row['parentidnumber']) && $row['parentidnumber'] === '') {
+                if ($csvsaveemptyfields) {
+                    // Saving empty fields (erase data).
+                    $row['parentidnumber'] = '';
+                } else {
+                    // Not saving (set to null and the element will get the existing value).
+                    $row['parentidnumber'] = null;
+                }
+            }
+
+            if (isset($row['frameworkidnumber']) && $row['frameworkidnumber'] === '') {
+                if ($csvsaveemptyfields) {
+                    // Saving empty fields,
+                    // We cannot have an empty framework id number but will be stopped in the element.
+                    $row['frameworkidnumber'] = '';
+                } else{
+                    $row['frameworkidnumber'] = null;
+                }
+            }
 
             if ($this->config->{'import_typeidnumber'} == '0') {
                 unset($row['typeidnumber']);
@@ -301,39 +208,32 @@ class totara_sync_source_org_csv extends totara_sync_source_org {
                 $row['timemodified'] = $now; // This should probably be 0, but it causes repeated sync_item calls to parents.
             } else {
                 // Try to parse the contents - if parse fails assume a unix timestamp and leave unchanged
-                $parsed_date = totara_date_parse_from_format($csvdateformat, trim($row['timemodified']), true);
+                $parsed_date = totara_date_parse_from_format(
+                    $this->get_csv_date_format(),
+                    trim($csvrow['timemodified']),
+                    true
+                );
                 if ($parsed_date) {
                     $row['timemodified'] = $parsed_date;
                 }
             }
 
-            // Custom fields - need to handle custom field formats like dates here
-            $customfieldkeys = preg_grep('/^customfield_.*/', $fields);
-            if (!empty($customfieldkeys)) {
-                $customfields = array();
-                foreach ($customfieldkeys as $key) {
-                    // Get shortname and check if we need to do field type processing
-                    $value = trim($csvrow[$key]);
-                    if (!empty($value)) {
-                        $shortname = str_replace('customfield_', '', $key);
-                        $datatype = $DB->get_field('org_type_info_field', 'datatype', array('shortname' => $shortname));
-                        switch ($datatype) {
-                            case 'datetime':
-                                // Try to parse the contents - if parse fails assume a unix timestamp and leave unchanged
-                                $parsed_date = totara_date_parse_from_format($csvdateformat, $value, true);
-                                if ($parsed_date) {
-                                    $value = $parsed_date;
-                                }
-                                break;
-                            default:
-                                break;
-                        }
+            // Unset fields we are not saving since they are empty
+            if (!$csvsaveemptyfields) {
+                foreach ($row as $key => $value) {
+                    if ($value === '') {
+                        $row[$key] = null;
                     }
-                    $customfields[$key] = $value;
-                    unset($csvrow[$key]);
                 }
+            }
 
-                $row['customfields'] = json_encode($customfields);
+            if (!empty($this->hierarchy_customfields)) {
+                $row['customfields'] = $this->get_customfield_json($csvrow, $csvsaveemptyfields);
+                foreach ($this->hierarchy_customfields as $hierarchy_customfield) {
+                    if ($this->is_importing_customfield($hierarchy_customfield)) {
+                        unset($row[$hierarchy_customfield->get_default_fieldname()]);
+                    }
+                }
             }
 
             $datarows[] = $row;
@@ -365,11 +265,7 @@ class totara_sync_source_org_csv extends totara_sync_source_org {
         }
         unset($fieldmappings);
 
-        fclose($file);
-        // Done, clean up the file(s)
-        if ($fileaccess == FILE_ACCESS_UPLOAD) {
-            unlink($storefilepath); // don't store this file in temp
-        }
+        $this->close_csv_file($file);
 
         // Update temporary table stats once import is done.
         $DB->update_temp_table_stats();
@@ -386,4 +282,36 @@ class totara_sync_source_org_csv extends totara_sync_source_org {
         return $this->get_common_csv_notifications();
     }
 
+    /**
+     * Cleans values for import. Excludes custom fields, which should not be part of the input array.
+     *
+     * @param string[] $row with field name as key (after mapping) and value provided for the given field.
+     * @return string[] Same structure as input but with cleaned values.
+     */
+    private function clean_fields($row) {
+        $cleaned = [];
+        foreach($row as $key => $value) {
+            switch($key) {
+                case 'idnumber':
+                case 'fullname':
+                case 'shortname':
+                case 'parentidnumber':
+                case 'typeidnumber':
+                case 'frameworkidnumber':
+                case 'timemodified':
+                    $cleaned[$key] = clean_param(trim($value), PARAM_TEXT);
+                    break;
+                case 'deleted':
+                    $cleaned[$key] = clean_param(trim($value), PARAM_INT);
+                    break;
+                case 'description':
+                    $cleaned[$key] = clean_param(trim($value), PARAM_RAW);
+                    break;
+                default:
+                    // This is not an available field to be synced, don't include.
+            }
+        }
+
+        return $cleaned;
+    }
 }

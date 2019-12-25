@@ -689,8 +689,10 @@ class core_course_management_renderer extends plugin_renderer_base {
      */
     public function course_listing_actions(coursecat $category, course_in_list $course = null, $perpage = 20) {
         $actions = array();
-        if ($category->can_create_course()) {
-            $url = new moodle_url('/course/edit.php', array('category' => $category->id, 'returnto' => 'catmanage'));
+        $wm = new \core_course\workflow_manager\coursecreate();
+        $wm->set_params(['category' => $category->id, 'returnto' => 'catmanage']);
+        if ($wm->workflows_available()) {
+            $url = $wm->get_url();
             $actions[] = html_writer::link($url, get_string('createnewcourse'));
         }
         if ($category->can_request_course()) {

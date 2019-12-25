@@ -27,7 +27,7 @@ use totara_job\job_assignment;
 /**
  * Tests the {@see update_competencies_task} class
  */
-class update_competencies_task_testcase extends advanced_testcase {
+class totara_hierarchy_update_competencies_task_testcase extends advanced_testcase {
 
     public static function setUpBeforeClass() {
         global $CFG;
@@ -185,15 +185,18 @@ class update_competencies_task_testcase extends advanced_testcase {
 
         $this->assert_user_hold_competencies($user1, [$comp9id]);
 
-        $output = $this->run_task();
-
-        $this->assertSame(0, $DB->count_records('comp_record', ['reaggregate' => $reaggregatetime]));
-
-        // Run it a second time
-        $this->waitForSecond();
-        $output .= $this->run_task();
+        // Run it a multiple times, maximum five times
+        // Just to make sure all records are processed.
+        $i = 0;
+        $output = '';
+        do {
+            $this->waitForSecond();
+            $output .= $this->run_task();
+            $i++;
+        } while ($i < 5 && $DB->count_records('comp_record', ['reaggregate' => 0]) < 9);
 
         // All items should have been reaggregated
+        $this->assertSame(0, $DB->count_records('comp_record', ['reaggregate' => $reaggregatetime]));
         $this->assertSame(9, $DB->count_records('comp_record', ['reaggregate' => 0]));
 
         $this->assertContains('Aggregating competency items evidence for user '.$user1->id.' for competency '.$comp9id, $output);

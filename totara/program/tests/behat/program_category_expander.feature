@@ -23,7 +23,7 @@ Feature: Find learning program category management
         | c1bp2     | c1bp2     | cat1b    | 1       |
     And I log in as "admin"
     And I set the following administration settings values:
-        | Enhanced catalog | 0 |
+        | catalogtype | moodle |
     And I press "Save changes"
     And I log out
 

@@ -1,3 +1,0 @@
-last_access_five_minutes,block_last_course_accessed
-last_access_half_hour,block_last_course_accessed
-last_access_hour,block_last_course_accessed

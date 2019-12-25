@@ -237,8 +237,6 @@ class mod_workshop_userdata_assessments_testcase extends advanced_testcase {
     }
 
     public function test_export_system_context() {
-        $this->resetAfterTest(false);
-
         $data = $this->create_test_data();
 
         $export = assessments::execute_export(new target_user($data['user1']), context_system::instance());
@@ -267,16 +265,10 @@ class mod_workshop_userdata_assessments_testcase extends advanced_testcase {
         foreach ($export->files as $file) {
             $this->assertStringStartsWith($data['user1']->username, $file->get_filename());
         }
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @depends test_export_system_context
-     */
-    public function test_count_system_context($data) {
-        $this->resetAfterTest(false);
+    public function test_count_system_context() {
+        $data = $this->create_test_data();
 
         $count = assessments::execute_count(new target_user($data['user1']), context_system::instance());
 
@@ -285,13 +277,10 @@ class mod_workshop_userdata_assessments_testcase extends advanced_testcase {
         return $data;
     }
 
-    /**
-     * @param $data
-     * @depends test_count_system_context
-     */
-    public function test_purge_system_context($data) {
-        $this->resetAfterTest(true);
+    public function test_purge_system_context() {
         global $DB;
+
+        $data = $this->create_test_data();
 
         assessments::execute_purge(new target_user($data['user1']), context_system::instance());
 
@@ -325,8 +314,6 @@ class mod_workshop_userdata_assessments_testcase extends advanced_testcase {
     }
 
     public function test_export_coursecat_context() {
-        $this->resetAfterTest(false);
-
         $data = $this->create_test_data();
 
         $export = assessments::execute_export(new target_user($data['user1']), context_coursecat::instance($data['category2']->id));
@@ -355,31 +342,20 @@ class mod_workshop_userdata_assessments_testcase extends advanced_testcase {
             $this->assertStringStartsWith($data['user1']->username, $file->get_filename());
             $this->assertStringEndsNotWith('workshop1', $file->get_filename());
         }
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @depends test_export_coursecat_context
-     */
-    public function test_count_coursecat_context($data) {
-        $this->resetAfterTest(false);
+    public function test_count_coursecat_context() {
+        $data = $this->create_test_data();
 
         $count = assessments::execute_count(new target_user($data['user1']), context_coursecat::instance($data['category2']->id));
 
         $this->assertEquals(6, $count);
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @depends test_count_coursecat_context
-     */
-    public function test_purge_coursecat_context($data) {
-        $this->resetAfterTest(true);
+    public function test_purge_coursecat_context() {
         global $DB;
+
+        $data = $this->create_test_data();
 
         assessments::execute_purge(new target_user($data['user1']), context_coursecat::instance($data['category2']->id));
 
@@ -411,8 +387,6 @@ class mod_workshop_userdata_assessments_testcase extends advanced_testcase {
     }
 
     public function test_export_course_context() {
-        $this->resetAfterTest(false);
-
         $data = $this->create_test_data();
 
         $export = assessments::execute_export(new target_user($data['user1']), context_course::instance($data['course3']->id));
@@ -441,31 +415,20 @@ class mod_workshop_userdata_assessments_testcase extends advanced_testcase {
             $this->assertStringEndsNotWith('workshop1', $file->get_filename());
             $this->assertStringEndsNotWith('workshop2', $file->get_filename());
         }
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @depends test_export_course_context
-     */
-    public function test_count_course_context($data) {
-        $this->resetAfterTest(false);
+    public function test_count_course_context() {
+        $data = $this->create_test_data();
 
         $count = assessments::execute_count(new target_user($data['user1']), context_course::instance($data['course3']->id));
 
         $this->assertEquals(4, $count);
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @depends test_count_course_context
-     */
-    public function test_purge_course_context($data) {
-        $this->resetAfterTest(true);
+    public function test_purge_course_context() {
         global $DB;
+
+        $data = $this->create_test_data();
 
         assessments::execute_purge(new target_user($data['user1']), context_course::instance($data['course3']->id));
 
@@ -497,8 +460,6 @@ class mod_workshop_userdata_assessments_testcase extends advanced_testcase {
     }
 
     public function test_export_module_context() {
-        $this->resetAfterTest(false);
-
         $data = $this->create_test_data();
 
         $export = assessments::execute_export(new target_user($data['user1']), context_module::instance($data['workshop4']->cmid));
@@ -525,31 +486,20 @@ class mod_workshop_userdata_assessments_testcase extends advanced_testcase {
             $this->assertStringStartsWith($data['user1']->username, $file->get_filename());
             $this->assertStringEndsWith('workshop4', $file->get_filename());
         }
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @depends test_export_module_context
-     */
-    public function test_count_module_context($data) {
-        $this->resetAfterTest(false); // Last of dependent tests.
+    public function test_count_module_context() {
+        $data = $this->create_test_data();
 
         $count = assessments::execute_count(new target_user($data['user1']), context_module::instance($data['workshop4']->cmid));
 
         $this->assertEquals(2, $count);
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @depends test_count_module_context
-     */
-    public function test_purge_module_context($data) {
-        $this->resetAfterTest(true);
+    public function test_purge_module_context() {
         global $DB;
+
+        $data = $this->create_test_data();
 
         assessments::execute_purge(new target_user($data['user1']), context_module::instance($data['workshop4']->cmid));
 
@@ -585,7 +535,6 @@ class mod_workshop_userdata_assessments_testcase extends advanced_testcase {
      */
     public function test_purge_deleted_user() {
         global $DB;
-        $this->resetAfterTest(true);
 
         $data = $this->create_test_data();
 
@@ -655,7 +604,6 @@ class mod_workshop_userdata_assessments_testcase extends advanced_testcase {
      * module is not set to visible due to internal code within the \workshop class.
      */
     public function test_purge_assessments_module_not_visible() {
-        $this->resetAfterTest(true);
         global $DB;
 
         $this->setAdminUser();

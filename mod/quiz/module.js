@@ -182,6 +182,12 @@ M.mod_quiz.nav.init = function(Y) {
             var questionidmatch = this.get('href').match(/#q(\d+)/);
             if (questionidmatch) {
                 form.set('action', form.get('action') + '#q' + questionidmatch[1]);
+            } else {
+                // Totara: support different types of fragments
+                questionidmatch = this.get('href').match(/#question-(\d+-\d+)/);
+                if (questionidmatch) {
+                    form.set('action', form.get('action') + '#question-' + questionidmatch[1]);
+                }
             }
 
             nav_to_page(pageno);

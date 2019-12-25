@@ -29,14 +29,14 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$version  = 2016120509.00;              // YYYYMMDD      = weekly release date of this DEV branch.
+$version  = 2017051509.00;              // 20170515      = branching date YYYYMMDD - do not modify!
                                         //         RR    = release increments - 00 in DEV branches.
                                         //           .XX = incremental changes.
 
-$release  = '3.2.9 (Build: 20180517)'; // Human-friendly version name
+$release  = '3.3.9 (Build: 20181112)'; // Human-friendly version name
 
-$branch   = '32';                       // This version's branch.
-$maturity = MATURITY_STABLE;             // This version's maturity level.
+$branch   = '33';                       // This version's branch.
+$maturity = MATURITY_STABLE;         // This version's maturity level.
 
 
 // TOTARA VERSION INFORMATION
@@ -46,12 +46,11 @@ $maturity = MATURITY_STABLE;             // This version's maturity level.
 
 $TOTARA = new stdClass();
 
-$TOTARA->version    = '11.12';          // Please keep as string.
-$TOTARA->build      = '20190214.00';   // Please keep as string.
+$TOTARA->version    = '12.9.1';          // Please keep as string.
+$TOTARA->build      = '20190826.00';   // Please keep as string.
 
 if ($maturity == MATURITY_EVERGREEN) {
     $TOTARA->release = "Evergreen (Build: {$TOTARA->build})";
 } else {
     $TOTARA->release = "{$TOTARA->version} (Build: {$TOTARA->build})";
 }
-// checking update with jankins

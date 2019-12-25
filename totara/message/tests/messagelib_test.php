@@ -159,7 +159,12 @@ class messagelib_test extends advanced_testcase {
         $eventdata->userto = $user;
         $eventdata->userfrom = $user;
 
-        $result = tm_alert_send($eventdata);
+        tm_alert_send($eventdata);
+        $this->assertEquals($expected, $eventdata->fullmessagehtml);
+
+        // Send again re-using the $eventdata object. This caused problems before with repeatedly appended context links
+        // as tm_alert_send() manipulates $eventdata and doesn't clone it (see TL-20258).
+        tm_alert_send($eventdata);
         $this->assertEquals($expected, $eventdata->fullmessagehtml);
     }
 }

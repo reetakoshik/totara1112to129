@@ -112,7 +112,7 @@ class program_created extends \core\event\base {
         if ($CFG->debugdeveloper) {
             parent::validate_data();
 
-            if (!isset($this->other['certifid'])) {
+            if (!array_key_exists('certifid', $this->other)) {
                 throw new \coding_exception('certifid must be set in $other.');
             }
         }

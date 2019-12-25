@@ -1,4 +1,4 @@
-<script src="{{siteurl}}/mod/lzojt/ui/build/main.js"></script>
+
 <header data-color="{{color}}">
     <section class="header-top text-right">  
         <div class="container">    
@@ -6,7 +6,7 @@
                 <img class="center-block" alt="Brand" src="{{logo}}">
             </a>
             <div class="menu-btn-wrapper pull-left">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#totara-navbar" aria-expanded="false">
+                <button type="button" id="glz_collapsebtn" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#totara-navbar" aria-expanded="false">
                     <span class="sr-only">Toggle navigation</span>
                     <span class="icon-bar"></span>
                 </button>
@@ -18,7 +18,8 @@
                                 data-action="tool_usertours/resetpagetour"
                                 class="btn btn-default dropdown-toggle tooltip"
                                 data-toggle="dropdown" >
-                            <i class="fa fa-map-marker" aria-hidden="true"></i>
+                      
+					  		<img src="{{siteurl}}/theme/golearningzone/pix/markerIcons.svg" style="width: 16px;">
                             <span class="tooltiptext tooltip-bottom">{{tour.tooltip}}</span>
                         </button>
                     </div>
@@ -26,38 +27,19 @@
                         <a  class="btn btn-default dropdown-toggle"
                             href="#"
                             data-action="tool_usertours/resetpagetour">
-                            <i class="fa fa-map-marker" aria-hidden="true"></i>
+                            <img src="{{siteurl}}/theme/golearningzone/pix/markerIcons.svg">
                         </a>
                     </div>
                 {{/tour.enabled}}
-                {{#search.enabled}}
+
                     <div class="btn-group action-totara-alerts">
-                        <button type="button"
-                                class="btn btn-default dropdown-toggle menu-search"
-                                data-toggle="dropdown" >
-                            <i class="fa fa-search" aria-hidden="true"></i>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-left alerts-list">
-                            <div class="header-list-top">
-                                <div class="triangle-left"></div>
-                                <div class="triangle-right"></div>
-                                {{search.text.header}}
-                            </div>
-                            <form class="form-inline"
-                                  method="POST"
-                                  action="{{siteurl}}/local/lz_report/activity_search/filter.php">
-                                <input type="text" name="activityname" class="form-control" placeholder="{{search.text.placeholder}}">
-                                <button type="submit">{{search.text.submit}}</button>
-                            </form>
-                        </div>
+                            {{{adminmenu}}}
                     </div>
-                    <div class="btn-group action-totara-alerts-sm">
-                        <a  class="btn btn-default dropdown-toggle"
-                            href="/local/lz_report/activity_search/embedded.php">
-                            <i class="fa fa-search" aria-hidden="true"></i>
-                        </a>
+					<div class="btn-group action-totara-alerts-sm">
+                       {{{adminmenu}}}
                     </div>
-                {{/search.enabled}}
+                
+                
                 {{#badges}}
                     <div class="btn-group action-totara-alerts">
                         <button type="button"
@@ -66,12 +48,13 @@
                                 aria-haspopup="true"
                                 aria-expanded="false"
                                 id="dropdownMenu1" >
-                            <i class="fa fa-trophy" aria-hidden="true"></i>
+                           
+							<img src="{{siteurl}}/theme/golearningzone/pix/trophyIcons.svg">
                             {{#total_badges}}
                                 <span class="items-count">{{{total_badges}}}</span>
                             {{/total_badges}}
                         </button>
-                        <div aria-labelledby="dropdownMenu1" class="dropdown-menu dropdown-menu-left alerts-list">
+                        <div aria-labelledby="dropdownMenu1" class="dropdown-menu dropdown-menu-left alerts-list adminHeaderUser">
                             <div class="header-list-top">
                                 <div class="triangle-left"></div>
                                 <div class="triangle-right"></div>
@@ -92,70 +75,15 @@
                     </div>
                     <div class="btn-group action-totara-alerts-sm">
                         <a class="btn btn-default dropdown-toggle" href="{{siteurl}}/badges/view.php?type=1">
-                            <i class="fa fa-trophy" aria-hidden="true"></i>
+                            <img src="{{siteurl}}/theme/golearningzone/pix/trophyIcons.svg">
                             {{#total_badges}}
                                 <span class="items-count">{{{total_badges}}}</span>
                             {{/total_badges}}
                         </a>
                     </div>
                 {{/badges}}
-                <!--{{#alerts}}-->
-                    <!--<div class="btn-group action-totara-alerts">-->
-                        <!--<button type="button"-->
-                                <!--class="btn btn-default dropdown-toggle"-->
-                                <!--data-toggle="dropdown"-->
-                                <!--aria-haspopup="true"-->
-                                <!--aria-expanded="false">-->
-                            <!--<i class="fa fa-bell-o" aria-hidden="true"></i>-->
-                            <!--{{#total_alerts}}-->
-                                <!--<span class="items-count">{{{total_alerts}}}</span>-->
-                            <!--{{/total_alerts}}-->
-                        <!--</button>-->
-                        <!--<div class="dropdown-menu dropdown-menu-left alerts-list">-->
-                            <!--<div class="header-list-top">-->
-                                <!--<div class="triangle-left"></div>-->
-                                <!--<div class="triangle-right"></div>-->
-                                <!--{{my_alerts}}-->
-                            <!--</div>-->
-                            <!--<ul>-->
-                                <!--{{# list }}-->
-                                    <!--<li>-->
-                            <!--<span>-->
-                                <!--<div class="icon pull-left">-->
-                                    <!--<a href="/totara/message/alerts.php">-->
-                                        <!--{{{icon}}}-->
-                                    <!--</a>-->
-                                <!--</div>-->
-                                <!--<div class="text pull-left">-->
-                                    <!--<a href="/totara/message/alerts.php">-->
-                                        <!--{{subject}}-->
-                                    <!--</a>-->
-                                <!--</div>-->
-                                <!--<div class="actions pull-left">-->
-                                    <!--<form class="remove-form" method="POST" action="/theme/golearningzone/action.php">-->
-                                        <!--<input type="hidden" name="sesskey" value="{{sesskey}}">-->
-                                        <!--<input type="hidden" name="Id" value="{{id}}">-->
-                                        <!--<button type="submit">-->
-                                            <!--<i class="fa fa-times" aria-hidden="true"></i>-->
-                                        <!--</button>-->
-                                    <!--</form>-->
-                                <!--</div>-->
-                            <!--</span>-->
-                                    <!--</li>-->
-                                <!--{{/ list }}-->
-                            <!--</ul>-->
-                            <!--<a class="total_link" href="/totara/message/alerts.php">{{{total_alerts_string}}}</a>-->
-                        <!--</div>-->
-                    <!--</div>-->
-                    <!--<div class="btn-group action-totara-alerts-sm">-->
-                        <!--<a class="btn btn-default dropdown-toggle" href="/totara/message/alerts.php">-->
-                            <!--<i class="fa fa-bell-o" aria-hidden="true"></i>-->
-                            <!--{{#total_alerts}}-->
-                                <!--<span class="items-count">{{{total_alerts}}}</span>-->
-                            <!--{{/total_alerts}}-->
-                        <!--</a>-->
-                    <!--</div>-->
-                <!--{{/alerts}}-->
+                
+                               
                 {{#notifications}}
                     <div class="btn-group action-totara-alerts">
                         <button type="button"
@@ -163,16 +91,33 @@
                                 data-toggle="dropdown"
                                 aria-haspopup="true"
                                 aria-expanded="false">
-                            <i class="fa fa-bell-o" aria-hidden="true"></i>
+                            
+							<img src="{{siteurl}}/theme/golearningzone/pix/bellIcons.svg">
                             {{#total_notifications}}
                                 <span class="items-count">{{{total_notifications}}}</span>
                             {{/total_notifications}}
                         </button>
-                        <div class="dropdown-menu dropdown-menu-left alerts-list">
+                        <div class="dropdown-menu dropdown-menu-left alerts-list adminHeaderUser">
                             <div class="header-list-top">
                                 <div class="triangle-left"></div>
                                 <div class="triangle-right"></div>
+
                                 {{my_notifications}}
+                                <div class="noteIconInTop">
+                                
+                                <a class="mark-all-read-button"
+           href="javascript:void(0)" onclick="mark_all_read_button(val = 'notification')"
+            
+           role="button"
+           title="{{#str}} markallread {{/str}}"
+           data-action="mark-all-read">
+            <span class="normal-icon">{{#pix}} t/markasread, core, markallread, core {{/pix}}</span>
+            <!-- {{> core/loading }} -->
+        </a>
+                                <a href="{{notification_editurl}}">
+                                <img src="{{siteurl}}/theme/golearningzone/pix/settingIcon.svg">
+                                </a>
+                                </div>
                             </div>
                             <ul>
                                 {{# list }}
@@ -188,6 +133,7 @@
                                             </a>
                                         </div>
                                         <div class="text pull-left">
+                                        <h3 class="messageStduent">{{{ufullname}}}</h3>
                                             <a href="{{siteurl}}/message/output/popup/notifications.php?notificationid={{id}}">
                                                 {{subject}}
                                             </a>
@@ -200,7 +146,7 @@
                     </div>
                     <div class="btn-group action-totara-alerts-sm">
                         <a class="btn btn-default dropdown-toggle" href="{{siteurl}}/message/output/popup/notifications.php">
-                            <i class="fa fa-bell-o" aria-hidden="true"></i>
+                            <img src="{{siteurl}}/theme/golearningzone/pix/bellIcons.svg">
                             {{#total_notifications}}
                                 <span class="items-count">{{{total_notifications}}}</span>
                             {{/total_notifications}}
@@ -214,16 +160,30 @@
                                 data-toggle="dropdown"
                                 aria-haspopup="true"
                                 aria-expanded="false">
-                            <i class="fa fa-envelope-o" aria-hidden="true"></i>
+                           		<img src="{{siteurl}}/theme/golearningzone/pix/mailIcons.svg">
                             {{#total_messages}}
                                 <span class="items-count">{{{total_messages}}}</span>
                             {{/total_messages}}
                         </button>
-                        <div class="dropdown-menu dropdown-menu-left alerts-list">
+                        <div class="dropdown-menu dropdown-menu-left alerts-list adminHeaderUser">
                             <div class="header-list-top">
                                 <div class="triangle-left"></div>
                                 <div class="triangle-right"></div>
                                 {{my_messages}}
+                                <div class="noteIconInTop">
+                               
+                                <a class="mark-all-read-button"
+           href="javascript:void(0)" onclick="mark_all_read_button(val = 'message')"
+           role="button"
+           title="{{#str}} markallread {{/str}}"
+           data-action="mark-all-read">
+            <span class="normal-icon">{{#pix}} t/markasread, core, markallread, core {{/pix}}</span>
+            <!-- {{> core/loading }} -->
+        </a>
+                                <a href="{{message_editurl}}">
+                                <img src="{{siteurl}}/theme/golearningzone/pix/settingIcon.svg">
+                                </a>
+                                </div>
                             </div>
                             <ul>
                                 {{# list }}
@@ -239,6 +199,7 @@
                                             {{/ pic }}
                                         </div>
                                         <div class="text pull-left">
+                                        <h3 class="messageStduent">{{{ufullname}}}</h3>
                                             <a href="{{siteurl}}/message/index.php?usergroup=unread&id={{userid}}">
                                                 {{{text}}}
                                             </a>
@@ -251,24 +212,106 @@
                     </div>
                     <div class="btn-group action-totara-alerts-sm">
                         <a class="btn btn-default dropdown-toggle" href="{{siteurl}}/message/index.php">
-                            <i class="fa fa-envelope-o" aria-hidden="true"></i>
+                            <img src="{{siteurl}}/theme/golearningzone/pix/mailIcons.svg">
                             {{#total_messages}}
                                 <span class="items-count">{{{total_messages}}}</span>
                             {{/total_messages}}
                         </a>
                     </div>
                 {{/messages}}
+
                 {{{user_menu}}}
+                {{#search.enabled}}
+				 <div class="searching">
+					    <div class="btn-group action-totara-alerts iconSearch">
+							<a href="javascript:void(0)" class="search-open">
+							<img src="{{siteurl}}/theme/golearningzone/pix/searchIcon.svg">
+						</a>
+						</div>
+		 
+					   
+						<div class="search-inline">
+							<form method="POST"
+                                  action="{{siteurl}}/local/lz_report/activity_search/filter.php">
+								<input type="text" name="activityname" class="form-control" placeholder="Search" id="activitynamesearch">
+								<button type="submit">
+									{{search.text.submit}}
+								</button>
+								<a href="javascript:void(0)" class="search-close">
+								 <span><i class="fa fa-times "></i> </span>
+								</a>
+							</form>
+						</div>
+					</div>
+					<script>
+						 var sp = document.querySelector('.search-open');
+					var searchbar = document.querySelector('.search-inline');
+					var shclose = document.querySelector('.search-close');
+					function changeClass() {
+						searchbar.classList.add('search-visible');
+                        setTimeout(activitynamesearchfocus, 300);
+					}
+					function closesearch() {
+						searchbar.classList.remove('search-visible');
+					}
+					sp.addEventListener('click', changeClass);
+					shclose.addEventListener('click', closesearch);
+						function activitynamesearchfocus() {
+                            $("#activitynamesearch").focus();
+                        }
+					</script>
+                  <!--<div class="btn-group action-totara-alerts">
+                        <button type="button"
+                                class="btn btn-default dropdown-toggle menu-search"
+                                data-toggle="dropdown" >
+                            <i class="fa fa-search" aria-hidden="true"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-left alerts-list adminHeaderUser">
+                            <div class="header-list-top">
+                                <div class="triangle-left"></div>
+                                <div class="triangle-right"></div>
+                                {{search.text.header}}
+                            </div>
+                            <form class="form-inline"
+                                  method="POST"
+                                  action="{{siteurl}}/local/lz_report/activity_search/filter.php">
+                                <input type="text" name="activityname" class="form-control" placeholder="{{search.text.placeholder}}">
+                                <button type="submit">{{search.text.submit}}</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="btn-group action-totara-alerts-sm">
+                        <a  class="btn btn-default dropdown-toggle"
+                            href="{{siteurl}}/local/lz_report/activity_search/embedded.php">
+                            <i class="fa fa-search" aria-hidden="true"></i>
+                        </a>
+                    </div>-->
+                {{/search.enabled}}
             </div>
             {{{navbar_button}}}
             {{{budges}}} 
+
             <div class="clearer"></div> 
         </div>
     </section>
     <nav role="navigation" class="navbar navbar-default navbar-site">  
         <div class="container container-fluid text-left">
+            {{> theme_golearningzone/glztop_menu}}
             {{{totaramenu}}}
         </div>
     </nav>
 </header>
 
+{{#js}}
+    function mark_all_read_button(val){
+            $.ajax({
+                url: '{{siteurl}}' + '/theme/golearningzone/msgallreaddone.php',
+                data: {msgtype:val},
+                success: function(response1) {
+                    $(".items-count").remove();
+                    $(".messageStduent").css("color","#999");
+                    $(".text.pull-left a").css("color","#999");
+                }
+            });
+    }
+{{/js}}

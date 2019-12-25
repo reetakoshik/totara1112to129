@@ -38,9 +38,7 @@ Feature: Seminar Signup No Approval
     And I click on "s__facetoface_approvaloptions[approval_manager]" "checkbox"
     And I click on "s__facetoface_approvaloptions[approval_self]" "checkbox"
     And I press "Save changes"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
-    And I turn editing mode on
+    And I am on "Classroom Connect Course" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name                | Classroom Connect       |
       | Description         | Classroom Connect Tests |
@@ -67,13 +65,11 @@ Feature: Seminar Signup No Approval
 
   Scenario: Student signs up and is instantly booked
     When I log in as "jimmy"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
+    And I am on "Classroom Connect Course" course homepage
     And I should see "Sign-up"
     And I follow "Sign-up"
     And I should not see "Approval"
     And I press "Sign-up"
-    When I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
+    When I am on "Classroom Connect Course" course homepage
     And I follow "View all events"
     Then I should see "Booked"

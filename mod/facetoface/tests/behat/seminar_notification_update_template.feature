@@ -24,6 +24,7 @@ Feature: User is able to see the template used when editting a seminar notificat
     And I click on "Add" "button"
     And I set the following fields to these values:
       | booked         | 1              |
+      | booked_type    | 1              |
       | Template       | This is title  |
     And I click on "Save" "button"
     When I click on "Edit" "link" in the "This is title" "table_row"

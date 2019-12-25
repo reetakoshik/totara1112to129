@@ -26,13 +26,11 @@ Feature: Test the cohort associations report source.
       | C1     | Aud #1 |
 
     Given I log in as "admin"
-    And I navigate to "Manage programs" node in "Site administration > Courses"
+    And I navigate to "Manage programs" node in "Site administration > Programs"
     And I follow "Miscellaneous"
     And I click on "Settings" "link" in the "Program #1" "table_row"
     And I switch to "Assignments" tab
     And I set the field "Add a new" to "Audiences"
-    And I click on "Add" "button"
-    And I click on "Add audiences to program" "button"
     And I click on "Audience #1" "link" in the "Add audiences to program" "totaradialogue"
     And I click on "Audience #2" "link" in the "Add audiences to program" "totaradialogue"
     And I click on "Audience #3" "link" in the "Add audiences to program" "totaradialogue"
@@ -51,15 +49,12 @@ Feature: Test the cohort associations report source.
       | completiontimehour   | 14         |
       | completiontimeminute | 30         |
     And I click on "Set fixed completion date" "button" in the "Completion criteria" "totaradialogue"
-    And I click on "Save changes" "button"
 
-    Given I navigate to "Manage certifications" node in "Site administration > Courses"
+    Given I navigate to "Manage certifications" node in "Site administration > Certifications"
     And I follow "Miscellaneous"
     And I click on "Settings" "link" in the "Cert #1" "table_row"
     And I switch to "Assignments" tab
     And I set the field "Add a new" to "Audiences"
-    And I click on "Add" "button"
-    And I click on "Add audiences to program" "button"
     And I click on "Audience #1" "link" in the "Add audiences to program" "totaradialogue"
     And I click on "Audience #2" "link" in the "Add audiences to program" "totaradialogue"
     And I click on "Audience #4" "link" in the "Add audiences to program" "totaradialogue"
@@ -78,12 +73,11 @@ Feature: Test the cohort associations report source.
       | completiontimehour   | 17         |
       | completiontimeminute | 30         |
     And I click on "Set fixed completion date" "button" in the "Completion criteria" "totaradialogue"
-    And I click on "Save changes" "button"
-
 
   # -------------------------------
   Scenario: cohort_associations_rs_00: custom report contents
-    Given I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "Audiences"
     And I set the field "Source" to "Audience: Enrolled Learning"
     And I press "Create report"
@@ -156,7 +150,7 @@ Feature: Test the cohort associations report source.
 
   # -------------------------------
   Scenario: cohort_associations_rs_01: embedded report contents
-    Given I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage embedded reports" node in "Site administration > Reports"
     And I set the field "report-name" to "Audience: Enrolled Learning"
     And I press "id_submitgroupstandard_addfilter"
     And I follow "Audience: Enrolled Learning"

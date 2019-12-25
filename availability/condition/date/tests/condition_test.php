@@ -31,6 +31,7 @@ use core_availability\tree;
  * Unit tests for the date condition.
  *
  * @package availability_date
+ * @group availability
  * @copyright 2014 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

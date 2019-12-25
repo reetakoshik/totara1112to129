@@ -335,8 +335,17 @@ function message_update_providers($component='moodle') {
 
     foreach ($dbproviders as $dbprovider) {  // Delete old ones
         $DB->delete_records('message_providers', array('id' => $dbprovider->id));
-        $DB->delete_records_select('config_plugins', "plugin = 'message' AND ".$DB->sql_like('name', '?', false), array("%_provider_{$component}_{$dbprovider->name}_%"));
-        $DB->delete_records_select('user_preferences', $DB->sql_like('name', '?', false), array("message_provider_{$component}_{$dbprovider->name}_%"));
+        $search_for = $DB->sql_like_escape("_provider_{$component}_{$dbprovider->name}_");
+        $DB->delete_records_select(
+            'config_plugins',
+            "plugin = 'message' AND ".$DB->sql_like('name', '?', false),
+            array("%{$search_for}%")
+        );
+        $DB->delete_records_select(
+            'user_preferences',
+            $DB->sql_like('name', '?', false),
+            array("message{$search_for}%")
+        );
         cache_helper::invalidate_by_definition('core', 'config', array(), 'message');
     }
 

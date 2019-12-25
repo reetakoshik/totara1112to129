@@ -272,11 +272,21 @@ class totara_core_observer {
     }
 
     /**
-     * Reset Totara menu caches.
+     * Reset Totara menu caches for all users.
+     *
      * \core\event\base
      */
-    public static function reset_totara_menu(\core\event\base $event) {
-        totara_menu_reset_cache();
+    public static function totara_menu_reset_all_caches(\core\event\base $event) {
+        totara_menu_reset_all_caches();
+    }
+
+    /**
+     * Reset Totara menu caches for current user session only.
+     *
+     * \core\event\base
+     */
+    public static function totara_menu_reset_session_cache(\core\event\base $event) {
+        totara_menu_reset_session_cache();
     }
 
     /**

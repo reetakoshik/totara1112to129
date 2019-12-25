@@ -28,6 +28,9 @@
  */
 
 use totara_job\job_assignment;
+use mod_facetoface\signup;
+use mod_facetoface\signup_helper;
+use mod_facetoface\seminar_event;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -92,6 +95,10 @@ class mod_facetoface_generator extends testing_module_generator {
         $defaults['approvaloptions'] = 'approval_none';
         $defaults['usercalentry'] = 1;
         $defaults['multiplesessions'] = 0;
+        $defaults['multisignupmaximum'] = 0;
+        $defaults['multisignupnoshow'] = 0;
+        $defaults['multisignuppartly'] = 0;
+        $defaults['multisignupfully'] = 0;
         $defaults['completionstatusrequired'] = '{"100":1}';
         $defaults['managerreserve'] = 0;
         $defaults['maxmanagerreserves'] = 1;
@@ -142,6 +149,7 @@ class mod_facetoface_generator extends testing_module_generator {
             $sessiondates = array($sessiondate);
         } else {
             $sessiondates = $record->sessiondates;
+            unset($record->sessiondates);
         }
 
         if (!isset($record->capacity)) {
@@ -174,7 +182,12 @@ class mod_facetoface_generator extends testing_module_generator {
 
         $record->usermodified = $USER->id;
 
-        return facetoface_add_session($record, $sessiondates);
+        $seminarevent = new \mod_facetoface\seminar_event();
+        $seminarevent->from_record($record);
+        $seminarevent->save();
+        facetoface_save_dates($seminarevent->to_record(), $sessiondates);
+
+        return $seminarevent->get_id();
     }
 
     /**
@@ -353,9 +366,10 @@ class mod_facetoface_generator extends testing_module_generator {
      * Creates facetoface for the session as well.
      *
      * @param stdClass $course
+     * @param int $daysoffset how many days from now session will occur
      * @return stdClass
      */
-    public function create_session_for_course(stdClass $course): stdClass {
+    public function create_session_for_course(stdClass $course, int $daysoffset = 1): stdClass {
         // Set up facetoface.
         $facetofacedata = [
             'name' => 'facetoface1',
@@ -365,8 +379,8 @@ class mod_facetoface_generator extends testing_module_generator {
 
         // Set up session.
         $sessiondate = new stdClass();
-        $sessiondate->timestart = time() + DAYSECS;
-        $sessiondate->timefinish = time() + DAYSECS + 60;
+        $sessiondate->timestart = time() + $daysoffset * DAYSECS;
+        $sessiondate->timefinish = time() + $daysoffset * DAYSECS + 60;
         $sessiondate->sessiontimezone = 'Pacific/Auckland';
         $sessiondata = [
             'facetoface' => $facetoface->id,
@@ -394,16 +408,10 @@ class mod_facetoface_generator extends testing_module_generator {
 
         $discountcode = 'disc1';
         $notificationtype = 1;
-        $statuscode = MDL_F2F_STATUS_REQUESTED;
-        facetoface_user_signup(
-            $session,
-            $this->mapsessionf2f[$session->id],
-            $this->mapsessioncourse[$session->id],
-            $discountcode,
-            $notificationtype,
-            $statuscode,
-            $student->id
-        );
+
+        $signup = \mod_facetoface\signup::create($student->id, new \mod_facetoface\seminar_event($session->id), $notificationtype);
+        $signup->set_discountcode($discountcode);
+        signup_helper::signup($signup);
 
         return $DB->get_record('facetoface_signups', ['userid' => $student->id, 'sessionid' => $session->id]);
     }
@@ -413,7 +421,11 @@ class mod_facetoface_generator extends testing_module_generator {
      * @param stdClass $session
      */
     public function create_cancellation(stdClass $student, stdClass $session) {
-        facetoface_user_cancel($session, $student->id);
+        $seminarevent = new seminar_event($session->id);
+        $signup = signup::create($student->id, $seminarevent);
+        if (signup_helper::can_user_cancel($signup)) {
+            signup_helper::user_cancel($signup);
+        }
     }
 
     /**
@@ -554,12 +566,5 @@ class mod_facetoface_generator extends testing_module_generator {
     public function create_global_asset_for_behat(array $record) {
         $record['custom'] = 0;
         $this->add_asset($record);
-    }
-
-    /**
-     * @param array $record
-     */
-    public function create_custom_asset_for_behat(array $record) {
-        $this->add_custom_asset($record);
     }
 }

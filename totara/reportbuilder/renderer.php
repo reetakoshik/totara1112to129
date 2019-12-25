@@ -97,7 +97,7 @@ class totara_reportbuilder_renderer extends plugin_renderer_base {
                     array('title' => $strdelete));
                 $cache = '';
                 if (!empty($CFG->enablereportcaching) && !empty($report->cache)) {
-                    $reportbuilder = new reportbuilder($report->id);
+                    $reportbuilder = reportbuilder::create($report->id);
                     if (empty($reportbuilder->get_caching_problems())) {
                         $cache = $this->cachenow_button($report->id, true);
                     }
@@ -199,7 +199,7 @@ class totara_reportbuilder_renderer extends plugin_renderer_base {
                     array('title' => $strreload));
             $cache = '';
             if (!empty($CFG->enablereportcaching) && !empty($report->cache)) {
-                $reportbuilder = new reportbuilder($report->id);
+                $reportbuilder = reportbuilder::create($report->id);
                 if (empty($reportbuilder->get_caching_problems())) {
                     $cache = $this->cachenow_button($report->id, true);
                 }
@@ -392,159 +392,6 @@ class totara_reportbuilder_renderer extends plugin_renderer_base {
 
         return $out;
     }
-    /**
-     * Renders a table containing reporting activity groups
-     *
-     * @param array $groups array of group objects
-     * @return string HTML table
-     */
-    public function activity_groups_table($groups) {
-        global $USER;
-
-        if (empty($groups)) {
-            return html_writer::tag('p', get_string('nogroups', 'totara_reportbuilder'));
-        }
-
-        $tableheader = array(get_string('name', 'totara_reportbuilder'),
-                             get_string('tag'),
-                             get_string('baseitem', 'totara_reportbuilder'),
-                             get_string('activities', 'totara_reportbuilder'),
-                             get_string('reports', 'totara_reportbuilder'),
-                             get_string('options', 'totara_reportbuilder'));
-
-        $data = array();
-        foreach ($groups as $group) {
-            $row = array();
-            $strsettings = get_string('settings', 'totara_reportbuilder');
-            $strdelete = get_string('delete', 'totara_reportbuilder');
-            $strcron = get_string('refreshdataforthisgroup', 'totara_reportbuilder');
-
-            $settingsurl = new moodle_url('/totara/reportbuilder/groupsettings.php', array('id' => $group->id));
-            $settingsattr = array('title' => $strsettings);
-            $settings = $this->output->action_icon($settingsurl, new pix_icon('t/edit', $strsettings), null, $settingsattr);
-
-            $deleteurl = new moodle_url('/totara/reportbuilder/groups.php', array('id' => $group->id, 'd' => 1));
-            $deleteattr = array('title' => $strdelete);
-            $delete = $this->output->action_icon($deleteurl, new pix_icon('t/delete', $strdelete), null, $deleteattr);
-
-            $url = new moodle_url('/totara/reportbuilder/groupsettings.php', array('id' => $group->id));
-            $row[] = html_writer::link($url, $group->name);
-            //$row[] = $group->preproc;
-            $row[] = $group->tagname;
-
-            $url = new moodle_url('/mod/feedback/view.php', array('id' => $group->cmid));
-            $row[] = html_writer::link($url, $group->feedbackname);
-            $row[] = ($group->numitems === null) ? 0 : $group->numitems;
-            $row[] = ($group->numreports === null) ? 0 : $group->numreports;
-            $row[] = "$settings &nbsp; $delete";
-            $data[] = $row;
-        }
-
-        $table = new html_table();
-        $table->summary = '';
-        $table->head = $tableheader;
-        $table->data = $data;
-
-        return html_writer::table($table);
-    }
-
-
-    /**
-     * Renders a table containing assigned activities of a reporting activity group
-     *
-     * @param array $groups array of activity objects
-     * @return string HTML table
-     */
-    public function activity_group_activities_table($activities) {
-        if (empty($activities)) {
-            return '';
-        }
-
-        $tableheader = array(get_string('course'),
-                         get_string('feedback'),
-                         get_string('lastchecked', 'totara_reportbuilder'),
-                         get_string('disabled', 'totara_reportbuilder'));
-
-        $data = array();
-        foreach ($activities as $activity) {
-            $row = array();
-            // print course
-            if ($activity->course !== null) {
-                $url = new moodle_url('/course/view.php', array('id' => $activity->courseid));
-                $row[] = html_writer::link($url, $activity->course);
-            } else {
-                $row[] = get_string('coursenotset', 'totara_reportbuilder');
-            }
-
-            // print feedback name
-            $url = new moodle_url('/mod/feedback/view.php', array('id' => $activity->cmid));
-            $row[] = html_writer::link($url, $activity->feedback);
-
-            // print when last checked
-            if ($activity->lastchecked !== null) {
-                $row[] = userdate($activity->lastchecked);
-            } else {
-                $row[] = get_string('notyetchecked', 'totara_reportbuilder');
-            }
-
-            // print if disabled or not
-            if ($activity->disabled !== null && $activity->disabled) {
-                $row[] = get_string('yes');
-            } else {
-                $row[] = get_string('no');
-            }
-            $data[] = $row;
-        }
-        $table = new html_table();
-        $table->summary = '';
-        $table->head = $tableheader;
-        $table->data = $data;
-
-        return html_writer::table($table);
-    }
-
-
-    /**
-     * Renders a table containing reports of a reporting activity group
-     *
-     * @param array $groups array of report objects
-     * @return string HTML table
-     */
-    public function activity_group_reports_table($reports) {
-        if (empty($reports)) {
-            return html_writer::tag('p', get_string('noreportscount', 'totara_reportbuilder'));
-        }
-
-        echo html_writer::tag('p', get_string('reportcount', 'totara_reportbuilder', count($reports)));
-
-        $tableheader = array(get_string('name'),
-                         get_string('options', 'totara_reportbuilder'));
-        $data = array();
-        foreach ($reports as $report) {
-            $row = array();
-            $reporturl = reportbuilder_get_report_url($report);
-            $row[] = html_writer::link($reporturl, format_string($report->fullname));
-
-            $strsettings = get_string('settings', 'totara_reportbuilder');
-            $strdelete = get_string('delete', 'totara_reportbuilder');
-
-            $editurl = new moodle_url('/totara/reportbuilder/general.php', array('id' => $report->id));
-            $editattr = array('title' => $strsettings);
-            $settings = $this->output->action_icon($editurl, new pix_icon('/t/edit', $strsettings), null, $editattr);
-            $deleteurl = new moodle_url('/totara/reportbuilder/index.php', array('id' => $report->id, 'd' => 1));
-            $deleteattr = array('title' => $strdelete);
-            $delete = $this->output->action_icon($deleteurl, new pix_icon('/t/delete', $strdelete), null, $deleteattr);
-            $row[] = "$settings &nbsp; $delete";
-            $data[] = $row;
-        }
-        $table = new html_table();
-        $table->summary = '';
-        $table->head = $tableheader;
-        $table->data = $data;
-
-        return html_writer::table($table);
-    }
-
 
     /** Prints select box and Export button to export current report.
      *
@@ -569,7 +416,7 @@ class totara_reportbuilder_renderer extends plugin_renderer_base {
             $url = $report->get_current_url();
         } else {
             $id = $report;
-            $report = new reportbuilder($id);
+            $report = reportbuilder::create($id);
             if ($PAGE->has_set_url()) {
                 $url = $PAGE->url;
             } else {
@@ -616,7 +463,7 @@ class totara_reportbuilder_renderer extends plugin_renderer_base {
             return '';
         }
         if (is_numeric($report)) {
-            $report = new reportbuilder($report);
+            $report = reportbuilder::create($report);
         }
         $notice = '';
         if ($report instanceof reportbuilder) {
@@ -832,36 +679,6 @@ class totara_reportbuilder_renderer extends plugin_renderer_base {
             $out .= $this->output->box_end();
         }
         return $out;
-    }
-
-
-    /**
-     * Return the appropriate string describing the search matches
-     *
-     * @deprecated since Totara 9.9, 10 Please call $this->result_count_info() instead.
-     * @param integer $countfiltered Number of records that matched the search query
-     * @param integer $countall Number of records in total (with no search)
-     * @return string Text describing the number of results
-     */
-    public function print_result_count_string($countfiltered, $countall) {
-
-        debugging(__METHOD__ . ' has been deprecated please call totara_reportbuilder_renderer::result_count_info instead', DEBUG_DEVELOPER);
-
-        $displaycountall = get_config('totara_reportbuilder', 'allowtotalcount');
-
-        // Countall is 0.
-        if (empty($displaycountall) || ($countall == 0 && $countfiltered > 0)) {
-            // If we're here then countall is obviously wrong, so don't display it.
-            $resultstr = ((int)$countfiltered === 1) ? 'xrecord' : 'xrecords';
-            $a = $countfiltered;
-        } else {
-            $resultstr = ((int)$countall === 1) ? 'xofyrecord' : 'xofyrecords';
-            $a = new stdClass();
-            $a->filtered = $countfiltered;
-            $a->unfiltered = $countall;
-
-        }
-        return html_writer::span(get_string($resultstr, 'totara_reportbuilder', $a), 'rb-record-count');
     }
 
     /**

@@ -47,6 +47,7 @@ class hierarchy_export_form extends moodleform {
         foreach ($HIERARCHY_EXPORT_OPTIONS as $option => $code) {
             $select[$option] = get_string('export'.$option, 'totara_hierarchy');
         }
+
         if (count($select) == 0) {
             // no export options - don't show form
             return false;
@@ -55,11 +56,11 @@ class hierarchy_export_form extends moodleform {
             $mform->addElement('hidden', 'format', key($select));
             $mform->addElement('submit', 'export', current($select));
         } else {
-            // show pulldown menu
-            $group=array();
-            $group[] =& $mform->createElement('select', 'format', get_string('exportformat', 'totara_hierarchy'), $select);
-            $group[] =& $mform->createElement('submit', 'export', get_string('export', 'totara_hierarchy'));
-            $mform->addGroup($group, 'exportgroup', get_string('exportas', 'totara_hierarchy'), array(' '), false);
+
+            // show Export dropdown
+            $attributes = $this->_customdata['attributes'] ?? '';
+            $mform->addElement('select', 'format', get_string('format', 'totara_hierarchy'), $select, $attributes);
+            $mform->addElement('submit', 'export', get_string('exportitems', 'totara_hierarchy'), $attributes);
         }
     }
 }

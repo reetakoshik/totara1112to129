@@ -19,14 +19,12 @@
  *
  * Totara navigation edit page.
  *
- * @package    totara
+ * @package    totara_appraisal
  * @subpackage navigation
  * @author     Oleg Demeshev <oleg.demeshev@totaralms.com>
  */
 
 namespace totara_appraisal\totara\menu;
-
-use \totara_core\totara\menu\menu as menu;
 
 class latestappraisal extends \totara_core\totara\menu\item {
 
@@ -42,18 +40,14 @@ class latestappraisal extends \totara_core\totara\menu\item {
         return 41000;
     }
 
-    public function get_default_visibility() {
-        return menu::SHOW_WHEN_REQUIRED;
-    }
-
     protected function check_visibility() {
         global $CFG, $USER;
-        static $cache = null;
 
-        if (!totara_feature_visible('appraisals')) {
-            $cache = null;
-            return menu::HIDE_ALWAYS;
+        if (!isloggedin() or isguestuser()) {
+            return false;
         }
+
+        static $cache = null;
 
         if (isset($cache)) {
             return $cache;
@@ -61,9 +55,9 @@ class latestappraisal extends \totara_core\totara\menu\item {
 
         require_once($CFG->dirroot . '/totara/appraisal/lib.php');
         if (\appraisal::can_view_own_appraisals($USER->id)) {
-            $cache = menu::SHOW_ALWAYS;
+            $cache = true;
         } else {
-            $cache = menu::HIDE_ALWAYS;
+            $cache = false;
         }
         return $cache;
     }
@@ -79,5 +73,9 @@ class latestappraisal extends \totara_core\totara\menu\item {
      */
     public function is_disabled() {
         return totara_feature_disabled('appraisals');
+    }
+
+    public function get_incompatible_preset_rules(): array {
+        return ['can_view_latestappraisal'];
     }
 }

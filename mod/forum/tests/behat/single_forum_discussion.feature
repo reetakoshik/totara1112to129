@@ -22,14 +22,14 @@ Feature: Single simple forum discussion type
 
   Scenario: Teacher can start the single simple discussion
     Given I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     When I follow "Single discussion forum name"
     Then I should see "Single discussion forum description" in the "div.firstpost.starter" "css_element"
     And I should not see "Add a new discussion topic"
 
   Scenario: Student can not add more discussions
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     # Replaced test here as it passed due to the link in the breadcrumbs in Moodle
     And I follow "Single discussion forum name"
     And I follow "Reply"

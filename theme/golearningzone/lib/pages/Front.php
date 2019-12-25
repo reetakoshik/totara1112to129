@@ -9,7 +9,7 @@ class Front extends Base
     use ThemeTrait;
 
     public function render()
-    {
+    {   
         $blocksSizes = $this->calculateBlocksSizes();
         $template = 'theme_golearningzone/front_page';
         $params = $this->getDefaultPageValues() + [
@@ -25,7 +25,8 @@ class Front extends Base
             'fourth-center' => $this->blocks('fourth-center', $blocksSizes[3][1]),
             'fourth-right'  => $this->blocks('fourth-right', $blocksSizes[3][2])
         ];
-        
+        //echo '<pre>';print_r($this->blocks('first', $blocksSizes[0][0]));echo '</pre>';
+        //die('test123');
         return $this->renderer->render_from_template($template, $params);  
     }
 
@@ -111,9 +112,9 @@ class Front extends Base
         $renderer = $this->renderer;
         $block = $renderer->blocks($name);
 
-        if (!$width || !$block) {
-            return '';
-        }
+         if (!$width || !$block) {
+             return '';
+         }
 
         return $renderer->render_from_template(
             'theme_golearningzone/front_page_block_wrapper',
@@ -124,4 +125,5 @@ class Front extends Base
             ]
         );
     }
+
 }

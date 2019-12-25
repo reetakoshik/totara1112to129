@@ -53,7 +53,7 @@ class totara_appraisal_observer {
     /**
      * Stage complete message handler
      *
-     * @deprecated since Totara 11.11 - use appraisal_stage_completed instead
+     * @deprecated since Totara 12.2 - use appraisal_stage_completed instead
      * @param \totara_appraisal\event\appraisal_stage_completion $event
      */
     public static function appraisal_stage_completion(\totara_appraisal\event\appraisal_stage_completion $event) {

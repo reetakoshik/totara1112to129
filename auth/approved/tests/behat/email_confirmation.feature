@@ -99,7 +99,7 @@ Feature: auth_approved: email confirmation
     And "jb007" row "Email confirmed" column of "auth_approved_pending_requests" table should contain "Yes"
 
     # Successful registration outcome #2: audit trail created.
-    When I navigate to "Logs" node in "Site administration > Reports"
+    When I navigate to "Logs" node in "Site administration > Server"
     And I press "Get these logs"
     Then "Self-registration with approval" row "Event name" column of "reportlog" table should contain "Account request email was confirmed"
     And "Self-registration with approval" row "Description" column of "reportlog" table should contain "jb007 (bond@example.gov) confirmed email address"
@@ -142,7 +142,7 @@ Feature: auth_approved: email confirmation
     And I confirm self-registration request from email "bond@example.gov"
     Then I should see "User account request was already approved"
     When I log in as "admin"
-    And I navigate to "Logs" node in "Site administration > Reports"
+    And I navigate to "Logs" node in "Site administration > Server"
     And I press "Get these logs"
     Then I should not see "Self-registration with approval"
     And I should not see "Account request email was confirmed"
@@ -172,7 +172,7 @@ Feature: auth_approved: email confirmation
     Then I should see "User account request was already rejected"
 
     When I log in as "admin"
-    And I navigate to "Logs" node in "Site administration > Reports"
+    And I navigate to "Logs" node in "Site administration > Server"
     And I press "Get these logs"
     Then I should not see "Self-registration with approval"
     And I should not see "Account request email was confirmed"

@@ -235,6 +235,11 @@ class totara_generator_site_backend extends tool_generator_site_backend {
 
         //Set up basic Totara users, positions, hierarchies etc.
         $this->create_totara_objects();
+        // MSSQL will hang on a locked 'DELETE [mdl_context_map]  WHERE [childid]=@1' unless we commit.
+        if ($DB->get_dbfamily() == 'mssql') {
+            $transaction->allow_commit();
+            $transaction = $DB->start_delegated_transaction();
+        }
         // Loop through the data components we want data for.
         foreach ($this->site_data_components as $component) {
             $this->make_component_data_iterations($component);

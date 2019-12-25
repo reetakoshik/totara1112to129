@@ -13,7 +13,8 @@ Feature: Caching works as expected
     And I log in as "admin"
     And I set the following administration settings values:
       | Enable report caching | 1 |
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "Some User Report"
     And I set the field "Source" to "User"
     And I press "Create report"

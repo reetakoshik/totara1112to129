@@ -12,7 +12,8 @@ Feature: Test that report builder scheduled report recipient settings restrict w
       | CH1  | CH1      |
       | CH2  | CH2      |
     And I log in as "admin"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "Schedulable Report"
     And I set the field "Source" to "User"
     And I press "Create report"

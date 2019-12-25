@@ -363,9 +363,10 @@ class core_webservice_renderer extends plugin_renderer_base {
      * )
      *
      * @param stdClass $params a part of parameter/return description
+     * @param array $parents List of parent nodes to search for recursive loops
      * @return string the html to display
      */
-    public function detailed_description_html($params) {
+    public function detailed_description_html($params, array $parents = array()) {
         // retrieve the description of the description object
         $paramdesc = "";
         if (!empty($params->desc)) {
@@ -399,8 +400,13 @@ class core_webservice_renderer extends plugin_renderer_base {
 
         // description object is a list
         if ($params instanceof external_multiple_structure) {
+            if ($this::occurs_in_array($params, $parents)) {
+                return "... (Recursion)";
+            }
+
+            $parents[] = $params;
             return $paramdesc . "list of ( " . html_writer::empty_tag('br', array())
-            . $this->detailed_description_html($params->content) . ")";
+            . $this->detailed_description_html($params->content, $parents) . ")";
         } else if ($params instanceof external_single_structure) {
             // description object is an object
             $singlestructuredesc = $paramdesc . "object {" . html_writer::empty_tag('br', array());
@@ -409,7 +415,7 @@ class core_webservice_renderer extends plugin_renderer_base {
                 $singlestructuredesc .= $attributname;
                 $singlestructuredesc .= html_writer::end_tag('b');
                 $singlestructuredesc .= " " .
-                        $this->detailed_description_html($params->keys[$attributname]);
+                        $this->detailed_description_html($params->keys[$attributname], $parents);
             }
             $singlestructuredesc .= "} ";
             $singlestructuredesc .= html_writer::empty_tag('br', array());
@@ -437,9 +443,10 @@ class core_webservice_renderer extends plugin_renderer_base {
      *
      * @param external_description $returndescription the description structure of the web service function returned value
      * @param string $indentation Indentation in the generated HTML code; should contain only spaces.
+     * @param array $parents List of parent nodes to search for recursive loops
      * @return string the html to diplay
      */
-    public function description_in_indented_xml_format($returndescription, $indentation = "") {
+    public function description_in_indented_xml_format($returndescription, $indentation = "", array $parents = array()) {
         $indentation = $indentation . "    ";
         $brakeline = <<<EOF
 
@@ -447,10 +454,19 @@ class core_webservice_renderer extends plugin_renderer_base {
 EOF;
         // description object is a list
         if ($returndescription instanceof external_multiple_structure) {
-            $return = $indentation . "<MULTIPLE>" . $brakeline;
-            $return .= $this->description_in_indented_xml_format($returndescription->content,
-                            $indentation);
-            $return .= $indentation . "</MULTIPLE>" . $brakeline;
+            if ($this::occurs_in_array($returndescription, $parents)) {
+                $return = $indentation . "<RECURSION></RECURSION>" . $brakeline;
+            } else {
+                $return = $indentation . "<MULTIPLE>" . $brakeline;
+
+                $parents[] = $returndescription;
+                $return .= $this->description_in_indented_xml_format($returndescription->content,
+                    $indentation, $parents);
+
+                $return .= $indentation . "</MULTIPLE>" . $brakeline;
+
+            }
+
             return $return;
         } else if ($returndescription instanceof external_single_structure) {
             // description object is an object
@@ -460,7 +476,7 @@ EOF;
                 $singlestructuredesc .= $keyindentation . "<KEY name=\"" . $attributname . "\">"
                         . $brakeline .
                         $this->description_in_indented_xml_format(
-                                $returndescription->keys[$attributname], $keyindentation) .
+                                $returndescription->keys[$attributname], $keyindentation, $parents) .
                         $keyindentation . "</KEY>" . $brakeline;
             }
             $singlestructuredesc .= $indentation . "</SINGLE>" . $brakeline;
@@ -487,9 +503,10 @@ EOF;
      *
      * @param external_description $paramdescription the description structure of the web service function parameters
      * @param string $indentation Indentation in the generated HTML code; should contain only spaces.
+     * @param array $parents List of parent nodes to search for recursive loops
      * @return string the html to diplay
      */
-    public function xmlrpc_param_description_html($paramdescription, $indentation = "") {
+    public function xmlrpc_param_description_html($paramdescription, $indentation = "", array $parents = array()) {
         $indentation = $indentation . "    ";
         $brakeline = <<<EOF
 
@@ -501,7 +518,13 @@ EOF;
             $indentation = $indentation . "    ";
             $return .= $brakeline . $indentation . "(";
             $return .= $brakeline . $indentation . "[0] =>";
-            $return .= $this->xmlrpc_param_description_html($paramdescription->content, $indentation);
+
+            if ($this::occurs_in_array($paramdescription, $parents, 2)) {
+                $return .= $brakeline. $indentation . "... Recursion";
+            } else {
+                $parents[] = $paramdescription;
+                $return .= $this->xmlrpc_param_description_html($paramdescription->content, $indentation, $parents);
+            }
             $return .= $brakeline . $indentation . ")";
             return $return;
         } else if ($paramdescription instanceof external_single_structure) {
@@ -512,7 +535,7 @@ EOF;
             foreach ($paramdescription->keys as $attributname => $attribut) {
                 $singlestructuredesc .= $brakeline . $keyindentation . "[" . $attributname . "] =>" .
                         $this->xmlrpc_param_description_html(
-                                $paramdescription->keys[$attributname], $keyindentation) .
+                                $paramdescription->keys[$attributname], $keyindentation, $parents) .
                         $keyindentation;
             }
             $singlestructuredesc .= $brakeline . $keyindentation . ")";
@@ -829,6 +852,25 @@ EOF;
             html_writer::nonempty_tag('strong', $token)
         );
         return $output;
+    }
+
+    /**
+     * Search the array to ensure that a value occurs a certain number of times
+     * @param mixed $needle value to find
+     * @param array $haystack array to find value in
+     * @param int $repetitions how many times the value should occur
+     *
+     * @return bool whether the $value occurs $repetitions time in $haystack
+     */
+    private static function occurs_in_array($needle, array $haystack, int $repetitions = 2) : bool {
+        $count = 0;
+        for ($i = 0; $i < count($haystack); $i++) {
+            if ($haystack[$i] === $needle) {
+                $count++;
+            }
+        }
+
+        return $count >= $repetitions;
     }
 
 }

@@ -29,11 +29,6 @@ defined('MOODLE_INTERNAL') || die();
 final class rb_source_userdata_export_type_items extends rb_base_source {
     use \totara_userdata\rb\source\export_type_trait;
 
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
-    public $cacheable;
-
     public function __construct() {
         $this->usedcomponents[] = 'totara_userdata';
         $this->base = '{totara_userdata_export_type_item}';
@@ -71,14 +66,16 @@ final class rb_source_userdata_export_type_items extends rb_base_source {
             'export_type_item',
             'id',
             'ID',
-            'base.id'
+            'base.id',
+            array('displayfunc' => 'integer')
         );
 
         $columnoptions[] = new rb_column_option(
             'export_type_item',
             'name',
             get_string('itemname', 'totara_userdata'),
-            'base.name'
+            'base.name',
+            array('displayfunc' => 'format_string')
         );
 
         $columnoptions[] = new rb_column_option(
@@ -97,7 +94,8 @@ final class rb_source_userdata_export_type_items extends rb_base_source {
             'export_type_item',
             'component',
             get_string('itemcomponent', 'totara_userdata'),
-            'base.component'
+            'base.component',
+            array('displayfunc' => 'plaintext')
         );
 
         $columnoptions[] = new rb_column_option(
@@ -106,7 +104,7 @@ final class rb_source_userdata_export_type_items extends rb_base_source {
             get_string('itemexportdata', 'totara_userdata'),
             'base.exportdata',
             array(
-                'displayfunc' => 'yes_no',
+                'displayfunc' => 'yes_or_no',
             )
         );
 

@@ -21,7 +21,7 @@ Feature: Test suitable job assignment for session sign-up
 
   Scenario: Test learner job assignment for session sign-up when manager approval required
     Given I log in as "admin"
-    And I navigate to "User policies" node in "Site administration > Users > Permissions"
+    And I navigate to "User policies" node in "Site administration > Permissions"
     And I set the following fields to these values:
       | s__enabletempmanagers | 0 |
     And I press "Save changes"
@@ -30,6 +30,7 @@ Feature: Test suitable job assignment for session sign-up
     And I press "Save changes"
     And I click on "Find Learning" in the totara menu
     And I follow "Course 1"
+    And I follow "Go to course"
     And I follow "Test seminar name"
     And I follow "Add a new event"
     And I click on "Edit session" "link"
@@ -49,13 +50,14 @@ Feature: Test suitable job assignment for session sign-up
       | capacity           | 10   |
     And I press "Save changes"
     And I navigate to "Edit settings" node in "Seminar administration"
-    And I click on "Approval Options" "link"
+    And I click on "Sign-up Workflow" "link"
     And I click on "#id_approvaloptions_approval_manager" "css_element"
     And I press "Save and display"
     And I log out
     When I log in as "student1"
     And I click on "Find Learning" in the totara menu
     And I follow "Course 1"
+    And I follow "Go to course"
     And I follow "Test seminar name"
-    And I click on "Sign-up" "link" in the "1 January 2020" "table_row"
+    And I click on "More info" "link" in the "1 January 2020" "table_row"
     Then I should see "You must have a suitable job assignment to sign up for this seminar activity."

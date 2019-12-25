@@ -70,7 +70,7 @@ class totara_assign_goal_grouptype_org extends totara_assign_core_grouptype_org 
                 $todb->id = $DB->insert_record($this->tablename, $todb);
 
                 // Create all the user assignments to go along with it.
-                $goal->create_user_assignments(GOAL_ASSIGNMENT_ORGANISATION, $todb, $todb->includechildren);
+                $goal->update_user_assignments($this->moduleinstanceid, GOAL_ASSIGNMENT_ORGANISATION, $todb);
 
                 // So it won't affect the next insert.
                 unset($todb->id);

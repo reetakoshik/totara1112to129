@@ -880,4 +880,120 @@ class mod_data_lib_testcase extends advanced_testcase {
         $config = json_decode($database->config);
         $this->assertEquals($value, $config->$key);
     }
+
+    /**
+     * Test data_view
+     * @return void
+     */
+    public function test_data_view() {
+        global $CFG;
+
+        $CFG->enablecompletion = 1;
+        $this->resetAfterTest();
+
+        $this->setAdminUser();
+        // Setup test data.
+        $course = $this->getDataGenerator()->create_course(array('enablecompletion' => 1));
+        $data = $this->getDataGenerator()->create_module('data', array('course' => $course->id),
+                                                            array('completion' => 2, 'completionview' => 1));
+        $context = context_module::instance($data->cmid);
+        $cm = get_coursemodule_from_instance('data', $data->id);
+
+        // Trigger and capture the event.
+        $sink = $this->redirectEvents();
+
+        data_view($data, $course, $cm, $context);
+
+        $events = $sink->get_events();
+        // 2 additional events thanks to completion.
+        // internal_set_data called twice resulting in 2 core\event\course_module_completion_updated events
+        $this->assertCount(4, $events);
+        $event = array_shift($events);
+
+        // Checking that the event contains the expected values.
+        $this->assertInstanceOf('\mod_data\event\course_module_viewed', $event);
+        $this->assertEquals($context, $event->get_context());
+        $moodleurl = new \moodle_url('/mod/data/view.php', array('id' => $cm->id));
+        $this->assertEquals($moodleurl, $event->get_url());
+        $this->assertEventContextNotUsed($event);
+        $this->assertNotEmpty($event->get_name());
+
+        // Check completion status.
+        $completion = new completion_info($course);
+        $completiondata = $completion->get_data($cm);
+        $this->assertEquals(1, $completiondata->completionstate);
+    }
+
+    /**
+     * Test check_updates_since callback.
+     */
+    public function test_check_updates_since() {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $course = $this->getDataGenerator()->create_course();
+        // Create user.
+        $student = self::getDataGenerator()->create_user();
+        // User enrolment.
+        $studentrole = $DB->get_record('role', array('shortname' => 'student'));
+        $this->getDataGenerator()->enrol_user($student->id, $course->id, $studentrole->id, 'manual');
+        $this->setCurrentTimeStart();
+        $record = array(
+            'course' => $course->id,
+        );
+        $data = $this->getDataGenerator()->create_module('data', $record);
+        $cm = get_coursemodule_from_instance('data', $data->id, $course->id);
+        $cm = cm_info::create($cm);
+        $this->setUser($student);
+
+        // Check that upon creation, the updates are only about the new configuration created.
+        $onehourago = time() - HOURSECS;
+        $updates = data_check_updates_since($cm, $onehourago);
+        foreach ($updates as $el => $val) {
+            if ($el == 'configuration') {
+                $this->assertTrue($val->updated);
+                $this->assertTimeCurrent($val->timeupdated);
+            } else {
+                $this->assertFalse($val->updated);
+            }
+        }
+
+        // Add a couple of entries.
+        $datagenerator = $this->getDataGenerator()->get_plugin_generator('mod_data');
+        $fieldtypes = array('checkbox', 'date');
+
+        $count = 1;
+        // Creating test Fields with default parameter values.
+        foreach ($fieldtypes as $fieldtype) {
+            // Creating variables dynamically.
+            $fieldname = 'field-' . $count;
+            $record = new StdClass();
+            $record->name = $fieldname;
+            $record->type = $fieldtype;
+            $record->required = 1;
+
+            ${$fieldname} = $datagenerator->create_field($record, $data);
+            $count++;
+        }
+
+        $fields = $DB->get_records('data_fields', array('dataid' => $data->id), 'id');
+
+        $contents = array();
+        $contents[] = array('opt1', 'opt2', 'opt3', 'opt4');
+        $contents[] = '01-01-2037'; // It should be lower than 2038, to avoid failing on 32-bit windows.
+        $count = 0;
+        $fieldcontents = array();
+        foreach ($fields as $fieldrecord) {
+            $fieldcontents[$fieldrecord->id] = $contents[$count++];
+        }
+
+        $datarecor1did = $datagenerator->create_entry($data, $fieldcontents);
+        $datarecor2did = $datagenerator->create_entry($data, $fieldcontents);
+        $records = $DB->get_records('data_records', array('dataid' => $data->id));
+        $this->assertCount(2, $records);
+        // Check we received the entries updated.
+        $updates = data_check_updates_since($cm, $onehourago);
+        $this->assertTrue($updates->entries->updated);
+        $this->assertEqualsCanonicalizing([$datarecor1did, $datarecor2did], $updates->entries->itemids);
+    }
 }

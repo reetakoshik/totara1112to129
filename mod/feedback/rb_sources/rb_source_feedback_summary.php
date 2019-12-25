@@ -15,9 +15,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 class rb_source_feedback_summary extends rb_base_source {
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $sourcetitle;
+    use \core_course\rb\source\report_trait;
+    use \core_tag\rb\source\report_trait;
+    use \totara_job\rb\source\report_trait;
 
     public function __construct($groupid, rb_global_restriction_set $globalrestrictionset = null) {
         if ($groupid instanceof rb_global_restriction_set) {
@@ -38,6 +38,7 @@ class rb_source_feedback_summary extends rb_base_source {
         $this->defaultcolumns = $this->define_defaultcolumns();
         $this->defaultfilters = $this->define_defaultfilters();
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_feedback_summary');
+        $this->usedcomponents[] = 'totara_cohort';
 
         parent::__construct();
     }
@@ -138,13 +139,13 @@ class rb_source_feedback_summary extends rb_base_source {
         );
 
         // include some standard joins
-        $this->add_user_table_to_joinlist($joinlist, 'base', 'userid');
-        $this->add_course_table_to_joinlist($joinlist, 'feedback', 'course');
+        $this->add_core_user_tables($joinlist, 'base', 'userid');
+        $this->add_core_course_tables($joinlist, 'feedback', 'course');
         // requires the course join
-        $this->add_course_category_table_to_joinlist($joinlist,
+        $this->add_core_course_category_tables($joinlist,
             'course', 'category');
-        $this->add_job_assignment_tables_to_joinlist($joinlist, 'base', 'userid');
-        $this->add_core_tag_tables_to_joinlist('core', 'course', $joinlist, 'feedback', 'course');
+        $this->add_totara_job_tables($joinlist, 'base', 'userid');
+        $this->add_core_tag_tables('core', 'course', $joinlist, 'feedback', 'course');
         return $joinlist;
     }
 
@@ -166,14 +167,16 @@ class rb_source_feedback_summary extends rb_base_source {
                 'feedback.name',
                 array('joins' => 'feedback',
                       'dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'format_string')
             ),
             new rb_column_option(
                 'trainer',
                 'id',
                 get_string('trainerid', 'rb_source_feedback_summary'),
                 'sessiontrainer.userid',
-                array('joins' => 'sessiontrainer')
+                array('joins' => 'sessiontrainer',
+                      'displayfunc' => 'integer')
             ),
             new rb_column_option(
                 'trainer',
@@ -182,14 +185,16 @@ class rb_source_feedback_summary extends rb_base_source {
                 $DB->sql_fullname('trainer.firstname', 'trainer.lastname'),
                 array('joins' => 'trainer',
                       'dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'plaintext')
             ),
             new rb_column_option(
                 'trainer',
                 'organisationid',
                 get_string('trainerorgid', 'rb_source_feedback_summary'),
                 'trainer_job_assignment.organisationid',
-                array('joins' => 'trainer_job_assignment')
+                array('joins' => 'trainer_job_assignment',
+                      'displayfunc' => 'integer')
             ),
             new rb_column_option(
                 'trainer',
@@ -198,14 +203,16 @@ class rb_source_feedback_summary extends rb_base_source {
                 'trainer_organisation.fullname',
                 array('joins' => 'trainer_organisation',
                       'dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'format_string')
             ),
             new rb_column_option(
                 'trainer',
                 'positionid',
                 get_string('trainerposid', 'rb_source_feedback_summary'),
                 'trainer_job_assignment.positionid',
-                array('joins' => 'trainer_job_assignment')
+                array('joins' => 'trainer_job_assignment',
+                      'displayfunc' => 'integer')
             ),
             new rb_column_option(
                 'trainer',
@@ -214,15 +221,16 @@ class rb_source_feedback_summary extends rb_base_source {
                 'trainer_position.fullname',
                 array('joins' => 'trainer_position',
                       'dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'format_string')
             ),
         );
         // include some standard columns
-        $this->add_user_fields_to_columns($columnoptions);
-        $this->add_course_fields_to_columns($columnoptions);
-        $this->add_course_category_fields_to_columns($columnoptions);
-        $this->add_job_assignment_fields_to_columns($columnoptions);
-        $this->add_core_tag_fields_to_columns('core', 'course', $columnoptions);
+        $this->add_core_user_columns($columnoptions);
+        $this->add_core_course_columns($columnoptions);
+        $this->add_core_course_category_columns($columnoptions);
+        $this->add_totara_job_columns($columnoptions);
+        $this->add_core_tag_columns('core', 'course', $columnoptions);
 
         return $columnoptions;
     }
@@ -271,11 +279,11 @@ class rb_source_feedback_summary extends rb_base_source {
         );
 
         // include some standard filters
-        $this->add_user_fields_to_filters($filteroptions);
-        $this->add_course_fields_to_filters($filteroptions);
-        $this->add_course_category_fields_to_filters($filteroptions);
-        $this->add_job_assignment_fields_to_filters($filteroptions, 'base', 'userid');
-        $this->add_core_tag_fields_to_filters('core', 'course', $filteroptions);
+        $this->add_core_user_filters($filteroptions);
+        $this->add_core_course_filters($filteroptions);
+        $this->add_core_course_category_filters($filteroptions);
+        $this->add_totara_job_filters($filteroptions, 'base', 'userid');
+        $this->add_core_tag_filters('core', 'course', $filteroptions);
 
         return $filteroptions;
     }

@@ -48,7 +48,7 @@ Feature: Link appraisal with an appraisee job assignment.
       | appraisal           | stage  | name        |
       | Job assignment test | Stage1 | Stage1 Page |
       | Job assignment test | Stage2 | Stage2 Page |
-     And the following "questions" exist in "totara_appraisal" plugin:
+    And the following "questions" exist in "totara_appraisal" plugin:
       | appraisal           | stage  | page        | name    | type          | default | ExtraInfo                          |
       | Job assignment test | Stage1 | Stage1 Page | S1-desc | ratingnumeric | 5       | Range:1-10,Display:slider          |
       | Job assignment test | Stage2 | Stage2 Page | S2-desc | ratingnumeric | 5       | Range:1-10,Display:slider          |
@@ -113,7 +113,7 @@ Feature: Link appraisal with an appraisee job assignment.
 
     Given I log out
     And I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "James Bond" "link"
     And I click on "Unnamed job assignment (ID: 1)" "link"
     And I set the following fields to these values:
@@ -161,7 +161,7 @@ Feature: Link appraisal with an appraisee job assignment.
 
     Given I log out
     And I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "James Bond" "link"
     And I click on "Add job assignment" "link"
     And I set the following fields to these values:
@@ -215,7 +215,7 @@ Feature: Link appraisal with an appraisee job assignment.
 
     Given I log out
     And I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "James Bond" "link"
     And I click on "Add job assignment" "link"
     And I set the following fields to these values:

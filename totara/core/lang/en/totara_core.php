@@ -26,13 +26,17 @@
 
 $string['activitycompletionunlockedtext'] = 'When you save changes, completion state for all learners who have completed this activity will be erased. If you change your mind about this, do not save the form.';
 $string['activitycompletionunlockednoresettext'] = 'Completion has been unlocked without deleting activity completion data. After this change different users may have received their completion status for different reasons.';
+$string['accordion:accordionitem'] = 'Accordion Item';
 $string['addanothercolumn'] = 'Add another column...';
 $string['allf2fbookings'] = 'All Seminar Bookings';
 $string['alllearningrecords'] = 'All Learning Records';
 $string['allmycourses'] = 'All My Courses';
 $string['allteammembers'] = 'All Team Members';
 $string['alreadyselected'] = '(already selected)';
+$string['alttext'] = 'Logo alternative text';
+$string['alttextdesc'] = 'The text that is displayed when an image can\'t be. This text is also read by a screen reader.';
 $string['ampersand'] = 'and';
+$string['analyzetabletask'] = 'Execute analyze table command to analyse context and context_map tables';
 $string['archivecompletionrecords'] = 'Archive completion records';
 $string['assessments'] = 'Assessments';
 $string['assessmenttype'] = 'Assessment Type';
@@ -60,9 +64,11 @@ $string['browsecategories'] = 'Browse Categories';
 $string['cachedef_completion_progressinfo'] = 'Completion progressinfo cache';
 $string['cachedef_flex_icons'] = 'Flex icons';
 $string['cachedef_hookwatchers'] = 'Hook watchers';
+$string['cachedef_quickaccessmenu'] = 'Admin menu preferences cache';
 $string['calendar'] = 'Calendar';
 $string['cannotdownloadtotaralanguageupdatelist'] = 'Cannot download list of language updates from download.totaralms.com';
 $string['cannotundeleteuser'] = 'Cannot undelete user';
+$string['clearall'] = 'Clear all';
 $string['cloudconfigoverride'] = 'This setting is not available on Totara cloud.';
 $string['column'] = 'Column';
 $string['competency_typeicon'] = 'Competency type icon';
@@ -73,16 +79,14 @@ Alternatively you can choose to keep all existing completion records and accept 
 $string['completionexcludefailuresoff'] = 'Users may complete activities in any way, failures are acceptable.';
 $string['completionexcludefailureson'] = 'Users have to complete activities without failures.';
 $string['configdynamicappraisals'] = 'This setting allows you to specify whether appraisals lock on activation and no longer update assignments and roles or continue to update after activation';
-$string['configenhancedcatalog'] = 'This setting allows you to specify if the enhanced catalog appears when clicking on \'Find Learning\' or any of the menu options under \'Find Learning\'.
-    The enhanced catalog supports faceted search by multiple criteria using custom fields instead of relying on a single category.
-    When disabled, the standard catalog (i.e., the hierarchical category system configured in the \'Manage categories\' administration area) appears when clicking on \'Find Learning\' or any of the menu options under \'Find Learning\'.
-    Note: When enabled, the standard catalog remains available for Admins to manage course and program/certification administration in the "backend" (e.g., to assign Instructors to courses and course categories).';
+$string['configdynamicappraisalsautoprogress'] = 'When Dynamic Appraisals is enabled, this setting allows you to specify whether appraisals will automatically progress to the next stage if one or more roles are empty (assuming all filled roles are complete and there is at least one role filled). When Dynamic Appraisals is not enabled, appraisals will automatically progress.';
 $string['configforcelogintotara'] = 'Normally, the entire site is only available to logged in users. If you would like to make the front page and the course listings (but not the course contents) available without logging in, then you should uncheck this setting.';
 $string['core:appearance'] = 'Configure site appearance settings';
 $string['core:coursemanagecustomfield'] = 'Manage a course custom field';
 $string['core:delegateownmanager'] = 'Assign a temporary manager to yourself';
 $string['core:delegateusersmanager'] = 'Assign a temporary manager to other users';
-$string['core:editmainmenu'] = 'Edit the main menu';
+$string['core:editmainmenu'] = 'Edit Main menu';
+$string['core:editownquickaccessmenu'] = 'Edit your own quick access menu';
 $string['core:langconfig'] = 'Edit language settings';
 $string['core:manageprofilefields'] = 'Manage profile fields';
 $string['core:markusercoursecomplete'] = 'Mark another user\'s courses as complete';
@@ -99,8 +103,6 @@ $string['coursecompletion'] = 'Course completion';
 $string['coursecompletionsfor'] = 'Course Completions for ';
 $string['courseduex'] = 'Course due {$a}';
 $string['courseicon'] = 'Course icon';
-$string['courseprogress'] = 'Course progress';
-$string['courseprogresshelp'] = 'This specifies if the course progress block appears on the homepage';
 $string['coursetype'] = 'Course Type';
 $string['cronscheduleregularity'] = 'Your cron is not run very regularly. We recommend configuring the cron to run every minute, this way scheduled tasks will run as configured below and system load will be minimised.';
 $string['csvdateformat'] = 'CSV Import date format';
@@ -146,6 +148,8 @@ $string['datepickerlongyearregexphp'] = '@^(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[
 $string['dailyat'] = 'Daily at';
 $string['debugstatus'] = 'Debug status';
 $string['delete'] = 'Delete';
+$string['deletecompletionorphanstask'] = 'Cleanup orphaned course completion data';
+$string['deletecoursestask'] = 'Course delete task';
 $string['deleted'] = 'Deleted';
 $string['deleteusercheckfull'] = 'Are you absolutely sure you want to completely delete {$a} ?<br />All associated data, including but not limited to the following, will be deleted and is not recoverable:
 <ul>
@@ -174,7 +178,9 @@ $string['deleteusercheckfull'] = 'Are you absolutely sure you want to completely
 If you wish to retain any data you may wish to consider suspending the user instead.';
 $string['disablefeature'] = 'Disable';
 $string['downloaderrorlog'] = 'Download error log';
+$string['downloadregistrationdata'] = 'Download encrypted registration data';
 $string['dynamicappraisals'] = 'Dynamic Appraisals';
+$string['dynamicappraisalsautoprogress'] = 'Dynamic Appraisals Automatic Progression';
 $string['editheading'] = 'Edit the Report Heading Block';
 $string['edition'] = 'Edition';
 $string['elearning'] = 'E-learning';
@@ -188,7 +194,6 @@ $string['enableteam_desc'] = 'This option will let you: Enable(show)/Disable Tea
 * If Disable is chosen, Team will disappear from any menu on the site and will not be accessible.';
 $string['enableprogramextensionrequests'] = 'Enable program extension requests';
 $string['enableprogramextensionrequests_help'] = 'When enabled extension requests can be turned on for individual programs. This allows the program assignee to request an extension to the due date for a program. This extension can then be accepted or denied by the assignees manager.';
-$string['enhancedcatalog'] = 'Enhanced catalog';
 $string['enrolled'] = 'Enrolled';
 $string['error:assigncannotdeletegrouptypex'] = 'You cannot delete groups of type {$a}';
 $string['error:assignmentbadparameters'] = 'Bad parameter array passed to dialog set_parameters';
@@ -214,7 +219,7 @@ $string['error:duplicaterecordsfound'] = '{$a->count} duplicate record(s) found 
 $string['error:emptyidnumberwithsync'] = 'HR Import is enabled but the ID number field is empty. Either disable HR Import for this user or provide a valid ID number.';
 $string['error:findingmenuitem'] = 'Error finding the menu item';
 $string['error:importtimezonesfailed'] = 'Failed to update timezone information.';
-$string['error:itemhaschildren'] = 'You cannot change the parent of this item while it has children. Please move this items children first.';
+$string['error:itemhasdescendants'] = 'You cannot move this item to the selected parent because it has descendants. Please move this item\'s descendants first.';
 $string['error:itemnotselected'] = 'Please select an item';
 $string['error:menuitemcannotberemoved'] = '"{$a}" item can not be removed, please review your settings.';
 $string['error:menuitemcannotremove'] = '"{$a}" has the children which can not be removed, please review your settings.';
@@ -229,7 +234,6 @@ $string['error:menuitemrulerequired'] = 'At least one restriction type must be s
 $string['error:menuitemrulerolerequired'] = 'At least one role must be selected';
 $string['error:menuitemurlinvalid'] = 'Menu url address is invalid. Use "/" for a relative link of your domain name or full address for external link, i.e. http://extdomain.com';
 $string['error:menuitemurltoolong'] = 'Menu url address too long';
-$string['error:menuitemurlrequired'] = 'Menu url address required';
 $string['error:morethanxitemsatthislevel'] = 'There are more than {$a} items at this level.';
 $string['error:norolesfound'] = 'No roles found';
 $string['error:notificationsparamtypewrong'] = 'Incorrect param type sent to Totara notifications';
@@ -249,7 +253,7 @@ $string['eventcoursearchived'] = 'Course was archived';
 $string['eventcoursecompletionreset'] = 'Course completion was reset';
 $string['eventcoursecompletionunlocked'] = 'Course completion was unlocked without reset';
 $string['eventcourseinprogress'] = 'User was marked in progress for course';
-$string['eventmenuadminviewed'] = 'Main menu viewed';
+$string['eventmenuadminviewed'] = 'Main menu administration viewed';
 $string['eventmenuitemcreated'] = 'Menu item created';
 $string['eventmenuitemdeleted'] = 'Menu item deleted';
 $string['eventmenuitemupdated'] = 'Menu item updated';
@@ -264,12 +268,16 @@ $string['eventreminderupdated'] = "Reminder was updated";
 $string['eventundeleted'] = 'User undeleted';
 $string['eventuserconfirmed'] = 'User confirmed';
 $string['eventusersuspended'] = 'User suspended';
+$string['eventupdateadmin'] = 'Admin user group updated';
+$string['eventupdateauth'] = 'Authentication methods updated';
 $string['exportformat'] = 'Export format';
 $string['facetoface'] = 'Seminar';
 $string['findcourses'] = 'Find Courses';
 $string['findlearning'] = 'Find Learning';
 $string['flexibleicons'] = 'Flexible icons';
 $string['enableflexiconsinfo'] = 'Enable rendering of icons using Flexible Icons API where possible.';
+$string['favicon'] = 'Favicon';
+$string['favicondesc'] = 'Select or upload the image file to be used as the site\'s favicon, the icon must be *.ico format';
 $string['fontdefault'] = 'Appropriate default';
 $string['framework'] = 'Framework';
 $string['heading'] = 'Heading';
@@ -286,6 +294,9 @@ $string['idnumberexists'] = 'Record with this ID number already exists';
 $string['importtimezonesskipped'] = 'Skipped updating timezone information.';
 $string['importtimezonessuccess'] = 'Timezone information updated from source {$a}.';
 $string['incompatiblerepository'] = 'File download is disabled for security reasons, repository "{$a}" needs to be updated by developer';
+$string['inlineedit:instructions'] = 'Escape to cancel, Enter when finished';
+$string['inlineedit:noempty'] = 'Revert to previous item name?';
+$string['inlineedit:maxlength'] = 'Length limit reached';
 $string['inprogress'] = 'In Progress';
 $string['installdemoquestion'] = 'Do you want to include demo data with this installation?<br /><br />(This will take a long time.)';
 $string['installingdemodata'] = 'Installing Demo Data';
@@ -297,6 +308,8 @@ $string['learningplans'] = 'Learning Plans';
 $string['learningrecords'] = 'Learning Records';
 $string['loading'] = 'Loading';
 $string['localpostinstfailed'] = 'There was a problem setting up local modifications to this installation.';
+$string['logo'] = 'Logo';
+$string['logodesc'] = 'Select or upload the image file to be used as the site\'s logo';
 $string['managecertifications'] = 'Manage certifications';
 $string['managecustomicons'] = 'Manage custom icons';
 $string['managers'] = 'Manager\'s ';
@@ -328,16 +341,17 @@ When **Users must have role in the system context** is selected the user must be
 When **User may have role in any context** is selected a user can view the report when they have been assigned the selected role anywhere in the system.';
 $string['menuitem:delete'] = 'Are you sure you want to delete the "{$a}" item?';
 $string['menuitem:deletechildren'] = 'All children of "{$a}" will be deleted:';
-$string['menuitem:deletesuccess'] = 'The item was deleted successfully';
+$string['menuitem:deletesuccess'] = 'Menu item has been deleted';
 $string['menuitem:edit'] = 'Edit menu item';
 $string['menuitem:editaccess'] = 'Access';
 $string['menuitem:editingx'] = 'Editing menu item "{$a}"';
+$string['menuitem:formitemcustomtitle'] = 'Override menu title';
 $string['menuitem:formitemparent'] = 'Parent item';
 $string['menuitem:formitemtargetattr'] = 'Open link in new window';
 $string['menuitem:formitemtargetattr_help'] = 'If selected, clicking this menu item will open the page in a new browser window instead of the current window.';
 $string['menuitem:formitemtitle'] = 'Menu title';
 $string['menuitem:formitemtitle_help'] = 'The name of this menu item. This field supports the multi-language content filter.';
-$string['menuitem:formitemurl'] = 'Menu default url address';
+$string['menuitem:formitemurl'] = 'Menu url address';
 $string['menuitem:formitemurl_help'] = 'Start the URL with a **/** to make the link relative to your site URL. Otherwise start the URL with http:// or https://, i.e. http://extdomain.com
 
 You can also use following placeholders:
@@ -348,17 +362,25 @@ You can also use following placeholders:
 * ##courseid## : Current course ID.';
 $string['menuitem:formitemvisibility'] = 'Visibility';
 $string['menuitem:hide'] = 'Hide';
+$string['menuitem:hiddentoodeep'] = 'Hidden: menu limit exceeded';
+$string['menuitem:hiddentoodeep_help'] = 'The menu does not show items which are nested deeper than 2 levels.';
+$string['menuitem:mainmenu'] = 'Main menu';
 $string['menuitem:movesuccess'] = 'The item was moved successfully';
+$string['menuitem:navigationsettings'] = 'Navigation settings';
 $string['menuitem:norolesfound'] = 'No roles found';
+$string['menuitem:nourlwithchildren'] = 'No URL';
 $string['menuitem:presetwithaccess'] = 'Condition required to view';
 $string['menuitem:presetwithaccess_help'] = 'This criteria allows you to restrict access to the menu item using one or more predefined rules.
 
 How these rules are required is determined by the **Preset rule aggregation** setting. If it is set to **all** then the user must meet all of the selected criteria. If it is set to **any** the user must meet only one of the selected criteria.';
 $string['menuitem:presetaggregation'] = 'Preset rule aggregation';
 $string['menuitem:presetaggregation_help'] = 'Determines whether the user must meet all of the selected preset rules, or any of the selected preset rules.';
+$string['menuitem:resetbackupcustom'] = 'hidden from menu and available in menu settings';
+$string['menuitem:resetcustomoption'] = 'All custom items will be';
+$string['menuitem:resetdeletecustom'] = 'permanently deleted';
 $string['menuitem:resettodefault'] = 'Reset menu to default configuration';
-$string['menuitem:resettodefaultconfirm'] = 'Are you absolutely sure that you want to reset the main menu to its default configuration? This will permanently erase all customisations.';
-$string['menuitem:resettodefaultcomplete'] = 'Main menu reset to default configuration.';
+$string['menuitem:resettodefaultcomplete'] = 'Main menu has been reset to default configuration.';
+$string['menuitem:resetwarnign'] = 'You are about to reset the Main menu to its default configuration.';
 $string['menuitem:restrictaccess'] = 'Restrict access';
 $string['menuitem:restrictaccessbyaudience'] = 'Restrict access by audience';
 $string['menuitem:roleaggregation'] = 'Role aggregation';
@@ -387,16 +409,20 @@ $string['menuitem:rulepreset_is_not_logged_in'] = 'User is <b>not</b> logged in'
 $string['menuitem:rulepreset_is_site_admin'] = 'User is site administrator';
 $string['menuitem:show'] = 'Show';
 $string['menuitem:showcustom'] = 'Use custom access rules';
-$string['menuitem:showwhenrequired'] = 'Show when required';
+$string['menuitem:showwhenrequired'] = 'Show when accessible';
 $string['menuitem:systemcontext'] = 'Users must have role in the system context';
 $string['menuitem:title'] = 'Item title';
+$string['menuitem:type'] = 'Type';
+$string['menuitem:typedisabled'] = 'Feature disabled';
+$string['menuitem:typeparent'] = 'Parent';
+$string['menuitem:typeurl'] = 'URL';
 $string['menuitem:updateaccesssuccess'] = 'Access rules updated successfully';
-$string['menuitem:updatesuccess'] = 'Main menu updated successfully';
-$string['menuitem:url'] = 'Default url address';
+$string['menuitem:updatesuccess'] = 'Main menu has been updated successfully';
+$string['menuitem:url'] = 'URL address';
 $string['menuitem:visibility'] = 'Visibility';
 $string['menuitem:withrestrictionall'] = 'Users matching <strong>all</strong> of the criteria below can view this menu item.';
 $string['menuitem:withrestrictionany'] = 'Users matching <strong>any</strong> of the criteria below can view this menu item.';
-$string['menulifetime'] = 'Cache main menu';
+$string['menulifetime'] = 'Main menu cache life time';
 $string['menulifetime_desc'] = 'Higher values improve performance but some changes in menu structure may be delayed.';
 $string['minutelyon'] = 'Minutely on';
 $string['modulearchive'] = 'Activity archives';
@@ -426,6 +452,8 @@ $string['notavailable'] = 'Not available';
 $string['notenrolled'] = '<em>You are not currently enrolled in any courses.</em>';
 $string['notfound'] = 'Not found';
 $string['notimplementedtotara'] = 'Sorry, this feature is only implemented on MySQL, MSSQL and PostgreSQL databases.';
+$string['ngramcheckinfo'] = 'NGRAM check';
+$string['ngramenvironmentmsg'] = "NGRAM plugin for MySQL is missing. It is highly recommended to install NGRAM plugin in order to optimise full text search on MySQL database.";
 $string['activeusercountstr'] = '{$a->activeusers} users have logged in to this site in the last year ({$a->activeusers3mth} in the last 3 months)';
 $string['numberofstaff'] = '({$a} staff)';
 $string['old_release_security_text_plural'] = ' (including [[SECURITY_COUNT]] new security releases)';
@@ -462,6 +490,40 @@ $string['proficiency'] = 'Proficiency';
 $string['progdoesntbelongcat'] = 'The program doesn\'t belong to this category';
 $string['programicon'] = 'Program icon';
 $string['queryerror'] = 'Query error. No results found.';
+$string['quickaccessmenu:addgroup'] = 'Add a new group';
+$string['quickaccessmenu:addmenuitem'] = 'Add menu item...';
+$string['quickaccessmenu:addtomenu'] = 'Add to admin menu';
+$string['quickaccessmenu:createnewgroup'] ='Create new group';
+$string['quickaccessmenu:empty-message'] = 'This is your administration menu. <br /><a href="{$a}">Click here to customise it</a>';
+$string['quickaccessmenu:empty-message-noedit'] = 'This is your administration menu.<br /> To start using it contact your system administrator.';
+$string['quickaccessmenu:hidemenuwindow'] = 'Hide admin menu window';
+$string['quickaccessmenu:menuheading'] = 'Administration Menu';
+$string['quickaccessmenu:menusettings'] = 'Menu settings';
+$string['quickaccessmenu:removefrommenu'] = 'Remove from admin menu';
+$string['quickaccessmenu:reset'] = 'Reset admin menu';
+$string['quickaccessmenu:resetcomplete'] = 'Your administration navigation preferences have been reset to default configuration.';
+$string['quickaccessmenu:resetconfirm'] = 'Are you sure that you want to reset your administration navigation preferences to their default configuration? This will permanently erase your customisations.';
+$string['quickaccessmenu:settingsheading'] = 'Administration navigation settings';
+$string['quickaccessmenu:untitledgroup'] = 'Untitled';
+$string['quickaccessmenu:error:emptyitemlabel'] = 'Menu item labels cannot be empty';
+$string['quickaccessmenu:error:invalidaction'] = 'Invalid action "{$a}"';
+$string['quickaccessmenu:error:invalidgroup'] = 'Invalid menu group {$a}';
+$string['quickaccessmenu:error:invaliditem'] = 'Invalid menu group item {$a}';
+$string['quickaccessmenu:search'] = 'Search administration';
+$string['quickaccessmenu:showmenuwindow'] = 'Show admin menu window';
+$string['quickaccessmenu:success:itemadded'] = 'Page added to the admin menu';
+$string['quickaccessmenu:success:itemremoved'] = 'Page removed from the admin menu';
+$string['quickaccesssettings:deletegroup'] = 'Delete group';
+$string['quickaccesssettings:deleteitem'] = 'Delete item';
+$string['quickaccesssettings:editgroupname'] = 'Edit group name';
+$string['quickaccesssettings:edititemname'] = 'Edit item name';
+$string['quickaccesssettings:groupactions'] = 'Group Actions';
+$string['quickaccesssettings:itemlabel'] = 'Item Label:';
+$string['quickaccesssettings:itemname'] = 'Item Target Page:';
+$string['quickaccesssettings:reordergroup-down'] = 'Reorder group lower';
+$string['quickaccesssettings:reorderitem-down'] = 'Reorder item lower';
+$string['quickaccesssettings:reordergroup-up'] = 'Reorder group higher';
+$string['quickaccesssettings:reorderitem-up'] = 'Reorder item higher';
 $string['recordnotcreated'] = 'Record could not be created';
 $string['recordnotupdated'] = 'Record could not be updated';
 $string['recordoflearning'] = 'Record of Learning';
@@ -560,7 +622,6 @@ $string['totaracore'] = 'Totara core';
 $string['totarafeatures'] = 'Totara features';
 $string['totaralogo'] = 'Totara Logo';
 $string['totaramenu'] = 'Totara Menu';
-$string['totaranavigation'] = 'Main menu';
 $string['totararegistration'] = 'Totara registration';
 $string['totararegistration_desc'] = '<p>To register Totara software you must include your registration code.</p>
 <p>Registering your software is not an End User Licensing Agreement. Registration establishes the subscriber\'s right to receive Totara’s software update service,
@@ -615,6 +676,7 @@ $string['userdataitemexternal_tokens'] = 'External tokens';
 $string['userdataitemexternal_tokens_help'] = 'All access tokens for webservices created by or for the user.';
 $string['userdataitemportfolios'] = 'Portfolio exports';
 $string['userdataitemportfolios_help'] = 'Records of exports a user has made to portfolios. This does not include or affect the actual data that was exported to the portfolio.';
+$string['userdataitemquickaccess_preferences'] = 'Quick access menu user preferences';
 $string['viewmyteam'] = 'View My Team';
 $string['weeklyon'] = 'Weekly on';
 $string['xofy'] = '{$a->count} / {$a->total}';
@@ -684,7 +746,7 @@ $string['updatetemporarymanagerstask'] = 'Update temporary managers';
 $string['mysqlneedsbarracuda'] = 'Advanced Totara features require InnoDB Barracuda storage format';
 $string['mysqlneedsfilepertable'] = 'Advanced Totara features require InnoDB File-Per-Table mode to be enabled';
 $string['timecompleted'] = 'Time completed';
-$string['poweredby'] = 'Powered by Totara LMS';
+$string['poweredby'] = 'Powered by Totara';
 
 // Deprecated in Platform.
 
@@ -692,10 +754,14 @@ $string['error:itemhaschildren'] = 'You cannot change the parent of this item wh
 $string['error:menuitemurlrequired'] = 'Menu url address required';
 $string['totaranavigation'] = 'Main menu';
 
-// Deprecated in 11
-
-$string['strftimedateshortmonth'] = '%d %b %Y';
-
 // Deprecated in 12
 
 $string['numberofactiveusers'] = '{$a} users have logged in to this site in the last year';
+$string['enhancedcatalog'] = 'Enhanced catalog';
+$string['configenhancedcatalog'] = 'This setting allows you to specify if the enhanced catalog appears when clicking on \'Find Learning\' or any of the menu options under \'Find Learning\'.
+    The enhanced catalog supports faceted search by multiple criteria using custom fields instead of relying on a single category.
+    When disabled, the standard catalog (i.e., the hierarchical category system configured in the \'Manage categories\' administration area) appears when clicking on \'Find Learning\' or any of the menu options under \'Find Learning\'.
+    Note: When enabled, the standard catalog remains available for Admins to manage course and program/certification administration in the "backend" (e.g., to assign Instructors to courses and course categories).';
+$string['menuitem:resettodefaultconfirm'] = 'Are you absolutely sure that you want to reset the top navigation to its default configuration? This will permanently erase all customisations.';
+$string['menuitem:topnavigation'] = 'Top navigation';
+$string['strftimedateshortmonth'] = '%d %b %Y';

@@ -1,0 +1,166 @@
+@totara_core__QuickAccessSettings__accordion-header--bg-color: @totara_style-color_neutral_3;
+@totara_core__QuickAccessSettings__accordion-border-color: @totara_style-color_neutral_4;
+
+@totara_core__QuickAccessSettings__item-border-color: @totara_core__QuickAccessSettings__accordion-border-color;
+@totara_core__QuickAccessSettings__spacing: @totara_style-spacing_medium;
+@totara_core__QuickAccessSettings__heading-icons-size: @totara_style-font_heading_medium_size * .85;
+@totara_core__QuickAccess__transition-time: 200ms;
+
+@quickaccess_desktop_breakpoint: @totara_style-screen_sm_min;
+@quickaccess_mobile_breakpoint: (@quickaccess_desktop_breakpoint - 1px);
+
+.totara_core__QuickAccessSettings {
+  max-width: 100ch;
+
+  .ie11 & {
+    // TL-20522: IE11 calculates ch units differently to other browsers (it doesn't account for the space between letters)
+    // so we're going to magic-number a conversion from chrome
+    max-width: 88rem;
+  }
+
+  .totara_core__Accordion__item {
+    border: 1px solid @totara_core__QuickAccessSettings__accordion-border-color;
+  }
+
+  &__group {
+    &-header {
+      background-color: @totara_core__QuickAccessSettings__accordion-header--bg-color;
+      padding: @totara_core__QuickAccessSettings__spacing;
+
+      &::after {
+        content: '';
+        display: block;
+        clear: both;
+      }
+
+      h3 {
+        margin: 0;
+        display: inline-block;
+      }
+    }
+
+    &-content {
+      padding: @totara_core__QuickAccessSettings__spacing;
+    }
+
+    &--controls {
+      float: right;
+      font-size: @totara_core__QuickAccessSettings__heading-icons-size;
+
+      a {
+        &,
+        &:hover {
+          text-decoration: none;
+        }
+      }
+    }
+
+    &:first-of-type {
+      [data-quickaccesssettings-group-action="moveup"] {
+        visibility: hidden;
+        z-index: -1;
+      }
+    }
+
+    &:last-of-type {
+      [data-quickaccesssettings-group-action="movedown"] {
+        visibility: hidden;
+        z-index: -1;
+      }
+    }
+  }
+
+  &__item-list {
+    list-style: none;
+    margin: 0;
+  }
+
+  &__item {
+    display: flex;
+
+    padding: @totara_core__QuickAccessSettings__spacing;
+    justify-content: space-between;
+
+    border-top: 1px solid @totara_core__QuickAccessSettings__item-border-color;
+    transition: transform 0ms ease-out; //set to 0 duration so swap doesn't try and ease
+
+    @media (max-width: @quickaccess_mobile_breakpoint) {
+      padding: @totara_core__QuickAccessSettings__spacing 0;
+    }
+
+    &:last-of-type {
+      border-bottom: 1px solid @totara_core__QuickAccessSettings__item-border-color;
+    }
+
+    //Animations to swap up and down
+    &-swap-up {
+      transition-duration: @totara_core__QuickAccess__transition-time;
+
+      //When the menu is open, we don't know how big everything is, so we can't move the menu by any percentage of itself
+      //so instead, we approximate the height of the header by using font-size * line-height + padding-top + padding-bottom
+      transform: translateY(calc( -@font-size-h3 * 1.1 ~"+" 2 * -@totara_core__QuickAccessSettings__spacing));
+      .collapsed& {
+        transform: translateY(-100%);
+      }
+    }
+    &-swap-down {
+      transition-duration: @totara_core__QuickAccess__transition-time;
+
+      //When the menu is open, we don't know how big everything is, so we can't move the menu by any percentage of itself
+      //so instead, we approximate the height of the header by using font-size * line-height + padding-top + padding-bottom
+      transform: translateY(calc(@font-size-h3 * 1.1 ~"+" 2 * @totara_core__QuickAccessSettings__spacing));
+      .collapsed& {
+        transform: translateY(100%);
+      }
+    }
+
+    &--name {
+      flex: 1 1 auto;
+    }
+
+    &--label {
+      flex: 0 0 30%;
+      max-width: 30%; //cap this so text doesn't mis-align on small sizes
+      margin-left: @totara_core__QuickAccessSettings__spacing;
+
+      overflow-wrap: break-word;
+      hyphens: auto;
+
+      input {
+        max-width: 100%;
+      }
+    }
+
+    &--controls {
+      flex: 0 1 auto;
+      text-align: right;
+      margin-left: @totara_core__QuickAccessSettings__spacing;
+      white-space: nowrap;
+
+      a {
+        &,
+        &:hover {
+          text-decoration: none;
+        }
+      }
+    }
+
+    &:first-of-type {
+      [data-quickaccesssettings-item-action="moveup"] {
+        visibility: hidden;
+        z-index: -1;
+      }
+    }
+
+    &:last-of-type {
+      [data-quickaccesssettings-item-action="movedown"] {
+        visibility: hidden;
+        z-index: -1;
+      }
+    }
+  }
+
+  &__button {
+    margin-top: @totara_core__QuickAccessSettings__spacing;
+  }
+}

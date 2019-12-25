@@ -19,7 +19,7 @@ Feature: We can set the grade to pass value
       | name | scale |
       | Test Scale 1 | Disappointing, Good, Very good, Excellent |
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
 
   @javascript
   Scenario: Validate that switching the type of grading used correctly disables grade to pass

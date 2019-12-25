@@ -1,0 +1,60 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Kevin Hottinger <kevin.hottinger@totaralearning.com>
+   @package totara_catalog
+}}
+{{!
+
+    @template totara_core/grid
+
+    This template generates a grid layout.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * data-core-autoinitialise: State of this JS auto initilise
+    * data-core-autoinitialise-amd: AMD to be linked to template
+    * data-tw-grid: Selector for grid
+    * data-tw-grid-item: Selector for grid item
+
+    Context variables required for this template:
+    * single_column: Bool, single column row
+    * tiles_exist: Bool, whether or not there are tiles
+    * tiles: Array, list of items
+    * tiles -> template_name: Name of the template partial
+    * tiles -> template_data: Template partial for content
+    * tiles -> template_data -> itemid: An id for the tile (optional)
+
+}}
+
+<section class="tw-grid"
+    data-tw-grid=""
+    data-core-autoinitialise="true"
+    data-core-autoinitialise-amd="totara_core/grid">
+
+    {{#tiles}}{{!
+  }}<div class="tw-grid__item
+        {{#single_column}}tw-grid__item--single-column{{/single_column}}
+        {{^single_column}}tw-grid__item--multi-column{{/single_column}}"
+        data-tw-grid-item=""
+        data-tw-grid-item-ID="{{#template_data}}{{itemid}}{{/template_data}}">
+        {{#template_data}}{{> &&template_name }}{{/template_data}}{{!
+  }}</div>{{/tiles}}
+</section>

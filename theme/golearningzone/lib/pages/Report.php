@@ -1,7 +1,6 @@
 <?php
 
 namespace GoLearningZone\Pages;
-
 use GoLearningZone\Traits\Theme as ThemeTrait;
 
 class Report extends Base
@@ -9,7 +8,8 @@ class Report extends Base
     use ThemeTrait;
 
     public function render()
-    {
+    {   
+        
         global $CFG;
         $template = 'theme_golearningzone/report';
 

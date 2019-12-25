@@ -160,7 +160,13 @@ switch ($action) {
             // Use DateTime to properly account for DST changes.
             $dateobj = new DateTime();
             $dateobj->setTimestamp($timestart);
-            $dateobj->add(new DateInterval("P{$duration}D"));
+            if (floor($duration) !== $duration) {
+                // Convert fractional days to integer seconds
+                $durationsec = (int)($duration * DAYSECS);
+                $dateobj->add(new DateInterval("PT{$durationsec}S"));
+            } else {
+                $dateobj->add(new DateInterval("P{$duration}D"));
+            }
             $dateobj->sub(new DateInterval('PT1S'));
             $timeend = $dateobj->getTimestamp();
         }

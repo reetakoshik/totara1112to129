@@ -26,8 +26,6 @@
 
 namespace totara_hierarchy\totara\menu;
 
-use \totara_core\totara\menu\menu as menu;
-
 class mygoals extends \totara_core\totara\menu\item {
 
     protected function get_default_title() {
@@ -38,22 +36,18 @@ class mygoals extends \totara_core\totara\menu\item {
         return '/totara/hierarchy/prefix/goal/mygoals.php';
     }
 
-    public function get_default_visibility() {
-        return menu::SHOW_WHEN_REQUIRED;
-    }
-
     public function get_default_sortorder() {
         return 44000;
     }
 
     protected function check_visibility() {
         global $CFG, $USER;
-        static $cache = null;
 
-        if (!totara_feature_visible('goals')) {
-            $cache = null;
-            return menu::HIDE_ALWAYS;
+        if (!isloggedin() or isguestuser()) {
+            return false;
         }
+
+        static $cache = null;
 
         if (isset($cache)) {
             return $cache;
@@ -61,9 +55,9 @@ class mygoals extends \totara_core\totara\menu\item {
 
         require_once($CFG->dirroot . '/totara/hierarchy/prefix/goal/lib.php');
         if (\goal::can_view_goals($USER->id)) {
-            $cache = menu::SHOW_ALWAYS;
+            $cache = true;
         } else {
-            $cache = menu::HIDE_ALWAYS;
+            $cache = false;
         }
         return $cache;
     }
@@ -79,5 +73,9 @@ class mygoals extends \totara_core\totara\menu\item {
 
     protected function get_default_parent() {
         return '\totara_appraisal\totara\menu\appraisal';
+    }
+
+    public function get_incompatible_preset_rules(): array {
+        return ['can_view_my_goals'];
     }
 }

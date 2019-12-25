@@ -27,6 +27,11 @@ require_once(__DIR__ . '/../../../../config.php');
 require_once($CFG->dirroot . '/mod/facetoface/lib.php');
 require_once($CFG->dirroot . '/totara/core/dialogs/dialog_content.class.php');
 
+use mod_facetoface\asset;
+use mod_facetoface\asset_list;
+use mod_facetoface\seminar;
+use mod_facetoface\seminar_event;
+
 $facetofaceid = required_param('facetofaceid', PARAM_INT); // Necessary when creating new sessions.
 $sessionid = required_param('sessionid', PARAM_INT);       // Empty when adding new session.
 $timestart = required_param('timestart', PARAM_INT);
@@ -35,25 +40,30 @@ $offset = optional_param('offset', 0, PARAM_INT);
 $search = optional_param('search', 0, PARAM_INT);
 $selected = required_param('selected', PARAM_SEQUENCE);
 
-if (!$facetoface = $DB->get_record('facetoface', array('id' => $facetofaceid))) {
+$seminar = new seminar($facetofaceid);
+if (!$seminar->exists()) {
     print_error('error:incorrectfacetofaceid', 'facetoface');
 }
 
-if (!$course = $DB->get_record('course', array('id' => $facetoface->course))) {
+if (!$course = $DB->get_record('course', array('id' => $seminar->get_course()))) {
     print_error('error:coursemisconfigured', 'facetoface');
 }
 
-if (!$cm = get_coursemodule_from_instance('facetoface', $facetoface->id, $course->id)) {
+if (!$cm = get_coursemodule_from_instance('facetoface', $seminar->get_id(), $course->id)) {
     print_error('error:incorrectcoursemoduleid', 'facetoface');
 }
 
 if ($sessionid) {
-    if (!$session = facetoface_get_session($sessionid)) {
+    $seminarevent = new seminar_event($sessionid);
+    if ($seminarevent->get_id() == 0) {
         print_error('error:incorrectcoursemodulesession', 'facetoface');
     }
-    if ($session->facetoface != $facetoface->id) {
+    if ($seminarevent->get_facetoface() != $seminar->get_id()) {
         print_error('error:incorrectcoursemodulesession', 'facetoface');
     }
+} else {
+    $seminarevent = new seminar_event();
+    $seminarevent->set_facetoface($seminar->get_id());
 }
 
 $context = context_module::instance($cm->id);
@@ -70,7 +80,6 @@ $PAGE->set_url('/mod/facetoface/asset/ajax/sessionassets.php', array(
     'timefinish' => $timefinish
 ));
 
-// Include the same strings as mod/facetoface/sessions.php, because we override the lang string cache with this ugly hack.
 $PAGE->requires->strings_for_js(array('save', 'delete'), 'totara_core');
 $PAGE->requires->strings_for_js(array('cancel', 'ok', 'edit', 'loadinghelp'), 'moodle');
 $PAGE->requires->strings_for_js(array('chooseassets', 'chooseroom', 'dateselect', 'useroomcapacity', 'nodatesyet',
@@ -84,24 +93,35 @@ if (empty($timestart) || empty($timefinish)) {
 send_headers('text/html; charset=utf-8', false);
 
 // Setup / loading data
-$allassets = facetoface_get_available_assets(0, 0 , 'fa.*', $sessionid, $facetofaceid);
-$availableassets = facetoface_get_available_assets($timestart, $timefinish, 'fa.id', $sessionid, $facetofaceid);
+$assetslist = asset_list::get_available(0, 0, $seminarevent);
+$availableassets = asset_list::get_available($timestart, $timefinish, $seminarevent);
 $selectedids = explode(',', $selected);
-$selectedassets = array();
-$unavailableassets = array();
-foreach ($allassets as $asset) {
-    customfield_load_data($asset, "facetofaceasset", "facetoface_asset");
-    $asset->fullname = $asset->name;
-    if (!isset($availableassets[$asset->id])) {
-        $unavailableassets[$asset->id] = $asset->id;
-        $asset->fullname .= get_string('assetalreadybooked', 'facetoface');
+$allassets = [];
+$selectedassets = [];
+$unavailableassets = [];
+foreach ($assetslist as $assetid => $asset) {
+
+    $dialogdata = (object)[
+        'id' => $assetid,
+        'fullname' => $asset->get_name(),
+        'custom' => $asset->get_custom(),
+    ];
+
+    customfield_load_data($dialogdata, "facetofaceasset", "facetoface_asset");
+    if (!$availableassets->contains($assetid)) {
+        $unavailableassets[$assetid] = $assetid;
+        $dialogdata->fullname .= get_string('assetalreadybooked', 'facetoface');
     }
-    if ($asset->custom) {
-        $asset->fullname .= ' (' . get_string('facetoface', 'facetoface') . ': ' . format_string($facetoface->name) . ')';
+
+    if ($dialogdata->custom) {
+        $dialogdata->fullname .= ' (' . get_string('facetoface', 'facetoface') . ': ' . format_string($seminar->get_name()) . ')';
     }
-    if (in_array($asset->id, $selectedids)) {
-        $selectedassets[$asset->id] = $asset;
+
+    if (in_array($assetid, $selectedids)) {
+        $selectedassets[$assetid] = $dialogdata;
     }
+
+    $allassets[$assetid] = $dialogdata;
 }
 
 // Display page.

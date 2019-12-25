@@ -132,6 +132,7 @@ trait report_trait {
             "{$join}.fullname",
             [
                 'joins' => [$join],
+                'displayfunc' => 'format_string'
             ]
         );
         $this->columnoptions[] = new \rb_column_option(
@@ -187,6 +188,7 @@ trait report_trait {
             "{$join}.id",
             [
                 'joins' => [$join],
+                'displayfunc' => 'integer'
             ]
         );
         $this->columnoptions[] = new \rb_column_option(
@@ -195,7 +197,7 @@ trait report_trait {
             get_string('reportembedded', 'totara_reportbuilder'),
             "{$join}.embedded",
             [
-                'displayfunc' => 'yes_no',
+                'displayfunc' => 'yes_or_no',
                 'joins' => [$join],
             ]
         );
@@ -205,7 +207,7 @@ trait report_trait {
             get_string('reporthidden', 'totara_reportbuilder'),
             "{$join}.hidden",
             [
-                'displayfunc' => 'yes_no',
+                'displayfunc' => 'yes_or_no',
                 'joins' => [$join],
             ]
         );
@@ -239,7 +241,8 @@ trait report_trait {
             get_string('numcolumns', 'totara_reportbuilder'),
             'CASE WHEN column_count.count IS NULL THEN 0 ELSE column_count.count END',
             [
-                'joins' => 'column_count'
+                'joins' => 'column_count',
+                'displayfunc' => 'integer'
             ]
         );
         $this->columnoptions[] = new \rb_column_option(
@@ -248,7 +251,8 @@ trait report_trait {
             get_string('numfilters', 'totara_reportbuilder'),
             'CASE WHEN filter_count.count IS NULL THEN 0 ELSE filter_count.count END',
             [
-                'joins' => 'filter_count'
+                'joins' => 'filter_count',
+                'displayfunc' => 'integer'
             ]
         );
         $this->columnoptions[] = new \rb_column_option(
@@ -257,7 +261,8 @@ trait report_trait {
             get_string('numscheduled', 'totara_reportbuilder'),
             'CASE WHEN scheduled_count.count IS NULL THEN 0 ELSE scheduled_count.count END',
             [
-                'joins' => 'scheduled_count'
+                'joins' => 'scheduled_count',
+                'displayfunc' => 'integer'
             ]
         );
         $this->columnoptions[] = new \rb_column_option(
@@ -266,7 +271,8 @@ trait report_trait {
             get_string('numsaved', 'totara_reportbuilder'),
             'CASE WHEN saved_count.count IS NULL THEN 0 ELSE saved_count.count END',
             [
-                'joins' => 'saved_count'
+                'joins' => 'saved_count',
+                'displayfunc' => 'integer'
             ]
         );
         $this->columnoptions[] = new \rb_column_option(
@@ -286,16 +292,6 @@ trait report_trait {
      * Add report filters.
      */
     protected function add_report_filters() {
-        global $CFG;
-
-        require_once($CFG->dirroot . '/totara/reportbuilder/lib.php');
-        // Get list of sources. Need the static var to avoid recursion as get_source_list() instanitates each source.
-        // Can be fixed by making it possible to get source name without instantiating source object.
-        static $sourcelist;
-        if (is_null($sourcelist)) {
-            $sourcelist = [];
-            $sourcelist = \reportbuilder::get_source_list();
-        }
 
         /** @var report_trait|\rb_base_source $this */
         $this->filteroptions[] = new \rb_filter_option(
@@ -330,7 +326,7 @@ trait report_trait {
             get_string('reportsource', 'totara_reportbuilder'),
             'select',
             [
-                'selectchoices' => $sourcelist,
+                'selectfunc' => 'totara_reportbuilder_source_list',
                 'simplemode' => true,
             ]
         );
@@ -360,4 +356,37 @@ trait report_trait {
         );
     }
 
+    /**
+     * Adds the course table to the $joinlist array
+     *
+     * @param array &$joinlist Array of current join options
+     *                         Passed by reference and updated to
+     *                         include new table joins
+     * @param string $join Name of the join that provides the
+     *                     'course id' field
+     * @param string $field Name of course id field to join on
+     * @param int $contextlevel Name of course id field to join on
+     * @param string $jointype Type of join (INNER, LEFT, RIGHT)
+     */
+    protected function add_context_tables(&$joinlist, $join, $field, $contextlevel, $jointype = 'LEFT') {
+
+        $joinlist[] = new \rb_join(
+            'ctx',
+            $jointype,
+            '{context}',
+            "ctx.instanceid = $join.$field AND ctx.contextlevel = $contextlevel",
+            REPORT_BUILDER_RELATION_ONE_TO_ONE,
+            $join
+        );
+    }
+
+    /**
+     * Generate options for the report builder source list filter.
+     * @return array
+     */
+    public function rb_filter_totara_reportbuilder_source_list() {
+        global $CFG;
+        require_once($CFG->dirroot . '/totara/reportbuilder/lib.php');
+        return \reportbuilder::get_source_list();
+    }
 }

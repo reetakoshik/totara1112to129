@@ -65,7 +65,7 @@
         "controls": "rendered html for an action menu"
       }
 }}
-<div class="block-totara-featured-links-tile-{{size}} block-totara-featured-links-tile-{{tile_id}}{{#editing}} block-totara-featured-links-editing-tile{{/editing}} background-{{background_appearance}}"
+<div class="block-totara-featured-links-tile block-totara-featured-links-tile-{{size}} block-totara-featured-links-tile-{{tile_id}}{{#editing}} block-totara-featured-links-editing-tile{{/editing}} background-{{background_appearance}}"
      id="block-totara-featured-links-tile-{{tile_id}}"
      style="{{#background_img}}background-image: url('{{background_img}}');{{/background_img}}{{#background_color}}background-color: {{background_color}};{{/background_color}}"
      {{#alt_text.tile_title}}title="{{alt_text.tile_title}}"{{/alt_text.tile_title}}>
@@ -85,4 +85,9 @@
             {{{controls}}}
         </div>
     {{/editing}}
+    {{#icon}}
+        <div class="block-totara-featured-links-icon block-totara-featured-links-icon-{{icon_size}}">
+            {{#context}}{{> &&template}}{{/context}}
+        </div>
+    {{/icon}}
 </div>

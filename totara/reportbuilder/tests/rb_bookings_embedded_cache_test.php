@@ -143,7 +143,7 @@ class totara_reportbuilder_rb_bookings_embedded_cache_testcase extends reportcac
      * @param bool $timeinverse Invert future time to past
      */
     protected function create_booking($initiator, $attender, $course, $timeinverse = false) {
-        global $DB;
+        global $DB, $USER;
 
         self::$ind++;
 
@@ -153,6 +153,7 @@ class totara_reportbuilder_rb_bookings_embedded_cache_testcase extends reportcac
         $facetoface->name = 'Name '.self::$ind;
         $facetoface->display = 6;
         $facetoface->reminderperiod = 2;
+        $facetoface->multiplesessions = 1;
         $facetoface->timecreated = time();
         $facetoface->showoncal = 1;
 
@@ -164,19 +165,18 @@ class totara_reportbuilder_rb_bookings_embedded_cache_testcase extends reportcac
         $sessiondata->facetoface = $facetoface1->id;
         $sessiondata->capacity = 10;
         $sessiondata->allowoverbook = 0;
-        $sessiondata->duration = 1;
         $sessiondata->normalcost = 0;
         $sessiondata->discountcost = 0;
         $sessiondata->usermodified = 2;
 
-        $delta = ($timeinverse) ? -1 * $this->delta : $this->delta;
-        $dates = new stdClass();
-        $dates->sessionid = self::$ind;
-        $dates->roomid = 1;
-        $dates->timestart = time() + $delta;
-        $dates->timefinish = time() + $delta + abs($delta) * 0.5;
-        $dates->sessiontimezone = 'Europe/London';
-        $sessiondates = array($dates);
+        // Dates time will be adjusted afte sign ups
+        $sessiondate = new stdClass();
+        $sessiondate->sessionid = self::$ind;
+        $sessiondate->roomid = 1;
+        $sessiondate->timestart = time() + HOURSECS * self::$ind;
+        $sessiondate->timefinish = time() + 2 * HOURSECS * self::$ind - 1;
+        $sessiondate->sessiontimezone = 'Europe/London';
+        $sessiondates = array($sessiondate);
         $sessiondata->sessiondates = $sessiondates;
 
         $sessionid = $f2fgenerator->add_session($sessiondata);
@@ -186,11 +186,17 @@ class totara_reportbuilder_rb_bookings_embedded_cache_testcase extends reportcac
 
         // Signup for session
         $sink = $this->redirectMessages();
-        $usernote = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
-        facetoface_user_signup($session, $facetoface1, $course, 0, MDL_F2F_INVITE, MDL_F2F_STATUS_BOOKED,
-            $initiator->id, false, null, $usernote);
-        facetoface_user_signup($session, $facetoface1, $course, 0, MDL_F2F_INVITE, MDL_F2F_STATUS_BOOKED,
-            $attender->id, false, null, $usernote);
+        $initsignup = \mod_facetoface\signup::create($initiator->id, new \mod_facetoface\seminar_event($session->id))->set_skipusernotification();
+        \mod_facetoface\signup_helper::signup($initsignup);
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($attender->id, new \mod_facetoface\seminar_event($session->id))->set_skipusernotification());
+
+        $delta = ($timeinverse) ? -1 * $this->delta : $this->delta;
+        $sessiondate = new stdClass();
+        $sessiondate->timestart = time() + $delta;
+        $sessiondate->timefinish = time() + $delta + abs($delta) * 0.5;
+        facetoface_save_dates($session->id, [$sessiondate]);
+
+        $this->execute_adhoc_tasks();
         $this->assertCount(2, $sink->get_messages());
         $sink->close();
     }
@@ -231,7 +237,8 @@ class totara_reportbuilder_rb_bookings_embedded_cache_testcase extends reportcac
 
         // Set up report and embedded object for is_capable checks.
         $shortname = $this->report_builder_data['shortname'];
-        $report = reportbuilder_get_embedded_report($shortname, array('userid' => $this->user1->id), false, 0);
+        $config = (new rb_config())->set_embeddata(array('userid' => $this->user1->id));
+        $report = reportbuilder::create_embedded($shortname, $config);
         $embeddedobject = $report->embedobj;
 
         // Test admin can access report.

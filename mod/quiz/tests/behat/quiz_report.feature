@@ -1,4 +1,4 @@
-@mod @mod_quiz
+@mod @mod_quiz @core_grades
 Feature: Quiz report for all user and groups
   In order to ensure a trainer can review reports
   As a trainer
@@ -39,7 +39,7 @@ Feature: Quiz report for all user and groups
       | user | group |
       | student1 | G1 |
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test quiz name"
     # No groups selected: "All users..." option exists
     When I navigate to "Grades" node in "Quiz administration > Results"

@@ -37,7 +37,8 @@ if (!$opensesame->is_enabled()) {
     redirect(new moodle_url('/repository/opensesame/register.php'));
 }
 
-$report = reportbuilder_get_embedded_report('opensesame', array(), false, $sid);
+$config = (new rb_config())->set_sid($sid);
+$report = reportbuilder::create_embedded('opensesame', $config);
 $PAGE->set_button($report->edit_button());
 
 if (!empty($format)) {

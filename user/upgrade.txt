@@ -1,0 +1,4 @@
+This files describes API changes in /user/*.
+
+=== 12 ===
+* useredit_update_bounces() has been deprecated, please use \core_user\email_bounce_counter instead

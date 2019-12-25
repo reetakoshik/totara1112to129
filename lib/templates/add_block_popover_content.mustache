@@ -1,0 +1,73 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template core/add_block_popover_content
+
+    Creates the add block popover contents.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * data-addBlockPopover-blockName: key, used for form submit
+    * data-addBlockPopover-blockTitle: Title, used to filter blocks
+
+    Context variables required for this template:
+    * close_icon: close icon context.
+    * search_icon: search icon context.
+    * item_list: array of available items
+    * item_list -> blockname: block name, used for form submit
+    * item_list -> blocktitle: block title in readable format
+}}
+
+<div class="addBlockPopover">
+
+    <div class="addBlockPopover--heading">
+        <h2>{{#str}}addblock, core{{/str}}</h2>
+    </div>
+
+    <div class="addBlockPopover--search">
+        {{#search_icon}}{{#context}}{{> &&template }}{{/context}}{{/search_icon}}
+        <label for="addBlockPopover--search_query" class="sr-only">
+            {{#str}}addblock, core{{/str}}
+        </label>
+        <input type="text" placeholder="{{#str}}search, core{{/str}}" id="addBlockPopover--search_query">
+    </div>
+
+    <div class="addBlockPopover--results">
+        <ul class="addBlockPopover--results_list">
+            {{#item_list}}
+            <li class="addBlockPopover--results_list_item" data-addBlockPopover-blockName="{{blockname}}"
+            data-addBlockPopover-blockTitle="{{blocktitle}}">
+                <a href="">
+                    {{blocktitle}}
+                </a>
+            </li>
+            {{/item_list}}
+        </ul>
+    </div>
+
+    <a href="" class="addBlockPopover--close" data-addBlockPopover-close="">
+        {{#close_icon}}{{#context}}{{> &&template }}{{/context}}{{/close_icon}}
+    </a>
+
+    <div class="addBlockPopover--loading">
+        {{#flex_icon}}loading, loading, core{{/flex_icon}}
+    </div>
+</div>

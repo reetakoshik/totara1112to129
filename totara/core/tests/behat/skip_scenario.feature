@@ -1,4 +1,4 @@
-@totara @totara_core
+@totara @totara_core @totara_core_menu
 Feature: Test scenario skip step
   In order to skip Behat steps with known failures
   The skip step needs to work correctly
@@ -12,5 +12,5 @@ Feature: Test scenario skip step
     Given I skip the scenario until issue "TL-SOME-REFERENCE" lands
 
     # These steps should be skipped even if they cause errors.
-    And I click on "Find Learning" in the totara menu
+    And I click on "XXXXX YYYYY" in the totara menu
     Then I should see "This step WILL FAIL"

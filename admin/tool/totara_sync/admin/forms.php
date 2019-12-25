@@ -32,49 +32,273 @@ require_once($CFG->libdir . '/formslib.php');
  * Formslib template for the element settings form
  */
 class totara_sync_element_settings_form extends moodleform {
+
+    public const USE_DEFAULT = -1;
+
     function definition() {
         global $CFG;
         $mform =& $this->_form;
+        /* @var totara_sync_element $element */
         $element = $this->_customdata['element'];
-        $elementname = $element->get_name();
+
+        $mform->addElement('header', 'sourcesettingsheader', get_string('sourcesettings', 'tool_totara_sync'));
 
         // Source selection
         if ($sources = $element->get_sources()) {
-            $sourceoptions = array('' => get_string('select'));
-            foreach ($sources as $s) {
-                $sourceoptions[$s->get_name()] = get_string('displayname:'.$s->get_name(), 'tool_totara_sync');
+            $sourceselection = 'source_'.$element->get_name();
+            $radioarray = [];
+
+            foreach ($sources as $source) {
+                $radioarray[] = $mform->createElement(
+                    'radio',
+                    $sourceselection,
+                    '',
+                    get_string('displayname:' . $source->get_name(), 'tool_totara_sync'),
+                    $source->get_name()
+                );
+
+                if (substr($source->get_name(), -3) === 'csv') {
+                    $csvsource = $source->get_name();
+                }
             }
-            $mform->addElement('select', 'source_'.$elementname,
-                get_string('source', 'tool_totara_sync'), $sourceoptions);
-            $mform->setDefault('source_'.$elementname, get_config('totara_sync', 'source_'.$elementname));
+
+            $mform->addGroup(
+                $radioarray,
+                'source_type_group',
+                get_string('source', 'tool_totara_sync'),
+                html_writer::empty_tag('br'),
+                false
+            );
         } else {
             $mform->addElement('static', 'nosources', '('.get_string('nosources', 'tool_totara_sync').')');
             if (!$element->has_config()) {
                 return;
             }
         }
-        try {
-            $source = $element->get_source();
-            if ($source->has_config()) {
-                $mform->addElement('static', 'configuresource', '', html_writer::link(new moodle_url('/admin/tool/totara_sync/admin/sourcesettings.php', array('element' => $element->get_name(), 'source' => $source->get_name())), get_string('configuresource', 'tool_totara_sync')));
+
+        // File access.
+        if (has_capability('tool/totara_sync:setfileaccess', context_system::instance())) {
+            $dir = get_string('fileaccess_directory', 'tool_totara_sync');
+            $upl = get_string('fileaccess_upload', 'tool_totara_sync');
+
+            $fileaccess_default_setting = get_config('totara_sync', 'fileaccess');
+            // false means not config setting. But we should allow both 0 and '0' to mean FILE_ACCESS_DIRECTORY.
+            if (($fileaccess_default_setting == FILE_ACCESS_DIRECTORY) && ($fileaccess_default_setting !== false)) {
+                $filedefaultstr = get_string('fileaccess_default', 'tool_totara_sync', $dir);
+            } else if ($fileaccess_default_setting == FILE_ACCESS_UPLOAD) {
+                $filedefaultstr = get_string('fileaccess_default', 'tool_totara_sync', $upl);
+            } else {
+                // Either the setting has not been configured or is another type, perhaps a 3rd-party value.
+                $filedefaultstr = get_string('fileaccess_unknowndefault', 'tool_totara_sync');
             }
-        } catch (totara_sync_exception $e) {
-            // do nothing, as no source is present :D
+
+            $mform->addElement(
+                'select',
+                'fileaccess',
+                get_string('fileaccess', 'tool_totara_sync'),
+                [self::USE_DEFAULT => $filedefaultstr, FILE_ACCESS_DIRECTORY => $dir, FILE_ACCESS_UPLOAD => $upl]
+            );
+            $mform->setType('fileaccess', PARAM_INT);
+            $mform->setDefault('fileaccess', self::USE_DEFAULT);
+            $mform->addHelpButton('fileaccess', 'fileaccess', 'tool_totara_sync');
+            $mform->disabledIf('fileaccess', $sourceselection, 'noteq', $csvsource);
+
+            $mform->addElement('text', 'filesdir', get_string('filesdir', 'tool_totara_sync'), array('size' => 50));
+            $mform->setType('filesdir', PARAM_TEXT);
+            $mform->hideIf('filesdir', 'fileaccess', 'noteq', FILE_ACCESS_DIRECTORY);
+            $mform->disabledIf('filesdir', $sourceselection, 'noteq', $csvsource);
+
+            if ($fileaccess_default_setting == FILE_ACCESS_DIRECTORY) {
+                // This element is really meant to be a static element, but the hideIf method doesn't seem to work for those.
+                // So we're going with a text box that gets frozen.
+                $mform->addElement('text', 'filesdirdefaulttext', get_string('filesdir', 'tool_totara_sync'), array('size' => 50));
+                $mform->setDefault('filesdirdefaulttext', get_config('totara_sync', 'filesdir'));
+                $mform->setType('filesdirdefaulttext',PARAM_TEXT);
+                $mform->hideIf('filesdirdefaulttext', 'fileaccess', 'noteq', self::USE_DEFAULT);
+                $mform->hardFreeze(['filesdirdefaulttext']);
+            }
         }
+
+        // Empty CSV field setting.
+        $emptyfieldopt = array(
+            false => get_string('emptyfieldskeepdata', 'tool_totara_sync'),
+            true => get_string('emptyfieldsremovedata', 'tool_totara_sync')
+        );
+
+        $mform->addElement('select', 'csvsaveemptyfields', get_string('emptyfieldsbehaviourhierarchy', 'tool_totara_sync'), $emptyfieldopt);
+        $default = !empty($element->config->csvsaveemptyfields);
+        $mform->setDefault('csvsaveemptyfields', $default);
+        $mform->addHelpButton('csvsaveemptyfields', 'emptyfieldsbehaviourhierarchy', 'tool_totara_sync');
+
+        // Disable the field when nothing is selected, and when database is selected.
+        $mform->disabledIf('csvsaveemptyfields', $sourceselection, 'noteq', $csvsource);
 
         // Element configuration
         if ($element->has_config()) {
             $element->config_form($mform);
         }
 
+        // Notifications.
+        $mform->addElement('header', 'notificationheading', get_string('notifications', 'tool_totara_sync'));
+
+        $mform->addElement('advcheckbox', 'notificationusedefaults',  get_string('usedefaultsettings', 'tool_totara_sync'));
+        $mform->setDefault('notificationusedefaults', '1');
+        $mform->addHelpButton('notificationusedefaults', 'usedefaultsettings', 'tool_totara_sync');
+
+        // This object will be the $a for placeholders in the language strings describing notification defaults.
+        $notification_defaults = new stdClass();
+
+        // We need to get the list of default notify types and translate them.
+        $notifytypes_default = get_config( 'totara_sync', 'notifytypes');
+
+        if (!empty($notifytypes_default)) {
+            $notifytypes_default_strings = [];
+            foreach (explode(',', $notifytypes_default) as $logtype) {
+                switch ($logtype) {
+                    case 'error':
+                        $notifytypes_default_strings[] = get_string('errorplural', 'tool_totara_sync');
+                        break;
+                    case 'warn':
+                        $notifytypes_default_strings[] = get_string('warnplural', 'tool_totara_sync');
+                        break;
+                }
+            }
+
+            // This is not going to be a cross-language-friendly list for a bunch of reasons (e.g. hard-coded comma,
+            // inserting string inside others) but the priority for now is that it at least conveys the information without
+            // being confusing.
+            $notification_defaults->logmessagetypes = implode(', ', $notifytypes_default_strings);
+        } else {
+            $notification_defaults->logmessagetypes = get_string('noneselected', 'tool_totara_sync');
+        }
+
+        $notification_defaults->recipients = get_config( 'totara_sync', 'notifymailto');
+
+        $notication_default_text = html_writer::tag(
+            'p',
+            get_string('notifytypesdefault', 'tool_totara_sync', $notification_defaults)
+        );
+        $notication_default_text .= html_writer::tag(
+            'p',
+            get_string('notifymailtodefault', 'tool_totara_sync', $notification_defaults)
+        );
+
+        // hideIf doesn't work on static elements for mforms. See js in elementsettings.php which affects this element.
+        $mform->addElement('static', 'notifcationdefaults', '', $notication_default_text);
+
+        $notifytypes = array();
+        $notifytypes[] = $mform->createElement('checkbox', 'notifytypes[error]', '', get_string('errorplural', 'tool_totara_sync'));
+        $notifytypes[] = $mform->createElement('checkbox', 'notifytypes[warn]', '', get_string('warnplural', 'tool_totara_sync'));
+        $mform->addGroup($notifytypes, 'notifytypes', get_string('notifytypes', 'tool_totara_sync'), '<br/>', false);
+
+        $mform->hideIf('notifytypes', 'notificationusedefaults', 'checked');
+
+        $mform->addElement('text', 'notifymailto', get_string('notifymailto', 'tool_totara_sync'));
+        $mform->hideIf('notifymailto', 'notificationusedefaults', 'checked');
+        $mform->setType('notifymailto', PARAM_TEXT);
+        $mform->setDefault('notifymailto', $CFG->supportemail);
+        $mform->addHelpButton('notifymailto', 'notifymailto', 'tool_totara_sync');
+        $mform->setExpanded('notificationheading');
+
+        $mform->addElement('header', 'scheduleheading', get_string('schedule', 'tool_totara_sync'));
+
+        $mform->addElement('advcheckbox', 'scheduleusedefaults',  get_string('usedefaultsettings', 'tool_totara_sync'));
+        $mform->setDefault('scheduleusedefaults', '1');
+        $mform->addHelpButton('scheduleusedefaults', 'usedefaultsettings', 'tool_totara_sync');
+
+        $default_task = \core\task\manager::get_scheduled_task('totara_core\task\tool_totara_sync_task');
+        if ($default_task->get_disabled()) {
+            $default_schedule_string = get_string('schedulingdisabled', 'tool_totara_sync');
+        } else {
+            list($default_complexscheduling, $default_scheduleconfig) = get_schedule_form_data($default_task);
+            if ($default_complexscheduling) {
+                $default_schedule_string = get_string('scheduledefault_complex', 'tool_totara_sync');
+            } else {
+                $scheduler = new scheduler((object)$default_scheduleconfig);
+                $default_schedule_string = get_string('scheduledefault_currentsetting', 'tool_totara_sync', $scheduler->get_formatted());
+            }
+        }
+
+        // hideIf doesn't work on static elements for mforms. See js in elementsettings.php which affects this element.
+        $mform->addElement('static', 'scheduledefaultsetting', '', $default_schedule_string);
+
+        $schedulearray = [];
+        $schedulearray[] = $mform->createElement('radio', 'cronenable', null, get_string('scheduledisabled', 'tool_totara_sync'), 0);
+        $schedulearray[] = $mform->createElement('radio', 'cronenable', null, get_string('scheduleenabled', 'tool_totara_sync'), 1);
+        $mform->addGroup(
+            $schedulearray,
+            'cronenable_group',
+            get_string('scheduledhrimporting', 'tool_totara_sync'),
+            html_writer::empty_tag('br'),
+            false
+        );
+        $mform->hideIf('cronenable', 'scheduleusedefaults', 'checked');
+
+        if (!$this->_customdata['complexscheduling']) {
+            $mform->addElement('scheduler', 'schedulegroup', get_string('scheduleserver', 'tool_totara_sync'));
+            $mform->disabledIf('schedulegroup', 'cronenable', 'notchecked');
+            $mform->disabledIf('schedulegroup', 'scheduleusedefaults', 'checked');
+            $mform->hideIf('schedulegroup', 'scheduleusedefaults', 'checked');
+        } else if (has_capability('moodle/site:config', context_system::instance())) {
+            // If there is complex scheduling set then show a message and link to scheduled task edit page.
+            $url = new moodle_url('/admin/tool/task/scheduledtasks.php', ['action' => 'edit', 'task' => 'tool_totara_sync\task\\' . $element->get_name()]);
+            $editlink = html_writer::link($url, get_string('scheduleadvancedlink', 'totara_core'));
+            $advancedschedulestr = get_string('scheduleadvanced', 'totara_core', $editlink);
+            $mform->addElement('static', 'advancedschedule', get_string('scheduleserver', 'tool_totara_sync'), $advancedschedulestr);
+        } else {
+            $advancedschedulestr = get_string('scheduleadvancednopermission', 'totara_core');
+
+            // hideIf doesn't work on static elements for mforms. See js in elementsettings.php which affects this element.
+            $mform->addElement('static', 'advancedschedule', get_string('scheduleserver', 'tool_totara_sync'), $advancedschedulestr);
+        }
+        $mform->setExpanded('scheduleheading');
+
         $this->add_action_buttons(false);
     }
 
+    /**
+     * Validate submitted data.
+     *
+     * @param array $data array of ("fieldname"=>value) of submitted data
+     * @param array $files array of uploaded files "element_name"=>tmp_file_path
+     * @return array of "element_name"=>"error_description" if there are errors,
+     *         or an empty array if everything is OK.
+     */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
+        /** @var totara_sync_element $element */
         $element = $this->_customdata['element'];
         $errors = array_merge($errors, $element->validation($data, $files));
+
+        if ($data['fileaccess'] == FILE_ACCESS_DIRECTORY && isset($data['filesdir'])) {
+            $filesdir = trim($data['filesdir']);
+
+            if (DIRECTORY_SEPARATOR == '\\') {
+                $pattern = '/^[a-z0-9 \/\.\-_\\\\\\:]{1,}$/i';
+            } else {
+                // Character '@' is used in Jenkins workspaces, it might be used on other servers too.
+                $pattern = '/^[a-z0-9@ \/\.\-_]{1,}$/i';
+            }
+
+            if (!preg_match($pattern, $filesdir)) {
+                $errors['filesdir'] = get_string('pathformerror', 'tool_totara_sync');
+            } else if (!is_dir($filesdir)) {
+                $errors['filesdir'] = get_string('notadirerror', 'tool_totara_sync', $filesdir);
+            } else if (!is_writable($filesdir)) {
+                $errors['filesdir'] = get_string('readonlyerror', 'tool_totara_sync', $filesdir);
+            }
+        }
+
+        if (!empty($data['notifymailto'])) {
+            $emailaddresses = array_map('trim', explode(',', $data['notifymailto']));
+            foreach ($emailaddresses as $mailaddress) {
+                if (!validate_email($mailaddress)) {
+                    $errors['notifymailto'] = get_string('invalidemailaddress', 'tool_totara_sync', format_string($mailaddress));
+                    break;
+                }
+            }
+        }
 
         return $errors;
     }
@@ -129,6 +353,20 @@ class totara_sync_source_settings_form extends moodleform {
         }
         parent::set_data($data);
     }
+
+    /**
+     * Validate submitted data.
+     *
+     * @param array $data array of ("fieldname"=>value) of submitted data
+     * @param array $files array of uploaded files "element_name"=>tmp_file_path
+     * @return array of "element_name"=>"error_description" if there are errors,
+     *         or an empty array if everything is OK.
+     */
+    public function validation($data, $files) {
+        /* @var totara_sync_source $source */
+        $source = $this->_customdata['source'];
+        return $source->validate_settings($data);
+    }
 }
 
 
@@ -144,6 +382,14 @@ class totara_sync_config_form extends moodleform {
         // File access.
         if (has_capability('tool/totara_sync:setfileaccess', context_system::instance())) {
             $mform->addElement('header', 'fileheading', get_string('files', 'tool_totara_sync'));
+
+            $mform->addElement(
+                'static',
+                'fileusingdefaults',
+                get_string('elementsusingdefault', 'tool_totara_sync'),
+                $this->display_elements_using_default('fileaccess')
+            );
+
             $dir = get_string('fileaccess_directory', 'tool_totara_sync');
             $upl = get_string('fileaccess_upload', 'tool_totara_sync');
             $mform->addElement('select', 'fileaccess', get_string('fileaccess', 'tool_totara_sync'),
@@ -158,6 +404,14 @@ class totara_sync_config_form extends moodleform {
 
         // Notifications.
         $mform->addElement('header', 'notificationheading', get_string('notifications', 'tool_totara_sync'));
+
+        $mform->addElement(
+            'static',
+            'notificationusingdefaults',
+            get_string('elementsusingdefault', 'tool_totara_sync'),
+            $this->display_elements_using_default('notification')
+        );
+
         $notifytypes = array();
         $notifytypes[] = $mform->createElement('checkbox', 'notifytypes[error]', '', get_string('errorplural', 'tool_totara_sync'));
         $notifytypes[] = $mform->createElement('checkbox', 'notifytypes[warn]', '', get_string('warnplural', 'tool_totara_sync'));
@@ -170,13 +424,30 @@ class totara_sync_config_form extends moodleform {
         $mform->setExpanded('notificationheading');
 
         $mform->addElement('header', 'scheduleheading', get_string('schedule', 'tool_totara_sync'));
-        $mform->addElement('advcheckbox', 'cronenable', get_string('enablescheduledsync', 'tool_totara_sync'));
+
+        $mform->addElement(
+            'static',
+            'scheduleusingdefaults',
+            get_string('elementsusingdefault', 'tool_totara_sync'),
+            $this->display_elements_using_default('schedule')
+        );
+
+        $schedulearray = [];
+        $schedulearray[] = $mform->createElement('radio', 'cronenable', null, get_string('scheduledisabled', 'tool_totara_sync'), 0);
+        $schedulearray[] = $mform->createElement('radio', 'cronenable', null, get_string('scheduleenabled', 'tool_totara_sync'), 1);
+        $mform->addGroup(
+            $schedulearray,
+            'cronenable_group',
+            get_string('scheduledhrimporting', 'tool_totara_sync'),
+            html_writer::empty_tag('br'),
+            false
+        );
         $mform->setDefault('cronenable', 1);
 
         $complexscheduling = $this->_customdata['complexscheduling'];
         if (!$complexscheduling) {
             $mform->addElement('scheduler', 'schedulegroup', get_string('scheduleserver', 'tool_totara_sync'));
-            $mform->disabledIf('schedulegroup', 'cronenable', 'notchecked');
+            $mform->disabledIf('schedulegroup', 'cronenable', 1);
         } else if (has_capability('moodle/site:config', context_system::instance())) {
             // If there is complex scheduling set then show a message and link to scheduled task edit page.
             $url = new moodle_url('/admin/tool/task/scheduledtasks.php', array('action' => 'edit', 'task' => 'totara_core\task\tool_totara_sync_task'));
@@ -194,9 +465,10 @@ class totara_sync_config_form extends moodleform {
 
     /**
      * Check if path is well-formed (no validation for existence)
-     * @param array $data
-     * @param array $files
-     * @return boolean
+     * @param array $data array of ("fieldname"=>value) of submitted data
+     * @param array $files array of uploaded files "element_name"=>tmp_file_path
+     * @return array of "element_name"=>"error_description" if there are errors,
+     *         or an empty array if everything is OK.
      */
     function validation($data, $files) {
         $errors = parent::validation($data, $files);
@@ -230,6 +502,34 @@ class totara_sync_config_form extends moodleform {
 
         return $errors;
     }
+
+    private function display_elements_using_default(string $configarea) {
+        $elements = totara_sync_get_elements(true);
+        $usingdefault_names = [];
+        foreach ($elements as $element) {
+            $usingdefaults = false;
+            switch ($configarea) {
+                case 'fileaccess':
+                    $usingdefaults = $element->use_fileaccess_defaults();
+                    break;
+                case 'notification':
+                    $usingdefaults = $element->use_notification_defaults();
+                    break;
+                case 'schedule':
+                    $usingdefaults = $element->use_schedule_defaults();
+                    break;
+            }
+            if ($usingdefaults) {
+                    $usingdefault_names[] = get_string('displayname:' . $element->get_name(), 'tool_totara_sync');
+            }
+        }
+
+        if (empty($usingdefault_names)) {
+            return get_string('noneusedefault', 'tool_totara_sync');
+        } else {
+            return implode(html_writer::empty_tag('br'), $usingdefault_names);
+        }
+    }
 }
 
 
@@ -251,7 +551,7 @@ class totara_sync_source_files_form extends moodleform {
 
         foreach ($elements as $e) {
             $name = $e->get_name();
-            if (!has_capability("tool/totara_sync:upload{$name}", context_system::instance())) {
+            if (!$e->can_upload_file()) {
                 continue;
             }
             $mform->addElement('header', "header_{$name}",
@@ -277,7 +577,7 @@ class totara_sync_source_files_form extends moodleform {
             $mform->addElement('filepicker', $name,
             get_string('displayname:'.$source->get_name(), 'tool_totara_sync'), 'size="40"');
 
-            if (get_config('totara_sync', 'fileaccess') == FILE_ACCESS_UPLOAD) {
+            if ($e->can_upload_file()) {
                 $usercontext = context_user::instance($USER->id);
                 $systemcontext = context_system::instance();
                 $fs = get_file_storage();

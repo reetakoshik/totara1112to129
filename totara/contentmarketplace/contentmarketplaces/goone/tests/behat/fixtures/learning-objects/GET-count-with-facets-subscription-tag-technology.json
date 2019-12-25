@@ -1,0 +1,48 @@
+{
+  "total": 123,
+  "hits": [],
+  "facets": {
+    "instance": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": 1866847,
+          "doc_count": 42,
+          "name": "GO1 Content"
+        },
+        {
+          "key": 101,
+          "doc_count": 41,
+          "name": "Content provider 101"
+        },
+        {
+          "key": 102,
+          "doc_count": 40,
+          "name": "Content provider 102"
+        }
+      ]
+    },
+    "language": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": "en",
+          "doc_count": 123
+        }
+      ]
+    },
+    "tag": {
+      "doc_count_error_upper_bound": 6,
+      "sum_other_doc_count": 3823,
+      "buckets": [
+        {
+          "key": "Technology",
+          "doc_count": 123,
+          "type": "premium"
+        }
+      ]
+    }
+  }
+}

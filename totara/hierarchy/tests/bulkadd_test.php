@@ -55,7 +55,7 @@ require_once($CFG->dirroot . '/totara/hierarchy/lib.php');
 require_once($CFG->dirroot . '/totara/hierarchy/prefix/organisation/lib.php');
 
 
-class bulkaddhierarchyitems_test extends advanced_testcase {
+class totara_hierarchy_bulkadd_testcase extends advanced_testcase {
 
     private $orgs = array();
 

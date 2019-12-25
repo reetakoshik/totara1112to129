@@ -67,7 +67,7 @@ if ($canmanage) {
     $PAGE->set_url($pageurl);
     $PAGE->set_context($sitecontext);
     $PAGE->set_pagelayout('admin');
-    $PAGE->set_totara_menu_selected('mygoals');
+    $PAGE->set_totara_menu_selected('\totara_hierarchy\totara\menu\mygoals');
     $PAGE->set_title($goalscalestr);
     $PAGE->set_heading($goalscalestr);
 }

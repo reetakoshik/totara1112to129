@@ -27,11 +27,24 @@
 defined('MOODLE_INTERNAL') || die();
 
 function xmldb_auth_approved_upgrade($oldversion) {
-    global $CFG, $DB;
+    global $DB;
 
     $dbman = $DB->get_manager();
 
+    if ($oldversion < 2018112201) {
 
+        // Define field extradata to be added to auth_approved_request.
+        $table = new xmldb_table('auth_approved_request');
+        $field = new xmldb_field('extradata', XMLDB_TYPE_TEXT, null, null, null, null, null, 'timeresolved');
+
+        // Conditionally launch add field extradata.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Approved savepoint reached.
+        upgrade_plugin_savepoint(true, 2018112201, 'auth', 'approved');
+    }
 
     return true;
 }

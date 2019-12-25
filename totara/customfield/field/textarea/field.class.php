@@ -170,6 +170,11 @@ class customfield_textarea extends customfield_base {
      */
     static function display_item_data($data, $extradata=array()) {
 
+        // Export - return raw data
+        if (!empty($extradata['isexport'])) {
+            return $data;
+        }
+
         if (!empty($extradata['altprefix'])) {
             $extradata['prefix'] = $extradata['altprefix'];
         }

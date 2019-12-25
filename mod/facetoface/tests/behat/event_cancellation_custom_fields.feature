@@ -111,15 +111,14 @@ Feature: Seminar event cancellation custom fields
     # Add images to the private files block to use later
     When I click on "Dashboard" in the totara menu
     And I press "Customise this page"
-    And I select "Private files" from the "Add a block" singleselect
+    And I add the "Private files" block
     And I follow "Manage private files..."
     And I upload "mod/facetoface/tests/fixtures/test.jpg" file to "Files" filemanager
     And I upload "mod/facetoface/tests/fixtures/leaves-green.png" file to "Files" filemanager
     Then I should see "test.jpg"
     And I should see "leaves-green.png"
 
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test Seminar |
       | Description | Test Seminar |
@@ -148,8 +147,7 @@ Feature: Seminar event cancellation custom fields
     And I click on "Teacher One" "checkbox"
     And I press "Save changes"
 
-    Given I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    Given I am on "Course 1" course homepage
     And I follow "View all events"
     And I click on "Cancel event" "link" in the "10:00 AM - 4:00 PM Pacific/Auckland" "table_row"
     And I set the following fields to these values:
@@ -199,7 +197,8 @@ Feature: Seminar event cancellation custom fields
   Scenario: mod_facetoface_cancel_501: create seminar events custom report with custom cancellation fields
     Given I log out
     And I log in as "admin"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | fullname | Custom test event report |
       | source   | Seminar Sessions         |
@@ -242,6 +241,7 @@ Feature: Seminar event cancellation custom fields
 
   # ----------------------------------------------------------------------------
   Scenario: mod_facetoface_cancel_502: use cancellation custom fields in notification template
+    And I run all adhoc tasks
     When I click on "Dashboard" in the totara menu
     Then I should see "Seminar event cancellation"
 

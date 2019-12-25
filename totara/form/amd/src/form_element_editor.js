@@ -68,9 +68,7 @@ define(['jquery', 'totara_form/form'], function($, Form) {
      * @param {Function} done
      */
     Editor.prototype.init = function(done) {
-        var id = this.id,
-            deferred = $.Deferred();
-        this.input = $('#' + id);
+        this.input = $('#' + this.id);
         this.input.change($.proxy(this.changed, this));
 
         // This is a bit of hackery to expose this editor object to the world.
@@ -78,22 +76,7 @@ define(['jquery', 'totara_form/form'], function($, Form) {
         window.totara_form_editors = window.totara_form_editors || {};
         window.totara_form_editors[this.id] = this;
 
-        if (this.input.attr('required')) {
-            require(['totara_form/modernizr'], function (mod) {
-                if (!mod.input.required) {
-                    require(['totara_form/polyfill_required-lazy'], function (poly) {
-                        poly.init(id);
-                        deferred.resolve();
-                    });
-                } else {
-                    deferred.resolve();
-                }
-            });
-        } else {
-            deferred.resolve();
-        }
-
-        deferred.done(done);
+        done();
     };
 
     /**

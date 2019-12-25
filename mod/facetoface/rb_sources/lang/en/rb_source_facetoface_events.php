@@ -62,7 +62,7 @@ $string['unknowndate'] = 'Unknown';
 $string['userstatus'] = 'Viewer\'s status';
 $string['userstatusdefault'] = 'My status';
 $string['userstatus:user_cancelled'] = 'Cancelled';
-$string['userstatus:session_cancelled'] = 'Session cancelled';
+$string['userstatus:event_cancelled'] = 'Event cancelled';
 $string['userstatus:declined'] = 'Declined';
 $string['userstatus:requested'] = 'Requested';
 $string['userstatus:requestedadmin'] = 'Requested';
@@ -74,3 +74,6 @@ $string['userstatus:partially_attended'] = 'Partially attended';
 $string['userstatus:fully_attended'] = 'Fully attended';
 $string['userstatus:not_set'] = 'Not set';
 $string['waitlistattendees'] = 'Number of wait-listed';
+
+# Deprecated
+$string['userstatus:session_cancelled'] = 'Session cancelled';

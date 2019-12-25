@@ -116,7 +116,7 @@ class customfield_define_location extends customfield_define_base {
 
         // Give html element a name here, so it won't cause moodle form bug
         $h3element = $form->createElement('html', html_writer::tag('h3', $fieldname));
-        $h3element->setName(uniqid('customfieldtitle_'));
+        $h3element->setName(uniqid("customfieldtitle_"));
         $form->addElement($h3element);
 
         // Address element.
@@ -484,6 +484,11 @@ class customfield_define_location extends customfield_define_base {
         if (is_string($fielddata)) {
             // Data is json_endoded prior to storage. Lets decode it.
             $fielddata = json_decode($fielddata);
+        }
+
+        // Export address only
+        if (!empty($extradata['isexport'])) {
+            return $fielddata->address;
         }
 
         // Ensure zoom level is set.

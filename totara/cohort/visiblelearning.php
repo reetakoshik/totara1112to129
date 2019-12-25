@@ -85,7 +85,8 @@ if ($context->contextlevel == CONTEXT_SYSTEM) {
     $PAGE->set_url($url);
 }
 
-$report = reportbuilder_get_embedded_report('cohort_associations_visible', array('cohortid' => $id), false, $sid);
+$config = (new rb_config())->set_sid($sid)->set_embeddata(['cohortid' => $id]);
+$report = reportbuilder::create_embedded('cohort_associations_visible', $config);
 $report->include_js();
 
 // Handle a request for export.

@@ -50,6 +50,11 @@
 [data-palette="blue"].path-totara-program .notifymessage,
 [data-palette="blue"] header .tooltip .tooltiptext {
 	background-color: rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+	 border-radius: 0;
+    border-radius: 9px;
+    border-top-left-radius: 0;
+    border-bottom-right-radius: 0;
+   /* padding: 4px 10px;*/
 }
 
 [data-palette="blue"] .editing_on .region > * { 
@@ -84,6 +89,11 @@
 [data-palette="blue"].path-admin .buttons input[type="submit"]:focus, 
 [data-palette="blue"] td.submit input:focus {
 	background-color: rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 0.7);
+	 border-radius: 0;
+    border-radius: 9px;
+    border-top-left-radius: 0;
+    border-bottom-right-radius: 0;
+    /*padding: 4px 10px;*/
 }
 
 [data-palette="blue"] .nav-tabs > li.active > a,
@@ -109,3 +119,128 @@
 [data-palette="blue"] header .tooltip-bottom:after {
 	border-bottom-color: rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1)
 }
+
+[data-palette="blue"] #page-admin-course-management .buttons .singlebutton input[type="submit"]
+{
+	 background-color:rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+}
+[data-palette="blue"] #page-admin-course-management .buttons .singlebutton input[type="submit"]:hover
+{
+	 background-color:rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+}
+
+/*[data-palette="blue"] a {
+	color: rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+	}
+[data-palette="blue"] a:hover {
+	color: rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 0.7);
+	}*/	
+	
+/* css for 1 april yashco */
+
+[data-palette="blue"] .block div.header h2 {
+	color: rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+}
+[data-palette="blue"] .tw-selectMulti__link:hover {
+    background: rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+}
+[data-palette="blue"] .tw-selectMulti__link_active{
+	 background: rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+}
+[data-palette="blue"] .tw-selectMulti__link:hover{
+    color: #fff;
+}
+[data-palette="blue"] .tw-selectMulti__link:hover .tw-selectMulti__link_text, [data-palette="blue"] .tw-selectMulti__link_active .tw-selectMulti__link_text{
+	 color: #fff;
+}
+[data-palette="blue"] .totara-menu>.totara-menu-nav>.totara-menu-nav-list>.totara-menu-nav-item.selected>.totara-menu-nav-item-link {
+    box-shadow: inset 0 -3px rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+}
+[data-palette="blue"] .totara-menu-subnav-item.selected .totara-menu-subnav-item-link {
+    box-shadow: inset 0 -3px rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+}
+[data-palette="blue"] .totara-menu-subnav-item-link:hover, .totara-menu-subnav-item-link:active {
+    background-color: rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+	color:#fff;
+}
+[data-palette="blue"] .ui-dialog-buttonset button.ui-button:first-child{
+	background: rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1) !important;
+	color:#fff !important;
+	}
+[data-palette="blue"] .setbuttons .moveup{
+	background-color:rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1) !important;
+	color:#fff !important;
+	}
+[data-palette="blue"] .setbuttons .movedown{
+	background-color:rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1) !important;
+	color:#fff !important;
+	}
+[data-palette="blue"] .messagebuttons .moveup{
+	background-color:rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1) !important;
+	color:#fff !important;
+	}
+[data-palette="blue"] .messagebuttons .movedown{
+	background-color:rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1) !important;
+	color:#fff !important;
+	}		
+[data-palette="blue"] .tw-catalogManageBtns__btn { 
+  color: #fff;
+  background-color:rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+  border-color:rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+}
+[data-palette="blue"] .tw-catalogManageBtns__btn:active, [data-palette="blue"] .tw-catalogManageBtns__btn:focus, [data-palette="blue"] .tw-catalogManageBtns__btn:hover{
+	background: rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 0.7);
+	}
+[data-palette="blue"] .nav-tabs>li.active>a, [data-palette="blue"] .nav-tabs>li.active>a:hover, [data-palette="blue"] #dialog-tabs .tabs li.ui-tabs-active.ui-state-active a, [data-palette="blue"] #dialog-tabs .tabs li.ui-tabs-active.ui-state-active a:hover{
+    box-shadow: 0 -1px rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+}
+[data-palette="blue"] .tw-catalog .tw-catalogResultsCount{ 
+    color:rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+	}
+[data-palette="blue"] .tw-catalogResultsShare__btn{ 
+    background-color:rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+	}	
+[data-palette="blue"] .tw-catalogResultsShare__btn:hover{ 
+    background-color:rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 0.7);
+	}
+/*[data-palette="blue"] .tw-selectTree__current, [data-palette="blue"] .tw-selectSearchText__field, [data-palette="blue"] .tw-catalogItemNarrow__title_featured{
+    border: solid 1px rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1) !important;
+	}*/
+/*[data-palette="blue"] .tw-selectTree__current:hover, [data-palette="blue"] .tw-selectSearchText__field:hover{
+    border: solid 1px rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 0.7) !important;
+	}*/
+[data-palette="blue"] .tw-catalogItemNarrow:hover, [data-palette="blue"] .tw-grid__item_active .tw-catalogItemNarrow{
+    border: solid 3px rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1) !important;
+	}
+[data-palette="blue"] .tw-catalogDetails__arrow::after {
+    border-top-color:rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+	}
+[data-palette="blue"] .tw-catalogDetails__content {
+	border: solid 2px rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+	}
+[data-palette="blue"] .btnSubmitCont a.continueBtn{
+	border: 1px solid rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+	background:rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+	}
+[data-palette="blue"] .btnSubmitCont a.featureBtn{
+	border:solid 1px rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+}
+[data-palette="blue"] .tw-catalogManageBtns .tw-catalog__activePopover .tw-catalogManageBtns__btn {
+    background:rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+    color: #ffffff;
+}
+[data-palette="blue"] .tw-catalogManageBtns__group_options_item_link:focus, [data-palette="blue"] .tw-catalogManageBtns__group_options_item_link:hover, [data-palette="blue"] .tw-selectTree__list_row.tw-selectTree__active {
+    background:rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1) !important;
+	}
+[data-palette="blue"] .tw-selectTree__list_row_link:hover, [data-palette="blue"] .tw-selectTree__list_row.tw-selectTree__active>.tw-selectTree__list_row_link:focus, [data-palette="blue"] .tw-selectTree__list_row.tw-selectTree__active>.tw-selectTree__list_row_link:active	{
+	background:rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1) !important;
+	}
+[data-palette="blue"]  .searching .search-inline button	{
+	background:rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+}
+[data-palette="blue"]  .searching .search-inline button:hover{
+	background:rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], .7);
+}					
+[data-palette="blue"] .totara-menu-nav-list .totara-menu-nav-list:hover .triangle-left, [data-palette="blue"] .totara-menu-nav-list .totara-menu-nav-list:hover .triangle-right {
+	border-color:rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+}										

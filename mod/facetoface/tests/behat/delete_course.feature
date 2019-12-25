@@ -13,17 +13,15 @@ Feature: Delete a course with a seminar
       | student1 | Sam1      | Student1 | student1@example.com |
       | student2 | Sam2      | Student2 | student2@example.com |
     And the following "courses" exist:
-      | fullname | shortname | category | enablecompletion | completionstartonenrol |
-      | Course 1 | C1        | 0        | 1                | 1                      |
+      | fullname | shortname | category | enablecompletion |
+      | Course 1 | C1        | 0        | 1                |
     And the following "course enrolments" exist:
       | user     | course | role           |
       | teacher1 | C1     | editingteacher |
       | student1 | C1     | student        |
       | student2 | C1     | student        |
     And I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name                | Test seminar name                              |
       | Description         | Test seminar description                       |
@@ -51,7 +49,7 @@ Feature: Delete a course with a seminar
     And I press "Add"
     And I wait "1" seconds
     And I click on "Sam2 Student2, student2@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     And I press "Confirm"
@@ -59,7 +57,7 @@ Feature: Delete a course with a seminar
     And I log out
 
     And I log in as "admin"
-    And I navigate to "Manage courses and categories" node in "Site administration > Courses"
+    And I navigate to "Courses and categories" node in "Site administration > Courses"
     And I should see "Course 1" in the "#course-listing" "css_element"
     And I click on "delete" action for "Course 1" in management course listing
     And I should see "Delete C1"
@@ -69,6 +67,6 @@ Feature: Delete a course with a seminar
     Then I should see "Deleting C1"
     And I should see "C1 has been completely deleted"
     And I press "Continue"
-    And I navigate to "Manage courses and categories" node in "Site administration > Courses"
+    And I navigate to "Courses and categories" node in "Site administration > Courses"
     And I should not see "Course 1" in the "#course-listing" "css_element"
 

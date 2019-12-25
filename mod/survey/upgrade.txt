@@ -1,0 +1,6 @@
+This files describes API changes in the mod_survey code,
+information provided here is intended especially for developers.
+
+=== 12 ===
+
+* Converted validation JavaScript from YUI2 to AMD

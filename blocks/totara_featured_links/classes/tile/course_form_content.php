@@ -35,7 +35,7 @@ use totara_form\element_validator;
 class course_form_content extends learning_item_form_content {
 
     /**
-     * Tels the parent class what learning item this is for.
+     * Tells the parent class what learning item this is for.
      *
      * @return string 'course'
      */

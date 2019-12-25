@@ -1,5 +1,5 @@
 @_file_upload @javascript @tool @tool_totara_sync @totara @totara_job
-Feature: Use user source to import job assignments data in HR sync
+Feature: Use user source to import basic job assignments data in HR sync
   In order to test HR import of job assignments
   I must log in as an admin and import from a CSV file
 
@@ -23,15 +23,15 @@ Feature: Use user source to import job assignments data in HR sync
       | PFW001        | PositionZ | posz     |
 
     # User source setup.
-    When I navigate to "General settings" node in "Site administration > HR Import"
+    When I navigate to "Default settings" node in "Site administration > HR Import"
     And I set the following fields to these values:
-        | File Access | Upload Files |
+        | File access | Upload Files |
     And I press "Save changes"
     And I navigate to "Manage elements" node in "Site administration > HR Import > Elements"
     And I "Enable" the "Job assignment" HR Import element
     And I navigate to "Job assignment" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source | CSV |
+      | CSV | 1 |
     And I press "Save changes"
 
     # Enable all job assignment fields.
@@ -74,3 +74,4 @@ Feature: Use user source to import job assignments data in HR sync
       | totara_sync_log-logtype    | info |
     And I click on "Search" "button" in the ".fitem_actionbuttons" "css_element"
     Then I should see "HR Import finished" in the "#totarasynclog" "css_element"
+

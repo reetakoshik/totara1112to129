@@ -7,6 +7,8 @@ require_once __DIR__.'/../detailed_quiz_completion/sources_traits/quiz_contentop
 
 class rb_source_detailed_quiz_completion extends rb_base_source
 {
+    use \core_course\rb\source\report_trait;
+    use \totara_job\rb\source\report_trait;
     use quiz_contentoptions;
     use quiz_completions_columns;
     use quiz_completions_joins;
@@ -77,21 +79,21 @@ class rb_source_detailed_quiz_completion extends rb_base_source
             throw new coding_exception('Wrong parameter orders detected during report source instantiation.');
         }
 
-        $this->add_user_table_to_joinlist($this->joinlist, 'base', 'userid');
+        $this->add_core_user_tables($this->joinlist, 'base', 'userid');
         $this->add_quiz_table_to_joinlist($this->joinlist, 'base', 'quiz');
-        $this->add_course_table_to_joinlist($this->joinlist, 'quiz', 'course');
-        $this->add_course_category_table_to_joinlist($this->joinlist, 'course', 'category');
+        $this->add_core_course_tables($this->joinlist, 'quiz', 'course');
+        $this->add_core_course_category_tables($this->joinlist, 'course', 'category');
 
         $this->add_global_report_restriction_join('base', 'userid');
 
-        $this->add_user_fields_to_columns($this->columnoptions);
+        $this->add_core_user_columns($this->columnoptions);
         $this->add_quiz_attempts_fields_to_columns($this->columnoptions, 'base');
         $this->add_quiz_fields_to_columns($this->columnoptions, 'quiz', 'question');
-        $this->add_course_fields_to_columns($this->columnoptions);
-        $this->add_course_category_fields_to_columns($this->columnoptions);
+        $this->add_core_course_columns($this->columnoptions);
+        $this->add_core_course_category_columns($this->columnoptions);
 
-        $this->add_user_fields_to_filters($this->filteroptions);
-        $this->add_course_fields_to_filters($this->filteroptions);
+        //$this->add_core_user_columns($this->filteroptions);
+        $this->add_core_course_filters($this->filteroptions);
         $this->add_quiz_fields_to_filters($this->filteroptions);
 
         $this->add_basic_user_content_options($this->contentoptions);

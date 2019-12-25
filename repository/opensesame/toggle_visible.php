@@ -41,7 +41,7 @@ if ($reportid) {
 
 $PAGE->set_context($syscontext);
 $PAGE->set_url($returnurl);
-$PAGE->set_totara_menu_selected('myreports');
+$PAGE->set_totara_menu_selected('\totara_core\totara\menu\myreports');
 $PAGE->set_pagelayout('noblocks');
 
 $prevpkg = $DB->get_record('repository_opensesame_pkgs', array('id' => $id));

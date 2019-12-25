@@ -65,7 +65,7 @@ Feature: Users updating course may enrol cohorts
 
   Scenario: Teacher with cohort view capability from category may enrol cohorts via course edit form
     Given I log in as "teacher1"
-    And I follow "Course 01"
+    And I am on "Course 01" course homepage
     And I navigate to "Edit settings" node in "Course administration"
     And I should see "Audience 01-1"
     And I should see "Audience 03-1"
@@ -114,7 +114,7 @@ Feature: Users updating course may enrol cohorts
 
   Scenario: Teacher with cohort view capability from subcategory may enrol cohorts via course edit form
     Given I log in as "teacher2"
-    And I follow "Course 11"
+    And I am on "Course 11" course homepage
     And I navigate to "Edit settings" node in "Course administration"
     And I should see "Audience 01-1"
     And I should see "Audience 11-1"
@@ -161,7 +161,7 @@ Feature: Users updating course may enrol cohorts
 
   Scenario: Teacher with cohort view capability from system may enrol cohorts via course edit form
     Given I log in as "teacher3"
-    And I follow "Course 11"
+    And I am on "Course 11" course homepage
     And I navigate to "Edit settings" node in "Course administration"
     And I should see "Audience 01-1"
     And I should see "Audience 11-1"
@@ -228,7 +228,7 @@ Feature: Users updating course may enrol cohorts
 
   Scenario: Teacher without cohort view capability may not enrol cohorts via course edit form
     Given I log in as "teacher4"
-    And I follow "Course 01"
+    And I am on "Course 01" course homepage
     And I navigate to "Edit settings" node in "Course administration"
     And I should see "Audience 01-1"
     And I should see "Audience 03-1"

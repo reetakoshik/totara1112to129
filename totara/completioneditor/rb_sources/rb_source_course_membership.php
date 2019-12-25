@@ -27,17 +27,8 @@ global $CFG;
 require_once($CFG->dirroot . '/completion/completion_completion.php');
 
 class rb_source_course_membership extends rb_base_source {
-
-    public $base;
-    public $joinlist;
-    public $columnoptions;
-    public $filteroptions;
-    public $contentoptions;
-    public $paramoptions;
-    public $defaultcolumns;
-    public $defaultfilters;
-    public $requiredcolumns;
-    public $sourcetitle;
+    use \core_course\rb\source\report_trait;
+    use \totara_job\rb\source\report_trait;
 
     public function __construct($groupid, rb_global_restriction_set $globalrestrictionset = null) {
         if ($groupid instanceof rb_global_restriction_set) {
@@ -56,6 +47,8 @@ class rb_source_course_membership extends rb_base_source {
         $this->defaultfilters = $this->define_defaultfilters();
         $this->requiredcolumns = array();
         $this->sourcetitle = $this->define_sourcetitle();
+        $this->usedcomponents[] = 'totara_completioneditor';
+        $this->usedcomponents[] = 'totara_cohort';
         parent::__construct();
     }
 
@@ -106,9 +99,9 @@ class rb_source_course_membership extends rb_base_source {
     protected function define_joinlist() {
         $joinlist = array();
 
-        $this->add_user_table_to_joinlist($joinlist, 'base', 'userid');
-        $this->add_job_assignment_tables_to_joinlist($joinlist, 'base', 'userid');
-        $this->add_course_table_to_joinlist($joinlist, 'base', 'courseid', 'INNER');
+        $this->add_core_user_tables($joinlist, 'base', 'userid');
+        $this->add_totara_job_tables($joinlist, 'base', 'userid');
+        $this->add_core_course_tables($joinlist, 'base', 'courseid', 'INNER');
 
         return $joinlist;
     }
@@ -127,7 +120,7 @@ class rb_source_course_membership extends rb_base_source {
                 get_string('coursecompletionedit', 'totara_completioneditor'),
                 'base.id',
                 array(
-                    'displayfunc' => 'edit_completion',
+                    'displayfunc' => 'completioneditor_edit_completion',
                     'extrafields' => array(
                         'userid' => 'base.userid',
                         'courseid' => 'base.courseid',
@@ -137,9 +130,9 @@ class rb_source_course_membership extends rb_base_source {
             )
         );
 
-        $this->add_user_fields_to_columns($columnoptions);
-        $this->add_job_assignment_fields_to_columns($columnoptions);
-        $this->add_course_fields_to_columns($columnoptions);
+        $this->add_core_user_columns($columnoptions);
+        $this->add_totara_job_columns($columnoptions);
+        $this->add_core_course_columns($columnoptions);
 
         return $columnoptions;
     }
@@ -152,9 +145,9 @@ class rb_source_course_membership extends rb_base_source {
     protected function define_filteroptions() {
         $filteroptions = array();
 
-        $this->add_user_fields_to_filters($filteroptions);
-        $this->add_job_assignment_fields_to_filters($filteroptions);
-        $this->add_course_fields_to_filters($filteroptions);
+        $this->add_core_user_filters($filteroptions);
+        $this->add_totara_job_filters($filteroptions);
+        $this->add_core_course_filters($filteroptions);
 
         return $filteroptions;
     }
@@ -227,7 +220,17 @@ class rb_source_course_membership extends rb_base_source {
         return $defaultfilters;
     }
 
+    /**
+     * Display the edit completion link
+     *
+     * @deprecated Since Totara 12.0
+     * @param $id
+     * @param $row
+     * @param $isexport
+     * @return string
+     */
     public function rb_display_edit_completion($id, $row, $isexport) {
+        debugging('rb_source_course_membership::rb_display_edit_completion has been deprecated since Totara 12.0. Use totara_completioneditor\rb\display\completioneditor_edit_completion::display', DEBUG_DEVELOPER);
         // Ignores $id == course_completions->id, because the user might have been unassigned and only history records exist.
         $url = new moodle_url('/totara/completioneditor/edit_course_completion.php',
             array('courseid' => $row->courseid, 'userid' => $row->userid));

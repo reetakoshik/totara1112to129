@@ -25,5 +25,5 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-$ADMIN->add('language', new admin_externalpage('toollangimport', get_string('pluginname', 'tool_langimport'),
+$ADMIN->add('localisation', new admin_externalpage('toollangimport', get_string('pluginname', 'tool_langimport'),
     "$CFG->wwwroot/$CFG->admin/tool/langimport/index.php", array('moodle/site:config', 'tool/langimport:managelanguages')));

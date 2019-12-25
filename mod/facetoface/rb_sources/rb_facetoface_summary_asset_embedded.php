@@ -23,7 +23,7 @@ defined('MOODLE_INTERNAL') || die();
 class rb_facetoface_summary_asset_embedded extends rb_base_embedded {
 
     public function __construct($data) {
-        $this->url = '/mod/facetoface/asset.php';
+        $this->url = '/mod/facetoface/reports/assets.php';
         $this->source = 'facetoface_asset_assignments';
         $this->shortname = 'facetoface_summary_asset';
         $this->fullname = get_string('embedded:seminarassetsupcoming', 'mod_facetoface');

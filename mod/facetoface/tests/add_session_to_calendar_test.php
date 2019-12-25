@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author Riana Rossouw <riana.rossouw@totaralearning.com>
- * @package facetoface
+ * @package mod_facetoface
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -74,8 +74,8 @@ class mod_facetoface_add_session_to_calendar_testcase extends advanced_testcase 
         $sid = $this->facetofacegenerator->add_session(array('facetoface' => $this->facetoface->id, 'sessiondates' => array($sessiondate)));
 
         // We still need to add the calendar entries.
-        $session = facetoface_get_session($sid);
-        facetoface_update_calendar_entries($session);
+        $seminarevent = new \mod_facetoface\seminar_event($sid);
+        \mod_facetoface\calendar::update_entries($seminarevent);
 
         $events = $DB->get_records('event', array('modulename' => 'facetoface', 'eventtype' => 'facetofacesession', 'courseid' => $this->course->id),
             'timestart');
@@ -103,8 +103,8 @@ class mod_facetoface_add_session_to_calendar_testcase extends advanced_testcase 
             $sids[$i]= $this->facetofacegenerator->add_session(array('facetoface' => $this->facetoface->id, 'sessiondates' => array($sessiondates[$i])));
 
             // We still need to add the calendar entries.
-            $session = facetoface_get_session($sids[$i]);
-            facetoface_update_calendar_entries($session);
+            $seminarevent = new \mod_facetoface\seminar_event($sids[$i]);
+            \mod_facetoface\calendar::update_entries($seminarevent);
         }
 
         $events = $DB->get_records('event', array('modulename' => 'facetoface', 'eventtype' => 'facetofacesession', 'courseid' => $this->course->id),
@@ -135,8 +135,8 @@ class mod_facetoface_add_session_to_calendar_testcase extends advanced_testcase 
         $sid = $this->facetofacegenerator->add_session(array('facetoface' => $this->facetoface->id, 'sessiondates' => $sessiondates));
 
         // We still need to add the calendar entries.
-        $session = facetoface_get_session($sid);
-        facetoface_update_calendar_entries($session);
+        $seminarevent = new \mod_facetoface\seminar_event($sid);
+        \mod_facetoface\calendar::update_entries($seminarevent);
 
         $events = $DB->get_records('event', array('modulename' => 'facetoface', 'eventtype' => 'facetofacesession', 'courseid' => $this->course->id),
             'timestart');

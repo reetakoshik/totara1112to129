@@ -15,18 +15,18 @@ class Header extends Base
 
     public function render()
     {
-        global $CFG;
+        global $CFG, $USER, $PAGE; 
         $renderer = $this->renderer;
-
-//        $alertsInfo = $this->getSettingValue(HeaderSettings::ALERTS) == 1 ? $this->getAlerts() : false;
-        $notificationsInfo = $this->getSettingValue(HeaderSettings::ALERTS) == 1 ? $this->getNotifications() : false;
+       
+        $notificationsInfo = $this->getSettingValue(HeaderSettings::NOTIFICATIONS) == 1 ? $this->getNotifications() : false;
+        
         $messagesInfo = $this->getSettingValue(HeaderSettings::MESSAGES) == 1 ? $this->getMessages() : false;
         $badgesInfo = $this->getSettingValue(HeaderSettings::BADGES) == 1 ? $this->getBadges() : false;
 
-        return $renderer->render_from_template(
+        $a = $renderer->render_from_template(
             'theme_golearningzone/header',
             [
-                'siteurl' => $CFG->wwwroot,
+                'siteurl'       => $CFG->wwwroot,
                 'logo'          => $this->getLogo(), 
                 'user_menu'     => $renderer->user_menu(),
                 'totaramenu'    => $this->getTotaraMenu(),
@@ -43,6 +43,11 @@ class Header extends Base
 //                        '<span class="count">'.$alertsInfo['total'].'</span>'
 //                    ),
 //                ] : false,
+                
+                'notification_checkurl' => $CFG->wwwroot.'/message/notificationpreferences.php?userid='.$USER->id,
+                'notification_editurl'  => $CFG->wwwroot.'/message/notificationpreferences.php?userid='.$USER->id,
+                'message_editurl'       => $CFG->wwwroot.'/message/edit.php?id='.$USER->id,
+                'adminmenu' =>$this->getTotaraMenu123(),
                 'notifications'                 => $this->getSettingValue(HeaderSettings::NOTIFICATIONS) == 1 ? [
                     'my_notifications'          => get_string('my_notifications', 'theme_golearningzone'),
                     'list'                      => $notificationsInfo['notifications'],
@@ -86,6 +91,8 @@ class Header extends Base
                 ]
             ]
         );
+        //echo "<pre>"; print_r($notificationsInfo); die('hiii');
+        return $a;
     }  
 
     private function getAlerts()
@@ -122,7 +129,7 @@ class Header extends Base
     {
         global $USER;
 
-        $notifications = \message_popup\api::get_popup_notifications($USER->id, 'DESC', 2, 0);
+        $notifications = \message_popup\api::get_popup_notifications($USER->id, 'DESC', 0, 0);
 
         foreach ($notifications as &$n) {
             $n->icon =  '<i class="fa fa-file-text" aria-hidden="true"></i>';
@@ -150,14 +157,14 @@ class Header extends Base
         if ($USER->id) {
 
             $response['messages'] = $DB->get_counted_records_sql("
-              SELECT m.id AS mid, m.smallmessage, m.fullmessagehtml, m.useridfrom, u.picture FROM {message} m
+              SELECT m.id AS mid, m.smallmessage, m.fullmessagehtml, m.useridfrom, u.picture, u.firstname, u.lastname FROM {message} m
                 LEFT JOIN {message_metadata} md ON md.messageid = m.id AND md.id IS NULL
                 INNER JOIN {user} u ON m.useridfrom = u.id
               WHERE  m.useridto = ?
                 AND m.timeusertodeleted = 0
                 AND m.notification <> 1
               ORDER BY m.timecreated DESC",
-                [$USER->id], 0, 2, $response['total']);
+                [$USER->id], 0, 0, $response['total']);
 
             foreach ($response['messages'] as &$msg) {
                 $smallmessage = trim($msg->smallmessage);
@@ -170,6 +177,7 @@ class Header extends Base
                         ? substr($text, 0, PREVIEW_MESSAGE_LENGH).'...'
                         : $text,
                     'userid' => $msg->useridfrom,
+                    'ufullname' => $msg->firstname. ' '. $msg->lastname,
                     'pic'    => $msg->picture
                         ? $this->renderer->user_picture(current($DB->get_records('user', ['id' => $msg->useridfrom])), [])
                         : ''
@@ -207,25 +215,43 @@ class Header extends Base
         $images = array_values($images);
 
         return [
-            'badges' => array_slice($images, 0, 2),
+            'badges' => array_slice($images, 0, 8),
             'total'  => count($images)
         ];
     }
 
     private function getTotaraMenu()
     {
+        global $CFG;
         $renderer = $this->renderer;
 
         $totaramenu = '';
-        if (empty($renderer->page->layout_options['nocustommenu'])) {
+         if (empty($renderer->page->layout_options['nocustommenu'])) {
             $menudata = totara_build_menu();
             $totara_core_renderer = $renderer->page->get_renderer('totara_core');
-            $totaramenu = $totara_core_renderer->totara_menu($menudata);
-        }
-
+            $totaramenu = $totara_core_renderer->glztop_menu($menudata);
+         }
+         
         return $totaramenu;
     }
-
+     
+     private function getTotaraMenu123()
+    {
+        global $CFG, $PAGE;
+        //error_reporting(E_ALL);
+        //ini_set('display_errors', 1);
+        $renderer = $this->renderer;
+        //$PAGE->requires->js_call_amd('totara_core/totaramenu', null, true);
+        
+        $totaramenu = '';
+         //if (empty($renderer->page->layout_options['nocustommenu'])) {
+            $menudata = totara_build_menu();
+            $totara_core_renderer = $renderer->page->get_renderer('totara_core');
+            $totaramenu = $totara_core_renderer->mastheadglz(1);
+        // }
+         //print_r($totaramenu); die('1111111');
+        return $totaramenu;
+    }
     private function getLogo()
     {
         global $CFG;

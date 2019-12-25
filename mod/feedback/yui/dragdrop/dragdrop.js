@@ -107,14 +107,23 @@ YUI.add('moodle-mod_feedback-dragdrop', function(Y) {
          * @return void
          */
         drag_drag_handler : function(e) {
-            //Get the last y point
+            // Get the last y point
             var y = e.target.lastXY[1];
-            //Is it greater than the lastY var?
+            var parentNode = e.target.get('node').get('parentNode');
+            if (e.target.mouseXY[0] < parentNode.getX()
+                || e.target.mouseXY[1] < parentNode.getY()
+                || e.target.mouseXY[0] > parentNode.getX() + parseInt(parentNode.getComputedStyle('width'), 10)
+                || e.target.mouseXY[1] > parentNode.getY() + parseInt(parentNode.getComputedStyle('height'), 10)) {
+                var drag = e.target;
+                this.previousNode.insert(drag.get('node'), 'after');
+                return;
+            }
+
             if (y < this.lastY) {
-                //We are going up
+                // We are going up
                 this.goingUp = true;
             } else {
-                //We are going down.
+                // We are going down.
                 this.goingUp = false;
             }
             //Cache for next check
@@ -130,6 +139,7 @@ YUI.add('moodle-mod_feedback-dragdrop', function(Y) {
         drag_start_handler : function(e) {
             //Get our drag object
             var drag = e.target;
+            this.previousNode = drag.get('node').previous();
 
             //Set some styles here
             drag.get('node').addClass('drag_target_active');
@@ -182,6 +192,16 @@ YUI.add('moodle-mod_feedback-dragdrop', function(Y) {
                 var spinner = M.util.add_spinner(Y, dragnode);
                 this.save_item_order(this.cmid, elements.toString(), spinner);
            }
+        },
+
+        /**
+         * Resets the page to the pre-drag state
+         *
+         * @param {drag:dropmiss YUI Event} e The YUI drag:dropmiss event object
+         */
+        drag_dropmiss_handler: function(e) {
+            var drag = e.target;
+            this.previousNode.insert(drag.get('node'), 'after');
         },
 
         /**

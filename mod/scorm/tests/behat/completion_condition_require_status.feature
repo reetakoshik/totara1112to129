@@ -21,8 +21,7 @@ Feature: Scorm multi-sco completion
 
   Scenario: Test completion with a single sco completion.
     When I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I navigate to "Edit settings" in current page administration
     And I set the following fields to these values:
       | Enable completion tracking | Yes |
@@ -39,7 +38,7 @@ Feature: Scorm multi-sco completion
     Then I should see "Basic Multi-sco SCORM package"
     And I log out
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Basic Multi-sco SCORM package"
     And I should see "Normal"
     And I press "Enter"
@@ -52,14 +51,13 @@ Feature: Scorm multi-sco completion
     And I am on homepage
     And I log out
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then "Student 1" user has completed "Basic Multi-sco SCORM package" activity
 
 
   Scenario: Test completion with all scos and correct sco load on re-entry.
     When I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I navigate to "Edit settings" in current page administration
     And I set the following fields to these values:
       | Enable completion tracking | Yes |
@@ -76,7 +74,7 @@ Feature: Scorm multi-sco completion
     Then I should see "ADV Multi-sco SCORM package"
     And I log out
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "ADV Multi-sco SCORM package"
     And I should see "Normal"
     And I press "Enter"
@@ -89,11 +87,11 @@ Feature: Scorm multi-sco completion
     And I am on homepage
     And I log out
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then "Student 1" user has not completed "ADV Multi-sco SCORM package" activity
     And I log out
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "ADV Multi-sco SCORM package"
     And I should see "Normal"
     And I press "Enter"
@@ -186,5 +184,5 @@ Feature: Scorm multi-sco completion
     And I am on homepage
     And I log out
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And "Student 1" user has completed "ADV Multi-sco SCORM package" activity

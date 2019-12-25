@@ -118,8 +118,8 @@ foreach ($notifications as $note) {
 }
 
 echo $OUTPUT->header();
-$heading = get_string('notifications', 'facetoface');
-echo $OUTPUT->heading_with_help($heading, 'notifications', 'facetoface');
+$heading = get_string('notifications', 'mod_facetoface');
+echo $OUTPUT->heading_with_help($heading, 'notifications', 'mod_facetoface');
 
 if (!empty($defaultnotifications)) {
     $url1 = new moodle_url('/mod/facetoface/notification/restore.php', array('update' => $cm->id, 'sesskey' => sesskey()));
@@ -137,7 +137,7 @@ foreach ($notifications as $note) {
     // If its not an auto notification OR if it is but there are duplicates allow the notification to be deleted.
     $warn = ($note->type == MDL_F2F_NOTIFICATION_AUTO && $autonotifications[$note->conditiontype] > 1) ? $str_warn_icon : '';
 
-    $row[] = $warn . $note->title;
+    $row[] = $warn . format_string($note->title);
 
     // Create a notification object so we can figure out
     // the recipient string

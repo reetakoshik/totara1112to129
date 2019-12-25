@@ -1,0 +1,81 @@
+//
+// This file is part of Totara Learn
+//
+// Copyright (C) 2018 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @copyright 2018 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Kevin Hottinger <kevin.hottinger@totaralearning.com>
+// @package   theme_roots
+
+.totaraNav_sub {
+    background: @totaranav_sub-color_background;
+    display: none;
+
+    &--list {
+        margin: 0;
+
+        &_item {
+            display: inline-block;
+
+            &_link {
+                color: @totaranav_sub-color_font;
+                display: flex;
+                padding: @totaranav-spacing_x_small @totaranav-spacing_medium;
+
+                &:focus,
+                &:hover {
+                    background: @totaranav_sub-color_background_active;
+                    text-decoration: none;
+                }
+            }
+
+            &_externalLink &_link,
+            &_hasChildren &_link {
+                padding-right: @totaranav-spacing_small;
+            }
+
+            &_hasChildren &_link {
+                .totaraNav--expand_indent {
+                    display: inline-block;
+                }
+            }
+
+            &_selected &_link {
+                background: @totaranav_sub-color_background_selected;
+            }
+        }
+    }
+
+    .totaraNav--expand_indent {
+        display: none;
+        min-width: 1.2em;
+        order: 2;
+        text-align: right;
+    }
+
+    .totaraNav--list_item_expanded {
+        > a {
+            background: @totaranav_sub-color_background_active;
+        }
+    }
+}
+
+@media (min-width: @totaranav-screen_md_min) {
+    .totaraNav_sub {
+        display: block;
+    }
+}

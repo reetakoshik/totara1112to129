@@ -244,8 +244,6 @@ class core_user_testcase extends advanced_testcase {
      * Test clean_data() method.
      */
     public function test_clean_data() {
-        $this->resetAfterTest(false);
-
         $user = new stdClass();
         $user->firstname = 'John <script>alert(1)</script> Doe';
         $user->username = 'john%#&~%*_doe';

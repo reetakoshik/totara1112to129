@@ -10,8 +10,8 @@ Feature: Certification completion date is based on course completion time
       | username | firstname | lastname | email                |
       | learner1 | Learner   | One      | learner1@example.com |
     And the following "courses" exist:
-      | fullname   | shortname | format | enablecompletion | completionstartonenrol |
-      | Course One | course1   | topics | 1                | 1                      |
+      | fullname   | shortname | format | enablecompletion |
+      | Course One | course1   | topics | 1                |
     And the following "certifications" exist in "totara_program" plugin:
       | fullname          | shortname | activeperiod | windowperiod | recertifydatetype |
       | Certification One | cert1     | 1 month      | 1 month      | 1                 |
@@ -21,8 +21,7 @@ Feature: Certification completion date is based on course completion time
     And I set the following administration settings values:
       | enableprogramcompletioneditor | 1       |
       | enableprograms                | Disable |
-    And I click on "Certifications" in the totara menu
-    And I follow "Certification One"
+    And I am on "Certification One" certification homepage
     And I press "Edit certification details"
     And I switch to "Content" tab
     And I click on "addcontent_ce" "button" in the "#programcontent_ce" "css_element"
@@ -39,16 +38,10 @@ Feature: Certification completion date is based on course completion time
     And I click on "Save all changes" "button"
     And I switch to "Assignments" tab
     And I set the field "Add a new" to "Individuals"
-    And I click on "Add" "button"
-    And I click on "Add individuals to program" "button"
     And I click on "Learner One" "link" in the "Add individuals to program" "totaradialogue"
     And I click on "Ok" "button" in the "Add individuals to program" "totaradialogue"
     And I wait "1" seconds
-    And I click on "Save changes" "button"
-    And I click on "Save all changes" "button"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course One"
-    And I turn editing mode on
+    And I am on "Course One" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Seminar One              |
       | Description | Test seminar description |
@@ -61,6 +54,33 @@ Feature: Certification completion date is based on course completion time
     And I press "Save changes"
     And I follow "View all events"
     And I follow "Add a new event"
+    And I click on "Edit session" "link"
+    # In order to signup create session in future, and then move it back in time
+    And I fill seminar session with relative date in form data:
+      | sessiontimezone    | Pacific/Auckland |
+      | timestart[day]     | +2               |
+      | timestart[month]   | 0                |
+      | timestart[year]    | 0                |
+      | timestart[hour]    | -1               |
+      | timestart[minute]  | 0                |
+      | timefinish[day]    | +2               |
+      | timefinish[month]  | 0                |
+      | timefinish[year]   | 0                |
+      | timefinish[hour]   | 0                |
+      | timefinish[minute] | 0                |
+    And I press "OK"
+    And I press "Save changes"
+    And I click on "Attendees" "link"
+    And I set the field "Attendee actions" to "Add users"
+    And I click on "Learner One, learner1@example.com" "option"
+    And I press exact "add"
+    And I wait "1" seconds
+    And I press "Continue"
+    And I press "Confirm"
+
+    # Move event back in time.
+    And I follow "Go back"
+    And I click on "Edit" "link" in the ".lastrow" "css_element"
     And I click on "Edit session" "link"
     And I fill seminar session with relative date in form data:
       | sessiontimezone    | Pacific/Auckland |
@@ -76,15 +96,10 @@ Feature: Certification completion date is based on course completion time
       | timefinish[minute] | 0                |
     And I press "OK"
     And I press "Save changes"
+
     And I click on "Attendees" "link"
-    And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
-    And I click on "Learner One, learner1@example.com" "option"
-    And I press "Add"
-    And I wait "1" seconds
-    And I press "Continue"
-    And I press "Confirm"
     And I click on "Take attendance" "link"
-    And I click on "Fully attended" "option" in the "Learner One" "table_row"
+    And I set the field "Learner One's attendance" to "Fully attended"
     And I press "Save attendance"
     Then I should see "Successfully updated attendance"
     When I follow "Go back"
@@ -104,8 +119,7 @@ Feature: Certification completion date is based on course completion time
       | timefinish[minute] | 0                |
     And I press "OK"
     And I press "Save changes"
-    And I click on "Certifications" in the totara menu
-    And I follow "Certification One"
+    And I am on "Certification One" certification homepage
     And I press "Edit certification details"
     And I switch to "Completion" tab
     And I click on "Edit completion records" "link" in the "Learner One" "table_row"

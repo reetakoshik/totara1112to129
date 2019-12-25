@@ -428,6 +428,8 @@ class behat_data_generators extends behat_base {
                     $data['timestart'], $data['timeend'], $data['status']);
         }
 
+        // Purge the completion caches
+        completion_info::purge_progress_caches();
     }
 
     /**

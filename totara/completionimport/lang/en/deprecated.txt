@@ -1,6 +1,0 @@
-dataimportdone_certification,totara_completionimport
-dataimportdone_course,totara_completionimport
-error:import_certifications,totara_completionimport
-error:import_course,totara_completionimport
-missingfield,totara_completionimport
-unknownfield,totara_completionimport

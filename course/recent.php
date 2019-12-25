@@ -344,9 +344,9 @@ if ($param->sortby == 'default') {
         }
     }
     if ($activitystart != -1 && (count($activities) - 1) != $activitystart) {
-        $array = array_slice($activities, $activitystart, ((count($activities) - 1) - $activitystart));
+        $array = array_slice($activities, $activitystart, (count($activities) - $activitystart));
         usort($array, 'compare_activities_by_time_asc');
-        array_splice($activities, $activitystart, ((count($activities) - 1) - $activitystart), $array);
+        array_splice($activities, $activitystart, (count($activities) - $activitystart), $array);
     }
 }
 

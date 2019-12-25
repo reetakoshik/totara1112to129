@@ -17,16 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Totara navigation edit page.
- *
- * @package    totara
+ * @package    totara_coursecatalogue
  * @subpackage navigation
  * @author     Oleg Demeshev <oleg.demeshev@totaralms.com>
  */
 
 namespace totara_coursecatalog\totara\menu;
-
-use \totara_core\totara\menu\menu as menu;
 
 class certifications extends \totara_core\totara\menu\item {
 
@@ -37,7 +33,7 @@ class certifications extends \totara_core\totara\menu\item {
     protected function get_default_url() {
         global $CFG;
 
-        if (!empty($CFG->enhancedcatalog)) {
+        if ($CFG->catalogtype === 'enhanced') {
             return '/totara/coursecatalog/certifications.php';
         } else {
             return '/totara/program/index.php?viewtype=certification';
@@ -46,18 +42,6 @@ class certifications extends \totara_core\totara\menu\item {
 
     public function get_default_sortorder() {
         return 73000;
-    }
-
-    public function get_default_visibility() {
-        return menu::SHOW_WHEN_REQUIRED;
-    }
-
-    protected function check_visibility() {
-        if (totara_feature_visible('certifications')) {
-            return menu::SHOW_ALWAYS;
-        } else {
-            return menu::HIDE_ALWAYS;
-        }
     }
 
     protected function get_default_parent() {
@@ -71,5 +55,9 @@ class certifications extends \totara_core\totara\menu\item {
      */
     public function is_disabled() {
         return totara_feature_disabled('certifications');
+    }
+
+    public function get_incompatible_preset_rules(): array {
+        return ['can_view_certifications'];
     }
 }

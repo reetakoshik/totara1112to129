@@ -53,14 +53,8 @@ class fragment_requirements_manager extends page_requirements_manager {
      * @return string
      */
     protected function get_amd_footercode() {
-        global $CFG;
-        $output = '';
-
-        // First include must be to a module with no dependencies, this prevents multiple requests.
-        $prefix = "require(['core/first'], function() {\n";
-        $suffix = "\n});";
-        $output .= html_writer::script($prefix . implode(";\n", $this->amdjscode) . $suffix);
-        return $output;
+        // Totara: no need to use 'core/first' any more, we use bundle configuration instead now.
+        return html_writer::script(implode(";\n", $this->amdjscode));
     }
 
 

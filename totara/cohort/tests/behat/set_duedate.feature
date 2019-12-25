@@ -21,11 +21,11 @@ Feature: Set due date for program assignments via audience management
       | user1 | aud1   |
       | user2 | aud1   |
     And I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "Edit" "link" in the "Admin User" "table_row"
     And I select "Europe/Rome" from the "Timezone" singleselect
     And I press "Update profile"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I click on "Audience1" "link"
     And I switch to "Enrolled learning" tab
     And I press "Add programs"
@@ -51,7 +51,7 @@ Feature: Set due date for program assignments via audience management
       | completiontimeminute | 30         |
     And I click on "Cancel" "button" in the "Completion criteria" "totaradialogue"
     And I wait "1" seconds
-    When I navigate to "Manage programs" node in "Site administration > Courses"
+    When I navigate to "Manage programs" node in "Site administration > Programs"
     And I click on "Miscellaneous" "link"
     And I click on "Set Due Date Tests" "link"
     And I click on "Edit program details" "button"
@@ -64,13 +64,11 @@ Feature: Set due date for program assignments via audience management
     And I click on "OK" "button" in the "Confirm issue resolution" "totaradialogue"
     And I log out
     And I log in as "user1"
-    And I click on "Programs" in the totara menu
-    And I click on "Set Due Date Tests" "link"
+    And I am on "Set Due Date Tests" program homepage
     Then I should see "Due date: 09 December 2015, 2:30 PM"
     When I log out
     And I log in as "user2"
-    And I click on "Programs" in the totara menu
-    And I click on "Set Due Date Tests" "link"
+    And I am on "Set Due Date Tests" program homepage
     Then I should see "Due date: 09 December 2015, 8:30 AM"
 
   @javascript
@@ -83,7 +81,7 @@ Feature: Set due date for program assignments via audience management
     And I click on "Set time relative to event" "button" in the "Completion criteria" "totaradialogue"
     And I wait "1" seconds
     Then I should see "Complete within 2 Day(s) of Program enrollment date" in the "Set Due Date Tests" "table_row"
-    When I navigate to "Manage programs" node in "Site administration > Courses"
+    When I navigate to "Manage programs" node in "Site administration > Programs"
     And I click on "Miscellaneous" "link"
     And I click on "Set Due Date Tests" "link"
     And I click on "Edit program details" "button"

@@ -35,7 +35,7 @@ require_once($CFG->dirroot . '/totara/hierarchy/lib.php');
 require_once($CFG->dirroot . '/totara/hierarchy/prefix/competency/lib.php');
 
 
-class hierarchylib_test extends advanced_testcase {
+class totara_hierarchy_lib_testcase extends advanced_testcase {
 
     /** @var  $competency competency */
     private $competency, $nofwid;
@@ -49,11 +49,22 @@ class hierarchylib_test extends advanced_testcase {
 
     protected function tearDown() {
         $this->competency = null;
-        $this->frame1 = null;
-        $this->type1 = null;
-        $this->comp1 = null;
+        $this->nofwid = null;
+        $this->frame1 = $this->frame2 = null;
+        $this->type1 = $this->type2 = $this->type3 = null;
+        $this->comp1 = $this->comp2 = $this->comp3 = $this->comp4 = $this->comp5 = null;
         $this->type_field_data = null;
+        $this->type_data_data = null;
+        $this->competency_data = null;
+        $this->template_data = null;
+        $this->template_assignment_data = null;
+        $this->org_pos_data = null;
         $this->relations_data = null;
+        $this->scale_assignments_data = null;
+        $this->plan_competency_assign_data = null;
+        $this->plan_course_assign_data = null;
+        $this->events_handlers_data = null;
+
         parent::tearDown();
     }
 
@@ -116,7 +127,7 @@ class hierarchylib_test extends advanced_testcase {
         $this->type2->timecreated = 1265963591;
         $this->type2->timemodified = 1265963591;
         $this->type2->usermodified = $userid;
-        $this->type2->idnumber = 'TYPE1ID';
+        $this->type2->idnumber = 'TYPE2ID';
         $this->type2->id = $DB->insert_record('comp_type', $this->type2);
 
         $this->type3 = new stdClass();
@@ -198,7 +209,7 @@ class hierarchylib_test extends advanced_testcase {
         $this->type_field_data = new stdClass();
         $this->type_field_data->fullname = 'Custom Field 1';
         $this->type_field_data->shortname = 'CF1';
-        $this->type_field_data->typeid = 2;
+        $this->type_field_data->typeid = $this->type2->id;
         $this->type_field_data->datatype = 'checkbox';
         $this->type_field_data->description = 'Custom Field Description 1';
         $this->type_field_data->sortorder = 1;
@@ -213,6 +224,26 @@ class hierarchylib_test extends advanced_testcase {
         $this->type_data_data->fieldid = $this->type_field_data->id;
         $this->type_data_data->competencyid = $this->comp2->id;
         $this->type_data_data->id = $DB->insert_record('comp_type_info_data', $this->type_data_data);
+
+        // Same custom field short name in type 1
+        $this->type_field_data2 = new stdClass();
+        $this->type_field_data2->fullname = 'Type 1 Custom Field 1';
+        $this->type_field_data2->shortname = 'CF1';
+        $this->type_field_data2->typeid = $this->type1->id;
+        $this->type_field_data2->datatype = 'checkbox';
+        $this->type_field_data2->description = 'Type 1 Custom Field Description 1';
+        $this->type_field_data2->sortorder = 1;
+        $this->type_field_data2->hidden = 0;
+        $this->type_field_data2->locked = 0;
+        $this->type_field_data2->required = 0;
+        $this->type_field_data2->forceunique = 0;
+        $this->type_field_data2->id = $DB->insert_record('comp_type_info_field', $this->type_field_data2);
+
+        $this->type_data_data2 = new stdClass();
+        $this->type_data_data2->data = 1;
+        $this->type_data_data2->fieldid = $this->type_field_data2->id;
+        $this->type_data_data2->competencyid = $this->comp1->id;
+        $this->type_data_data2->id = $DB->insert_record('comp_type_info_data', $this->type_data_data2);
 
         //set up evidence data
         $this->competency_data = new stdClass();
@@ -824,6 +855,67 @@ class hierarchylib_test extends advanced_testcase {
 
         $this->resetAfterTest(true);
     }
+
+    private function verify_export_files_equal($exp_filename, $act_filename, $ignore = []) {
+
+        $exp_file = file($exp_filename, FILE_IGNORE_NEW_LINES);
+        $this->assertNotFalse($exp_file);
+        $act_file = file($act_filename, FILE_IGNORE_NEW_LINES);
+        $this->assertNotFalse($act_file);
+
+        // We need to verify line by line to ignore the times as they will always differ
+        $exp_line = array_shift($exp_file);
+        $this->assertNotNull($exp_line);
+        $act_line = array_shift($act_file);
+        $this->assertNotNull($act_line);
+        $this->assertSame($exp_line, $act_line);
+
+        // Parse heading line to determine position of timemodified column
+        $ignoreidx = [];
+        if (!empty($ignore)) {
+            $exp_columns = explode(',', $exp_line);
+            foreach ($ignore as $colname) {
+                $ignoreidx[] = array_search($colname, $exp_columns);
+            }
+        }
+
+        $exp_line = array_shift($exp_file);
+        $act_line = array_shift($act_file);
+
+        while (!is_null($exp_line) && !is_null($act_line)) {
+            $exp_columns = explode(',', $exp_line);
+            $act_columns = explode(',', $act_line);
+
+            // Simply setting both lines' ignored column values to 0
+            foreach ($ignoreidx as $idx) {
+                $exp_columns[$idx] = 0;
+                $act_columns[$idx] = 0;
+            }
+
+            $this->assertEquals($exp_columns, $act_columns);
+
+            $exp_line = array_shift($exp_file);
+            $act_line = array_shift($act_file);
+        }
+
+        // Ensure one file doesn't have more lines than the other
+        $this->assertSame($exp_line, $act_line);
+    }
+
+    function test_export_data() {
+        global $CFG;
+
+        $this->resetAfterTest(true);
+
+        $this->competency->export_data('csv', false, $CFG->dataroot . '/a.aa');
+        $this->verify_export_files_equal($CFG->dirroot . '/totara/hierarchy/tests/fixtures/export_comp_hierarchy_fw1.csv', $CFG->dataroot . '/a.aa', ['timemodified']);
+        unlink($CFG->dataroot . '/a.aa');
+
+        $this->competency->export_data('csv', true, $CFG->dataroot . '/b.bb');
+        $this->verify_export_files_equal($CFG->dirroot . '/totara/hierarchy/tests/fixtures/export_comp_hierarchy_all.csv', $CFG->dataroot . '/b.bb', ['timemodified']);
+        unlink($CFG->dataroot . '/b.bb');
+    }
+
 
     /* TODO
     function test_get_next_child_sortthread() {

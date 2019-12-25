@@ -41,6 +41,11 @@ abstract class totara_sync_source {
      */
     public $filesdir;
 
+    /**
+     * @var totara_sync_element
+     */
+    protected $element;
+
     abstract function has_config();
 
     /**
@@ -94,7 +99,13 @@ abstract class totara_sync_source {
         if (empty($this->config->delimiter)) {
             $this->config->delimiter = ',';
         }
-        $this->filesdir = rtrim(get_config('totara_sync', 'filesdir'), '/');
+
+        try {
+            $this->filesdir = rtrim($this->get_element()->get_filesdir(), '/');
+        } catch (totara_sync_exception $e) {
+            // Third party code may be assigning an element after the parent::construct().
+            $this->filesdir = rtrim(get_config('totara_sync', 'filesdir'), '/');
+        }
 
         // Ensure child class specified temptablename
         if (!isset($this->temptablename)) {
@@ -263,38 +274,24 @@ abstract class totara_sync_source {
 
         // Display file example
         $fieldmappings = array();
-
         foreach ($this->fields as $field) {
             if (!empty($this->config->{'fieldmapping_' . $field})) {
                 $fieldmappings[$field] = $this->config->{'fieldmapping_' . $field};
             }
         }
 
-        // If we've got a set of customfields for this element, process these too
-        // - not all elements have them.
-        if (isset($this->customfields)) {
-            foreach ($this->customfields as $key => $field) {
-                if (!empty($this->config->{'fieldmapping_' . $key})) {
-                    $fieldmappings[$key] = $this->config->{'fieldmapping_' . $key};
-                }
-            }
-        }
-
         $filestruct = array();
-
         foreach ($this->fields as $field) {
             if (!empty($this->config->{'import_' . $field})) {
-                $filestruct[] = !empty($fieldmappings[$field]) ? '"' . $fieldmappings[$field] . '"' : '"' . $field . '"';
+                $filestruct[] = !empty($fieldmappings[$field]) ? $fieldmappings[$field] : $field;
             }
         }
+        $filestruct = array_merge($filestruct, array_unique($this->get_mapped_customfields()));
 
-        if (isset($this->customfields)) {
-            foreach (array_keys($this->customfields) as $field) {
-                if (!empty($this->config->{'import_' . $field})) {
-                    $filestruct[] = !empty($fieldmappings[$field]) ? '"' . $fieldmappings[$field] . '"' : '"' . $field . '"';
-                }
-            }
-        }
+        // Each value is surrounded by quotes when displaying the structure for a file.
+        array_walk($filestruct, function(&$value) {
+            $value = '"' . $value . '"';
+        });
 
         $info = get_string('csvimportfilestructinfo', 'tool_totara_sync', implode($this->config->delimiter, $filestruct));
         $notifications = html_writer::tag('div', $info, ['class' => 'informationbox']);
@@ -314,42 +311,22 @@ abstract class totara_sync_source {
     protected function get_common_db_notifications() {
         global $OUTPUT;
 
-        $notifications = '';
-
         // Display required db table columns
         $fieldmappings = array();
-
         foreach ($this->fields as $field) {
             if (!empty($this->config->{'fieldmapping_' . $field})) {
                 $fieldmappings[$field] = $this->config->{'fieldmapping_' . $field};
             }
         }
 
-        // If we've got a set of customfields for this element, process these too
-        // - not all elements have them.
-        if (isset($this->customfields)) {
-            foreach ($this->customfields as $key => $field) {
-                if (!empty($this->config->{'fieldmapping_' . $key})) {
-                    $fieldmappings[$key] = $this->config->{'fieldmapping_'.$key};
-                }
-            }
-        }
-
         $dbstruct = array();
-
         foreach ($this->fields as $field) {
             if (!empty($this->config->{'import_' . $field})) {
                 $dbstruct[] = !empty($fieldmappings[$field]) ? $fieldmappings[$field] : $field;
             }
         }
 
-        if (isset($this->customfields)) {
-            foreach (array_keys($this->customfields) as $field) {
-                if (!empty($this->config->{'import_' . $field})) {
-                    $dbstruct[] = !empty($fieldmappings[$field]) ? $fieldmappings[$field] : $field;;
-                }
-            }
-        }
+        $dbstruct = array_merge($dbstruct, array_unique($this->get_mapped_customfields()));
 
         $dbstruct = implode(', ', $dbstruct);
         $description = get_string('tablemustincludexdb', 'tool_totara_sync') . \html_writer::empty_tag('br') . $dbstruct;
@@ -362,4 +339,56 @@ abstract class totara_sync_source {
         return $notifications;
     }
 
+    /**
+     * @return array of customfields with structure ['identifier' => 'mapped field name']
+     */
+    protected function get_mapped_customfields() {
+        $mappedfields = [];
+
+        if (isset($this->customfields)) {
+            foreach ($this->customfields as $key => $field) {
+                if (empty($this->config->{'import_' . $key})) {
+                    continue;
+                }
+                if (empty($this->config->{'fieldmapping_' . $key})) {
+                    $mappedfields[$key] = 'customfield_' . $field;
+                } else {
+                    $mappedfields[$key] = $this->config->{'fieldmapping_' . $key};
+                }
+            }
+        }
+
+        return $mappedfields;
+    }
+
+    /**
+     * @return string with the intended format for dates in csv files on this site.
+     */
+    protected function get_csv_date_format() {
+        global $CFG;
+
+        return $CFG->csvdateformat ?? get_string('csvdateformatdefault', 'totara_core');
+    }
+
+    /**
+     * Validates configuration settings for this source.
+     *
+     * @param array $data Data submitted via the moodle form.
+     * @param array $files Files submitted via the moodle form.
+     * @return string[] Containing errors found during validation.
+     */
+    public function validate_settings($data, $files = []) {
+        return [];
+    }
+
+    /**
+     * @return totara_sync_element
+     */
+    public function get_element() {
+        if (isset($this->element)) {
+            return $this->element;
+        }
+
+        throw new totara_sync_exception($this->get_element_name(), 'settings', 'noassociatedelement');
+    }
 }

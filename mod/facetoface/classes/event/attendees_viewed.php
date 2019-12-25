@@ -108,7 +108,7 @@ class attendees_viewed extends \core\event\base {
         if (!empty($this->other['section'])) {
             $params['action'] = $this->other['section'];
         }
-        return new \moodle_url('/mod/facetoface/attendees.php', $params);
+        return new \moodle_url('/mod/facetoface/attendees/view.php', $params);
     }
 
     /**

@@ -54,7 +54,7 @@ Feature: Profile option locking of approved user accounts
     And I log out
 
     When I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Third User"
     And I follow "Edit profile"
     And I expand all fieldsets

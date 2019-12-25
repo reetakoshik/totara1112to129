@@ -25,8 +25,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 class rb_source_column_extra_id extends rb_base_source {
-    public $base, $joinlist, $columnoptions, $filteroptions;
-
     function __construct() {
         $this->base = '{course}';
         $this->joinlist = $this->define_joinlist();
@@ -50,24 +48,24 @@ class rb_source_column_extra_id extends rb_base_source {
      */
     protected function define_columnoptions() {
         $columnoptions = array();
-        $this->add_course_fields_to_columns($columnoptions, 'base');
+        $this->add_core_course_columns($columnoptions, 'base');
         $columnoptions[] = new rb_column_option('course_category', 'cat_id', 'Course Category Id',
                 'course_category.id', array('extrafields' =>  array('id' => 'base.id')));
-        $this->add_course_category_fields_to_columns($columnoptions, 'course_category', 'base');
+        $this->add_core_course_category_columns($columnoptions, 'course_category', 'base');
         return $columnoptions;
     }
 
     protected function define_joinlist() {
         $joinlist = array();
-        $this->add_course_category_table_to_joinlist($joinlist,
+        $this->add_core_course_category_tables($joinlist,
             'base', 'category');
         return $joinlist;
     }
 
     protected function define_filteroptions() {
         $filteroptions = array();
-        $this->add_course_fields_to_filters($filteroptions, 'base', 'id');
-        $this->add_course_category_fields_to_filters($filteroptions, 'base', 'category');
+        $this->add_core_course_filters($filteroptions, 'base', 'id');
+        $this->add_core_course_category_filters($filteroptions, 'base', 'category');
         return $filteroptions;
     }
 }

@@ -17,9 +17,9 @@ Feature: Verify that parentid is set correctly for position database import.
       | 21       | Position B1        | PF1               | 2              | 0            |
       | 22       | Position B2        | PF1               | 2              | 0            |
 
-    When I navigate to "General settings" node in "Site administration > HR Import"
+    When I navigate to "Default settings" node in "Site administration > HR Import"
     And I set the following fields to these values:
-      | File Access | Upload Files |
+      | File access | Upload Files |
     And I press "Save changes"
     Then I should see "Settings saved"
 
@@ -29,10 +29,10 @@ Feature: Verify that parentid is set correctly for position database import.
 
     When I navigate to "Position" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source                      | External Database |
+      | External Database           | 1                 |
       | Source contains all records | Yes               |
     And I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
 
     When I navigate to "External Database" node in "Site administration > HR Import > Sources > Position"
     And I press "Save changes"
@@ -45,7 +45,7 @@ Feature: Verify that parentid is set correctly for position database import.
     Then I should not see "Error"
     And I should see "Running HR Import cron...Done!"
 
-    When I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    When I navigate to "Manage positions" node in "Site administration > Positions"
     And I follow "Position Framework 1"
     Then I should see these hierarchy items at the following depths:
       | Department Manager  | 1 |
@@ -76,7 +76,7 @@ Feature: Verify that parentid is set correctly for position database import.
     Then I should not see "Error"
     And I should see "Running HR Import cron...Done!"
 
-    When I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    When I navigate to "Manage positions" node in "Site administration > Positions"
     And I follow "Position Framework 1"
     Then I should see these hierarchy items at the following depths:
       | Department Manager  | 1 |

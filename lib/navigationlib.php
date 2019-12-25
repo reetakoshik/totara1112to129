@@ -444,7 +444,7 @@ class navigation_node implements renderable {
     public function build_flat_navigation_list(flat_navigation $nodes, $showdivider = false) {
         if ($this->showinflatnavigation) {
             $indent = 0;
-            if ($this->type == self::TYPE_COURSE || $this->key == self::COURSE_INDEX_PAGE) {
+            if ($this->type == self::TYPE_COURSE || $this->key === self::COURSE_INDEX_PAGE) {
                 $indent = 1;
             }
             $flat = new flat_navigation_node($this, $indent);
@@ -3917,7 +3917,7 @@ class settings_navigation extends navigation_node {
      *
      * @return bool
      */
-    protected function is_admin_tree_needed() {
+    public function is_admin_tree_needed() {
         if (self::$loadadmintree) {
             // Usually external admin page or settings page.
             return true;
@@ -4862,6 +4862,15 @@ class settings_navigation extends navigation_node {
             $notificationsurl = new moodle_url('/message/notificationpreferences.php', array('userid' => $user->id));
             $useraccount->add(get_string('messagepreferences', 'message'), $messagingurl, self::TYPE_SETTING);
             $useraccount->add(get_string('notificationpreferences', 'message'), $notificationsurl, self::TYPE_SETTING);
+        }
+
+        // Totara: Admin navigation preferences.
+        if (isloggedin() && !isguestuser($user) && !is_mnet_remote_user($user)) {
+            $adminmenu = totara_core\quickaccessmenu\factory::instance($USER->id)->get_possible_items();
+            if ($currentuser && !empty($adminmenu) && has_capability('totara/core:editownquickaccessmenu', $systemcontext)) {
+                $url = new moodle_url('/user/quickaccessmenu.php', array('id' => $user->id));
+                $useraccount->add(get_string('quickaccessmenu:settingsheading', 'totara_core'), $url, self::TYPE_SETTING, null, 'quickaccessmenu');
+            }
         }
 
         // Blogs.

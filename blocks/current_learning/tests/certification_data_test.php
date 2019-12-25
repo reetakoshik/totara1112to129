@@ -42,9 +42,10 @@ class block_current_learning_certification_data_testcase extends block_current_l
         $this->generator = null;
         $this->program_generator = null;
         $this->completion_generator = null;
-        $this->user1 = null;
-        $this->course1 = null;
-        $this->program1 = null;
+        $this->user1 = $this->user2 = $this->user3 = $this->user4 = null;
+        $this->course1 = $this->course2 = $this->course3 = $this->course4 = null;
+        $this->program1 = $this->program2 = null;
+
         parent::tearDown();
     }
 
@@ -97,8 +98,13 @@ class block_current_learning_certification_data_testcase extends block_current_l
         $learning_data = $this->get_learning_data($this->user1->id);
         $this->assertTrue($this->course_in_learning_data($this->course1->id, $learning_data));
 
-        // Create a program and assign a user.
-        $program1 = $this->program_generator->create_program(array('fullname' => 'Program 1'));
+        // Create a certification and assign a user.
+        list($actperiod, $winperiod, $recerttype) = $this->program_generator->get_random_certification_setting();
+        $data = [
+            'fullname' => 'Program 1',
+            'certifid' => $this->program_generator->create_certification_settings(0, $actperiod, $winperiod, $recerttype),
+        ];
+        $program1 = $this->program_generator->create_program($data);
         $this->program_generator->assign_program($program1->id, array($this->user1->id));
 
         // Add content to the program.
@@ -119,10 +125,6 @@ class block_current_learning_certification_data_testcase extends block_current_l
         $progcontent->add_course(1, $coursedata);
 
         $progcontent->save_content();
-
-        // Create certification from the program.
-        list($actperiod, $winperiod, $recerttype) = $this->program_generator->get_random_certification_setting();
-        $this->program_generator->create_certification_settings($program1->id, $actperiod, $winperiod, $recerttype);
 
         certif_create_completion($program1->id, $this->user1->id);
 

@@ -17,8 +17,7 @@ Feature: Forum discussions can be split
       | teacher1 | C1 | editingteacher |
       | student1 | C1 | student |
     And I log in as "teacher1"
-    And I follow "Science 101"
-    And I turn editing mode on
+    And I am on "Science 101" course homepage with editing mode on
     And I add a "Forum" to section "1" and I fill the form with:
       | Forum name | Study discussions |
       | Forum type | Standard forum for general use |

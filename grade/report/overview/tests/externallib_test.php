@@ -80,7 +80,8 @@ class gradereport_overview_externallib_testcase extends externallib_advanced_tes
         $studentgrades = array($this->student1->id => $this->student1grade2);
         assign_grade_item_update($assignment2, $studentgrades);
 
-        grade_get_setting($this->course1->id, 'report_overview_showrank', 1);
+        // Totara: with grade_get_setting() this was passing only because of stale static caches
+        grade_set_setting($this->course1->id, 'report_overview_showrank', 1);
     }
 
     /**

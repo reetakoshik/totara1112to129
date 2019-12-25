@@ -31,8 +31,8 @@ Feature: Make sure the real user is recorded in appraisals when using login-as
       | appraisal   | stage      | name      |
       | Appraisal1  | App1_Stage | App1_Page |
     And the following "questions" exist in "totara_appraisal" plugin:
-      | appraisal   | stage      | page      | name     | type          | default | roles   | ExtraInfo |
-      | Appraisal1  | App1_Stage | App1_Page | App1-Q1  | text          | 2       | manager |           |
+      | appraisal   | stage      | page      | name     | type          | default | roles           | ExtraInfo |
+      | Appraisal1  | App1_Stage | App1_Page | App1-Q1  | text          | 2       | learner,manager |           |
     And the following "assignments" exist in "totara_appraisal" plugin:
       | appraisal   | type     | id     |
       | Appraisal1  | audience | AppAud |
@@ -53,13 +53,13 @@ Feature: Make sure the real user is recorded in appraisals when using login-as
     # Admin logs in as the manager
     And I log out
     And I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "manager lastname" "link"
     And I click on "Log in as" "link"
     Then I should see "You are logged in as manager lastname"
 
     # Mark the appraisal complete
-    When I click on "Performance" in the totara menu
+    When I click on "All Appraisals" in the totara menu
     And I follow "Appraisal1"
     And I press "Start"
     And I click on "Complete stage" "button"

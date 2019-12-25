@@ -26,7 +26,7 @@ Feature: Manual user data purging
 
   Scenario: Purge user data manually
     Given I log in as "manager"
-    And I navigate to "Purge types" node in "Site administration > Users > User data management"
+    And I navigate to "Purge types" node in "Site administration > User data management"
 
     And I press "Add purge type"
     And I set the "User status restriction" Totara form field to "Active"
@@ -68,7 +68,7 @@ Feature: Manual user data purging
       | User          | core_user-username,core_user-email                          |
     And I press "Add"
 
-    When I navigate to "Deleted user accounts" node in "Site administration > Users > User data management"
+    When I navigate to "Deleted user accounts" node in "Site administration > User data management"
     And I should see "bob4.learner@example.com"
     And I click on "User data" "link" in the "Bob4 Learner" "table_row"
     And I press "Select purge type"
@@ -88,7 +88,7 @@ Feature: Manual user data purging
     And I click on "1" "link" in the "All data purges" "definition_exact"
     And I should see "Success" in the "Deleted user purging" "table_row"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "User data" "link" in the "Bob1 Learner" "table_row"
     And I press "Select purge type"
     And I set the "Purge type" Totara form field to "Additional names purging"
@@ -116,7 +116,7 @@ Feature: Manual user data purging
     And I should see "Success" in the "Additional names purging" "table_row"
     And I should see "Success" in the "Picture purging" "table_row"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I set the following fields to these values:
     | User Status | any value |
     And I press "id_submitgroupstandard_addfilter"

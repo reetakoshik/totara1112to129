@@ -462,7 +462,8 @@ final class course_editor {
          LEFT JOIN {course_completion_crit_compl} cccc
                 ON cccc.criteriaid = ccc.id
                AND cccc.userid = :userid2
-             WHERE cm.course = :courseid";
+             WHERE cm.course = :courseid
+               AND cm.instance != 0";
         $params = array('courseid' => $courseid, 'userid1' => $userid, 'userid2' => $userid);
         $records = $DB->get_records_sql($sql, $params);
 

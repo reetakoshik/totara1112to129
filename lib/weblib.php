@@ -203,7 +203,7 @@ function qualified_me() {
 /**
  * Determines whether or not the Moodle site is being served over HTTPS.
  *
- * This is done simply by checking the value of $CFG->httpswwwroot, which seems
+ * This is done simply by checking the value of $CFG->wwwroot, which seems
  * to be the only reliable method.
  *
  * @return boolean True if site is served over HTTPS, false otherwise.
@@ -211,7 +211,7 @@ function qualified_me() {
 function is_https() {
     global $CFG;
 
-    return (strpos($CFG->httpswwwroot, 'https://') === 0);
+    return (strpos($CFG->wwwroot, 'https://') === 0);
 }
 
 /**
@@ -392,12 +392,9 @@ class moodle_url {
 
             // Normalise shortened form of our url ex.: '/course/view.php'.
             if (strpos($url, '/') === 0) {
-                // We must not use httpswwwroot here, because it might be url of other page,
-                // devs have to use httpswwwroot explicitly when creating new moodle_url.
                 $url = $CFG->wwwroot.$url;
             }
 
-            // Now fix the admin links if needed, no need to mess with httpswwwroot.
             if ($CFG->admin !== 'admin') {
                 if (strpos($url, "$CFG->wwwroot/admin/") === 0) {
                     $url = str_replace("$CFG->wwwroot/admin/", "$CFG->wwwroot/$CFG->admin/", $url);
@@ -826,7 +823,7 @@ class moodle_url {
     public static function make_pluginfile_url($contextid, $component, $area, $itemid, $pathname, $filename,
                                                $forcedownload = false) {
         global $CFG;
-        $urlbase = "$CFG->httpswwwroot/pluginfile.php";
+        $urlbase = "$CFG->wwwroot/pluginfile.php";
         if ($itemid === null) {
             return self::make_file_url($urlbase, "/$contextid/$component/$area".$pathname.$filename, $forcedownload);
         } else {
@@ -852,7 +849,7 @@ class moodle_url {
     public static function make_webservice_pluginfile_url($contextid, $component, $area, $itemid, $pathname, $filename,
                                                $forcedownload = false) {
         global $CFG;
-        $urlbase = "$CFG->httpswwwroot/webservice/pluginfile.php";
+        $urlbase = "$CFG->wwwroot/webservice/pluginfile.php";
         if ($itemid === null) {
             return self::make_file_url($urlbase, "/$contextid/$component/$area".$pathname.$filename, $forcedownload);
         } else {
@@ -871,7 +868,7 @@ class moodle_url {
      */
     public static function make_draftfile_url($draftid, $pathname, $filename, $forcedownload = false) {
         global $CFG, $USER;
-        $urlbase = "$CFG->httpswwwroot/draftfile.php";
+        $urlbase = "$CFG->wwwroot/draftfile.php";
         $context = context_user::instance($USER->id);
 
         return self::make_file_url($urlbase, "/$context->id/user/draft/$draftid".$pathname.$filename, $forcedownload);
@@ -906,14 +903,10 @@ class moodle_url {
         global $CFG;
 
         $url = $this->out($escaped, $overrideparams);
-        $httpswwwroot = str_replace("http://", "https://", $CFG->wwwroot);
 
-        // Url should be equal to wwwroot or httpswwwroot. If not then throw exception.
+        // Url should be equal to wwwroot. If not then throw exception.
         if (($url === $CFG->wwwroot) || (strpos($url, $CFG->wwwroot.'/') === 0)) {
             $localurl = substr($url, strlen($CFG->wwwroot));
-            return !empty($localurl) ? $localurl : '';
-        } else if (($url === $httpswwwroot) || (strpos($url, $httpswwwroot.'/') === 0)) {
-            $localurl = substr($url, strlen($httpswwwroot));
             return !empty($localurl) ? $localurl : '';
         } else {
             throw new coding_exception('out_as_local_url called on a non-local URL');
@@ -1366,7 +1359,7 @@ function format_text($text, $format = FORMAT_MOODLE, $options = null, $courseidd
         // this happens when developers forget to post process the text.
         // The only potential problem is that somebody might try to format
         // the text before storing into database which would be itself big bug..
-        $text = str_replace("\"$CFG->httpswwwroot/draftfile.php", "\"$CFG->httpswwwroot/brokenfile.php#", $text);
+        $text = str_replace("\"$CFG->wwwroot/draftfile.php", "\"$CFG->wwwroot/brokenfile.php#", $text);
 
         if ($CFG->debugdeveloper) {
             if (strpos($text, '@@PLUGINFILE@@/') !== false) {
@@ -1496,7 +1489,9 @@ function format_string($string, $striplinks = true, $options = null) {
     }
 
     // Calculate md5.
-    $md5 = md5($string.'<+>'.$striplinks.'<+>'.$options['context']->id.'<+>'.$options['escape'].'<+>'.current_language());
+    $cachekeys = array($string, $striplinks, $options['context']->id,
+        $options['escape'], current_language(), $options['filter']);
+    $md5 = md5(implode('<+>', $cachekeys));
 
     // Fetch from cache if possible.
     if (isset($strcache[$md5])) {
@@ -2311,8 +2306,13 @@ function get_html_lang($dir = false) {
             $direction = ' dir="ltr"';
         }
     }
+    // Totara: make sure we set existing language to make this compatible with PARAM_LANG!
+    $currentlanguage = current_language();
+    if (!get_string_manager()->translation_exists($currentlanguage)) {
+        $currentlanguage = 'en';
+    }
     // Accessibility: added the 'lang' attribute to $direction, used in theme <html> tag.
-    $language = str_replace('_', '-', current_language());
+    $language = str_replace('_', '-', $currentlanguage);
     @header('Content-Language: '.$language);
     return ($direction.' lang="'.$language.'" xml:lang="'.$language.'"');
 }
@@ -2790,7 +2790,7 @@ function navmenulist($course, $sections, $modinfo, $strsection, $strjumpto, $wid
         $class = 'activity '.$mod->modname;
         $class .= ($cmid == $mod->id) ? ' selected' : '';
         $menu[] = '<li class="'.$class.'">'.
-                  '<img src="'.$OUTPUT->pix_url('icon', $mod->modname) . '" alt="" />'.
+                  $OUTPUT->pix_icon('icon', '', $mod->modname) .
                   '<a href="'.$CFG->wwwroot.'/mod/'.$url.'">'.$mod->name.'</a></li>';
     }
 
@@ -3030,7 +3030,8 @@ function redirect($url, $message='', $delay=null, $messagetype = \core\output\no
     }
 
     if (!empty($message)) {
-        if (!$debugdisableredirect && !headers_sent()) {
+        if (!$debugdisableredirect && !headers_sent() && core\session\manager::is_session_active()) {
+            // Totara: this is used only if session is active.
             // A message has been provided, and the headers have not yet been sent.
             // Display the message as a notification on the subsequent page.
             \core\notification::add($message, $messagetype);

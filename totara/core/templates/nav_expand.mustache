@@ -1,0 +1,92 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template totara_core/nav_expand
+
+    Creates the totara nav expandable lists.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * data-tw-navExpand-list: Is an expandable list
+    * data-tw-totaraNav-hasChildren: Has child items
+    * data-tw-totaraNav-item: Menu item
+    * data-tw-navExpand-listLink: Lets JS know this is an expandable list link
+    * data-tw-totaraNav-chevron: Used to dynamically add chevron
+
+    Context variables required for this template:
+    * children: list of items
+    * children -> haschildren: Has sub list items
+    * children -> class_isfirst: First node
+    * children -> class_islast: Last node
+    * children -> class_isselected: Is current section or parent of current section
+    * children -> target: _self or _blank
+    * children -> url: section URL
+    * children -> linktext: Section text
+    * children -> external_link -> Bool, has external link
+    * children -> external_link -> external_link_icon: New window icon
+}}
+
+
+<ul class="navExpand--list navExpand--listSecond" data-tw-navExpand-list="true">
+    {{#children}}
+        <li id="{{class_name}}"
+            class="navExpand--list_item
+            {{#haschildren}} navExpand--list_item_hasChildren{{/haschildren}}
+            {{#class_isselected}} navExpand--list_item_selected{{/class_isselected}}"
+            {{#haschildren}} data-tw-totaraNav-hasChildren="true"{{/haschildren}}
+             data-tw-totaraNav-item="true">
+            <a class="navExpand--list_item_link" target="{{target}}" href="{{url}}" data-tw-navExpand-listLink="true"
+                {{#haschildren}} aria-haspopup="true" aria-expanded="false"{{/haschildren}}>
+                <div class="totaraNav--expand_indent" {{#haschildren}}data-tw-totaraNav-chevron="true"{{/haschildren}}></div>
+                <div class="navExpand--list_item_label">
+                    {{{linktext}}}
+                    {{^haschildren}}{{#external_link}}
+                        {{{external_link_icon}}}
+                    {{/external_link}}{{/haschildren}}
+                </div>
+            </a>
+
+            {{! Third level navigation, used for mobile }}
+            {{#haschildren}}
+            <ul class="navExpand--list navExpand--listThird" data-tw-navExpand-list="true">
+                {{#children}}
+                    <li class="navExpand--list_item
+                        {{#class_isselected}} selected{{/class_isselected}}
+                        {{#class_islast}} navExpand--list_item_last{{/class_islast}}"
+                         data-tw-totaraNav-item="true">
+                        <a class="navExpand--list_item_link" target="{{target}}" href="{{url}}"
+                            data-tw-navExpand-listLink="true">
+                            <div class="totaraNav--expand_indent"></div>
+                            <div class="navExpand--list_item_label">
+                                {{linktext}}
+                                {{#external_link}}
+                                    {{{external_link_icon}}}
+                                {{/external_link}}
+                            </div>
+                        </a>
+                    </li>
+                {{/children}}
+            </ul>
+            {{/haschildren}}
+
+        </li>
+    {{/children}}
+</ul>

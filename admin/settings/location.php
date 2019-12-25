@@ -70,6 +70,6 @@ if ($hassiteconfig) { // speedup for non-admins, add all caps used on this page
         )
     );
 
-    $ADMIN->add('location', $temp);
+    $ADMIN->add('localisation', $temp);
 
 } // end of speedup

@@ -31,7 +31,7 @@ if ($hassiteconfig || has_any_capability($capabilities, context_system::instance
     $ADMIN->add(
         'experimental',
         new admin_externalpage(
-            'tool_usertours/tours',
+            'toolusertours',
             get_string('usertours', 'tool_usertours'),
             new moodle_url('/admin/tool/usertours/configure.php'),
             'tool/usertours:managetours'

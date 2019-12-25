@@ -16,8 +16,7 @@ Feature: Test page title step
     When I click on "Dashboard" in the totara menu
     Then I should see "Acceptance test site: My Learning" in the page title
 
-    When I click on "Home" in the totara menu
-    And I follow "Course 1"
+    When I am on "Course 1" course homepage
     Then I should see "Course: Course 1" in the page title
     And I should see "Course 1" in the page title
 
@@ -34,7 +33,6 @@ Feature: Test page title step
     When I click on "Dashboard" in the totara menu
     Then I should see "Acceptance test site: My Learning" in the page title
 
-    When I click on "Home" in the totara menu
-    And I follow "Course 1"
+    When I am on "Course 1" course homepage
     Then I should see "Course: Course 1" in the page title
     And I should see "Course 1" in the page title

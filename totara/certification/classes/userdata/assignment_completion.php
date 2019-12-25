@@ -57,18 +57,21 @@ class assignment_completion extends base_assignment_completion {
 
         $programids = self::get_assigned_programids($user, $context);
 
-        if (!empty($programids)) {
-            $transaction = $DB->start_delegated_transaction();
+        $transaction = $DB->start_delegated_transaction();
 
+        if (!empty($programids)) {
             self::unassign_from_programs($user, $programids);
 
             // Even after unassigning the learner there might be entries left
             // for the completion, we need to make sure all of them are gone.
             self::purge_certification_completion($user, $programids);
             self::purge_program_completion($user, $programids);
-
-            $transaction->allow_commit();
+        } else {
+            // there are no records in {prog_user_assignment} by the time manual purge occurs.
+            self::purge_any_certification_completion($user);
         }
+
+        $transaction->allow_commit();
 
         return self::RESULT_STATUS_SUCCESS;
     }
@@ -91,6 +94,17 @@ class assignment_completion extends base_assignment_completion {
         $params['userid'] = $user->id;
         $DB->delete_records_select('certif_completion', $select, $params);
         $DB->delete_records_select('certif_completion_history', $select, $params);
+    }
+
+    /**
+     * @param target_user $user
+     */
+    private static function purge_any_certification_completion(target_user $user) {
+        global $DB;
+
+        $condition = [ 'userid' => $user->id ];
+        $DB->delete_records('certif_completion', $condition);
+        $DB->delete_records('certif_completion_history', $condition);
     }
 
     /**

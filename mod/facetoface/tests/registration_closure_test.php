@@ -82,7 +82,13 @@ class mod_facetoface_registration_closure_testcase extends advanced_testcase {
         \totara_job\job_assignment::create_default($user4->id, array('managerjaid' => $managerja->id));
 
         $course = $generator->create_course();
-        $facetoface = $facetofacegenerator->create_instance(array('course' => $course->id));
+
+        $this->getDataGenerator()->enrol_user($user1->id, $course->id);
+        $this->getDataGenerator()->enrol_user($user2->id, $course->id);
+        $this->getDataGenerator()->enrol_user($user3->id, $course->id);
+        $this->getDataGenerator()->enrol_user($user4->id, $course->id);
+
+        $facetoface = $facetofacegenerator->create_instance(array('course' => $course->id, 'approvaltype' => \mod_facetoface\seminar::APPROVAL_ADMIN));
 
         $sessiondate = new stdClass();
         $sessiondate->timestart = time() + DAYSECS;
@@ -98,13 +104,22 @@ class mod_facetoface_registration_closure_testcase extends advanced_testcase {
 
         $session = facetoface_get_session($sessionid);
 
-        facetoface_user_signup($session, $facetoface, $course, '', MDL_F2F_NONE, MDL_F2F_STATUS_REQUESTED, $user1->id, false);
-        facetoface_user_signup($session, $facetoface, $course, '', MDL_F2F_NONE, MDL_F2F_STATUS_REQUESTEDADMIN, $user2->id, false);
-        facetoface_user_signup($session, $facetoface, $course, '', MDL_F2F_NONE, MDL_F2F_STATUS_APPROVED, $user3->id, false);
-        facetoface_user_signup($session, $facetoface, $course, '', MDL_F2F_NONE, MDL_F2F_STATUS_APPROVED, $user4->id, false);
+        // We need admin approval.
+        $this->setAdminUser();
+
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user1->id, new \mod_facetoface\seminar_event($session->id)));
+        $signup2 = \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user2->id, new \mod_facetoface\seminar_event($session->id)));
+        $signup2->switch_state(\mod_facetoface\signup\state\requestedadmin::class);
+
+        $signup3 = \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user3->id, new \mod_facetoface\seminar_event($session->id)));
+        $signup3->switch_state(\mod_facetoface\signup\state\booked::class);
+
+        $signup4 = \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user4->id, new \mod_facetoface\seminar_event($session->id)));
+        $signup4->switch_state(\mod_facetoface\signup\state\booked::class);
         facetoface_cancel_attendees($session->id, array($user4->id));
 
         // Clear any events/messages caused by the signups.
+        $this->execute_adhoc_tasks();
         $this->eventsink->clear();
         $this->emailsink->clear();
 
@@ -116,7 +131,7 @@ class mod_facetoface_registration_closure_testcase extends advanced_testcase {
         $cron->execute();
 
         // Check that users 1 & 2 are no longer pending but are declined.
-        $closures = facetoface_get_attendees($session->id, array(MDL_F2F_STATUS_DECLINED));
+        $closures = facetoface_get_attendees($session->id, array(\mod_facetoface\signup\state\declined::get_code()));
         $this->assertEquals(2, count($closures));
         foreach ($closures as $closure) {
             $expected = false;
@@ -130,7 +145,7 @@ class mod_facetoface_registration_closure_testcase extends advanced_testcase {
         }
 
         // And just double check there are no pending requests.
-        $requests = facetoface_get_attendees($session->id, array(MDL_F2F_STATUS_REQUESTED, MDL_F2F_STATUS_REQUESTEDADMIN));
+        $requests = facetoface_get_attendees($session->id, array(\mod_facetoface\signup\state\requested::get_code(), \mod_facetoface\signup\state\requestedadmin::get_code()));
         $this->assertEquals(0, count($requests));
 
         // There should be 2 status changed events.
@@ -147,11 +162,12 @@ class mod_facetoface_registration_closure_testcase extends advanced_testcase {
             }
 
             $this->assertTrue($expected);
-            $this->assertEquals(MDL_F2F_STATUS_DECLINED, $status->statuscode);
+            $this->assertEquals(\mod_facetoface\signup\state\declined::get_code(), $status->get_statuscode());
             $this->assertInstanceOf('\mod_facetoface\event\signup_status_updated', $event);
         }
 
         // Check the registration closure messages.
+        $this->execute_adhoc_tasks();
         $emails = $this->emailsink->get_messages();
         $this->assertEquals(4, count($emails));
         $subject = get_string('setting:defaultpendingreqclosuresubjectdefault', 'mod_facetoface');

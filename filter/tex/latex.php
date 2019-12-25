@@ -68,19 +68,6 @@
         }
 
         /**
-         * execute an external command, with optional logging
-         * @param string $command command to execute
-         * @param file $log valid open file handle - log info will be written to this file
-         * @throws coding_exception
-         * @deprecated since Totara 10
-         */
-        function execute( $command, $log=null ) {
-            // This function takes a pre-built command which we can't safely convert to something usable by
-            // the new command class so we can't do backwards compability.
-            throw new coding_exception('\latex::execute has been deprecated since Totara 10. Please use the \core\command\executable class');
-        }
-
-        /**
          * Render TeX string into gif/png
          * @param string $formula TeX formula
          * @param string $filename filename for output (including extension)

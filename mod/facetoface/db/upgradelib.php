@@ -132,3 +132,22 @@ function facetoface_upgradelib_calendar_events_for_sessiondates() {
         }
     }
 }
+
+/**
+ *  Rewrite grades if they are 0.0000 and their signup state is either fully/partially attended
+ */
+function facetoface_upgradelib_fixup_seminar_grades() {
+    global $DB;
+    /** @var \moodle_database $DB */
+    // magic numbers
+    // status_fully: 100
+    // status_partially: 90
+    // status_booked: 70
+    // grade_fully: 100
+    // grade_partially: 50
+
+    // TODO: need more complicated solution to the system upgraded from Evergreen-20190322
+    $DB->execute('UPDATE {facetoface_signups_status} SET grade = NULL WHERE statuscode <= 70');
+    $DB->execute('UPDATE {facetoface_signups_status} SET grade = 50 WHERE statuscode = 90 AND grade = 0');
+    $DB->execute('UPDATE {facetoface_signups_status} SET grade = 100 WHERE statuscode = 100 AND grade = 0');
+}

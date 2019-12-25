@@ -99,7 +99,7 @@ class core_blocklib_testcase extends advanced_testcase {
         // Exercise SUT.
         $this->blockmanager->add_regions($regions, false);
         // Validate.
-        $this->assertEquals($regions, $this->blockmanager->get_regions(), '', 0, 10, true);
+        $this->assertEqualsCanonicalizing($regions, $this->blockmanager->get_regions());
     }
 
     public function test_add_region_twice() {
@@ -107,7 +107,7 @@ class core_blocklib_testcase extends advanced_testcase {
         $this->blockmanager->add_region('a-region-name', false);
         $this->blockmanager->add_region('another-region', false);
         // Validate.
-        $this->assertEquals(array('a-region-name', 'another-region'), $this->blockmanager->get_regions(), '', 0, 10, true);
+        $this->assertEqualsCanonicalizing(array('a-region-name', 'another-region'), $this->blockmanager->get_regions());
     }
 
     /**
@@ -145,7 +145,7 @@ class core_blocklib_testcase extends advanced_testcase {
         // Exercise SUT.
         $this->blockmanager->add_regions($regions);
         // Validate.
-        $this->assertEquals($regions, $this->blockmanager->get_regions(), '', 0, 10, true);
+        $this->assertEqualsCanonicalizing($regions, $this->blockmanager->get_regions());
         $this->assertTrue(isset($SESSION->custom_block_regions));
         $this->assertArrayHasKey('phpunit-block-test', $SESSION->custom_block_regions);
         $this->assertTrue(in_array('another-custom-region', $SESSION->custom_block_regions['phpunit-block-test']));
@@ -159,10 +159,9 @@ class core_blocklib_testcase extends advanced_testcase {
         $this->blockmanager->add_region('a-custom-region-name');
         $this->blockmanager->add_region('another-custom-region');
         // Validate.
-        $this->assertEquals(
+        $this->assertEqualsCanonicalizing(
             array('a-custom-region-name', 'another-custom-region'),
-            $this->blockmanager->get_regions(),
-            '', 0, 10, true
+            $this->blockmanager->get_regions()
         );
     }
 
@@ -205,17 +204,17 @@ class core_blocklib_testcase extends advanced_testcase {
     }
 
     public function test_matching_page_type_patterns() {
-        $this->assertEquals(array('site-index', 'site-index-*', 'site-*', '*'),
-            matching_page_type_patterns('site-index'), '', 0, 10, true);
+        $this->assertEqualsCanonicalizing(array('site-index', 'site-index-*', 'site-*', '*'),
+            matching_page_type_patterns('site-index'));
 
-        $this->assertEquals(array('mod-quiz-report-overview', 'mod-quiz-report-overview-*', 'mod-quiz-report-*', 'mod-quiz-*', 'mod-*', '*'),
-            matching_page_type_patterns('mod-quiz-report-overview'), '', 0, 10, true);
+        $this->assertEqualsCanonicalizing(array('mod-quiz-report-overview', 'mod-quiz-report-overview-*', 'mod-quiz-report-*', 'mod-quiz-*', 'mod-*', '*'),
+            matching_page_type_patterns('mod-quiz-report-overview'));
 
-        $this->assertEquals(array('mod-forum-view', 'mod-*-view', 'mod-forum-view-*', 'mod-forum-*', 'mod-*', '*'),
-            matching_page_type_patterns('mod-forum-view'), '', 0, 10, true);
+        $this->assertEqualsCanonicalizing(array('mod-forum-view', 'mod-*-view', 'mod-forum-view-*', 'mod-forum-*', 'mod-*', '*'),
+            matching_page_type_patterns('mod-forum-view'));
 
-        $this->assertEquals(array('mod-forum-index', 'mod-*-index', 'mod-forum-index-*', 'mod-forum-*', 'mod-*', '*'),
-            matching_page_type_patterns('mod-forum-index'), '', 0, 10, true);
+        $this->assertEqualsCanonicalizing(array('mod-forum-index', 'mod-*-index', 'mod-forum-index-*', 'mod-forum-*', 'mod-*', '*'),
+            matching_page_type_patterns('mod-forum-index'));
     }
 
     protected function get_a_page_and_block_manager($regions, $context, $pagetype, $subpage = '') {
@@ -772,6 +771,61 @@ return;
         $this->assertEquals($sitestickyblock3->id, $mybr[5]->instance->id);
         $this->assertEquals('8', $mybr[5]->instance->weight);
         $PAGE = $storedpage;
+    }
+
+    /**
+     * Test that invlid values in block names are handled correctly
+     */
+    public function test_block_add_block_ui_names_handling() {
+        global $OUTPUT, $USER;
+        $this->resetAfterTest(true);
+
+        $this->setAdminUser();
+        $USER->editing = true;
+        $syscontext = context_system::instance();
+        [$page, $blockmanager] = $this->get_a_page_and_block_manager(['side-pre'], $syscontext, 'page-type');
+
+        // Mock blocks.
+        $blocks = new core_blocklib_test_blocks_mock();
+        $reflection = new ReflectionClass($page);
+        $property = $reflection->getProperty("_blocks");
+        $property->setAccessible(true);
+        $property->setValue($page, $blocks);
+
+        block_add_block_ui($page, $OUTPUT);
+        /**
+         * @var page_requirements_manager $requirements
+         */
+        $requirements = $page->requires;
+
+        $code = implode(';', $requirements->get_raw_amd_js_code());
+
+        // Current UTF-8 fixer will recover invalid UTF-8 sequence with "1".
+        $this->assertContains('{"blockname":"name1","blocktitle":"title1"}', $code);
+        $this->assertContains('{"blockname":"invalid21","blocktitle":"title2"}', $code);
+        $this->assertContains('{"blockname":"title3","blocktitle":"invalid31"}', $code);
+        $this->assertContains('{"blockname":"name4","blocktitle":"title4"}', $code);
+
+        // Confirm that default region works correctly.
+        $this->assertContains('"default-region"', $code);
+    }
+}
+
+/**
+ * Class for mocking moodle_page::_blocks property which implements methods requrie to call test_block_add_block_ui_names_handling
+ */
+class core_blocklib_test_blocks_mock {
+    public function get_addable_blocks() {
+        return [
+            (object)['name' => 'name1', 'title' => 'title1'],
+            (object)['name' => 'invalid2' . "\xB1\x31", 'title' => 'title2'],
+            (object)['name' => 'title3', 'title' => 'invalid3'. "\xB1\x31"],
+            (object)['name' => 'name4', 'title' => 'title4']
+        ];
+    }
+
+    public function get_default_region() {
+        return 'default-region';
     }
 }
 

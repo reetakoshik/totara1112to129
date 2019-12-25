@@ -232,8 +232,9 @@ function core_myprofile_navigation(core_user\output\myprofile\tree $tree, $user,
     }
 
     if (isset($identityfields['idnumber']) && $user->idnumber) {
+        // TOTARA - Escape potential XSS in idnumber field.
         $node = new core_user\output\myprofile\node('contact', 'idnumber', get_string('idnumber'), null, null,
-            $user->idnumber);
+            s($user->idnumber));
         $tree->add_node($node);
     }
 

@@ -156,11 +156,14 @@ function get_schedule_form_data (\core\task\scheduled_task $task) {
  * Save the totara_sync scheduled task given form data.
  *
  * @param object $data Object containing the frequency and schedule.
- *
+ * @param \core\task\scheduled_task $task Task to save data from form against.
  */
-function save_scheduled_task_from_form ($data) {
-    // Create instance of the task so we can change config.
-    $task = \core\task\manager::get_scheduled_task('\totara_core\task\tool_totara_sync_task');
+function save_scheduled_task_from_form ($data, \core\task\scheduled_task $task = null) {
+
+    if (!isset($task)) {
+        // Default to the overall totara sync task for backwards compatibility.
+        $task = \core\task\manager::get_scheduled_task('\totara_core\task\tool_totara_sync_task');
+    }
 
     if (isset($data->frequency) && isset($data->schedule)) {
         switch ($data->frequency) {

@@ -12,8 +12,7 @@ Feature: Switch role does not cause an error message in assignsubmission_comment
       | course | user     | role           |
       | C1     | teacher1 | editingteacher |
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Assignment" to section "1" and I fill the form with:
       | Assignment name           | Test assignment              |
       | Description               | This is the description text |

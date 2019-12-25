@@ -61,6 +61,12 @@ class customfield_checkbox extends customfield_base {
      * Display the data for this field
      */
     static function display_item_data($data, $extradata=array()) {
+
+        // Exporting 0 or 1
+        if (!empty($extradata['isexport'])) {
+            return (string)intval($data);
+        }
+
         if (intval($data) === 1) {
             return get_string('yes');
         } else {
@@ -91,5 +97,23 @@ class customfield_checkbox extends customfield_base {
 
         return $syncitem;
 
+    }
+
+    /**
+     * Does some extra pre-processing for totara sync uploads.
+     *
+     * @param  object $itemnew The item being saved
+     * @return object          The same item after processing
+     */
+    public function sync_data_preprocess($syncitem) {
+        $fieldname = $this->inputname;
+
+        if (!isset($syncitem->$fieldname)) {
+            return $syncitem;
+        }
+
+        $syncitem->{$fieldname} = clean_param($syncitem->{$fieldname}, PARAM_INT);
+
+        return $syncitem;
     }
 }

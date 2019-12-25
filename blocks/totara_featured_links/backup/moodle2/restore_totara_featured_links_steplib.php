@@ -32,6 +32,7 @@ class restore_totara_featured_links_block_structure_step extends restore_block_i
         $paths = [];
 
         $paths[] = new restore_path_element('tiles', '/block/tiles');
+        $paths[] = new restore_path_element('subtiles', '/block/tiles/gallery/subtiles');
         $paths[] = new restore_path_element('tilesvisibility', '/block/tiles/tilesvisibility');
 
         return $paths;
@@ -48,12 +49,34 @@ class restore_totara_featured_links_block_structure_step extends restore_block_i
         $oldid = $data->id;
         $data->blockid = $this->task->get_blockid();
         $data->userid  = $USER->id;
+        $data->timecreated = time();
+        $data->timemodified= time();
         $newid = $DB->insert_record('block_totara_featured_links_tiles', $data);
         // Restore block fileareas.
         $this->set_mapping('tiles', $oldid, $newid, true);
         $this->add_related_files('block_totara_featured_links', 'tile_background',  'tiles');
         $this->add_related_files('block_totara_featured_links', 'tile_backgrounds', 'tiles');
+    }
 
+    public function process_subtiles($data) {
+        global $DB, $USER;
+
+        $data = (object)$data;
+        if (empty($data)) {
+            return;
+        }
+
+        $oldid = $data->id;
+        $data->blockid  = $this->task->get_blockid();
+        $data->userid   = $USER->id;
+        $data->parentid = $this->get_new_parentid('tiles');
+        $data->timecreated = time();
+        $data->timemodified= time();
+        $newid = $DB->insert_record('block_totara_featured_links_tiles', $data);
+        // Restore block fileareas.
+        $this->set_mapping('subtiles', $oldid, $newid, true);
+        $this->add_related_files('block_totara_featured_links', 'tile_background',  'subtiles');
+        $this->add_related_files('block_totara_featured_links', 'tile_backgrounds', 'subtiles');
     }
 
     public function process_tilesvisibility($data) {

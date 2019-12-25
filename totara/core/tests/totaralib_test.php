@@ -18,8 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author Yuliya Bozhko <yuliya.bozhko@totaralms.com>
- * @package totara
- * @subpackage totaracore
+ * @package totara_core
  */
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.'); // It must be included from a Moodle page.
@@ -30,11 +29,15 @@ require_once($CFG->dirroot . '/totara/hierarchy/prefix/position/lib.php');
 require_once($CFG->dirroot . '/totara/core/lib.php');
 require_once($CFG->dirroot . '/completion/cron.php');
 
-class totaralib_test extends advanced_testcase {
+class totara_core_totaralib_testcase extends advanced_testcase {
     protected $user, $manager, $teamleader, $appraiser, $invaliduserid = 9999;
 
     protected function tearDown() {
         $this->user = null;
+        $this->manager = null;
+        $this->teamleader = null;
+        $this->appraiser = null;
+
         parent::tearDown();
     }
 
@@ -51,76 +54,6 @@ class totaralib_test extends advanced_testcase {
             array('managerjaid' => $teamleaderja->id));
         \totara_job\job_assignment::create_default($this->user->id,
             array('managerjaid' => $managerja->id, 'appraiserid' => $this->appraiser->id));
-    }
-
-    public function test_totara_is_manager() {
-        $this->resetAfterTest();
-
-        // Totara_is_manager should return true when there is a role assignment for managerid at the user context for userid.
-        $this->assertTrue(totara_is_manager($this->user->id, $this->manager->id));
-        $this->assertDebuggingCalled('The function totara_is_manager has been deprecated since 9.0. Please use \totara_job\job_assignment::is_managing instead.');
-
-        // Totara_is_manager should return false when there is not role assignment record for managerid on userid's user context.
-        $this->assertFalse(totara_is_manager($this->user->id, $this->invaliduserid));
-        $this->assertDebuggingCalled('The function totara_is_manager has been deprecated since 9.0. Please use \totara_job\job_assignment::is_managing instead.');
-        $this->assertFalse(totara_is_manager($this->user->id, $this->appraiser->id));
-        $this->assertDebuggingCalled('The function totara_is_manager has been deprecated since 9.0. Please use \totara_job\job_assignment::is_managing instead.');
-        $this->assertFalse(totara_is_manager($this->user->id, $this->teamleader->id));
-        $this->assertDebuggingCalled('The function totara_is_manager has been deprecated since 9.0. Please use \totara_job\job_assignment::is_managing instead.');
-    }
-
-    public function test_totara_get_manager() {
-        $this->resetAfterTest();
-
-        // Return value should be user object.
-        $this->assertEquals(totara_get_manager($this->user->id)->id, $this->manager->id);
-        $this->assertDebuggingCalled('totara_get_manager has been deprecated since 9.0. You will need to use methods from \totara_job\job_assignment instead.');
-
-        // Totara_get_manager returns get_record_sql. expecting false here.
-        $this->assertFalse(totara_get_manager($this->teamleader->id));
-        $this->assertDebuggingCalled('totara_get_manager has been deprecated since 9.0. You will need to use methods from \totara_job\job_assignment instead.');
-    }
-
-    public function test_totara_get_teamleader() {
-        $this->resetAfterTest();
-
-        // Return value should be user object.
-        $this->assertEquals($this->teamleader->id, totara_get_teamleader($this->user->id)->id);
-        // debugging called more than once so can't use assertDebuggingCalled.
-        $debugging = $this->getDebuggingMessages();
-        $this->assertCount(3, $debugging);
-        $this->resetDebugging();
-
-
-        // Totara_get_manager returns get_record_sql. expecting false here.
-        $this->assertFalse(totara_get_teamleader($this->manager->id));
-        $debugging = $this->getDebuggingMessages();
-        $this->assertCount(3, $debugging);
-        $this->resetDebugging();
-    }
-
-    public function test_totara_get_appraiser() {
-        $this->resetAfterTest();
-
-        // Return value should be user object.
-        $this->assertEquals($this->appraiser->id, totara_get_appraiser($this->user->id)->id);
-        $this->assertDebuggingCalled('totara_get_appraiser is deprecated. Use \totara_job\job_assignment methods instead.');
-
-        // Totara_get_manager returns get_record_sql. expecting false here.
-        $this->assertFalse(totara_get_appraiser($this->manager->id));
-        $this->assertDebuggingCalled('totara_get_appraiser is deprecated. Use \totara_job\job_assignment methods instead.');
-    }
-
-    public function test_totara_get_staff() {
-        $this->resetAfterTest();
-
-        // Expect array of id numbers.
-        $this->assertEquals(array($this->user->id), totara_get_staff($this->manager->id));
-        $this->assertDebuggingCalled('totara_get_staff has been deprecated since 9.0. Use \totara_job\job_assignment::get_staff_userids instead.');
-
-        // Expect false when the 'managerid' being inspected has no staff.
-        $this->assertFalse(totara_get_staff($this->user->id));
-        $this->assertDebuggingCalled('totara_get_staff has been deprecated since 9.0. Use \totara_job\job_assignment::get_staff_userids instead.');
     }
 
     public function test_totara_create_icon_picker() {
@@ -172,7 +105,7 @@ class totaralib_test extends advanced_testcase {
         $this->assertEquals('admin', totara_get_sender_from_user_by_id('')->username);
 
         $this->assertEquals('noreply', totara_get_sender_from_user_by_id(core_user::NOREPLY_USER)->username);
-        $this->assertEquals('facetoface', totara_get_sender_from_user_by_id(\mod_facetoface\facetoface_user::FACETOFACE_USER)->username);
+        $this->assertEquals('noreply', totara_get_sender_from_user_by_id(\mod_facetoface\facetoface_user::FACETOFACE_USER)->username);
 
         $user1 = $this->getDataGenerator()->create_user(array('username' => 'testuser1'));
         $user2 = $this->getDataGenerator()->create_user(array('email' => 'testuser2@test.com'));

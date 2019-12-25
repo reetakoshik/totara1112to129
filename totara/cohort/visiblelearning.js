@@ -90,17 +90,12 @@ M.totara_cohortvisiblelearning = M.totara_cohortvisiblelearning || {
 
         // Pressing the delete button should just sending an AJAX to the server here, and
         // should remove the row after ajax has been done.
-        $(tableselector).on('click', ".learning-delete", function(event) {
-            if (document.body.id === 'page-admin-totara-cohort-visiblelearning') {
-                // Do nothing if this is the embeded report as that is handled elsewhere
-                return;
-            }
+        $(tableselector).on('click', ".cohort-association-visible-delete", function(event) {
             event.preventDefault();
             var self = this;
-            var url = $(self).attr('href');
-
+            var url = self.href;
             var confirmed = confirm(M.util.get_string('deletelearningconfirm', 'totara_cohort'));
-            var parent = $(self).closest('tr');
+            var parent = self.closest('tr');
 
             if (!confirmed) {
                 return;
@@ -112,8 +107,8 @@ M.totara_cohortvisiblelearning = M.totara_cohortvisiblelearning || {
                 beforeSend: function() {
                     require(['core/templates'], function(templates) {
                         templates.renderIcon('loading', M.util.get_string('savingrule', 'totara_cohort')).done(function(html) {
-                            if ($(self).parent() !== undefined) {
-                                $(self).parent().html(html);
+                            if (self.parentNode !== undefined) {
+                                self.parentNode.innerHTML = html;
                             }
                         });
                     });

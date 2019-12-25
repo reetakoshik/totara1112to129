@@ -35,8 +35,7 @@ Feature: As a teacher I need to see an accurate list of subscribed users
       | grouping | group |
       | GG1      | G1    |
     And I log in as "teacher"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
 
   @javascript
   Scenario: A forced forum lists all subscribers
@@ -77,7 +76,7 @@ Feature: As a teacher I need to see an accurate list of subscribed users
     And I should see "Student 1"
     And I should see "Student 2"
     And I should see "Student 3"
-    And I should not see "Turn editing on"
+    And I should not see "Manage subscriptions"
 
   Scenario: A forced and hidden forum lists only teachers
     When I add a "Forum" to section "1" and I fill the form with:
@@ -139,7 +138,7 @@ Feature: As a teacher I need to see an accurate list of subscribed users
       | Subscription mode | Optional subscription          |
     And I follow "Subscription Forum 1"
     And I navigate to "Show/edit current subscribers" in current page administration
-    And I press "Turn editing on"
+    And I press "Manage subscriptions"
     Then I should see "Student 1" in the "potentialsubscribers" "select"
     And I should see "Student 2" in the "potentialsubscribers" "select"
     And I should see "Student 3" in the "potentialsubscribers" "select"
@@ -150,7 +149,7 @@ Feature: As a teacher I need to see an accurate list of subscribed users
     And I should not see "Teacher Teacher" in the "existingsubscribers" "select"
 
     When I set the field "potentialsubscribers" to "Student 2 (student.2@example.com)"
-    And I press "Add"
+    And I press exact "subscribe"
     Then I should see "Student 1" in the "potentialsubscribers" "select"
     And I should not see "Student 2" in the "potentialsubscribers" "select"
     And I should see "Student 3" in the "potentialsubscribers" "select"

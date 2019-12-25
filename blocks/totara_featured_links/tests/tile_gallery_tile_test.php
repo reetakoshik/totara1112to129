@@ -22,6 +22,9 @@
  */
 
 
+use block_totara_featured_links\tile\base;
+use block_totara_featured_links\tile\gallery_tile;
+
 require_once('test_helper.php');
 
 defined('MOODLE_INTERNAL') || die();
@@ -45,91 +48,94 @@ class block_totara_featured_links_tile_gallery_tile_testcase extends test_helper
         $this->blockgenerator = $this->getDataGenerator()->get_plugin_generator('block_totara_featured_links');
     }
 
+    public function tearDown() {
+        parent::tearDown();
+        $this->blockgenerator = null;
+    }
+
     /**
      * Makes sure that the saving works properly cause this is different from the default tile.
      */
     public function test_tile_custom_save() {
-        global $DB, $CFG;
+        global $DB;
         $this->resetAfterTest();
-        $this->setAdminUser();
         $instance = $this->blockgenerator->create_instance();
         $tile1 = $this->blockgenerator->create_gallery_tile($instance->id);
         $data = new \stdClass();
         $data->type = 'block_totara_featured_links-gallery_tile';
         $data->sortorder = 4;
-        $data->url = 'www.example.com';
-        $data->heading = 'some heading';
-        $data->textbody = 'some textbody';
-        $data->background_color = '#123abc';
-        $data->alt_text = 'This is some alternative text';
+        $data->interval = 10;
 
         $tile1->save_content($data);
-        $tile_real = new \block_totara_featured_links\tile\gallery_tile($DB->get_record('block_totara_featured_links_tiles', ['id' => $tile1->id]));
-
-        $this->assertSame('some heading', $this->get_protected_property($tile_real, 'data')->heading);
-        $this->assertSame('some textbody',  $this->get_protected_property($tile_real, 'data')->textbody);
-        $this->assertSame('#123abc',  $this->get_protected_property($tile_real, 'data')->background_color);
-        $this->assertSame('This is some alternative text',  $this->get_protected_property($tile_real, 'data')->alt_text);
-        // Checks urls without wwwroot, /, http:// or https:// get http:// appended to them.
-        $this->assertSame('http://www.example.com',  $this->get_protected_property($tile_real, 'data')->url);
-        // Check wwwroot identification.
-        $data->url = $CFG->wwwroot . '/';
-        $tile1->save_content($data);
-        $tile_real = new \block_totara_featured_links\tile\gallery_tile($DB->get_record('block_totara_featured_links_tiles', ['id' => $tile1->id]));
-        $this->assertSame('/',  $this->get_protected_property($tile_real, 'data')->url);
-        // Check urls that are to be left alone are.
-        $data->url = '/www.example.com';
-        $tile1->save_content($data);
-        $tile_real = new \block_totara_featured_links\tile\gallery_tile($DB->get_record('block_totara_featured_links_tiles', ['id' => $tile1->id]));
-        $this->assertSame('/www.example.com',  $this->get_protected_property($tile_real, 'data')->url);
-        // Makes sure urls with https:// do not get http:// appended to them.
-        $data->url = 'https://www.example.com';
-        $tile1->save_content($data);
-        $tile_real = new \block_totara_featured_links\tile\gallery_tile($DB->get_record('block_totara_featured_links_tiles', ['id' => $tile1->id]));
-        $this->assertSame('https://www.example.com',  $this->get_protected_property($tile_real, 'data')->url);
+        $tile_real = new block_totara_featured_links\tile\gallery_tile($DB->get_record('block_totara_featured_links_tiles', ['id' => $tile1->id]));
+        $this->assertSame(10,  $this->get_protected_property($tile_real, 'data')->interval);
     }
 
     /**
-     * Checks that the file can be uploaded and then rendered
-     * does not check that the tile can save an image
+     * Makes sure all the sub tiles are retrieved from the database correctly.
      */
-    public function test_render_file() {
-        global $CFG , $PAGE;
+    public function test_get_subtiles() {
+        global $DB;
+        $this->resetAfterTest();
+
+        $instance = $this->blockgenerator->create_instance();
+        $gallerytile = $this->blockgenerator->create_gallery_tile($instance->id);
+
+        $statictile1 = $this->blockgenerator->create_default_tile($instance->id);
+        $statictile2 = $this->blockgenerator->create_default_tile($instance->id);
+        $statictile3 = $this->blockgenerator->create_default_tile($instance->id);
+
+        $statictile1->parentid = $gallerytile->id;
+        $statictile2->parentid = $gallerytile->id;
+        $statictile3->parentid = $gallerytile->id;
+
+        $DB->update_record('block_totara_featured_links_tiles', $statictile1);
+        $DB->update_record('block_totara_featured_links_tiles', $statictile2);
+        $DB->update_record('block_totara_featured_links_tiles', $statictile3);
+
+        $gallerytile = base::get_tile_instance($gallerytile->id);
+
+        $subtiles = $gallerytile->get_subtiles();
+        $this->assertEquals(3, count($subtiles));
+        $expected_subtiles = [$statictile1->id, $statictile2->id, $statictile3->id];
+
+        foreach ($subtiles as $subtile) {
+            $this->assertTrue(in_array($subtile->id, $expected_subtiles));
+            unset($expected_subtiles[array_search($subtile->id, $expected_subtiles)]);
+        }
+        $this->assertEquals(0, count($expected_subtiles));
+    }
+
+    /**
+     * When a gallery tile is empty is should only be shown in edit mode.
+     */
+    public function test_render_hide_when_no_subtiles() {
+        global $DB, $PAGE;
         $PAGE->set_url('/');
         $this->resetAfterTest();
+        $this->setAdminUser();
+
         $instance = $this->blockgenerator->create_instance();
-        $tile1 = $this->blockgenerator->create_gallery_tile($instance->id);
-        $context = \context_block::instance($instance->id);
+        $gallerytile = $this->blockgenerator->create_gallery_tile($instance->id);
 
-        $file_url = $CFG->dirroot.'/blocks/totara_featured_links/tests/fixtures/test.png';
-        $fs = get_file_storage();
-        $file_record = ['contextid' => $context->__get('id'),
-        'component' => 'block_totara_featured_links',
-        'filearea' => 'tile_backgrounds',
-        'itemid' => 123456,
-        'filepath' => '/',
-        'filename' => 'background.png',
-        'timecreated' => time(),
-        'timemodified' => time()];
-        $fs->create_file_from_pathname($file_record, $file_url);
+        $emptycontent = $gallerytile->render_content_wrapper($PAGE->get_renderer('core'),
+            ['editing' => false]);
+        $this->assertEquals('', $emptycontent);
+        $nonemptycontent = $gallerytile->render_content_wrapper($PAGE->get_renderer('core'),
+            ['editing' => true]);
+        $this->assertNotEquals('', $nonemptycontent);
 
-        $files = $fs->get_area_files($context->__get('id'),
-            'block_totara_featured_links',
-            'tile_backgrounds',
-            123456,
-            '',
-            false);
-        foreach ($files as $file) {
-            $data = $this->get_protected_property($tile1, 'data');
-            $data->background_imgs[] = $file->get_filename();
-            $this->set_protected_property($tile1, 'data', $data);
-        }
+        $subtile = $this->blockgenerator->create_default_tile($instance->id);
+        $subtile->parentid = $gallerytile->id;
+        $DB->update_record('block_totara_featured_links_tiles', $subtile);
 
-        $this->call_protected_method($tile1, 'encode_data');
-        $this->call_protected_method($tile1, 'decode_data');
+        $this->refresh_tiles($gallerytile);
 
-        $content = $tile1->render_content_wrapper($PAGE->get_renderer('core'), []);
-        $this->assertContains('background-image: url', $content);
-        $this->assertContains($this->get_protected_property($tile1, 'data')->background_imgs[0], $content);
+        $nonemptycontent = $gallerytile->render_content_wrapper($PAGE->get_renderer('core'),
+            ['editing' => false]);
+        $this->assertNotEquals('', $nonemptycontent);
+        $nonemptycontent = $gallerytile->render_content_wrapper($PAGE->get_renderer('core'),
+            ['editing' => true]);
+        $this->assertNotEquals('', $nonemptycontent);
     }
 }

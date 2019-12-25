@@ -27,6 +27,22 @@ defined('MOODLE_INTERNAL') || die();
  * Tests for Totara functionality added to DML database drivers.
  */
 class totara_core_dml_testcase extends database_driver_testcase {
+    protected $olddboptions = null;
+
+    public function tearDown() {
+        // Set our dboptions back to their initial values.
+        if (isset($this->olddboptions)) {
+            $reflection = new ReflectionClass($this->tdb);
+            $property = $reflection->getProperty('dboptions');
+            $property->setAccessible(true);
+            $property->setValue($this->tdb, $this->olddboptions);
+            $property->setAccessible(false);
+            $this->olddboptions = null;
+        }
+
+        parent::tearDown();
+    }
+
     public function test_get_in_or_equal() {
         $DB = $this->tdb;
         $dbman = $DB->get_manager();
@@ -912,5 +928,1025 @@ ORDER BY tt1.groupid";
      */
     public static function trueFalseProvider() {
         return [[true], [false]];
+    }
+
+    /**
+     * Override a dboption for tests.
+     *
+     * @param string $name  The name of the option (for example, ftslanguage)
+     * @param mixed  $value New value that the option should have
+     */
+    protected function override_dboption(string $name, $value) {
+        $DB = $this->tdb;
+
+        if (!isset($this->olddboptions)) {
+            $cfg = $DB->export_dbconfig();
+            if (!empty($cfg->dboptions)) {
+                $this->olddboptions = $cfg->dboptions;
+            } else {
+                $this->olddboptions = [];
+            }
+        }
+
+        $reflection = new ReflectionClass($DB);
+        $property = $reflection->getProperty('dboptions');
+        $property->setAccessible(true);
+        $dboptions = $property->getValue($DB);
+        $dboptions[$name] = $value;
+        $property->setValue($DB, $dboptions);
+        $property->setAccessible(false);
+    }
+
+    /**
+     * Oh well, MS SQL Server needs time to index the data, we need to wait a few seconds.
+     * @param string $tablename
+     */
+    public function wait_for_mssql_fts_indexing(string $tablename) {
+        $DB = $this->tdb;
+
+        if ($DB->get_dbfamily() !== 'mssql') {
+            return;
+        }
+
+        /** @var sqlsrv_native_moodle_database $DB */
+        $done = $DB->fts_wait_for_indexing($tablename, 10);
+        $this->assertTrue($done);
+    }
+
+    public function test_override_dboption() {
+        $DB = $this->tdb;
+
+        $lang = $DB->get_ftslanguage();
+        $fts3b = $DB->get_fts3bworkaround();
+        $inparams = $DB->get_max_in_params();
+
+        $this->assertNotNull($inparams);
+        $this->assertNotNull($lang);
+        $this->assertNotNull($fts3b);
+
+        $this->override_dboption('maxinparams', 234);
+        $this->assertSame(234, $DB->get_max_in_params());
+
+        $this->override_dboption('ftslanguage', $lang . 'xyz');
+        $this->assertSame($lang . 'xyz', $DB->get_ftslanguage());
+
+        $this->override_dboption('ftslanguage', $lang);
+        $this->assertSame($lang, $DB->get_ftslanguage());
+
+        $this->override_dboption('fts3bworkaround', true);
+        $this->assertSame(true, $DB->get_fts3bworkaround());
+
+        $this->override_dboption('fts3bworkaround', $fts3b);
+        $this->assertSame($fts3b, $DB->get_fts3bworkaround());
+
+        $this->override_dboption('fts3bworkaround', false);
+        $this->assertSame(false, $DB->get_fts3bworkaround());
+
+        $this->override_dboption('maxinparams', $inparams);
+        $this->assertSame($inparams, $DB->get_max_in_params());
+    }
+
+    /**
+     * Make sure the full text search indexes are created and visible.
+     */
+    public function test_get_indexes_full_text_search() {
+        $DB = $this->tdb;
+        $dbman = $this->tdb->get_manager();
+
+        $tablename = 'test_table';
+        $table = new xmldb_table($tablename);
+
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('course', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('high', XMLDB_TYPE_TEXT, null, null, null, null);
+        $table->add_field('low', XMLDB_TYPE_TEXT, null, null, null, null);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_index('course', XMLDB_INDEX_NOTUNIQUE, array('course'));
+        $table->add_index('course-id', XMLDB_INDEX_UNIQUE, array('course', 'id'));
+        $table->add_index('high', XMLDB_INDEX_NOTUNIQUE, array('high'), array('full_text_search'));
+        $table->add_index('low', XMLDB_INDEX_NOTUNIQUE, array('low'), array('full_text_search'));
+        $dbman->create_table($table);
+
+        $indices = $DB->get_indexes($tablename);
+        $this->assertIsArray($indices);
+        $this->assertCount(4, $indices);
+
+        // Ignore the index names here.
+
+        $coursex = null;
+        $courseidx = null;
+        $highx = null;
+        $lowx = null;
+        foreach ($indices as $index) {
+            if ($index['columns'] === array('course')) {
+                $coursex = (object)$index;
+                continue;
+            }
+            if ($index['columns'] === array('course', 'id')) {
+                $courseidx = (object)$index;
+                continue;
+            }
+            if ($index['columns'] === array('high')) {
+                $highx = (object)$index;
+                continue;
+            }
+            if ($index['columns'] === array('low')) {
+                $lowx = (object)$index;
+                continue;
+            }
+        }
+        $this->assertNotNull($coursex);
+        $this->assertNotNull($courseidx);
+        $this->assertNotNull($highx);
+        $this->assertNotNull($lowx);
+
+        $this->assertFalse($coursex->unique);
+        $this->assertTrue($courseidx->unique);
+        $this->assertFalse($highx->unique);
+        $this->assertFalse($lowx->unique);
+
+        $this->assertFalse($coursex->fulltextsearch);
+        $this->assertFalse($courseidx->fulltextsearch);
+        $this->assertTrue($highx->fulltextsearch);
+        $this->assertTrue($lowx->fulltextsearch);
+
+        $dbman->drop_table($table);
+    }
+
+    public function test_unformat_fts_content() {
+        $DB = $this->tdb;
+        $content = "Lorem <span class='xyz'>Ipsum</span> dolor<br/>sit amet.\n\n* ABC\n* def __xyz__ &amp; *opq*";
+        $this->assertSame($content, $DB->unformat_fts_content($content, FORMAT_PLAIN));
+        $this->assertSame("Lorem Ipsum dolor\nsit amet.\n\n* ABC\n* def __xyz__ & *opq*", $DB->unformat_fts_content($content, FORMAT_HTML));
+        $this->assertSame("Lorem Ipsum dolor\nsit amet.\n\n* ABC\n* def __xyz__ & *opq*", $DB->unformat_fts_content($content, FORMAT_MOODLE));
+        $this->assertSame("Lorem Ipsum dolor\nsit amet.\n\n ABC\n def xyz & opq ", $DB->unformat_fts_content($content, FORMAT_MARKDOWN));
+        $this->assertNull($DB->unformat_fts_content(null, FORMAT_HTML));
+    }
+
+    public function test_get_fts_subquery() {
+        $DB = $this->tdb;
+        $dbman = $this->tdb->get_manager();
+
+        $coursetable = 'test_table_course';
+        $table = new xmldb_table($coursetable);
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('visible', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('fullname', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('shortname', XMLDB_TYPE_CHAR, '100', null, null, null, null);
+        $table->add_field('summary', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('summaryformat', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $dbman->create_table($table);
+
+        $coursesearchtable = 'test_table_course_search';
+        $table = new xmldb_table($coursesearchtable);
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('fullname', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('shortname', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('summary', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('courseid', XMLDB_KEY_FOREIGN, array('courseid'), 'course', array('id'));
+        $table->add_index('fullname', XMLDB_INDEX_NOTUNIQUE, array('fullname'), array('full_text_search'));
+        $table->add_index('shortname', XMLDB_INDEX_NOTUNIQUE, array('shortname'), array('full_text_search'));
+        $table->add_index('summary', XMLDB_INDEX_NOTUNIQUE, array('summary'), array('full_text_search'));
+        $dbman->create_table($table);
+
+        // Create some fake courses.
+        $now = time();
+        $courses = array();
+        $courses[0] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Old style PHP development',
+            'shortname' => 'Old PHP',
+            'summary' => '<p>Good old times when <strong>web applications</strong> were single pages written purely in PHP.<p>',
+            'summaryformat' => FORMAT_HTML,
+            'timemodified' => $now,
+        ));
+        $courses[1] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'New PHP frameworks',
+            'shortname' => 'Frameworks',
+            'summary' => 'Fancy new PHP frameworks that can be used to build some great systems.',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'timemodified' => $now,
+        ));
+        $courses[2] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Web development basics',
+            'shortname' => 'Basics',
+            'summary' => 'Quick overview of different approaches to building of modern web applications including PHP, Ajax, REST, Node, Ruby and other fancy stuff.',
+            'summaryformat' => FORMAT_MOODLE,
+            'timemodified' => $now,
+        ));
+        $courses[3] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Javascript rulez',
+            'shortname' => 'JS',
+            'summary' => 'Nothing is impossible with JavaScript! Prepare to be amazed how great this ancient language can be when used for the good of mankind.',
+            'summaryformat' => FORMAT_MOODLE,
+            'timemodified' => $now,
+        ));
+        $courses[4] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Future of development with PHP',
+            'shortname' => 'PHP666',
+            'summary' => 'Should we use PHP for any new projects? Some x xx stuff.',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'visible' => 0,
+            'timemodified' => $now,
+        ));
+        $courses[5] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Course with null data',
+            'shortname' => null,
+            'summary' => null,
+            'summaryformat' => FORMAT_MARKDOWN,
+            'visible' => 0,
+            'timemodified' => $now,
+        ));
+        $courses[6] = $DB->insert_record($coursetable, (object)array( // Czech test course.
+            'fullname' => 'Žluťoučký koníček',
+            'shortname' => 'Koníček',
+            'summary' => 'Šíleně žluťoučký koníček úpěl ďábelské ódy.',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'timemodified' => $now,
+        ));
+        $courses[7] = $DB->insert_record($coursetable, (object)array( // Russian test course.
+            'fullname' => 'Выставка достижений народного хозяйства',
+            'shortname' => 'ВДНХ',
+            'summary' => 'Learn more about the former trade show in Moscow',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'timemodified' => $now,
+        ));
+        $courses[8] = $DB->insert_record($coursetable, (object)array( // Japanese test course - something about a dog and tree (hopefully).
+            'fullname' => '犬と木', // Dog and tree.
+            'shortname' => '犬', // Dog.
+            'summary' => 'Psíček uviděl stromeček. = Dog saw a tree. = 犬が木を見た。',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'timemodified' => $now,
+        ));
+        $courses[9] = $DB->insert_record($coursetable, (object)array( // Hebrew.
+            'fullname' => 'שיעורי ספורט', // Sport courses
+            'shortname' => null,
+            'summary' => 'שיעורי ספורט מיועדים לבני נוער שמעוניינים לשפר את כישוריהם האתלטיים. הקורס ייפתח באוגוסט הבא',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'timemodified' => $now,
+        ));
+
+        // NOTE: the results may be different if there are only a few records in the search table,
+        //       this is because the databases may ignore words that are repeated in all rows.
+        foreach ($courses as $i => $id) {
+            $courses[$i] = $DB->get_record($coursetable, array('id' => $id), '*', MUST_EXIST);
+        }
+
+        // Fill the course search table with data, these will have to be kept in sync via events in real code.
+        foreach ($courses as $i => $course) {
+            $record = new stdClass();
+            $record->courseid = $course->id;
+            $record->fullname = $DB->unformat_fts_content($course->fullname, FORMAT_HTML); // This is not plain text because it may have multilang!
+            $record->shortname = $DB->unformat_fts_content($course->shortname, FORMAT_HTML); // This is not plain text because it may have multilang!
+            $record->summary = $DB->unformat_fts_content($course->summary, $course->summaryformat);
+            $record->timemodified = time(); // Keep track of last update.
+            $DB->insert_record($coursesearchtable, $record);
+        }
+        $this->wait_for_mssql_fts_indexing($coursesearchtable);
+
+        // One column only.
+        list($ftssql, $params) = $DB->get_fts_subquery($coursesearchtable, ['fullname' => 1], 'php');
+        $this->assertIsString($ftssql);
+        $this->assertIsArray($params);
+        $sql = "SELECT c.*, fts.score
+                  FROM {{$coursesearchtable}} cs
+                  JOIN {$ftssql} fts ON fts.id = cs.id
+                  JOIN {{$coursetable}} c ON c.id = cs.courseid
+                 WHERE c.visible = 1
+              ORDER BY fts.score DESC, c.fullname ASC";
+        $result = $DB->get_records_sql($sql, $params);
+        $this->assertSame(array((int)$courses[1]->id, (int)$courses[0]->id), array_keys($result));
+
+        // Three columns ranked.
+        list($ftssql, $params) = $DB->get_fts_subquery($coursesearchtable, ['shortname' => 100, 'fullname' => 10, 'summary' => 1], 'php');
+        $this->assertIsString($ftssql);
+        $this->assertIsArray($params);
+        $sql = "SELECT c.*, fts.score
+                  FROM {{$coursesearchtable}} cs
+                  JOIN {$ftssql} fts ON fts.id = cs.id
+                  JOIN {{$coursetable}} c ON c.id = cs.courseid
+                 WHERE c.visible = 1
+              ORDER BY fts.score DESC, c.fullname ASC";
+        $result = $DB->get_records_sql($sql, $params);
+        $this->assertSame(array((int)$courses[0]->id, (int)$courses[1]->id, (int)$courses[2]->id), array_keys($result));
+
+        // Three columns ranked with null values
+        list($ftssql, $params) = $DB->get_fts_subquery($coursesearchtable, ['shortname' => 100, 'fullname' => 10, 'summary' => 1], 'null data');
+        $this->assertIsString($ftssql);
+        $this->assertIsArray($params);
+        $sql = "SELECT c.*, fts.score
+                  FROM {{$coursesearchtable}} cs
+                  JOIN {$ftssql} fts ON fts.id = cs.id
+                  JOIN {{$coursetable}} c ON c.id = cs.courseid
+              ORDER BY fts.score DESC, c.fullname ASC";
+        $result = $DB->get_records_sql($sql, $params);
+        $this->assertSame(array((int)$courses[5]->id), array_keys($result));
+
+        // Empty search.
+        $this->assertDebuggingNotCalled();
+        list($ftssql, $params) = $DB->get_fts_subquery($coursesearchtable, ['shortname' => 100, 'fullname' => 10, 'summary' => 1], ' ');
+        $this->assertDebuggingCalled('Full text search text is empty, developers should make sure user entered something.');
+        $this->assertIsString($ftssql);
+        $this->assertIsArray($params);
+        $sql = "SELECT c.*, fts.score
+                  FROM {{$coursesearchtable}} cs
+                  JOIN {$ftssql} fts ON fts.id = cs.id
+                  JOIN {{$coursetable}} c ON c.id = cs.courseid
+                 WHERE c.visible = 1
+              ORDER BY fts.score DESC, c.fullname ASC";
+        $result = $DB->get_records_sql($sql, $params);
+        $this->assertCount(0, $result);
+
+        // Search too short.
+        list($ftssql, $params) = $DB->get_fts_subquery($coursesearchtable, ['shortname' => 100, 'fullname' => 10, 'summary' => 1], 'x');
+        $this->assertIsString($ftssql);
+        $this->assertIsArray($params);
+        $sql = "SELECT c.*, fts.score
+                  FROM {{$coursesearchtable}} cs
+                  JOIN {$ftssql} fts ON fts.id = cs.id
+                  JOIN {{$coursetable}} c ON c.id = cs.courseid
+                 WHERE c.visible = 1
+              ORDER BY fts.score DESC, c.fullname ASC";
+        $result = $DB->get_records_sql($sql, $params);
+        $this->assertCount(0, $result);
+        list($ftssql, $params) = $DB->get_fts_subquery($coursesearchtable, ['shortname' => 100, 'fullname' => 10, 'summary' => 1], 'xx');
+        $this->assertIsString($ftssql);
+        $this->assertIsArray($params);
+        $sql = "SELECT c.*, fts.score
+                  FROM {{$coursesearchtable}} cs
+                  JOIN {$ftssql} fts ON fts.id = cs.id
+                  JOIN {{$coursetable}} c ON c.id = cs.courseid
+                 WHERE c.visible = 1
+              ORDER BY fts.score DESC, c.fullname ASC";
+        $result = $DB->get_records_sql($sql, $params);
+        $this->assertCount(0, $result);
+
+        // Search for an incomplete word should not match anything,
+        // this proves full text search is not good for autocompletion!
+        list($ftssql, $params) = $DB->get_fts_subquery($coursesearchtable, ['shortname' => 100, 'fullname' => 10, 'summary' => 1], 'Java');
+        $this->assertIsString($ftssql);
+        $this->assertIsArray($params);
+        $sql = "SELECT c.*, fts.score
+                  FROM {{$coursesearchtable}} cs
+                  JOIN {$ftssql} fts ON fts.id = cs.id
+                  JOIN {{$coursetable}} c ON c.id = cs.courseid
+                 WHERE c.visible = 1
+              ORDER BY fts.score DESC, c.fullname ASC";
+        $result = $DB->get_records_sql($sql, $params);
+        $this->assertCount(0, $result);
+
+        // Search one phrase.
+        list($ftssql, $params) = $DB->get_fts_subquery($coursesearchtable, ['fullname' => 1], '"PHP development"');
+        $this->assertIsString($ftssql);
+        $this->assertIsArray($params);
+        $sql = "SELECT c.*, fts.score
+                  FROM {{$coursesearchtable}} cs
+                  JOIN {$ftssql} fts ON fts.id = cs.id
+                  JOIN {{$coursetable}} c ON c.id = cs.courseid
+              ORDER BY fts.score DESC, c.id DESC";
+        $result = $DB->get_records_sql($sql, $params);
+        $count = count($result);
+        $this->assertGreaterThanOrEqual(1, $count);
+        $first = reset($result);
+        $this->assertEquals($first->id, $courses[0]->id);
+        // NOTE: pg is not great with phrase searching, especially in old versions < 9.6,
+        //       MS SQL Server may return more results too.
+        $this->assertLessThanOrEqual(4, $count);
+
+        // Other languages: Czech.
+        list($ftssql, $params) = $DB->get_fts_subquery($coursesearchtable, ['summary' => 1], 'žluťoučký koníček');
+        $this->assertIsString($ftssql);
+        $this->assertIsArray($params);
+        $sql = "SELECT c.*, fts.score
+                  FROM {{$coursesearchtable}} cs
+                  JOIN {$ftssql} fts ON fts.id = cs.id
+                  JOIN {{$coursetable}} c ON c.id = cs.courseid
+                 WHERE c.visible = 1
+              ORDER BY fts.score DESC, c.fullname ASC";
+        $result = $DB->get_records_sql($sql, $params);
+        $this->assertCount(1, $result);
+        $this->assertSame(array((int)$courses[6]->id), array_keys($result));
+
+        // Other languages: Russian.
+        list($ftssql, $params) = $DB->get_fts_subquery($coursesearchtable, ['fullname' => 1], 'достижений народного');
+        $this->assertIsString($ftssql);
+        $this->assertIsArray($params);
+        $sql = "SELECT c.*, fts.score
+                  FROM {{$coursesearchtable}} cs
+                  JOIN {$ftssql} fts ON fts.id = cs.id
+                  JOIN {{$coursetable}} c ON c.id = cs.courseid
+                 WHERE c.visible = 1
+              ORDER BY fts.score DESC, c.fullname ASC";
+        $result = $DB->get_records_sql($sql, $params);
+        $this->assertCount(1, $result);
+        $this->assertSame(array((int)$courses[7]->id), array_keys($result));
+
+        // RTL languages: Hebrew
+        list($ftssql, $params) = $DB->get_fts_subquery($coursesearchtable, ['summary' => 1], 'שיעורי ספורט');
+        $this->assertIsString($ftssql);
+        $this->assertIsArray($params);
+        $sql = "SELECT c.*, fts.score
+                  FROM {{$coursesearchtable}} cs
+                  JOIN {$ftssql} fts ON fts.id = cs.id
+                  JOIN {{$coursetable}} c ON c.id = cs.courseid
+                 WHERE c.visible = 1
+              ORDER BY fts.score DESC, c.fullname ASC";
+        $result = $DB->get_records_sql($sql, $params);
+        $this->assertCount(1, $result);
+        $this->assertSame(array((int)$courses[9]->id), array_keys($result));
+
+        $dbman->drop_table(new xmldb_table($coursetable));
+        $dbman->drop_table(new xmldb_table($coursesearchtable));
+    }
+
+    /**
+     * Test that PHP Intl extension works properly.
+     */
+    public function test_word_breaking_for_search() {
+        $i = IntlBreakIterator::createWordInstance('en_AU');
+        $i->setText('Psíček uviděl stromeček. = Dog saw a tree.');
+        $words = array();
+        foreach ($i->getPartsIterator() as $word) {
+            $words[] = $word;
+        }
+        $this->assertSame('Psíček/ /uviděl/ /stromeček/./ /=/ /Dog/ /saw/ /a/ /tree/.', implode('/', $words));
+    }
+
+    /**
+     * Test that PHP Intl extension works properly.
+     */
+    public function test_word_breaking_for_search_complex() {
+        if (!defined('INTL_ICU_VERSION') or version_compare('57', INTL_ICU_VERSION, '>')) {
+            // Most likely RedHat with outdated ICU.
+            $this->markTestSkipped('Outdated ICU detected');
+        }
+
+        $i = IntlBreakIterator::createWordInstance('en_AU');
+        $i->setText('Psíček uviděl stromeček. : Dog saw a tree. : 犬が木を見た。 : 狗看到树');
+        $words = array();
+        foreach($i->getPartsIterator() as $word) {
+            $words[] = $word;
+        }
+        $this->assertSame('Psíček/ /uviděl/ /stromeček/./ /:/ /Dog/ /saw/ /a/ /tree/./ /:/ /犬/が/木/を/見/た/。/ /:/ /狗/看到/树', implode('/', $words));
+    }
+
+    public function test_apply_fts_3b_workaround() {
+        $DB = $this->tdb;
+
+        if (!defined('INTL_ICU_VERSION') or version_compare('57', INTL_ICU_VERSION, '>')) {
+            // Most likely RedHat with outdated ICU.
+            $this->markTestSkipped('Outdated ICU detected');
+        }
+
+        $result = $DB->apply_fts_3b_workaround('Psíček uviděl stromeček. : Dog saw a tree. : 犬が木を見た。 : 狗看到树');
+        $expected = 'Psíček uviděl stromeček. : Dog saw a tree. :  犬xx  がxx  木xx  をxx  見xx  たxx   :  狗xx  看到xx  树xx ';
+        $this->assertSame($expected, $result);
+    }
+
+    public function test_get_fts_subquery_japanese() {
+        $DB = $this->tdb;
+        $dbman = $this->tdb->get_manager();
+        $dbfamily = $DB->get_dbfamily();
+
+        if ($dbfamily !== 'mssql') {
+            if (!defined('INTL_ICU_VERSION') or version_compare('57', INTL_ICU_VERSION, '>')) {
+                // Most likely RedHat with outdated ICU.
+                $this->markTestSkipped('Outdated ICU detected');
+            }
+        }
+
+        if ($dbfamily === 'postgres') {
+            $this->override_dboption('ftslanguage', 'english');
+            $this->override_dboption('fts3bworkaround', true);
+        } else if ($dbfamily === 'mysql') {
+            $this->override_dboption('fts3bworkaround', true);
+        } else if ($dbfamily === 'mssql') {
+            $this->override_dboption('ftslanguage', 'Japanese');
+            $this->override_dboption('fts3bworkaround', false);
+        }
+
+        $coursetable = 'test_table_course';
+        $table = new xmldb_table($coursetable);
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('visible', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('fullname', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('shortname', XMLDB_TYPE_CHAR, '100', null, null, null, null);
+        $table->add_field('summary', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('summaryformat', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $dbman->create_table($table);
+
+        $coursesearchtable = 'test_table_course_search';
+        $table = new xmldb_table($coursesearchtable);
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('fullname', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('shortname', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('summary', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('courseid', XMLDB_KEY_FOREIGN, array('courseid'), 'course', array('id'));
+        $table->add_index('fullname', XMLDB_INDEX_NOTUNIQUE, array('fullname'), array('full_text_search'));
+        $table->add_index('shortname', XMLDB_INDEX_NOTUNIQUE, array('shortname'), array('full_text_search'));
+        $table->add_index('summary', XMLDB_INDEX_NOTUNIQUE, array('summary'), array('full_text_search'));
+        $dbman->create_table($table);
+
+        // Create some fake courses.
+        $now = time();
+        $courses = array();
+        $courses[0] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Old style PHP development',
+            'shortname' => 'Old PHP',
+            'summary' => '<p>Good old times when <strong>web applications</strong> were single pages written purely in PHP.<p>',
+            'summaryformat' => FORMAT_HTML,
+            'timemodified' => $now,
+        ));
+        $courses[1] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'New PHP frameworks',
+            'shortname' => 'Frameworks',
+            'summary' => 'Fancy new PHP frameworks that can be used to build some great systems.',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'timemodified' => $now,
+        ));
+        $courses[2] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Web development basics',
+            'shortname' => 'Basics',
+            'summary' => 'Quick overview of different approaches to building of modern web applications including PHP, Ajax, REST, Node, Ruby and other fancy stuff.',
+            'summaryformat' => FORMAT_MOODLE,
+            'timemodified' => $now,
+        ));
+        $courses[3] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Javascript rulez',
+            'shortname' => 'JS',
+            'summary' => 'Nothing is impossible with JavaScript! Prepare to be amazed how great this ancient language can be when used for the good of mankind.',
+            'summaryformat' => FORMAT_MOODLE,
+            'timemodified' => $now,
+        ));
+        $courses[4] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Future of development with PHP',
+            'shortname' => 'PHP666',
+            'summary' => 'Should we use PHP for any new projects?',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'visible' => 0,
+            'timemodified' => $now,
+        ));
+        $courses[5] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Course with null data',
+            'shortname' => null,
+            'summary' => null,
+            'summaryformat' => FORMAT_MARKDOWN,
+            'visible' => 0,
+            'timemodified' => $now,
+        ));
+        $courses[6] = $DB->insert_record($coursetable, (object)array( // Czech test course.
+            'fullname' => 'Žluťoučký koníček',
+            'shortname' => 'Koníček',
+            'summary' => 'Šíleně žluťoučký koníček úpěl ďábelské ódy.',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'timemodified' => $now,
+        ));
+        $courses[7] = $DB->insert_record($coursetable, (object)array( // Russian test course.
+            'fullname' => 'Выставка достижений народного хозяйства',
+            'shortname' => 'ВДНХ',
+            'summary' => 'Learn more about the former trade show in Moscow',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'timemodified' => $now,
+        ));
+        $courses[8] = $DB->insert_record($coursetable, (object)array( // Japanese test course - something about a dog and tree (hopefully).
+            'fullname' => '犬と木', // Dog and tree.
+            'shortname' => '犬', // Dog.
+            'summary' => 'Psíček uviděl stromeček. = Dog saw a tree. = 犬が木を見た。',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'timemodified' => $now,
+        ));
+        // NOTE: the results may be different if there are only a few records in the search table,
+        //       this is because the databases may ignore words that are repeated in all rows.
+        foreach ($courses as $i => $id) {
+            $courses[$i] = $DB->get_record($coursetable, array('id' => $id), '*', MUST_EXIST);
+        }
+
+        // Fill the course search table with data, these will have to be kept in sync via events in real code.
+        foreach ($courses as $i => $course) {
+            $record = new stdClass();
+            $record->courseid = $course->id;
+            $record->fullname = $DB->unformat_fts_content($course->fullname, FORMAT_HTML); // This is not plain text because it may have multilang!
+            $record->shortname = $DB->unformat_fts_content($course->shortname, FORMAT_HTML); // This is not plain text because it may have multilang!
+            $record->summary = $DB->unformat_fts_content($course->summary, $course->summaryformat);
+            $record->timemodified = time(); // Keep track of last update.
+            $DB->insert_record($coursesearchtable, $record);
+        }
+        $this->wait_for_mssql_fts_indexing($coursesearchtable);
+
+        list($ftssql, $params) = $DB->get_fts_subquery($coursesearchtable, ['summary' => 1], '犬');
+        $this->assertIsString($ftssql);
+        $this->assertIsArray($params);
+        $sql = "SELECT c.*, fts.score
+                  FROM {{$coursesearchtable}} cs
+                  JOIN {$ftssql} fts ON fts.id = cs.id
+                  JOIN {{$coursetable}} c ON c.id = cs.courseid
+                 WHERE c.visible = 1
+              ORDER BY fts.score DESC, c.fullname ASC";
+        $result = $DB->get_records_sql($sql, $params);
+        $this->assertCount(1, $result);
+        $this->assertSame(array((int)$courses[8]->id), array_keys($result));
+
+        // Not sure if it is correct, but MS SQL Server does not search for these two without space.
+        list($ftssql, $params) = $DB->get_fts_subquery($coursesearchtable, ['summary' => 1], '犬 木');
+        $this->assertIsString($ftssql);
+        $this->assertIsArray($params);
+        $sql = "SELECT c.*, fts.score
+                  FROM {{$coursesearchtable}} cs
+                  JOIN {$ftssql} fts ON fts.id = cs.id
+                  JOIN {{$coursetable}} c ON c.id = cs.courseid
+                 WHERE c.visible = 1
+              ORDER BY fts.score DESC, c.fullname ASC";
+        $result = $DB->get_records_sql($sql, $params);
+        $this->assertCount(1, $result);
+        $this->assertSame(array((int)$courses[8]->id), array_keys($result));
+
+        $dbman->drop_table(new xmldb_table($coursetable));
+        $dbman->drop_table(new xmldb_table($coursesearchtable));
+    }
+
+    public function test_get_fts_subquery_chinese_traditional() {
+        $DB = $this->tdb;
+        $dbman = $this->tdb->get_manager();
+        $dbfamily = $DB->get_dbfamily();
+
+        if ($dbfamily !== 'mssql') {
+            if (!defined('INTL_ICU_VERSION') or version_compare('57', INTL_ICU_VERSION, '>')) {
+                // Most likely RedHat with outdated ICU.
+                $this->markTestSkipped('Outdated ICU detected');
+            }
+        }
+
+        if ($dbfamily === 'postgres') {
+            $this->override_dboption('ftslanguage', 'english');
+            $this->override_dboption('fts3bworkaround', true);
+        } else if ($dbfamily === 'mysql') {
+            $this->override_dboption('fts3bworkaround', true);
+        } else if ($dbfamily === 'mssql') {
+            $this->override_dboption('ftslanguage', 1028); // Traditional Chinese
+            $this->override_dboption('fts3bworkaround', false);
+        }
+
+        $coursetable = 'test_table_course';
+        $table = new xmldb_table($coursetable);
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('visible', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('fullname', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('shortname', XMLDB_TYPE_CHAR, '100', null, null, null, null);
+        $table->add_field('summary', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('summaryformat', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $dbman->create_table($table);
+
+        $coursesearchtable = 'test_table_course_search';
+        $table = new xmldb_table($coursesearchtable);
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('fullname', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('shortname', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('summary', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('courseid', XMLDB_KEY_FOREIGN, array('courseid'), 'course', array('id'));
+        $table->add_index('fullname', XMLDB_INDEX_NOTUNIQUE, array('fullname'), array('full_text_search'));
+        $table->add_index('shortname', XMLDB_INDEX_NOTUNIQUE, array('shortname'), array('full_text_search'));
+        $table->add_index('summary', XMLDB_INDEX_NOTUNIQUE, array('summary'), array('full_text_search'));
+        $dbman->create_table($table);
+
+        // Create some fake courses.
+        $now = time();
+        $courses = array();
+        $courses[0] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Old style PHP development',
+            'shortname' => 'Old PHP',
+            'summary' => '<p>Good old times when <strong>web applications</strong> were single pages written purely in PHP.<p>',
+            'summaryformat' => FORMAT_HTML,
+            'timemodified' => $now,
+        ));
+        $courses[1] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'New PHP frameworks',
+            'shortname' => 'Frameworks',
+            'summary' => 'Fancy new PHP frameworks that can be used to build some great systems.',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'timemodified' => $now,
+        ));
+        $courses[2] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Web development basics',
+            'shortname' => 'Basics',
+            'summary' => 'Quick overview of different approaches to building of modern web applications including PHP, Ajax, REST, Node, Ruby and other fancy stuff.',
+            'summaryformat' => FORMAT_MOODLE,
+            'timemodified' => $now,
+        ));
+        $courses[3] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Javascript rulez',
+            'shortname' => 'JS',
+            'summary' => 'Nothing is impossible with JavaScript! Prepare to be amazed how great this ancient language can be when used for the good of mankind.',
+            'summaryformat' => FORMAT_MOODLE,
+            'timemodified' => $now,
+        ));
+        $courses[4] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Future of development with PHP',
+            'shortname' => 'PHP666',
+            'summary' => 'Should we use PHP for any new projects?',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'visible' => 0,
+            'timemodified' => $now,
+        ));
+        $courses[5] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Course with null data',
+            'shortname' => null,
+            'summary' => null,
+            'summaryformat' => FORMAT_MARKDOWN,
+            'visible' => 0,
+            'timemodified' => $now,
+        ));
+        $courses[6] = $DB->insert_record($coursetable, (object)array( // Czech test course.
+            'fullname' => 'Žluťoučký koníček',
+            'shortname' => 'Koníček',
+            'summary' => 'Šíleně žluťoučký koníček úpěl ďábelské ódy.',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'timemodified' => $now,
+        ));
+        $courses[7] = $DB->insert_record($coursetable, (object)array( // Russian test course.
+            'fullname' => 'Выставка достижений народного хозяйства',
+            'shortname' => 'ВДНХ',
+            'summary' => 'Learn more about the former trade show in Moscow',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'timemodified' => $now,
+        ));
+        $courses[8] = $DB->insert_record($coursetable, (object)array( // Chinese test course - something about a dog and tree (hopefully, blame Google translate if not).
+            'fullname' => '狗和樹', // Dog and tree.
+            'shortname' => '狗', // Dog.
+            'summary' => 'Psíček vidí stromeček. = Dog sees the tree. = 狗看到樹',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'timemodified' => $now,
+        ));
+        // NOTE: the results may be different if there are only a few records in the search table,
+        //       this is because the databases may ignore words that are repeated in all rows.
+        foreach ($courses as $i => $id) {
+            $courses[$i] = $DB->get_record($coursetable, array('id' => $id), '*', MUST_EXIST);
+        }
+
+        // Fill the course search table with data, these will have to be kept in sync via events in real code.
+        foreach ($courses as $i => $course) {
+            $record = new stdClass();
+            $record->courseid = $course->id;
+            $record->fullname = $DB->unformat_fts_content($course->fullname, FORMAT_HTML); // This is not plain text because it may have multilang!
+            $record->shortname = $DB->unformat_fts_content($course->shortname, FORMAT_HTML); // This is not plain text because it may have multilang!
+            $record->summary = $DB->unformat_fts_content($course->summary, $course->summaryformat);
+            $record->timemodified = time(); // Keep track of last update.
+            $DB->insert_record($coursesearchtable, $record);
+        }
+        $this->wait_for_mssql_fts_indexing($coursesearchtable);
+
+        list($ftssql, $params) = $DB->get_fts_subquery($coursesearchtable, ['summary' => 1], '狗');
+        $this->assertIsString($ftssql);
+        $this->assertIsArray($params);
+        $sql = "SELECT c.*, fts.score
+                  FROM {{$coursesearchtable}} cs
+                  JOIN {$ftssql} fts ON fts.id = cs.id
+                  JOIN {{$coursetable}} c ON c.id = cs.courseid
+                 WHERE c.visible = 1
+              ORDER BY fts.score DESC, c.fullname ASC";
+        $result = $DB->get_records_sql($sql, $params);
+        $this->assertCount(1, $result);
+        $this->assertSame(array((int)$courses[8]->id), array_keys($result));
+
+        // Not sure if it is correct, but MS SQL Server does not search for these two without space.
+        list($ftssql, $params) = $DB->get_fts_subquery($coursesearchtable, ['summary' => 1], '狗 樹');
+        $this->assertIsString($ftssql);
+        $this->assertIsArray($params);
+        $sql = "SELECT c.*, fts.score
+                  FROM {{$coursesearchtable}} cs
+                  JOIN {$ftssql} fts ON fts.id = cs.id
+                  JOIN {{$coursetable}} c ON c.id = cs.courseid
+                 WHERE c.visible = 1
+              ORDER BY fts.score DESC, c.fullname ASC";
+        $result = $DB->get_records_sql($sql, $params);
+        $this->assertCount(1, $result);
+        $this->assertSame(array((int)$courses[8]->id), array_keys($result));
+
+        $dbman->drop_table(new xmldb_table($coursetable));
+        $dbman->drop_table(new xmldb_table($coursesearchtable));
+    }
+
+    public function test_get_fts_subquery_chinese_simplified() {
+        $DB = $this->tdb;
+        $dbman = $this->tdb->get_manager();
+        $dbfamily = $DB->get_dbfamily();
+
+        if ($dbfamily !== 'mssql') {
+            if (!defined('INTL_ICU_VERSION') or version_compare('57', INTL_ICU_VERSION, '>')) {
+                // Most likely RedHat with outdated ICU.
+                $this->markTestSkipped('Outdated ICU detected');
+            }
+        }
+
+        if ($dbfamily === 'postgres') {
+            $this->override_dboption('ftslanguage', 'english');
+            $this->override_dboption('fts3bworkaround', true);
+        } else if ($dbfamily === 'mysql') {
+            $this->override_dboption('fts3bworkaround', true);
+        } else if ($dbfamily === 'mssql') {
+            $this->override_dboption('ftslanguage', 2052); // Simplified Chinese
+            $this->override_dboption('fts3bworkaround', false);
+        }
+
+        $coursetable = 'test_table_course';
+        $table = new xmldb_table($coursetable);
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('visible', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('fullname', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('shortname', XMLDB_TYPE_CHAR, '100', null, null, null, null);
+        $table->add_field('summary', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('summaryformat', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $dbman->create_table($table);
+
+        $coursesearchtable = 'test_table_course_search';
+        $table = new xmldb_table($coursesearchtable);
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('fullname', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('shortname', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('summary', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('courseid', XMLDB_KEY_FOREIGN, array('courseid'), 'course', array('id'));
+        $table->add_index('fullname', XMLDB_INDEX_NOTUNIQUE, array('fullname'), array('full_text_search'));
+        $table->add_index('shortname', XMLDB_INDEX_NOTUNIQUE, array('shortname'), array('full_text_search'));
+        $table->add_index('summary', XMLDB_INDEX_NOTUNIQUE, array('summary'), array('full_text_search'));
+        $dbman->create_table($table);
+
+        // Create some fake courses.
+        $now = time();
+        $courses = array();
+        $courses[0] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Old style PHP development',
+            'shortname' => 'Old PHP',
+            'summary' => '<p>Good old times when <strong>web applications</strong> were single pages written purely in PHP.<p>',
+            'summaryformat' => FORMAT_HTML,
+            'timemodified' => $now,
+        ));
+        $courses[1] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'New PHP frameworks',
+            'shortname' => 'Frameworks',
+            'summary' => 'Fancy new PHP frameworks that can be used to build some great systems.',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'timemodified' => $now,
+        ));
+        $courses[2] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Web development basics',
+            'shortname' => 'Basics',
+            'summary' => 'Quick overview of different approaches to building of modern web applications including PHP, Ajax, REST, Node, Ruby and other fancy stuff.',
+            'summaryformat' => FORMAT_MOODLE,
+            'timemodified' => $now,
+        ));
+        $courses[3] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Javascript rulez',
+            'shortname' => 'JS',
+            'summary' => 'Nothing is impossible with JavaScript! Prepare to be amazed how great this ancient language can be when used for the good of mankind.',
+            'summaryformat' => FORMAT_MOODLE,
+            'timemodified' => $now,
+        ));
+        $courses[4] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Future of development with PHP',
+            'shortname' => 'PHP666',
+            'summary' => 'Should we use PHP for any new projects?',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'visible' => 0,
+            'timemodified' => $now,
+        ));
+        $courses[5] = $DB->insert_record($coursetable, (object)array(
+            'fullname' => 'Course with null data',
+            'shortname' => null,
+            'summary' => null,
+            'summaryformat' => FORMAT_MARKDOWN,
+            'visible' => 0,
+            'timemodified' => $now,
+        ));
+        $courses[6] = $DB->insert_record($coursetable, (object)array( // Czech test course.
+            'fullname' => 'Žluťoučký koníček',
+            'shortname' => 'Koníček',
+            'summary' => 'Šíleně žluťoučký koníček úpěl ďábelské ódy.',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'timemodified' => $now,
+        ));
+        $courses[7] = $DB->insert_record($coursetable, (object)array( // Russian test course.
+            'fullname' => 'Выставка достижений народного хозяйства',
+            'shortname' => 'ВДНХ',
+            'summary' => 'Learn more about the former trade show in Moscow',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'timemodified' => $now,
+        ));
+        $courses[8] = $DB->insert_record($coursetable, (object)array( // Chinese test course - something about a dog and tree (hopefully, blame Google translate if not).
+            'fullname' => '狗和树', // Dog and tree.
+            'shortname' => '狗', // Dog.
+            'summary' => 'Psíček vidí stromeček. = Dog sees the tree. = 狗看到树',
+            'summaryformat' => FORMAT_MARKDOWN,
+            'timemodified' => $now,
+        ));
+        // NOTE: the results may be different if there are only a few records in the search table,
+        //       this is because the databases may ignore words that are repeated in all rows.
+        foreach ($courses as $i => $id) {
+            $courses[$i] = $DB->get_record($coursetable, array('id' => $id), '*', MUST_EXIST);
+        }
+
+        // Fill the course search table with data, these will have to be kept in sync via events in real code.
+        foreach ($courses as $i => $course) {
+            $record = new stdClass();
+            $record->courseid = $course->id;
+            $record->fullname = $DB->unformat_fts_content($course->fullname, FORMAT_HTML); // This is not plain text because it may have multilang!
+            $record->shortname = $DB->unformat_fts_content($course->shortname, FORMAT_HTML); // This is not plain text because it may have multilang!
+            $record->summary = $DB->unformat_fts_content($course->summary, $course->summaryformat);
+            $record->timemodified = time(); // Keep track of last update.
+            $DB->insert_record($coursesearchtable, $record);
+        }
+        $this->wait_for_mssql_fts_indexing($coursesearchtable);
+
+        list($ftssql, $params) = $DB->get_fts_subquery($coursesearchtable, ['summary' => 1], '狗');
+        $this->assertIsString($ftssql);
+        $this->assertIsArray($params);
+        $sql = "SELECT c.*, fts.score
+                  FROM {{$coursesearchtable}} cs
+                  JOIN {$ftssql} fts ON fts.id = cs.id
+                  JOIN {{$coursetable}} c ON c.id = cs.courseid
+                 WHERE c.visible = 1
+              ORDER BY fts.score DESC, c.fullname ASC";
+        $result = $DB->get_records_sql($sql, $params);
+        $this->assertCount(1, $result);
+        $this->assertSame(array((int)$courses[8]->id), array_keys($result));
+
+        // Not sure if it is correct, but MS SQL Server does not search for these two without space.
+        list($ftssql, $params) = $DB->get_fts_subquery($coursesearchtable, ['summary' => 1], '狗 树');
+        $this->assertIsString($ftssql);
+        $this->assertIsArray($params);
+        $sql = "SELECT c.*, fts.score
+                  FROM {{$coursesearchtable}} cs
+                  JOIN {$ftssql} fts ON fts.id = cs.id
+                  JOIN {{$coursetable}} c ON c.id = cs.courseid
+                 WHERE c.visible = 1
+              ORDER BY fts.score DESC, c.fullname ASC";
+        $result = $DB->get_records_sql($sql, $params);
+        $this->assertCount(1, $result);
+        $this->assertSame(array((int)$courses[8]->id), array_keys($result));
+
+        $dbman->drop_table(new xmldb_table($coursetable));
+        $dbman->drop_table(new xmldb_table($coursesearchtable));
+    }
+
+    /**
+     * Tests that recommends_counted_recordset returns the expected value.
+     *
+     * Expected results are thanks to performance testing completed for each database.
+     * For results on performance testing of paginated results see moodle_database class.
+     */
+    public function test_recommends_counted_recordset() {
+        global $DB;
+        $expected = false;
+        $dbfamily = $DB->get_dbvendor(); // Cannot use get_dbfamily() here because MariaDB returns 'mysql'.
+        if ($dbfamily === 'mariadb') {
+            $expected = true;
+        }
+        self::assertSame($expected, $DB->recommends_counted_recordset());
+    }
+
+    public function test_get_max_in_params() {
+        global $CFG;
+
+        $DB = $this->tdb;
+
+        // Basic check for default value.
+        if (empty($CFG->dboptions['maxinparams'])) {
+            self::assertEquals(30000, $DB->get_max_in_params());
+        } else {
+            self::assertEquals($CFG->dboptions['maxinparams'], $DB->get_max_in_params());
+        }
+
+        // Override 'maxinparams' in dboptions for this test.
+        $this->override_dboption('maxinparams', 100);
+
+        // Check we have a new value now.
+        self::assertEquals(100, $DB->get_max_in_params());
+
+        // Check get_in_or_equal() warns about exceeding maximum number allowed.
+        $params = range(1, 1000);
+        $DB->get_in_or_equal($params);
+        self::assertDebuggingCalled("The number of parameters passed (1000) exceeds maximum number allowed (100)", DEBUG_DEVELOPER);
+
+        // Check get_in_or_equal() passes with the maximum number allowed.
+        $params = range(1, 100);
+        $DB->get_in_or_equal($params);
+        self::assertDebuggingNotCalled();
     }
 }

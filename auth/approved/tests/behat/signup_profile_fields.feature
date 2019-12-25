@@ -12,7 +12,7 @@ Feature: auth_approved: signup with profile fields
       | registerauth | Self-registration with approval |
     And I press "Save changes"
 
-    And I navigate to "User profile fields" node in "Site administration > Users > Accounts"
+    And I navigate to "User profile fields" node in "Site administration > Users"
     And I set the following fields to these values:
       | datatype | checkbox |
     And I set the following fields to these values:

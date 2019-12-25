@@ -29,10 +29,13 @@ defined('MOODLE_INTERNAL') || die();
  * @param int $assetid
  *
  * @return mixed stdClass object or false if not found
+ * @deprecated since Totara 12
  */
 function facetoface_get_asset($assetid) {
     global $DB, $CFG;
     require_once($CFG->dirroot . '/totara/customfield/fieldlib.php');
+
+    debugging('facetoface_get_asset has been deprecated. Use new asset($id) instead.', DEBUG_DEVELOPER);
 
     if (!$assetid) {
         return false;
@@ -55,12 +58,16 @@ function facetoface_get_asset($assetid) {
  * @param stdClass|false $session non-false means we are editing existing session via ajax
  * @param callable $successhandler function($id) where $id is assetid
  * @param callable $cancelhandler
- * @return mod_facetoface_asset_form
+ * @return mod_facetoface\form\asset_edit
+ *
+ * @deprecated since Totara 12
  */
 function facetoface_process_asset_form($asset, $facetoface, $session, callable $successhandler, callable $cancelhandler = null) {
     global $DB, $TEXTAREA_OPTIONS, $USER, $CFG;
     require_once($CFG->dirroot . '/totara/customfield/fieldlib.php');
     require_once($CFG->dirroot . '/mod/facetoface/asset/asset_form.php');
+
+    debugging('facetoface_process_asset_form has been deprecated, this is now handled by the form', DEBUG_DEVELOPER);
 
     $editoroptions = $TEXTAREA_OPTIONS;
     if ($facetoface) {
@@ -91,7 +98,7 @@ function facetoface_process_asset_form($asset, $facetoface, $session, callable $
     $customdata['session'] = $session;
     $customdata['editoroptions'] = $editoroptions;
 
-    $form = new mod_facetoface_asset_form(null, $customdata, 'post', '', array('class' => 'dialog-nobind'), true, null, 'mform_modal');
+    $form = new \mod_facetoface\form\asset_edit(null, $customdata, 'post', '', array('class' => 'dialog-nobind'), true, null, 'mform_modal');
 
     if ($form->is_cancelled()) {
         if (is_callable($cancelhandler)) {
@@ -131,7 +138,6 @@ function facetoface_process_asset_form($asset, $facetoface, $session, callable $
          * $_customlocationfieldname added in @see customfield_location::edit_field_add()
          */
         if (property_exists($form->_form, '_customlocationfieldname')) {
-            // TODO: TL-9425 this hack is absolutely unacceptable!
             customfield_define_location::prepare_form_location_data_for_db($data, $form->_form->_customlocationfieldname);
         }
 
@@ -163,10 +169,14 @@ function facetoface_process_asset_form($asset, $facetoface, $session, callable $
  * If any session is still using this asset, the asset is unassigned.
  *
  * @param int $id
+ *
+ * @deprecated since Totara 12
  */
 function facetoface_delete_asset($id) {
     global $DB, $CFG;
     require_once("$CFG->dirroot/totara/customfield/fieldlib.php");
+
+    debugging('facetoface_delete_asset has been deprecated. Use \mod_facetoface\asset->delete() instead', DEBUG_DEVELOPER);
 
     $asset = $DB->get_record('facetoface_asset', array('id' => $id));
     if (!$asset) {
@@ -207,9 +217,13 @@ function facetoface_delete_asset($id) {
  * @param int $sessionid current session id, 0 if session is being created, all current session assets are always included
  * @param int $facetofaceid facetofaceid custom assets can be used in all dates of one seminar activity
  * @return stdClass[] assets
+ *
+ * @deprecated since Totara 12
  */
 function facetoface_get_available_assets($timestart, $timefinish, $fields='fa.*', $sessionid, $facetofaceid) {
     global $DB, $USER;
+
+    debugging('facetoface_get_available_assets has been deprecated. Use \mod_facetoface\asset_list::get_available() instead.', DEBUG_DEVELOPER);
 
     $params = array();
     $params['timestart'] = (int)$timestart;
@@ -308,9 +322,13 @@ function facetoface_get_available_assets($timestart, $timefinish, $fields='fa.*'
  * @param int $sessionid current session id, 0 if adding new session
  * @param int $facetofaceid current facetoface id
  * @return boolean
+ *
+ * @deprecated since Totara 12
  */
 function facetoface_is_asset_available($timestart, $timefinish, stdClass $asset, $sessionid, $facetofaceid) {
     global $DB, $USER;
+
+    debugging('facetoface_is_asset_available has been deprecated. Use \mod_facetoface\asset->is_available() instead', DEBUG_DEVELOPER);
 
     if ($asset->hidden) {
         // Hidden assets can be assigned only if they are already used in the session.
@@ -378,9 +396,13 @@ function facetoface_is_asset_available($timestart, $timefinish, stdClass $asset,
  *
  * @param int $assetid
  * @return bool
+ *
+ * @deprecated since Totara 12
  */
 function facetoface_asset_has_conflicts($assetid) {
     global $DB;
+
+    debugging('facetoface_asset_has_conflicts has been deprecated. Please use \mod_facetoface\asset->has_conflicts() instead.', DEBUG_DEVELOPER);
 
     $sql = "SELECT 'x'
               FROM {facetoface_sessions_dates} fsd

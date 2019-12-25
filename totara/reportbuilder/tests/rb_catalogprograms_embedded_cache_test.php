@@ -107,11 +107,8 @@ class totara_reportbuilder_rb_catalogprograms_embedded_cache_testcase extends re
      * - Enable op[2]-cf[1] and op2cf2 for program2
      * - Enable op<1> cf"1", op[2]-cf[1], op1cf2, op2cf2 for program3
      * - Program4 has no enabled customfield options
-     *
-     * @param int $usecache Use cache or not (1/0)
-     * @dataProvider provider_use_cache
      */
-    public function test_programs($usecache) {
+    public function test_programs() {
         $this->resetAfterTest();
 
         $cfgenerator = $this->getDataGenerator()->get_plugin_generator('totara_customfield');
@@ -129,9 +126,8 @@ class totara_reportbuilder_rb_catalogprograms_embedded_cache_testcase extends re
         $this->loadDataSet($this->createArrayDataSet(array(
                         'report_builder_filters' => $this->report_builder_cf_filters_data)));
 
-        if ($usecache) {
-            $this->enable_caching($this->report_builder_data['id']);
-        }
+        $usecache = false;
+        $this->enable_caching($this->report_builder_data['id']);
 
         // No restrictions.
         $result = $this->get_report_result($this->report_builder_data['shortname'], array(),

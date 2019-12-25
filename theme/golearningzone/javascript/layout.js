@@ -4,6 +4,7 @@ function Layout() {
 
 Layout.prototype = {
 	init: function() {
+				
 		var $totaraMyBlockLeft = $('#block-region-second-left .block_totara_my');
 		var $totaraMyBlockRight = $('#block-region-second-right .block_totara_my');
 		if ($totaraMyBlockLeft.length || $totaraMyBlockRight.length) {
@@ -186,3 +187,20 @@ Layout.prototype = {
     }
 }
 
+$(document).ready(function() {
+	//$(".navbar-toggle.collapsed").click(function() {
+		//$(".totara-navbar.navbar-collapse.collapse").removeAttr('class');
+		//$(".totara-navbar.navbar-collapse.collapse").attr('class','totara-navbar navbar-collapse collapse.open');
+		//$(this).addClass('tog-cancel');
+	//});
+	$('#glz_collapsebtn').click(function() {//alert('test123');
+		$(".totara-navbar.navbar-collapse.collapse").attr('class','totara-navbar navbar-collapse collapse.open');
+		//$(".totara-navbar.navbar-collapse.collapse").removeClass('.open');
+		//$(".totara-navbar.navbar-collapse.collapse").addClass('totara-navbar navbar-collapse collapse');
+		$(".container.container-fluid.text-left").toggle();
+	});
+	/*menu-btn-wrapper*/
+   
+
+
+});

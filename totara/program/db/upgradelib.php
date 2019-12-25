@@ -77,3 +77,22 @@ function totara_program_fix_timestarted() {
 
     return true;
 }
+
+/**
+ * Remove orphaned courseset completions from the program completion table
+ */
+function totara_program_remove_orphaned_courseset_completions() {
+    global $DB;
+
+    // Remove orphaned courseset completion records
+    $deletecompletionsql = 'DELETE FROM {prog_completion}
+                             WHERE coursesetid <> 0
+                               AND coursesetid NOT IN ( SELECT id
+                                                          FROM {prog_courseset}
+                                                      )
+                           ';
+
+    $DB->execute($deletecompletionsql);
+
+    return true;
+}

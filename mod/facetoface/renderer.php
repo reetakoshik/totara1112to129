@@ -21,6 +21,8 @@
  * @subpackage facetoface
  */
 
+use mod_facetoface\room;
+
 defined('MOODLE_INTERNAL') || die();
 
 class mod_facetoface_renderer extends plugin_renderer_base {
@@ -34,7 +36,6 @@ class mod_facetoface_renderer extends plugin_renderer_base {
      * It's assumed that these sessions are all from the same facetoface activity.
      *
      * *** If a session has been booked by the user ***
-     * Todo: We need a more intuitive api for this part.
      * If a session has been booked, then that one session should have a bookedsession property
      * containing that information. An appropriate object for this property would be the
      * first result from facetoface_get_user_submissions, obtained via array_shift.
@@ -57,7 +58,7 @@ class mod_facetoface_renderer extends plugin_renderer_base {
      * @throws coding_exception
      */
     public function print_session_list_table($sessions, $viewattendees, $editevents, $displaytimezones, $reserveinfo = array(),
-                                             $currenturl=null, $minimal = false, $returntoallsessions = true) {
+                                             $currenturl = null, $minimal = false, $returntoallsessions = true) {
         $output = '';
 
         if (empty($sessions)) {
@@ -111,18 +112,18 @@ class mod_facetoface_renderer extends plugin_renderer_base {
 
             $comp = '>='; // SQL comparison operator.
             if ($session->cancelledstatus) {
-                $status = MDL_F2F_STATUS_SESSION_CANCELLED;
+                $status = \mod_facetoface\signup\state\event_cancelled::get_code();
                 $comp = '=';
             } else if (!empty($session->sessiondates)) {
-                $status = MDL_F2F_STATUS_BOOKED;
+                $status = \mod_facetoface\signup\state\booked::get_code();
             } else {
-                $status = MDL_F2F_STATUS_WAITLISTED;
+                $status = \mod_facetoface\signup\state\waitlisted::get_code();
                 $comp = '=';
             }
             $signupcount = facetoface_get_num_attendees($session->id, $status, $comp);
             $sessionfull = ($signupcount >= $session->capacity);
 
-            $rooms = facetoface_get_session_rooms($session->id);
+            $rooms = \mod_facetoface\room_list::get_event_rooms($session->id);
 
             if (empty($session->sessiondates)) {
                 // An event without session dates, is a wait-listed event
@@ -168,7 +169,7 @@ class mod_facetoface_renderer extends plugin_renderer_base {
                 // given a rowspan value as they apply to the whole session rather than just the session date.
                 $datescount = count($session->sessiondates);
                 $firstsessiondate = true;
-                foreach($session->sessiondates as $date) {
+                foreach ($session->sessiondates as $date) {
                     $sessionrow = array();
                     if ($firstsessiondate && !$minimal) {
                         $sessionrow = array_merge($sessionrow, $this->session_customfield_table_cells($session, $customfields, $datescount));
@@ -183,9 +184,10 @@ class mod_facetoface_renderer extends plugin_renderer_base {
                     $sessiontimezonetext = !empty($displaytimezones) ? $sessionobj->timezone : '';
                     $sessionrow[] = $sessionobj->starttime . ' - ' . $sessionobj->endtime . ' ' . $sessiontimezonetext;
 
-                    if (!empty($date->roomid) && isset($rooms[$date->roomid])) {
-                        $room = $rooms[$date->roomid];
-                        $sessionrow[] = facetoface_room_html($room, $currenturl);
+                    if (!empty($date->roomid) && $rooms->contains($date->roomid)) {
+                        $room = $rooms->get((int)$date->roomid);
+                        $sessionrow[] = $this->get_room_details_html($room, $currenturl);
+
                     } else {
                         $sessionrow[] = '';
                     }
@@ -228,6 +230,119 @@ class mod_facetoface_renderer extends plugin_renderer_base {
         }
 
         $output .= $this->render($table);
+
+        return $output;
+    }
+
+    /**
+     * Print the list of a sessions
+     *
+     * @param \mod_facetoface\seminar $seminar
+     * @param $roomid
+     * @return string
+     */
+    public function print_session_list(\mod_facetoface\seminar $seminar, $roomid) {
+        global $USER, $OUTPUT, $PAGE;
+
+        $timenow = time();
+        $output = '';
+        $sessions = facetoface_get_sessions_where_timestart($seminar->get_id(), $roomid);
+
+        $viewattendees = has_capability('mod/facetoface:viewattendees', $this->context);
+        $editevents = has_capability('mod/facetoface:editevents', $this->context);
+
+        $bookedsession = null;
+        $submissions = facetoface_get_user_submissions($seminar->get_id(), $USER->id);
+        if (!$seminar->get_multiplesessions()) {
+            $submission = array_shift($submissions);
+            $bookedsession = $submission;
+        }
+
+        $upcomingarray = array();
+        $previousarray = array();
+
+        if ($sessions) {
+            foreach ($sessions as $session) {
+                $sessiondata = $session;
+                if ($seminar->get_multiplesessions()) {
+                    $submission = facetoface_get_user_submissions($seminar->get_id(), $USER->id,
+                        \mod_facetoface\signup\state\requested::get_code(), \mod_facetoface\signup\state\fully_attended::get_code(), $session->id);
+                    $bookedsession = array_shift($submission);
+                }
+                $sessiondata->bookedsession = $bookedsession;
+
+                // Is session waitlisted
+                if (!$session->cntdates) {
+                    $upcomingarray[] = $sessiondata;
+                } else {
+                    // Only sessions that are over should go to the previous session section.
+                    if (facetoface_is_session_over($session, $timenow)) {
+                        $previousarray[] = $sessiondata;
+                    } else {
+                        // Session is in progress or has not yet started.
+                        // Normal scheduled session.
+                        $upcomingarray[] = $sessiondata;
+                    }
+                }
+            }
+        }
+
+        $displaytimezones = get_config(null, 'facetoface_displaysessiontimezones');
+
+        if ($editevents) {
+            $output .= html_writer::link(
+                new moodle_url('events/add.php', array('f' => $seminar->get_id(), 'backtoallsessions' => 1)), get_string('addsession', 'facetoface'),
+                array('class' => 'btn btn-default')
+            );
+        }
+
+        // Upcoming sessions
+        $output .= $OUTPUT->heading(get_string('upcomingsessions', 'facetoface'), 3);
+        if (empty($upcomingarray)) {
+            $output .= html_writer::tag('p', $OUTPUT->flex_icon('info') . get_string('noresults', 'mod_facetoface'), array('class' => 'mod_facetoface__no-events-message'));
+        } else {
+            $reserveinfo = array();
+            if (!empty($seminar->get_managerreserve())) {
+                // Include information about reservations when drawing the list of sessions.
+                $reserveinfo = \mod_facetoface\reservations::can_reserve_or_allocate($seminar, $sessions, $this->context);
+                $output .= html_writer::tag('p', get_string('lastreservation', 'mod_facetoface', $seminar->get_properties()));
+            }
+
+            $sessionlist = $this->print_session_list_table(
+                $upcomingarray, $viewattendees, $editevents, $displaytimezones, $reserveinfo, $PAGE->url
+            );
+            $output .= html_writer::div($sessionlist, 'upcomingsessionlist');
+        }
+
+        // Previous sessions.
+        $output .= $OUTPUT->heading(get_string('previoussessions', 'mod_facetoface'), 3);
+        $timeperiod = (int)get_config(null, 'facetoface_previouseventstimeperiod');
+        if ($timeperiod != 0) {
+            $baseurl = $PAGE->url;
+            $roomid = optional_param('roomid', 0, PARAM_INT);
+            if ($roomid) {
+                $baseurl->param('roomid', $roomid);
+            }
+            $a = new stdClass();
+            if (!optional_param('allpreviousevents', false, PARAM_BOOL)) {
+                $a->days = $timeperiod;
+                $baseurl->param('allpreviousevents', '1');
+                $substr = 'showpreviousevents';
+            } else {
+                $substr = 'showingallpreviousevents';
+            }
+            $a->url = $baseurl->out();
+            $subtitle = get_string($substr, 'mod_facetoface', $a);
+            $output .= html_writer::tag('span', $subtitle);
+        }
+        $sessionlist = $this->print_session_list_table(
+            $previousarray, $viewattendees, $editevents, $displaytimezones, [], $PAGE->url
+        );
+        if (!empty($sessionlist)) {
+            $output .= html_writer::div($sessionlist, 'previoussessionlist');
+        } else {
+            $output .= html_writer::tag('p', $OUTPUT->flex_icon('info') . get_string('noresults', 'mod_facetoface'), array('class' => 'mod_facetoface__no-events-message'));
+        }
 
         return $output;
     }
@@ -288,7 +403,7 @@ class mod_facetoface_renderer extends plugin_renderer_base {
                 if ($signupcount > $session->capacity) {
                     $stats .= get_string('capacityoverbooked', 'facetoface');
                 }
-                $waitlisted = facetoface_get_num_attendees($session->id, MDL_F2F_STATUS_WAITLISTED) - $signupcount;
+                $waitlisted = facetoface_get_num_attendees($session->id, \mod_facetoface\signup\state\waitlisted::get_code()) - $signupcount;
                 if ($waitlisted > 0) {
                     $stats .= " (" . $waitlisted . " " . get_string('status_waitlisted', 'facetoface') . ")";
                 }
@@ -334,16 +449,16 @@ class mod_facetoface_renderer extends plugin_renderer_base {
         $isbookedsession = (!empty($session->bookedsession) && ($session->id == $session->bookedsession->sessionid));
         $timenow = time();
 
-        $status  = get_string('bookingopen', 'facetoface');
+        $status = get_string('bookingopen', 'facetoface');
         if (!empty($session->cancelledstatus)) {
-                $status = get_string('bookingsessioncancelled', 'facetoface');
+            $status = get_string('bookingsessioncancelled', 'facetoface');
         } else if (!empty($session->sessiondates) && facetoface_has_session_started($session, $timenow) && facetoface_is_session_in_progress($session, $timenow)) {
             $status = get_string('sessioninprogress', 'facetoface');
         } else if (!empty($session->sessiondates) && facetoface_has_session_started($session, $timenow)) {
             $status = get_string('sessionover', 'facetoface');
         } else if ($isbookedsession) {
-            $signupstatus = facetoface_get_status($session->bookedsession->statuscode);
-            $status = get_string('status_'.$signupstatus, 'facetoface');
+            $state = \mod_facetoface\signup\state\state::from_code($session->bookedsession->statuscode);
+            $status = $state::get_string();
         } else if ($signupcount >= $session->capacity) {
             $status = get_string('bookingfull', 'facetoface');
         } else if (!empty($session->registrationtimestart) && $session->registrationtimestart > $timenow) {
@@ -378,8 +493,8 @@ class mod_facetoface_renderer extends plugin_renderer_base {
      */
     private function session_resgistrationperiod_table_cell($session, $datescount = 0) {
         // Signup Start Dates/times.
-        if(!empty($session->registrationtimestart)) {
-            if(!empty($session->registrationtimefinish)) {
+        if (!empty($session->registrationtimestart)) {
+            if (!empty($session->registrationtimefinish)) {
                 $sessionobj = facetoface_format_session_times($session->registrationtimestart, $session->registrationtimefinish, '');
                 $registrationstring = get_string('signupstartend', 'facetoface', $sessionobj);
             } else {
@@ -390,7 +505,7 @@ class mod_facetoface_renderer extends plugin_renderer_base {
                 $registrationstring = get_string('signupstartsonly', 'facetoface', $start);
             }
         } else {
-            if(!empty($session->registrationtimefinish)) {
+            if (!empty($session->registrationtimefinish)) {
                 $finish = new stdClass();
                 $finish->enddate = userdate($session->registrationtimefinish, get_string('strftimedate', 'langconfig'));
                 $finish->endtime = userdate($session->registrationtimefinish, get_string('strftimetime', 'langconfig'));
@@ -449,7 +564,7 @@ class mod_facetoface_renderer extends plugin_renderer_base {
 
         // Can view attendees.
         if ($viewattendees) {
-            $options .= html_writer::link(new moodle_url('/mod/facetoface/attendees.php', array('s' => $session->id, 'backtoallsessions' => $bas)), get_string('attendees', 'facetoface'), array('title' => get_string('seeattendees', 'facetoface')));
+            $options .= html_writer::link(new moodle_url('/mod/facetoface/attendees/view.php', array('s' => $session->id, 'backtoallsessions' => $bas)), get_string('attendees', 'facetoface'), array('title' => get_string('seeattendees', 'facetoface')));
             $options .= html_writer::empty_tag('br');
         }
 
@@ -549,44 +664,41 @@ class mod_facetoface_renderer extends plugin_renderer_base {
         $currentime = time();
         if (isset($session->sessiondates)
             && facetoface_has_session_started($session, $currentime)
-                || facetoface_is_session_over($session, $currentime)) {
+            || facetoface_is_session_over($session, $currentime)) {
             return $reservelink;
         }
 
         // Output links to reserve/allocate spaces.
         if (!empty($reserveinfo)) {
             $sessreserveinfo = $reserveinfo;
+            $seminarevent = new \mod_facetoface\seminar_event($session->id);
             if (!$session->allowoverbook) {
-                $sessreserveinfo = facetoface_limit_reserveinfo_to_capacity_left($session->id, $sessreserveinfo,
+                $sessreserveinfo = \mod_facetoface\reservations::limit_info_to_capacity_left($seminarevent, $sessreserveinfo,
                     max(0, $session->capacity - $signupcount));
             }
-            $sessreserveinfo = facetoface_limit_reserveinfo_by_session_date($sessreserveinfo, $session);
+            $sessreserveinfo = \mod_facetoface\reservations::limit_info_by_session_date($seminarevent, $sessreserveinfo);
             if (!empty($sessreserveinfo['allocate']) && $sessreserveinfo['maxallocate'][$session->id] > 0) {
                 // Able to allocate and not used all allocations for other sessions.
-                $allocateurl = new moodle_url('/mod/facetoface/reserve.php', array('action' => 'allocate', 's' => $session->id,
-                    'backtoallsessions' => 1));
+                $allocateurl = new moodle_url('/mod/facetoface/reservations/allocate.php', ['s' => $session->id, 'backtoallsessions' => 1]);
                 $reservelink .= html_writer::link($allocateurl, get_string('allocate', 'mod_facetoface'));
-                $reservelink .= ' ('.$sessreserveinfo['allocated'][$session->id].'/'.$sessreserveinfo['maxallocate'][$session->id].')';
+                $reservelink .= ' (' . $sessreserveinfo['allocated'][$session->id] . '/' . $sessreserveinfo['maxallocate'][$session->id] . ')';
                 $reservelink .= html_writer::empty_tag('br');
             }
             if (!empty($sessreserveinfo['reserve']) && $sessreserveinfo['maxreserve'][$session->id] > 0) {
                 if (empty($sessreserveinfo['reservepastdeadline'])) {
-                    $reserveurl = new moodle_url('/mod/facetoface/reserve.php', array('action' => 'reserve', 's' => $session->id,
-                        'backtoallsessions' => 1));
+                    $reserveurl = new moodle_url('/mod/facetoface/reservations/reserve.php', ['s' => $session->id, 'backtoallsessions' => 1]);
                     $reservelink .= html_writer::link($reserveurl, get_string('reserve', 'mod_facetoface'));
-                    $reservelink .= ' ('.$sessreserveinfo['reserved'][$session->id].'/'.$sessreserveinfo['maxreserve'][$session->id].')';
+                    $reservelink .= ' (' . $sessreserveinfo['reserved'][$session->id] . '/' . $sessreserveinfo['maxreserve'][$session->id] . ')';
                     $reservelink .= html_writer::empty_tag('br');
                 }
             } else if (!empty($sessreserveinfo['reserveother']) && empty($sessreserveinfo['reservepastdeadline'])) {
-                $reserveurl = new moodle_url('/mod/facetoface/reserve.php', array('action' => 'reserve', 's' => $session->id,
-                    'backtoallsessions' => 1));
+                $reserveurl = new moodle_url('/mod/facetoface/reservations/reserve.php', ['s' => $session->id, 'backtoallsessions' => 1]);
                 $reservelink .= html_writer::link($reserveurl, get_string('reserveother', 'mod_facetoface'));
                 $reservelink .= html_writer::empty_tag('br');
             }
 
             if (has_capability('mod/facetoface:managereservations', $this->context)) {
-                $managereserveurl = new moodle_url('/mod/facetoface/managereservations.php',
-                    array('action'=> 'manage', 's' => $session->id));
+                $managereserveurl = new moodle_url('/mod/facetoface/reservations/manage.php', array('s' => $session->id));
 
                 $reservelink .= html_writer::link($managereserveurl, get_string('managereservations', 'mod_facetoface'));
                 $reservelink .= html_writer::empty_tag('br');
@@ -609,7 +721,7 @@ class mod_facetoface_renderer extends plugin_renderer_base {
      * @throws coding_exception
      */
     private function session_options_signup_link($session, $sessionstarted, $regdatestooltip = false, $returntoallsessions = true, $displaytimezones = true) {
-        global $USER, $DB;
+        global $USER;
         $signuplink = '';
 
         $timenow = time();
@@ -650,21 +762,25 @@ class mod_facetoface_renderer extends plugin_renderer_base {
                 $signuplink .= html_writer::link($cancelurl, get_string($canceltext, 'facetoface'), array('title' => get_string($canceltext, 'facetoface')));
             }
         } else if (!$sessionstarted) {
-            if (!facetoface_session_has_capacity($session, $this->context, MDL_F2F_STATUS_WAITLISTED) && !$session->allowoverbook) {
+            if (!facetoface_session_has_capacity($session, $this->context, \mod_facetoface\signup\state\waitlisted::get_code()) && !$session->allowoverbook) {
                 $signuplink .= get_string('none', 'facetoface');
             } else {
-                $facetoface = $DB->get_record('facetoface', ['id' => $session->facetoface], 'multiplesessions');
+                $seminar = new \mod_facetoface\seminar($session->facetoface);
+                $seminarevent = new \mod_facetoface\seminar_event($session->id);
+                $signup = \mod_facetoface\signup::create($USER->id, $seminarevent);
                 if (empty($session->cancelledstatus) && $registrationopen == true && $registrationclosed == false) {
-                    if (!facetoface_has_unarchived_signups($session->facetoface, $USER->id)
-                        || $facetoface->multiplesessions == "1") {
+                    if (!$seminar->has_unarchived_signups() || $seminar->get_multiplesessions() == 1) {
                         // Ok to register.
                         if ($regdatestooltip) {
                             $tooltip = $this->get_regdates_tooltip_info($session, $displaytimezones);
                         } else {
                             $tooltip = '';
                         }
-                        $signuptext = facetoface_is_signup_by_waitlist($session) ? 'joinwaitlist' : 'signup';
-                        $signuplink .= html_writer::link($signupurl, get_string($signuptext, 'facetoface'), array('title' => $tooltip, 'aria-label' => $tooltip));
+                        $signuptext = \mod_facetoface\signup_helper::expected_signup_state($signup)->get_action_label();
+                        if (empty($signuptext)) {
+                            $signuptext = get_string('moreinfo', 'facetoface');
+                        }
+                        $signuplink .= html_writer::link($signupurl, $signuptext, array('title' => $tooltip, 'aria-label' => $tooltip));
                     } else {
                         $signuplink .= html_writer::span(get_string('error:alreadysignedup', 'facetoface'), '',
                             array('aria-label' => get_string('error:alreadysignedup', 'facetoface')));
@@ -710,7 +826,7 @@ class mod_facetoface_renderer extends plugin_renderer_base {
         global $SESSION;
 
         // Custom fields.
-        $fieldsall = facetoface_get_customfield_filters();
+        $fieldsall = \mod_facetoface\calendar::get_customfield_filters();
         $output = '';
         foreach ($fieldsall as $type => $fields) {
             foreach ($fields as $f) {
@@ -737,13 +853,13 @@ class mod_facetoface_renderer extends plugin_renderer_base {
         // Same $fieldname  must be used in lib.php facetoface_calendar_set_filter().
         $fieldname = "field_{$type}_{$field->shortname}";
         $stringsource = '';
-        switch($type) {
+        switch ($type) {
             case 'sess':
                 $stringsource = 'customfieldsession';
-            break;
+                break;
             case 'room':
                 $stringsource = 'customfieldroom';
-            break;
+                break;
             default:
                 $stringsource = 'customfieldother';
         }
@@ -813,7 +929,7 @@ class mod_facetoface_renderer extends plugin_renderer_base {
      * @param array $reserveinfo details of the number of allocations allowed / left
      * @return string HTML fragment to be output
      */
-    function session_user_selector($team, $session, $reserveinfo) {
+    public function session_user_selector($team, $session, $reserveinfo) {
         $output = html_writer::start_tag('div', array('class' => 'row-fluid user-multiselect'));
 
         // Current allocations.
@@ -839,9 +955,9 @@ class mod_facetoface_renderer extends plugin_renderer_base {
                 }
                 if (!empty($user->cannotremove)) {
                     $attr['disabled'] = 'disabled';
-                    $name .= ' ('.get_string($user->cannotremove, 'mod_facetoface').')';
+                    $name .= ' (' . get_string($user->cannotremove, 'mod_facetoface') . ')';
                 }
-                $opts .= html_writer::tag('option', $name, $attr)."\n";
+                $opts .= html_writer::tag('option', $name, $attr) . "\n";
             }
         }
         $opts .= html_writer::end_tag('optgroup');
@@ -851,30 +967,30 @@ class mod_facetoface_renderer extends plugin_renderer_base {
                 $name = fullname($user);
                 $attr = array('value' => $user->id, 'disabled' => 'disabled');
                 if (!empty($user->cannotremove)) {
-                    $name .= ' ('.get_string($user->cannotremove, 'mod_facetoface').')';
+                    $name .= ' (' . get_string($user->cannotremove, 'mod_facetoface') . ')';
                 }
-                $opts .= html_writer::tag('option', $name, $attr)."\n";
+                $opts .= html_writer::tag('option', $name, $attr) . "\n";
             }
         }
         $output .= html_writer::tag('select', $opts, array('name' => 'deallocation[]', 'multiple' => 'multiple',
-                                                          'id' => 'deallocation', 'size' => 20));
+            'id' => 'deallocation', 'size' => 20));
         $output .= html_writer::end_tag('div');
 
         // Buttons.
         $output .= html_writer::start_tag('div', array('class' => 'span2 controls'));
-        $addlabel = $this->output->larrow().' '.get_string('add');
+        $addlabel = $this->output->larrow() . ' ' . get_string('add');
         $output .= html_writer::empty_tag('input', array('name' => 'add', 'id' => 'add', 'type' => 'submit',
-                                                         'value' => $addlabel, 'title' => get_string('add')));
-        $removelabel = get_string('remove').' '.$this->output->rarrow();
+            'value' => $addlabel, 'title' => get_string('add')));
+        $removelabel = get_string('remove') . ' ' . $this->output->rarrow();
         $output .= html_writer::empty_tag('input', array('name' => 'remove', 'id' => 'remove', 'type' => 'submit',
-                                                          'value' => $removelabel, 'title' => get_string('remove')));
+            'value' => $removelabel, 'title' => get_string('remove')));
         $output .= html_writer::end_tag('div');
 
         // Potential allocations.
         $output .= html_writer::start_tag('div', array('class' => 'span5'));
         $output .= html_writer::tag('label', get_string('potentialallocations', 'mod_facetoface',
-                                                           $reserveinfo['allocate'][$session->id]),
-                                       array('for' => 'allocation'));
+            $reserveinfo['allocate'][$session->id]),
+            array('for' => 'allocation'));
 
         $selected = optional_param_array('allocation', array(), PARAM_INT);
         $optspotential = array();
@@ -900,7 +1016,7 @@ class mod_facetoface_renderer extends plugin_renderer_base {
      * @param object $manager
      * @return string HTML fragment to output the list
      */
-    function other_reservations($bookings, $manager) {
+    public function other_reservations($bookings, $manager) {
         global $USER;
 
         if (!$bookings) {
@@ -944,7 +1060,7 @@ class mod_facetoface_renderer extends plugin_renderer_base {
                 $details[] = get_string('reservations', 'mod_facetoface', $session->reservations);
             }
             $details += $session->bookings;
-            $details = '<li>'.implode('</li><li>', $details).'</li>';
+            $details = html_writer::alist($details); //'<li>' . implode('</li><li>', $details) . '</li>';
             $details = html_writer::tag('ul', $details);
             $row = new html_table_row(array($session->dates, $details));
             $table->data[] = $row;
@@ -993,15 +1109,16 @@ class mod_facetoface_renderer extends plugin_renderer_base {
      * @return string tabs
      */
     public function reports_management_tabs($currenttab = 'facetofaceeventreport') {
+
         $tabs = array();
         $row = array();
         $activated = array();
         $inactive = array();
 
-        $row[] = new tabobject('facetofaceeventreport', new moodle_url('/mod/facetoface/eventreport.php'),
+        $row[] = new tabobject('facetofaceeventreport', new moodle_url('/mod/facetoface/reports/events.php'),
             get_string('eventsview', 'mod_facetoface'));
 
-        $row[] = new tabobject('facetofacesessionreport', new moodle_url('/mod/facetoface/sessionreport.php'),
+        $row[] = new tabobject('facetofacesessionreport', new moodle_url('/mod/facetoface/reports/sessions.php'),
             get_string('sessionsview', 'mod_facetoface'));
 
         $tabs[] = $row;
@@ -1036,8 +1153,8 @@ class mod_facetoface_renderer extends plugin_renderer_base {
                 $managerlink = html_writer::link(new moodle_url('/user/profile.php',
                     array('id' => $reservation->bookedby)), $managername);
 
-                $deleteurl = new moodle_url('/mod/facetoface/managereservations.php', array('s' => $reservation->sessionid,
-                    'action' => 'delete', 'managerid' => $reservation->bookedby, 'sesskey' => sesskey()));
+                $deleteurl = new moodle_url('/mod/facetoface/reservations/delete.php', ['s' => $reservation->sessionid,
+                    'managerid' => $reservation->bookedby, 'sesskey' => sesskey()]);
                 $buttons = $this->action_icon($deleteurl, new pix_icon('t/delete', $strdelete));
 
                 $row = new html_table_row(array($managerlink, $reservation->reservedspaces, $buttons));
@@ -1093,7 +1210,7 @@ class mod_facetoface_renderer extends plugin_renderer_base {
 
             foreach ($users as $user) {
                 $fullname = fullname($user);
-                $row = array($fullname, $user->email, $user->username, $user->idnumber);
+                $row = array($fullname, $user->email, $user->username, s($user->idnumber));
 
                 if ($jaselector) {
                     $janame = '';
@@ -1103,11 +1220,13 @@ class mod_facetoface_renderer extends plugin_renderer_base {
                         $jobassignment = \totara_job\job_assignment::get_with_id($userdata['jobassignmentid']);
                         $janame = $jobassignment->fullname;
                     }
-                    $url = new moodle_url('/mod/facetoface/attendees/select_job_assignment.php',
+
+                    $url = new moodle_url('/mod/facetoface/attendees/ajax/select_job_assignment.php',
                             array('id' => $user->id, 's' => $sessionid, 'listid' => $list->get_list_id()));
+
                     $icon = $OUTPUT->action_icon($url, new pix_icon('t/edit', get_string('edit')), null,
-                            array('class' => 'action-icon attendee-edit-job-assignment pull-right'));
-                    $jobassign = html_writer::span($janame, 'jobassign'.$user->id, array('id' => 'jobassign'.$user->id));
+                        array('class' => 'action-icon attendee-edit-job-assignment pull-right'));
+                    $jobassign = html_writer::span($janame, 'jobassign' . $user->id, array('id' => 'jobassign' . $user->id));
                     $row[] = $icon . $jobassign;
                 }
 
@@ -1132,24 +1251,31 @@ class mod_facetoface_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Displays the dismiss action icon the the mismatched approval types notice
+     * Displays the dismiss action icon the mismatched approval types notice.
      *
-     * @param int $f2fid    The id of the facetoface currently being viewed
+     * @param int $f2fid The id of the facetoface currently being viewed
      * @return string       The html for the icon
      */
-    public function dismiss_selfapproval_notice($f2fid) {
-        $attributes = array('class' => 'smallicon dismissicon');
-        $dismissstr = get_string('dismiss', 'mod_facetoface');
-        $dismissurl = new moodle_url('/mod/facetoface/approver/dismiss.php', array('fid' => $f2fid, 'sesskey' => sesskey()));
-        return $this->output->action_icon($dismissurl, new pix_icon('/t/delete', $dismissstr), null, $attributes);
+    public function selfapproval_notice($f2fid) {
+        global $OUTPUT;
+
+        $approvalcount = \mod_facetoface\approver::count_selfapproval($f2fid);
+        if ($approvalcount > 1) {
+            $attributes = array('class' => 'smallicon dismissicon');
+            $dismissstr = get_string('dismiss', 'mod_facetoface');
+            $dismissurl = new \moodle_url('/mod/facetoface/approver/dismiss.php', array('fid' => $f2fid, 'sesskey' => sesskey()));
+            $icon = $this->output->action_icon($dismissurl, new pix_icon('/t/delete', $dismissstr), null, $attributes);
+            $message = get_string('warning:mixedapprovaltypes', 'mod_facetoface') . $icon;
+            echo $OUTPUT->notification($message, 'notifynotice');
+        }
     }
 
     /**
      * Render details of the room
-     * @param stdClass $room
+     * @param room $room
      * @return string
      */
-    public function render_room_details($room) {
+    public function render_room_details(room $room) {
         global $DB;
 
         $output = array();
@@ -1158,10 +1284,12 @@ class mod_facetoface_renderer extends plugin_renderer_base {
 
         // Room name.
         $output[] = html_writer::tag('dt', get_string('roomname', 'facetoface'));
-        $output[] = html_writer::tag('dd', $room->name);
+        $output[] = html_writer::tag('dd', $room->get_name());
 
         $options = array('prefix' => 'facetofaceroom', 'extended' => true);
-        $fields = customfield_get_data($room, 'facetoface_room', 'facetofaceroom', true, $options);
+        // Converts to item required by Custom Fields.
+        $cf_item = (object)['id' => $room->get_id()];
+        $fields = customfield_get_data($cf_item, 'facetoface_room', 'facetofaceroom', true, $options);
         if (!empty($fields)) {
 
             foreach ($fields as $field => $value) {
@@ -1173,22 +1301,22 @@ class mod_facetoface_renderer extends plugin_renderer_base {
 
         // Capacity.
         $output[] = html_writer::tag('dt', get_string('capacity', 'facetoface'));
-        $output[] = html_writer::tag('dd', $room->capacity);
+        $output[] = html_writer::tag('dd', $room->get_capacity());
 
         // Allow scheduling conflicts.
         $output[] = html_writer::tag('dt', get_string('allowroomconflicts', 'facetoface'));
-        $output[] = html_writer::tag('dd', $room->allowconflicts ? get_string('yes') : get_string('no'));
+        $output[] = html_writer::tag('dd', $room->get_allowconflicts() ? get_string('yes') : get_string('no'));
 
         // Description.
-        if (!empty($room->description)) {
+        if (!empty($room->get_description())) {
             $output[] = html_writer::tag('dt', get_string('roomdescription', 'facetoface'));
             $descriptionhtml = file_rewrite_pluginfile_urls(
-                $room->description,
+                $room->get_description(),
                 'pluginfile.php',
                 \context_system::instance()->id,
                 'mod_facetoface',
                 'room',
-                $room->id
+                $room->get_id()
             );
             $descriptionhtml = format_text($descriptionhtml, FORMAT_HTML);
             $output[] = html_writer::tag('dd', $descriptionhtml);
@@ -1197,27 +1325,27 @@ class mod_facetoface_renderer extends plugin_renderer_base {
         // Created.
         $created = new stdClass();
         $created->user = get_string('unknownuser');
-        if (!empty($room->usercreated)) {
+        if (!empty($room->get_usercreated())) {
             $created->user = html_writer::link(
-                new moodle_url('/user/view.php', array('id' => $room->usercreated)),
-                fullname($DB->get_record('user', array('id' => $room->usercreated)))
+                new moodle_url('/user/view.php', array('id' => $room->get_usercreated())),
+                fullname($DB->get_record('user', array('id' => $room->get_usercreated())))
             );
         }
-        $created->time = userdate($room->timecreated);
+        $created->time = userdate($room->get_timecreated());
         $output[] = html_writer::tag('dt', get_string('created', 'mod_facetoface'));
         $output[] = html_writer::tag('dd', get_string('timestampbyuser', 'mod_facetoface', $created));
 
         // Modified.
-        if (!empty($room->timemodified)) {
+        if (!empty($room->get_timemodified())) {
             $modified = new stdClass();
             $modified->user = get_string('unknownuser');
-            if (!empty($room->usermodified)) {
+            if (!empty($room->get_usermodified())) {
                 $modified->user = html_writer::link(
-                    new moodle_url('/user/view.php', array('id' => $room->usermodified)),
-                    fullname($DB->get_record('user', array('id' => $room->usermodified)))
+                    new moodle_url('/user/view.php', array('id' => $room->get_usermodified())),
+                    fullname($DB->get_record('user', array('id' => $room->get_usermodified())))
                 );
             }
-            $modified->time = userdate($room->timemodified);
+            $modified->time = userdate($room->get_timemodified());
 
             $output[] = html_writer::tag('dt', get_string('modified'));
             $output[] = html_writer::tag('dd', get_string('timestampbyuser', 'mod_facetoface', $modified));
@@ -1231,12 +1359,38 @@ class mod_facetoface_renderer extends plugin_renderer_base {
     }
 
     /**
+     * Gets the HTML output for room details.
+     *
+     * @param \room $room - The room instance to get details for
+     * @return string containing room details with relevant html tags.
+     */
+    public function get_room_details_html(room $room, $backurl = null): string {
+        $roomhtml = [];
+
+        $roomhtml[] = (string)$room;
+        $url = new moodle_url('/mod/facetoface/reports/rooms.php', array(
+            'roomid' => $room->get_id(),
+            'b' => $backurl
+        ));
+
+        $popupurl = clone($url);
+        $popupurl->param('popup', 1);
+        $action = new popup_action('click', $popupurl, 'popup', array('width' => 800, 'height' => 600));
+        $link = $this->output->action_link($url, get_string('roomdetails', 'facetoface'), $action);
+        $roomhtml[] = html_writer::span('(' . $link . ')', 'room room_details');
+
+        $roomhtml = implode('', $roomhtml);
+
+        return $roomhtml;
+    }
+
+    /**
      * Render asset meta data
      *
-     * @param stdClass $asset
+     * @param \mod_facetoface\asset $asset
      * @return string
      */
-    public function render_asset_details($asset) {
+    public function render_asset_details(\mod_facetoface\asset $asset) {
         global $DB;
 
         $output = [];
@@ -1245,10 +1399,15 @@ class mod_facetoface_renderer extends plugin_renderer_base {
 
         // Asset name.
         $output[] = html_writer::tag('dt', get_string('assetname', 'facetoface'));
-        $output[] = html_writer::tag('dd', $asset->name);
+        $output[] = html_writer::tag('dd', $asset->get_name());
 
         $options = array('prefix' => 'facetofaceasset', 'extended' => true);
-        $fields = customfield_get_data($asset, 'facetoface_asset', 'facetofaceasset', true, $options);
+        $cfdata = (object)[
+            'id' => $asset->get_id(),
+            'fullname' => $asset->get_name(),
+            'custom' => $asset->get_custom(),
+        ];
+        $fields = customfield_get_data($cfdata, 'facetoface_asset', 'facetofaceasset', true, $options);
         if (!empty($fields)) {
             foreach ($fields as $field => $value) {
 
@@ -1259,18 +1418,18 @@ class mod_facetoface_renderer extends plugin_renderer_base {
 
         // Allow scheduling conflicts.
         $output[] = html_writer::tag('dt', get_string('allowassetconflicts', 'facetoface'));
-        $output[] = html_writer::tag('dd', $asset->allowconflicts ? get_string('yes') : get_string('no'));
+        $output[] = html_writer::tag('dd', $asset->get_allowconflicts() ? get_string('yes') : get_string('no'));
 
         // Description.
-        if (!empty($asset->description)) {
+        if (!empty($asset->get_description())) {
             $output[] = html_writer::tag('dt', get_string('assetdescription', 'facetoface'));
             $descriptionhtml = file_rewrite_pluginfile_urls(
-                $asset->description,
+                $asset->get_description(),
                 'pluginfile.php',
                 \context_system::instance()->id,
                 'mod_facetoface',
                 'asset',
-                $asset->id
+                $asset->get_id()
             );
             $descriptionhtml = format_text($descriptionhtml, FORMAT_HTML);
             $output[] = html_writer::tag('dd', $descriptionhtml);
@@ -1279,27 +1438,30 @@ class mod_facetoface_renderer extends plugin_renderer_base {
         // Created.
         $created = new stdClass();
         $created->user = get_string('unknownuser');
-        if (!empty($asset->usercreated)) {
+        $usercreated = $asset->get_usercreated();
+        if (!empty($usercreated)) {
             $created->user = html_writer::link(
-                new moodle_url('/user/view.php', array('id' => $asset->usercreated)),
-                fullname($DB->get_record('user', array('id' => $asset->usercreated)))
+                new moodle_url('/user/view.php', array('id' => $usercreated)),
+                fullname($DB->get_record('user', array('id' => $usercreated)))
             );
         }
-        $created->time = userdate($asset->timecreated);
+        $created->time = userdate($asset->get_timecreated());
         $output[] = html_writer::tag('dt', get_string('created', 'mod_facetoface'));
         $output[] = html_writer::tag('dd', get_string('timestampbyuser', 'mod_facetoface', $created));
 
         // Modified.
-        if (!empty($asset->timemodified)) {
+        $timemodified = $asset->get_timemodified();
+        if (!empty($timemodified)) {
             $modified = new stdClass();
             $modified->user = get_string('unknownuser');
-            if (!empty($asset->usermodified)) {
+            $usermodified = $asset->get_usermodified();
+            if (!empty($usermodified)) {
                 $modified->user = html_writer::link(
-                    new moodle_url('/user/view.php', array('id' => $asset->usermodified)),
-                    fullname($DB->get_record('user', array('id' => $asset->usermodified)))
+                    new moodle_url('/user/view.php', array('id' => $usermodified)),
+                    fullname($DB->get_record('user', array('id' => $usermodified)))
                 );
             }
-            $modified->time = userdate($asset->timemodified);
+            $modified->time = userdate($timemodified);
 
             $output[] = html_writer::tag('dt', get_string('modified'));
             $output[] = html_writer::tag('dd', get_string('timestampbyuser', 'mod_facetoface', $modified));
@@ -1311,4 +1473,342 @@ class mod_facetoface_renderer extends plugin_renderer_base {
 
         return $output;
     }
+
+    /**
+     * Output for a removable approver in the facetoface mod_form.
+     *
+     * @param int       $user           The user object for the approver being displayed
+     * @param boolean   $activity       Whether the approver is activity level or site level
+     * @return string                   The html output for the approver
+     */
+    public function display_approver($user, $activity = false) : string {
+
+        $uniqueid = "facetoface_approver_{$user->id}";
+        if ($activity) {
+            $classname = 'activity_approver';
+            $delete = $this->action_icon('', new pix_icon('/t/delete', get_string('remove')), null,
+                array('class' => 'activity_approver_del', 'id' => $user->id));
+            $content = get_string('approval_activityapprover', 'mod_facetoface', fullname($user)) . ' ' . $delete;
+        } else {
+            $classname = 'system_approver';
+            $content = get_string('approval_siteapprover', 'mod_facetoface', fullname($user));
+        }
+
+        return html_writer::tag('div', $content, array('id' => $uniqueid, 'class' => $classname));
+    }
+
+    /**
+
+     * Declare or withdraw interest html output button.
+     *
+     * @param \mod_facetoface\seminar $seminar
+     */
+    public function declare_interest(\mod_facetoface\seminar $seminar) {
+        global $OUTPUT;
+
+        $interest = \mod_facetoface\interest::from_seminar($seminar);
+        if ($interest->is_user_declared() || $interest->can_user_declare()) {
+            if ($interest->is_user_declared()) {
+                $strbutton = get_string('declareinterestwithdraw', 'mod_facetoface');
+            } else {
+                $strbutton = get_string('declareinterest', 'mod_facetoface');
+            }
+            $url = new moodle_url('/mod/facetoface/interest.php', array('f' => $seminar->get_id()));
+            echo $OUTPUT->single_button($url, $strbutton, 'get');
+        }
+    }
+
+    /**
+     * Filter by room html output select input.
+     *
+     * @param \mod_facetoface\seminar $seminar
+     * @param int $roomid
+     * @return int
+     */
+    public function filter_by_room(\mod_facetoface\seminar $seminar, int $roomid) {
+        global $OUTPUT, $PAGE;
+
+        $rooms = \mod_facetoface\room_list::get_seminar_rooms($seminar->get_id());
+        if ($rooms->count() > 1) {
+            $roomselect = array(0 => get_string('allrooms', 'facetoface'));
+            // Here used to be some fancy code that deal with missing room names,
+            // that magic cannot be done easily any more, allow selection of named rooms only here.
+            foreach ($rooms as $room) {
+                $roomname = format_string($room->get_name());
+                if ($roomname === '') {
+                    continue;
+                }
+                $roomselect[$room->get_id()] = $roomname;
+            }
+
+            if (!isset($roomselect[$roomid])) {
+                $roomid = 0;
+            }
+
+            if (count($roomselect) > 2) {
+                echo $OUTPUT->single_select($PAGE->url, 'roomid', $roomselect, $roomid, null, null, array('label' => get_string('filterbyroom', 'facetoface')));
+            }
+        } else {
+            $roomid = 0;
+        }
+
+        return $roomid;
+    }
+
+    /**
+     * Attendees export html form.
+     *
+     * @param \mod_facetoface\seminar $seminar
+     */
+    public function attendees_export_form(\mod_facetoface\seminar $seminar) {
+        global $OUTPUT;
+
+        if (has_capability('mod/facetoface:viewattendees', $this->context)) {
+            echo \html_writer::start_tag('form', array('action' => 'export.php', 'method' => 'post'));
+            echo \html_writer::start_tag('div') . \html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'f', 'value' => $seminar->get_id()));
+            echo $OUTPUT->help_icon('exportattendance', 'mod_facetoface', true) . '&nbsp;';
+
+            $formats = [
+                '0' => get_string('format', 'mod_facetoface'),
+                'excel' => get_string('excelformat', 'facetoface'),
+                'ods' => get_string('odsformat', 'facetoface')
+            ];
+            echo \html_writer::select($formats, 'download', '0', '', ['aria-label' => get_string('exportformat', 'totara_core')]);
+
+            echo \html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('exporttofile', 'facetoface')));
+            echo \html_writer::end_tag('div') . \html_writer::end_tag('form');
+        }
+    }
+
+    /**
+     * Print the details of a session
+     *
+     * @param \mod_facetoface\seminar_event $seminarevent  Record from facetoface_sessions
+     * @param boolean $showcapacity   Show the capacity (true) or only the seats available (false)
+     * @param boolean $calendaroutput Whether the output should be formatted for a calendar event
+     * @param boolean $hidesignup     Hide any messages relating to signing up
+     * @param string  $class          Custom css class for dl
+     * @return string html markup
+     */
+    public function render_seminar_event(\mod_facetoface\seminar_event $seminarevent, $showcapacity, $calendaroutput=false, $hidesignup=false, $class='f2f') {
+        global $DB, $PAGE, $USER;
+        $output = html_writer::start_tag('dl', array('class' => $class));
+
+        $bookedsessions = facetoface_get_user_submissions($seminarevent->get_seminar()->get_id(), $USER->id,
+            MDL_F2F_STATUS_REQUESTED, MDL_F2F_STATUS_BOOKED, $seminarevent->get_id());
+        $bookedsession = current($bookedsessions);
+
+        // Print customfields.
+        $customfields = customfield_get_data($seminarevent->to_record(), 'facetoface_session', 'facetofacesession', true, array('extended' => true));
+        if (!empty($customfields)) {
+            foreach ($customfields as $cftitle => $cfvalue) {
+                $output .= html_writer::tag('dt', str_replace(' ', '&nbsp;', $cftitle));
+                $output .= html_writer::tag('dd', $cfvalue);
+            }
+        }
+
+        $displaytimezones = get_config(null, 'facetoface_displaysessiontimezones');
+
+        $rooms = \mod_facetoface\room_list::get_event_rooms($seminarevent->get_id());
+
+        $strdatetime = str_replace(' ', '&nbsp;', get_string('sessiondatetime', 'facetoface'));
+        if ($seminarevent->get_mintimestart()) {
+            foreach ($seminarevent->get_sessions() as $date) {
+                /**
+                 * @var \mod_facetoface\seminar_session $date
+                 */
+                $output .= html_writer::empty_tag('br');
+
+                $sessionobj = facetoface_format_session_times($date->get_timestart(), $date->get_timefinish(), $date->get_sessiontimezone());
+                if ($sessionobj->startdate == $sessionobj->enddate) {
+                    $html = $sessionobj->startdate . ', ';
+                } else {
+                    $html = $sessionobj->startdate . ' - ' . $sessionobj->enddate . ', ';
+                }
+
+                $sessiontimezonestr = !empty($displaytimezones) ? $sessionobj->timezone : '';
+                $html .= $sessionobj->starttime . ' - ' . $sessionobj->endtime . ' ' . $sessiontimezonestr;
+
+                $output .= html_writer::tag('dt', $strdatetime);
+                $output .= html_writer::tag('dd', $html);
+
+                $output .= html_writer::tag('dt', get_string('duration', 'facetoface'));
+                $output .= html_writer::tag('dd', format_time((int)$date->get_timestart() - (int)$date->get_timefinish()));
+
+                if (!$date->get_roomid() || !$rooms->contains($date->get_roomid())) {
+                    continue;
+                }
+                // Display room information
+                $room = $rooms->get($date->get_roomid());
+                $backurl = $PAGE->has_set_url() ? $PAGE->url : null;
+                $roomstring = $this->get_room_details_html($room, $backurl);
+
+                $systemcontext = context_system::instance();
+                $descriptionhtml = file_rewrite_pluginfile_urls($room->get_description(), 'pluginfile.php', $systemcontext->id, 'mod_facetoface', 'room', $room->get_id());
+                $roomstring .= format_text($descriptionhtml, FORMAT_HTML);
+                $output .= html_writer::tag('dt', get_string('room', 'facetoface'));
+                $output .= html_writer::tag('dd', html_writer::tag('span', $roomstring, array('class' => 'roomdescription')));
+            }
+
+            $output .= html_writer::empty_tag('br');
+        } else {
+            $output .= html_writer::tag('dt', $strdatetime);
+            $output .= html_writer::tag('dd', html_writer::tag('em', get_string('wait-listed', 'facetoface')));
+        }
+
+        $signupcount = facetoface_get_num_attendees($seminarevent->get_id());
+        $placesleft = $seminarevent->get_capacity() - $signupcount;
+
+        if ($showcapacity) {
+            $output .= html_writer::tag('dt', get_string('maxbookings', 'facetoface'));
+
+            if ($seminarevent->get_allowoverbook()) {
+                $output .= html_writer::tag('dd', get_string('capacityallowoverbook', 'facetoface', $seminarevent->get_capacity()));
+            } else {
+                $output .= html_writer::tag('dd', $seminarevent->get_capacity());
+            }
+        } else if (!$calendaroutput) {
+            $output .= html_writer::tag('dt', get_string('seatsavailable', 'facetoface'));
+            $output .= html_writer::tag('dd', max(0, $placesleft));
+        }
+
+        // Display requires approval notification
+        $facetoface = $DB->get_record('facetoface', array('id' => $seminarevent->get_facetoface()));
+
+        // Display job assignments.
+        if (get_config(null, 'facetoface_selectjobassignmentonsignupglobal') &&
+            ($facetoface->selectjobassignmentonsignup || $facetoface->forceselectjobassignment)) {
+            if (isset($bookedsession->jobassignmentid) && $bookedsession->jobassignmentid) {
+                $jobassignment = \totara_job\job_assignment::get_with_id(
+                    $bookedsession->jobassignmentid,
+                    false
+                );
+
+                if (null == $jobassignment) {
+                    // If the job assignment does not exist, we should let the user know that
+                    // the job assignment might have been deleted by the site admin, and the
+                    // reference is not updated yet
+                    $fullname = get_string("missingjobassignment", "mod_facetoface");
+                } else {
+                    $fullname = $jobassignment->fullname;
+                }
+
+                $output .= html_writer::empty_tag('br');
+                $output .= html_writer::tag('dt', get_string('jobassignment', 'facetoface'));
+                $output .= html_writer::tag('dd', $fullname);
+                $output .= html_writer::empty_tag('br');
+            }
+        }
+
+        // Display waitlist notification
+        if (!$hidesignup && $seminarevent->get_allowoverbook() && $placesleft < 1) {
+            $output .= html_writer::tag('dd', get_string('userwillbewaitlisted', 'facetoface'));
+        }
+
+        // Display managers.
+        if ($facetoface->approvaltype != APPROVAL_NONE && $facetoface->approvaltype != APPROVAL_SELF) {
+            $approver = facetoface_get_approvaltype_string($facetoface->approvaltype, $facetoface->approvalrole);
+            $output .= html_writer::tag('dt', get_string('approvalrequiredby', 'facetoface'));
+            $output .= html_writer::tag('dd', $approver);
+
+            if (isset($bookedsession->managerid) && $bookedsession->managerid) {
+                $manager = core_user::get_user($bookedsession->managerid);
+                $manager_url = new moodle_url('/user/view.php', array('id' => $manager->id));
+                $output .= html_writer::tag('dt', get_string('managername', 'facetoface'));
+                $output .= html_writer::tag('dd', html_writer::link($manager_url, fullname($manager)));
+            } else {
+                $managerids   = \totara_job\job_assignment::get_all_manager_userids($USER->id);
+                if (!empty($managerids)) {
+                    $managers = array();
+                    foreach ($managerids as $managerid) {
+                        $manager = core_user::get_user($managerid);
+                        $manager_url = new moodle_url('/user/view.php', array('id' => $manager->id));
+                        $managers[] = html_writer::link($manager_url, fullname($manager));
+                    }
+                    $output .= html_writer::tag('dt', get_string('managername', 'facetoface'));
+                    $output .= html_writer::tag('dd', implode(', ', $managers));
+                }
+            }
+        }
+        // Display trainers.
+        $trainerroles = facetoface_get_trainer_roles(context_course::instance($facetoface->course));
+        $trainers = facetoface_get_trainers($seminarevent->get_id());
+        foreach ((array)$trainerroles as $role => $rolename) {
+            if (empty($trainers[$role])) {
+                continue;
+            }
+
+            $trainer_names = array();
+            $rolename = $rolename->localname;
+            foreach ($trainers[$role] as $trainer) {
+                $trainer_url = new moodle_url('/user/view.php', array('id' => $trainer->id));
+                $trainer_names[] = html_writer::link($trainer_url, fullname($trainer));
+            }
+            $output .= html_writer::tag('dt', $rolename);
+            $output .= html_writer::tag('dd', implode(', ', $trainer_names));
+        }
+
+        if (!get_config(null, 'facetoface_hidecost') && !empty($seminarevent->get_normalcost())) {
+            $output .= html_writer::tag('dt', get_string('normalcost', 'facetoface'));
+            $output .= html_writer::tag('dd', format_string($seminarevent->get_normalcost()));
+
+            if (!get_config(null, 'facetoface_hidediscount') && !empty($seminarevent->get_discountcost())) {
+                $output .= html_writer::tag('dt', get_string('discountcost', 'facetoface'));
+                $output .= html_writer::tag('dd', format_string($seminarevent->get_discountcost()));
+            }
+        }
+
+        if (!empty($seminarevent->get_details())) {
+            if ($cm = get_coursemodule_from_instance('facetoface', $facetoface->id, $facetoface->course)) {
+                $context = context_module::instance($cm->id);
+                $details = file_rewrite_pluginfile_urls($seminarevent->get_details(), 'pluginfile.php', $context->id, 'mod_facetoface', 'session', $seminarevent->get_id());
+                $details = format_text($details, FORMAT_HTML);
+            } else {
+                $details = format_text($seminarevent->get_details(), FORMAT_HTML);
+            }
+            $output .= html_writer::tag('dt', get_string('details', 'facetoface'));
+            $output .= html_writer::tag('dd', $details);
+        }
+
+        $output .= html_writer::end_tag('dl');
+
+        return $output;
+    }
+
+    /**
+     * Render signup state tranisitons failures
+     * Only most relevant failures will be displayed
+     * @param array $failures string[string] where value - failure text and key failure code
+     * @return string
+     */
+    public function render_signup_failures(array $failures) : string {
+        // Display first failure as the most relevant
+        reset($failures);
+        $failure = current($failures);
+        return $this->output->notification($failure, 'info');
+    }
+
+    /**
+     * Displays a bulk actions selector
+     */
+    public function display_bulk_actions_picker() {
+        global $OUTPUT;
+
+        $status_options = \mod_facetoface\attendees_list_helper::get_status();
+        unset($status_options[\mod_facetoface\signup\state\not_set::get_code()]);
+        $out = $OUTPUT->container_start('facetoface-bulk-actions-picker');
+        $select = html_writer::select($status_options, 'bulkattendanceop', '',
+            array('' => get_string('bulkactions', 'mod_facetoface')), ['id' => 'menubulkattendanceop', 'class' => 'bulkactions']);
+        $label = html_writer::label(get_string('mark_selected_as', 'mod_facetoface'), 'menubulkattendanceop', false);
+        $error = get_string('selectoptionbefore', 'mod_facetoface');
+        $hidenlabel = html_writer::tag('span', $error, array('id' => 'selectoptionbefore', 'class' => 'hide error'));
+        $out .= $label;
+        $out .= $select;
+        $out .= $hidenlabel;
+        $out .= $OUTPUT->container_end();
+
+        return $out;
+    }
+
 }
+

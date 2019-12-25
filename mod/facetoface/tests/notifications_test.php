@@ -33,11 +33,16 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 
 require_once($CFG->dirroot . '/mod/facetoface/lib.php');
+require_once($CFG->dirroot . '/mod/facetoface/tests/facetoface_testcase.php');
 require_once($CFG->dirroot . '/totara/hierarchy/prefix/position/lib.php');
 require_once($CFG->dirroot . '/totara/customfield/field/datetime/define.class.php');
 require_once($CFG->dirroot . '/totara/customfield/field/datetime/field.class.php');
 
-class mod_facetoface_notifications_testcase extends advanced_testcase {
+use mod_facetoface\signup;
+use mod_facetoface\signup_helper;
+use mod_facetoface\seminar_event;
+
+class mod_facetoface_notifications_testcase extends mod_facetoface_facetoface_testcase {
     /**
      * PhpUnit fixture method that runs before the test method executes.
      */
@@ -176,7 +181,6 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
             'capacity' => 3,
             'allowoverbook' => 1,
             'sessiondates' => $dates ?: [$this->createSeminarDate()],
-            'datetimeknown' => '1',
             'mincapacity' => '1',
             'cutoff' => DAYSECS - 60
         ], $params);
@@ -224,10 +228,11 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         // Call facetoface_delete_session function for session1.
         $emailsink = $this->redirectMessages();
         facetoface_delete_session($session);
+        $this->execute_adhoc_tasks();
         $emailsink->close();
 
         $emails = $emailsink->get_messages();
-        $this->assertCount(4, $emails, 'Wrong no of cancellation notifications sent out.');
+        $this->assertCount(2, $emails, 'Wrong no of cancellation notifications sent out.');
     }
 
     public function test_cancellation_nonesend_delete_session() {
@@ -283,13 +288,8 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
 
         $sessiondate = new stdClass();
         $sessiondate->sessiontimezone = 'Pacific/Auckland';
-        if ($future) {
-            $sessiondate->timestart = time() + WEEKSECS;
-            $sessiondate->timefinish = time() + WEEKSECS + 60;
-        } else {
-            $sessiondate->timestart = time() - WEEKSECS;
-            $sessiondate->timefinish = time() - WEEKSECS + 60;
-        }
+        $sessiondate->timestart = time() + WEEKSECS;
+        $sessiondate->timefinish = time() + WEEKSECS + 60;
         $sessiondate->assetids = array();
 
         $sessiondata = array(
@@ -305,21 +305,23 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         $session = facetoface_get_session($sessionid);
         $session->sessiondates = facetoface_get_session_dates($session->id);
 
-        $discountcode = 'GET15OFF';
-        $notificationtype = 1;
-        $statuscode = MDL_F2F_STATUS_REQUESTED;
-
         // Signup user1.
-        $emailsink = $this->redirectMessages();
         $this->setUser($student1);
-        facetoface_user_signup($session, $facetoface, $course, $discountcode, $notificationtype, $statuscode);
-        $emailsink->close();
+        signup_helper::signup(\mod_facetoface\signup::create($student1->id, new \mod_facetoface\seminar_event($sessionid)));
 
         // Signup user2.
-        $emailsink = $this->redirectMessages();
         $this->setUser($student2);
-        facetoface_user_signup($session, $facetoface, $course, $discountcode, $notificationtype, $statuscode);
+        signup_helper::signup(\mod_facetoface\signup::create($student2->id, new \mod_facetoface\seminar_event($sessionid)));
+
+        $emailsink = $this->redirectMessages();
+        $this->execute_adhoc_tasks();
         $emailsink->close();
+
+        if (!$future) {
+            $sessiondate->timestart = time() - WEEKSECS;
+            $sessiondate->timefinish = time() - WEEKSECS + 60;
+            facetoface_save_dates($sessionid, [$sessiondate]);
+        }
 
         return $session;
     }
@@ -389,13 +391,13 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         $session = $this->addSeminarSession($seminar, $dates);
 
         $icals['original'] = [
-            $this->dissect_ical(facetoface_generate_ical($seminar,
+            $this->dissect_ical(\mod_facetoface\messaging::generate_ical($seminar,
                 $session,
                 MDL_F2F_INVITE,
                 $students[0],
                 null,[],
                 'iCal description must have this text')->content, ['location', 'uid', 'sequence', 'dtstart', 'dtend', 'description']),
-            $this->dissect_ical(facetoface_generate_ical($seminar,
+            $this->dissect_ical(\mod_facetoface\messaging::generate_ical($seminar,
                 $session,
                 MDL_F2F_INVITE,
                 $students[1])->content, ['location', 'uid', 'sequence', 'dtstart', 'dtend']),
@@ -432,13 +434,13 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         $session = facetoface_get_session($session->id);
 
         $icals['session_date_removed'] = [
-            $this->dissect_ical(facetoface_generate_ical($seminar,
+            $this->dissect_ical(\mod_facetoface\messaging::generate_ical($seminar,
                 $session,
                 MDL_F2F_INVITE,
                 $students[0],
                 null,
                 $old)->content, ['location', 'uid', 'sequence', 'dtstart', 'dtend', 'status']),
-            $this->dissect_ical(facetoface_generate_ical($seminar,
+            $this->dissect_ical(\mod_facetoface\messaging::generate_ical($seminar,
                 $session,
                 MDL_F2F_INVITE,
                 $students[1],
@@ -475,13 +477,13 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         $session = facetoface_get_session($session->id);
 
         $icals['session_date_removed_and_added'] = [
-            $this->dissect_ical(facetoface_generate_ical($seminar,
+            $this->dissect_ical(\mod_facetoface\messaging::generate_ical($seminar,
                 $session,
                 MDL_F2F_INVITE,
                 $students[0],
                 null,
                 $old)->content, ['location', 'uid', 'sequence', 'dtstart', 'dtend', 'status']),
-            $this->dissect_ical(facetoface_generate_ical($seminar,
+            $this->dissect_ical(\mod_facetoface\messaging::generate_ical($seminar,
                 $session,
                 MDL_F2F_INVITE,
                 $students[1],
@@ -516,11 +518,11 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         $this->mock_status_change($students[0]->id, $session->id);
 
         $icals['first_user_status_changed'] = [
-            $this->dissect_ical(facetoface_generate_ical($seminar,
+            $this->dissect_ical(\mod_facetoface\messaging::generate_ical($seminar,
                 $session,
                 MDL_F2F_CANCEL,
                 $students[0])->content, ['location', 'uid', 'sequence', 'dtstart', 'dtend', 'status']),
-            $this->dissect_ical(facetoface_generate_ical($seminar,
+            $this->dissect_ical(\mod_facetoface\messaging::generate_ical($seminar,
                 $session,
                 MDL_F2F_INVITE,
                 $students[1])->content, ['location', 'uid', 'sequence', 'dtstart', 'dtend']),
@@ -573,21 +575,20 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         ]);
 
         $emailsink = $this->redirectMessages();
-        facetoface_user_import($course, $seminar, $session, $student->id);
-        $emailsink->close();
-
+        signup_helper::signup(\mod_facetoface\signup::create($student->id, new \mod_facetoface\seminar_event($session->id)));
+        $this->execute_adhoc_tasks();
         $preemails = $emailsink->get_messages();
-
+        $emailsink->clear();
         foreach($preemails as $preemail) {
             $this->assertContains("This is to confirm that you are now booked", $preemail->fullmessagehtml);
         }
 
         $icals = [
             'original' => [
-                $this->dissect_ical(facetoface_generate_ical($seminar, $session, MDL_F2F_INVITE,
+                $this->dissect_ical(\mod_facetoface\messaging::generate_ical($seminar, $session, MDL_F2F_INVITE,
                     $student, $session->sessiondates[0])->content,
                     ['location', 'uid', 'sequence', 'dtstart', 'dtend']),
-                $this->dissect_ical(facetoface_generate_ical($seminar, $session, MDL_F2F_INVITE,
+                $this->dissect_ical(\mod_facetoface\messaging::generate_ical($seminar, $session, MDL_F2F_INVITE,
                     $student, $session->sessiondates[1])->content,
                     ['location', 'uid', 'sequence', 'dtstart', 'dtend']),
             ]
@@ -610,18 +611,26 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         $new[0]->id = $dates[0]->id;
 
         $emailsink = $this->redirectMessages();
-        facetoface_update_session($session, $new);
-        $session = facetoface_get_session($session->id);
+        unset($session->notifyuser, $session->trainers, $session->trainerroles, $session->sessiondates,
+            $session->maxtimefinish, $session->mintimestart, $session->cntdates);
+        $seminarevent = new seminar_event();
+        $seminarevent->from_record($session);
+        $seminarevent->save();
+        facetoface_save_dates($seminarevent->to_record(), $new);
+
+        $session = facetoface_get_session($seminarevent->get_id());
 
         // Send message.
-        facetoface_send_datetime_change_notice($seminar, $session, $student->id, $dates);
-        $emailsink->close();
+        \mod_facetoface\notice_sender::signup_datetime_changed(
+            \mod_facetoface\signup::create($student->id, new \mod_facetoface\seminar_event($session->id)),
+            $dates
+        );
 
         $icals['date_edited_and_cancelled'] = [
-            $this->dissect_ical(facetoface_generate_ical($seminar, $session, MDL_F2F_INVITE,
+            $this->dissect_ical(\mod_facetoface\messaging::generate_ical($seminar, $session, MDL_F2F_INVITE,
                 $student, $new[0])->content,
                 ['location', 'uid', 'sequence', 'dtstart', 'dtend']),
-            $this->dissect_ical(facetoface_generate_ical($seminar, $session, MDL_F2F_CANCEL,
+            $this->dissect_ical(\mod_facetoface\messaging::generate_ical($seminar, $session, MDL_F2F_CANCEL,
                 $student, $dates[1])->content,
                 ['location', 'uid', 'sequence', 'dtstart', 'dtend', 'status']),
         ];
@@ -642,19 +651,25 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         $this->assertCount(1, $icals['date_edited_and_cancelled'][1]->status,
             $errors['cancelled_count_dont_match']);
 
+        $this->execute_adhoc_tasks();
         $emails = $emailsink->get_messages();
-        $emailsink->close();
-        $this->assertContains("The session you are booked on (or on the waitlist) has changed:", $emails[0]->fullmessagehtml);
-        $this->assertContains("BOOKING CANCELLED", $emails[1]->fullmessagehtml);
+        $emailsink->clear();
+
+        usort($emails, function($email1, $email2) {
+           return strcmp($email1->subject, $email2->subject);
+        });
+        $this->assertContains("BOOKING CANCELLED", $emails[0]->fullmessagehtml);
+        $this->assertContains("The session you are booked on (or on the waitlist) has changed:", $emails[1]->fullmessagehtml);
 
         // Now test cancelling the session.
-        $emailsink = $this->redirectMessages();
-        $result = facetoface_cancel_session($session = facetoface_get_session($session->id), null);
+        $result = $seminarevent->cancel();
         $this->assertTrue($result);
 
         // One email has been sent and it contains all the required data.
+        $this->execute_adhoc_tasks();
         $this->assertCount(1, $messages = $emailsink->get_messages());
         $message = $messages[0];
+        $emailsink->close();
 
         $this->assertContains('Seminar event cancellation', $message->subject);
         $this->assertContains('This is to advise that the following session has been cancelled',
@@ -728,8 +743,8 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         $haystack = array_map(function($item) {
             // We are expecting a seminar date to be passed here, so keys will be different.
             return (object) [
-                'dtstart' => facetoface_ical_generate_timestamp($item->timestart),
-                'dtend' => facetoface_ical_generate_timestamp($item->timefinish),
+                'dtstart' => \mod_facetoface\messaging::ical_generate_timestamp($item->timestart),
+                'dtend' => \mod_facetoface\messaging::ical_generate_timestamp($item->timefinish),
             ];
         }, !is_array($haystack) ? [$haystack] : $haystack);
 
@@ -968,7 +983,11 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
 
         $session = $DB->get_record('facetoface_sessions', array('id' => $sessionid));
         $session->sessiondates = facetoface_get_session_dates($session->id);
-        $rooms = facetoface_get_session_rooms($session->id);
+        $roomcf = [];
+        $roomlist = \mod_facetoface\room_list::get_event_rooms($session->id);
+        foreach ($roomlist as $room) {
+            $roomcf[$room->get_id()] = customfield_get_data($room->to_record(), "facetoface_room", "facetofaceroom");
+        }
 
         $msg = "The details for each session:\n";
         $msg .= "[#sessions]* Start time of [session:startdate] at [session:starttime]";
@@ -977,7 +996,7 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         $msg .= "[/sessions]";
         $msg .= "Those are all the details.";
 
-        $replacedmsg = facetoface_notification_loop_session_placeholders($msg, $session, $rooms);
+        $replacedmsg = facetoface_notification_loop_session_placeholders($msg, $session, $roomlist, $roomcf);
 
         // Get strings for display of dates and times in email.
         $startdate1 = userdate($times['start1'], get_string('strftimedate', 'langconfig'), $timezone);
@@ -1088,11 +1107,11 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         // Now get all the date we've created.
         $session = $DB->get_record('facetoface_sessions', array('id' => $sessionid));
         $session->sessiondates = facetoface_get_session_dates($session->id);
-        $rooms = facetoface_get_session_rooms($session->id);
         // Get data for room custom fields.
-        $roomcustomfields = array();
-        foreach($rooms as $room) {
-            $roomcustomfields[$room->id] = customfield_get_data($room, 'facetoface_room', 'facetofaceroom', false);
+        $roomcf = [];
+        $roomlist = \mod_facetoface\room_list::get_event_rooms($session->id);
+        foreach ($roomlist as $room) {
+            $roomcf[$room->get_id()] = customfield_get_data($room->to_record(), "facetoface_room", "facetofaceroom", false);
         }
 
         $msg = "The details for each session:\n";
@@ -1103,7 +1122,7 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         $msg .= "[/sessions]";
         $msg .= "Those are all the details.";
 
-        $replacedmsg = facetoface_notification_loop_session_placeholders($msg, $session, $rooms, $roomcustomfields);
+        $replacedmsg = facetoface_notification_loop_session_placeholders($msg, $session, $roomlist, $roomcf);
 
         $expectedmsg = "The details for each session:\n";
         $expectedmsg .= "Room One has custom date of ".userdate($times['other1'], get_string('strftimedaydatetime', 'langconfig'), $timezone).".\n";
@@ -1196,10 +1215,10 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
 
         $session = $DB->get_record('facetoface_sessions', array('id' => $sessionid));
         $session->sessiondates = facetoface_get_session_dates($session->id);
-        $rooms = facetoface_get_session_rooms($session->id);
-        $roomcustomfields = array();
-        foreach($rooms as $room) {
-            $roomcustomfields[$room->id] = customfield_get_data($room, 'facetoface_room', 'facetofaceroom', false);
+        $roomcf = [];
+        $roomlist = \mod_facetoface\room_list::get_event_rooms($session->id);
+        foreach ($roomlist as $room) {
+            $roomcf[$room->get_id()] = customfield_get_data($room->to_record(), "facetoface_room", "facetofaceroom", false);
         }
 
         $msg = "Using the old deprecated subsitutions ";
@@ -1208,7 +1227,7 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         $msg .= "Location: [session:location]. ";
         $msg .= "Those are all the details.";
 
-        $replacedmsg = facetoface_notification_substitute_deprecated_placeholders($msg, $session, $rooms, $roomcustomfields);
+        $replacedmsg = facetoface_notification_substitute_deprecated_placeholders($msg, $session, $roomlist, $roomcf);
 
         $expectedmsg = "Using the old deprecated subsitutions ";
         $expectedmsg .= "Room name: Room One ";
@@ -1292,10 +1311,10 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
 
         $session = $DB->get_record('facetoface_sessions', array('id' => $sessionid));
         $session->sessiondates = facetoface_get_session_dates($session->id);
-        $rooms = facetoface_get_session_rooms($session->id);
-        $roomcustomfields = array();
-        foreach($rooms as $room) {
-            $roomcustomfields[$room->id] = customfield_get_data($room, 'facetoface_room', 'facetofaceroom', false);
+        $roomcf = [];
+        $roomlist = \mod_facetoface\room_list::get_event_rooms($session->id);
+        foreach ($roomlist as $room) {
+            $roomcf[$room->get_id()] = customfield_get_data($room->to_record(), "facetoface_room", "facetofaceroom");
         }
 
         $msg = "Using the old deprecated subsitutions ";
@@ -1304,7 +1323,7 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         $msg .= "Location: [session:location]. ";
         $msg .= "Those are all the details.";
 
-        $replacedmsg = facetoface_notification_substitute_deprecated_placeholders($msg, $session, $rooms, $roomcustomfields);
+        $replacedmsg = facetoface_notification_substitute_deprecated_placeholders($msg, $session, $roomlist, $roomcf);
 
         $expectedmsg = "Using the old deprecated subsitutions ";
         $expectedmsg .= "Room name: Room One ";
@@ -1423,7 +1442,7 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
     public function test_notification_duplicates() {
         global $DB;
         $sessionok = $this->f2f_generate_data(false);
-        $sessionbad = $session = $this->f2f_generate_data(false);
+        $sessionbad = $session = $this->f2f_generate_data(true);
 
         // Make duplicate.
         $duplicate = $DB->get_record('facetoface_notification', array(
@@ -1453,9 +1472,10 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         $student = $this->getDataGenerator()->create_user();
         $studentrole = $DB->get_record('role', array('shortname' => 'student'));
         $this->getDataGenerator()->enrol_user($student->id, $course->id, $studentrole->id);
-        facetoface_user_signup($session, $facetoface, $course, '', MDL_F2F_NOTIFICATION_AUTO, MDL_F2F_STATUS_BOOKED, $student->id);
 
-        facetoface_send_cancellation_notice($facetoface, $sessionbad, $student->id);
+        $signup = signup_helper::signup(\mod_facetoface\signup::create($student->id, new \mod_facetoface\seminar_event($session->id)));
+        \mod_facetoface\notice_sender::signup_cancellation($signup);
+
         $this->assertDebuggingCalled();
 
         // Check duplicates prevention.
@@ -1517,12 +1537,12 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
             'capacity' => 3,
             'allowoverbook' => 1,
             'sessiondates' => array($sessiondate),
-            'datetimeknown' => '1',
             'mincapacity' => '1',
             'cutoff' => DAYSECS - 60
         );
 
         $sessionid = $facetofacegenerator->add_session($sessiondata);
+        $sessiondata['datetimeknown'] = '1';
         $session = facetoface_get_session($sessionid);
 
         return array($session, $facetoface, $course, $student1, $student2, $teacher1, $manager);
@@ -1534,11 +1554,60 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         list($session, $facetoface, $course, $student1, $student2, $teacher1, $manager) = $this->f2fsession_generate_data();
 
         $emailsink = $this->redirectMessages();
-        facetoface_user_import($course, $facetoface, $session, $student1->id);
+        signup_helper::signup(\mod_facetoface\signup::create($student1->id, new \mod_facetoface\seminar_event($session->id)));
+        $this->execute_adhoc_tasks();
         $emailsink->close();
 
         $emails = $emailsink->get_messages();
         $this->assertCount(2, $emails, 'Wrong booking confirmation for Default test Manager copy is enable and suppressccmanager is disabled.');
+    }
+
+    /**
+     * $this->test_booking_confirmation_default() checks that both user and manager receive the signup notification.
+     * This function servers to test the other three possibilities:
+     * - notification to user only;
+     * - notification to manager only;
+     * - notification to neither user, or manager.
+     */
+    public function test_booking_confirmation_not_sent() {
+
+
+        $emailsink = $this->redirectMessages();
+
+        // Only send to user.
+        list($session, $facetoface, $course, $student1, $student2, $teacher1, $manager) = $this->f2fsession_generate_data();
+        $new_signup = \mod_facetoface\signup::create($student1->id, new \mod_facetoface\seminar_event($session->id));
+        $new_signup->set_skipusernotification(false);
+        $new_signup->set_skipmanagernotification();
+        signup_helper::signup($new_signup);
+        $this->execute_adhoc_tasks();
+        $emails = $emailsink->get_messages();
+        $this->assertCount(1, $emails, 'Incorrect number of notification emails generated for signup.');
+        $emailsink->clear();
+        $new_signup = null;
+
+        // Only send to manager.
+        $new_signup = \mod_facetoface\signup::create($student2->id, new \mod_facetoface\seminar_event($session->id));
+        $new_signup->set_skipusernotification();
+        $new_signup->set_skipmanagernotification(false);
+        signup_helper::signup($new_signup);
+        $this->execute_adhoc_tasks();
+        $emails = $emailsink->get_messages();
+        $this->assertCount(1, $emails, 'Incorrect number of notification emails generated for signup.');
+        $emailsink->clear();
+        $new_signup = null;
+
+        // Send to neither user, nor manager.
+        list($session, $facetoface, $course, $student1, $student2, $teacher1, $manager) = $this->f2fsession_generate_data();
+        $new_signup = \mod_facetoface\signup::create($student1->id, new \mod_facetoface\seminar_event($session->id));
+        $new_signup->set_skipusernotification();
+        $new_signup->set_skipmanagernotification();
+        signup_helper::signup($new_signup);
+        $this->execute_adhoc_tasks();
+        $emails = $emailsink->get_messages();
+        $this->assertCount(0, $emails, 'Incorrect number of notification emails generated for signup.');
+
+        $emailsink->close();
     }
 
     public function test_booking_confirmation_suppress_ccmanager() {
@@ -1546,14 +1615,11 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         // Test Manager copy is enable and suppressccmanager is enabled(do not send a copy to manager).
         list($session, $facetoface, $course, $student1, $student2, $teacher1, $manager) = $this->f2fsession_generate_data();
 
-        $suppressccmanager = true;
-
-        $params = array();
-        if ($suppressccmanager) {
-            $params['ccmanager'] = 0;
-        }
         $emailsink = $this->redirectMessages();
-        facetoface_user_import($course, $facetoface, $session, $student1->id, $params);
+        $signup = \mod_facetoface\signup::create($student1->id, new \mod_facetoface\seminar_event($session->id));
+        $signup->set_skipmanagernotification();
+        signup_helper::signup($signup);
+        $this->execute_adhoc_tasks();
         $emailsink->close();
 
         $emails = $emailsink->get_messages();
@@ -1573,7 +1639,8 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         $this->update_f2f_notification($params, 0);
 
         $emailsink = $this->redirectMessages();
-        facetoface_user_import($course, $facetoface, $session, $student1->id);
+        signup_helper::signup(\mod_facetoface\signup::create($student1->id, new \mod_facetoface\seminar_event($session->id)));
+        $this->execute_adhoc_tasks();
         $emailsink->close();
 
         $emails = $emailsink->get_messages();
@@ -1599,7 +1666,8 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
             $data['ccmanager'] = 0;
         }
         $emailsink = $this->redirectMessages();
-        facetoface_user_import($course, $facetoface, $session, $student1->id, $data);
+        signup_helper::signup(\mod_facetoface\signup::create($student1->id, new \mod_facetoface\seminar_event($session->id)));
+        $this->execute_adhoc_tasks();
         $emailsink->close();
 
         $emails = $emailsink->get_messages();
@@ -1612,17 +1680,20 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         list($session, $facetoface, $course, $student1, $student2, $teacher1, $manager) = $this->f2fsession_generate_data();
 
         $emailsink = $this->redirectMessages();
-        facetoface_user_import($course, $facetoface, $session, $student1->id);
+        $signup = signup_helper::signup(\mod_facetoface\signup::create($student1->id, new \mod_facetoface\seminar_event($session->id)));
+        $this->execute_adhoc_tasks();
         $emailsink->close();
 
-        $attendees = facetoface_get_attendees($session->id, array(MDL_F2F_STATUS_BOOKED));
+        $attendees = facetoface_get_attendees($session->id, array(\mod_facetoface\signup\state\booked::get_code()));
 
         $emailsink = $this->redirectMessages();
         foreach ($attendees as $attendee) {
-            if (facetoface_user_cancel($session, $attendee->id)) {
-                facetoface_send_cancellation_notice($facetoface, $session, $attendee->id);
+            if (signup_helper::can_user_cancel($signup)) {
+                signup_helper::user_cancel($signup);
+                \mod_facetoface\notice_sender::signup_cancellation($signup);
             }
         }
+        $this->execute_adhoc_tasks();
         $emailsink->close();
 
         $emails = $emailsink->get_messages();
@@ -1637,20 +1708,23 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         $suppressccmanager = true;
 
         $emailsink = $this->redirectMessages();
-        facetoface_user_import($course, $facetoface, $session, $student1->id);
+        $signup = signup_helper::signup(\mod_facetoface\signup::create($student1->id, new \mod_facetoface\seminar_event($session->id)));
+        $this->execute_adhoc_tasks();
         $emailsink->close();
 
-        $attendees = facetoface_get_attendees($session->id, array(MDL_F2F_STATUS_BOOKED));
+        $attendees = facetoface_get_attendees($session->id, array(\mod_facetoface\signup\state\booked::get_code()));
 
         $emailsink = $this->redirectMessages();
         foreach ($attendees as $attendee) {
-            if (facetoface_user_cancel($session, $attendee->id)) {
+            if (signup_helper::can_user_cancel($signup)) {
+               signup_helper::user_cancel($signup);
                 if ($suppressccmanager) {
-                    $facetoface->ccmanager = 0;
+                    $signup->set_skipmanagernotification();
                 }
-                facetoface_send_cancellation_notice($facetoface, $session, $attendee->id);
+                \mod_facetoface\notice_sender::signup_cancellation($signup);
             }
         }
+        $this->execute_adhoc_tasks();
         $emailsink->close();
 
         $emails = $emailsink->get_messages();
@@ -1663,10 +1737,11 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         list($session, $facetoface, $course, $student1, $student2, $teacher1, $manager) = $this->f2fsession_generate_data();
 
         $emailsink = $this->redirectMessages();
-        facetoface_user_import($course, $facetoface, $session, $student1->id);
+        $signup = signup_helper::signup(\mod_facetoface\signup::create($student1->id, new \mod_facetoface\seminar_event($session->id)));
+        $this->execute_adhoc_tasks();
         $emailsink->close();
 
-        $attendees = facetoface_get_attendees($session->id, array(MDL_F2F_STATUS_BOOKED));
+        $attendees = facetoface_get_attendees($session->id, array(\mod_facetoface\signup\state\booked::get_code()));
 
         $params = array(
             'facetofaceid'  => $facetoface->id,
@@ -1677,12 +1752,13 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
 
         $emailsink = $this->redirectMessages();
         foreach ($attendees as $attendee) {
-            if (facetoface_user_cancel($session, $attendee->id)) {
-                $facetoface->ccmanager = 1;
-                $session->notifyuser = 0;
-                facetoface_send_cancellation_notice($facetoface, $session, $attendee->id);
+            if (signup_helper::can_user_cancel($signup)) {
+            signup_helper::user_cancel($signup);
+                $signup->set_skipusernotification();
+                \mod_facetoface\notice_sender::signup_cancellation($signup);
             }
         }
+        $this->execute_adhoc_tasks();
         $emailsink->close();
 
         $emails = $emailsink->get_messages();
@@ -1698,10 +1774,11 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         list($session, $facetoface, $course, $student1, $student2, $teacher1, $manager) = $this->f2fsession_generate_data();
 
         $emailsink = $this->redirectMessages();
-        facetoface_user_import($course, $facetoface, $session, $student1->id);
+        $signup = signup_helper::signup(\mod_facetoface\signup::create($student1->id, new \mod_facetoface\seminar_event($session->id)));
+        $this->execute_adhoc_tasks();
         $emailsink->close();
 
-        $attendees = facetoface_get_attendees($session->id, array(MDL_F2F_STATUS_BOOKED));
+        $attendees = facetoface_get_attendees($session->id, array(\mod_facetoface\signup\state\booked::get_code()));
 
         $params = array(
             'facetofaceid'  => $facetoface->id,
@@ -1712,10 +1789,12 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
 
         $emailsink = $this->redirectMessages();
         foreach ($attendees as $attendee) {
-            if (facetoface_user_cancel($session, $attendee->id)) {
-                facetoface_send_cancellation_notice($facetoface, $session, $attendee->id);
+            if (signup_helper::can_user_cancel($signup)) {
+                signup_helper::user_cancel($signup);
+                \mod_facetoface\notice_sender::signup_cancellation($signup);
             }
         }
+        $this->execute_adhoc_tasks();
         $emailsink->close();
 
         $emails = $emailsink->get_messages();
@@ -1730,10 +1809,11 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         $suppressccmanager = true;
 
         $emailsink = $this->redirectMessages();
-        facetoface_user_import($course, $facetoface, $session, $student1->id);
+        $signup = signup_helper::signup(\mod_facetoface\signup::create($student1->id, new \mod_facetoface\seminar_event($session->id)));
+        $this->execute_adhoc_tasks();
         $emailsink->close();
 
-        $attendees = facetoface_get_attendees($session->id, array(MDL_F2F_STATUS_BOOKED));
+        $attendees = facetoface_get_attendees($session->id, array(\mod_facetoface\signup\state\booked::get_code()));
 
         $params = array(
             'facetofaceid'  => $facetoface->id,
@@ -1744,13 +1824,15 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
 
         $emailsink = $this->redirectMessages();
         foreach ($attendees as $attendee) {
-            if (facetoface_user_cancel($session, $attendee->id)) {
+            if (signup_helper::can_user_cancel($signup)) {
+                signup_helper::user_cancel($signup);
                 if ($suppressccmanager) {
-                    $facetoface->ccmanager = 0;
+                    $signup->set_skipmanagernotification();
                 }
-                facetoface_send_cancellation_notice($facetoface, $session, $attendee->id);
+                \mod_facetoface\notice_sender::signup_cancellation($signup);
             }
         }
+        $this->execute_adhoc_tasks();
         $emailsink->close();
 
         $emails = $emailsink->get_messages();
@@ -1774,6 +1856,7 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
 
         $emailsink = $this->redirectMessages();
         list($sessiondate, $student1, $student2, $student3) = $this->f2fsession_generate_timezone(99);
+        $this->execute_adhoc_tasks();
         $emailsink->close();
 
         // Test we are getting F2F booking confirmation email.
@@ -1810,6 +1893,7 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         $emailsink = $this->redirectMessages();
         $notification = new \facetoface_notification((array)$notify, false);
         $notification->send_scheduled();
+        $this->execute_adhoc_tasks();
         $emailsink->close();
         // Test we are getting F2F booking reminder email.
         $haystack = $emailsink->get_messages();
@@ -1848,6 +1932,7 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
 
         $emailsink = $this->redirectMessages();
         list($sessiondate, $student1, $student2, $student3) = $this->f2fsession_generate_timezone($test->timezone);
+        $this->execute_adhoc_tasks();
         $emailsink->close();
 
         // Test we are getting F2F booking confirmation email.
@@ -1883,6 +1968,7 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         $emailsink = $this->redirectMessages();
         $notification = new \facetoface_notification((array)$notify, false);
         $notification->send_scheduled();
+        $this->execute_adhoc_tasks();
         $emailsink->close();
         // Test we are getting F2F booking reminder email.
         $haystack = $emailsink->get_messages();
@@ -1928,54 +2014,83 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         $sessiondate->timestart = time() + DAYSECS;
         $sessiondate->timefinish = $sessiondate->timestart + (DAYSECS * 2);
         $sessiondate->sessiontimezone = 'Pacific/Auckland';
-        $sessionid = $generator->add_session(array('facetoface' => $facetoface->id, 'sessiondates' => array($sessiondate)));
+        $session1id = $generator->add_session(array('facetoface' => $facetoface->id, 'sessiondates' => array($sessiondate)));
+        $session2id = $generator->add_session(array('facetoface' => $facetoface->id, 'sessiondates' => []));
+
+        $facetoface2 = $generator->create_instance(array('course' => $course->id, 'approvaltype' => \mod_facetoface\seminar::APPROVAL_ADMIN));
+        $session3id = $generator->add_session(array('facetoface' => $facetoface2->id, 'sessiondates' => array($sessiondate)));
 
         $user1 = $this->getDataGenerator()->create_user();
         $user2 = $this->getDataGenerator()->create_user();
         $user3 = $this->getDataGenerator()->create_user();
         $user4 = $this->getDataGenerator()->create_user();
+        $user5 = $this->getDataGenerator()->create_user();
         $manager = $this->getDataGenerator()->create_user();
+
+        $this->getDataGenerator()->enrol_user($user1->id, $course->id);
+        $this->getDataGenerator()->enrol_user($user2->id, $course->id);
+        $this->getDataGenerator()->enrol_user($user3->id, $course->id);
+        $this->getDataGenerator()->enrol_user($user4->id, $course->id);
+        $this->getDataGenerator()->enrol_user($user5->id, $course->id);
 
         $managerja = \totara_job\job_assignment::create_default($manager->id);
         \totara_job\job_assignment::create_default($user4->id, array('managerjaid' => $managerja->id));
+        \totara_job\job_assignment::create_default($user5->id, array('managerjaid' => $managerja->id));
 
-        $session = facetoface_get_session($sessionid);
+        $seminarevent1 = new seminar_event($session1id);
+        $seminarevent2 = new seminar_event($session2id);
+        $seminarevent3 = new seminar_event($session3id);
 
-        facetoface_user_signup($session, $facetoface, $course, '', MDL_F2F_NONE, MDL_F2F_STATUS_APPROVED, $user1->id, false);
-        facetoface_cancel_attendees($sessionid, array($user1->id));
-        facetoface_user_signup($session, $facetoface, $course, '', MDL_F2F_NONE, MDL_F2F_STATUS_APPROVED, $user2->id, false);
-        facetoface_user_signup($session, $facetoface, $course, '', MDL_F2F_NONE, MDL_F2F_STATUS_BOOKED, $user3->id, false);
-        facetoface_user_signup($session, $facetoface, $course, '', MDL_F2F_NONE, MDL_F2F_STATUS_REQUESTED, $user4->id, false);
-        $attendee = facetoface_get_attendee($session->id, $user4->id);
-        facetoface_update_signup_status($attendee->submissionid, MDL_F2F_STATUS_DECLINED,$user4->id);
+        signup_helper::signup(\mod_facetoface\signup::create($user1->id, new \mod_facetoface\seminar_event($session1id)));
+        facetoface_cancel_attendees($session1id, array($user1->id));
+
+        $signup2 = \mod_facetoface\signup::create($user2->id, new \mod_facetoface\seminar_event($session1id));
+        signup_helper::signup($signup2);
+        signup_helper::signup(\mod_facetoface\signup::create($user3->id, new \mod_facetoface\seminar_event($session2id)));
+        signup_helper::signup(\mod_facetoface\signup::create($user4->id, new \mod_facetoface\seminar_event($session3id)));
+        signup_helper::signup(\mod_facetoface\signup::create($user5->id, new \mod_facetoface\seminar_event($session3id)));
+
+        $signup53 = \mod_facetoface\signup::create($user5->id, $seminarevent3);
+        $signup53->switch_state(\mod_facetoface\signup\state\declined::class);
 
         $sql = "SELECT ss.statuscode
                   FROM {facetoface_signups} s
                   JOIN {facetoface_signups_status} ss ON ss.signupid = s.id
                  WHERE s.sessionid = :sid AND ss.superceded = 0 AND s.userid = :uid";
 
-        $this->assertEquals(MDL_F2F_STATUS_USER_CANCELLED, $DB->get_field_sql($sql, array('sid' => $session->id, 'uid' => $user1->id)));
-        $this->assertEquals(MDL_F2F_STATUS_APPROVED, $DB->get_field_sql($sql, array('sid' => $session->id, 'uid' => $user2->id)));
-        $this->assertEquals(MDL_F2F_STATUS_BOOKED, $DB->get_field_sql($sql, array('sid' => $session->id, 'uid' => $user3->id)));
-        $this->assertEquals(MDL_F2F_STATUS_DECLINED, $DB->get_field_sql($sql, array('sid' => $session->id, 'uid' => $user4->id)));
+        $this->assertEquals(\mod_facetoface\signup\state\user_cancelled::get_code(), $DB->get_field_sql($sql, array('sid' => $session1id, 'uid' => $user1->id)));
+        $this->assertEquals(\mod_facetoface\signup\state\booked::get_code(), $DB->get_field_sql($sql, array('sid' => $session1id, 'uid' => $user2->id)));
+        $this->assertEquals(\mod_facetoface\signup\state\waitlisted::get_code(), $DB->get_field_sql($sql, array('sid' => $session2id, 'uid' => $user3->id)));
+        $this->assertEquals(\mod_facetoface\signup\state\requested::get_code(), $DB->get_field_sql($sql, array('sid' => $session3id, 'uid' => $user4->id)));
+        $this->assertEquals(\mod_facetoface\signup\state\declined::get_code(), $DB->get_field_sql($sql, array('sid' => $session3id, 'uid' => $user5->id)));
+
+        // Clean messages stack.
+        $emailsink = $this->redirectMessages();
+        $this->execute_adhoc_tasks();
+        $emailsink->close();
 
         // Now test cancelling the session.
         $emailsink = $this->redirectMessages();
-        $result = facetoface_cancel_session($session, null);
-        $this->assertTrue($result);
+        $result1 = $seminarevent1->cancel();
+        $result2 = $seminarevent2->cancel();
+        $result3 = $seminarevent3->cancel();
+        $this->assertTrue($result1);
+        $this->assertTrue($result2);
+        $this->assertTrue($result3);
+        $this->execute_adhoc_tasks();
         $emailsink->close();
 
         $messages = $emailsink->get_messages();
-        $this->assertCount(2, $messages);
+        $this->assertCount(3, $messages);
 
         // Users that have cancelled their session or their request have been declined should not being affected when a
         // session is cancelled.
-        $affectedusers = array($user2->id, $user3->id);
+        $affectedusers = array($user2->id, $user3->id, $user4->id);
         foreach ($messages as $message) {
             $this->assertContains('Seminar event cancellation', $message->subject);
             $this->assertContains('This is to advise that the following session has been cancelled', $message->fullmessagehtml);
             $this->assertContains('Course:   Test course 1', $message->fullmessagehtml);
-            $this->assertContains('Seminar:   Seminar 1', $message->fullmessagehtml);
+            $this->assertContains('Seminar:   Seminar ', $message->fullmessagehtml);
             $this->assertContains($message->useridto, $affectedusers);
         }
     }
@@ -2022,16 +2137,16 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
             'facetoface' => $facetoface->id,
             'capacity' => 5,
             'sessiondates' => array($sessiondate),
-            'datetimeknown' => '1',
         );
 
         $sessionid = $facetofacegenerator->add_session($sessiondata);
+        $sessiondata['datetimeknown'] = '1';
         $session = $DB->get_record('facetoface_sessions', array('id' => $sessionid));
         $session->sessiondates = facetoface_get_session_dates($session->id);
 
-        facetoface_user_signup($session, $facetoface, $course, '', MDL_F2F_TEXT, MDL_F2F_STATUS_BOOKED, $student1->id);
-        facetoface_user_signup($session, $facetoface, $course, '', MDL_F2F_TEXT, MDL_F2F_STATUS_BOOKED, $student2->id);
-        facetoface_user_signup($session, $facetoface, $course, '', MDL_F2F_TEXT, MDL_F2F_STATUS_BOOKED, $student3->id);
+        signup_helper::signup(\mod_facetoface\signup::create($student1->id, new \mod_facetoface\seminar_event($session->id)));
+        signup_helper::signup(\mod_facetoface\signup::create($student2->id, new \mod_facetoface\seminar_event($session->id)));
+        signup_helper::signup(\mod_facetoface\signup::create($student3->id, new \mod_facetoface\seminar_event($session->id)));
 
         return array($sessiondate, $student1, $student2, $student3);
     }
@@ -2092,18 +2207,18 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
             'capacity' => 3,
             'allowoverbook' => 1,
             'sessiondates' => [],
-            'datetimeknown' => '0',
             'mincapacity' => '1'
         );
-
         $session = facetoface_get_session($facetofacegenerator->add_session($sessiondata));
+        $sessiondata['datetimeknown'] = '0';
 
         $emailsink = $this->redirectMessages();
-        facetoface_user_import($course, $facetoface, $session, $student1->id);
+        signup_helper::signup(\mod_facetoface\signup::create($student1->id, new \mod_facetoface\seminar_event($session->id)));
+        $this->execute_adhoc_tasks();
         $emailsink->close();
 
         $preemails = $emailsink->get_messages();
-        foreach($preemails as $preemail) {
+        foreach ($preemails as $preemail) {
             $this->assertContains("This is to advise that you have been added to the waitlist", $preemail->fullmessagehtml);
         }
     }
@@ -2261,6 +2376,8 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
         facetoface_notify_under_capacity();
         ob_end_clean();
 
+        $this->execute_adhoc_tasks();
+
         $messages = $emailsink->get_messages();
         $emailsink->close();
 
@@ -2283,5 +2400,82 @@ class mod_facetoface_notifications_testcase extends advanced_testcase {
             [0],
             [1]
         ];
+    }
+
+    public function test_trainer_confirmation_trainer_unassigned(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        // Prepare data.
+        $f2f = $this->create_facetoface();
+        $role = $DB->get_record('role', array('shortname' => 'teacher'));
+        $DB->set_field('facetoface', 'approvalrole', $role->id, ['id' => $f2f->get_id()]);
+        $seminarevent = $f2f->get_events()->current();
+
+        // Assign teacher1 to seminar event.
+        $teacher1 = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($teacher1->id, $f2f->get_course(), $role->id);
+        $teachers[] = $teacher1->id;
+        $form[$role->id] = $teachers;
+        $sink = $this->redirectEmails();
+        facetoface_update_trainers($f2f, $seminarevent->to_record(), $form);
+        unset($form, $teachers);
+        $count = $DB->count_records('facetoface_session_roles', ['roleid' => $role->id, 'userid' => $teacher1->id]);
+        $this->assertEquals(1, (int)$count);
+
+        $this->execute_adhoc_tasks();
+        $messages = $sink->get_messages();
+        $sink->close();
+        $this->assertCount(1, $messages);
+
+        $message = $messages[0];
+        $this->assertSame($teacher1->email, $message->to);
+        $this->assertStringStartsWith('Seminar trainer confirmation:', $message->subject);
+
+        // Assign teacher2 to seminar event and unassign teacher1 from, check emails.
+        $teacher2 = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($teacher2->id, $f2f->get_course(), $role->id);
+        $teachers[] = $teacher2->id;
+        $form[$role->id] = $teachers;
+        $sink = $this->redirectEmails();
+        facetoface_update_trainers($f2f, $seminarevent->to_record(), $form);
+        unset($form, $teachers);
+        $count = $DB->count_records('facetoface_session_roles', ['roleid' => $role->id, 'userid' => $teacher2->id]);
+        $this->assertEquals(1, (int)$count);
+
+        $this->execute_adhoc_tasks();
+        $messages = $sink->get_messages();
+        $sink->close();
+        usort($messages, function($email1, $email2) {
+            return strcmp($email1->to, $email2->to);
+        });
+        $this->assertCount(2, $messages);
+
+        $message2 = $messages[1];
+        $this->assertSame($teacher2->email, $message2->to);
+        $this->assertStringStartsWith('Seminar trainer confirmation:', $message2->subject);
+
+        $message1 = $messages[0];
+        $this->assertSame($teacher1->email, $message1->to);
+        $this->assertStringStartsWith('Seminar event trainer unassigned', $message1->subject);
+        $this->assertEquals(1, 1);
+    }
+
+    private function create_facetoface() {
+
+        $course = $this->createCourse(null, ['createsections' => true]);
+        $f2f = $this->createSeminar($course, 'Approval', ['approvaltype' => \mod_facetoface\seminar::APPROVAL_ROLE]);
+
+        $seminarevent = new \mod_facetoface\seminar_event();
+        $seminarevent->set_facetoface($f2f->id)->save();
+
+        $time = time() + 3600;
+        $seminarsession = new \mod_facetoface\seminar_session();
+        $seminarsession->set_sessionid($seminarevent->get_id())
+            ->set_timestart($time)
+            ->set_timefinish($time + 7200)
+            ->save();
+
+        return new \mod_facetoface\seminar($f2f->id);
     }
 }

@@ -67,7 +67,7 @@ Feature: Verify the case insensitive shortnames for certification completion imp
     And "11" row "Imported as evidence?" column of "completionimport_certification" table should contain "No"
     And "12" row "Imported as evidence?" column of "completionimport_certification" table should contain "Yes"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob1 Learner1"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     Then I should see "Record of Learning for Bob1 Learner1 : Other Evidence"
@@ -77,7 +77,7 @@ Feature: Verify the case insensitive shortnames for certification completion imp
     Then "Certification 1" row "Previous completions" column of "plan_certifications" table should contain "1"
     And "Certification 2" row "Previous completions" column of "plan_certifications" table should contain "1"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob4 Learner4"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     Then I should see "Record of Learning for Bob4 Learner4 : Other Evidence"
@@ -87,7 +87,7 @@ Feature: Verify the case insensitive shortnames for certification completion imp
     Then "Certification 1" row "Previous completions" column of "plan_certifications" table should contain "1"
     And "Certification 2" row "Previous completions" column of "plan_certifications" table should contain "0"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob8 Learner8"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     Then I should see "Record of Learning for Bob8 Learner8 : Other Evidence"
@@ -133,7 +133,7 @@ Feature: Verify the case insensitive shortnames for certification completion imp
     And "10" row "Errors" column of "completionimport_certification" table should contain "Duplicate ID Number"
     And "11" row "Errors" column of "completionimport_certification" table should contain "Duplicate ID Number"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob1 Learner1"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     Then I should see "Record of Learning for Bob1 Learner1 : Other Evidence"
@@ -143,7 +143,7 @@ Feature: Verify the case insensitive shortnames for certification completion imp
     Then "Certification 1" row "Previous completions" column of "plan_certifications" table should contain "0"
     And "Certification 2" row "Previous completions" column of "plan_certifications" table should contain "0"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob4 Learner4"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     Then I should see "Record of Learning for Bob4 Learner4 : Other Evidence"
@@ -153,7 +153,7 @@ Feature: Verify the case insensitive shortnames for certification completion imp
     Then "Certification 1" row "Previous completions" column of "plan_certifications" table should contain "0"
     And "Certification 2" row "Previous completions" column of "plan_certifications" table should contain "0"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob8 Learner8"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     Then I should see "Record of Learning for Bob8 Learner8 : Other Evidence"

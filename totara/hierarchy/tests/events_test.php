@@ -80,18 +80,20 @@ class totara_hierarchy_events_testcase extends advanced_testcase {
     protected $user, $cohort, $course, $module;
 
     protected function tearDown() {
-        $this->pos_type_data = null;
-        $this->org_type_data = null;
-        $this->comp_type_data = null;
-        $this->goal_type_data = null;
-        $this->type_changed_data = null;
-        $this->comp_scale_data = null;
-        $this->comp_scale_value_data = null;
-        $this->goal_scale_data = null;
-        $this->goal_scale_value_data = null;
         $this->pos_framework = null;
+        $this->org_framework = null;
+        $this->comp_framework = null;
+        $this->goal_framework = null;
         $this->pos = null;
+        $this->org = null;
+        $this->comp = null;
+        $this->comp2 = null;
+        $this->goal = null;
         $this->user = null;
+        $this->cohort = null;
+        $this->course = null;
+        $this->module = null;
+
         parent::tearDown();
     }
 

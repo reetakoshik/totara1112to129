@@ -7,6 +7,8 @@ Feature: Administrators can add a custom location field to complete during room 
   Background:
     Given I am on a totara site
     And I log in as "admin"
+    And I set the following administration settings values:
+      | catalogtype | enhanced |
 
     # Set up first custom field
     When I navigate to "Custom fields" node in "Site administration > Courses"
@@ -39,7 +41,7 @@ Feature: Administrators can add a custom location field to complete during room 
     And I click on "Save changes" "button"
 
   Scenario: Test custom location field
-    Given I click on "Find Learning" in the totara menu
+    Given I click on "Courses" in the totara menu
     And I click on "Create Course" "button"
     And I expand all fieldsets
     # Check the defaults

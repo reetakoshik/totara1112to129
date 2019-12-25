@@ -270,7 +270,7 @@ class totara_cohort_position_rules_testcase extends advanced_testcase {
         $postype1 = $DB->insert_record('pos_type', $newtype);
 
         // Check the record was created correctly.
-        $this->assertInternalType('int', $postype1);
+        $this->assertIsInt($postype1);
 
         // Assign the type position to pos1.
         $this->assertTrue($DB->set_field('pos', 'typeid', $postype1, array('id' => $this->pos1->id)));
@@ -464,7 +464,7 @@ class totara_cohort_position_rules_testcase extends advanced_testcase {
         // 4. data4: 3 users (user1, user3 and manager2).
         $members = $DB->get_fieldset_select('cohort_members', 'userid', 'cohortid = ?', array($this->cohort->id));
         $this->assertEquals($usercount, count($members));
-        $this->assertEquals($members, $membersofmanagers, '', 0.0, 10, true);
+        $this->assertEqualsCanonicalizing($members, $membersofmanagers);
     }
 
     /**

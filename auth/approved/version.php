@@ -22,6 +22,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2018022701;        // The current plugin version (Date: YYYYMMDDXX)
-$plugin->requires = 2016120505;       // Requires this Totara version
+$plugin->version = 2018112201;        // The current plugin version (Date: YYYYMMDDXX)
+$plugin->requires = 2017051509;       // Requires this Totara version
 $plugin->component = 'auth_approved';      // Full name of the plugin (used for diagnostics)

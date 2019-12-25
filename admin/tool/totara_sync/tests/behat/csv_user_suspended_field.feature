@@ -4,17 +4,17 @@ Feature: Test HR Import user csv suspended field import.
   Background:
     Given I am on a totara site
     When I log in as "admin"
-    And I navigate to "General settings" node in "Site administration > HR Import"
+    And I navigate to "Default settings" node in "Site administration > HR Import"
     And I set the following fields to these values:
-      | File Access | Upload Files |
+      | File access | Upload Files |
     And I press "Save changes"
     And I navigate to "Manage elements" node in "Site administration > HR Import > Elements"
     And I "Enable" the "User" HR Import element
     And I navigate to "User" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source | CSV |
+      | CSV | 1 |
     And I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
 
     When I navigate to "CSV" node in "Site administration > HR Import > Sources > User"
     And I click on "Suspended" "checkbox"
@@ -33,7 +33,7 @@ Feature: Test HR Import user csv suspended field import.
     And I set the following fields to these values:
       | Empty string behaviour in CSV  | <empty string behaviour> |
     And I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
     And I should see "<empty string behaviour>" in the "Empty string behaviour in CSV" "field"
 
     # Upload the sync source and run sync.
@@ -47,7 +47,7 @@ Feature: Test HR Import user csv suspended field import.
     And I should not see "However, there have been some problems"
 
     # Check the user has the correct suspended setting.
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I set the field "user-deleted" to "any value"
     And I click on "Search" "button" in the ".fitem_actionbuttons" "css_element"
     Then the following should exist in the "system_browse_users" table:

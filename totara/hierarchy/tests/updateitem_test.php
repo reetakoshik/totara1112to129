@@ -32,16 +32,17 @@ global $CFG;
 require_once($CFG->dirroot . '/totara/hierarchy/lib.php');
 require_once($CFG->dirroot . '/totara/hierarchy/prefix/organisation/lib.php');
 
-class updatehierarchyitem_test extends advanced_testcase {
+class totara_hierarchy_updateitem_testcase extends advanced_testcase {
 
     private $frame1, $frame2;
     private $org1, $org2, $org3, $org4;
     private $org;
 
     protected function tearDown() {
-        $this->frame1 = null;
-        $this->org1 = null;
+        $this->frame1 = $this->frame2 = null;
+        $this->org1 = $this->org2 = $this->org3 = $this->org4 = null;
         $this->org = null;
+
         parent::tearDown();
     }
 

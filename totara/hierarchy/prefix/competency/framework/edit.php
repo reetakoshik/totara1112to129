@@ -18,9 +18,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author Simon Coggins <simon.coggins@totaralms.com>
- * @package totara
- * @subpackage totara_hierarchy
+ * @package totara_hierarchy
  */
+
+defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/totara/hierarchy/lib.php');
 require_once($CFG->dirroot.'/totara/hierarchy/prefix/competency/scale/lib.php');
@@ -50,11 +51,7 @@ if ($id == 0) {
     $framework->id = 0;
     $framework->visible = 1;
     $framework->description = '';
-    $framework->sortorder = $DB->get_field($shortprefix.'_framework', 'MAX(sortorder) + 1', array());
     $framework->hidecustomfields = 0;
-    if (!$framework->sortorder) {
-        $framework->sortorder = 1;
-    }
     $framework->scale = array();
 
 } else {
@@ -107,7 +104,10 @@ if ($frameworkform->is_cancelled()) {
         unset($frameworknew->id);
 
         $frameworknew->timecreated = $time;
-
+        $frameworknew->sortorder = $DB->get_field($shortprefix.'_framework', 'MAX(sortorder) + 1', array());
+        if (!$frameworknew->sortorder) {
+            $frameworknew->sortorder = 1;
+        }
         $frameworknew->id = $DB->insert_record($shortprefix.'_framework', $frameworknew);
         $frameworknew = file_postupdate_standard_editor($frameworknew, 'description', $TEXTAREA_OPTIONS, $TEXTAREA_OPTIONS['context'], 'totara_hierarchy', $shortprefix.'_framework', $frameworknew->id);
         $DB->set_field($shortprefix.'_framework', 'description', $frameworknew->description, array('id' => $frameworknew->id));

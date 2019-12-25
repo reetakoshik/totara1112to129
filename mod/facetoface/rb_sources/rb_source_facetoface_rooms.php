@@ -129,7 +129,7 @@ class rb_source_facetoface_rooms extends rb_facetoface_base_source
                 'joins' => 'assigned',
                 'capability' => 'totara/core:modconfig',
                 'extrafields' => array('hidden' => 'base.hidden', 'cntdates' => 'assigned.cntdates', 'custom' => 'base.custom'),
-                'displayfunc' => 'actions',
+                'displayfunc' => 'f2f_room_actions',
                 'hidden' => false
             )
         );
@@ -197,7 +197,7 @@ class rb_source_facetoface_rooms extends rb_facetoface_base_source
     }
 
     protected function add_customfields() {
-        $this->add_custom_fields_for(
+        $this->add_totara_customfield_component(
             'facetoface_room',
             'base',
             'facetofaceroomid',
@@ -213,13 +213,33 @@ class rb_source_facetoface_rooms extends rb_facetoface_base_source
     }
 
     /**
+     * Get the embeddedurl
+     *
+     * @return string
+     */
+    public function get_embeddedurl() {
+        return $this->embeddedurl;
+    }
+
+    /**
+     * Get the url params
+     *
+     * @return mixed
+     */
+    public function get_urlparams() {
+        return $this->urlparams;
+    }
+
+    /**
      * Room name
      *
+     * @deprecated Since Totara 12.0
      * @param int $roomid
      * @param stdClass $row
      * @param bool $isexport
      */
     public function rb_display_actions($roomid, $row, $isexport = false) {
+        debugging('rb_source_facetoface_rooms::rb_display_actions has been deprecated since Totara 12.0. Use mod_facetoface\rb\display\f2f_room_actions::display', DEBUG_DEVELOPER);
         global $OUTPUT;
 
         if ($isexport) {
@@ -229,7 +249,7 @@ class rb_source_facetoface_rooms extends rb_facetoface_base_source
         $output = array();
 
         $output[] = $OUTPUT->action_icon(
-            new moodle_url('/mod/facetoface/room.php', array('roomid' => $roomid)),
+            new moodle_url('/mod/facetoface/reports/rooms.php', array('roomid' => $roomid)),
             new pix_icon('t/calendar', get_string('details', 'mod_facetoface'))
         );
 
@@ -244,13 +264,13 @@ class rb_source_facetoface_rooms extends rb_facetoface_base_source
         }
 
         if ($row->hidden && $this->embeddedurl) {
-            $params = array_merge($this->urlparams, array('show' => $roomid, 'sesskey' => sesskey()));
+            $params = array_merge($this->urlparams, array('action' => 'show', 'id' => $roomid, 'sesskey' => sesskey()));
             $output[] = $OUTPUT->action_icon(
                 new moodle_url($this->embeddedurl, $params),
                 new pix_icon('t/show', get_string('roomshow', 'mod_facetoface'))
             );
         } else if ($this->embeddedurl) {
-            $params = array_merge($this->urlparams, array('hide' => $roomid, 'sesskey' => sesskey()));
+            $params = array_merge($this->urlparams, array('action' => 'hide', 'id' => $roomid, 'sesskey' => sesskey()));
             $output[] = $OUTPUT->action_icon(
                 new moodle_url($this->embeddedurl, $params),
                 new pix_icon('t/hide', get_string('roomhide', 'mod_facetoface'))
@@ -261,7 +281,7 @@ class rb_source_facetoface_rooms extends rb_facetoface_base_source
             $output[] = $OUTPUT->pix_icon('t/delete_gray', get_string('currentlyassigned', 'mod_facetoface'), 'moodle', array('class' => 'disabled iconsmall'));
         } else {
             $output[] = $OUTPUT->action_icon(
-                new moodle_url('/mod/facetoface/room/manage.php', array('delete' => $roomid)),
+                new moodle_url('/mod/facetoface/room/manage.php', array('action' => 'delete', 'id' => $roomid)),
                 new pix_icon('t/delete', get_string('delete'))
             );
         }

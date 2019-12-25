@@ -34,6 +34,7 @@ require_once($CFG->dirroot . '/lib/grade/constants.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_activity_results_edit_form extends block_edit_form {
+
     /**
      * The definition of the fields to use.
      *
@@ -46,7 +47,7 @@ class block_activity_results_edit_form extends block_edit_form {
         $blockconfig = get_config('block_activity_results');
 
         // Fields for editing activity_results block title and contents.
-        $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
+        $mform->addElement('header', 'configheader', get_string('customblocksettings', 'block'));
 
         // Get supported modules (Only modules using grades or scales will be listed).
         $sql = 'SELECT id, itemname FROM {grade_items} WHERE courseid = ? and itemtype = ? and (gradetype = ? or gradetype = ?)';

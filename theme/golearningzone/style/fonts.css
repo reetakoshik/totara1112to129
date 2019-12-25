@@ -3,7 +3,7 @@
     font-family: 'Arimo';
     font-style: normal;
     font-weight: 400;
-    src: local('Arimo Regular'), local('Arimo-Regular'), url(/theme/golearningzone/fonts/P5sMzZCDf9_T_10UxCF8jA.woff2) format('woff2');
+    src: local('Arimo Regular'), local('Arimo-Regular'), url([[setting:wwwroot]]/theme/golearningzone/fonts/P5sMzZCDf9_T_10UxCF8jA.woff2) format('woff2');
     unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
 }
 /* cyrillic */
@@ -11,7 +11,7 @@
     font-family: 'Arimo';
     font-style: normal;
     font-weight: 400;
-    src: local('Arimo Regular'), local('Arimo-Regular'), url(/theme/golearningzone/fonts/P5sMzZCDf9_T_10dxCF8jA.woff2) format('woff2');
+    src: local('Arimo Regular'), local('Arimo-Regular'), url([[setting:wwwroot]]/theme/golearningzone/fonts/P5sMzZCDf9_T_10dxCF8jA.woff2) format('woff2');
     unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
 /* greek-ext */
@@ -19,7 +19,7 @@
     font-family: 'Arimo';
     font-style: normal;
     font-weight: 400;
-    src: local('Arimo Regular'), local('Arimo-Regular'), url(/theme/golearningzone/fonts/P5sMzZCDf9_T_10VxCF8jA.woff2) format('woff2');
+    src: local('Arimo Regular'), local('Arimo-Regular'), url([[setting:wwwroot]]/theme/golearningzone/fonts/P5sMzZCDf9_T_10VxCF8jA.woff2) format('woff2');
     unicode-range: U+1F00-1FFF;
 }
 /* greek */
@@ -27,7 +27,7 @@
     font-family: 'Arimo';
     font-style: normal;
     font-weight: 400;
-    src: local('Arimo Regular'), local('Arimo-Regular'), url(/theme/golearningzone/fonts/P5sMzZCDf9_T_10axCF8jA.woff2) format('woff2');
+    src: local('Arimo Regular'), local('Arimo-Regular'), url([[setting:wwwroot]]/theme/golearningzone/fonts/P5sMzZCDf9_T_10axCF8jA.woff2) format('woff2');
     unicode-range: U+0370-03FF;
 }
 /* hebrew */
@@ -35,7 +35,7 @@
     font-family: 'Arimo';
     font-style: normal;
     font-weight: 400;
-    src: local('Arimo Regular'), local('Arimo-Regular'), url(/theme/golearningzone/fonts/P5sMzZCDf9_T_10bxCF8jA.woff2) format('woff2');
+    src: local('Arimo Regular'), local('Arimo-Regular'), url([[setting:wwwroot]]/theme/golearningzone/fonts/P5sMzZCDf9_T_10bxCF8jA.woff2) format('woff2');
     unicode-range: U+0590-05FF, U+20AA, U+25CC, U+FB1D-FB4F;
 }
 /* vietnamese */
@@ -43,7 +43,7 @@
     font-family: 'Arimo';
     font-style: normal;
     font-weight: 400;
-    src: local('Arimo Regular'), local('Arimo-Regular'), url(/theme/golearningzone/fonts/P5sMzZCDf9_T_10WxCF8jA.woff2) format('woff2');
+    src: local('Arimo Regular'), local('Arimo-Regular'), url([[setting:wwwroot]]/theme/golearningzone/fonts/P5sMzZCDf9_T_10WxCF8jA.woff2) format('woff2');
     unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
 }
 /* latin-ext */
@@ -51,7 +51,7 @@
     font-family: 'Arimo';
     font-style: normal;
     font-weight: 400;
-    src: local('Arimo Regular'), local('Arimo-Regular'), url(/theme/golearningzone/fonts/P5sMzZCDf9_T_10XxCF8jA.woff2) format('woff2');
+    src: local('Arimo Regular'), local('Arimo-Regular'), url([[setting:wwwroot]]/theme/golearningzone/fonts/P5sMzZCDf9_T_10XxCF8jA.woff2) format('woff2');
     unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 /* latin */
@@ -59,7 +59,7 @@
     font-family: 'Arimo';
     font-style: normal;
     font-weight: 400;
-    src: local('Arimo Regular'), local('Arimo-Regular'), url(/theme/golearningzone/fonts/P5sMzZCDf9_T_10ZxCE.woff2) format('woff2');
+    src: local('Arimo Regular'), local('Arimo-Regular'), url([[setting:wwwroot]]/theme/golearningzone/fonts/P5sMzZCDf9_T_10ZxCE.woff2) format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 /* cyrillic-ext */
@@ -67,7 +67,7 @@
     font-family: 'Arimo';
     font-style: normal;
     font-weight: 700;
-    src: local('Arimo Bold'), local('Arimo-Bold'), url(/theme/golearningzone/fonts/P5sBzZCDf9_T_1Wi4TROrZKX0A.woff2) format('woff2');
+    src: local('Arimo Bold'), local('Arimo-Bold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/P5sBzZCDf9_T_1Wi4TROrZKX0A.woff2) format('woff2');
     unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
 }
 /* cyrillic */
@@ -75,7 +75,7 @@
     font-family: 'Arimo';
     font-style: normal;
     font-weight: 700;
-    src: local('Arimo Bold'), local('Arimo-Bold'), url(/theme/golearningzone/fonts/P5sBzZCDf9_T_1Wi4TRHrZKX0A.woff2) format('woff2');
+    src: local('Arimo Bold'), local('Arimo-Bold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/P5sBzZCDf9_T_1Wi4TRHrZKX0A.woff2) format('woff2');
     unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
 /* greek-ext */
@@ -83,7 +83,7 @@
     font-family: 'Arimo';
     font-style: normal;
     font-weight: 700;
-    src: local('Arimo Bold'), local('Arimo-Bold'), url(/theme/golearningzone/fonts/P5sBzZCDf9_T_1Wi4TRPrZKX0A.woff2) format('woff2');
+    src: local('Arimo Bold'), local('Arimo-Bold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/P5sBzZCDf9_T_1Wi4TRPrZKX0A.woff2) format('woff2');
     unicode-range: U+1F00-1FFF;
 }
 /* greek */
@@ -91,7 +91,7 @@
     font-family: 'Arimo';
     font-style: normal;
     font-weight: 700;
-    src: local('Arimo Bold'), local('Arimo-Bold'), url(/theme/golearningzone/fonts/P5sBzZCDf9_T_1Wi4TRArZKX0A.woff2) format('woff2');
+    src: local('Arimo Bold'), local('Arimo-Bold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/P5sBzZCDf9_T_1Wi4TRArZKX0A.woff2) format('woff2');
     unicode-range: U+0370-03FF;
 }
 /* hebrew */
@@ -99,7 +99,7 @@
     font-family: 'Arimo';
     font-style: normal;
     font-weight: 700;
-    src: local('Arimo Bold'), local('Arimo-Bold'), url(/theme/golearningzone/fonts/P5sBzZCDf9_T_1Wi4TRBrZKX0A.woff2) format('woff2');
+    src: local('Arimo Bold'), local('Arimo-Bold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/P5sBzZCDf9_T_1Wi4TRBrZKX0A.woff2) format('woff2');
     unicode-range: U+0590-05FF, U+20AA, U+25CC, U+FB1D-FB4F;
 }
 /* vietnamese */
@@ -107,7 +107,7 @@
     font-family: 'Arimo';
     font-style: normal;
     font-weight: 700;
-    src: local('Arimo Bold'), local('Arimo-Bold'), url(/theme/golearningzone/fonts/P5sBzZCDf9_T_1Wi4TRMrZKX0A.woff2) format('woff2');
+    src: local('Arimo Bold'), local('Arimo-Bold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/P5sBzZCDf9_T_1Wi4TRMrZKX0A.woff2) format('woff2');
     unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
 }
 /* latin-ext */
@@ -115,7 +115,7 @@
     font-family: 'Arimo';
     font-style: normal;
     font-weight: 700;
-    src: local('Arimo Bold'), local('Arimo-Bold'), url(/theme/golearningzone/fonts/P5sBzZCDf9_T_1Wi4TRNrZKX0A.woff2) format('woff2');
+    src: local('Arimo Bold'), local('Arimo-Bold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/P5sBzZCDf9_T_1Wi4TRNrZKX0A.woff2) format('woff2');
     unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 /* latin */
@@ -123,7 +123,7 @@
     font-family: 'Arimo';
     font-style: normal;
     font-weight: 700;
-    src: local('Arimo Bold'), local('Arimo-Bold'), url(/theme/golearningzone/fonts/P5sBzZCDf9_T_1Wi4TRDrZI.woff2) format('woff2');
+    src: local('Arimo Bold'), local('Arimo-Bold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/P5sBzZCDf9_T_1Wi4TRDrZI.woff2) format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 /* cyrillic-ext */
@@ -131,7 +131,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 300;
-    src: local('Open Sans Light'), local('OpenSans-Light'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN_r8OX-hpOqc.woff2) format('woff2');
+    src: local('Open Sans Light'), local('OpenSans-Light'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN_r8OX-hpOqc.woff2) format('woff2');
     unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
 }
 /* cyrillic */
@@ -139,7 +139,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 300;
-    src: local('Open Sans Light'), local('OpenSans-Light'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN_r8OVuhpOqc.woff2) format('woff2');
+    src: local('Open Sans Light'), local('OpenSans-Light'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN_r8OVuhpOqc.woff2) format('woff2');
     unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
 /* greek-ext */
@@ -147,7 +147,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 300;
-    src: local('Open Sans Light'), local('OpenSans-Light'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN_r8OXuhpOqc.woff2) format('woff2');
+    src: local('Open Sans Light'), local('OpenSans-Light'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN_r8OXuhpOqc.woff2) format('woff2');
     unicode-range: U+1F00-1FFF;
 }
 /* greek */
@@ -155,7 +155,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 300;
-    src: local('Open Sans Light'), local('OpenSans-Light'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN_r8OUehpOqc.woff2) format('woff2');
+    src: local('Open Sans Light'), local('OpenSans-Light'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN_r8OUehpOqc.woff2) format('woff2');
     unicode-range: U+0370-03FF;
 }
 /* vietnamese */
@@ -163,7 +163,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 300;
-    src: local('Open Sans Light'), local('OpenSans-Light'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN_r8OXehpOqc.woff2) format('woff2');
+    src: local('Open Sans Light'), local('OpenSans-Light'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN_r8OXehpOqc.woff2) format('woff2');
     unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
 }
 /* latin-ext */
@@ -171,7 +171,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 300;
-    src: local('Open Sans Light'), local('OpenSans-Light'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN_r8OXOhpOqc.woff2) format('woff2');
+    src: local('Open Sans Light'), local('OpenSans-Light'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN_r8OXOhpOqc.woff2) format('woff2');
     unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 /* latin */
@@ -179,7 +179,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 300;
-    src: local('Open Sans Light'), local('OpenSans-Light'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN_r8OUuhp.woff2) format('woff2');
+    src: local('Open Sans Light'), local('OpenSans-Light'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN_r8OUuhp.woff2) format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 /* cyrillic-ext */
@@ -187,7 +187,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 400;
-    src: local('Open Sans Regular'), local('OpenSans-Regular'), url(/theme/golearningzone/fonts/mem8YaGs126MiZpBA-UFWJ0bbck.woff2) format('woff2');
+    src: local('Open Sans Regular'), local('OpenSans-Regular'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem8YaGs126MiZpBA-UFWJ0bbck.woff2) format('woff2');
     unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
 }
 /* cyrillic */
@@ -195,7 +195,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 400;
-    src: local('Open Sans Regular'), local('OpenSans-Regular'), url(/theme/golearningzone/fonts/mem8YaGs126MiZpBA-UFUZ0bbck.woff2) format('woff2');
+    src: local('Open Sans Regular'), local('OpenSans-Regular'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem8YaGs126MiZpBA-UFUZ0bbck.woff2) format('woff2');
     unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
 /* greek-ext */
@@ -203,7 +203,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 400;
-    src: local('Open Sans Regular'), local('OpenSans-Regular'), url(/theme/golearningzone/fonts/mem8YaGs126MiZpBA-UFWZ0bbck.woff2) format('woff2');
+    src: local('Open Sans Regular'), local('OpenSans-Regular'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem8YaGs126MiZpBA-UFWZ0bbck.woff2) format('woff2');
     unicode-range: U+1F00-1FFF;
 }
 /* greek */
@@ -211,7 +211,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 400;
-    src: local('Open Sans Regular'), local('OpenSans-Regular'), url(/theme/golearningzone/fonts/mem8YaGs126MiZpBA-UFVp0bbck.woff2) format('woff2');
+    src: local('Open Sans Regular'), local('OpenSans-Regular'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem8YaGs126MiZpBA-UFVp0bbck.woff2) format('woff2');
     unicode-range: U+0370-03FF;
 }
 /* vietnamese */
@@ -219,7 +219,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 400;
-    src: local('Open Sans Regular'), local('OpenSans-Regular'), url(/theme/golearningzone/fonts/mem8YaGs126MiZpBA-UFWp0bbck.woff2) format('woff2');
+    src: local('Open Sans Regular'), local('OpenSans-Regular'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem8YaGs126MiZpBA-UFWp0bbck.woff2) format('woff2');
     unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
 }
 /* latin-ext */
@@ -227,7 +227,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 400;
-    src: local('Open Sans Regular'), local('OpenSans-Regular'), url(/theme/golearningzone/fonts/mem8YaGs126MiZpBA-UFW50bbck.woff2) format('woff2');
+    src: local('Open Sans Regular'), local('OpenSans-Regular'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem8YaGs126MiZpBA-UFW50bbck.woff2) format('woff2');
     unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 /* latin */
@@ -235,7 +235,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 400;
-    src: local('Open Sans Regular'), local('OpenSans-Regular'), url(/theme/golearningzone/fonts/mem8YaGs126MiZpBA-UFVZ0b.woff2) format('woff2');
+    src: local('Open Sans Regular'), local('OpenSans-Regular'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem8YaGs126MiZpBA-UFVZ0b.woff2) format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 /* cyrillic-ext */
@@ -243,7 +243,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 600;
-    src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UNirkOX-hpOqc.woff2) format('woff2');
+    src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UNirkOX-hpOqc.woff2) format('woff2');
     unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
 }
 /* cyrillic */
@@ -251,7 +251,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 600;
-    src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UNirkOVuhpOqc.woff2) format('woff2');
+    src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UNirkOVuhpOqc.woff2) format('woff2');
     unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
 /* greek-ext */
@@ -259,7 +259,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 600;
-    src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UNirkOXuhpOqc.woff2) format('woff2');
+    src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UNirkOXuhpOqc.woff2) format('woff2');
     unicode-range: U+1F00-1FFF;
 }
 /* greek */
@@ -267,7 +267,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 600;
-    src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UNirkOUehpOqc.woff2) format('woff2');
+    src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UNirkOUehpOqc.woff2) format('woff2');
     unicode-range: U+0370-03FF;
 }
 /* vietnamese */
@@ -275,7 +275,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 600;
-    src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UNirkOXehpOqc.woff2) format('woff2');
+    src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UNirkOXehpOqc.woff2) format('woff2');
     unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
 }
 /* latin-ext */
@@ -283,23 +283,23 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 600;
-    src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UNirkOXOhpOqc.woff2) format('woff2');
+    src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UNirkOXOhpOqc.woff2) format('woff2');
     unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 /* latin */
-@font-face {
+/*@font-face {
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 600;
-    src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UNirkOUuhp.woff2) format('woff2');
+    src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UNirkOUuhp.woff2) format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
+}*/
 /* cyrillic-ext */
 @font-face {
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 700;
-    src: local('Open Sans Bold'), local('OpenSans-Bold'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN7rgOX-hpOqc.woff2) format('woff2');
+    src: local('Open Sans Bold'), local('OpenSans-Bold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN7rgOX-hpOqc.woff2) format('woff2');
     unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
 }
 /* cyrillic */
@@ -307,7 +307,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 700;
-    src: local('Open Sans Bold'), local('OpenSans-Bold'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN7rgOVuhpOqc.woff2) format('woff2');
+    src: local('Open Sans Bold'), local('OpenSans-Bold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN7rgOVuhpOqc.woff2) format('woff2');
     unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
 /* greek-ext */
@@ -315,7 +315,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 700;
-    src: local('Open Sans Bold'), local('OpenSans-Bold'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN7rgOXuhpOqc.woff2) format('woff2');
+    src: local('Open Sans Bold'), local('OpenSans-Bold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN7rgOXuhpOqc.woff2) format('woff2');
     unicode-range: U+1F00-1FFF;
 }
 /* greek */
@@ -323,7 +323,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 700;
-    src: local('Open Sans Bold'), local('OpenSans-Bold'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN7rgOUehpOqc.woff2) format('woff2');
+    src: local('Open Sans Bold'), local('OpenSans-Bold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN7rgOUehpOqc.woff2) format('woff2');
     unicode-range: U+0370-03FF;
 }
 /* vietnamese */
@@ -331,7 +331,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 700;
-    src: local('Open Sans Bold'), local('OpenSans-Bold'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN7rgOXehpOqc.woff2) format('woff2');
+    src: local('Open Sans Bold'), local('OpenSans-Bold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN7rgOXehpOqc.woff2) format('woff2');
     unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
 }
 /* latin-ext */
@@ -339,7 +339,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 700;
-    src: local('Open Sans Bold'), local('OpenSans-Bold'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN7rgOXOhpOqc.woff2) format('woff2');
+    src: local('Open Sans Bold'), local('OpenSans-Bold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN7rgOXOhpOqc.woff2) format('woff2');
     unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 /* latin */
@@ -347,7 +347,7 @@
     font-family: 'Open Sans';
     font-style: normal;
     font-weight: 700;
-    src: local('Open Sans Bold'), local('OpenSans-Bold'), url(/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN7rgOUuhp.woff2) format('woff2');
+    src: local('Open Sans Bold'), local('OpenSans-Bold'), url([[setting:wwwroot]]/theme/golearningzone/fonts/mem5YaGs126MiZpBA-UN7rgOUuhp.woff2) format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 /* Font Awesome */
@@ -355,10 +355,8 @@
     font-family: "FontAwesome";
     font-weight: normal;
     font-style : normal;
-    src : url(/theme/golearningzone/fonts/fontawesome-webfont.eot?v=4.3.0);
-    src : url(/theme/golearningzone/fonts/fontawesome-webfont.eot?#iefix&v=4.3.0) format('embedded-opentype'),
-    url(/theme/golearningzone/fonts/fontawesome-webfont.woff2?v=4.3.0) format('woff2'),
-    url(/theme/golearningzone/fonts/fontawesome-webfont.woff?v=4.3.0) format('woff'),
-    url(/theme/golearningzone/fonts/fontawesome-webfont.ttf?v=4.3.0) format('truetype'),
-    url(/theme/golearningzone/fonts/fontawesome-webfont.svg?v=4.3.0#fontawesomeregular) format('svg');
+    src : url([[setting:wwwroot]]/theme/golearningzone/fonts/fontawesome-webfont.eot?v=4.3.0);
+    src : url([[setting:wwwroot]]/theme/golearningzone/fonts/fontawesome-webfont.eot?#iefix&v=4.3.0) format('embedded-opentype'),
+    url([[setting:wwwroot]]/theme/golearningzone/fonts/fontawesome-webfont.svg?v=4.3.0#fontawesomeregular) format('svg');
 }
+@import url('https://fonts.googleapis.com/css?family=Lato:400,400i,700,700i,900,900i');

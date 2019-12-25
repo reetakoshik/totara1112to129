@@ -18,8 +18,7 @@
  *
  * @author Alastair Munro <alastair.munro@totaralms.com>
  * @author Aaron Barnes <aaron.barnes@totaralms.com>
- * @package totara
- * @subpackage facetoface
+ * @package mod_facetoface
  */
 
 M.totara_f2f_attendees = M.totara_f2f_attendees || {
@@ -86,7 +85,7 @@ M.totara_f2f_attendees = M.totara_f2f_attendees || {
                     if (tab.length > 0) {
                         //remove the nolink class if present and set up the link attributes
                         tab.parent('a').removeClass('nolink');
-                        tab.parent('a').attr("href", M.cfg.wwwroot + '/mod/facetoface/attendees.php?s=' + M.totara_f2f_attendees.config.sessionid + '&action=approvalrequired');
+                        tab.parent('a').attr("href", M.cfg.wwwroot + '/mod/facetoface/attendees/approvalrequired.php?s=' + M.totara_f2f_attendees.config.sessionid);
                         tab.parent('a').attr("title", M.util.get_string('approvalreqd','facetoface'));
                     }
                 }
@@ -116,7 +115,7 @@ M.totara_f2f_attendees = M.totara_f2f_attendees || {
                     buttons: buttonsObj,
                     title: '<h2>' + M.util.get_string('bulkaddattendeesresults', 'facetoface') + '</h2>'
                 },
-                M.cfg.wwwroot + '/mod/facetoface/attendees/bulkadd_results.php?s=' + M.totara_f2f_attendees.config.sessionid,
+                M.cfg.wwwroot + '/mod/facetoface/attendees/ajax/bulk_add.php?s=' + M.totara_f2f_attendees.config.sessionid,
                 handler
                 );
         })();
@@ -145,15 +144,31 @@ M.totara_f2f_attendees = M.totara_f2f_attendees || {
             }
         }
 
-        // Print notice of operation (boolean: true =>success false=>failure).
-        function print_notice(success) {
-            var notice = M.util.get_string('updateattendeessuccessful','facetoface');
-            var classname = 'notifysuccess';
+        /**
+         * Print notice of operation
+         * @param bool success true =>success false=>failure
+         * @param string Optional HTML content of the result
+         */
+        function print_notice(success, content) {
+            var notice = M.util.get_string('updateattendeessuccessful', 'facetoface');
             if (!success) {
-                notice = M.util.get_string('updateattendeesunsuccessful','facetoface');
-                classname = 'notifyproblem';
+                notice = M.util.get_string('updateattendeesunsuccessful', 'facetoface');
             }
-            $('div#noticeupdate').removeClass('hide').addClass(classname).text(notice);
+            if (content) {
+                require(["core/notification"], function(notification) {
+                    notification.addNotification({
+                        message: notice + content,
+                        type: "error"
+                    });
+                });
+            } else {
+                require(["core/notification"], function(notification) {
+                    notification.addNotification({
+                        message: notice,
+                        type: "success"
+                    });
+                });
+            }
         }
 
         function options_validated(selectbulk) {
@@ -349,6 +364,27 @@ M.totara_f2f_attendees = M.totara_f2f_attendees || {
             });
         }
 
+        // Handle wait-list select attendees "All" or "None" drop down.
+        $(document).on('change', 'select#menuf2f-select', function() {
+            // Get current value.
+            var current = $(this).val();
+            // If its the empty or if its the same as the last action.
+            if (current === '') {
+                // No need to do anything here we're returning to the default value.
+                return;
+            }
+            // Reset to default.
+            // This triggers the change event for a second time but we catch it with the above check.
+            $(this).val('');
+
+            if (current == "all") {
+                $('[name="userid"]').prop("checked", true);
+            }
+            if (current == "none") {
+                $('[name="userid"]').prop("checked", false);
+            }
+        });
+
         // Handle actions drop down.
         $(document).on('change', 'select#menuf2f-actions', function() {
             var select = $(this);
@@ -372,29 +408,30 @@ M.totara_f2f_attendees = M.totara_f2f_attendees || {
 
             switch (current) {
                 case "add":
-                    window.location.href = M.cfg.wwwroot + '/mod/facetoface/attendees/add.php?s=' + M.totara_f2f_attendees.config.sessionid;
+                    window.location.href = M.cfg.wwwroot + '/mod/facetoface/attendees/list/add.php?s=' + M.totara_f2f_attendees.config.sessionid;
                     break;
                 case "bulkaddfile":
-                    window.location.href = M.cfg.wwwroot + '/mod/facetoface/attendees/addfile.php?s=' + M.totara_f2f_attendees.config.sessionid;
+                    window.location.href = M.cfg.wwwroot + '/mod/facetoface/attendees/list/addfile.php?s=' + M.totara_f2f_attendees.config.sessionid;
                     break;
                 case "bulkaddinput":
-                    window.location.href = M.cfg.wwwroot + '/mod/facetoface/attendees/addlist.php?s=' + M.totara_f2f_attendees.config.sessionid;
+                    window.location.href = M.cfg.wwwroot + '/mod/facetoface/attendees/list/addlist.php?s=' + M.totara_f2f_attendees.config.sessionid;
                     break;
                 case "remove":
-                    window.location.href = M.cfg.wwwroot + '/mod/facetoface/attendees/remove.php?s=' + M.totara_f2f_attendees.config.sessionid;
+                    window.location.href = M.cfg.wwwroot + '/mod/facetoface/attendees/list/remove.php?s=' + M.totara_f2f_attendees.config.sessionid;
                     break;
             }
 
-            // Process confirm/cancel attendees.
+            // Process confirm/cancel(remove) attendees.
             if (current == "confirmattendees" || current == "cancelattendees" || current == "playlottery") {
 
-                var users = Y.all('table.mod-facetoface-attendees.waitlist tr');
+                var users = Y.all('table.reportbuilder-table tr');
                 var updateusers = [];
                 var i = 0;
                 users.each(function(node) {
-                    if (checkbox = node.one('input[type=checkbox]')) {
+                    var checkbox = node.one('input[type=checkbox]');
+                    if (checkbox) {
                         if (checkbox._node.checked) {
-                            userid = checkbox.get('value');
+                            var userid = checkbox.get('value');
                             updateusers[i] = userid;
                             i++;
                         }
@@ -409,8 +446,8 @@ M.totara_f2f_attendees = M.totara_f2f_attendees || {
                             draggable: true,
                             modal: true
                         };
-                        dialog = new M.core.dialogue(config);
 
+                        var dialog = new M.core.dialogue(config);
                         dialog.addButton({
                             label: M.util.get_string('close', 'facetoface'),
                             section: Y.WidgetStdMod.FOOTER,
@@ -430,7 +467,8 @@ M.totara_f2f_attendees = M.totara_f2f_attendees || {
 
             // If exporting, redirect to that url
             if (current.substr(0, 6) == "export") {
-                var url = M.cfg.wwwroot + '/mod/facetoface/attendees.php?s=' + M.totara_f2f_attendees.config.sessionid + '&action=' + M.totara_f2f_attendees.config.action + '&download=';
+                var page = M.totara_f2f_attendees.config.action + '.php';
+                var url = M.cfg.wwwroot + '/mod/facetoface/attendees/' + page + '?s=' + M.totara_f2f_attendees.config.sessionid + '&download=';
                 url += current.substr(6);
                 url += '&onlycontent=1';
                 window.location.href = url;
@@ -454,7 +492,7 @@ M.totara_f2f_attendees = M.totara_f2f_attendees || {
             }
 
             function do_post() {
-                Y.io(M.cfg.wwwroot + '/mod/facetoface/updatewaitlist.php', {
+                Y.io(M.cfg.wwwroot + '/mod/facetoface/attendees/ajax/update_waitlist.php', {
                     data: {
                         courseid: M.totara_f2f_attendees.config.courseid,
                         sessionid: M.totara_f2f_attendees.config.sessionid,
@@ -506,6 +544,9 @@ M.totara_f2f_attendees = M.totara_f2f_attendees || {
 
                                 print_notice(true);
                             }
+                            if (parsedResponse.result == 'failure') {
+                                print_notice(false, parsedResponse.content);
+                            }
                         },
                         failure: function () {
                             print_notice(false);
@@ -522,7 +563,7 @@ M.totara_f2f_attendees = M.totara_f2f_attendees || {
                         draggable: true,
                         modal: true,
                     };
-                    dialogue = new M.core.dialogue(config);
+                    var dialogue = new M.core.dialogue(config);
                     dialogue.addButton({
                         label: M.util.get_string('ok', 'moodle'),
                         section: Y.WidgetStdMod.FOOTER,

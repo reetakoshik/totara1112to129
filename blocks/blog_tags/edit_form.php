@@ -29,13 +29,11 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_blog_tags_edit_form extends block_edit_form {
-    protected function specific_definition($mform) {
-        // Fields for editing HTML block title and contents.
-        $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
 
-        $mform->addElement('text', 'config_title', get_string('blocktitle', 'blog'));
-        $mform->setDefault('config_title', get_string('blogtags', 'blog'));
-        $mform->setType('config_title', PARAM_TEXT);
+    protected function specific_definition($mform) {
+
+        // Fields for editing HTML block title and contents.
+        $mform->addElement('header', 'configheader', get_string('customblocksettings', 'block'));
 
         $numberoftags = array();
         for($i = 1; $i <= 50; $i++) {

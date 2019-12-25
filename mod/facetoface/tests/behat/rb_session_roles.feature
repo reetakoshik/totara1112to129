@@ -46,7 +46,7 @@ Feature: Use facetoface session roles content restriction in facetoface session 
       | facetoface | Seminar 11187B | C2     | S11187B  |
 
     And I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "id_s__enableglobalrestrictions" to "1"
     And I press "Save changes"
 
@@ -57,7 +57,8 @@ Feature: Use facetoface session roles content restriction in facetoface session 
 
   @javascript
   Scenario: Setup session roles through report builder content restriction and the teachers can view only their attendees according to session role
-    Given I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "Seminar Sign-ups"
     And I set the field "Source" to "Seminar Sign-ups"
     And I press "Create report"
@@ -75,7 +76,8 @@ Feature: Use facetoface session roles content restriction in facetoface session 
     And I set the field "All users can view this report" to "1"
     And I press "Save changes"
 
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "Seminar Events"
     And I set the field "Source" to "Seminar Events"
     And I press "Create report"
@@ -93,7 +95,8 @@ Feature: Use facetoface session roles content restriction in facetoface session 
     And I set the field "All users can view this report" to "1"
     And I press "Save changes"
 
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "Seminar Sessions"
     And I set the field "Source" to "Seminar Sessions"
     And I press "Create report"
@@ -111,8 +114,7 @@ Feature: Use facetoface session roles content restriction in facetoface session 
     And I set the field "All users can view this report" to "1"
     And I press "Save changes"
 
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I follow "Add a new event"
     And I click on "Edit session" "link"
@@ -206,7 +208,8 @@ Feature: Use facetoface session roles content restriction in facetoface session 
 
   @javascript
   Scenario: Setup multiple session roles through report builder content restriction and the teachers can view only their attendees according to mulitple session roles
-    Given I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "Seminar Sign-ups"
     And I set the field "Source" to "Seminar Sign-ups"
     And I press "Create report"
@@ -226,8 +229,7 @@ Feature: Use facetoface session roles content restriction in facetoface session 
     And I press "Save changes"
 
     # Course 1 setup
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I follow "Add a new event"
     And I click on "Edit session" "link"
@@ -285,8 +287,7 @@ Feature: Use facetoface session roles content restriction in facetoface session 
     And I press "Confirm"
 
     # Course 2 setup
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 2"
+    And I am on "Course 2" course homepage
     And I follow "View all events"
     And I follow "Add a new event"
     And I click on "Edit session" "link"

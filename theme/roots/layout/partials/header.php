@@ -23,6 +23,10 @@
  * @author    Joby Harding <joby.harding@totaralearning.com>
  */
 
+ /**
+  * @deprecated since 12.0
+  */
+
 defined('MOODLE_INTERNAL') || die();
 
 global $OUTPUT;

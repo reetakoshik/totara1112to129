@@ -34,8 +34,7 @@ class block_totara_featured_links_learning_item_tile_testcase extends test_helpe
     /**
      * Makes sure that the course id is saved to the database.
      */
-    public function test_save_content_tile() {
-        $this->resetAfterTest(false);
+    public function create_save_content_tile() {
         global $DB;
 
         $this->setAdminUser();
@@ -58,14 +57,10 @@ class block_totara_featured_links_learning_item_tile_testcase extends test_helpe
         return ['course' => $course, 'tile' => $tile, 'tilenocourse' => $tilenocourse];
     }
 
-    /**
-     * @param array $tiledata
-     * @depends test_save_content_tile
-     */
-    public function test_get_course_valid($tiledata) {
-        $this->resetAfterTest(false);
+    public function test_get_course_valid() {
+        $tiledata = $this->create_save_content_tile();
 
-        /* @var \block_totara_featured_links\tile\course_tile $tile */
+        /* @var block_totara_featured_links\tile\course_tile $tile */
         $tile = $tiledata['tile'];
         $course = $tiledata['course'];
 
@@ -73,19 +68,21 @@ class block_totara_featured_links_learning_item_tile_testcase extends test_helpe
         $this->assertEquals($course->id, $loadedcourse->id);
     }
 
-    /**
-     * @param array $tiledata
-     * @depends test_save_content_tile
-     */
-    public function test_get_course_reload($tiledata) {
-        $this->resetAfterTest(false);
+    public function test_get_course_reload() {
         global $DB;
 
-        /* @var \block_totara_featured_links\tile\course_tile $tile */
+        $tiledata = $this->create_save_content_tile();
+
+        /* @var block_totara_featured_links\tile\course_tile $tile */
         $tile = $tiledata['tile'];
         $course = $tiledata['course'];
 
+        // Prime caches.
+        $loadedcourse = $tile->get_course();
+
         $originalshortname = $course->shortname;
+        $this->assertEquals($originalshortname, $loadedcourse->shortname);
+
         $course->shortname = 'newshortname';
         $this->assertNotEquals($originalshortname, $course->shortname);
 
@@ -99,32 +96,27 @@ class block_totara_featured_links_learning_item_tile_testcase extends test_helpe
         $this->assertEquals($course->id, $reloadedcourse->id);
         $this->assertEquals('newshortname', $reloadedcourse->shortname);
 
-        /* @var \block_totara_featured_links\tile\course_tile $tilenocourse */
+        /* @var block_totara_featured_links\tile\course_tile $tilenocourse */
         $tilenocourse = $tiledata['tilenocourse'];
         $this->assertFalse($tilenocourse->get_course());
     }
 
-    /**
-     * @param array $tiledata
-     * @depends test_save_content_tile
-     */
-    public function test_get_course_no_course($tiledata) {
-        $this->resetAfterTest(false);
+    public function test_get_course_no_course() {
 
-        /* @var \block_totara_featured_links\tile\learning_item $tilenocourse */
+        $tiledata = $this->create_save_content_tile();
+
+        /* @var block_totara_featured_links\tile\learning_item $tilenocourse */
         $tilenocourse = $tiledata['tilenocourse'];
         $this->assertFalse($tilenocourse->get_course());
     }
 
     /**
      * Checks that the course is rendered with the tile.
-     *
-     * @param array $tiledata
-     * @depends test_save_content_tile
      */
-    public function test_render_course($tiledata) {
-        $this->resetAfterTest(false);
+    public function test_render_course() {
         global $PAGE;
+
+        $tiledata = $this->create_save_content_tile();
 
         $PAGE->set_url('/');
 
@@ -134,17 +126,14 @@ class block_totara_featured_links_learning_item_tile_testcase extends test_helpe
         $this->assertContains('Test course 1', $content);
     }
 
-    /**
-     * @param array $tile
-     * @depends test_save_content_tile
-     */
-    public function test_user_can_view_content($tiledata) {
+    public function test_user_can_view_content() {
         global $DB;
-        $this->resetAfterTest(true);
+
+        $tiledata = $this->create_save_content_tile();
 
         $this->setUser();
 
-        /* @var \block_totara_featured_links\tile\learning_item $tile */
+        /* @var block_totara_featured_links\tile\learning_item $tile */
         $tile = $tiledata['tile'];
         $course = $tiledata['course'];
 
@@ -165,8 +154,7 @@ class block_totara_featured_links_learning_item_tile_testcase extends test_helpe
      *
      * @return array
      */
-    public function test_save_program() {
-        $this->resetAfterTest(false);
+    public function crate_save_program() {
         global $DB;
         $this->setAdminUser();
 
@@ -191,12 +179,8 @@ class block_totara_featured_links_learning_item_tile_testcase extends test_helpe
         return ['program' => $program, 'tile' => $tile, 'tilenoprogram' => $tilenoprogram];
     }
 
-    /**
-     * @param $tiledata
-     * @depends test_save_program
-     */
-    public function test_get_program_valid($tiledata) {
-        $this->resetAfterTest(false);
+    public function test_get_program_valid() {
+        $tiledata = $this->crate_save_program();
 
         /** @var block_totara_featured_links\tile\program_tile $tile */
         $tile = $tiledata['tile'];
@@ -207,19 +191,21 @@ class block_totara_featured_links_learning_item_tile_testcase extends test_helpe
         $this->assertEquals($program, $loadedprogram);
     }
 
-    /**
-     * @param $tiledata
-     * @depends test_save_program
-     */
-    public function test_get_program_reload($tiledata) {
-        $this->resetAfterTest(false);
+    public function test_get_program_reload() {
         global $DB;
+
+        $tiledata = $this->crate_save_program();
 
         /* @var \block_totara_featured_links\tile\program_tile $tile */
         $tile = $tiledata['tile'];
         $program = $tiledata['program'];
 
+        // Prime caches.
+        $loadedcourse = $tile->get_program();
+
         $originalshortname = $program->shortname;
+        $this->assertEquals($originalshortname, $loadedcourse->shortname);
+
         $program->shortname = 'newshortname';
         $this->assertNotEquals($originalshortname, $program->shortname);
 
@@ -234,25 +220,18 @@ class block_totara_featured_links_learning_item_tile_testcase extends test_helpe
         $this->assertEquals('newshortname', $reloadedprogram->shortname);
     }
 
-    /**
-     * @param $tiledata
-     * @depends test_save_program
-     */
-    public function test_get_program_no_program($tiledata) {
-        $this->resetAfterTest(false);
+    public function test_get_program_no_program() {
+        $tiledata = $this->crate_save_program();
 
         /* @var \block_totara_featured_links\tile\program_tile $tilenoprogram */
         $tilenoprogram = $tiledata['tilenoprogram'];
         $this->assertFalse($tilenoprogram->get_program());
     }
 
-    /**
-     * @param $tiledata
-     * @depends test_save_program
-     */
-    public function test_get_program_hidden($tiledata) {
-        $this->resetAfterTest(false);
+    public function test_get_program_hidden() {
         global $DB;
+
+        $tiledata = $this->crate_save_program();
 
         /* @var \block_totara_featured_links\tile\program_tile $tile */
         $tile = $tiledata['tile'];

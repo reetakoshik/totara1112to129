@@ -20,12 +20,11 @@ Feature: Check My bookings displays the right information for future and past ev
 
     # Create a Seminar.
     And I log in as "admin"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name                                    | seminar1                   |
       | Description                             | Test seminar description   |
-      | Users can sign-up to multiple events    | 1                          |
+      | How many times the user can sign-up?    | Unlimited                  |
     And I follow "View all events"
     And I follow "Add a new event"
     And I click on "Edit session" "link" in the "Select room" "table_row"
@@ -68,9 +67,9 @@ Feature: Check My bookings displays the right information for future and past ev
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I set the following fields to these values:
       | searchtext | Sam2 Student2 |
-    And I press "Search"
+    And I click on "Search" "button" in the "#region-main" "css_element"
     And I click on "Sam2 Student2, student2@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     And I press "Confirm"
@@ -80,7 +79,7 @@ Feature: Check My bookings displays the right information for future and past ev
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name                                    | seminar2                   |
       | Description                             | Test seminar description2  |
-      | Users can sign-up to multiple events    | 1                          |
+      | How many times the user can sign-up?    | Unlimited                  |
     And I click on "seminar2" "link"
 
     # Past event.
@@ -103,7 +102,7 @@ Feature: Check My bookings displays the right information for future and past ev
     And I click on "Attendees" "link" in the "Event over" "table_row"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Sam2 Student2, student2@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     And I press "Confirm"
@@ -140,8 +139,7 @@ Feature: Check My bookings displays the right information for future and past ev
     Then I should see "My Future Bookings: 0 records shown"
 
     # Sign-up for Seminar 1 and Seminar 2.
-    When I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    When I am on "Course 1" course homepage
     And I click on "Sign-up" "link" in the "115" "table_row"
     And I press "Sign-up"
     And I click on "Sign-up" "link" in the "125" "table_row"
@@ -195,12 +193,12 @@ Feature: Check My bookings displays the right information for future and past ev
 
     # Login as admin and add past booking for student2.
     When I log in as "admin"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "seminar2" "link"
     And I click on "Attendees" "link" in the "Event over" "table_row"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Sam1 Student1, student1@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     And I press "Confirm"

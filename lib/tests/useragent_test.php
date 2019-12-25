@@ -1500,6 +1500,35 @@ class core_useragent_testcase extends advanced_testcase {
                ),
             ),
 
+            // Google image proxy, not a real browser and does not support SVG
+            array(
+                'Mozilla/5.0 (Windows NT 5.1; rv:11.0) Gecko Firefox/11.0 (via ggpht.com GoogleImageProxy)',
+                array(
+                    'is_google_image_proxy'         => true,
+                    'supports_svg'                  => false,
+                    'versionclasses'                => array(
+                    ),
+                ),
+            ),
+            array(
+                'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7 (via ggpht.com GoogleImageProxy)',
+                array(
+                    'is_google_image_proxy'         => true,
+                    'supports_svg'                  => false,
+                    'versionclasses'                => array(
+                    ),
+                ),
+            ),
+            array(
+                'Mozilla/5.0 (Windows NT 9000; rv:9000.0) Gecko Firefox/9000.0 (via ggpht.com googleimageproxy)',
+                array(
+                    'is_google_image_proxy'         => true,
+                    'supports_svg'                  => false,
+                    'versionclasses'                => array(
+                    ),
+                ),
+            ),
+
             // Yandex.
             // See http://help.yandex.com/search/robots/agent.xml.
             array(

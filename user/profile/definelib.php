@@ -62,6 +62,7 @@ class profile_define_base {
         $form->addElement('editor', 'description', get_string('profiledescription', 'admin'), null, null);
 
         $form->addElement('selectyesno', 'required', get_string('profilerequired', 'admin'));
+        $form->addHelpButton('required', 'profilerequired', 'admin');
 
         $form->addElement('selectyesno', 'locked', get_string('profilelocked', 'admin'));
 

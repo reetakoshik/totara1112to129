@@ -27,27 +27,25 @@
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-if ($hassiteconfig) {
-    if (!empty($CFG->enablesitepolicies)) {
-        $sitepolicy = new admin_category('tool_sitepolicy', get_string('pluginname', 'tool_sitepolicy'));
-        $ADMIN->add('security', $sitepolicy);
-        $ADMIN->add(
-            'tool_sitepolicy',
-            new admin_externalpage(
-                'tool_sitepolicy-managerpolicies',
-                get_string('managepolicies', 'tool_sitepolicy'),
-                new moodle_url("/{$CFG->admin}/tool/sitepolicy/index.php"),
-                'tool/sitepolicy:manage'
-            )
-        );
-        $ADMIN->add(
-            'tool_sitepolicy',
-            new admin_externalpage(
-                'tool_sitepolicy-userconsentreport',
-                get_string('userconsentreport', 'tool_sitepolicy'),
-                new moodle_url("/{$CFG->admin}/tool/sitepolicy/sitepolicyreport.php"),
-                'tool/sitepolicy:manage'
-            )
-        );
-    }
+if (!empty($CFG->enablesitepolicies)) {
+    $sitepolicy = new admin_category('tool_sitepolicy', get_string('pluginname', 'tool_sitepolicy'));
+    $ADMIN->add('security', $sitepolicy);
+    $ADMIN->add(
+        'tool_sitepolicy',
+        new admin_externalpage(
+            'tool_sitepolicy-managerpolicies',
+            get_string('managepolicies', 'tool_sitepolicy'),
+            new moodle_url("/{$CFG->admin}/tool/sitepolicy/index.php"),
+            'tool/sitepolicy:manage'
+        )
+    );
+    $ADMIN->add(
+        'tool_sitepolicy',
+        new admin_externalpage(
+            'tool_sitepolicy-userconsentreport',
+            get_string('userconsentreport', 'tool_sitepolicy'),
+            new moodle_url("/{$CFG->admin}/tool/sitepolicy/sitepolicyreport.php"),
+            'tool/sitepolicy:manage'
+        )
+    );
 }

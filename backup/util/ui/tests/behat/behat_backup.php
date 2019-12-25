@@ -60,8 +60,8 @@ class behat_backup extends behat_base {
         $this->getSession()->visit($this->locate_path('/?redirect=0'));
         $this->execute("behat_general::wait_until_the_page_is_ready");
 
-        // Click the course link.
-        $this->execute("behat_general::click_link", $backupcourse);
+        // Totara: Go to the course homepage.
+        $this->execute("behat_navigation::i_am_on_course_homepage", $backupcourse);
 
         // Click the backup link.
         $this->execute("behat_navigation::i_navigate_to_in_current_page_administration", get_string('backup'));
@@ -103,8 +103,8 @@ class behat_backup extends behat_base {
         $this->getSession()->visit($this->locate_path('/?redirect=0'));
         $this->execute("behat_general::wait_until_the_page_is_ready");
 
-        // Click the course link.
-        $this->execute("behat_general::click_link", $backupcourse);
+        // Totara: Go to the course homepage.
+        $this->execute("behat_navigation::i_am_on_course_homepage", $backupcourse);
 
         // Click the backup link.
         $this->execute("behat_navigation::i_navigate_to_in_current_page_administration", get_string('backup'));
@@ -137,12 +137,8 @@ class behat_backup extends behat_base {
         // We can not use other steps here as we don't know where the provided data
         // table elements are used, and we need to catch exceptions contantly.
 
-        // Go to homepage.
-        $this->getSession()->visit($this->locate_path('/?redirect=0'));
-        $this->execute("behat_general::wait_until_the_page_is_ready");
-
-        // Click the course link.
-        $this->execute("behat_general::click_link", $tocourse);
+        // TOTARA: Go to course homepage for $tocourse
+        $this->execute("behat_navigation::i_am_on_course_homepage", $tocourse);
 
         // Click the import link.
         $this->execute("behat_navigation::i_navigate_to_in_current_page_administration", get_string('import'));

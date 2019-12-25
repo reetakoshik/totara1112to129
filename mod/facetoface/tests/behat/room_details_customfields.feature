@@ -17,7 +17,7 @@ Feature: Check room details with all possible custom fields
     # Add images to the private files block to use later
     When I click on "Dashboard" in the totara menu
     And I press "Customise this page"
-    And I select "Private files" from the "Add a block" singleselect
+    And I add the "Private files" block
     And I follow "Manage private files..."
     And I upload "mod/facetoface/tests/fixtures/test.jpg" file to "Files" filemanager
     And I upload "mod/facetoface/tests/fixtures/leaves-green.png" file to "Files" filemanager
@@ -138,8 +138,7 @@ Feature: Check room details with all possible custom fields
     And I press "Add a room"
 
     # Use the room.
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I follow "Add a new event"
     And I click on "Select room" "link"
@@ -147,8 +146,7 @@ Feature: Check room details with all possible custom fields
     And I click on "OK" "button" in the "Choose a room" "totaradialogue"
     And I wait "1" seconds
     And I press "Save changes"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
 
     # View the room.
     And I click on "Room details" "link"

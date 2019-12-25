@@ -16,8 +16,7 @@ Feature: Edit activities in social activities block
       | user | course | role |
       | user1 | C1 | editingteacher |
     Given I log in as "user1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I set the field "Add an activity to section 'section 0'" to "Forum"
     And I set the field "Forum name" to "My forum name"
     And I press "Save and return to course"

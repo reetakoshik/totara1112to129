@@ -26,7 +26,7 @@ require_once('test_helper.php');
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Tests the methods on the \block_totara_featured_links\tile\default_tile class
+ * Tests the methods on the block_totara_featured_links\tile\default_tile class
  */
 class block_totara_featured_links_form_element_audience_list_testcase extends test_helper {
     /**
@@ -40,6 +40,11 @@ class block_totara_featured_links_form_element_audience_list_testcase extends te
         $this->blockgenerator = $this->getDataGenerator()->get_plugin_generator('block_totara_featured_links');
     }
 
+    public function tearDown() {
+        parent::tearDown();
+        $this->blockgenerator = null;
+    }
+
     /**
      * Test that the form element gets the right audience data from the data base
      */
@@ -49,7 +54,7 @@ class block_totara_featured_links_form_element_audience_list_testcase extends te
         $instance = $this->blockgenerator->create_instance();
         $this->blockgenerator->create_default_tile($instance->id);
 
-        $cohort_data = \block_totara_featured_links\form\element\audience_list::get_audience_data($audience1->id);
+        $cohort_data = block_totara_featured_links\form\element\audience_list::get_audience_data($audience1->id);
 
         $this->assertTrue(isset($cohort_data['name']));
         $this->assertTrue(isset($cohort_data['learners']));

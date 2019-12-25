@@ -156,6 +156,14 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         ),
     ),
+    // Edit own admin navigation preferences.
+    'totara/core:editownquickaccessmenu' => array(
+        'captype'      => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes'   => array(
+            'user'    => CAP_ALLOW,
+        ),
+    ),
     // Allows for the user to configure activity module settings. No one gets this by default.
     'totara/core:modconfig' => array(
         'riskbitmask' => RISK_CONFIG,

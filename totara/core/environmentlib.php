@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Check that database user has enough permission for database upgrade
  * @param environment_results $result
- * @return environment_results
+ * @return environment_results|null
  */
 function totara_core_mysql_environment_check(environment_results $result) {
     global $DB;
@@ -131,4 +131,32 @@ function totara_core_xml_external_entities_check(environment_results $result) {
 
     // The test passed, no text from the external file was found.
     return null;
+}
+
+/**
+ * NGRAM is a parser plugin for full-text index. Which helps to optimize diacritics search and compound word search,
+ * only for the full-text indexed columns. At this point, only MySQL supports this plugin, but not MariaDB.
+ *
+ * @param environment_results $result
+ * @return environment_results
+ */
+function totara_core_check_for_ngram(environment_results $result) {
+    global $DB;
+    if ($DB->get_dbvendor() !== "mysql") {
+        // Nothing to check, so lets keep it out of the list of results
+        return null;
+    }
+
+    $ngram = $DB->record_exists_sql(
+        "SELECT 1 FROM information_schema.PLUGINS WHERE PLUGIN_NAME = 'ngram' AND PLUGIN_STATUS = 'ACTIVE'"
+    );
+
+    $result->setStatus($ngram);
+    $result->setInfo(get_string('ngramcheckinfo', 'totara_core'));
+
+    if (!$ngram) {
+        $result->setFeedbackStr(['ngramenvironmentmsg', 'totara_core']);
+    }
+
+    return $result;
 }

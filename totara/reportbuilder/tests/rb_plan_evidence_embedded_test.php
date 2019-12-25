@@ -70,7 +70,8 @@ class totara_reportbuilder_rb_plan_evidence_embedded_testcase extends advanced_t
 
         // Set up report and embedded object for is_capable checks.
         $shortname = 'plan_evidence';
-        $report = reportbuilder_get_embedded_report($shortname, array('userid' => $this->user1->id), false, 0);
+        $config = (new rb_config())->set_embeddata(array('userid' => $this->user1->id));
+        $report = reportbuilder::create_embedded($shortname, $config);
         $embeddedobject = $report->embedobj;
 
         // Test admin can access report.

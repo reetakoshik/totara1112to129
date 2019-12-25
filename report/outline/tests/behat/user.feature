@@ -17,9 +17,7 @@ Feature: View the user page for the outline report
       | teacher1 | C1 | editingteacher |
       | student1 | C1 | student |
     When I log in as "admin"
-    And I am on site homepage
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Folder" to section "1" and I fill the form with:
       | Name | Folder name |
       | Description | Folder description |
@@ -36,7 +34,7 @@ Feature: View the user page for the outline report
       | loglegacy | 1 | logstore_legacy |
     And I log out
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     # We want to view this multiple times, to make sure the count is working.
     And I follow "Folder name"
     And I follow "Folder name"
@@ -64,7 +62,7 @@ Feature: View the user page for the outline report
     And "Disable" "link" should exist in the "Standard log" "table_row"
     And I log out
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     # We want to view this multiple times, to make sure the count is working.
     And I follow "Folder name"
     And I follow "Folder name"
@@ -94,7 +92,7 @@ Feature: View the user page for the outline report
       | loglegacy | 1 | logstore_legacy |
     And I log out
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     # We want to view this multiple times, to make sure the count is working.
     And I follow "Folder name"
     And I follow "Folder name"

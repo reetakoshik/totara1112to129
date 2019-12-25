@@ -10,12 +10,17 @@
         {{{standard_top_of_body_html}}}
         {{{header}}}
         <div class="container">
-            <div id="page" class="container-fluid text-left">
+            <div id="page" class="container-fluid text-left homeHeader">
                 {{{breadcrumbs}}}
                 <div id="page-content">
+                	<div class="row">
+	                	<div class="col-md-12">
+	                        {{{ first }}}
+	                    </div>
+                    </div>
                     <div class="row">
                         <div class="col-md-12 course-header">
-                            <h2 name="CourseShortname">{{coursename}}</h2>
+                            <h2 class="CourseShortname">{{coursename}}</h2>
                         </div>
                     </div>
                     <div class="row custom-blocks">
@@ -31,29 +36,21 @@
                         {{/outcomes}}
                     </div>
                     <div class="row">
+                        {{#render-side-blocks}}
+                            <div class="col-md-{{blocks-size}}">
+                                {{{ side-pre }}}
+                            </div>
+                        {{/render-side-blocks}}
                         <div class="col-md-{{main_content-size}}">
                             {{{main_content}}}
                         </div>
-                        {{#render-side-blocks}}
-                            <div class="col-md-{{blocks-size}}">
-                                {{{ side-post }}}
-                            </div>
-                        {{/render-side-blocks}}
                     </div>
                 </div>
             </div> 
         </div>
         {{{footer}}}
         {{{standard_end_of_body_html}}}
-        <script src="/theme/golearningzone/js/course.js"></script>
-        <script>
-            window.onload = function() {
-                new Header().init();
-                new Course().init();
-                new Layout().init();
-                $('body').show();
-            }
-        </script>
+        
         <style type="text/css">
             [data-flex-icon="completion-manual-n"].fa-square-o:before,
             [data-flex-icon="core|i/completion-manual-n"].fa-square-o:before {

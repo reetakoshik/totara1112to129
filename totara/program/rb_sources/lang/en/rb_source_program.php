@@ -22,4 +22,6 @@
  */
 
 $string['sourcetitle'] = 'Programs';
+
+// Deprecated since Totara 12
 $string['availablecontent'] = 'Only show available Programs';

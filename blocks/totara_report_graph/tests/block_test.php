@@ -27,29 +27,18 @@
  * @author Sam Hemelryk <sam.hemelryk@totaralearning.com>
  * @package block_totara_report_graph
  */
-class block_totara_report_graph_testcase extends advanced_testcase {
+class block_totara_report_graph_block_testcase extends advanced_testcase {
 
     use \block_totara_report_graph\phpunit\block_testing;
 
-    /**
-     * @var block_totara_report_graph
-     */
-    protected $blockinstance;
-
-    protected function tearDown() {
-        $this->blockinstance = null;
-        parent::tearDown();
-    }
-
-    protected function setUp() {
+    public function test_get_content() {
         $this->resetAfterTest();
+        $this->setAdminUser();
 
         $rid = $this->create_user_report_with_graph();
-        $this->blockinstance = $this->create_report_graph_block_instance($rid, ['graphimage_maxwidth' => 777]);
-    }
+        $blockinstance = $this->create_report_graph_block_instance($rid, ['graphimage_maxwidth' => 777]);
 
-    public function test_get_content() {
-        $content = $this->blockinstance->get_content();
+        $content = $blockinstance->get_content();
         $this->assertInstanceOf('stdClass', $content);
         $this->assertNotEmpty($content->text);
         $this->assertNotEmpty($content->footer);
@@ -58,6 +47,6 @@ class block_totara_report_graph_testcase extends advanced_testcase {
         $this->assertContains('width="100%"', $content->text);
         $this->assertContains('height="100%"', $content->text);
         $this->assertContains('type="image/svg+xml"', $content->text);
-        $this->assertContains('blocks/totara_report_graph/ajax_graph.php?blockid='.$this->blockinstance->instance->id, $content->text);
+        $this->assertContains('blocks/totara_report_graph/ajax_graph.php?blockid='.$blockinstance->instance->id, $content->text);
     }
 }

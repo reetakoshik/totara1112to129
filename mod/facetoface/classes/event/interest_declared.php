@@ -48,23 +48,23 @@ class interest_declared extends \core\event\base {
     /**
      * Create from instance.
      *
-     * @param \stdClass $facetoface_interest
+     * @param \interest $interest
      * @param \context_module $context
      * @return interest_declared
      */
-    public static function create_from_instance(\stdClass $facetoface_interest, \context_module $context) {
+    public static function create_from_instance(\mod_facetoface\interest $interest, \context_module $context) {
         $data = array(
             'context'  => $context,
-            'objectid' => $facetoface_interest->id,
+            'objectid' => $interest->get_id(),
             'other' => array(
-                'facetoface' => $facetoface_interest->facetoface
+                'facetoface' => $interest->get_facetoface()
             )
         );
 
         self::$preventcreatecall = false;
         $event = self::create($data);
         self::$preventcreatecall = true;
-        $event->instance = $facetoface_interest;
+        $event->instance = $interest;
 
         return $event;
     }

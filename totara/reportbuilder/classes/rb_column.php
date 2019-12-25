@@ -204,6 +204,7 @@ class rb_column {
      * Some common group functions are provided by {@link rb_base_source}, and more
      * can be created by the source that needs them.
      *
+     * @deprecated since Totara 12
      * @access public
      * @var string
      */
@@ -213,6 +214,7 @@ class rb_column {
      * Used to pass through the fields for ordering the grouping, for example:
      *
      * 'grouporder' => array('prog_courseset.sortorder', 'prog_courseset_course.id')
+     * @deprecated since Totara 12
      */
     public $grouporder;
 
@@ -302,6 +304,12 @@ class rb_column {
     public $issubquery;
 
     /**
+     * Is column deprecated?
+     * @var bool
+     */
+    public $deprecated;
+
+    /**
      * Does this column produce results that combine multiple data records?
      * Compound results are generally not compatible with aggregations
      * and as such should not allow them.
@@ -345,6 +353,7 @@ class rb_column {
             'aggregate' => null,
             'extracontext' => null,
             'issubquery' => false,
+            'deprecated' => false,
         );
         $options = array_merge($defaults, $options);
 

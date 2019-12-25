@@ -28,8 +28,7 @@ Feature: Restoring backups files must be backwards compatible
     And I press "Next"
     And I press "Perform restore"
     And I press "Continue"
-    And I click on "Courses" in the totara menu
-    And I follow "Course Two"
+    And I am on "Course Two" course homepage
     Then I should see "Text activity"
     And I should see "F2f"
     And I follow "View all events"

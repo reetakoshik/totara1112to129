@@ -34,7 +34,7 @@ function xmldb_totara_job_upgrade($oldversion) {
 
     // Totara 10 branching line.
 
-    if ($oldversion < 2018022701) {
+    if ($oldversion < 2018092100) {
         // Update the indexes on the job_assignment table to remove the additional index on id
         $table = new xmldb_table('job_assignment');
 
@@ -46,7 +46,7 @@ function xmldb_totara_job_upgrade($oldversion) {
         }
 
         // Core savepoint reached.
-        upgrade_plugin_savepoint(true, 2018022701, 'totara', 'job');
+        upgrade_plugin_savepoint(true, 2018092100, 'totara', 'job');
     }
 
     return true;

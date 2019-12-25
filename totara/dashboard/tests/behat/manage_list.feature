@@ -12,7 +12,7 @@ Feature: Perform basic dashboard administration
 
   Scenario: Add block to default dashboard
     When I log in as "admin"
-    And I navigate to "Dashboards" node in "Site administration > Appearance"
+    And I navigate to "Dashboards" node in "Site administration > Navigation"
     And I press "Create dashboard"
     And I set the following fields to these values:
       | Name | Behat Test Dashboard |
@@ -23,7 +23,7 @@ Feature: Perform basic dashboard administration
 
   Scenario: Edit dashboard
     Given I log in as "admin"
-    And I navigate to "Dashboards" node in "Site administration > Appearance"
+    And I navigate to "Dashboards" node in "Site administration > Navigation"
     And I should see "Dashboard for edit" in the ".generaltable" "css_element"
     And I click on ".edit" "css_element" in the "Dashboard for edit" "table_row"
     And I set the following fields to these values:
@@ -36,7 +36,7 @@ Feature: Perform basic dashboard administration
 
   Scenario: Check available to all dashboard management
     Given I log in as "admin"
-    And I navigate to "Dashboards" node in "Site administration > Appearance"
+    And I navigate to "Dashboards" node in "Site administration > Navigation"
     And I press "Create dashboard"
     And I set the following fields to these values:
       | Name   | Public dashboard |
@@ -54,7 +54,7 @@ Feature: Perform basic dashboard administration
       | name    | idnumber |
       | Cohort1 | COHORT1  |
       | Cohort2 | COHORT2  |
-    And I navigate to "Dashboards" node in "Site administration > Appearance"
+    And I navigate to "Dashboards" node in "Site administration > Navigation"
     And I press "Create dashboard"
     And I set the following fields to these values:
       | Name | Audience dashboard |
@@ -76,7 +76,7 @@ Feature: Perform basic dashboard administration
 
   Scenario: Delete dashboard
     Given I log in as "admin"
-    And I navigate to "Dashboards" node in "Site administration > Appearance"
+    And I navigate to "Dashboards" node in "Site administration > Navigation"
     And I click on ".delete" "css_element" in the "Dashboard for edit" "table_row"
     And I should see "Do you really want to remove dashboard"
     And I press "Continue"
@@ -93,7 +93,7 @@ Feature: Perform basic dashboard administration
         | Dashboard 2 |
         | Dashboard 3 |
     And I log in as "admin"
-    And I navigate to "Dashboards" node in "Site administration > Appearance"
+    And I navigate to "Dashboards" node in "Site administration > Navigation"
     And I click on ".up" "css_element" in the "Dashboard 2" "table_row"
     Then "Dashboard 2" "link" should appear before "Dashboard for edit" "link"
     And "Dashboard for edit" "link" should appear before "Dashboard 3" "link"
@@ -105,7 +105,7 @@ Feature: Perform basic dashboard administration
         | Dashboard 2 |
         | Dashboard 3 |
     And I log in as "admin"
-    And I navigate to "Dashboards" node in "Site administration > Appearance"
+    And I navigate to "Dashboards" node in "Site administration > Navigation"
     And I click on ".down" "css_element" in the "Dashboard 2" "table_row"
     Then "Dashboard 3" "link" should appear before "Dashboard 2" "link"
     And "Dashboard for edit" "link" should appear before "Dashboard 3" "link"

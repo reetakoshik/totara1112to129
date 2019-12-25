@@ -1,5 +1,5 @@
-@block @block_html
-Feature: Adding and configuring HTML blocks
+@block @block_html @javascript
+Feature: Adding and configuring multiple HTML blocks
   In order to have one or multiple HTML blocks on a page
   As admin
   I need to be able to create, configure and change HTML blocks
@@ -18,7 +18,10 @@ Feature: Adding and configuring HTML blocks
 
   Scenario: Other users can see HTML block that has been configured even when it has no header
     And I configure the "(new HTML block)" block
-    And I set the field "Content" to "Static text without a header"
+    And I set the following fields to these values:
+      | Override default block title    | Yes                           |
+      | Block title                     |                               |
+      | Content                         | Static text without a header  |
     And I press "Save changes"
     Then I should not see "(new HTML block)"
     And I log out
@@ -29,13 +32,17 @@ Feature: Adding and configuring HTML blocks
 
   Scenario: Adding multiple instances of HTML block on a page
     And I configure the "block_html" block
-    And I set the field "Block title" to "The HTML block header"
-    And I set the field "Content" to "Static text with a header"
+    And I set the following fields to these values:
+      | Override default block title    | Yes                       |
+      | Block title                     | The HTML block header     |
+      | Content                         | Static text with a header |
     And I press "Save changes"
     And I add the "HTML" block
     And I configure the "(new HTML block)" block
-    And I set the field "Block title" to "The second HTML block header"
-    And I set the field "Content" to "Second block contents"
+    And I set the following fields to these values:
+      | Override default block title    | Yes                          |
+      | Block title                     | The second HTML block header |
+      | Content                         | Second block contents        |
     And I press "Save changes"
     And I log out
     Then I should see "Static text with a header" in the "The HTML block header" "block"

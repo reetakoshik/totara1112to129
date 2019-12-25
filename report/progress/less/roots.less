@@ -23,7 +23,7 @@
 
 #page-report-progress-index #completion-progress th,
 #page-report-progress-index #completion-progress td {
-    padding: 2px 4px;
+    padding: 2px 2px;
     font-weight: normal;
     border-right: 1px solid #eee;
 }
@@ -46,15 +46,41 @@
     display: inline;
     margin-left: 2em;
 }
-#page-report-progress-index.dir-rtl #completion-progress th svg {
-    direction: ltr;
-}
-
+#page-report-progress-index .completion-header,
 #page-report-progress-index .completion-progresscell {
-    text-align: left;
+    text-align: center;
 }
 
-#page-report-progress-index .activity svg,
-#page-report-progress-index .activity .flex-icon {
-    display: block;
+/* Custom CSS for rotated header.. */
+#page-report-progress-index .rotated-text-container {
+    display: inline-block;
+    width: 16px;
+}
+
+#page-report-progress-index .rotated-text {
+    display: inline-block;
+    white-space: nowrap;
+
+    transform-origin: 0 0;
+    vertical-align: middle;
+}
+
+/*rtl:begin:ignore*/
+#page-report-progress-index.dir-ltr .rotated-text {
+    transform: translate(0, 100%) rotate(-90deg);
+}
+
+#page-report-progress-index.dir-rtl .rotated-text {
+    transform: translate(0, 100%) rotate(90deg);
+}
+/*rtl:begin:ignore*/
+
+#page-report-progress-index .rotated-text:after {
+    content: "";
+    float: left;
+    margin-top: 100%;
+}
+
+#page-report-progress-index .modicon {
+    padding-top: 5px;
 }

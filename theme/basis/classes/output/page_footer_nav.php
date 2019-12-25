@@ -21,12 +21,18 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @author    Joby Harding <joby.harding@totaralearning.com>
  * @package   theme_basis
+ * @deprecated since 12.0
  */
 
 namespace theme_basis\output;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Displays the totara menu in the footer
+ *
+ * @deprecated since 12.0
+ */
 class page_footer_nav implements \renderable, \templatable {
 
     protected $menudata;

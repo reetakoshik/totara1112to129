@@ -152,6 +152,7 @@ if ($ADMIN->fulltree) {
         new lang_string('expiration_desc', 'auth_manual'), 0));
 
     $options = array(
+        '0' => new lang_string('unlimited'),
         '30' => new lang_string('numdays', '', 30),
         '60' => new lang_string('numdays', '', 60),
         '90' => new lang_string('numdays', '', 90),

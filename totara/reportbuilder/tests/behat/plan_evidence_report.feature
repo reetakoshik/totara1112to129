@@ -31,7 +31,7 @@ Feature: Record of learning evidence report
       | Checkbox test 1 | 0               |
     And I press "Add evidence"
     And I click on "Record of Learning" in the totara menu
-    And I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage embedded reports" node in "Site administration > Reports"
     And I follow "Record of Learning: Evidence"
     And I follow "Columns"
     And I set the field "newcolumns" to "Checkbox test 1"
@@ -84,7 +84,7 @@ Feature: Record of learning evidence report
       | customfield_datetimetest[year]    | 2000            |
     And I press "Add evidence"
     And I click on "Record of Learning" in the totara menu
-    And I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage embedded reports" node in "Site administration > Reports"
     And I follow "Record of Learning: Evidence"
     And I follow "Columns"
     And I set the field "newcolumns" to "Date/time test"
@@ -167,7 +167,7 @@ Feature: Record of learning evidence report
       | Choices test                      | one             |
     And I press "Add evidence"
     And I click on "Record of Learning" in the totara menu
-    And I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage embedded reports" node in "Site administration > Reports"
     And I follow "Record of Learning: Evidence"
     And I follow "Columns"
     And I set the field "newcolumns" to "Choices test"
@@ -213,7 +213,7 @@ Feature: Record of learning evidence report
       | Text test     | This is some test text 2 |
     And I press "Add evidence"
     And I click on "Record of Learning" in the totara menu
-    And I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage embedded reports" node in "Site administration > Reports"
     And I follow "Record of Learning: Evidence"
     And I follow "Columns"
     And I set the field "newcolumns" to "Text test"
@@ -259,7 +259,7 @@ Feature: Record of learning evidence report
       | Text area test     | This is some test text 2 |
     And I press "Add evidence"
     And I click on "Record of Learning" in the totara menu
-    And I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage embedded reports" node in "Site administration > Reports"
     And I follow "Record of Learning: Evidence"
     And I follow "Columns"
     And I set the field "newcolumns" to "Text area test"
@@ -305,7 +305,7 @@ Feature: Record of learning evidence report
       | Evidence name               | Test evidence 2      |
     And I press "Add evidence"
     And I click on "Record of Learning" in the totara menu
-    And I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage embedded reports" node in "Site administration > Reports"
     And I follow "Record of Learning: Evidence"
     And I follow "Columns"
     And I set the field "newcolumns" to "URL test"
@@ -352,7 +352,7 @@ Feature: Record of learning evidence report
     And I upload "totara/reportbuilder/tests/fixtures/test2.txt" file to "File test" filemanager
     And I press "Add evidence"
     And I click on "Record of Learning" in the totara menu
-    And I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage embedded reports" node in "Site administration > Reports"
     And I follow "Record of Learning: Evidence"
     And I follow "Columns"
     And I set the field "newcolumns" to "File test"
@@ -392,7 +392,7 @@ Feature: Record of learning evidence report
       | customfield_selecttest[1]         | 1               |
     And I press "Add evidence"
     And I click on "Record of Learning" in the totara menu
-    And I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage embedded reports" node in "Site administration > Reports"
     And I follow "Record of Learning: Evidence"
     And I follow "Columns"
     And I set the field "newcolumns" to "Multi select test (text)"

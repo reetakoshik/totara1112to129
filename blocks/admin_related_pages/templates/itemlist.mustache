@@ -1,0 +1,58 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Sam Hemelryk <sam.hemelryk@totaralearning.com>
+   @package block_admin_related_pages
+}}
+{{!
+
+    @template block_admin_related_pages/itemlist
+
+    This template is used by the \block_admin_related_pages\output\itemlist output component.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * has items
+    * items
+        * url
+        * label
+
+    Example context (json):
+      {
+          "hasitems":true,
+          "items":[
+              {"url":"\/cohort\/index.php","label":"Audiences"},
+              {"url":"\/admin\/roles\/assign.php?contextid=1","label":"Permissions"},
+              {"url":"\/admin\/settings.php?section=manageauths","label":"Authentication"},
+              {"url":"\/admin\/settings.php?section=userdatasettings","label":"User data management"},
+              {"url":"\/admin\/tool\/totara_sync\/admin\/elements.php","label":"HR Import"}
+          ]
+      }
+}}
+<div class="block_admin_related_pages__itemlist">
+    <ul class="unlist">
+        {{#items}}
+        <li><a class="block_admin_related_pages__item" href="{{url}}">{{label}}</a></li>
+        {{/items}}
+    </ul>
+</div>

@@ -15,8 +15,7 @@ Feature: Completion report rpl
       | label      | label1            | label1        | C1                   | label1      | 1            |
       | label      | label2            | label2        | C1                   | label2      | 1            |
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "Course completion" node in "Course administration"
     And I expand all fieldsets
     And I click on "criteria_activity_value[1]" "checkbox"
@@ -50,14 +49,13 @@ Feature: Completion report rpl
 
     # As a student, complete one activity
     When I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I click on "Not completed: label1. Select to mark as complete." "link"
     And I log out
 
     # Set course completion via RPL
     When I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "Course completion" node in "Course administration > Reports"
     Then I complete the course via rpl for "Student 1" with text "Test 1"
     And I delete the course rpl for "Student 1"

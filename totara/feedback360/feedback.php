@@ -153,7 +153,7 @@ if ($isexternaluser) {
 
     $PAGE->set_title($heading);
     $PAGE->set_heading($heading);
-    $PAGE->set_totara_menu_selected('appraisals');
+    $PAGE->set_totara_menu_selected('\totara_appraisal\totara\menu\appraisal');
     $PAGE->navbar->add($heading);
     $PAGE->navbar->add(get_string('givefeedback', 'totara_feedback360'));
 } else if ($viewasown) {
@@ -161,7 +161,7 @@ if ($isexternaluser) {
 
     $PAGE->set_title($heading);
     $PAGE->set_heading($heading);
-    $PAGE->set_totara_menu_selected('appraisals');
+    $PAGE->set_totara_menu_selected('\totara_appraisal\totara\menu\appraisal');
     $PAGE->navbar->add(get_string('feedback360', 'totara_feedback360'), new moodle_url('/totara/feedback360/index.php'));
     $PAGE->navbar->add(get_string('givefeedback', 'totara_feedback360'));
 } else {
@@ -172,7 +172,7 @@ if ($isexternaluser) {
     $PAGE->set_title($userxfeedback);
     $PAGE->set_heading($userxfeedback);
     if (totara_feature_visible('myteam')) {
-        $PAGE->set_totara_menu_selected('myteam');
+        $PAGE->set_totara_menu_selected('\totara_core\totara\menu\myteam');
         $PAGE->navbar->add(get_string('team', 'totara_core'), new moodle_url('/my/teammembers.php'));
     }
     $PAGE->navbar->add($userxfeedback);

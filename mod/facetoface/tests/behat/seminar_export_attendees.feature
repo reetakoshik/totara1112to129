@@ -23,9 +23,7 @@ Feature: Export seminar attendees
       | student1 | C1     | student        |
 
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test seminar name        |
       | Description | Test seminar description |
@@ -54,8 +52,7 @@ Feature: Export seminar attendees
 
   Scenario: Export seminar without job assignments on signup
     Given I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I follow "Sign-up"
     Then I should not see "Job assignment"
@@ -68,8 +65,7 @@ Feature: Export seminar attendees
     And I log out
 
     When I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     Then I should see "Attendees" in the "10 February 2025" "table_row"
 
@@ -77,7 +73,7 @@ Feature: Export seminar attendees
     Then I should not see "Job assignment"
 
     When I follow "Go back"
-    And I click on "Excel" "option" in the "#menudownload" "css_element"
+    And I set the field "Export format" to "Excel"
     And I click on "Export to file" "button"
     Then I should not see "Can not find data record in database"
     And I log out
@@ -89,8 +85,7 @@ Feature: Export seminar attendees
     And I log out
 
     And I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I follow "Sign-up"
     Then I should not see "Select a job assignment"
@@ -103,8 +98,7 @@ Feature: Export seminar attendees
     And I log out
 
     When I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     Then I should see "Attendees" in the "10 February 2025" "table_row"
 
@@ -113,7 +107,7 @@ Feature: Export seminar attendees
     And I should not see "job1" in the "Sam1 Student1" "table_row"
 
     When I follow "Go back"
-    And I click on "Excel" "option" in the "#menudownload" "css_element"
+    And I set the field "Export format" to "Excel"
     And I click on "Export to file" "button"
     Then I should not see "Can not find data record in database"
     And I log out
@@ -122,8 +116,7 @@ Feature: Export seminar attendees
     Given I log in as "admin"
     And I set the following administration settings values:
       | facetoface_selectjobassignmentonsignupglobal | 1 |
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I navigate to "Edit settings" node in "Seminar administration"
     And I set the following fields to these values:
@@ -132,8 +125,7 @@ Feature: Export seminar attendees
     And I log out
 
     And I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I follow "Sign-up"
     Then I should see "Select a job assignment"
@@ -147,8 +139,7 @@ Feature: Export seminar attendees
     And I log out
 
     When I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     Then I should see "Attendees" in the "10 February 2025" "table_row"
 
@@ -157,7 +148,7 @@ Feature: Export seminar attendees
     And I should see "job1" in the "Sam1 Student1" "table_row"
 
     When I follow "Go back"
-    And I click on "Excel" "option" in the "#menudownload" "css_element"
+    And I set the field "Export format" to "Excel"
     And I click on "Export to file" "button"
     Then I should not see "Can not find data record in database"
     And I log out

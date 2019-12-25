@@ -1,0 +1,7 @@
+"idnumber","timemodified","username","deleted","firstname","lastname","email","customfield_textinput_unique"
+1,0,user1,0,user1-firstname,user1-lastname,user1@email.com,1
+2,0,user2,0,user2-firstname,user2-lastname,user2@email.com,1
+3,0,user3,0,user3-firstname,user3-lastname,user3@email.com,
+4,0,user4,0,user4-firstname,user4-lastname,user4@email.com,
+5,0,user5,0,user5-firstname,user5-lastname,user5@email.com,5
+6,0,user6,0,user6-firstname,user6-lastname,user6@email.com,6

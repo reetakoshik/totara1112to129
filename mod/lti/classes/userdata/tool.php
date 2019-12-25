@@ -57,6 +57,7 @@ class tool extends item {
         $submissions = self::submissions($context, $userid);
 
         self::purge_user_submissions($submissions);
+        self::purge_user_submissions_history($context, $userid);
         self::purge_user_gradebook($submissions);
 
         return self::RESULT_STATUS_SUCCESS;
@@ -108,6 +109,19 @@ class tool extends item {
         $DB->delete_records_list("lti_submission", "id", $ids);
     }
 
+    /**
+     * Deletes historic submissions records.
+     *
+     * @param \context $context context.
+     * @param int $userid user to be deleted.
+     */
+    private static function purge_user_submissions_history(\context $context, int $userid) {
+        global $DB;
+
+        $contextjoin = self::get_activities_join($context, 'lti', 'l.id');
+        $select = "ltiid IN (SELECT l.id FROM {lti} l {$contextjoin}) AND userid = :userid";
+        $DB->delete_records_select('lti_submission_history', $select, ['userid' => $userid]);
+    }
 
     /**
      * Deletes grades from the gradebook.

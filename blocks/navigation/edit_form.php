@@ -32,14 +32,15 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_navigation_edit_form extends block_edit_form {
+
     /**
      * @param MoodleQuickForm $mform
      */
     protected function specific_definition($mform) {
         global $CFG;
-        $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
+        $mform->addElement('header', 'configheader', get_string('customblocksettings', 'block'));
 
-        $mods = array('enabledock'=>'yes', 'linkcategories'=>'no');
+        $mods = array('linkcategories'=>'no');
         $yesnooptions = array('yes'=>get_string('yes'), 'no'=>get_string('no'));
         foreach ($mods as $modname=>$default) {
             $mform->addElement('select', 'config_'.$modname, get_string($modname.'desc', $this->block->blockname), $yesnooptions);

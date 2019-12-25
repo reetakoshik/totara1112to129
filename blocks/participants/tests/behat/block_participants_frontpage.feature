@@ -1,4 +1,4 @@
-@block @block_participants
+@block @block_participants @javascript
 Feature: People Block used on frontpage
   In order to view participants in a site
   As a admin

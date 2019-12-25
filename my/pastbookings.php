@@ -35,7 +35,7 @@ $debug  = optional_param('debug', 0, PARAM_INT);
 
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/my/pastbookings.php', array('userid' => $userid, 'format' => $format)));
-$PAGE->set_totara_menu_selected('mybookings');
+$PAGE->set_totara_menu_selected('\totara_core\totara\menu\mybookings');
 $PAGE->set_pagelayout('standard');
 $PAGE->set_pagetype('my-bookings');
 
@@ -72,7 +72,8 @@ $data = array(
     'userid' => $userid,
 );
 
-if (!$report = reportbuilder_get_embedded_report($shortname, $data, false, $sid)) {
+$config = (new rb_config())->set_sid($sid)->set_embeddata($data);
+if (!$report = reportbuilder::create_embedded($shortname, $config)) {
     print_error('error:couldnotgenerateembeddedreport', 'totara_reportbuilder');
 }
 

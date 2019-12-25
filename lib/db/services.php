@@ -336,6 +336,15 @@ $functions = array(
         // Totara: no ajax
         'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
     ),
+    'core_course_get_updates_since' => array(
+        'classname' => 'core_course_external',
+        'methodname' => 'get_updates_since',
+        'classpath' => 'course/externallib.php',
+        'description' => 'Check if there are updates affecting the user for the given course since the given time stamp.',
+        'type' => 'read',
+        'ajax' => true,
+        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+    ),
     'core_enrol_get_course_enrolment_methods' => array(
         'classname' => 'core_enrol_external',
         'methodname' => 'get_course_enrolment_methods',
@@ -430,6 +439,14 @@ $functions = array(
         'description' => 'Return some translated strings - like several core get_string(), calls',
         'type' => 'read',
         'loginrequired' => false,
+        'ajax' => true,
+    ),
+    'core_get_user_dates' => array(
+        'classname' => 'core_external',
+        'methodname' => 'get_user_dates',
+        'classpath' => 'lib/external/externallib.php',
+        'description' => 'Return formatted timestamps',
+        'type' => 'read',
         'ajax' => true,
     ),
     'core_grades_get_grades' => array(
@@ -1107,7 +1124,17 @@ $functions = array(
         'description' => 'Return some site info / user info / list web service functions',
         'type' => 'read',
         'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
-    )
+    ),
+
+    // Blocks functions.
+    'core_block_get_course_blocks' => array(
+        'classname'     => 'core_block_external',
+        'methodname'    => 'get_course_blocks',
+        'description'   => 'Returns blocks information for a course.',
+        'type'          => 'read',
+        'capabilities'  => '',
+        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+    ),
 );
 
 $services = array(

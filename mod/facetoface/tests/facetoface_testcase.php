@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @package mod_facetoface
  */
-abstract class facetoface_testcase extends advanced_testcase {
+abstract class mod_facetoface_facetoface_testcase extends advanced_testcase {
 
     public function assert_count_customfield_data(string $cftype, array $signupids, $expectedcountdata, $expectedcountparams) {
         global $DB;

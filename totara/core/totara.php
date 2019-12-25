@@ -200,13 +200,12 @@ function totara_load_program_settings($navinode, $context, $forceopen = false) {
     }
 
     // Add assign or override roles if allowed.
-    if (is_siteadmin()) {
-        if (has_capability('moodle/role:assign', $context)) {
-            $url = new moodle_url('/admin/roles/assign.php', array('contextid' => $context->id));
-            $permissionsnode->add(get_string('assignedroles', 'role'), $url, navigation_node::TYPE_SETTING, null,
-                    'roles', new pix_icon('t/assignroles', get_string('assignedroles', 'role')));
-        }
+    if (has_capability('moodle/role:assign', $context)) {
+        $url = new moodle_url('/admin/roles/assign.php', array('contextid' => $context->id));
+        $permissionsnode->add(get_string('assignedroles', 'role'), $url, navigation_node::TYPE_SETTING, null,
+            'roles', new pix_icon('t/assignroles', get_string('assignedroles', 'role')));
     }
+
     // Check role permissions.
     if (has_any_capability(array('moodle/role:assign', 'moodle/role:safeoverride', 'moodle/role:override', 'moodle/role:assign'), $context)) {
         $url = new moodle_url('/admin/roles/check.php', array('contextid' => $context->id));
@@ -708,25 +707,6 @@ function totara_queue_shift($key, $all = false) {
     return array_shift($SESSION->totara_queue[$key]);
 }
 
-
-
-/**
- *  Calls module renderer to return markup for displaying a progress bar for a user's course progress
- *
- * Optionally with a link to the user's profile if they have the correct permissions
- *
- * @deprecated since Totara 10.0
- * @access  public
- * @param   $userid     int
- * @param   $courseid   int
- * @param   $status     int     COMPLETION_STATUS_ constant
- * @return  string
- */
-function totara_display_course_progress_icon($userid, $courseid, $status) {
-    debugging('The function totara_display_course_progress_icon has been deprecated since 10.0. Please use totara_display_course_progress_bar.', DEBUG_DEVELOPER);
-    return totara_display_course_progress_bar($userid, $courseid, $status);
-}
-
 /**
  *  Calls module renderer to return markup for displaying a progress bar for a user's course progress
  *
@@ -742,6 +722,26 @@ function totara_display_course_progress_bar($userid, $courseid, $status) {
     $renderer = $PAGE->get_renderer('totara_core');
     $content = $renderer->course_progress_bar($userid, $courseid, $status);
     return $content;
+}
+
+/**
+ *  Calls module renderer to retrieve data for exporting the user's course progress
+ *
+ * @param int $userid User id
+ * @param int $courseid Course id
+ * @param int $status COMPLETION_STATUS_ constant
+ * @return string
+ */
+function totara_export_course_progress($userid, $courseid, $status) {
+    global $PAGE;
+
+    /** @var totara_core_renderer $renderer */
+    $renderer = $PAGE->get_renderer('totara_core');
+    $content = $renderer->export_course_progress_for_template($userid, $courseid, $status);
+    if (isset($content->percent)) {
+        return $content->percent;
+    }
+    return $content->statustext;
 }
 
 /**
@@ -898,7 +898,7 @@ function totara_icon_url_and_alt($type, $icon, $alt = '') {
         if (empty($icon) || empty($imagelocation)) {
             $icon = 'default';
         }
-        $src = $OUTPUT->pix_url('/' . $iconpath . $icon, $component);
+        $src = $OUTPUT->image_url('/' . $iconpath . $icon, $component);
     }
 
     $replace = array('.png' => '', '_' => ' ', '-' => ' ');
@@ -953,7 +953,7 @@ function get_my_reports_list() {
     foreach ($reportbuilder_permittedreports as $key => $reportrecord) {
         if ($reportrecord->embedded) {
             try {
-                new reportbuilder($reportrecord->id);
+                reportbuilder::create($reportrecord->id, null, true);
             } catch (moodle_exception $e) {
                 if ($e->errorcode == "nopermission") {
                     // The report creation failed, almost certainly due to a failed is_capable check in an embedded report.
@@ -1076,7 +1076,11 @@ function get_my_scheduled_reports_list($sqlclause=array()) {
     return $scheduledreports;
 }
 
+/**
+ * @deprecated since Totara 12, use the new structure block instead.
+ */
 function totara_print_my_courses() {
+    debugging(__FUNCTION__ . ' is deprecated, please use the new structure block instance', DEBUG_DEVELOPER);
     global $CFG, $OUTPUT, $PAGE;
 
     // Report builder lib is required for the embedded report.
@@ -1087,7 +1091,8 @@ function totara_print_my_courses() {
     $sid = optional_param('sid', '0', PARAM_INT);
     $debug  = optional_param('debug', 0, PARAM_INT);
 
-    if (!$report = reportbuilder_get_embedded_report('course_progress', array(), false, $sid)) {
+    $config = (new rb_config())->set_sid($sid);
+    if (!$report = reportbuilder::create_embedded('course_progress', $config)) {
         print_error('error:couldnotgenerateembeddedreport', 'totara_reportbuilder');
     }
 
@@ -1100,401 +1105,6 @@ function totara_print_my_courses() {
     echo $debughtml;
     echo $reporthtml;
 }
-
-
-/**
- * Check if a user is a manager of another user
- *
- * If managerid is not set, uses the current user
- *
- * @deprecated since 9.0
- * @param int $userid       ID of user
- * @param int $managerid    ID of a potential manager to check (optional)
- * @param int $postype      Type of the position to check (POSITION_TYPE_* constant). Defaults to all positions (optional)
- * @return boolean true if user $userid is managed by user $managerid
- **/
-function totara_is_manager($userid, $managerid = null, $postype = null) {
-    global $USER;
-
-    debugging('The function totara_is_manager has been deprecated since 9.0. Please use \totara_job\job_assignment::is_managing instead.', DEBUG_DEVELOPER);
-
-    if (empty($managerid)) {
-        $managerid = $USER->id;
-    }
-
-    $staffjaid = null;
-
-    if (!empty($postype)) {
-        if (!in_array($postype, array(POSITION_TYPE_PRIMARY, POSITION_TYPE_SECONDARY))) {
-            // Position type not recognised. Or if it was for an aspiration position, manager assignments were not possible.
-            return false;
-        }
-        // If postype has been included then we'll look according to sortorder. We're only getting job assignments
-        // where there's a manager.
-        $jobassignments = \totara_job\job_assignment::get_all($userid, true);
-        foreach($jobassignments as $jobassignment) {
-            if ($jobassignment->sortorder == $postype) {
-                $staffjaid = $jobassignment->id;
-                break;
-            }
-        }
-
-        if (empty($staffjaid)) {
-            // None found with that $postype, meaning there is no manager at all for that postype.
-            return false;
-        }
-    }
-
-    return \totara_job\job_assignment::is_managing($managerid, $userid, $staffjaid);
-}
-
-/**
- * Returns the staff of the specified user
- *
- * @deprecated since 9.0
- * @param int $managerid ID of a user to get the staff of, If $managerid is not set, returns staff of current user
- * @param mixed $postype Type of the position to check (POSITION_TYPE_* constant). Defaults to primary position (optional)
- * @param bool $sort optional ordering by lastname, firstname
- * @return array|bool Array of userids of staff who are managed by user $userid , or false if none
- **/
-function totara_get_staff($managerid = null, $postype = null, $sort = false) {
-    global $USER;
-
-    debugging('totara_get_staff has been deprecated since 9.0. Use \totara_job\job_assignment::get_staff_userids instead.', DEBUG_DEVELOPER);
-
-    if ($sort) {
-        debugging('Warning: The $sort argument in deprecated function totara_get_staff is no longer valid. Returned ids will not be sorted according to last name and first name.',
-            DEBUG_DEVELOPER);
-    }
-
-    if (!empty($postype)) {
-        if (!in_array($postype, array(POSITION_TYPE_PRIMARY, POSITION_TYPE_SECONDARY))) {
-            // Position type not recognised. Or if it was for an aspiration position, manager assignments were not possible.
-            return false;
-        }
-    } else {
-        $postype = POSITION_TYPE_PRIMARY;
-    }
-
-    if (empty($managerid)) {
-        $managerid = $USER->id;
-    }
-
-    $jobassignments = \totara_job\job_assignment::get_all($managerid);
-    $result = false;
-    foreach ($jobassignments as $jobassignment) {
-        if (!empty($postype) && $jobassignment->sortorder != $postype) {
-            // If $postype was specified, closest to backwards-compatibility we can achieve is to base it on sortorder.
-            continue;
-        }
-
-        $result = \totara_job\job_assignment::get_staff_userids($managerid, $jobassignment->id, true);
-        break;
-    }
-
-    if (empty($result)) {
-        return false;
-    } else {
-        return $result;
-    }
-}
-
-/**
- * Find out a user's manager.
- *
- * @deprecated since 9.0
- * @param int $userid Id of the user whose manager we want
- * @param int $postype Type of the position we want the manager for (POSITION_TYPE_* constant). Defaults to primary position (i.e. sortorder=1).
- * @param boolean $skiptemp Skip check and return of temporary manager
- * @param boolean $skipreal Skip check and return of real manager
- * @return mixed False if no manager. Manager user object from mdl_user if the user has a manager.
- */
-function totara_get_manager($userid, $postype = null, $skiptemp = false, $skipreal = false) {
-    global $CFG, $DB;
-
-    debugging('totara_get_manager has been deprecated since 9.0. You will need to use methods from \totara_job\job_assignment instead.', DEBUG_DEVELOPER);
-
-    if (!empty($postype)) {
-        if (!in_array($postype, array(POSITION_TYPE_PRIMARY, POSITION_TYPE_SECONDARY))) {
-            // Position type not recognised. Or if it was for an aspiration position, manager assignments were not possible.
-            return false;
-        }
-    } else {
-        $postype = POSITION_TYPE_PRIMARY;
-    }
-
-    $jobassignments = \totara_job\job_assignment::get_all($userid);
-
-    $managerid = false;
-    foreach ($jobassignments as $jobassignment) {
-        if (!empty($postype) && $jobassignment->sortorder != $postype) {
-            // If $postype was specified, closest to backwards-compatibility we can achieve is to base it on sortorder.
-            continue;
-        }
-        if (!$skiptemp && $jobassignment->tempmanagerjaid && !empty($CFG->enabletempmanagers)) {
-            $managerid = $jobassignment->tempmanagerid;
-            break;
-        }
-        if (!$skipreal && $jobassignment->managerjaid) {
-            $managerid = $jobassignment->managerid;
-            break;
-        }
-    }
-
-    if ($managerid) {
-        return $DB->get_record('user', array('id' => $managerid));
-    } else {
-        return false;
-    }
-}
-
-/**
- * Find the manager of the user's 'first' job.
- *
- * @deprecated since version 9.0
- * @param int|bool $userid Id of the user whose manager we want
- * @return mixed False if no manager. Manager user object from mdl_user if the user has a manager.
- */
-function totara_get_most_primary_manager($userid = false) {
-    global $DB, $USER;
-
-    debugging("totara_get_most_primary_manager is deprecated. Use \\totara_job\\job_assignment methods instead.", DEBUG_DEVELOPER);
-
-    if ($userid === false) {
-        $userid = $USER->id;
-    }
-
-    $managers = \totara_job\job_assignment::get_all_manager_userids($userid);
-    if (!empty($managers)) {
-        $managerid = reset($managers);
-        return $DB->get_record('user', array('id' => $managerid));
-    }
-    return false;
-}
-
-/**
- * Update/set a temp manager for the specified user
- *
- * @deprecated since 9.0
- * @param int $userid Id of user to set temp manager for
- * @param int $managerid Id of temp manager to be assigned to user.
- * @param int $expiry Temp manager expiry epoch timestamp
- */
-function totara_update_temporary_manager($userid, $managerid, $expiry) {
-    global $CFG, $DB, $USER;
-
-    debugging('totara_update_temporary_manager is deprecated. Use \totara_job\job_assignment::update instead.', DEBUG_DEVELOPER);
-
-    if (!$user = $DB->get_record('user', array('id' => $userid))) {
-        return false;
-    }
-
-    // With multiple job assignments, we'll only consider the first job assignment for this function.
-    $jobassignment = \totara_job\job_assignment::get_first($userid, false);
-    if (empty($jobassignment)) {
-        return false;
-    }
-
-    if (empty($jobassignment->managerid)) {
-        $realmanager = false;
-    } else {
-        $realmanager = $DB->get_record('user', array('id' => $jobassignment->managerid));
-    }
-
-    if (empty($jobassignment->tempmanagerid)) {
-        $oldtempmanager = false;
-    } else {
-        $oldtempmanager = $DB->get_record('user', array('id' => $jobassignment->tempmanagerid));
-    }
-
-    if (!$newtempmanager = $DB->get_record('user', array('id' => $managerid))) {
-        return false;
-    }
-
-    // Set up messaging.
-    require_once($CFG->dirroot.'/totara/message/messagelib.php');
-    $msg = new stdClass();
-    $msg->userfrom = $USER;
-    $msg->msgstatus = TOTARA_MSG_STATUS_OK;
-    $msg->contexturl = $CFG->wwwroot.'/totara/job/jobassignment.php?jobassignmentid='.$this->id;
-    $msg->contexturlname = get_string('xpositions', 'totara_core', fullname($user));
-    $msgparams = (object)array('staffmember' => fullname($user), 'tempmanager' => fullname($newtempmanager),
-        'expirytime' => userdate($expiry, get_string('strftimedatefulllong', 'langconfig')), 'url' => $msg->contexturl);
-
-    if (!empty($oldtempmanager) && $newtempmanager->id == $oldtempmanager->tempmanagerid) {
-        if ($jobassignment->tempmanagerexpirydate == $expiry) {
-            // Nothing to do here.
-            return true;
-        } else {
-            // Update expiry time.
-            $jobassignment->update(array('tempmanagerexpirydate' => $expiry));
-
-            // Expiry change notifications.
-
-            // Notify staff member.
-            $msg->userto = $user;
-            $msg->subject = get_string('tempmanagerexpiryupdatemsgstaffsubject', 'totara_core', $msgparams);
-            $msg->fullmessage = get_string('tempmanagerexpiryupdatemsgstaff', 'totara_core', $msgparams);
-            $msg->fullmessagehtml = get_string('tempmanagerexpiryupdatemsgstaff', 'totara_core', $msgparams);
-            tm_alert_send($msg);
-
-            // Notify real manager.
-            if (!empty($realmanager)) {
-                $msg->userto = $realmanager;
-                $msg->subject = get_string('tempmanagerexpiryupdatemsgmgrsubject', 'totara_core', $msgparams);
-                $msg->fullmessage = get_string('tempmanagerexpiryupdatemsgmgr', 'totara_core', $msgparams);
-                $msg->fullmessagehtml = get_string('tempmanagerexpiryupdatemsgmgr', 'totara_core', $msgparams);
-                $msg->roleid = $CFG->managerroleid;
-                tm_alert_send($msg);
-            }
-
-            // Notify temp manager.
-            $msg->userto = $newtempmanager;
-            $msg->subject = get_string('tempmanagerexpiryupdatemsgtmpmgrsubject', 'totara_core', $msgparams);
-            $msg->fullmessage = get_string('tempmanagerexpiryupdatemsgtmpmgr', 'totara_core', $msgparams);
-            $msg->fullmessagehtml = get_string('tempmanagerexpiryupdatemsgtmpmgr', 'totara_core', $msgparams);
-            $msg->roleid = $CFG->managerroleid;
-            tm_alert_send($msg);
-
-            return true;
-        }
-    }
-
-    $newtempmanagerja = \totara_job\job_assignment::get_first($newtempmanager->id);
-    if (empty($newtempmanagerja)) {
-        $newtempmanagerja = \totara_job\job_assignment::create_default($newtempmanager->id);
-    }
-    // Assign/update temp manager role assignment.
-    $jobassignment->update(array('tempmanagerjaid' => $newtempmanagerja->id, 'tempmanagerexpirydate' => $expiry));
-
-    // Send assignment notifications.
-
-    // Notify staff member.
-    $msg->userto = $user;
-    $msg->subject = get_string('tempmanagerassignmsgstaffsubject', 'totara_core', $msgparams);
-    $msg->fullmessage = get_string('tempmanagerassignmsgstaff', 'totara_core', $msgparams);
-    $msg->fullmessagehtml = get_string('tempmanagerassignmsgstaff', 'totara_core', $msgparams);
-    tm_alert_send($msg);
-
-    // Notify real manager.
-    if (!empty($realmanager)) {
-        $msg->userto = $realmanager;
-        $msg->subject = get_string('tempmanagerassignmsgmgrsubject', 'totara_core', $msgparams);
-        $msg->fullmessage = get_string('tempmanagerassignmsgmgr', 'totara_core', $msgparams);
-        $msg->fullmessagehtml = get_string('tempmanagerassignmsgmgr', 'totara_core', $msgparams);
-        $msg->roleid = $CFG->managerroleid;
-        tm_alert_send($msg);
-    }
-
-    // Notify temp manager.
-    $msg->userto = $newtempmanager;
-    $msg->subject = get_string('tempmanagerassignmsgtmpmgrsubject', 'totara_core', $msgparams);
-    $msg->fullmessage = get_string('tempmanagerassignmsgtmpmgr', 'totara_core', $msgparams);
-    $msg->fullmessagehtml = get_string('tempmanagerassignmsgtmpmgr', 'totara_core', $msgparams);
-    $msg->roleid = $CFG->managerroleid;
-    tm_alert_send($msg);
-}
-
-/**
- * Unassign the temporary manager of the specified user
- *
- * @deprecated since 9.0
- * @param int $userid
- * @return boolean true on success
- * @throws Exception
- */
-function totara_unassign_temporary_manager($userid) {
-    global $DB, $CFG;
-
-    debugging('totara_unassign_temporary_manager is deprecated. Use \totara_job\job_assignment::update instead.', DEBUG_DEVELOPER);
-
-    // We'll use first job assignment only.
-    $jobassignment = \totara_job\job_assignment::get_first($userid, false);
-    if (empty($jobassignment)) {
-        return false;
-    }
-
-    if (empty($jobassignment->tempmanagerid)) {
-        // Nothing to do.
-        return true;
-    }
-    $jobassignment->update(array('tempmanagerjaid' => null, 'tempmanagerexpirydate' => null));
-
-    return true;
-}
-
-/**
- * Find out a user's teamleader (manager's manager).
- *
- * @deprecated since 9.0
- * @param int $userid Id of the user whose teamleader we want
- * @param int $postype Type of the position we want the teamleader for (POSITION_TYPE_* constant).  Defaults to primary position (i.e. sortorder=1).
- * @return mixed False if no teamleader. Teamleader user object from mdl_user if the user has a teamleader.
- */
-function totara_get_teamleader($userid, $postype = null) {
-
-    debugging('totara_get_teamleader is deprecated. Use \totara_job\job_assignment methods instead.', DEBUG_DEVELOPER);
-
-    if (!empty($postype)) {
-        if (!in_array($postype, array(POSITION_TYPE_PRIMARY, POSITION_TYPE_SECONDARY))) {
-            // Position type not recognised. Or if it was for an aspiration position, manager assignments were not possible.
-            return false;
-        }
-    } else {
-        $postype = POSITION_TYPE_PRIMARY;
-    }
-
-    $manager = totara_get_manager($userid, $postype);
-
-    if (empty($manager)) {
-        return false;
-    } else {
-        return totara_get_manager($manager->id, $postype);
-    }
-}
-
-
-/**
- * Find out a user's appraiser.
- *
- * @deprecated since 9.0
- * @param int $userid Id of the user whose appraiser we want
- * @param int $postype Type of the position we want the appraiser for (POSITION_TYPE_* constant).
- *                     Defaults to primary position(optional)
- * @return mixed False if no appraiser. Appraiser user object from mdl_user if the user has a appraiser.
- */
-function totara_get_appraiser($userid, $postype = null) {
-    global $DB;
-
-    debugging('totara_get_appraiser is deprecated. Use \totara_job\job_assignment methods instead.', DEBUG_DEVELOPER);
-
-    if (!empty($postype)) {
-        if (!in_array($postype, array(POSITION_TYPE_PRIMARY, POSITION_TYPE_SECONDARY))) {
-            // Position type not recognised. Or if it was for an aspiration position, appraiser assignments were not possible.
-            return false;
-        }
-    } else {
-        $postype = POSITION_TYPE_PRIMARY;
-    }
-
-    $jobassignments = \totara_job\job_assignment::get_all($userid);
-
-    $appraiserid = false;
-    foreach ($jobassignments as $jobassignment) {
-        if (!empty($postype) && $jobassignment->sortorder != $postype) {
-            // If $postype was specified, closest to backwards-compatibility we can achieve is to base it on sortorder.
-            continue;
-        }
-        $appraiserid = $jobassignment->appraiserid;
-    }
-
-    if ($appraiserid) {
-        return $DB->get_record('user', array('id' => $appraiserid));
-    } else {
-        return false;
-    }
-}
-
 
 /**
  * Returns unix timestamp from a date string depending on the date format
@@ -1679,35 +1289,6 @@ function totara_print_edit_button($settingname, $params = array()) {
 }
 
 /**
- * Returns the SQL to be used in order to CAST one column to CHAR
- *
- * @param string fieldname the name of the field to be casted
- * @return string the piece of SQL code to be used in your statement.
- *
- * @deprecated since Totara 10.0
- */
-function sql_cast2char($fieldname) {
-    global $DB;
-    debugging('sql_cast2char() is deprecated. Use DB->sql_cast_2char() instead.', DEBUG_DEVELOPER);
-    return $DB->sql_cast_2char($fieldname);
-}
-
-
-/**
- * Returns the SQL to be used in order to CAST one column to FLOAT
- *
- * @param string fieldname the name of the field to be casted
- * @return string the piece of SQL code to be used in your statement.
- *
- * @deprecated since Totara 10.0
- */
-function sql_cast2float($fieldname) {
-    global $DB;
-    debugging('sql_cast2float() is deprecated. Use DB->sql_cast_char2float() instead.', DEBUG_DEVELOPER);
-    return $DB->sql_cast_char2float($fieldname);
-}
-
-/**
  * Returns as case sensitive field name.
  *
  * @param string $field table field name
@@ -1814,108 +1395,76 @@ function totara_get_nav_select_classes($navstructure, $primary_selected, $second
 }
 
 /**
- * Reset Totara menu caching.
+ * Deprecated Totara menu caching reset.
+ *
+ * Developers now need to decide if they want to reset current session only
+ * or force more expensive reset of menu caches of all logged-in-users.
+ *
+ * @deprecated since Totara 12.0
  */
 function totara_menu_reset_cache() {
+    debugging('totara_menu_reset_cache() was deprecated, use totara_menu_reset_all_caches() or totara_menu_reset_session_cache() instead', DEBUG_DEVELOPER);
+    totara_menu_reset_session_cache();
+}
+
+/**
+ * Force reset of all caches related to Main menu.
+ *
+ * This is intended to be used when the structure of menu changes
+ * or when a feature is enabled or disabled.
+ *
+ * This is called after every edit in Main menu administration.
+ */
+function totara_menu_reset_all_caches() {
+    \totara_core\totara\menu\helper::bump_cache_revision();
+}
+
+/**
+ * Reset Totara menu for current user session.
+ *
+ * This is intended to be called after current user state
+ * tested in item::check_visibility() changes.
+ *
+ * It is ok to call this function from event observers.
+ */
+function totara_menu_reset_session_cache() {
     global $SESSION;
     unset($SESSION->mymenu);
 }
 
 /**
  * Builds Totara menu, returns an array of objects that
- * represent the stucture of the menu
+ * represent the structure of the menu
  *
  * The parents must be defined before the children so we
  * can correctly figure out which items should be selected
  *
- * @return Array of menu item objects
+ * @return array tree of menu item objects
  */
 function totara_build_menu() {
-    global $SESSION, $USER, $CFG;
+    global $SESSION, $USER, $CFG, $DB;
 
+    $rev = \totara_core\totara\menu\helper::get_cache_revision();
     $lang = current_language();
-    if (!empty($CFG->menulifetime) and !empty($SESSION->mymenu['lang'])) {
-        if ($SESSION->mymenu['id'] == $USER->id and $SESSION->mymenu['lang'] === $lang) {
+    if (!empty($CFG->menulifetime) and !empty($SESSION->mymenu['lang']) and isset($SESSION->mymenu['rev'])) {
+        if ($SESSION->mymenu['id'] == $USER->id and $SESSION->mymenu['lang'] === $lang and $SESSION->mymenu['rev'] == $rev) {
             if ($SESSION->mymenu['c'] + $CFG->menulifetime > time()) {
                 $tree = $SESSION->mymenu['tree'];
                 foreach ($tree as $k => $node) {
                     $node = clone($node);
-                    $node->url = \totara_core\totara\menu\menu::replace_url_parameter_placeholders($node->url);
+                    $node->url = \totara_core\totara\menu\item::replace_url_parameter_placeholders($node->url);
                     $tree[$k] = $node;
                 }
+
+                totara_build_menu_selected_node($tree);
                 return $tree;
             }
         }
     }
     unset($SESSION->mymenu);
 
-    $rs = \totara_core\totara\menu\menu::get_nodes();
-    $tree = array();
-    $parentree = array();
-    foreach ($rs as $id => $item) {
-
-        if (!isset($parentree[$item->parentid])) {
-            $node = \totara_core\totara\menu\menu::get($item->parentid);
-            // Silently ignore bad nodes - they might have been removed
-            // from the code but not purged from the DB yet.
-            if ($node === false) {
-                continue;
-            }
-            $parentree[$item->parentid] = $node;
-        }
-        $node = $parentree[$item->parentid];
-
-        switch ((int)$item->parentvisibility) {
-            case \totara_core\totara\menu\menu::HIDE_ALWAYS:
-                if (!is_null($item->parentvisibility)) {
-                    continue 2;
-                }
-                break;
-            case \totara_core\totara\menu\menu::SHOW_WHEN_REQUIRED:
-                $classname = $item->parent;
-                if (!is_null($classname) && class_exists($classname)) {
-                    $parentnode = new $classname($node);
-                    if ($parentnode->get_visibility() != \totara_core\totara\menu\menu::SHOW_ALWAYS) {
-                        continue 2;
-                    }
-                }
-                break;
-            case \totara_core\totara\menu\menu::SHOW_ALWAYS:
-                break;
-            case \totara_core\totara\menu\menu::SHOW_CUSTOM:
-                $classname = $item->parent;
-                if (!is_null($classname) && class_exists($classname)) {
-                    $parentnode = new $classname($node);
-                    if (!$parentnode->get_visibility()) {
-                        continue 2;
-                    }
-                }
-                break;
-            default:
-                // Silently ignore bad nodes - they might have been removed
-                // from the code but not purged from the DB yet.
-                continue 2;
-        }
-
-        $node = \totara_core\totara\menu\menu::node_instance($item);
-        // Silently ignore bad nodes - they might have been removed
-        // from the code but not purged from the DB yet.
-        if ($node === false) {
-            continue;
-        }
-        // Check each node's visibility.
-        if ($node->get_visibility() != \totara_core\totara\menu\menu::SHOW_ALWAYS) {
-            continue;
-        }
-
-        $tree[] = (object)array(
-            'name'     => $node->get_name(),
-            'linktext' => $node->get_title(),
-            'parent'   => $node->get_parent(),
-            'url'      => $node->get_url(false),
-            'target'   => $node->get_targetattr()
-        );
-    }
+    $allnodes = $DB->get_records('totara_navigation', array(), 'parentid ASC, sortorder ASC, id ASC');
+    $tree = totara_build_menu_descendants(0, $allnodes);
 
     if (!empty($CFG->menulifetime)) {
         $SESSION->mymenu = array(
@@ -1923,32 +1472,151 @@ function totara_build_menu() {
             'lang' => $lang,
             'c' => time(),
             'tree' => $tree,
+            'rev' => $rev,
         );
     }
 
     foreach ($tree as $k => $node) {
         $node = clone($node);
-        $node->url = \totara_core\totara\menu\menu::replace_url_parameter_placeholders($node->url);
+        $node->url = \totara_core\totara\menu\item::replace_url_parameter_placeholders($node->url);
         $tree[$k] = $node;
+    }
+
+    totara_build_menu_selected_node($tree);
+
+    return $tree;
+}
+
+/**
+ * Get an array of all descendants of the given parent, recursively getting their descendants.
+ * The array will be ordered as a depth-first traversal of the tree.
+ *
+ * @param int $parentid
+ * @param array $allrecords containing all records from totara_navigation, so they don't need to be loaded from the db
+ * @param int $parentdepth used to prevent infinite loops, does not depend on the depth that nodes report, should
+ *                         usually not be provided
+ * @return array
+ */
+function totara_build_menu_descendants($parentid, $allrecords, $parentdepth = 0) {
+    $tree = [];
+
+    $currentdepth = $parentdepth + 1;
+
+    if ($currentdepth > \totara_core\totara\menu\item::MAX_DEPTH) {
+        // Respect max depth that can be displayed, this also prevents infinite loops.
+        // No debugging message necessary here, MAin menu admin UI shows items as 'Unused'.
+        return $tree;
+    }
+
+    foreach ($allrecords as $id => $record) {
+        // Search all records for nodes whose parent was the one specified.
+        if ($record->parentid != $parentid) {
+            continue;
+        }
+
+        if ($record->visibility == \totara_core\totara\menu\item::VISIBILITY_HIDE) {
+            // Shortcut, no need to create instance at all.
+            continue;
+        }
+
+        $node = \totara_core\totara\menu\item::create_instance($record);
+
+        // Ignore bad nodes, they are now showed in admin UI as 'Unused'.
+        if (!$node) {
+            continue;
+        }
+
+        if ($node->is_disabled()) {
+            continue;
+        }
+
+        // Is this item visible?
+        if (!$node->is_visible()) {
+            continue;
+        }
+
+        $url = $node->get_url(false);
+
+        if (($node instanceof \totara_core\totara\menu\container)) {
+            $descendants = totara_build_menu_descendants($record->id, $allrecords, $currentdepth);
+            if (!$descendants) {
+                // Container without leafs makes no sense, ignore it.
+                continue;
+            }
+        } else {
+            $descendants = array();
+            if (!$url) {
+                // Leaf without URL makes no sense, ignore it.
+                continue;
+            }
+        }
+
+        $tree[] = (object)array(
+            'name'     => $node->get_name(),
+            'linktext' => $node->get_title(),
+            'parent'   => $node->get_parent(),
+            'classname'=> $node->get_classname(),
+            'url'      => $url,
+            'target'   => $node->get_targetattr(),
+            'is_selected' => false,
+        );
+
+        $tree = array_merge($tree, $descendants);
     }
 
     return $tree;
 }
 
-function totara_upgrade_menu() {
-    totara_menu_reset_cache();
-    $TOTARAMENU = new \totara_core\totara\menu\build();
-    $plugintypes = core_component::get_plugin_types();
-    foreach ($plugintypes as $plugin => $path) {
-        $pluginname = core_component::get_plugin_list_with_file($plugin, 'db/totaramenu.php');
-        if (!empty($pluginname)) {
-            foreach ($pluginname as $name => $file) {
-                // This is NOT a library file!
-                require($file);
+/**
+ * Flags the selected node in the main navigation tree
+ * @param array $tree tree of menu item objects
+ */
+function totara_build_menu_selected_node($tree) {
+    global $PAGE, $FULLME;
+
+    // Check if the highlighted node has been directly assigned
+    if ($PAGE->totara_menu_selected) {
+        foreach ($tree as $k => $node) {
+            if ($PAGE->totara_menu_selected === $node->classname) {
+                $node->is_selected = true;
+                return;
             }
         }
     }
-    $TOTARAMENU->upgrade();
+
+    // If we haven't found a selected node yet, compare PAGE->url to find a matching node
+    $urlcache = [];
+    if ($PAGE->url) {
+        foreach ($tree as $k => $node) {
+            $url = new \moodle_url($node->url);
+            $urlcache[$node->name] = $url;
+            if ($PAGE->url->compare($url)) {
+                $node->is_selected = true;
+                unset($urlcache);
+                return;
+            }
+        }
+    }
+
+    // If we still haven't found a selected node, loop through again, but compare against the raw URL
+    $fullme = new \moodle_url($FULLME);
+    foreach ($tree as $k => $node) {
+        $url = $urlcache[$node->name] ?: new \moodle_url($node->url);
+        if ($url->compare($fullme, URL_MATCH_EXACT)) {
+            $node->is_selected = true;
+            break;
+        }
+    }
+    unset($urlcache);
+}
+
+
+/**
+ * Internal, to be called from upgrade process only.
+ */
+function totara_upgrade_menu() {
+    \totara_core\totara\menu\helper::add_default_items();
+    totara_menu_reset_all_caches();
 }
 
 /**
@@ -2228,7 +1896,7 @@ function totara_get_icon($instanceid, $icontype) {
         if (empty($icon) || empty($imagelocation)) {
             $icon = 'default';
         }
-        $urlicon = $OUTPUT->pix_url('/' . $iconpath . $icon, $component);
+        $urlicon = $OUTPUT->image_url('/' . $iconpath . $icon, $component);
     }
 
     return $urlicon->out();

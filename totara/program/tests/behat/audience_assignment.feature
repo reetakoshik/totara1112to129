@@ -31,29 +31,25 @@ Feature: Check user view capability for audiences in the assignments tab
   Scenario: Test Audience assignment dialog is showing audiences the user is allowed to
 #    catmgr should see Audience2 in the audience dialog of Category1 Permission Test program.
     Given I log in as "catmgr"
-    And I click on "Programs" in the totara menu
-    And I click on "Category1 Permission Test" "link"
+    And I am on "Category1 Permission Test" program homepage
     And I click on "Edit program details" "button"
     And I click on "Assignments" "link"
-    And I click on "Audiences" "option" in the "#menucategory_select_dropdown" "css_element"
-    And I click on "Add" "button" in the "#category_select" "css_element"
-    And I click on "Add audiences to program" "button"
+    And I set the field "Add a new" to "Audiences"
     Then I should see "Audience2"
     And I should not see "Audience1"
     And I should not see "Audience3"
 
-    When I click on "Search" "link" in the "add-assignment-dialog-3" "totaradialogue"
+    When I click on "Search" "link" in the "Add audiences to program" "totaradialogue"
     And I search for "Au" in the "add-assignment-dialog-3" totara dialogue
     Then I should see "Audience2" in the "Add audiences to program" "totaradialogue"
     And I should not see "Audience1" in the "Add audiences to program" "totaradialogue"
     And I should not see "Audience3" in the "Add audiences to program" "totaradialogue"
-    And I click on "Cancel" "button" in the "add-assignment-dialog-3" "totaradialogue"
-    And I click on "Clear unsaved changes" "link"
+    And I click on "Cancel" "button" in the "Add audiences to program" "totaradialogue"
     And I log out
 
 #    Assign audiencewatcher role to catmgr in the system level, so he can now see Audiences in the sys context.
     And I log in as "admin"
-    And I navigate to "Define roles" node in "Site administration > Users > Permissions"
+    And I navigate to "Define roles" node in "Site administration > Permissions"
     And I click on "Add a new role" "button"
     And I click on "Continue" "button"
     And I set the following fields to these values:
@@ -68,53 +64,49 @@ Feature: Check user view capability for audiences in the assignments tab
     And I log out
 
     When I log in as "catmgr"
-    And I click on "Programs" in the totara menu
-    And I click on "Category1 Permission Test" "link"
+    And I am on "Category1 Permission Test" program homepage
     And I click on "Edit program details" "button"
     And I click on "Assignments" "link"
-    And I click on "Audiences" "option" in the "#menucategory_select_dropdown" "css_element"
-    And I click on "Add" "button" in the "#category_select" "css_element"
-    And I click on "Add audiences to program" "button"
+    And I set the field "Add a new" to "Audiences"
     Then I should see "Audience1"
     And I should see "Audience2"
     And I should not see "Audience3"
 
 #    Search tab should also show Audience 1
-    When I click on "Search" "link" in the "add-assignment-dialog-3" "totaradialogue"
+    When I click on "Search" "link" in the "Add audiences to program" "totaradialogue"
     And I search for "Au" in the "add-assignment-dialog-3" totara dialogue
     Then I should see "Audience2" in the "Add audiences to program" "totaradialogue"
     And I should see "Audience1" in the "Add audiences to program" "totaradialogue"
     And I should not see "Audience3" in the "Add audiences to program" "totaradialogue"
 
 #    Select Audience 1
-    When I click on "Browse" "link" in the "add-assignment-dialog-3" "totaradialogue"
-    And I click on "Audience1" "link" in the "add-assignment-dialog-3" "totaradialogue"
-    And I click on "Ok" "button" in the "add-assignment-dialog-3" "totaradialogue"
+    When I click on "Browse" "link" in the "Add audiences to program" "totaradialogue"
+    And I click on "Audience1" "link" in the "Add audiences to program" "totaradialogue"
+    And I click on "Ok" "button" in the "Add audiences to program" "totaradialogue"
     And I wait "1" seconds
-    And I press "Save changes"
+    Then I should see "Audience1" in the "totara_program__assignments__results__table" "table"
     And I log out
 
 #    Remove audiencewatcher role from catmgr and make sure the audience is still visible and assigned
 #    but not reachable through the search.
     And I log in as "admin"
-    And I navigate to "Assign system roles" node in "Site administration > Users > Permissions"
+    And I navigate to "Assign system roles" node in "Site administration > Permissions"
     And I click on "Audience watcher" "link"
     And I set the field "Existing users" to "Category Manager (catmgr@example.com)"
     And I press "Remove"
     And I log out
 
     And I log in as "catmgr"
-    And I click on "Programs" in the totara menu
-    And I click on "Category1 Permission Test" "link"
+    And I am on "Category1 Permission Test" program homepage
     And I click on "Edit program details" "button"
     And I click on "Assignments" "link"
-    Then I should see "Audience1" in the "#assignment_categories" "css_element"
-    And I click on "Add audiences to program" "button"
+    Then I should see "Audience1" in the "totara_program__assignments__results__table" "table"
+    And I set the field "Add a new" to "Audiences"
     And I should see "Audience1"
     And I should see "Audience2"
     And I should not see "Audience3"
 
-    When I click on "Search" "link" in the "add-assignment-dialog-3" "totaradialogue"
+    When I click on "Search" "link" in the "Add audiences to program" "totaradialogue"
     And I search for "Au" in the "add-assignment-dialog-3" totara dialogue
     Then I should see "Audience2" in the "Add audiences to program" "totaradialogue"
     And I should not see "Audience1" in the "Add audiences to program" "totaradialogue"

@@ -28,6 +28,9 @@ use context_system;
 use Exception;
 use totara_userdata\userdata\export;
 use totara_userdata\userdata\target_user;
+use \mod_facetoface\seminar_event;
+use \mod_facetoface\signup;
+use \mod_facetoface\signup_helper;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -65,11 +68,13 @@ class signups extends signups_item {
 
         // Try to cancel signups before deleting, if not already cancelled.
         $signupids = [];
-        foreach ($signups as $signup) {
-            $signupids[] = $signup->id;
-            if (!facetoface_is_signup_cancelled($signup->id)) {
-                $session = facetoface_get_session($signup->sessionid);
-                facetoface_user_cancel($session, $user->id, false, $errorstr, get_string('userdatapurgedcancel', 'facetoface'));
+        foreach ($signups as $signupdata) {
+            $signupids[] = $signupdata->id;
+            $seminarevent = new seminar_event($signupdata->sessionid);
+            $signup = signup::create($user->id, $seminarevent);
+
+            if (signup_helper::can_user_cancel($signup)) {
+                signup_helper::user_cancel($signup, get_string('userdatapurgedcancel', 'facetoface'));
             }
         }
 
@@ -88,7 +93,10 @@ class signups extends signups_item {
         // Remove files.
         self::purge_files_for_signupids($signupids);
 
-        facetoface_delete_signups($signupids);
+        foreach ($signups as $signup) {
+            $instance = new \mod_facetoface\signup($signup->id);
+            $instance->delete();
+        }
 
         if ($transaction) {
             $transaction->allow_commit();

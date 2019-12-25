@@ -1,0 +1,57 @@
+/*
+ Styles specific to the workflow selector page.
+ In the future we should have a core panel/tile component that supports:
+ 1. Fixed height, responsive panels that form a grid
+ 2. Linked panels, where the whole panel is clickable and has appropriate hover/focus/active states
+ In the mean time this is implemented as a one-off
+ */
+.workflow-tile-selector {
+    /* Emulate fixed height, to a point. Need flexbox really. */
+    .panel-body {
+        min-height: 15em;
+        width: 100%;
+
+        .tile-image {
+            display: inline-block;
+            vertical-align: top;
+            width: 100px;
+            margin: 10px 10px 0px 0px;
+
+            img {
+                border-radius: 50%;
+            }
+        }
+
+        .tile-text {
+            display: inline-block;
+            /* Whitespace matters in calc() function but current version
+             * of LESS strips it so use LESS escaping as per:
+             * https://stackoverflow.com/a/11973298/73522
+             */
+            width: calc(~"100% - 120px");
+        }
+    }
+
+    .linked-panel {
+        color: @totara_style-color_neutral_7;
+
+        /* Remove link underlines inside panel */
+        &:hover {
+            text-decoration: none;
+        }
+        /* Darken on hover */
+        &:hover,
+        &:focus {
+            .panel {
+                background: @totara_style-color_neutral_2;
+                border-color: @totara_style-color_neutral_4;
+            }
+        }
+
+        &:active {
+            .panel {
+                background: @totara_style-color_neutral_3;
+            }
+        }
+    }
+}

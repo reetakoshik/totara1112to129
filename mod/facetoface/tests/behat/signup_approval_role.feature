@@ -43,9 +43,7 @@ Feature: Seminar Signup Role Approval
     And I press "Save changes"
     And I click on "s__facetoface_approvaloptions[approval_role_3]" "checkbox"
     And I press "Save changes"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
-    And I turn editing mode on
+    And I am on "Classroom Connect Course" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name              | Classroom Connect       |
       | Description       | Classroom Connect Tests |
@@ -72,25 +70,24 @@ Feature: Seminar Signup Role Approval
 
   Scenario: Student signs up a with no roles assigned
     When I log in as "sally"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
-    And I should see "Sign-up"
-    And I follow "Sign-up"
+    And I am on "Classroom Connect Course" course homepage
+    And I should see "Request approval"
+    And I follow "Request approval"
     And I should see "Editing Trainer"
     And I press "Request approval"
-    Then I should see "Your request was sent for approval"
+    Then I should see "Your request was sent to your manager for approval."
 
   Scenario: Student gets approved through role approval
     When I log in as "jimmy"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
-    And I should see "Sign-up"
-    And I follow "Sign-up"
+    And I am on "Classroom Connect Course" course homepage
+    And I should see "Request approval"
+    And I follow "Request approval"
     Then I should see "Editing Trainer"
     And I should see "Freddy Fred"
 
     When I press "Request approval"
-    Then I should see "Your request was sent for approval"
+    Then I should see "Your request was sent to your manager for approval."
+    And I run all adhoc tasks
 
     And I log out
     And I log in as "manager"
@@ -109,13 +106,13 @@ Feature: Seminar Signup Role Approval
     When I click on "requests[8]" "radio" in the ".lastrow .lastcol" "css_element"
     And I click on "Update requests" "button"
     Then I should not see "Jimmy Jim"
+    And I run all adhoc tasks
 
     When I log out
     And I log in as "jimmy"
     And I click on "Dashboard" in the totara menu
     Then I should see "Seminar booking confirmation"
 
-    When I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
+    When I am on "Classroom Connect Course" course homepage
     And I follow "View all events"
     Then I should see "Booked" in the "1 January 2020" "table_row"

@@ -145,6 +145,11 @@ abstract class quiz_attempts_report_table extends table_sql {
                 get_string('reviewattempt', 'quiz'), array('class' => 'reviewlink'));
     }
 
+    // TOTARA - Escape potential XSS in idnumber field.
+    public function col_idnumber($row) {
+        return s($row->idnumber);
+    }
+
     /**
      * Generate the display of the attempt state column.
      * @param object $attempt the table row being output.
@@ -603,15 +608,36 @@ abstract class quiz_attempts_report_table extends table_sql {
     }
 
     public function wrap_html_finish() {
+        global $PAGE;
         if ($this->is_downloading() || !$this->includecheckboxes) {
             return;
         }
 
         echo '<div id="commands">';
-        echo '<a href="javascript:select_all_in(\'DIV\', null, \'tablecontainer\');">' .
+        echo '<a id="checkattempts" href="#">' .
                 get_string('selectall', 'quiz') . '</a> / ';
-        echo '<a href="javascript:deselect_all_in(\'DIV\', null, \'tablecontainer\');">' .
+        echo '<a id="uncheckattempts" href="#">' .
                 get_string('selectnone', 'quiz') . '</a> ';
+        $PAGE->requires->js_amd_inline("
+        require([], function() {
+            document.getElementById('checkattempts').addEventListener('click', function (e) {
+                e.preventDefault();
+                var nodes = document.querySelectorAll('#attemptsform input[type=\"checkbox\"]');
+
+                for (var i = 0; i < nodes.length; i++) {
+                    nodes[i].checked = true;
+                }
+            });
+
+            document.getElementById('uncheckattempts').addEventListener('click', function (e) {
+                e.preventDefault();
+                var nodes = document.querySelectorAll('#attemptsform input[type=\"checkbox\"]');
+
+                for (var i = 0; i < nodes.length; i++) {
+                    nodes[i].checked = false;
+                }
+            });
+        });");
         echo '&nbsp;&nbsp;';
         $this->submit_buttons();
         echo '</div>';

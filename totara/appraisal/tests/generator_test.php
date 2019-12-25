@@ -160,7 +160,11 @@ class totara_appraisal_generator_testcase extends advanced_testcase {
         $this->assertEquals('appraisal_activation', $verify->type);
         $this->assertEquals(0, $verify->delta);
         $this->assertEquals(0, $verify->deltaperiod);
-        $this->assertEquals($this->allroles, $verify->roles);
+        $allroles = $this->allroles;
+        $verifyroles = $verify->roles;
+        sort($allroles);
+        sort($verifyroles);
+        $this->assertEquals($allroles, $verifyroles);
 
         foreach ($this->allroles as $role) {
             $content = $verify->get_message($role);

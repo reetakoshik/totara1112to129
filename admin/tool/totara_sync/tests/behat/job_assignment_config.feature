@@ -5,15 +5,15 @@ Feature: Configure user source to import job assignment data in HR sync
 
   Background:
     Given I log in as "admin"
-    And I navigate to "General settings" node in "Site administration > HR Import"
+    And I navigate to "Default settings" node in "Site administration > HR Import"
     And I set the following fields to these values:
-      | File Access | Upload Files |
+      | File access | Upload Files |
     And I press "Save changes"
     And I navigate to "Manage elements" node in "Site administration > HR Import > Elements"
     And I "Enable" the "Job assignment" HR Import element
     And I navigate to "Job assignment" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source | CSV |
+      | CSV | 1 |
     And I press "Save changes"
 
   Scenario: Configure HR import source link jaidnumber off
@@ -124,7 +124,7 @@ Feature: Configure user source to import job assignment data in HR sync
     When I navigate to "HR Import Log" node in "Site administration > HR Import"
     Then I should see "Created job assignment 'learnerjaid1' for user 'learner1'."
     And I should see "Created job assignment 'managerjaid1' for user 'manager1'."
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "Learner One" "link"
     And I click on "Learner1 JA1" "link"
     Then I should not see "Manager One (manager1@example.com) - Manager1 JA2"
@@ -166,7 +166,7 @@ Feature: Configure user source to import job assignment data in HR sync
     Then I should see "Updated job assignment 'learnerjaid1' for user 'learner1'."
     And I should see "Updated job assignment 'managerjaid1' for user 'manager1'."
     And I should see "Created job assignment 'managerjaid2' for user 'manager2'."
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "Learner One" "link"
     And I click on "Learner1 JA1" "link"
     Then I should not see "Manager One (manager1@example.com) - Manager1 JA2"

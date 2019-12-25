@@ -1,4 +1,4 @@
-Description of TCPDF library import 6.2.12
+Description of TCPDF library import 6.2.26
 ===========================================
 * delete examples/, tools/ and tcpdf_import.php
 * remove tcpdf_import.php from composer.json

@@ -24,6 +24,8 @@
  * @author      Petr Skoda <petr.skoda@totaralms.com>
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 $hasfooter = (!isset($PAGE->layout_options['nofooter']) || !$PAGE->layout_options['nofooter']);
 
 echo $OUTPUT->doctype() ?>

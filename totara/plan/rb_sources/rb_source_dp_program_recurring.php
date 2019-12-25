@@ -33,10 +33,8 @@ require_once($CFG->dirroot . '/totara/plan/lib.php');
 require_once($CFG->dirroot . '/totara/program/lib.php');
 
 class rb_source_dp_program_recurring extends rb_base_source {
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
-    public $sourcewhere;
+    use \totara_job\rb\source\report_trait;
+    use \totara_reportbuilder\rb\source\report_trait;
 
     public function __construct($groupid, rb_global_restriction_set $globalrestrictionset = null) {
         if ($groupid instanceof rb_global_restriction_set) {
@@ -60,6 +58,7 @@ class rb_source_dp_program_recurring extends rb_base_source {
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_dp_program_recurring');
         // only consider whole programs - not courseset completion
         $this->sourcewhere = 'base.coursesetid = 0';
+        $this->usedcomponents[] = 'totara_program';
         parent::__construct();
     }
 
@@ -96,9 +95,9 @@ class rb_source_dp_program_recurring extends rb_base_source {
                 'completion_organisation.id = base.organisationid',
                 REPORT_BUILDER_RELATION_ONE_TO_ONE
         );
-        $this->add_context_table_to_joinlist($joinlist, 'base', 'programid', CONTEXT_PROGRAM, 'INNER');
-        $this->add_user_table_to_joinlist($joinlist, 'base', 'userid');
-        $this->add_job_assignment_tables_to_joinlist($joinlist, 'base', 'userid', 'INNER');
+        $this->add_context_tables($joinlist, 'base', 'programid', CONTEXT_PROGRAM, 'INNER');
+        $this->add_core_user_tables($joinlist, 'base', 'userid');
+        $this->add_totara_job_tables($joinlist, 'base', 'userid');
 
         return $joinlist;
     }
@@ -113,7 +112,8 @@ class rb_source_dp_program_recurring extends rb_base_source {
             "prog.fullname",
             array('joins' => 'prog',
                   'dbdatatype' => 'char',
-                  'outputformat' => 'text')
+                  'outputformat' => 'text',
+                  'displayfunc' => 'format_string')
         );
         $columnoptions[] = new rb_column_option(
             'program',
@@ -122,7 +122,7 @@ class rb_source_dp_program_recurring extends rb_base_source {
             "prog.fullname",
             array(
                 'joins' => 'prog',
-                'displayfunc' => 'link_program_icon',
+                'displayfunc' => 'program_icon_link',
                 'defaultheading' => get_string('programname', 'totara_program'),
                 'extrafields' => array(
                     'programid' => "prog.id",
@@ -137,7 +137,8 @@ class rb_source_dp_program_recurring extends rb_base_source {
             "prog.shortname",
             array('joins' => 'prog',
                   'dbdatatype' => 'char',
-                  'outputformat' => 'text')
+                  'outputformat' => 'text',
+                  'displayfunc' => 'plaintext')
         );
         $columnoptions[] = new rb_column_option(
             'program',
@@ -153,7 +154,8 @@ class rb_source_dp_program_recurring extends rb_base_source {
             'program',
             'id',
             get_string('programid', 'totara_program'),
-            "base.programid"
+            "base.programid",
+            array('displayfunc' => 'integer')
         );
 
         $columnoptions[] = new rb_column_option(
@@ -162,7 +164,7 @@ class rb_source_dp_program_recurring extends rb_base_source {
             get_string('coursenamelink', 'totara_program'),
             "base.recurringcourseid",
             array(
-                'displayfunc' => 'link_course_name',
+                'displayfunc' => 'program_course_name_link',
             )
         );
 
@@ -186,7 +188,7 @@ class rb_source_dp_program_recurring extends rb_base_source {
             get_string('completiondate', 'totara_program'),
             "base.timecompleted",
             array(
-                'displayfunc' => 'completion_date',
+                'displayfunc' => 'program_completion_date',
                 'dbdatatype' => 'timestamp',
             )
         );
@@ -197,18 +199,28 @@ class rb_source_dp_program_recurring extends rb_base_source {
             get_string('duedate', 'totara_program'),
             "base.timedue",
             array(
-                'displayfunc' => 'completion_date',
+                'displayfunc' => 'program_completion_date',
                 'dbdatatype' => 'timestamp',
             )
         );
 
-        $this->add_user_fields_to_columns($columnoptions);
-        $this->add_job_assignment_fields_to_columns($columnoptions);
+        $this->add_core_user_columns($columnoptions);
+        $this->add_totara_job_columns($columnoptions);
 
         return $columnoptions;
     }
 
+    /**
+     * Display program icon with name and link
+     *
+     * @deprecated Since Totara 12.0
+     * @param $programname
+     * @param $row
+     * @param bool $isexport
+     * @return string
+     */
     function rb_display_link_program_icon($programname, $row, $isexport = false) {
+        debugging('rb_source_dp_program_recurring::rb_display_link_program_icon has been deprecated since Totara 12.0. Use totara_program\rb\display\program_icon_link::display', DEBUG_DEVELOPER);
         if ($isexport) {
             return $programname;
         }
@@ -216,8 +228,16 @@ class rb_source_dp_program_recurring extends rb_base_source {
         return prog_display_link_icon($row->programid, $row->userid);
     }
 
-
+    /**
+     * Display program completion status
+     *
+     * @deprecated Since Totara 12.0
+     * @param $status
+     * @param $row
+     * @return string
+     */
     function rb_display_program_completion_status($status,$row) {
+        debugging('rb_source_dp_program_recurring::rb_display_program_completion_status has been deprecated since Totara 12.0. Use totara_program\rb\display\program_completion_status::display', DEBUG_DEVELOPER);
         global $OUTPUT;
 
         if ($status == STATUS_PROGRAM_COMPLETE) {
@@ -230,7 +250,15 @@ class rb_source_dp_program_recurring extends rb_base_source {
 
     }
 
+    /**
+     * Display completion date
+     *
+     * @deprecated Since Totara 12.0
+     * @param $time
+     * @return string
+     */
     function rb_display_completion_date($time) {
+        debugging('rb_source_dp_program_recurring::rb_display_completion_date has been deprecated since Totara 12.0. Use totara_program\rb\display\program_completion_date::display', DEBUG_DEVELOPER);
         if ($time == 0) {
             return '';
         } else {
@@ -238,7 +266,15 @@ class rb_source_dp_program_recurring extends rb_base_source {
         }
     }
 
+    /**
+     * Display course name and link
+     *
+     * @deprecated Since Totara 12.0
+     * @param $courseid
+     * @return string
+     */
     function rb_display_link_course_name($courseid) {
+        debugging('rb_source_dp_program_recurring::rb_display_link_course_name has been deprecated since Totara 12.0. Use totara_program\rb\display\program_course_name_link::display', DEBUG_DEVELOPER);
         global $DB, $OUTPUT;
 
         $html = '';
@@ -291,8 +327,8 @@ class rb_source_dp_program_recurring extends rb_base_source {
                 'date'
             );
 
-        $this->add_user_fields_to_filters($filteroptions);
-        $this->add_job_assignment_fields_to_filters($filteroptions, 'base', 'userid');
+        $this->add_core_user_filters($filteroptions);
+        $this->add_totara_job_filters($filteroptions, 'base', 'userid');
 
         return $filteroptions;
     }

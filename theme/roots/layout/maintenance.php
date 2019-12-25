@@ -34,8 +34,9 @@
  * breaking installation or upgrade unwittingly.
  */
 
-$grid = new theme_roots\output\bootstrap_grid();
-$regions = $grid->get_regions_classes();
+defined('MOODLE_INTERNAL') || die();
+
+$themerenderer = $PAGE->get_renderer('theme_roots');
 
 echo $OUTPUT->doctype() ?>
 <html <?php echo $OUTPUT->htmlattributes(); ?>>
@@ -53,19 +54,19 @@ echo $OUTPUT->doctype() ?>
 <div id="page" class="container-fluid">
 
     <header id="page-header" class="clearfix">
-        <?php echo $OUTPUT->page_heading(); ?>
+        <?php echo $themerenderer->page_heading(); ?>
     </header>
 
     <div id="page-content" class="row">
-        <section id="region-main" class="<?php echo $regions['content']; ?>">
-            <?php echo $OUTPUT->main_content(); ?>
+        <section id="region-main" class="<?php echo $themerenderer->main_content_classes(); ?>">
+            <?php echo $themerenderer->main_content(); ?>
         </section>
     </div>
 </div>
 
 <footer id="page-footer" class="page-footer">
     <div class="container-fluid page-footer-main-content">
-        <?php echo $OUTPUT->standard_footer_html(); ?>
+        <?php echo $themerenderer->standard_footer_html(); ?>
     </div>
 </footer>
 <?php echo $OUTPUT->standard_end_of_body_html() ?>

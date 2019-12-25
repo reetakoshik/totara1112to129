@@ -42,8 +42,17 @@ class tool_totara_sync_org_csv_check_sanity_testcase extends totara_sync_csv_tes
     protected $source       = null;
 
     protected $org_framework_data1 = [
-        'id' => 1, 'fullname' => 'Organisation Framework 1', 'shortname' => 'OFW1', 'idnumber' => 'OF1', 'description' => 'Description 1',
-        'sortorder' => 1, 'visible' => 1, 'hidecustomfields' => 0, 'timecreated' => 1265963591, 'timemodified' => 1265963591, 'usermodified' => 2,
+        'id'                => 1,
+        'fullname'          => 'Organisation Framework 1',
+        'shortname'         => 'OFW1',
+        'idnumber'          => 'OF1',
+        'description'       => 'Description 1',
+        'sortorder'         => 1,
+        'visible'           => 1,
+        'hidecustomfields'  => 0,
+        'timecreated'       => 1265963591,
+        'timemodified'      => 1265963591,
+        'usermodified'      => 2
     ];
 
     protected function tearDown() {
@@ -173,6 +182,49 @@ class tool_totara_sync_org_csv_check_sanity_testcase extends totara_sync_csv_tes
         $this->add_csv('organisations_parent_zero_4.csv', 'org');
         $this->sync();
         $this->assertCount(4, $DB->get_records('org'));
+    }
+
+    public function test_org_csv_field_mappings_incorrect() {
+        global $DB;
+
+        $this->assertCount(0, $DB->get_records('org'));
+
+        // Set the element config.
+        $this->set_element_config($this->config);
+
+        // Using a mapping of fullname to name.
+        $additional_fields = ['fieldmapping_fullname' => 'orgname'];
+        $config = array_merge($this->configcsv, $this->importfields(), $additional_fields);
+        $this->set_source_config($config);
+        $this->add_csv('organisations_field_mapping_1.csv', 'org');
+        $error = '';
+        try {
+            $this->sync();
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+        }
+        $this->assertEquals("CSV file not valid, missing field \"fullname\" (mapping for \"orgname\")", $error);
+        $this->assertCount(0, $DB->get_records('org'));
+    }
+
+    public function test_org_csv_field_mappings_correct() {
+        global $DB;
+
+        $this->assertCount(0, $DB->get_records('org'));
+
+        // Set the element config.
+        $this->set_element_config($this->config);
+
+        // Using a mapping of fullname to name.
+        $additional_fields = ['fieldmapping_fullname' => 'name'];
+        $config = array_merge($this->configcsv, $this->importfields(), $additional_fields);
+        $this->set_source_config($config);
+        $this->add_csv('organisations_field_mapping_1.csv', 'org');
+        $this->sync();
+
+        $records = $DB->get_records('org');
+        $this->assertCount(1, $records);
+        $this->assertEquals('Organisation 1', current($records)->fullname);
     }
 
 }

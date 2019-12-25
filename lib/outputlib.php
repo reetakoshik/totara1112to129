@@ -399,6 +399,11 @@ class theme_config {
     public $enable_dock = false;
 
     /**
+     * @var bool If set to true and the theme enables then allow to hide the block
+     */
+    public $enable_hide = false;
+
+    /**
      * @var bool If set to true then this theme will not be shown in the theme selector unless
      * theme designer mode is turned on.
      */
@@ -493,6 +498,14 @@ class theme_config {
     public $blockrendermethod = null;
 
     /**
+     * The name of the function that takes a theme_config argument and returns the URL of the favicon.
+     *
+     * @var string
+     * @since Totara 11.15, 12.6, 13.0
+     */
+    public $resolvefaviconcallback = null;
+
+    /**
      * Load the config.php file for a particular theme, and return an instance
      * of this class. (That is, this is a factory method.)
      *
@@ -567,11 +580,13 @@ class theme_config {
         $configurable = array(
             'parents', 'sheets', 'parents_exclude_sheets', 'plugins_exclude_sheets',
             'javascripts', 'javascripts_footer', 'parents_exclude_javascripts',
-            'layouts', 'enable_dock', 'enablecourseajax', 'requiredblocks',
+            'layouts', 'enable_dock','enable_hide', 'enablecourseajax', 'requiredblocks',
             'rendererfactory', 'csspostprocess', 'editor_sheets', 'rarrow', 'larrow', 'uarrow', 'darrow',
             'hidefromselector', 'doctype', 'yuicssmodules', 'blockrtlmanipulations',
             'lessfile', 'extralesscallback', 'lessvariablescallback', 'blockrendermethod',
             'scss', 'extrascsscallback', 'prescsscallback', 'csstreepostprocessor', 'addblockposition');
+        // Totara: Add favicon resolver
+        $configurable[] = 'resolvefaviconcallback';
 
         foreach ($config as $key=>$value) {
             if (in_array($key, $configurable)) {
@@ -735,7 +750,7 @@ class theme_config {
         global $CFG;
         $rev = theme_get_revision();
         if ($rev > -1) {
-            $url = new moodle_url("$CFG->httpswwwroot/theme/styles.php");
+            $url = new moodle_url("/theme/styles.php");
             if (!empty($CFG->slasharguments)) {
                 $url->set_slashargument('/'.$this->name.'/'.$rev.'/editor', 'noparam', true);
             } else {
@@ -743,7 +758,7 @@ class theme_config {
             }
         } else {
             $params = array('theme'=>$this->name, 'type'=>'editor');
-            $url = new moodle_url($CFG->httpswwwroot.'/theme/styles_debug.php', $params);
+            $url = new moodle_url('/theme/styles_debug.php', $params);
         }
         return $url;
     }
@@ -810,7 +825,7 @@ class theme_config {
 
         if ($rev > -1) {
             $filename = right_to_left() ? 'all-rtl' : 'all';
-            $url = new moodle_url("$CFG->httpswwwroot/theme/styles.php");
+            $url = new moodle_url("/theme/styles.php");
             if (!empty($CFG->slasharguments)) {
                 $slashargs = '';
                 if (!$svg) {
@@ -844,7 +859,7 @@ class theme_config {
             $urls[] = $url;
 
         } else {
-            $baseurl = new moodle_url($CFG->httpswwwroot.'/theme/styles_debug.php');
+            $baseurl = new moodle_url('/theme/styles_debug.php');
 
             $css = $this->get_css_files(true);
             if (!$svg) {
@@ -1530,11 +1545,11 @@ class theme_config {
         }
 
         if (!empty($CFG->slasharguments) and $rev > 0) {
-            $url = new moodle_url("$CFG->httpswwwroot/theme/javascript.php");
+            $url = new moodle_url("/theme/javascript.php");
             $url->set_slashargument('/'.$this->name.'/'.$rev.'/'.$params['type'], 'noparam', true);
             return $url;
         } else {
-            return new moodle_url($CFG->httpswwwroot.'/theme/javascript.php', $params);
+            return new moodle_url('/theme/javascript.php', $params);
         }
     }
 
@@ -1653,7 +1668,7 @@ class theme_config {
                 $replaced[$match[0]] = true;
                 $imagename = $match[2];
                 $component = rtrim($match[1], '|');
-                $imageurl = $this->pix_url($imagename, $component)->out(false);
+                $imageurl = $this->image_url($imagename, $component)->out(false);
                  // we do not need full url because the image.php is always in the same dir
                 $imageurl = preg_replace('|^http.?://[^/]+|', '', $imageurl);
                 $css = str_replace($match[0], $imageurl, $css);
@@ -1724,13 +1739,30 @@ class theme_config {
     }
 
     /**
-     * Return the URL for an image
+     * Return the direct URL for an image from the pix folder.
      *
+     * Use this function sparingly and never for icons. For icons use pix_icon or the pix helper in a mustache template.
+     *
+     * @deprecated since Totara 12
      * @param string $imagename the name of the icon.
      * @param string $component specification of one plugin like in get_string()
      * @return moodle_url
      */
     public function pix_url($imagename, $component) {
+        debugging('pix_url is deprecated. Use image_url for images and pix_icon for icons.', DEBUG_DEVELOPER);
+        return $this->image_url($imagename, $component);
+    }
+
+    /**
+     * Return the direct URL for an image from the pix folder.
+     *
+     * Use this function sparingly and never for icons. For icons use pix_icon or the pix helper in a mustache template.
+     *
+     * @param string $imagename the name of the icon.
+     * @param string $component specification of one plugin like in get_string()
+     * @return moodle_url
+     */
+    public function image_url($imagename, $component) {
         global $CFG;
 
         $params = array('theme'=>$this->name);
@@ -1749,7 +1781,7 @@ class theme_config {
 
         $params['image'] = ltrim($imagename, '/'); // Totara: always remove leading slashes.
 
-        $url = new moodle_url("$CFG->httpswwwroot/theme/image.php");
+        $url = new moodle_url("/theme/image.php");
         if (!empty($CFG->slasharguments) and $rev > 0) {
             $path = '/'.$params['theme'].'/'.$params['component'].'/'.$params['rev'].'/'.$params['image'];
             if (!$svg) {
@@ -1795,7 +1827,7 @@ class theme_config {
 
         $params['font'] = $font;
 
-        $url = new moodle_url("$CFG->httpswwwroot/theme/font.php");
+        $url = new moodle_url("/theme/font.php");
         if (!empty($CFG->slasharguments) and $rev > 0) {
             $path = '/'.$params['theme'].'/'.$params['component'].'/'.$params['rev'].'/'.$params['font'];
             $url->set_slashargument($path, 'noparam', true);
@@ -2020,6 +2052,32 @@ class theme_config {
             }
             return null;
         }
+    }
+
+    /**
+     * Return the URL of the favicon by walking through the resolvefaviconcallback properties.
+     *
+     * @return string|null the URL for the favicon or null if no custom favicon.
+     * @since Totara 11.15, 12.6, 13.0
+     */
+    public function resolve_favicon_url() {
+        $function = $this->resolvefaviconcallback;
+        if (function_exists($function)) {
+            if (($url = $function($this)) != null) {
+                return $url;
+            }
+        }
+        foreach ($this->parent_configs as $parent_config) {
+            if (isset($parent_config->resolvefaviconcallback)) {
+                $function = $parent_config->resolvefaviconcallback;
+                if (function_exists($function)) {
+                    if (($url = $function($this)) != null) {
+                        return $url;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     /**

@@ -45,13 +45,27 @@ $items = $DB->get_records_select('user', 'deleted = 0 AND suspended = 0 AND id !
     'id, ' . $usernamefields . ', email', 0, TOTARA_DIALOG_MAXITEMS + 1);
 
 // We'll remove users from $selected whose id is not in $selectedids.
-$allselected = $items;
 foreach ($items as $item) {
     $item->fullname = fullname($item);
-    if (isset($selectedids[$item->id])) {
-        $allselected[$item->id]->fullname = $item->fullname;
-    } else {
-        unset($allselected[$item->id]);
+}
+
+// Get a list of all selected users
+$allselected = [];
+if (count($selectedids) > 0) {
+    $usernamefields = get_all_user_name_fields(true);
+
+    $batches = array_chunk($selectedids, $DB->get_max_in_params());
+
+    foreach ($batches as $batch) {
+        list($insql, $inparams) = $DB->get_in_or_equal($batch);
+        $selecteditems = $DB->get_records_select('user', "deleted = 0 AND suspended = 0 AND id $insql", $inparams, '',
+            'id, ' . $usernamefields . ', email');
+
+        foreach ($selecteditems as $item) {
+            $item->fullname = fullname($item);
+
+            $allselected[$item->id] = $item;
+        }
     }
 }
 

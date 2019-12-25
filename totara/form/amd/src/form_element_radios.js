@@ -75,30 +75,14 @@ define(['jquery', 'totara_form/form'], function($, Form) {
     RadiosElement.prototype.init = function(done) {
         var id = this.id,
             container = $('#' + id),
-            inputs = $('#' + id + ' input[type=radio]'),
-            input = $(inputs[0]),
-            self = this,
-            deferred = $.Deferred(),
-            submitselector = 'input[type="submit"]:not([formnovalidate])';
+            inputs = $('#' + id + ' input[type=radio]');
 
         this.container = container;
         this.inputs = inputs;
         // Call the changed method when this element is changed.
         this.inputs.change($.proxy(this.changed, this));
 
-        if (input.attr('required')) {
-            require(['totara_form/modernizr'], function (mod) {
-                if (!mod.input.required) {
-                    inputs.change($.proxy(self.polyFillValidate, self));
-                    container.closest('form').find(submitselector).click($.proxy(self.polyFillValidate, self));
-                }
-                deferred.resolve();
-            });
-        } else {
-            deferred.resolve();
-        }
-
-        deferred.done(done);
+        done();
     };
 
     RadiosElement.prototype.polyFillValidate = function(e) {
@@ -140,6 +124,14 @@ define(['jquery', 'totara_form/form'], function($, Form) {
             }
         }
         return false;
+    };
+
+    RadiosElement.prototype.showLoading = function() {
+        $(this.inputs).filter(':checked').siblings('.tf_loading').show();
+    };
+
+    RadiosElement.prototype.hideLoading = function() {
+        this.inputs.siblings('.tf_loading').hide();
     };
 
     return RadiosElement;

@@ -285,6 +285,9 @@ class assign_grading_table extends table_sql implements renderable {
                 $where .= '))';
                 $params['submitted'] = ASSIGN_SUBMISSION_STATUS_SUBMITTED;
 
+            } else if ($filter == ASSIGN_FILTER_GRANTED_EXTENSION) {
+                $where .= ' AND uf.extensionduedate > 0 ';
+
             } else if (strpos($filter, ASSIGN_FILTER_SINGLE_USER) === 0) {
                 $userfilter = (int) array_pop(explode('=', $filter));
                 $where .= ' AND (u.id = :userid)';
@@ -564,6 +567,10 @@ class assign_grading_table extends table_sql implements renderable {
         return get_string('hiddenuser', 'assign') . $row->recordid;
     }
 
+    // TOTARA - Escape potential XSS in idnumber field.
+    public function col_idnumber($row) {
+        return s($row->idnumber);
+    }
 
     /**
      * Add the userid to the row class so it can be updated via ajax.
@@ -1040,7 +1047,10 @@ class assign_grading_table extends table_sql implements renderable {
 
         $group = false;
         $submission = false;
-        $this->get_group_and_submission($row->id, $group, $submission, -1);
+
+        if ($instance->teamsubmission) {
+            $this->get_group_and_submission($row->id, $group, $submission, -1);
+        }
 
         if ($instance->teamsubmission && !$group && !$instance->preventsubmissionnotingroup) {
             $group = true;

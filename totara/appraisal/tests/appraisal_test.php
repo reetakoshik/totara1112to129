@@ -27,7 +27,7 @@
 global $CFG;
 require_once($CFG->dirroot.'/totara/appraisal/tests/appraisal_testcase.php');
 
-class appraisal_test extends appraisal_testcase {
+class totara_appraisal_appraisal_testcase extends appraisal_testcase {
 
     public function test_set_status() {
         $this->resetAfterTest();
@@ -321,7 +321,172 @@ class appraisal_test extends appraisal_testcase {
         $this->assertEmpty($user4appr);
     }
 
-    public function test_active_appraisal_add_group () {
+    public function test_appraisal_get_user_appraisal_sort_order() {
+        global $DB, $CFG;
+
+        // Set up users.
+        $manager = $this->getDataGenerator()->create_user();
+        $this->setUser($manager);
+
+        $user1 = $this->getDataGenerator()->create_user((object)[
+            'lastname' => 'Aardvark',
+            'firstname' => 'Yannis',
+        ]);
+        $user2 = $this->getDataGenerator()->create_user((object)[
+            'lastname' => 'Borg',
+            'firstname' => 'Walt',
+        ]);
+        $user3 = $this->getDataGenerator()->create_user((object)[
+            'lastname' => 'Chandler',
+            'firstname' => 'Walt',
+        ]);
+        $user4 = $this->getDataGenerator()->create_user((object)[
+            'lastname' => 'Doyley',
+            'firstname' => 'Zacharias',
+        ]);
+
+        // Set up job assignments.
+        $all_users = [$user1, $user2, $user3, $user4];
+        $manager_ja = \totara_job\job_assignment::create_default($manager->id);
+        $user_ja = [];
+        foreach ($all_users as $user) {
+            $user_ja[$user->id] = \totara_job\job_assignment::create_default($user->id, ['managerjaid' => $manager_ja->id]);
+        }
+
+        $def = [
+            'name' => 'Appraisal 1', 'stages' => [
+                [
+                    'name' => 'Stage 1', 'timedue' => time() + 86400, 'pages' => [
+                        [
+                            'name' => 'Page 1', 'questions' => [
+                                ['name' => 'Question text 1', 'type' => 'text', 'roles' =>
+                                    [
+                                        \appraisal::ROLE_LEARNER => \appraisal::ACCESS_CANANSWER,
+                                        \appraisal::ROLE_MANAGER => \appraisal::ACCESS_CANANSWER
+                                    ],
+                                ],
+                            ]
+                        ],
+                    ]
+                ],
+            ]
+        ];
+        list($appraisal1) = $this->prepare_appraisal_with_users($def, $all_users);
+        $def['name'] = 'Appraisal 2';
+        list($appraisal2) = $this->prepare_appraisal_with_users($def, $all_users);
+        $def['name'] = 'Appraisal 3';
+        list($appraisal3) = $this->prepare_appraisal_with_users($def, $all_users);
+
+        $all_appraisals = [$appraisal1, $appraisal2, $appraisal3];
+
+        $now = time();
+
+        foreach ($all_appraisals as $index => $appr) {
+            $appr->validate();
+            $appr->activate();
+            $DB->update_record('appraisal', ['id' => $appr->id, 'timestarted' => $now + $index]);
+
+            // Trigger job assignment allocation.
+            foreach ($all_users as $user) {
+                $appraisal_user_assignment = appraisal_user_assignment::get_user($appr->id, $user->id);
+                $appraisal_user_assignment->with_job_assignment($user_ja[$user->id]->id);
+            }
+        }
+
+        // Sorting should be by timestarted descending, then by user name fields configured for display.
+        $oldconfig = $CFG->fullnamedisplay;
+        $CFG->fullnamedisplay = 'firstname lastname';
+        $appraisals = array_values(appraisal::get_user_appraisals($manager->id, appraisal::ROLE_MANAGER));
+        $this->assertCount(12, $appraisals);
+        $this->assertEquals('Appraisal 3', $appraisals[0]->name);
+        $this->assertEquals($user2->id, $appraisals[0]->userid);
+        $this->assertEquals('Appraisal 3', $appraisals[1]->name);
+        $this->assertEquals($user3->id, $appraisals[1]->userid);
+        $this->assertEquals('Appraisal 3', $appraisals[2]->name);
+        $this->assertEquals($user1->id, $appraisals[2]->userid);
+        $this->assertEquals('Appraisal 3', $appraisals[3]->name);
+        $this->assertEquals($user4->id, $appraisals[3]->userid);
+        $this->assertEquals('Appraisal 2', $appraisals[4]->name);
+        $this->assertEquals($user2->id, $appraisals[4]->userid);
+        $this->assertEquals('Appraisal 2', $appraisals[5]->name);
+        $this->assertEquals($user3->id, $appraisals[5]->userid);
+        $this->assertEquals('Appraisal 2', $appraisals[6]->name);
+        $this->assertEquals($user1->id, $appraisals[6]->userid);
+        $this->assertEquals('Appraisal 2', $appraisals[7]->name);
+        $this->assertEquals($user4->id, $appraisals[7]->userid);
+        $this->assertEquals('Appraisal 1', $appraisals[8]->name);
+        $this->assertEquals($user2->id, $appraisals[8]->userid);
+        $this->assertEquals('Appraisal 1', $appraisals[9]->name);
+        $this->assertEquals($user3->id, $appraisals[9]->userid);
+        $this->assertEquals('Appraisal 1', $appraisals[10]->name);
+        $this->assertEquals($user1->id, $appraisals[10]->userid);
+        $this->assertEquals('Appraisal 1', $appraisals[11]->name);
+        $this->assertEquals($user4->id, $appraisals[11]->userid);
+
+        // Change configuration for user name fields and make sure sorting changes accordingly.
+        $CFG->fullnamedisplay = 'lastname firstname';
+        $appraisals = array_values(appraisal::get_user_appraisals($manager->id, appraisal::ROLE_MANAGER));
+        $this->assertCount(12, $appraisals);
+        $this->assertEquals('Appraisal 3', $appraisals[0]->name);
+        $this->assertEquals($user1->id, $appraisals[0]->userid);
+        $this->assertEquals('Appraisal 3', $appraisals[1]->name);
+        $this->assertEquals($user2->id, $appraisals[1]->userid);
+        $this->assertEquals('Appraisal 3', $appraisals[2]->name);
+        $this->assertEquals($user3->id, $appraisals[2]->userid);
+        $this->assertEquals('Appraisal 3', $appraisals[3]->name);
+        $this->assertEquals($user4->id, $appraisals[3]->userid);
+        $this->assertEquals('Appraisal 2', $appraisals[4]->name);
+        $this->assertEquals($user1->id, $appraisals[4]->userid);
+        $this->assertEquals('Appraisal 2', $appraisals[5]->name);
+        $this->assertEquals($user2->id, $appraisals[5]->userid);
+        $this->assertEquals('Appraisal 2', $appraisals[6]->name);
+        $this->assertEquals($user3->id, $appraisals[6]->userid);
+        $this->assertEquals('Appraisal 2', $appraisals[7]->name);
+        $this->assertEquals($user4->id, $appraisals[7]->userid);
+        $this->assertEquals('Appraisal 1', $appraisals[8]->name);
+        $this->assertEquals($user1->id, $appraisals[8]->userid);
+        $this->assertEquals('Appraisal 1', $appraisals[9]->name);
+        $this->assertEquals($user2->id, $appraisals[9]->userid);
+        $this->assertEquals('Appraisal 1', $appraisals[10]->name);
+        $this->assertEquals($user3->id, $appraisals[10]->userid);
+        $this->assertEquals('Appraisal 1', $appraisals[11]->name);
+        $this->assertEquals($user4->id, $appraisals[11]->userid);
+
+        // As manager, get appraisals for one user.
+        $appraisals = array_values(appraisal::get_user_appraisals($user1->id, appraisal::ROLE_MANAGER));
+        $this->assertCount(3, $appraisals);
+        $this->assertEquals('Appraisal 3', $appraisals[0]->name);
+        $this->assertEquals($user1->id, $appraisals[0]->userid);
+        $this->assertEquals('Appraisal 2', $appraisals[1]->name);
+        $this->assertEquals($user1->id, $appraisals[1]->userid);
+        $this->assertEquals('Appraisal 1', $appraisals[2]->name);
+        $this->assertEquals($user1->id, $appraisals[2]->userid);
+
+        // Should be empty because current user (manager) doesn't have learner role anywhere.
+        $appraisals = array_values(appraisal::get_user_appraisals($manager->id, appraisal::ROLE_LEARNER));
+        $this->assertCount(0, $appraisals);
+        $appraisals = array_values(appraisal::get_user_appraisals($user1->id, appraisal::ROLE_LEARNER));
+        $this->assertCount(0, $appraisals);
+
+        // As user, get own appraisals.
+        $this->setUser($user1);
+        $appraisals = array_values(appraisal::get_user_appraisals($user1->id, appraisal::ROLE_LEARNER));
+        $this->assertCount(3, $appraisals);
+        $this->assertEquals('Appraisal 3', $appraisals[0]->name);
+        $this->assertEquals($user1->id, $appraisals[0]->userid);
+        $this->assertEquals('Appraisal 2', $appraisals[1]->name);
+        $this->assertEquals($user1->id, $appraisals[1]->userid);
+        $this->assertEquals('Appraisal 1', $appraisals[2]->name);
+        $this->assertEquals($user1->id, $appraisals[2]->userid);
+
+        // As user, call with role manager. Shouldn't return anything.
+        $appraisals = array_values(appraisal::get_user_appraisals($user1->id, appraisal::ROLE_MANAGER));
+        $this->assertCount(0, $appraisals);
+
+        $CFG->fullnamedisplay = $oldconfig;
+    }
+
+    public function test_active_appraisal_add_group() {
         global $DB;
 
         // Set up active appraisal.
@@ -1806,5 +1971,99 @@ class appraisal_test extends appraisal_testcase {
             $this->assertFalse($DB->record_exists('appraisal_user_assignment', $params));
             $this->assertFalse($DB->record_exists('appraisal_role_assignment', $paramsrole));
         }
+    }
+
+    public function test_get_mandatory_completion() {
+        // Create appraisal and activate it.
+        $user1 = $this->getDataGenerator()->create_user();
+
+        $def = array('name' => 'Appraisal', 'stages' => array(
+            array('name' => 'Stage1', 'timedue' => time() + 86400, 'pages' => array(
+                array('name' => 'Page', 'questions' => array(
+                    array('name' => 'Text', 'type' => 'text', 'roles' => array(
+                        appraisal::ROLE_LEARNER => appraisal::ACCESS_MUSTANSWER,
+                        appraisal::ROLE_MANAGER => appraisal::ACCESS_MUSTANSWER
+                    ))
+                ))
+            )),
+            array('name' => 'Stage2', 'timedue' => time() + 86400, 'pages' => array(
+                array('name' => 'Page', 'questions' => array(
+                    array('name' => 'Text', 'type' => 'text', 'roles' => array(
+                        appraisal::ROLE_LEARNER => appraisal::ACCESS_CANANSWER,
+                        appraisal::ROLE_MANAGER => appraisal::ACCESS_CANANSWER
+                    ))
+                ))
+            ))
+        ));
+
+        /** @var appraisal $appraisal */
+        list($appraisal, $users) = $this->prepare_appraisal_with_users($def, array($user1));
+        $appraisal->activate();
+        $this->update_job_assignments($appraisal);
+
+        $map = $this->map($appraisal);
+
+        $stage = new appraisal_stage($map['stages']['Stage1']);
+
+        // Enable dynamic appraisals, disable auto-progress. Mandatory roles should be all roles involved
+        // in the stage.
+        set_config('dynamicappraisals', true);
+        set_config('dynamicappraisalsautoprogress', false);
+
+        $mandatory_roles = $stage->get_mandatory_completion($user1->id);
+        $this->assertEquals(array(appraisal::ROLE_LEARNER, appraisal::ROLE_MANAGER), array_keys($mandatory_roles));
+
+        // Enable dynamic appraisals, enable auto-progress. Unfilled roles are not mandatory.
+        set_config('dynamicappraisals', true);
+        set_config('dynamicappraisalsautoprogress', true);
+
+        $mandatory_roles = $stage->get_mandatory_completion($user1->id);
+        $this->assertEquals(array(appraisal::ROLE_LEARNER), array_keys($mandatory_roles));
+
+        // Disable dynamic appraisals, disbale auto-progress. Unfilled roles are not mandatory.
+        set_config('dynamicappraisals', false);
+        set_config('dynamicappraisalsautoprogress', false);
+
+        $mandatory_roles = $stage->get_mandatory_completion($user1->id);
+        $this->assertEquals(array(appraisal::ROLE_LEARNER), array_keys($mandatory_roles));
+
+        // Disable dynamic appraisals, enable auto-progress. Unfilled roles are not mandatory.
+        set_config('dynamicappraisals', false);
+        set_config('dynamicappraisalsautoprogress', true);
+
+        $mandatory_roles = $stage->get_mandatory_completion($user1->id);
+        $this->assertEquals(array(appraisal::ROLE_LEARNER), array_keys($mandatory_roles));
+
+        // Repeat with CANANSWER - no difference.
+        $stage = new appraisal_stage($map['stages']['Stage2']);
+
+        // Enable dynamic appraisals, disable auto-progress. Mandatory roles should be all roles involved
+        // in the stage.
+        set_config('dynamicappraisals', true);
+        set_config('dynamicappraisalsautoprogress', false);
+
+        $mandatory_roles = $stage->get_mandatory_completion($user1->id);
+        $this->assertEquals(array(appraisal::ROLE_LEARNER, appraisal::ROLE_MANAGER), array_keys($mandatory_roles));
+
+        // Enable dynamic appraisals, enable auto-progress. Unfilled roles are not mandatory.
+        set_config('dynamicappraisals', true);
+        set_config('dynamicappraisalsautoprogress', true);
+
+        $mandatory_roles = $stage->get_mandatory_completion($user1->id);
+        $this->assertEquals(array(appraisal::ROLE_LEARNER), array_keys($mandatory_roles));
+
+        // Disable dynamic appraisals, disbale auto-progress. Unfilled roles are not mandatory.
+        set_config('dynamicappraisals', false);
+        set_config('dynamicappraisalsautoprogress', false);
+
+        $mandatory_roles = $stage->get_mandatory_completion($user1->id);
+        $this->assertEquals(array(appraisal::ROLE_LEARNER), array_keys($mandatory_roles));
+
+        // Disable dynamic appraisals, enable auto-progress. Unfilled roles are not mandatory.
+        set_config('dynamicappraisals', false);
+        set_config('dynamicappraisalsautoprogress', true);
+
+        $mandatory_roles = $stage->get_mandatory_completion($user1->id);
+        $this->assertEquals(array(appraisal::ROLE_LEARNER), array_keys($mandatory_roles));
     }
 }

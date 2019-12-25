@@ -29,9 +29,6 @@ require_once($CFG->dirroot.'/user/editlib.php');
 require_once($CFG->dirroot.'/user/profile/lib.php');
 require_once($CFG->dirroot.'/user/lib.php');
 
-// HTTPS is required in this page when $CFG->loginhttps enabled.
-$PAGE->https_required();
-
 $userid = optional_param('id', $USER->id, PARAM_INT);    // User id.
 $course = optional_param('course', SITEID, PARAM_INT);   // Course id (defaults to Site).
 $returnto = optional_param('returnto', null, PARAM_ALPHANUMEXT);  // Code determining where to return to after save.
@@ -48,7 +45,7 @@ if ($course->id != SITEID) {
     require_login($course);
 } else if (!isloggedin()) {
     if (empty($SESSION->wantsurl)) {
-        $SESSION->wantsurl = $CFG->httpswwwroot.'/user/edit.php';
+        $SESSION->wantsurl = $CFG->wwwroot.'/user/edit.php';
     }
     redirect(get_login_url());
 } else {
@@ -71,7 +68,8 @@ if (isguestuser($user)) {
 }
 
 // User interests separated by commas.
-$user->interests = core_tag_tag::get_item_tags_array('core', 'user', $user->id);
+$user->interests = core_tag_tag::get_item_tags_array('core', 'user', $user->id,
+    core_tag_tag::BOTH_STANDARD_AND_NOT, 0, false); // Totara: do not encode the special characters.
 
 // Remote users cannot be edited. We have to perform the strict
 // user_not_fully_set_up() check, otherwise the remote user could end up in
@@ -325,9 +323,6 @@ if ($usernew = $userform->get_data()) {
         redirect(useredit_get_return_url($user, $returnto, $course, $customreturn));
     }
 }
-
-// Make sure we really are on the https page when https login required.
-$PAGE->verify_https_required();
 
 
 // Display page header.

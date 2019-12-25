@@ -23,6 +23,8 @@
  * @subpackage totara_core
  */
 
+require_once($CFG->dirroot.'/totara/hierarchy/db/upgradelib.php');
+
 /**
  * Database upgrade script
  *
@@ -42,7 +44,6 @@ function xmldb_totara_hierarchy_upgrade($oldversion) {
         // The function isn't particularly well performing, however we don't expect to encounter sites
         // with thousands of custom fields per type, as such we will raise memory as a caution as proceed.
         raise_memory_limit(MEMORY_HUGE);
-        require_once($CFG->dirroot.'/totara/hierarchy/db/upgradelib.php');
 
         totara_hierarchy_upgrade_fix_customfield_sortorder('comp_type'); // Competencies.
         totara_hierarchy_upgrade_fix_customfield_sortorder('goal_type'); // Company goals.
@@ -164,7 +165,7 @@ function xmldb_totara_hierarchy_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2017112705, 'totara', 'hierarchy');
     }
 
-    if ($oldversion < 2018022701) {
+    if ($oldversion < 2018031600) {
         // change the type of defaultid in competency scales from a smallint to a bigint since it contains an id record.
         $field = new xmldb_field('defaultid', XMLDB_TYPE_INTEGER, 10, null, null, null, null, 'usermodified');
         $table = new xmldb_table('comp_scale');
@@ -181,10 +182,10 @@ function xmldb_totara_hierarchy_upgrade($oldversion) {
         // Recreate or add the index.
         $dbman->add_index($table, $index);
 
-        upgrade_plugin_savepoint(true, 2018022701, 'totara', 'hierarchy');
+        upgrade_plugin_savepoint(true, 2018031600, 'totara', 'hierarchy');
     }
 
-    if ($oldversion < 2018022702) {
+    if ($oldversion < 2018031700) {
         // change the type of defaultid in goal scales from a smallint to a bigint since it contains an id record.
         $field = new xmldb_field('defaultid', XMLDB_TYPE_INTEGER, 10, null, null, null, null, 'usermodified');
         $table = new xmldb_table('goal_scale');
@@ -201,7 +202,29 @@ function xmldb_totara_hierarchy_upgrade($oldversion) {
         // Recreate or add the index.
         $dbman->add_index($table, $index);
 
-        upgrade_plugin_savepoint(true, 2018022702, 'totara', 'hierarchy');
+        upgrade_plugin_savepoint(true, 2018031700, 'totara', 'hierarchy');
+    }
+
+    if ($oldversion < 2018090300) {
+
+        // Define field totarasync to be added to comp.
+        $table = new xmldb_table('comp');
+        $field = new xmldb_field('totarasync', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'sortthread');
+
+        // Conditionally launch add field totarasync.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Hierarchy savepoint reached.
+        upgrade_plugin_savepoint(true, 2018090300, 'totara', 'hierarchy');
+    }
+
+    if ($oldversion < 2018112201) {
+        totara_hierarchy_upgrade_user_assignment_extrainfo();
+
+        // Hierarchy savepoint reached.
+        upgrade_plugin_savepoint(true, 2018112201, 'totara', 'hierarchy');
     }
 
     return true;

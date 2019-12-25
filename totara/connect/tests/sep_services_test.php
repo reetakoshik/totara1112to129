@@ -234,8 +234,8 @@ class totara_connect_sep_services_testcase extends advanced_testcase {
                 $this->assertObjectNotHasAttribute('jobs', $u);
                 $this->assertObjectNotHasAttribute('profile_fields', $u);
             } else {
-                $this->assertInternalType('array', $u->jobs);
-                $this->assertInternalType('array', $u->profile_fields);
+                $this->assertIsArray($u->jobs);
+                $this->assertIsArray($u->profile_fields);
             }
         }
     }

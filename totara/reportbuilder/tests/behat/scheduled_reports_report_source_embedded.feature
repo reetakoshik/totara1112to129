@@ -31,7 +31,7 @@ Feature: Test the embedded scheduled reports report source.
     And the following config values are set as admin:
       | allowedscheduledrecipients | audiences,systemusers,emailexternalusers | totara_reportbuilder |
     And I log in as "admin"
-    And I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage embedded reports" node in "Site administration > Reports"
     And I set the field "report-name" to "Scheduled reports"
     And I press "id_submitgroupstandard_addfilter"
     And I follow "Manage scheduled reports"
@@ -41,7 +41,8 @@ Feature: Test the embedded scheduled reports report source.
     And I add the "Recipients (external)" column to the report
     And I press "Save changes"
 
-    Given I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "Test Report#1"
     And I set the field "Source" to "User"
     And I press "Create report"
@@ -49,7 +50,8 @@ Feature: Test the embedded scheduled reports report source.
     And I set the field "All users can view this report" to "1"
     And I press "Save changes"
 
-    Given I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "Test Report#2"
     And I set the field "Source" to "Appraisal Status"
     And I press "Create report"
@@ -57,7 +59,8 @@ Feature: Test the embedded scheduled reports report source.
     And I set the field "All users can view this report" to "1"
     And I press "Save changes"
 
-    Given I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "Test Report#3"
     And I set the field "Source" to "User"
     And I press "Create report"
@@ -121,7 +124,7 @@ Feature: Test the embedded scheduled reports report source.
     And I log out
 
     Given I log in as "srm"
-    And I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage embedded reports" node in "Site administration > Reports"
     And I set the field "report-name" to "Scheduled reports"
     And I press "id_submitgroupstandard_addfilter"
     And I follow "Manage scheduled reports"
@@ -202,7 +205,7 @@ Feature: Test the embedded scheduled reports report source.
     And I press "Add email"
     And I press "Save changes"
 
-    When I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    When I navigate to "Manage embedded reports" node in "Site administration > Reports"
     And I set the field "report-name" to "Scheduled reports"
     And I press "id_submitgroupstandard_addfilter"
     And I follow "Manage scheduled reports"
@@ -233,7 +236,7 @@ Feature: Test the embedded scheduled reports report source.
     Then I should see "Are you sure you would like to delete the 'Test Report#2' scheduled report?"
 
     When I press "Continue"
-    And I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage embedded reports" node in "Site administration > Reports"
     And I set the field "report-name" to "Scheduled reports"
     And I press "id_submitgroupstandard_addfilter"
     And I follow "Manage scheduled reports"

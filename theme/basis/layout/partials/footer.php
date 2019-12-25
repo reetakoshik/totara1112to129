@@ -27,11 +27,6 @@ defined('MOODLE_INTERNAL') || die();
 ?>
 <footer id="page-footer" class="page-footer">
     <div class="container-fluid page-footer-main-content">
-        <?php
-        if (empty($PAGE->layout_options['nocustommenu'])) {
-            echo $themerenderer->page_footer_nav($menudata);
-        }
-        ?>
         <div class="row">
             <div id="course-footer"><?php echo $OUTPUT->course_footer(); ?></div>
         </div>

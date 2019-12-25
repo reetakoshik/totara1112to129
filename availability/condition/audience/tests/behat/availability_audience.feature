@@ -16,22 +16,20 @@ Feature: Adding audience membership activity access restriction
       | user     | course | role           |
       | teacher1 | C1     | editingteacher |
       | student1 | C1     | student        |
-  And the following "cohorts" exist:
-      | name      | idnumber | contextlevel | reference |
-      | Audience1 | aud1     | System       |           |
-      | Audience2 | aud2     | System       |           |
-  And the following "cohort members" exist:
-      | user     | cohort |
-      | student1 | aud1   |
+    And the following "cohorts" exist:
+        | name      | idnumber | contextlevel | reference |
+        | Audience1 | aud1     | System       |           |
+        | Audience2 | aud2     | System       |           |
+    And the following "cohort members" exist:
+        | user     | cohort |
+        | student1 | aud1   |
 
 
   @javascript
   Scenario: Test audience condition prevents student access
     # Basic setup.
     Given I log in as "admin"
-    And I am on site homepage
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
 
     # Add a page.
     And I add a "Page" to section "1"
@@ -64,8 +62,7 @@ Feature: Adding audience membership activity access restriction
     # Log in as student
     When I log out
     And I log in as "student1"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
 
     Then I should see "Test Page 1" in the "region-main" "region"
     And I should not see "Test Page 2" in the "region-main" "region"

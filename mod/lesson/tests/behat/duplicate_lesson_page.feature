@@ -21,9 +21,7 @@ Feature: In a lesson activity, a teacher can duplicate a lesson page
     And I follow "Manage private files"
     And I upload "mod/lesson/tests/fixtures/moodle_logo.jpg" file to "Files" filemanager
     And I click on "Save changes" "button"
-    When I am on homepage
-    And I follow "Course 1"
-    And I turn editing mode on
+    When I am on "Course 1" course homepage with editing mode on
     And I add a "Lesson" to section "1" and I fill the form with:
       | Name | Test lesson name |
       | Description | Test lesson description |
@@ -97,7 +95,7 @@ Feature: In a lesson activity, a teacher can duplicate a lesson page
     Then "//*[contains(@id, 'id_answer_editor_0')]//img[contains(@src, 'moodle_logo.jpg')]" "xpath_element" should exist
     And I should see image with alt text "It's the logo"
 
-@javascript @_file_upload
+  @javascript @_file_upload
   Scenario: Duplicate question page with image in feedback.
     Given I follow "Test lesson name"
     And I follow "Add a question page"

@@ -394,6 +394,6 @@ abstract class wiki_testcase extends advanced_testcase {
         $expected = array_column($expected, 'id');
         $actual = array_column($actual, 'id');
 
-        $this->assertEquals($expected, $actual, $error, .0, 10, true);
+        $this->assertEqualsCanonicalizing($expected, $actual, $error);
     }
 }

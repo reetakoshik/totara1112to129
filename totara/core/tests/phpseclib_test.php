@@ -48,7 +48,6 @@ class totara_core_phpseclib_testcase extends advanced_testcase {
 
     /**
      * Test key creation, encryption and decryption
-     * @depends test_encrypt_data
      */
     public function test_rsa() {
         // Do not include any files here, we rely on previous test to load all libs.

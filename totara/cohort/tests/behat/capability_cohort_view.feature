@@ -118,7 +118,7 @@ Feature: User with moodle/cohort:view can view but not manage audience details
     And I log in as "admin"
     And the following config values are set as admin:
       | audiencevisibility | 1 |
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "All audiences"
     And I follow "Category Audience"
     And I switch to "Visible learning" tab
@@ -155,7 +155,7 @@ Feature: User with moodle/cohort:view can view but not manage audience details
   Scenario: View audience management tabs with moodle/cohort:view capability in system context
     Given I log in as "audviewsys"
     And I am on site homepage
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "System Audience"
     Then I should see "Overview"
     And I should not see "Edit details"
@@ -181,7 +181,7 @@ Feature: User with moodle/cohort:view can view but not manage audience details
     And I log in as "admin"
     And the following config values are set as admin:
       | audiencevisibility | 1 |
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "System Audience"
     And I switch to "Visible learning" tab
     And I press "Add courses"
@@ -191,7 +191,7 @@ Feature: User with moodle/cohort:view can view but not manage audience details
     And I wait "1" seconds
     And "All users" "option" in the "CourseOne" "table_row" should be visible
     And "Delete" "link" in the "CourseOne" "table_row" should be visible
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Add new audience"
     And I set the following fields to these values:
       | Name | Dynamic Audience |
@@ -200,7 +200,7 @@ Feature: User with moodle/cohort:view can view but not manage audience details
     And I log out
     And I log in as "audviewsys"
     And I am on site homepage
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "System Audience"
     Then I should see "Overview"
     And I should not see "Edit details"
@@ -217,7 +217,7 @@ Feature: User with moodle/cohort:view can view but not manage audience details
     And "All users" "option" should not exist in the "CourseOne" "table_row"
     And "Delete" "link" should not exist in the "CourseOne" "table_row"
     When I am on site homepage
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "All audiences"
     Then I should see "Category Audience"
     And I should see "Cat2 Audience"
@@ -232,7 +232,7 @@ Feature: User with moodle/cohort:view can view but not manage audience details
     And I should not see "Assign Roles"
     And I should not see "Clone this audience"
     And I should not see "Delete this audience"
-    When I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    When I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Dynamic Audience"
     Then I should see "Members" in the ".tabtree" "css_element"
     And I should see "Enrolled learning" in the ".tabtree" "css_element"

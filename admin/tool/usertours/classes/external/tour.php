@@ -63,7 +63,13 @@ class tour extends external_api {
 
         $tour = tourinstance::instance($params['tourid']);
         if (!$tour->should_show_for_user()) {
-            return [];
+            return [
+                'showtour' => false,
+                'tourconfig' => [
+                    'name' => '',
+                    'steps' => [],
+                ]
+            ];
         }
 
         $touroutput = new \tool_usertours\output\tour($tour);
@@ -77,6 +83,7 @@ class tour extends external_api {
         ])->trigger();
 
         return [
+            'showtour' => true,
             'tourconfig' => $touroutput->export_for_template($PAGE->get_renderer('core')),
         ];
     }
@@ -101,6 +108,7 @@ class tour extends external_api {
      */
     public static function fetch_and_start_tour_returns() {
         return new external_single_structure([
+            'showtour'      => new external_value(PARAM_BOOL, 'Should the tour show to the user'),
             'tourconfig'    => new external_single_structure([
                 'name'      => new external_value(PARAM_RAW, 'Tour Name'),
                 'steps'     => new external_multiple_structure(self::step_structure_returns()),

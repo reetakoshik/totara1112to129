@@ -25,18 +25,16 @@ defined('MOODLE_INTERNAL') || die();
 
 global $COHORT_ALERT;
 
-$temp = new admin_settingpage('cohortglobalsettings', new lang_string('cohortglobalsettings', 'totara_cohort'), 'moodle/cohort:manage');
-$temp->add(new admin_setting_configmulticheckbox('cohort/alertoptions',
+$ADMIN->add('audiences', new admin_externalpage('cohorts', new lang_string('cohorts', 'cohort'), $CFG->wwwroot . '/cohort/index.php', array('moodle/cohort:manage', 'moodle/cohort:view')));
+
+$globalsettings = new admin_settingpage('cohortglobalsettings', new lang_string('cohortglobalsettings', 'totara_cohort'), 'moodle/cohort:manage');
+$globalsettings->add(new admin_setting_configmulticheckbox('cohort/alertoptions',
     new lang_string('cohortalertoptions', 'totara_cohort'), new lang_string('cohortalertoptions_help', 'totara_cohort'),
     array(COHORT_ALERT_NONE => 1, COHORT_ALERT_AFFECTED => 1, COHORT_ALERT_ALL => 1), $COHORT_ALERT
 ));
 
-$temp->add(new admin_setting_configcheckbox('cohort/applyinbackground',
+$globalsettings->add(new admin_setting_configcheckbox('cohort/applyinbackground',
     new lang_string('cohortapplyinbackground', 'totara_cohort'), new lang_string('cohortapplyinbackground_help', 'totara_cohort'), 0
 ));
 
-if ($ADMIN->locate('tooluploaduser')) {
-    $ADMIN->add('accounts', $temp, 'tooluploaduser');
-} else {
-    $ADMIN->add('accounts', $temp);
-}
+$ADMIN->add('audiences', $globalsettings);

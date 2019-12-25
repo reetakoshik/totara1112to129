@@ -33,6 +33,9 @@
     /** The maximum time in seconds that cron will wait between attempts to retry failing RSS feeds. */
     const CLIENT_MAX_SKIPTIME = 43200; // 60 * 60 * 12 seconds.
 
+    /** @var bool track whether any of the output feeds have recorded failures */
+    private $hasfailedfeeds = false;
+
     function init() {
         $this->title = get_string('pluginname', 'block_rss_client');
     }
@@ -43,13 +46,8 @@
 
     function specialization() {
         // After the block has been loaded we customize the block's title display
-        if (!empty($this->config) && !empty($this->config->title)) {
-            // There is a customized block title, display it
-            $this->title = $this->config->title;
-        } else {
-            // No customized block title, use localized remote news feed string
-            $this->title = get_string('remotenewsfeed', 'block_rss_client');
-        }
+        // Totara: Title override is done via get_title(); So loading only default title here
+        $this->title = get_string('remotenewsfeed', 'block_rss_client');
     }
 
     /**
@@ -59,6 +57,7 @@
      * @return block_rss_client\output\footer|null The renderable footer or null if none should be displayed.
      */
     protected function get_footer($feedrecords) {
+        global $PAGE;
         $footer = null;
 
         if ($this->config->block_rss_client_show_channel_link) {
@@ -71,6 +70,16 @@
 
             if (!empty($channellink)) {
                 $footer = new block_rss_client\output\footer($channellink);
+            }
+        }
+
+        if ($this->hasfailedfeeds) {
+            if (has_any_capability(['block/rss_client:manageownfeeds', 'block/rss_client:manageanyfeeds'], $this->context)) {
+                if ($footer === null) {
+                    $footer = new block_rss_client\output\footer();
+                }
+                $manageurl = new moodle_url('/blocks/rss_client/managefeeds.php', ['courseid' => $PAGE->course->id]);
+                $footer->set_failed($manageurl);
             }
         }
 
@@ -173,6 +182,12 @@
         global $CFG;
         require_once($CFG->libdir.'/simplepie/moodle_simplepie.php');
 
+        if ($feedrecord->skipuntil) {
+            // Last attempt to gather this feed via cron failed - do not try to fetch it now.
+            $this->hasfailedfeeds = true;
+            return null;
+        }
+
         $simplepiefeed = new moodle_simplepie($feedrecord->url);
 
         if(isset($CFG->block_rss_client_timeout)){
@@ -185,12 +200,14 @@
         }
 
         if(empty($feedrecord->preferredtitle)){
+            // Simplepie does escape HTML entities.
             $feedtitle = $this->format_title($simplepiefeed->get_title());
         }else{
-            $feedtitle = $this->format_title($feedrecord->preferredtitle);
+            // Moodle custom title does not does escape HTML entities.
+            $feedtitle = $this->format_title(s($feedrecord->preferredtitle));
         }
 
-        if (empty($this->config->title)){
+        if (empty($this->get_title())){
             //NOTE: this means the 'last feed' displayed wins the block title - but
             //this is exiting behaviour..
             $this->title = strip_tags($feedtitle);
@@ -245,17 +262,19 @@
 
     /**
      * Strips a large title to size and adds ... if title too long
+     * This function does not escape HTML entities, so they have to be escaped
+     * before being passed here.
      *
      * @param string title to shorten
      * @param int max character length of title
-     * @return string title s() quoted and shortened if necessary
+     * @return string title shortened if necessary
      */
     function format_title($title,$max=64) {
 
         if (core_text::strlen($title) <= $max) {
-            return s($title);
+            return $title;
         } else {
-            return s(core_text::substr($title,0,$max-3).'...');
+            return core_text::substr($title, 0, $max - 3) . '...';
         }
     }
 

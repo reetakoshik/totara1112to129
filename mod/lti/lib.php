@@ -73,6 +73,7 @@ function lti_supports($feature) {
         case FEATURE_GRADE_OUTCOMES:
         case FEATURE_BACKUP_MOODLE2:
         case FEATURE_SHOW_DESCRIPTION:
+        case FEATURE_ARCHIVE_COMPLETION:
             return true;
 
         default:
@@ -193,6 +194,10 @@ function lti_delete_instance($id) {
 
     // Delete any dependent records here.
     lti_grade_item_delete($basiclti);
+
+    // Delete any dependent submission records.
+    $DB->delete_records('lti_submission_history', ['ltiid' => $basiclti->id]);
+    $DB->delete_records('lti_submission', ['ltiid' => $basiclti->id]);
 
     $ltitype = $DB->get_record('lti_types', array('id' => $basiclti->typeid));
     if ($ltitype) {
@@ -481,6 +486,11 @@ function lti_get_lti_types_from_proxy_id($toolproxyid) {
 function lti_grade_item_update($basiclti, $grades = null) {
     global $CFG;
     require_once($CFG->libdir.'/gradelib.php');
+    require_once($CFG->dirroot.'/mod/lti/servicelib.php');
+
+    if (!lti_accepts_grades($basiclti)) {
+        return 0;
+    }
 
     $params = array('itemname' => $basiclti->name, 'idnumber' => $basiclti->cmidnumber);
 
@@ -605,5 +615,95 @@ function lti_check_updates_since(cm_info $cm, $from, $filter = array()) {
         $updates->submissions->itemids = array_keys($submissions);
     }
 
+    // Now, teachers should see other students updates.
+    if (has_capability('mod/lti:manage', $cm->context)) {
+        $select = 'ltiid = :id AND (datesubmitted > :since1 OR dateupdated > :since2)';
+        $params = array('id' => $cm->instance, 'since1' => $from, 'since2' => $from);
+
+        if (groups_get_activity_groupmode($cm) == SEPARATEGROUPS) {
+            $groupusers = array_keys(groups_get_activity_shared_group_members($cm));
+            if (empty($groupusers)) {
+                return $updates;
+            }
+            list($insql, $inparams) = $DB->get_in_or_equal($groupusers, SQL_PARAMS_NAMED);
+            $select .= ' AND userid ' . $insql;
+            $params = array_merge($params, $inparams);
+        }
+
+        $updates->usersubmissions = (object) array('updated' => false);
+        $submissions = $DB->get_records_select('lti_submission', $select, $params, '', 'id');
+        if (!empty($submissions)) {
+            $updates->usersubmissions->updated = true;
+            $updates->usersubmissions->itemids = array_keys($submissions);
+        }
+    }
+
     return $updates;
+}
+
+/**
+ * Archive's users completion records for the LTI module.
+ *
+ * @param int $userid
+ * @param int $courseid
+ * @param int $windowopens The time the window opens, so we can act differently for historic uploads
+ *
+ * @return bool
+ */
+function lti_archive_completion(int $userid, int $courseid, int $windowopens = null): bool {
+    global $DB, $CFG;
+
+    require_once($CFG->libdir . '/completionlib.php');
+
+    $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
+    $completion = new completion_info($course);
+
+    $sql = "SELECT ls.id AS submissionid,
+                   lti.id AS ltiid,
+                   ls.launchid
+            FROM {lti_submission} ls
+            INNER JOIN {lti} lti
+                ON lti.id = ls.ltiid AND lti.course = :courseid
+            WHERE ls.userid = :userid";
+    $params = ['userid' => $userid, 'courseid' => $courseid];
+
+    if ($submissions = $DB->get_records_sql($sql, $params)) {
+        $now = time();
+
+        // Create the reset grade.
+        $grade = new stdClass();
+        $grade->userid = $userid;
+        $grade->rawgrade = null;
+
+        foreach ($submissions as $submission) {
+            $cm = get_coursemodule_from_instance('lti', $submission->ltiid, $course->id);
+
+            // Create a record in lti_submission_history before we delete anything.
+            // This is needed to be able to correctly track attempts with the LTI provider.
+            $history = new stdClass();
+            $history->ltiid = $submission->ltiid;
+            $history->userid = $userid;
+            $history->launchid = $submission->launchid;
+            $history->timecreated = $now;
+            $DB->insert_record('lti_submission_history', $history);
+
+            // Delete LTI submission records.
+            $DB->delete_records('lti_submission', ['userid' => $userid, 'ltiid' => $submission->ltiid]);
+
+            // Reset grades.
+            $lti = $DB->get_record('lti', ['id' => $submission->ltiid]);
+            $lti->cmidnumber = $cm->id;
+            lti_grade_item_update($lti, $grade);
+
+            // Reset viewed.
+            $completion->set_module_viewed_reset($cm, $userid);
+
+            // Reset completion, in case viewed is not a required condition.
+            $completion->update_state($cm, COMPLETION_INCOMPLETE, $userid);
+        }
+
+        $completion->invalidatecache($courseid, $userid, true);
+    }
+
+    return true;
 }

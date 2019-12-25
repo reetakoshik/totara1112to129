@@ -1,6 +1,11 @@
 This files describes API changes in /backup/*,
 information provided here is intended especially for developers.
 
+=== 12.5 ===
+
+* Fixed missing closing <div> tag in core_backup_renderer::course_selector_new(),
+  core_backup_renderer::course_selector_current(), and core_backup_renderer::course_selector_existing.
+
 === 11 ===
 
 * Capability 'moodle/restore:restorecourse' is now used only for targeting of restore operations,

@@ -1,0 +1,107 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2015 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template core/block
+
+    Totara block template
+
+    The purpose of this template is to render a block and its contents.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * attributes Array HTML attributes provided by the block API that must be present on the top element of the block.
+    * accessible_skip_from Array Contains properties to create the accessiblie skip from code.
+    * accessible_skip_to Array Contains properties to create the accessiblie skip to code.
+    * header Array Header tag, if present indicates a header is present for this block.
+    * content String The content for the block, each block instance is responsible for producing their own content.
+    * footer Array The block footer.
+    * annotation Array Any annotations that accompany the block. A rarely used feature.
+
+    Example context (json):
+    {
+        "attributes": [
+            {
+                "name": "id",
+                "value": "inst4"
+            }
+        ],
+        "accessible_skip_from": {
+            "href": "#sb-2",
+            "title": "Navigation"
+        },
+        "accessible_skip_to": {
+            "id": "#sb-2"
+        },
+        "header":{
+            "title":{
+                "text":"Example block",
+                "id":"instance-123-header"
+            },
+            "controls":{
+                "control_output":"<div id='action-menu-1'> ... </div>"
+            },
+            "collapsible": true
+        },
+        "content":"I am the content of the example block<br \/>Each block is responsible for styling their own content.",
+        "footer":{
+            "footer_content":"This is the footer"
+        },
+        "annotation":false
+    }
+}}
+{{#accessible_skip}} <a class="skip-block" href="#sb-{{id}}">{{skiptext}}</a> {{/accessible_skip}}
+
+<div{{#attributes}} {{name}}="{{value}}"{{/attributes}}>
+
+{{#header}}{{^no_header}}
+    <div class="header block-header">
+        {{#controls}}
+            {{{control_output}}}
+        {{/controls}}
+        <div class="title block-title" data-dock-title="{{{dock_title}}}">
+            <div class="block_action" {{#collapsible}}data-collapsible="1"{{/collapsible}}></div>
+            {{#title}}
+                <h2 id="{{id}}" data-movetext="true">{{{text}}}</h2>
+            {{/title}}
+        </div>
+    </div>
+{{/no_header}}{{/header}}
+
+<div class="content block-content" data-movetext="true">
+    {{{content}}}
+
+    {{#footer}}
+        <div class="footer">
+            {{{footer_content}}}
+        </div>
+    {{/footer}}
+</div>
+
+</div>
+
+{{#annotation}}
+    <div class="blockannotation">{{{annotation_content}}}</div>
+{{/annotation}}
+
+{{#accessible_skip}}<span id="sb-{{id}}" class="skip-block-to"></span>{{/accessible_skip}}

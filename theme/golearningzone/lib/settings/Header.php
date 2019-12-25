@@ -25,6 +25,9 @@ class Header
     const SEARCH = 'headersearch';
     const SEARCH_LABLE = 'settings-header-search';
     const SEARCH_DESCRIPTION = 'settings-header-searchdescription';
+    const HEADERBORDER = 'blockheaderborder';
+    const HEADERBORDER_LABLE = 'settings-block-headerborder';
+    const HEADERBORDER_DESCRIPTION = 'settings-block-headerborderdescription';
     
     private $page;
 
@@ -38,6 +41,7 @@ class Header
             $this->notifications();
             $this->messages();
             $this->search();
+            //$this->headerborder();
         }
     }
 
@@ -124,4 +128,17 @@ class Header
         $setting->set_updatedcallback('theme_reset_all_caches');
         $this->page->add($setting);
     }
+
+    //  private function headerborder()
+    // {
+    //     $name = static::THEME.'/'.static::HEADERBORDER;
+    //     $title = get_string(static::HEADERBORDER_LABLE, static::THEME);
+    //     $description = get_string(static::HEADERBORDER_DESCRIPTION, static::THEME);
+    //     $yes = 1;
+    //     $no = 0;
+    //     $default = $no;
+    //     $setting = new \admin_setting_configcheckbox($name, $title, $description, $default);
+    //     $setting->set_updatedcallback('theme_reset_all_caches');
+    //     $this->page->add($setting);
+    // }
 }

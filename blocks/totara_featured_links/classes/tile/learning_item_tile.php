@@ -37,7 +37,7 @@ abstract class learning_item_tile extends base {
      *
      * {@inheritdoc}
      */
-    public function add_tile() {
+    public function add_tile(): void {
 
     }
 
@@ -47,7 +47,7 @@ abstract class learning_item_tile extends base {
      * {@inheritdoc}
      * @return array
      */
-    protected function get_content_template_data() {
+    protected function get_content_template_data(): array {
         return [
             'content_class' => (empty($this->content_class) ? '' : $this->content_class),
             'heading_location' => (empty($this->data_filtered->heading_location) ? '' : $this->data_filtered->heading_location),
@@ -62,8 +62,8 @@ abstract class learning_item_tile extends base {
      * @param \renderer_base $renderer
      * @return array
      */
-    protected function get_content_wrapper_template_data(\renderer_base $renderer) {
-        $data = parent::get_content_wrapper_template_data($renderer);
+    protected function get_content_wrapper_template_data(\renderer_base $renderer, array $settings = []): array {
+        $data = parent::get_content_wrapper_template_data($renderer, $settings);
         $data['background_color'] = (!empty($this->data_filtered->background_color) ?
             $this->data_filtered->background_color :
             false);
@@ -78,7 +78,7 @@ abstract class learning_item_tile extends base {
      * @param \stdClass $data
      * @return void
      */
-    public function save_content_tile($data) {
+    public function save_content_tile($data): void {
         if (isset($data->heading_location)) {
             $this->data->heading_location = $data->heading_location;
         }
@@ -96,7 +96,7 @@ abstract class learning_item_tile extends base {
      * {@inheritdoc}
      * @return int 0
      */
-    public function is_visible_tile() {
+    public function is_visible_tile(): int {
         return 0;
     }
 
@@ -107,7 +107,7 @@ abstract class learning_item_tile extends base {
      * @param \stdClass $data all the data from the form
      * @return string
      */
-    public function save_visibility_tile($data) {
+    public function save_visibility_tile($data): string {
         return '';
     }
 }

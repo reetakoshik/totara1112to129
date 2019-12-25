@@ -25,6 +25,8 @@
  * Unit tests for mod/facetoface/room/lib.php functions.
  */
 
+use mod_facetoface\room;
+
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');    // It must be included from a Moodle page.
 }
@@ -69,11 +71,34 @@ class mod_facetoface_roomlib_testcase extends advanced_testcase {
 
         $this->assertCount(2, $DB->get_records('facetoface_room', array()));
 
-        $this->assertEquals($sitewideroom, facetoface_get_room($sitewideroom->id));
-        $this->assertEquals($customroom, facetoface_get_room($customroom->id));
+        $room = new \mod_facetoface\room($sitewideroom->id);
+        $this->assertEquals($sitewideroom->id, $room->get_id());
+        $this->assertEquals($sitewideroom->name, $room->get_name());
+        $this->assertEquals((boolean)$sitewideroom->custom, $room->get_custom());
+        $this->assertEquals((boolean)$sitewideroom->hidden, $room->get_hidden());
+        $this->assertEquals($sitewideroom->capacity, $room->get_capacity());
+        $this->assertEquals((boolean)$sitewideroom->allowconflicts, $room->get_allowconflicts());
 
-        $this->assertFalse(facetoface_get_room(-1));
-        $this->assertFalse(facetoface_get_room(0));
+        $room = new \mod_facetoface\room($customroom->id);
+        $this->assertEquals($customroom->id, $room->get_id());
+        $this->assertEquals($customroom->name, $room->get_name());
+        $this->assertEquals((boolean)$customroom->custom, $room->get_custom());
+        $this->assertEquals((boolean)$customroom->hidden, $room->get_hidden());
+        $this->assertEquals($customroom->capacity, $room->get_capacity());
+        $this->assertEquals((boolean)$customroom->allowconflicts, $room->get_allowconflicts());
+
+        $room = new \mod_facetoface\room();
+        $this->assertFalse($room->exists());
+
+        $room = new \mod_facetoface\room(0);
+        $this->assertFalse($room->exists());
+
+        try {
+            $room = new \mod_facetoface\room(-1);
+            $this->fail('Exception expected due to MUST_EXIST in database query');
+        } catch (dml_missing_record_exception $e) {
+            $this->assertEquals('invalidrecordunknown', $e->errorcode);
+        }
     }
 
     public function test_facetoface_get_used_rooms() {
@@ -105,32 +130,12 @@ class mod_facetoface_roomlib_testcase extends advanced_testcase {
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 9), $now + (DAYSECS * 10), $sitewideroom2->id);
         $sessionid2_1 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface2->id, 'sessiondates' => $sessiondates));
 
-        $rooms = facetoface_get_used_rooms($facetoface1->id);
-        $expected = array(
-            $customroom1->id => (object)array('id' => $customroom1->id, 'name' => $customroom1->name),
-            $customroom3->id => (object)array('id' => $customroom3->id, 'name' => $customroom3->name),
-            $sitewideroom2->id => (object)array('id' => $sitewideroom2->id, 'name' => $sitewideroom2->name),
-            $sitewideroom1->id => (object)array('id' => $sitewideroom1->id, 'name' => $sitewideroom1->name),
-        );
-        $this->assertSame(array_keys($expected), array_keys($rooms));
-        $this->assertEquals($expected, $rooms);
-
-        $rooms = facetoface_get_used_rooms($facetoface1->id, 'fr.*');
-        $expected = array(
-            $customroom1->id => $customroom1,
-            $customroom3->id => $customroom3,
-            $sitewideroom2->id => $sitewideroom2,
-            $sitewideroom1->id => $sitewideroom1,
-        );
-        $this->assertSame(array_keys($expected), array_keys($rooms));
-        $this->assertEquals($expected, $rooms);
-
-        try {
-            facetoface_get_used_rooms($facetoface1->id, 'fr.id, fr.custom');
-            $this->fail('Coding exception expected');
-        } catch (moodle_exception $e) {
-            $this->assertInstanceOf('coding_exception', $e);
-        }
+        $rooms = \mod_facetoface\room_list::get_seminar_rooms($facetoface1->id);
+        $this->assertTrue($rooms->contains($customroom1->id));
+        $this->assertTrue($rooms->contains($customroom3->id));
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertEquals(4, $rooms->count(), 'unexpected amount of rooms used in seminar');
     }
 
     public function test_facetoface_get_session_rooms() {
@@ -168,14 +173,10 @@ class mod_facetoface_roomlib_testcase extends advanced_testcase {
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 9), $now + (DAYSECS * 10), $sitewideroom2->id);
         $sessionid2_1 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface2->id, 'sessiondates' => $sessiondates));
 
-        $rooms = facetoface_get_session_rooms($sessionid1_1);
-        $expected = array(
-            $customroom1->id => $customroom1,
-            $sitewideroom2->id => $sitewideroom2,
-            $sitewideroom1->id => $sitewideroom1,
-        );
-        $this->assertSame(array_keys($expected), array_keys($rooms));
-        $this->assertEquals($expected, $rooms);
+        $rooms = \mod_facetoface\room_list::get_event_rooms($sessionid1_1);
+        $this->assertTrue($rooms->contains($customroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
     }
 
     /**
@@ -232,7 +233,8 @@ class mod_facetoface_roomlib_testcase extends advanced_testcase {
         $sessiondate2 = $DB->get_record('facetoface_sessions_dates', array('sessionid' => $sessionid2), '*', MUST_EXIST);
         $this->assertSame($customroom->id, $sessiondate2->roomid);
 
-        facetoface_delete_room($sitewideroom->id);
+        $room = new room($sitewideroom->id);
+        $room->delete();
         $this->assertFalse($DB->record_exists('facetoface_room', array('id' => $sitewideroom->id)));
         $this->assertTrue($DB->record_exists('facetoface_room', array('id' => $customroom->id)));
         $sessiondate1 = $DB->get_record('facetoface_sessions_dates', array('sessionid' => $sessionid1), '*', MUST_EXIST);
@@ -241,9 +243,6 @@ class mod_facetoface_roomlib_testcase extends advanced_testcase {
         $sessiondate2 = $DB->get_record('facetoface_sessions_dates', array('sessionid' => $sessionid2), '*', MUST_EXIST);
         $this->assertSame($customroom->id, $sessiondate2->roomid);
         $this->assertTrue($fs->file_exists_by_hash($customfile->get_pathnamehash()));
-
-        // Second delete should do nothing.
-        facetoface_delete_room($sitewideroom->id);
     }
 
     /**
@@ -263,8 +262,8 @@ class mod_facetoface_roomlib_testcase extends advanced_testcase {
         $this->assertEquals('Some test text', $cfdata['roomcftext']);
         $this->assertEquals(1, $DB->count_records('facetoface_room_info_data', array('facetofaceroomid' => $sitewideroom->id)));
 
-        // Delete the room.
-        facetoface_delete_room($sitewideroom->id);
+        $room = new room($sitewideroom->id);
+        $room->delete();
 
         // We'll make sure the site-wide room was definitely deleted.
         $this->assertEquals(0, $DB->count_records('facetoface_room', array('id' => $sitewideroom->id)));
@@ -332,8 +331,8 @@ class mod_facetoface_roomlib_testcase extends advanced_testcase {
         $this->assertEquals(1, $DB->count_records('files',
             array('filearea' => 'facetofaceroom_filemgr', 'filename' => 'testfile2.txt', 'itemid' => $infodata_custom_cffile->id)));
 
-        // Delete the site-wide room.
-        facetoface_delete_room($sitewideroom->id);
+        $room = new room($sitewideroom->id);
+        $room->delete();
 
         // We'll make sure the site-wide room was definitely deleted and the custom room wasn't.
         $this->assertEquals(0, $DB->count_records('facetoface_room', array('id' => $sitewideroom->id)));
@@ -359,7 +358,8 @@ class mod_facetoface_roomlib_testcase extends advanced_testcase {
             array('filearea' => 'facetofaceroom_filemgr', 'filename' => 'testfile2.txt', 'itemid' => $infodata_custom_cffile->id)));
 
         // Now we get rid of the custom room to make sure nothing about it being custom prevents deletion of custom files.
-        facetoface_delete_room($customroom->id);
+        $room = new room($customroom->id);
+        $room->delete();
         $infodata_custom_cffile_again = $DB->get_record('facetoface_room_info_data',
             array('facetofaceroomid' => $customroom->id, 'fieldid' => $roomcffileid));
         $this->assertEmpty($infodata_custom_cffile_again);
@@ -457,7 +457,8 @@ class mod_facetoface_roomlib_testcase extends advanced_testcase {
         $this->assertEquals(userdate($customdate, get_string('strftimedaydatetime', 'langconfig')), $cfdata['roomcfdate']);
 
         // Now we'll delete the custom room.
-        facetoface_delete_room($customroom->id);
+        $room = new room($customroom->id);
+        $room->delete();
 
         // We'll make sure the custom room was definitely deleted and the site-wide room wasn't.
         $this->assertEquals(1, $DB->count_records('facetoface_room', array('id' => $sitewideroom->id)));
@@ -515,7 +516,7 @@ class mod_facetoface_roomlib_testcase extends advanced_testcase {
         $customroom4 = $this->facetoface_generator->add_custom_room(array('usercreated' => $user1->id, 'name' => 'Custom room 4', 'allowconflicts' => 1));
         $customroom5 = $this->facetoface_generator->add_custom_room(array('usercreated' => $user1->id, 'name' => 'Custom room 5', 'allowconflicts' => 1));
         $customroom6 = $this->facetoface_generator->add_custom_room(array('usercreated' => $user2->id, 'name' => 'Custom room 6', 'allowconflicts' => 1));
-        $allrooms = $DB->get_records('facetoface_room', array());
+        $allrooms = new \mod_facetoface\room_list();
 
         $course = $this->getDataGenerator()->create_course();
         $facetoface1 = $this->facetoface_generator->create_instance(array('course' => $course->id));
@@ -530,553 +531,563 @@ class mod_facetoface_roomlib_testcase extends advanced_testcase {
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 7), $now + (DAYSECS * 8), $customroom4->id);
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 9), $now + (DAYSECS * 10), $sitewideroom4->id);
         $sessionid1_1 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface1->id, 'sessiondates' => $sessiondates));
+        $event11 = new \mod_facetoface\seminar_event($sessionid1_1);
 
         $sessionid1_2 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface1->id, 'sessiondates' => array()));
+        $event12 = new \mod_facetoface\seminar_event($sessionid1_2);
 
         $sessiondates = array();
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 30), $now + (DAYSECS * 31), $sitewideroom1->id);
         $sessionid1_3 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface1->id, 'sessiondates' => $sessiondates));
+        $event13 = new \mod_facetoface\seminar_event($sessionid1_3);
 
         $sessiondates = array();
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 5), $now + (DAYSECS * 6), $customroom3->id);
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 9), $now + (DAYSECS * 10), $sitewideroom4->id);
         $sessionid2_1 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface2->id, 'sessiondates' => $sessiondates));
+        $event21 = new \mod_facetoface\seminar_event($sessionid2_1);
 
         $this->setUser(null);
 
-        // Get all site rooms that are not hidden.
+        // Set up some empty events for the tests.
+        $event00 = new \mod_facetoface\seminar_event();
+        $event10 = new \mod_facetoface\seminar_event();
+        $event10->set_facetoface($facetoface1->id);
+        $event20 = new \mod_facetoface\seminar_event();
+        $event20->set_facetoface($facetoface2->id);
 
-        $rooms = facetoface_get_available_rooms(0, 0, 'fr.*', 0, 0);
-        $this->assertCount(4, $rooms);
-        $this->assertArrayHasKey($sitewideroom1->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
+        // Get all site rooms that are not hidden.
+        $rooms = \mod_facetoface\room_list::get_available_rooms(0, 0, $event00);
+        $this->assertEquals(4, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available(0, 0, $room, 0, 0));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available(0, 0, $event00));
             } else {
-                $this->assertFalse(facetoface_is_room_available(0, 0, $room, 0, 0));
+                $this->assertFalse($room->is_available(0, 0, $event00));
             }
         }
 
         // Get available site rooms for given slot.
-
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * -1), $now + (DAYSECS * 1), 'fr.*', 0, 0);
-        $this->assertCount(4, $rooms);
-        $this->assertArrayHasKey($sitewideroom1->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * -1), $now + (DAYSECS * 1), $event00);
+        $this->assertEquals(4, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $room, 0, 0));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $event00));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $room, 0, 0));
+                $this->assertFalse($room->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $event00));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 2), 'fr.*', 0, 0);
-        $this->assertCount(3, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 2), $event00);
+        $this->assertEquals(3, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $room, 0, 0));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $event00));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $room, 0, 0));
+                $this->assertFalse($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $event00));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * 0), $now + (DAYSECS * 3), 'fr.*', 0, 0);
-        $this->assertCount(2, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * 0), $now + (DAYSECS * 3), $event00);
+        $this->assertEquals(2, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $room, 0, 0));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $event00));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $room, 0, 0));
+                $this->assertFalse($room->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $event00));
             }
         }
 
         // Specify only seminar id such as when adding new session.
-
-        $rooms = facetoface_get_available_rooms(0, 0, 'fr.*', 0, $facetoface1->id);
-        $this->assertCount(7, $rooms);
-        $this->assertArrayHasKey($sitewideroom1->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom1->id, $rooms);
-        $this->assertArrayHasKey($customroom3->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms(0, 0, $event10);
+        $this->assertEquals(7, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom1->id));
+        $this->assertTrue($rooms->contains($customroom3->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available(0, 0, $room, 0, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available(0, 0, $event10));
             } else {
-                $this->assertFalse(facetoface_is_room_available(0, 0, $room, 0, $facetoface1->id));
+                $this->assertFalse($room->is_available(0, 0, $event10));
             }
         }
 
-        $rooms = facetoface_get_available_rooms(0, 0, 'fr.*', 0, $facetoface2->id);
-        $this->assertCount(5, $rooms);
-        $this->assertArrayHasKey($sitewideroom1->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom3->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms(0, 0, $event20);
+        $this->assertEquals(5, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom3->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available(0, 0, $room, 0, $facetoface2->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available(0, 0, $event20));
             } else {
-                $this->assertFalse(facetoface_is_room_available(0, 0, $room, 0, $facetoface2->id));
+                $this->assertFalse($room->is_available(0, 0, $event20));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * -1), $now + (DAYSECS * 1), 'fr.*', 0, $facetoface1->id);
-        $this->assertCount(7, $rooms);
-        $this->assertArrayHasKey($sitewideroom1->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom1->id, $rooms);
-        $this->assertArrayHasKey($customroom3->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * -1), $now + (DAYSECS * 1), $event10);
+        $this->assertEquals(7, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom1->id));
+        $this->assertTrue($rooms->contains($customroom3->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $room, 0, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $event10));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $room, 0, $facetoface1->id));
+                $this->assertFalse($room->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $event10));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 2), 'fr.*', 0, $facetoface1->id);
-        $this->assertCount(6, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom1->id, $rooms);
-        $this->assertArrayHasKey($customroom3->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 2), $event10);
+        $this->assertEquals(6, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom1->id));
+        $this->assertTrue($rooms->contains($customroom3->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $room, 0, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $event10));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $room, 0, $facetoface1->id));
+                $this->assertFalse($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $event10));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * 0), $now + (DAYSECS * 3), 'fr.*', 0, $facetoface1->id);
-        $this->assertCount(5, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom1->id, $rooms);
-        $this->assertArrayHasKey($customroom3->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * 0), $now + (DAYSECS * 3), $event10);
+        $this->assertEquals(5, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom1->id));
+        $this->assertTrue($rooms->contains($customroom3->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $room, 0, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $event10));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $room, 0, $facetoface1->id));
+                $this->assertFalse($room->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $event10));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 20), 'fr.*', 0, $facetoface1->id);
-        $this->assertCount(3, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event10);
+        $this->assertEquals(3, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $room, 0, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event10));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $room, 0, $facetoface1->id));
+                $this->assertFalse($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event10));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 20), 'fr.*', 0, $facetoface2->id);
-        $this->assertCount(2, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event20);
+        $this->assertEquals(2, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $room, 0, $facetoface2->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event20));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $room, 0, $facetoface2->id));
+                $this->assertFalse($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event20));
             }
         }
 
         // Specify seminar id and session id such as when adding updating session.
-
-        $rooms = facetoface_get_available_rooms(0, 0, 'fr.*', $sessionid1_1, $facetoface1->id);
-        $this->assertCount(8, $rooms);
-        $this->assertArrayHasKey($sitewideroom1->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom3->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom1->id, $rooms);
-        $this->assertArrayHasKey($customroom3->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms(0, 0, $event11);
+        $this->assertEquals(8, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom3->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom1->id));
+        $this->assertTrue($rooms->contains($customroom3->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available(0, 0, $room, $sessionid1_1, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available(0, 0, $event11));
             } else {
-                $this->assertFalse(facetoface_is_room_available(0, 0, $room, $sessionid1_1, $facetoface1->id));
+                $this->assertFalse($room->is_available(0, 0, $event11));
             }
         }
 
-        $rooms = facetoface_get_available_rooms(0, 0, 'fr.*', $sessionid1_2, $facetoface1->id);
-        $this->assertCount(7, $rooms);
-        $this->assertArrayHasKey($sitewideroom1->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom1->id, $rooms);
-        $this->assertArrayHasKey($customroom3->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms(0, 0, $event12);
+        $this->assertEquals(7, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom1->id));
+        $this->assertTrue($rooms->contains($customroom3->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available(0, 0, $room, $sessionid1_2, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available(0, 0, $event12));
             } else {
-                $this->assertFalse(facetoface_is_room_available(0, 0, $room, $sessionid1_2, $facetoface1->id));
+                $this->assertFalse($room->is_available(0, 0, $event12));
             }
         }
 
-        $rooms = facetoface_get_available_rooms(0, 0, 'fr.*', $sessionid2_1, $facetoface2->id);
-        $this->assertCount(5, $rooms);
-        $this->assertArrayHasKey($sitewideroom1->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom3->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms(0, 0, $event21);
+        $this->assertEquals(5, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom3->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available(0, 0, $room, $sessionid2_1, $facetoface2->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available(0, 0, $event21));
             } else {
-                $this->assertFalse(facetoface_is_room_available(0, 0, $room, $sessionid2_1, $facetoface2->id));
+                $this->assertFalse($room->is_available(0, 0, $event21));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * -1), $now + (DAYSECS * 1), 'fr.*', $sessionid1_1, $facetoface1->id);
-        $this->assertCount(8, $rooms);
-        $this->assertArrayHasKey($sitewideroom1->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom3->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom1->id, $rooms);
-        $this->assertArrayHasKey($customroom3->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * -1), $now + (DAYSECS * 1), $event11);
+        $this->assertEquals(8, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom3->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom1->id));
+        $this->assertTrue($rooms->contains($customroom3->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $room, $sessionid1_1, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $event11));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $room, $sessionid1_1, $facetoface1->id));
+                $this->assertFalse($room->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $event11));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 2), 'fr.*', $sessionid1_3, $facetoface1->id);
-        $this->assertCount(6, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom1->id, $rooms);
-        $this->assertArrayHasKey($customroom3->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 2), $event13);
+        $this->assertEquals(6, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom1->id));
+        $this->assertTrue($rooms->contains($customroom3->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $room, $sessionid1_3, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $event13));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $room, $sessionid1_3, $facetoface1->id));
+                $this->assertFalse($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $event13));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * -1), $now + (DAYSECS * 1), 'fr.*', $sessionid1_2, $facetoface1->id);
-        $this->assertCount(7, $rooms);
-        $this->assertArrayHasKey($sitewideroom1->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom1->id, $rooms);
-        $this->assertArrayHasKey($customroom3->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * -1), $now + (DAYSECS * 1), $event12);
+        $this->assertEquals(7, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom1->id));
+        $this->assertTrue($rooms->contains($customroom3->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $room, $sessionid1_2, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $event12));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $room, $sessionid1_2, $facetoface1->id));
+                $this->assertFalse($room->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $event12));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 2), 'fr.*', $sessionid1_1, $facetoface1->id);
-        $this->assertCount(8, $rooms);
-        $this->assertArrayHasKey($sitewideroom1->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom3->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom1->id, $rooms);
-        $this->assertArrayHasKey($customroom3->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
-
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 2), $event11);
+        $this->assertEquals(8, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom3->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom1->id));
+        $this->assertTrue($rooms->contains($customroom3->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $room, $sessionid1_1, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $event11));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $room, $sessionid1_1, $facetoface1->id));
+                $this->assertFalse($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $event11));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 2), 'fr.*', $sessionid1_2, $facetoface1->id);
-        $this->assertCount(6, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom1->id, $rooms);
-        $this->assertArrayHasKey($customroom3->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 2), $event12);
+        $this->assertEquals(6, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom1->id));
+        $this->assertTrue($rooms->contains($customroom3->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $room, $sessionid1_2, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $event12));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $room, $sessionid1_2, $facetoface1->id));
+                $this->assertFalse($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $event12));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * 0), $now + (DAYSECS * 3), 'fr.*', $sessionid1_1, $facetoface1->id);
-        $this->assertCount(8, $rooms);
-        $this->assertArrayHasKey($sitewideroom1->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom3->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom1->id, $rooms);
-        $this->assertArrayHasKey($customroom3->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * 0), $now + (DAYSECS * 3), $event11);
+        $this->assertEquals(8, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom3->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom1->id));
+        $this->assertTrue($rooms->contains($customroom3->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $room, $sessionid1_1, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $event11));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $room, $sessionid1_1, $facetoface1->id));
+                $this->assertFalse($room->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $event11));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * 0), $now + (DAYSECS * 3), 'fr.*', $sessionid1_2, $facetoface1->id);
-        $this->assertCount(5, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom1->id, $rooms);
-        $this->assertArrayHasKey($customroom3->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * 0), $now + (DAYSECS * 3), $event12);
+        $this->assertEquals(5, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom1->id));
+        $this->assertTrue($rooms->contains($customroom3->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $room, $sessionid1_2, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $event12));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $room, $sessionid1_2, $facetoface1->id));
+                $this->assertFalse($room->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $event12));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 20), 'fr.*', $sessionid1_1, $facetoface1->id);
-        $this->assertCount(7, $rooms);
-        $this->assertArrayHasKey($sitewideroom1->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom3->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom1->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
-
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event11);
+        $this->assertEquals(7, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom3->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom1->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $room, $sessionid1_1, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event11));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $room, $sessionid1_1, $facetoface1->id));
+                $this->assertFalse($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event11));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 20), 'fr.*', $sessionid1_2, $facetoface1->id);
-        $this->assertCount(3, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event12);
+        $this->assertEquals(3, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $room, $sessionid1_2, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event12));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $room, $sessionid1_2, $facetoface1->id));
+                $this->assertFalse($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event12));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 20), 'fr.*', $sessionid2_1, $facetoface2->id);
-        $this->assertCount(2, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event21);
+        $this->assertEquals(2, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $room, $sessionid2_1, $facetoface2->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event21));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $room, $sessionid2_1, $facetoface2->id));
+                $this->assertFalse($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event21));
             }
         }
 
         // Now with user.
-
         $this->setUser($user1);
 
-        $rooms = facetoface_get_available_rooms(0, 0, 'fr.*', 0, 0);
-        $this->assertCount(6, $rooms);
-        $this->assertArrayHasKey($sitewideroom1->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom2->id, $rooms);
-        $this->assertArrayHasKey($customroom5->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms(0, 0, $event00);
+        $this->assertEquals(6, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom2->id));
+        $this->assertTrue($rooms->contains($customroom5->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available(0, 0, $room, 0, 0));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $event00));
             } else {
-                $this->assertFalse(facetoface_is_room_available(0, 0, $room, 0, 0));
+                $this->assertFalse($room->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $event00));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * -1), $now + (DAYSECS * 1), 'fr.*', 0, 0);
-        $this->assertCount(6, $rooms);
-        $this->assertArrayHasKey($sitewideroom1->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom2->id, $rooms);
-        $this->assertArrayHasKey($customroom5->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * -1), $now + (DAYSECS * 1), $event00);
+        $this->assertEquals(6, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom2->id));
+        $this->assertTrue($rooms->contains($customroom5->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $room, 0, 0));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $event00));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $room, 0, 0));
+                $this->assertFalse($room->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $event00));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * 0), $now + (DAYSECS * 3), 'fr.*', 0, 0);
-        $this->assertCount(4, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom2->id, $rooms);
-        $this->assertArrayHasKey($customroom5->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * 0), $now + (DAYSECS * 3), $event00);
+        $this->assertEquals(4, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom2->id));
+        $this->assertTrue($rooms->contains($customroom5->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $room, 0, 0));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $event00));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $room, 0, 0));
+                $this->assertFalse($room->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $event00));
             }
         }
 
-        $rooms = facetoface_get_available_rooms(0, 0, 'fr.*', $sessionid1_1, $facetoface1->id);
-        $this->assertCount(10, $rooms);
-        $this->assertArrayHasKey($sitewideroom1->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom3->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom1->id, $rooms);
-        $this->assertArrayHasKey($customroom3->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
-        $this->assertArrayHasKey($customroom2->id, $rooms);
-        $this->assertArrayHasKey($customroom5->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms(0, 0, $event11);
+        $this->assertEquals(10, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom3->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom1->id));
+        $this->assertTrue($rooms->contains($customroom2->id));
+        $this->assertTrue($rooms->contains($customroom3->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
+        $this->assertTrue($rooms->contains($customroom5->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available(0, 0, $room, $sessionid1_1, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available(0, 0, $event11));
             } else {
-                $this->assertFalse(facetoface_is_room_available(0, 0, $room, $sessionid1_1, $facetoface1->id));
+                $this->assertFalse($room->is_available(0, 0, $event11));
             }
         }
 
-        $rooms = facetoface_get_available_rooms(0, 0, 'fr.*', $sessionid1_2, $facetoface1->id);
-        $this->assertCount(9, $rooms);
-        $this->assertArrayHasKey($sitewideroom1->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom1->id, $rooms);
-        $this->assertArrayHasKey($customroom3->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
-        $this->assertArrayHasKey($customroom2->id, $rooms);
-        $this->assertArrayHasKey($customroom5->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms(0, 0, $event12);
+        $this->assertEquals(9, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom1->id));
+        $this->assertTrue($rooms->contains($customroom2->id));
+        $this->assertTrue($rooms->contains($customroom3->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
+        $this->assertTrue($rooms->contains($customroom5->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available(0, 0, $room, $sessionid1_2, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available(0, 0, $event12));
             } else {
-                $this->assertFalse(facetoface_is_room_available(0, 0, $room, $sessionid1_2, $facetoface1->id));
+                $this->assertFalse($room->is_available(0, 0, $event12));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 20), 'fr.*', $sessionid1_1, $facetoface1->id);
-        $this->assertCount(9, $rooms);
-        $this->assertArrayHasKey($sitewideroom1->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom3->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom1->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
-        $this->assertArrayHasKey($customroom2->id, $rooms);
-        $this->assertArrayHasKey($customroom5->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event11);
+        $this->assertEquals(9, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom3->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom1->id));
+        $this->assertTrue($rooms->contains($customroom2->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
+        $this->assertTrue($rooms->contains($customroom5->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $room, $sessionid1_1, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event11));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $room, $sessionid1_1, $facetoface1->id));
+                $this->assertFalse($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event11));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 20), 'fr.*', $sessionid1_2, $facetoface1->id);
-        $this->assertCount(5, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom4->id, $rooms);
-        $this->assertArrayHasKey($customroom2->id, $rooms);
-        $this->assertArrayHasKey($customroom5->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event12);
+        $this->assertEquals(5, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom2->id));
+        $this->assertTrue($rooms->contains($customroom4->id));
+        $this->assertTrue($rooms->contains($customroom5->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $room, $sessionid1_2, $facetoface1->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event12));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $room, $sessionid1_2, $facetoface1->id));
+                $this->assertFalse($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event12));
             }
         }
 
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 20), 'fr.*', $sessionid2_1, $facetoface2->id);
-        $this->assertCount(4, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom2->id, $rooms);
-        $this->assertArrayHasKey($customroom5->id, $rooms);
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event21);
+        $this->assertEquals(4, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom2->id));
+        $this->assertTrue($rooms->contains($customroom5->id));
         foreach ($allrooms as $room) {
-            if (isset($rooms[$room->id])) {
-                $this->assertTrue(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $room, $sessionid2_1, $facetoface2->id));
+            if ($rooms->contains($room->get_id())) {
+                $this->assertTrue($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event21));
             } else {
-                $this->assertFalse(facetoface_is_room_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $room, $sessionid2_1, $facetoface2->id));
+                $this->assertFalse($room->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event21));
             }
         }
 
-        // Test the fields can be specified.
-        $rooms = facetoface_get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 20), 'fr.id, fr.custom', $sessionid1_1, $facetoface1->id);
-        $this->assertCount(9, $rooms);
+        // The fields can no longer be specified, make sure it contains all the important ones.
+        $rooms = \mod_facetoface\room_list::get_available_rooms($now + (DAYSECS * 1), $now + (DAYSECS * 20), $event11);
+        $this->assertEquals(9, $rooms->count());
         foreach ($rooms as $room) {
+            $this->assertInstanceOf('\mod_facetoface\room', $room);
+            $this->assertObjectHasAttribute('id', $room);
+            $this->assertObjectHasAttribute('name', $room);
+            $this->assertObjectHasAttribute('hidden', $room);
             $this->assertObjectHasAttribute('custom', $room);
-            $this->assertObjectNotHasAttribute('name', $room);
+            $this->assertObjectHasAttribute('capacity', $room);
+            $this->assertObjectHasAttribute('allowconflicts', $room);
         }
+
 
         // Test slot must have size.
-        $rooms = facetoface_get_available_rooms(2, 1, 'fr.*', 0, 0);
+        $rooms = \mod_facetoface\room_list::get_available_rooms(2, 1, $event00);
         $this->assertDebuggingCalled();
-        $this->assertCount(6, $rooms);
-        $this->assertArrayHasKey($sitewideroom1->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom2->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom4->id, $rooms);
-        $this->assertArrayHasKey($sitewideroom5->id, $rooms);
-        $this->assertArrayHasKey($customroom2->id, $rooms);
-        $this->assertArrayHasKey($customroom5->id, $rooms);
+        $this->assertEquals(6, $rooms->count());
+        $this->assertTrue($rooms->contains($sitewideroom1->id));
+        $this->assertTrue($rooms->contains($sitewideroom2->id));
+        $this->assertTrue($rooms->contains($sitewideroom4->id));
+        $this->assertTrue($rooms->contains($sitewideroom5->id));
+        $this->assertTrue($rooms->contains($customroom2->id));
+        $this->assertTrue($rooms->contains($customroom5->id));
     }
 
     public function test_facetoface_room_has_conflicts() {
@@ -1125,18 +1136,33 @@ class mod_facetoface_roomlib_testcase extends advanced_testcase {
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 8), $now + (DAYSECS * 9), $customroom4->id);
         $sessionid2_1 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface2->id, 'sessiondates' => $sessiondates));
 
-        $this->assertTrue(facetoface_room_has_conflicts($sitewideroom1->id));
-        $this->assertTrue(facetoface_room_has_conflicts($sitewideroom2->id));
-        $this->assertTrue(facetoface_room_has_conflicts($sitewideroom3->id));
-        $this->assertTrue(facetoface_room_has_conflicts($sitewideroom4->id));
-        $this->assertFalse(facetoface_room_has_conflicts($sitewideroom5->id));
-        $this->assertFalse(facetoface_room_has_conflicts($sitewideroom6->id));
-        $this->assertFalse(facetoface_room_has_conflicts($customroom1->id));
-        $this->assertFalse(facetoface_room_has_conflicts($customroom2->id));
-        $this->assertTrue(facetoface_room_has_conflicts($customroom3->id));
-        $this->assertFalse(facetoface_room_has_conflicts($customroom4->id));
-        $this->assertFalse(facetoface_room_has_conflicts($customroom5->id));
-        $this->assertFalse(facetoface_room_has_conflicts($customroom6->id));
+        $room = new \mod_facetoface\room();
+
+        $room->from_record($sitewideroom1);
+        $this->assertTrue($room->has_conflicts());
+        $room->from_record($sitewideroom2);
+        $this->assertTrue($room->has_conflicts());
+        $room->from_record($sitewideroom3);
+        $this->assertTrue($room->has_conflicts());
+        $room->from_record($sitewideroom4);
+        $this->assertTrue($room->has_conflicts());
+        $room->from_record($sitewideroom5);
+        $this->assertFalse($room->has_conflicts());
+        $room->from_record($sitewideroom6);
+        $this->assertFalse($room->has_conflicts());
+
+        $room->from_record($customroom1);
+        $this->assertFalse($room->has_conflicts());
+        $room->from_record($customroom2);
+        $this->assertFalse($room->has_conflicts());
+        $room->from_record($customroom3);
+        $this->assertTrue($room->has_conflicts());
+        $room->from_record($customroom4);
+        $this->assertFalse($room->has_conflicts());
+        $room->from_record($customroom5);
+        $this->assertFalse($room->has_conflicts());
+        $room->from_record($customroom6);
+        $this->assertFalse($room->has_conflicts());
     }
 
     public function test_session_cancellation() {
@@ -1187,12 +1213,10 @@ class mod_facetoface_roomlib_testcase extends advanced_testcase {
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 8), $now + (DAYSECS * 9), $customroom4->id);
         $sessionid2_1 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface2->id, 'sessiondates' => $sessiondates));
 
-        $session = $DB->get_record('facetoface_sessions', array('id' => $sessionid2_1));
-        $session->sessiondates = facetoface_get_session_dates($session->id);
-
-        $this->assertTrue($DB->record_exists_select('facetoface_sessions_dates', "sessionid = :sessionid and roomid > 0", array('sessionid' => $session->id)));
-        facetoface_cancel_session($session, null);
-        $this->assertFalse($DB->record_exists_select('facetoface_sessions_dates', "sessionid = :sessionid and roomid > 0", array('sessionid' => $session->id)));
+        $this->assertTrue($DB->record_exists_select('facetoface_sessions_dates', "sessionid = :sessionid and roomid > 0", array('sessionid' => $sessionid2_1)));
+        $seminarevent = new \mod_facetoface\seminar_event($sessionid2_1);
+        $seminarevent->cancel();
+        $this->assertFalse($DB->record_exists_select('facetoface_sessions_dates', "sessionid = :sessionid and roomid > 0", array('sessionid' => $sessionid2_1)));
     }
 
     protected function prepare_date($timestart, $timeend, $roomid) {

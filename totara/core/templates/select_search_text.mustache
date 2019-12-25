@@ -1,0 +1,78 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Kevin Hottinger <kevin.hottinger@totaralearning.com>
+   @package totara_core
+}}
+{{!
+
+    @template totara_core/select_search_text
+
+    This template generates a search text select
+
+    Classes required for JS:
+    * tw-selectSearchText__hidden: Hides search text.
+
+    Data attributes required for JS:
+    * data-core-autoinitialise: State of this JS auto initilise
+    * data-core-autoinitialise-amd: AMD to be linked to template
+    * data-tw-selector-active: bool, selector state for grouping events
+    * data-tw-selectorGroup: selector grouping, used for clear all functionality
+    * data-tw-selectSearchText-urlkey: string, click handler & setting URL param
+    * data-tw-selectSearchText-clear: indicator for clearing selector
+    * data-tw-selectSearchText-trigger: Trigger for activating selector
+
+    Context variables required for this template:
+    * current_val: string, the current search text
+    * key: string, unique ID for this select
+    * placeholder_show: bool, if true and if the title is hidden then show the title as a placeholder
+    * title: string, Title for selector
+    * title_hidden: bool, true to hide the title
+    * has_hint_icon: bool, has hint icon
+    * hint_icon: template data for displaying help icon with popover
+
+}}
+<div class="tw-selectSearchText"
+    data-tw-selectorGroup=""
+    data-core-autoinitialise="true"
+    data-core-autoinitialise-amd="totara_core/select_search_text">
+
+    <label for="{{{key}}}_input" class="tw-selectSearchText__header{{#title_hidden}} sr-only{{/title_hidden}}">
+        {{{title}}}
+    </label>
+
+    {{#has_hint_icon}}
+     <div class="tw-selectSearchText__hint">
+         {{#hint_icon}}{{> core/help_icon}}{{/hint_icon}}
+     </div>
+    {{/has_hint_icon}}
+
+    <div class="tw-selectSearchText__field">
+        <input type="text" value="{{current_val}}"
+        {{#placeholder_show}}{{#title_hidden}}placeholder="{{title}}"{{/title_hidden}}{{/placeholder_show}}
+        class="tw-selectSearchText__field_input" id="{{{key}}}_input"
+        data-tw-selectSearchText-urlkey="{{{key}}}"{{#current_val}} data-tw-selector-active="true"{{/current_val}}>
+        <a href="#" class="tw-selectSearchText__field_clear tw-selectSearchText__hidden"
+        data-tw-selectSearchText-clear="">
+            {{#flex_icon}}close, remove, core,{{/flex_icon}}
+        </a>
+    </div>{{!
+  }}<button class="tw-selectSearchText__btn" data-tw-selectSearchText-trigger="">
+        {{#flex_icon}}search, search, core,{{/flex_icon}}
+    </button>
+</div>

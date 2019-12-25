@@ -82,7 +82,7 @@ class page_requirements_manager {
     /**
      * @var array Inline scripts using RequireJS module loading.
      */
-    protected $amdjscode = array('');
+    protected $amdjscode = array(); // Totara: no need for empty string here
 
     /**
      * @var array List of needed function calls
@@ -174,6 +174,16 @@ class page_requirements_manager {
     public function __construct() {
         global $CFG;
 
+        // Totara: Initialise all amd modules via data-core-autoinitialise,
+        //         make sure behat waits for all to complete.
+        $autoinitialisejs = "M.util.js_pending('core-autoinitialise');
+require(['core/autoinitialise'], function(ai) {
+    ai.scan().then(function() {
+        M.util.js_complete('core-autoinitialise');
+    });
+})";
+        $this->js_amd_inline($autoinitialisejs);
+
         // You may need to set up URL rewrite rule because oversized URLs might not be allowed by web server.
         $sep = empty($CFG->yuislasharguments) ? '?' : '/';
 
@@ -187,8 +197,8 @@ class page_requirements_manager {
         }
 
         // Set up some loader options.
-        $this->yui3loader->local_base = $CFG->httpswwwroot . '/lib/yuilib/'. $CFG->yui3version . '/';
-        $this->yui3loader->local_comboBase = $CFG->httpswwwroot . '/theme/yui_combo.php'.$sep;
+        $this->yui3loader->local_base = $CFG->wwwroot . '/lib/yuilib/'. $CFG->yui3version . '/';
+        $this->yui3loader->local_comboBase = $CFG->wwwroot . '/theme/yui_combo.php'.$sep;
 
         if (!empty($CFG->useexternalyui)) {
             $this->yui3loader->base = 'http://yui.yahooapis.com/' . $CFG->yui3version . '/';
@@ -220,8 +230,8 @@ class page_requirements_manager {
         $configname = $this->YUI_config->set_config_source('lib/yui/config/yui2.js');
         $this->YUI_config->add_group('yui2', array(
             // Loader configuration for our 2in3, for now ignores $CFG->useexternalyui.
-            'base' => $CFG->httpswwwroot . '/lib/yuilib/2in3/' . $CFG->yui2version . '/build/',
-            'comboBase' => $CFG->httpswwwroot . '/theme/yui_combo.php'.$sep,
+            'base' => $CFG->wwwroot . '/lib/yuilib/2in3/' . $CFG->yui2version . '/build/',
+            'comboBase' => $CFG->wwwroot . '/theme/yui_combo.php'.$sep,
             'combine' => $this->yui3loader->combine,
             'ext' => false,
             'root' => '2in3/' . $CFG->yui2version .'/build/',
@@ -235,9 +245,9 @@ class page_requirements_manager {
         $configname = $this->YUI_config->set_config_source('lib/yui/config/moodle.js');
         $this->YUI_config->add_group('moodle', array(
             'name' => 'moodle',
-            'base' => $CFG->httpswwwroot . '/theme/yui_combo.php' . $sep . 'm/' . $jsrev . '/',
+            'base' => $CFG->wwwroot . '/theme/yui_combo.php' . $sep . 'm/' . $jsrev . '/',
             'combine' => $this->yui3loader->combine,
-            'comboBase' => $CFG->httpswwwroot . '/theme/yui_combo.php'.$sep,
+            'comboBase' => $CFG->wwwroot . '/theme/yui_combo.php'.$sep,
             'ext' => false,
             'root' => 'm/'.$jsrev.'/', // Add the rev to the root path so that we can control caching.
             'patterns' => array(
@@ -250,9 +260,9 @@ class page_requirements_manager {
 
         $this->YUI_config->add_group('gallery', array(
             'name' => 'gallery',
-            'base' => $CFG->httpswwwroot . '/lib/yuilib/gallery/',
+            'base' => $CFG->wwwroot . '/lib/yuilib/gallery/',
             'combine' => $this->yui3loader->combine,
-            'comboBase' => $CFG->httpswwwroot . '/theme/yui_combo.php' . $sep,
+            'comboBase' => $CFG->wwwroot . '/theme/yui_combo.php' . $sep,
             'ext' => false,
             'root' => 'gallery/' . $jsrev . '/',
             'patterns' => array(
@@ -328,20 +338,25 @@ class page_requirements_manager {
         global $CFG;
 
         if (empty($this->M_cfg)) {
-            // JavaScript should always work with $CFG->httpswwwroot rather than $CFG->wwwroot.
-            // Otherwise, in some situations, users will get warnings about insecure content
-            // on secure pages from their web browser.
+
+            // It is possible that the $page->context is null, so we can't use $page->context->id.
+            $contextid = null;
+            if (!is_null($page->context)) {
+                $contextid = $page->context->id;
+            }
 
             $this->M_cfg = array(
-                'wwwroot'             => $CFG->httpswwwroot, // Yes, really. See above.
+                'wwwroot'             => $CFG->wwwroot,
                 'sesskey'             => sesskey(),
-                'loadingicon'         => $renderer->pix_url('i/loading_small', 'moodle')->out(false),
+                'loadingicon'         => $renderer->image_url('i/loading_small', 'moodle')->out(false),
                 'themerev'            => theme_get_revision(),
                 'slasharguments'      => (int)(!empty($CFG->slasharguments)),
                 'theme'               => $page->theme->name,
                 'jsrev'               => $this->get_jsrev(),
                 'admin'               => $CFG->admin,
-                'svgicons'            => $page->theme->use_svg_icons()
+                'svgicons'            => $page->theme->use_svg_icons(),
+                'usertimezone'        => usertimezone(),
+                'contextid'           => $contextid,
             );
             if ($CFG->debugdeveloper) {
                 $this->M_cfg['developerdebug'] = true;
@@ -565,14 +580,14 @@ class page_requirements_manager {
                 continue;
             }
             if (!empty($CFG->slasharguments)) {
-                $url = new moodle_url("$CFG->httpswwwroot/theme/jquery.php");
+                $url = new moodle_url("/theme/jquery.php");
                 $url->set_slashargument("/$component/$file");
 
             } else {
                 // This is not really good, we need slasharguments for relative links, this means no caching...
                 $path = realpath("$componentdir/jquery/$file");
                 if (strpos($path, $CFG->dirroot) === 0) {
-                    $url = $CFG->httpswwwroot.preg_replace('/^'.preg_quote($CFG->dirroot, '/').'/', '', $path);
+                    $url = $CFG->wwwroot.preg_replace('/^'.preg_quote($CFG->dirroot, '/').'/', '', $path);
                     // Replace all occurences of backslashes characters in url to forward slashes.
                     $url = str_replace('\\', '/', $url);
                     $url = new moodle_url($url);
@@ -719,14 +734,14 @@ class page_requirements_manager {
             if (substr($url, -3) === '.js') {
                 $jsrev = $this->get_jsrev();
                 if (empty($CFG->slasharguments)) {
-                    return new moodle_url($CFG->httpswwwroot.'/lib/javascript.php', array('rev'=>$jsrev, 'jsfile'=>$url));
+                    return new moodle_url('/lib/javascript.php', array('rev'=>$jsrev, 'jsfile'=>$url));
                 } else {
-                    $returnurl = new moodle_url($CFG->httpswwwroot.'/lib/javascript.php');
+                    $returnurl = new moodle_url('/lib/javascript.php');
                     $returnurl->set_slashargument('/'.$jsrev.$url);
                     return $returnurl;
                 }
             } else {
-                return new moodle_url($CFG->httpswwwroot.$url);
+                return new moodle_url($url);
             }
         } else {
             throw new coding_exception('Invalid JS url, it has to be shortened url starting with / or moodle_url instance.', $url);
@@ -751,7 +766,11 @@ class page_requirements_manager {
                 case 'core_filepicker':
                     $module = array('name'     => 'core_filepicker',
                                     'fullpath' => '/repository/filepicker.js',
-                                    'requires' => array('base', 'node', 'node-event-simulate', 'json', 'async-queue', 'io-base', 'io-upload-iframe', 'io-form', 'yui2-treeview', 'panel', 'cookie', 'datatable', 'datatable-sort', 'resize-plugin', 'dd-plugin', 'escape', 'moodle-core_filepicker'),
+                                    'requires' => array(
+                                        'base', 'node', 'node-event-simulate', 'json', 'async-queue', 'io-base', 'io-upload-iframe', 'io-form',
+                                        'yui2-treeview', 'panel', 'cookie', 'datatable', 'datatable-sort', 'resize-plugin', 'dd-plugin',
+                                        'escape', 'moodle-core_filepicker', 'moodle-core-notification-dialogue'
+                                    ),
                                     'strings'  => array(array('lastmodified', 'moodle'), array('name', 'moodle'), array('type', 'repository'), array('size', 'repository'),
                                                         array('invalidjson', 'repository'), array('error', 'moodle'), array('info', 'moodle'),
                                                         array('nofilesattached', 'repository'), array('filepicker', 'repository'), array('logout', 'repository'),
@@ -922,7 +941,7 @@ class page_requirements_manager {
         if ($stylesheet instanceof moodle_url) {
             // ok
         } else if (strpos($stylesheet, '/') === 0) {
-            $stylesheet = new moodle_url($CFG->httpswwwroot.$stylesheet);
+            $stylesheet = new moodle_url($stylesheet);
         } else {
             throw new coding_exception('Invalid stylesheet parameter.', $stylesheet);
         }
@@ -1042,7 +1061,11 @@ class page_requirements_manager {
 
         $jsonparams = array();
         foreach ($params as $param) {
-            $jsonparams[] = json_encode($param);
+            $jsonvalue = json_encode($param);
+            if ($jsonvalue === false) {
+                $jsonvalue = "null";
+            }
+            $jsonparams[] = $jsonvalue;
         }
         $strparams = implode(', ', $jsonparams);
 
@@ -1345,34 +1368,30 @@ class page_requirements_manager {
         $output = '';
         $jsrev = $this->get_jsrev();
 
-        $jsloader = new moodle_url($CFG->httpswwwroot . '/lib/javascript.php');
-        $jsloader->set_slashargument('/' . $jsrev . '/');
-        $requirejsloader = new moodle_url($CFG->httpswwwroot . '/lib/requirejs.php');
-        $requirejsloader->set_slashargument('/' . $jsrev . '/');
+        // Totara: no need to use 'core/first' here, we define bundle in requirejs configuration instead.
 
-        $requirejsconfig = file_get_contents($CFG->dirroot . '/lib/requirejs/moodle-config.js');
+        $configurl = "{$CFG->wwwroot}/lib/requirejs/config.php/{$jsrev}/config.js";
+        $output .= html_writer::script('', $configurl);
 
-        // No extension required unless slash args is disabled.
-        $jsextension = '.js';
-        if (!empty($CFG->slasharguments)) {
-            $jsextension = '';
-        }
-
-        $requirejsconfig = str_replace('[BASEURL]', $requirejsloader, $requirejsconfig);
-        $requirejsconfig = str_replace('[JSURL]', $jsloader, $requirejsconfig);
-        $requirejsconfig = str_replace('[JSEXT]', $jsextension, $requirejsconfig);
-
-        $output .= html_writer::script($requirejsconfig);
         if ($CFG->debugdeveloper) {
             $output .= html_writer::script('', $this->js_fix_url('/lib/requirejs/require.js'));
         } else {
             $output .= html_writer::script('', $this->js_fix_url('/lib/requirejs/require.min.js'));
         }
 
-        // First include must be to a module with no dependencies, this prevents multiple requests.
-        $prefix = "require(['core/first'], function() {\n";
-        $suffix = "\n});";
-        $output .= html_writer::script($prefix . implode(";\n", $this->amdjscode) . $suffix);
+        // Totara: add ajax activity tracking for behat, this must be done once per page only,
+        //         we do not want it in dialogs or fragments. This was in 'core/first' module before.
+        $ajaxpending = "require(['jquery'], function($) {
+    $(document).on('ajaxStart', function() {
+        M.util.js_pending('jq');
+    }).on('ajaxStop', function() {
+        M.util.js_complete('jq');
+    });
+})";
+        $amdjscode = $this->amdjscode;
+        array_unshift($amdjscode, $ajaxpending);
+
+        $output .= html_writer::script(implode(";\n", $amdjscode));
         return $output;
     }
 
@@ -1444,7 +1463,6 @@ class page_requirements_manager {
 
         $baserollups = array(
             'rollup/' . $rollupversion . "/yui-moodlesimple{$yuiformat}.js",
-            'rollup/' . $jsrev . "/mcore{$format}.js",
         );
 
         if ($this->yui3loader->combine) {
@@ -1576,6 +1594,7 @@ class page_requirements_manager {
      * @return string the HTML code to go at the start of the <body> tag.
      */
     public function get_top_of_body_code(core_renderer $renderer) {
+        global $CFG;
         // First the skip links.
         $output = $renderer->render_skip_links($this->skiplinks);
 
@@ -1584,6 +1603,19 @@ class page_requirements_manager {
 
         // Add hacked jQuery support, it is not intended for standard Moodle distribution!
         $output .= $this->get_jquery_headcode();
+
+        // Totara: add IE11 Polyfill, includes a polyfill for events, promises & fetch to allow us to use native es6 JS
+        if (core_useragent::is_ie()) {
+            if ($CFG->debugdeveloper) {
+                $output .= html_writer::script('', $this->js_fix_url('/lib/javascript_polyfill/src/es6-promise.auto.js'));
+                $output .= html_writer::script('', $this->js_fix_url('/lib/javascript_polyfill/src/fetch.js'));
+                $output .= html_writer::script('', $this->js_fix_url('/lib/javascript_polyfill/src/other_ie11.js'));
+            } else {
+                $output .= html_writer::script('', $this->js_fix_url('/lib/javascript_polyfill/build/es6-promise.auto.min.js'));
+                $output .= html_writer::script('', $this->js_fix_url('/lib/javascript_polyfill/build/fetch.min.js'));
+                $output .= html_writer::script('', $this->js_fix_url('/lib/javascript_polyfill/build/other_ie11.min.js'));
+            }
+        }
 
         // Link our main JS file, all core stuff should be there.
         $output .= html_writer::script('', $this->js_fix_url('/lib/javascript-static.js'));

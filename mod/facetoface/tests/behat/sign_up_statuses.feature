@@ -27,15 +27,13 @@ Feature: Sign up status
       | student1 | C1     | student |
       | student2 | C1     | student |
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test seminar name        |
       | Description | Test seminar description |
     And I follow "View all events"
 
-  Scenario: Check session with booking full status is changed when event is cancelled .
+  Scenario: Check session with booking full status is changed when event is cancelled.
     # Create a session with status full and then cancel it.
     Given I follow "Add a new event"
     And I click on "Edit session" "link"
@@ -60,9 +58,9 @@ Feature: Sign up status
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I set the following fields to these values:
       | searchtext | Sam |
-    And I press "Search"
+    And I click on "Search" "button" in the "#region-main" "css_element"
     And I click on "Sam1 Student1, student1@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     And I press "Confirm"
@@ -70,16 +68,14 @@ Feature: Sign up status
     And I log out
 
     When I log in as "student2"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     Then I should see "Booking full"
     And I should not see "Event cancelled"
     And I log out
 
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I click on "Cancel event" "link" in the "1 / 1" "table_row"
     And I should see "Are you completely sure you want to cancel this event?"
@@ -88,8 +84,7 @@ Feature: Sign up status
     And I log out
 
     When I log in as "student2"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     Then I should see "Event cancelled"
     And I log out
@@ -116,8 +111,7 @@ Feature: Sign up status
     And I log out
 
     When I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "<signupavailable>"
 
     When I follow "View all events"
@@ -127,8 +121,7 @@ Feature: Sign up status
     And I log out
 
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I click on "Cancel event" "link" in the "<signupperiod>" "table_row"
     And I should see "Are you completely sure you want to cancel this event?"
@@ -137,20 +130,17 @@ Feature: Sign up status
     And I log out
 
     When I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     Then I should see "Event cancelled"
     And I log out
 
-
-  Examples:
-  | periodopen | startyear | startzone        | periodclose | endyear | endzone         | signupavailable     | bookingstatus                | signupperiod                                                                 |
-  | 1          | 2014      | Australia/Perth  | 1           | 2015    | Australia/Perth | Sign-up unavailable | Sign-up period is now closed | 30 July 2014 1:00 AM Australia/Perth to 30 July 2015 1:00 AM Australia/Perth |
-  | 1          | 2014      | Australia/Perth  | 1           | 2030    | Australia/Perth | Join waitlist       | Booking open                 | 30 July 2014 1:00 AM Australia/Perth to 30 July 2030 1:00 AM Australia/Perth |
-  | 1          | 2029      | Australia/Perth  | 1           | 2030    | Australia/Perth | Sign-up unavailable | Sign-up period not open      | 30 July 2029 1:00 AM Australia/Perth to 30 July 2030 1:00 AM Australia/Perth |
-  | 1          | 2029      | Pacific/Honolulu | 1           | 2030    | Pacific/Fiji    | Sign-up unavailable | Sign-up period not open      | 30 July 2029 7:00 PM Australia/Perth to 29 July 2030 9:00 PM Australia/Perth |
-  | 0          | 2029      | Australia/Perth  | 0           | 2030    | Australia/Perth | Join waitlist       | Booking open                 | Booking open                                                                 |
-  | 1          | 2029      | Australia/Perth  | 0           | 2030    | Australia/Perth | Sign-up unavailable | Sign-up period not open      | After 30 July 2029 1:00 AM Australia/Perth                                   |
-  | 0          | 2029      | Australia/Perth  | 1           | 2030    | Australia/Perth | Join waitlist       | Booking open                 | Before 30 July 2030 1:00 AM Australia/Perth                                  |
-
+    Examples:
+      | periodopen | startyear | startzone        | periodclose | endyear | endzone         | signupavailable     | bookingstatus                | signupperiod                                                                 |
+      | 1          | 2014      | Australia/Perth  | 1           | 2015    | Australia/Perth | Sign-up unavailable | Sign-up period is now closed | 30 July 2014 1:00 AM Australia/Perth to 30 July 2015 1:00 AM Australia/Perth |
+      | 1          | 2014      | Australia/Perth  | 1           | 2030    | Australia/Perth | Join waitlist       | Booking open                 | 30 July 2014 1:00 AM Australia/Perth to 30 July 2030 1:00 AM Australia/Perth |
+      | 1          | 2029      | Australia/Perth  | 1           | 2030    | Australia/Perth | Sign-up unavailable | Sign-up period not open      | 30 July 2029 1:00 AM Australia/Perth to 30 July 2030 1:00 AM Australia/Perth |
+      | 1          | 2029      | Pacific/Honolulu | 1           | 2030    | Pacific/Fiji    | Sign-up unavailable | Sign-up period not open      | 30 July 2029 7:00 PM Australia/Perth to 29 July 2030 9:00 PM Australia/Perth |
+      | 0          | 2029      | Australia/Perth  | 0           | 2030    | Australia/Perth | Join waitlist       | Booking open                 | Booking open                                                                 |
+      | 1          | 2029      | Australia/Perth  | 0           | 2030    | Australia/Perth | Sign-up unavailable | Sign-up period not open      | After 30 July 2029 1:00 AM Australia/Perth                                   |
+      | 0          | 2029      | Australia/Perth  | 1           | 2030    | Australia/Perth | Join waitlist       | Booking open                 | Before 30 July 2030 1:00 AM Australia/Perth                                  |

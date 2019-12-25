@@ -1,0 +1,124 @@
+//
+// This file is part of Totara Learn
+//
+// Copyright (C) 2018 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @copyright 2018 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Kevin Hottinger <kevin.hottinger@totaralearning.com>
+// @package   theme_roots
+
+// Variables
+// Colours
+@selectMulti-color_neutral_2: @totara_style-color_neutral_2;
+@selectMulti-color_neutral_3: @totara_style-color_neutral_3;
+@selectMulti-color_neutral_4: @totara_style-color_neutral_4;
+@selectMulti-color_neutral_6: @totara_style-color_neutral_6;
+@selectMulti-color_neutral_7: @totara_style-color_neutral_7;
+@selectMulti-color_neutral_8: @totara_style-color_neutral_8;
+@selectMulti-color_theme_1: @totara_style-color_theme_1;
+// Spacing
+@selectMulti-spacing_x_small: @totara_style-spacing_x_small;
+@selectMulti-spacing_small: @totara_style-spacing_small;
+// Breakpoints
+@selectMulti-screen_sm_min: @totara_style-screen_sm_min;
+
+.tw-selectMulti__list {
+    list-style: none;
+    margin: 0;
+}
+
+.tw-selectMulti__link {
+    border-radius: 6px;
+    color: @selectMulti-color_theme_1;
+    display: flex;
+    margin: @selectMulti-spacing_x_small 0;
+    padding: @selectMulti-spacing_small @selectMulti-spacing_x_small;
+    transition: background-color 0.2s ease;
+
+    &:active,
+    &:focus,
+    &:hover {
+        text-decoration: none;
+
+        .tw-selectMulti__link_text {
+            color: @selectMulti-color_theme_1;
+        }
+    }
+
+    &:active {
+        .tw-selectMulti__link_close {
+            color: @selectMulti-color_theme_1;
+        }
+    }
+
+    &:hover {
+        background: @selectMulti-color_neutral_2;
+
+        .ios &,
+        .andriod & {
+            background: inherit;
+        }
+    }
+
+    &_active {
+        background: @selectMulti-color_neutral_2;
+
+        .ios .tw-selectMulti__link&,
+        .android .tw-selectMulti__link& {
+            background: @selectMulti-color_neutral_2;
+        }
+
+        &:active,
+        &:focus,
+        &:hover {
+            .tw-selectMulti__link_text {
+                color: @selectMulti-color_neutral_7;
+            }
+        }
+
+        .tw-selectMulti__link_text {
+            color: @selectMulti-color_neutral_7;
+        }
+    }
+
+    &_close {
+        height: 100%;
+        line-height: 0;
+        margin: auto auto auto @selectMulti-spacing_small;
+
+        .flex-icon {
+            font-size: 1.3rem;
+            padding: .14em;
+        }
+    }
+
+    &_text {
+        flex-grow: 1;
+        min-width: 0;
+        word-wrap: break-word;
+    }
+}
+
+.tw-selectMulti__hidden {
+    display: none;
+}
+
+@media (min-width: @selectMulti-screen_sm_min) {
+    .tw-selectMulti__link {
+        padding: @selectMulti-spacing_x_small @selectMulti-spacing_small;
+    }
+}

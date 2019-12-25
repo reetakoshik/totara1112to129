@@ -60,12 +60,24 @@ class behat_tool_totara_sync extends behat_base {
         require_once($CFG->dirroot . '/admin/tool/totara_sync/lib.php');
         require_once($CFG->dirroot . '/admin/tool/totara_sync/sources/databaselib.php');
 
-        // Validate the element type given.
-        if ($element != 'organisation' && $element != 'position' && $element != 'user' && $element != 'jobassignment') {
-            throw new PendingException("'{$element}' is not a valid HR Import element name.");
+        switch ($element) {
+            case 'organisation':
+                $short_element = 'org';
+                break;
+            case 'position':
+                $short_element = 'pos';
+                break;
+            case 'competency':
+                $short_element = 'comp';
+                break;
+            case 'user':
+            case 'jobassignment':
+                $short_element = $element;
+                break;
+            default:
+                throw new PendingException("'{$element}' is not a valid HR Import element name.");
         }
 
-        $short_element = ($element == 'organisation' || $element == 'position' ? substr($element, 0, 3) : $element);
         $dbconfig = array();
 
         // Determine the database connection settings we need to use.
@@ -154,6 +166,7 @@ class behat_tool_totara_sync extends behat_base {
 
             case 'organisation':
             case 'position':
+            case 'competency':
                 // Define a list of required fields so we can check the source data against them.
                 $required_fields = array ('idnumber', 'fullname', 'frameworkidnumber', 'timemodified');
 
@@ -168,6 +181,10 @@ class behat_tool_totara_sync extends behat_base {
                 $table->add_field('description', XMLDB_TYPE_TEXT);
                 $table->add_field('parentidnumber', XMLDB_TYPE_CHAR, '100');
                 $table->add_field('typeidnumber', XMLDB_TYPE_CHAR, '100');
+
+                if ($element === 'competency') {
+                    $table->add_field('aggregationmethod', XMLDB_TYPE_CHAR, '100');
+                }
 
                 break;
 

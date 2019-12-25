@@ -1448,4 +1448,15 @@ abstract class sql_generator {
     public function snapshot_drop() {
         throw new coding_exception('generator does not support snapshots');
     }
+
+    /**
+     * Get statement to switch FTS accent sensitivity.
+     *
+     * @param bool $switch If accent sensitivity should be enabled/disabled.
+     * @return array
+     */
+    public function get_fts_change_accent_sensitivity_sql(bool $switch): array {
+        // Override as necessary
+        return [];
+    }
 }

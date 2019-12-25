@@ -292,6 +292,8 @@ $string['competencyscaledefault'] = 'Default value';
 $string['competencyscaledefault_help'] = 'The **Default Value** is automatically assigned to a user when they have not yet demonstrated the proficiency required by the competency\'s specified evidence item(s) (course/activity completion, or passing course/activity grade).';
 $string['competencyscaledescription'] = 'Description';
 $string['competencyscaleinuse'] = 'This scale is in use (i.e. users have competencies marked with values from this scale). Scale values cannot be created, re-ordered or deleted to preserve data integrity. You can still rename scale values but this may confuse users when their proficiency changes without warning.';
+$string['competenctscaleoutoforderexist'] = 'There are scales with non-proficient values that are set higher than proficient ones. Scale values should be ordered from most proficient to least proficient – please adjust the proficiency setting on affected scale values to reflect this.';
+$string['competenctscaleoutoforderthis'] = 'This scale has non-proficient values that are set higher than proficient ones. Scale values should be ordered from most proficient to least proficient – please adjust the proficiency setting on affected scale values to reflect this.';
 $string['competencyscaleproficient'] = 'Proficient value';
 $string['competencyscaleproficient_help'] = 'Proficient values provide a way for the system to track if a user is \'competent\' in a particular competency. This is used to show progress in learning plans and only show overdue notices for incomplete competencies.
 A user is considered \'competent\' if the scale value set has \'proficent\' checked. You can have multiple scale values set to proficient, but you must have at least one scale value marked as proficient. The proficient value is edited by editing the scale value.
@@ -310,6 +312,13 @@ $string['competencyscalesgeneral'] = 'Competency Scale';
 $string['competencyscalesgeneral_help'] = '**Competency scales** enable you to define the criteria by which a competency can be measured. For example, a scale might have three values; \'competent, competent with supervision, not competent\'.
 
 You must have a competency scale set up before you set up a competency framework, or any competencies.';
+$string['competencyscaleupgradeorder'] = 'There are competency scales on this site with values in an invalid order, i.e. where non-proficient values are set higher on the scale than proficient ones. You must fix this before upgrading.
+
+Please revert to Totara versions 9.33, 10.22, 11.16, 12.7 or above, and review and update the affected competency scales.';
+$string['competencyscalevalueconfirmtitle'] = 'Confirm updates to scale values';
+$string['competencyscalevalueconfirmproficient'] = 'The proficiency status of users currently assigned to competencies using this scale may be affected.
+
+Do you want to proceed with applying these changes?';
 $string['competencyscalevaluedescription'] = 'Description';
 $string['competencyscalevaluedescription_help'] = 'A longer description of the competency scale value.';
 $string['competencyscalevalueidnumber'] = 'Scale value ID number';
@@ -506,6 +515,7 @@ $string['error:updatingscalevalue'] = 'Error: could not update scale value';
 $string['error:userownappraiser'] = 'A user cannot be assigned as their own appraiser';
 $string['error:viewusergoals'] = 'You do not have permissions to view this users goals';
 $string['eventexportedframework'] = 'Exported Hierarchy Framework';
+$string['eventexportedallframeworks'] = 'Exported all Hierarchy Frameworks';
 $string['eventpositionupdated'] = 'User position updated';
 $string['eventpositionviewed'] = 'User position viewed';
 $string['eventviewedframework'] = 'Viewed Hierarchy Framework List';
@@ -520,14 +530,20 @@ $string['export'] = 'Export';
 $string['exportas'] = 'Export as';
 $string['exportcsv'] = 'CSV format';
 $string['exportexcel'] = 'Excel format';
+$string['exportitems'] = 'Export all items';
+$string['exportframework'] = 'Export all items from framework';
+$string['exportframework_help'] = 'The export will contain all items in the framework and their associated fields. The file content structure is suitable for use in HR Import.';
+$string['exportframeworks'] = 'Export items from all frameworks';
+$string['exportframeworks_help'] = 'The export will contain all items (grouped by framework) and their associated fields. The file content structure is suitable for use in HR Import.';
 $string['exportformat'] = 'Export format';
 $string['exportods'] = 'ODS format';
 $string['exporttext'] = 'Text format';
-$string['exportxls'] = 'Excel Format';
+$string['exportxls'] = 'Excel format';
 $string['filterframework'] = 'Filter by framework: ';
 $string['findgoals'] = 'Find Goal(s)';
 $string['finishdate'] = 'Finish date';
 $string['finishdate_help'] = 'Click the calendar icon to select the date the user finished in that position.';
+$string['format'] = 'Format';
 $string['formrequiresjs'] = 'This form requires Javascript to be enabled.';
 $string['frameworkdoesntexist'] = 'The {$a} framework doesn\'t exist';
 $string['fullnamedepth'] = 'Depth level full name';
@@ -1269,6 +1285,7 @@ $string['updatedposition'] = 'The position "{$a}" has been updated';
 $string['updateposition'] = 'Update position';
 $string['updatescalevaluefailure'] = 'Scale value failed to update';
 $string['updatescalevaluesuccess'] = 'Scale value updated';
+$string['usedscale'] = 'Scale is already in use. New values may not be added.';
 $string['useraspirationalposition'] = 'Aspirational position';
 $string['useraspirationalposition_help'] = 'This is the target position the user will be progressing towards. Click **Choose position** to select the user\'s aspirational position from position framework(s) set up.';
 $string['useresourcelevelevidence'] = 'Use resource-level evidence';
@@ -1277,44 +1294,3 @@ $string['xandychild'] = '{$a->item} (and {$a->num} child)';
 $string['xandychildren'] = '{$a->item} (and {$a->num} children)';
 $string['xitemsdeleted'] = '{$a->num} {$a->items} and all children have been deleted';
 $string['xitemsmoved'] = '{$a->num} {$a->items} and all children have been moved';
-
-/**
- * @deprecated Since Totara 9.0.
- */
-$string['allowsignuporganisation'] = 'Organisation';
-$string['allowsignuporganisationsecurityrisk'] =  'Security risk: Please be aware that while this option is enabled, information about organisations will be public.';
-$string['allowsignuporganisation_help'] = 'When this option is selected and Self-registration is enabled,
-the organisation field will be available for users in the sign-up.';
-$string['allowsignupposition'] = 'Position';
-$string['allowsignuppositionfields'] = 'Allow primary position fields';
-$string['allowsignuppositionsecurityrisk'] =  'Security risk: Please be aware that while this option is enabled, information about positions will be public.';
-$string['allowsignupposition_help'] = 'When this option is selected and Self-registration is enabled,
-the position field will be available for users in the sign-up.';
-$string['allowsignupmanager'] = 'Manager';
-$string['allowsignupmanagersecurityrisk'] =  'Security risk: Please be aware that while this option is enabled, information about users will be public.';
-$string['allowsignupmanager_help'] = 'When this option is selected and Self-registration is enabled,
-the manager field will be available for users in the sign-up.';
-$string['chooseappraiser'] = 'Choose appraiser';
-$string['chooseappraiser_help'] = 'Click **Choose appraiser** to select the user\'s appraiser.';
-$string['choosemanager_help'] = 'Click **Choose manager** to select the user\'s manager.';
-$string['chooseorganisation_help'] = 'Click **Choose organisation** to select where the user works in the organisation. This will be useful for reporting purposes.';
-$string['chooseposition_help'] = 'Click **Choose position** to select the correct position (job role) for the user. This is useful for reporting purposes.';
-$string['error:managerdeleted'] = 'The manager "{$a->username}" has been deleted from the system, please select another manager.';
-$string['error:startafterfinish'] = 'Start date must not be later than finish date';
-$string['error:userownmanager'] = 'A user cannot be assigned as their own manager';
-$string['manager'] = 'Manager';
-$string['organisationdeleteincludexposassignments'] = '- {$a} assignment(s) to this organisation (user\'s assigned to this organisation will be unassigned)';
-$string['positiondeleteincludexposassignments'] = '- {$a} assignment to this position (user\'s assigned to this position will be unassigned)';
-$string['positionsenabled'] = 'Positions enabled';
-$string['positionsenabled_help'] = '**Positions enabled settings** allows a user with the appropriate permissions to specify the positions that are available in the system.
-
-When no options are selected, the position functionality will be disabled completely.';
-$string['positionsettings'] = 'Position settings';
-$string['userpositiondetails'] = 'User position details';
-$string['typeaspirational'] = 'Aspirational position';
-$string['mygoals'] = 'My Goals';
-$string['goalnotescalevalueentry'] = 'One value per line - from most completed to least';
-
-// Deprecated in 10.
-$string['competencyevidencetimecompleted'] = 'Time Evidence Completed';
-$string['competencyevidencetimecompleted_help'] = 'A record of when the competency evidence was completed.';

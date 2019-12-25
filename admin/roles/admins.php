@@ -89,6 +89,8 @@ if (optional_param('add', false, PARAM_BOOL) and confirm_sesskey()) {
 
 } else if ($confirmadd and confirm_sesskey()) {
     $admins = array();
+    $oldvalue = $CFG->siteadmins;
+
     foreach (explode(',', $CFG->siteadmins) as $admin) {
         $admin = (int)$admin;
         if ($admin) {
@@ -96,11 +98,18 @@ if (optional_param('add', false, PARAM_BOOL) and confirm_sesskey()) {
         }
     }
     $admins[$confirmadd] = $confirmadd;
-    set_config('siteadmins', implode(',', $admins));
+    $newvalue = implode(',', $admins);
+
+    add_to_config_log('siteadmins', $oldvalue, $newvalue, null);
+    set_config('siteadmins', $newvalue);
+
+    \totara_core\event\site_admin_update::add($confirmadd)->trigger();
     redirect($PAGE->url);
 
 } else if ($confirmdel and confirm_sesskey() and $confirmdel != $USER->id) {
     $admins = array();
+    $oldvalue = $CFG->siteadmins;
+
     foreach (explode(',', $CFG->siteadmins) as $admin) {
         $admin = (int)$admin;
         if ($admin) {
@@ -108,7 +117,12 @@ if (optional_param('add', false, PARAM_BOOL) and confirm_sesskey()) {
         }
     }
     unset($admins[$confirmdel]);
-    set_config('siteadmins', implode(',', $admins));
+    $newvalue = implode(',', $admins);
+
+    add_to_config_log('siteadmins', $oldvalue, $newvalue, null);
+    set_config('siteadmins', $newvalue);
+
+    \totara_core\event\site_admin_update::remove($confirmdel)->trigger();
     redirect($PAGE->url);
 }
 

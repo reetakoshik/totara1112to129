@@ -219,9 +219,16 @@ function quiz_delete_override($quiz, $overrideid) {
     $override = $DB->get_record('quiz_overrides', array('id' => $overrideid), '*', MUST_EXIST);
 
     // Delete the events.
-    $events = $DB->get_records('event', array('modulename' => 'quiz',
-            'instance' => $quiz->id, 'groupid' => (int)$override->groupid,
-            'userid' => (int)$override->userid));
+    if (isset($override->groupid)) {
+        // Create the search array for a group override.
+        $eventsearcharray = array('modulename' => 'quiz',
+            'instance' => $quiz->id, 'groupid' => (int)$override->groupid);
+    } else {
+        // Create the search array for a user override.
+        $eventsearcharray = array('modulename' => 'quiz',
+            'instance' => $quiz->id, 'userid' => (int)$override->userid);
+    }
+    $events = $DB->get_records('event', $eventsearcharray);
     foreach ($events as $event) {
         $eventold = calendar_event::load($event);
         $eventold->delete();
@@ -753,36 +760,45 @@ function quiz_grade_item_update($quiz, $grades = null) {
         $params['gradetype'] = GRADE_TYPE_NONE;
     }
 
-    // What this is trying to do:
-    // 1. If the quiz is set to not show grades while the quiz is still open,
-    //    and is set to show grades after the quiz is closed, then create the
-    //    grade_item with a show-after date that is the quiz close date.
-    // 2. If the quiz is set to not show grades at either of those times,
-    //    create the grade_item as hidden.
-    // 3. If the quiz is set to show grades, create the grade_item visible.
-    $openreviewoptions = mod_quiz_display_options::make_from_quiz($quiz,
-            mod_quiz_display_options::LATER_WHILE_OPEN);
-    $closedreviewoptions = mod_quiz_display_options::make_from_quiz($quiz,
-            mod_quiz_display_options::AFTER_CLOSE);
-    if ($openreviewoptions->marks < question_display_options::MARK_AND_MAX &&
-            $closedreviewoptions->marks < question_display_options::MARK_AND_MAX) {
-        $params['hidden'] = 1;
+    // Totara: This block replaces Moodle quiz grade item show/hide logic
+    $immediate = mod_quiz_display_options::make_from_quiz($quiz, mod_quiz_display_options::IMMEDIATELY_AFTER);
+    $later = mod_quiz_display_options::make_from_quiz($quiz, mod_quiz_display_options::LATER_WHILE_OPEN);
+    $closed = mod_quiz_display_options::make_from_quiz($quiz, mod_quiz_display_options::AFTER_CLOSE);
+    $show_marks = question_display_options::MARK_AND_MAX;
 
-    } else if ($openreviewoptions->marks < question_display_options::MARK_AND_MAX &&
-            $closedreviewoptions->marks >= question_display_options::MARK_AND_MAX) {
+    // Note that Moodle logic is to not show and then hide grade items later, and we keep that behaviour.
+    // For example, if marks are set to show immediately and also after the quiz is closed, but not later while open,
+    //   we do not have any way to hide the grade item after two minutes.
+    if ($immediate->marks < $show_marks && $later->marks < $show_marks && $closed->marks < $show_marks ) {
+        // All hidden.
+        $params['hidden'] = 1;
+    } else if ($immediate->marks < $show_marks && $later->marks < $show_marks && $closed->marks >= $show_marks ) {
+        // Hidden until close.
         if ($quiz->timeclose) {
             $params['hidden'] = $quiz->timeclose;
         } else {
             $params['hidden'] = 1;
         }
-
+    } else if ($immediate->marks < $show_marks && $later->marks >= $show_marks ) {
+        // Hidden until later.
+        // But this can't be implemented in grade_item because each quiz response will be different.
+        $params['hidden'] = 0;
+        if (!empty($grades) && is_array($grades)) {
+            // Set hidden on the grade_grade.
+            foreach ($grades as $ix => $item) {
+                $hidetime = $item->datesubmitted + 120;
+                // Check that hidetime is before quiz closed time.
+                if ($quiz->timeclose && $quiz->timeclose < $hidetime) {
+                    $hidetime = $quiz->timeclose;
+                }
+                $grades[$ix]->hidden = $hidetime;
+            }
+        }
     } else {
-        // Either
-        // a) both open and closed enabled
-        // b) open enabled, closed disabled - we can not "hide after",
-        //    grades are kept visible even after closing.
+        // Not hidden now.
         $params['hidden'] = 0;
     }
+    // End Totara block.
 
     if (!$params['hidden']) {
         // If the grade item is not hidden by the quiz logic, then we need to
@@ -999,8 +1015,7 @@ function quiz_print_recent_mod_activity($activity, $courseid, $detail, $modnames
     if ($detail) {
         $modname = $modnames[$activity->type];
         echo '<div class="title">';
-        echo '<img src="' . $OUTPUT->pix_url('icon', $activity->type) . '" ' .
-                'class="icon" alt="' . $modname . '" />';
+        echo $OUTPUT->pix_icon('icon', $modname, $activity->type);
         echo '<a href="' . $CFG->wwwroot . '/mod/quiz/view.php?id=' .
                 $activity->cmid . '">' . $activity->name . '</a>';
         echo '</div>';
@@ -2055,5 +2070,34 @@ function quiz_check_updates_since(cm_info $cm, $from, $filter = array()) {
         $updates->grades->itemids = array_keys($grades);
     }
 
+    // Now, teachers should see other students updates.
+    if (has_capability('mod/quiz:viewreports', $cm->context)) {
+        $select = 'quiz = ? AND timemodified > ?';
+        $params = array($cm->instance, $from);
+
+        if (groups_get_activity_groupmode($cm) == SEPARATEGROUPS) {
+            $groupusers = array_keys(groups_get_activity_shared_group_members($cm));
+            if (empty($groupusers)) {
+                return $updates;
+            }
+            list($insql, $inparams) = $DB->get_in_or_equal($groupusers);
+            $select .= ' AND userid ' . $insql;
+            $params = array_merge($params, $inparams);
+        }
+
+        $updates->userattempts = (object) array('updated' => false);
+        $attempts = $DB->get_records_select('quiz_attempts', $select, $params, '', 'id');
+        if (!empty($attempts)) {
+            $updates->userattempts->updated = true;
+            $updates->userattempts->itemids = array_keys($attempts);
+        }
+
+        $updates->usergrades = (object) array('updated' => false);
+        $grades = $DB->get_records_select('quiz_grades', $select, $params, '', 'id');
+        if (!empty($grades)) {
+            $updates->usergrades->updated = true;
+            $updates->usergrades->itemids = array_keys($grades);
+        }
+    }
     return $updates;
 }

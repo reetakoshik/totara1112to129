@@ -40,6 +40,8 @@ $prefix = required_param('prefix', PARAM_ALPHA);
 // Competency scale id
 $scaleid = optional_param('scaleid', 0, PARAM_INT);
 
+$confirmupdate = optional_param('confirmupdate', false, PARAM_BOOL);
+
 // Cache user capabilities.
 $sitecontext = context_system::instance();
 
@@ -108,7 +110,70 @@ if ($valueform->is_cancelled()) {
     redirect("$CFG->wwwroot/totara/hierarchy/prefix/competency/scale/view.php?id={$value->scaleid}&amp;prefix=competency");
 
 // Update data
-} else if ($valuenew = $valueform->get_data()) {
+} else if (($valuenew = $valueform->get_data()) || $confirmupdate) {
+
+    if ($confirmupdate) {
+        require_sesskey();
+
+        $valuenew = new stdClass();
+        $valuenew->id = required_param('id', PARAM_INT);
+        if ($valuenew->id == 0) {
+            // In theory, this should already have been checked and the error just like below thrown.
+            print_error('usedscale', 'totara_hierarchy');
+        }
+        $valuenew->scaleid = required_param('scaleid', PARAM_INT);
+        $valuenew->name = required_param('name', PARAM_TEXT);
+        $valuenew->idnumber = required_param('idnumber', PARAM_TEXT);
+        $valuenew->numericscore = required_param('numericscore', PARAM_RAW);
+        $valuenew->proficient = required_param('proficient', PARAM_INT);
+        $valuenew->description_editor = required_param_array('description_editor', PARAM_RAW);
+
+    } else {
+        if (competency_scale_is_used($valuenew->scaleid)) {
+            $current_record = $DB->get_record('comp_scale_values', ['id' => $valuenew->id], '*', MUST_EXIST);
+
+            if ($current_record->proficient != $valuenew->proficient) {
+
+                echo $OUTPUT->header();
+
+                $title = get_string('competencyscalevalueconfirmtitle', 'totara_hierarchy');
+                $message = nl2br(get_string('competencyscalevalueconfirmproficient', 'totara_hierarchy'));
+
+                // This will be going into a single_button with method set to post, which means params will be post params.
+                $continue_url = new moodle_url(
+                    $CFG->wwwroot . '/totara/hierarchy/prefix/competency/scale/editvalue.php',
+                    array (
+                        'id' => $valuenew->id,
+                        'scaleid' => $valuenew->scaleid,
+                        'name' => $valuenew->name,
+                        'idnumber' => $valuenew->idnumber,
+                        'numericscore' => $valuenew->numericscore,
+                        'proficient' => $valuenew->proficient,
+                        'description_editor[text]' => $valuenew->description_editor['text'],
+                        'description_editor[format]' => $valuenew->description_editor['format'],
+                        'description_editor[itemid]' => $valuenew->description_editor['itemid'],
+                        'prefix' => 'competency',
+                        'confirmupdate' => 1
+                    )
+                );
+                $continue = new single_button($continue_url, get_string('yes'), 'post', true);
+
+                $cancel_url = new moodle_url(
+                    $CFG->wwwroot . '/totara/hierarchy/prefix/competency/scale/view.php',
+                    array (
+                        'id' => $valuenew->scaleid,
+                        'prefix' => 'competency'
+                    )
+                );
+                $cancel = new single_button($cancel_url, get_string('no'), 'get');
+
+                echo $OUTPUT->confirm($message, $continue, $cancel, $title);
+
+                echo $OUTPUT->footer();
+                exit;
+            }
+        }
+    }
 
     $valuenew->timemodified = time();
     $valuenew->usermodified = $USER->id;

@@ -18,6 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author Simon Player <simon.player@totaralearning.com>
+ * @author Alastair Munro <alastair.munro@totaralearning.com>
  * @package tool_totara_sync
  */
 
@@ -25,15 +26,21 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/admin/tool/totara_sync/lib.php');
+require_once($CFG->dirroot . '/admin/tool/totara_sync/tests/source_csv_testcase.php');
+require_once($CFG->dirroot . '/admin/tool/totara_sync/sources/source_org_csv.php');
 
 /**
  * @group tool_totara_sync
  */
-class tool_totara_sync_org_csv_emptyfields_setting_testcase extends advanced_testcase {
+class tool_totara_sync_org_csv_emptyfields_setting_testcase extends totara_sync_csv_testcase {
 
-    private $filedir = null;
-    private $configcsv = array();
-    private $config = array();
+    protected $filedir = null;
+    protected $configcsv = array();
+    protected $config = array();
+
+    protected $elementname = 'org';
+    protected $sourcename = 'totara_sync_source_org_csv';
+    protected $source = null;
 
     protected $org_framework_data1 = array(
         'id' => 1, 'fullname' => 'Organisation Framework 1', 'shortname' => 'OFW1', 'idnumber' => '1', 'description' => 'Description 1',
@@ -63,49 +70,35 @@ class tool_totara_sync_org_csv_emptyfields_setting_testcase extends advanced_tes
         'param1' => 30, 'param2' => 2048, 'param3' => 0, 'param4' => '', 'param5' => '',
     );
 
-    private $importdata = array(
+    private $requiredfields = array('idnumber', 'fullname', 'frameworkidnumber', 'timemodified');
 
-        // Required fields.
-        "idnumber" => array(
-            "required" => true,
-            "tablefieldname" => "idnumber",
-            "newdata" => array("1"),
-            "editeddata" => array("1"), // Keep the same for this field.
-        ),
-        "fullname" => array(
-            "required" => true,
-            "tablefieldname" => "fullname",
-            "newdata" => array("org1"),
-            "editeddata" => array("org1-edited"),
-        ),
-        "frameworkidnumber" => array(
-            "required" => true,
-            "tablefieldname" => "frameworkid",
-            "newdata" => array(1),
-            "editeddata" => array(2)
-        ),
-        "timemodified" => array(
-            "required" => true,
-            "tablefieldname" => "timemodified",
-            "newdata" => array("0"),
-            "editeddata" => array("0"),
-        ),
+    // Expected data uses database field names rather than
+    // csv header names.
+    private $expected1 = array(
+        'idnumber' => 1,
+        'fullname' => 'Organisation 1',
+        'shortname' => 'org1',
+        'frameworkid' => 1,
+        'timemodified' => 0,
+        'description' => 'Description'
+    );
 
-        // Additional fields.
-        "shortname" => array(
-            "required" => false,
-            "tablefieldname" => "shortname",
-            "newdata" => array("shortname"),
-            "editeddata" => array("shortname-edited"),
-            "default" => array("")
-        ),
-        "description" => array(
-            "required" => false,
-            "tablefieldname" => "description",
-            "newdata" => array("description"),
-            "editeddata" => array("description-edited"),
-            "default" => array("")
-        ),
+    private $expected1_edited = array(
+        'idnumber' => 1,
+        'fullname' => 'Organisation 1 edited',
+        'shortname' => 'org1edited',
+        'frameworkid' => 2,
+        'timemodified' => 0,
+        'description' => 'Description edited'
+    );
+
+    private $expected2 = array(
+        'idnumber' => 1,
+        'fullname' => 'Organisation 1',
+        'shortname' => '',
+        'frameworkid' => 1,
+        'timemodified' => 0,
+        'description' => ''
     );
 
     protected function tearDown() {
@@ -117,7 +110,7 @@ class tool_totara_sync_org_csv_emptyfields_setting_testcase extends advanced_tes
         $this->org_data1 = null;
         $this->type_data1 = null;
         $this->customfield_textinput_data = null;
-        $this->importdata = null;
+        $this->source = null;
         parent::tearDown();
     }
 
@@ -128,6 +121,8 @@ class tool_totara_sync_org_csv_emptyfields_setting_testcase extends advanced_tes
 
         $this->resetAfterTest(true);
         $this->setAdminUser();
+
+        $this->source = new $this->sourcename();
 
         $this->filedir = $CFG->dataroot . '/totara_sync';
         mkdir($this->filedir . '/csv/ready', 0777, true);
@@ -174,82 +169,22 @@ class tool_totara_sync_org_csv_emptyfields_setting_testcase extends advanced_tes
         $this->config = array(
             'sourceallrecords' => '1',
             'allow_create' => '1',
-            'allow_delete' => '1',
+            'allow_delete' => '0',
             'allow_update' => '1',
         );
     }
 
-    public function set_config($config, $plugin) {
-        foreach ($config as $k => $v) {
-            set_config($k, $v, $plugin);
-        }
-    }
-
     public function importfields() {
-        $importfield = array();
+        $importfields = array();
 
-        foreach ($this->importdata as $field => $fielddata) {
-            $importfield['import_' . $field] = 1;
-        }
+        $importfields['import_idnumber'] = 1;
+        $importfields['import_fullname'] = 1;
+        $importfields['import_shortname'] = 1;
+        $importfields['import_frameworkidnumber'] = 1;
+        $importfields['import_timemodified'] = 1;
+        $importfields['import_description'] = 1;
 
-        return $importfield;
-    }
-
-    public function create_csv($usedata = "newdata") {
-        $csvdata = "";
-
-        // The header.
-        foreach ($this->importdata as $field => $fielddata) {
-            $csvdata .= '"' . $field . '",';
-        }
-        $csvdata = rtrim($csvdata, ",") . PHP_EOL;
-
-        // The data.
-        foreach ($this->importdata as $field => $fielddata) {
-
-            if ($usedata == 'emptydata' && $fielddata["required"]) {
-                $data =  $fielddata["newdata"][0];
-            } elseif ($usedata == 'emptydata' && !$fielddata["required"]) {
-                $data =  "";
-            } else {
-                $data =  $fielddata[$usedata][0];
-            }
-
-            $csvdata .= '"' . $data . '",';
-        }
-        $csvdata = rtrim($csvdata, ",");
-
-        // Create the file.
-        $filepath = $this->filedir . '/csv/ready/org.csv';
-        file_put_contents($filepath, $csvdata);
-    }
-
-    public function get_element() {
-        $elements = totara_sync_get_elements(true);
-        /** @var totara_sync_element_org $element */
-        return $elements['org'];
-    }
-
-    function sync_add_organisations() {
-        global $DB;
-
-        // Create the CSV file and run the sync.
-        $this->create_csv('newdata'); // Create and upload our CSV data file
-        $this->assertTrue($this->get_element()->sync()); // Run the sync.
-        $this->assertCount(2, $DB->get_records('org')); // Check the correct count of organisations.
-
-        // Now check each field is populated for organisation idnumber 1.
-        $org = $this->get_organisation(1);
-        foreach ($this->importdata as $field => $fielddata) {
-            if ($fielddata["required"]) {
-                // For required fields we just want to check they are not empty/null.
-                $this->assertNotEquals('', $org->{$fielddata['tablefieldname']});
-                $this->assertNotNull($org->{$fielddata['tablefieldname']});
-            } else {
-                // Check the data matches the value in the CSV.
-                $this->assertEquals($fielddata["newdata"][0], $org->{$fielddata['tablefieldname']}, 'Failed for field ' . $field);
-            }
-        }
+        return $importfields;
     }
 
     public function get_organisation($idnumber) {
@@ -269,6 +204,7 @@ class tool_totara_sync_org_csv_emptyfields_setting_testcase extends advanced_tes
     }
 
     public function test_sync_add_organisations_emptyfields_setting_off_populated_fields() {
+        global $DB;
 
         // Adding organisations.
         // The 'Empty fields remove data' setting is off.
@@ -276,15 +212,32 @@ class tool_totara_sync_org_csv_emptyfields_setting_testcase extends advanced_tes
 
         // Set the config.
         $config = array_merge($this->configcsv, $this->importfields());
-        $this->set_config($config, 'totara_sync_source_org_csv');
+        $this->set_source_config($config);
         $config = array_merge($this->config, array('csvsaveemptyfields' => false));
-        $this->set_config($config, 'totara_sync_element_org');
+        $this->set_element_config($config);
 
-        // Create the CSV file and run the sync and test.
-        $this->sync_add_organisations();
+        // Create the CSV file and run the sync.
+        $this->add_csv('organisation_empty_fields_1.csv', 'org');
+
+        $this->assertTrue($this->get_element()->sync()); // Run the sync.
+        $this->assertCount(2, $DB->get_records('org')); // Check the correct count of organisations.
+
+        // Now check each field is populated for organisation idnumber 1.
+        $org = $this->get_organisation(1);
+        foreach ($this->expected1 as $field => $value) {
+            if (in_array($field, $this->requiredfields)) {
+                // For required fields we just want to check they are not empty/null.
+                $this->assertNotEquals('', $org->$field);
+                $this->assertNotNull($org->$field);
+            } else {
+                // Check the data matches the value in the CSV.
+                $this->assertEquals($value, $org->$field, 'Failed for field ' . $field);
+            }
+        }
     }
 
     public function test_sync_add_organisations_emptyfields_setting_on_populated_fields() {
+        global $DB;
 
         // Adding organisations.
         // The 'Empty fields remove data' setting is on.
@@ -292,189 +245,432 @@ class tool_totara_sync_org_csv_emptyfields_setting_testcase extends advanced_tes
 
         // Set the config.
         $config = array_merge($this->configcsv, $this->importfields());
-        $this->set_config($config, 'totara_sync_source_org_csv');
+        $this->set_source_config($config);
         $config = array_merge($this->config, array('csvsaveemptyfields' => true));
-        $this->set_config($config, 'totara_sync_element_org');
-
-        // Create the CSV file and run the sync and test.
-        $this->sync_add_organisations();
-    }
-
-    public function test_sync_update_organisations_emptyfields_setting_off_populated_fields() {
-
-        // Updating organisations.
-        // The 'Empty fields remove data' setting is off.
-        // All the fields in the CSV are populated. (not empty)
-
-        global $DB;
-
-        // Set the config.
-        $config = array_merge($this->configcsv, $this->importfields());
-        $this->set_config($config, 'totara_sync_source_org_csv');
-        $config = array_merge($this->config, array('csvsaveemptyfields' => false));
-        $this->set_config($config, 'totara_sync_element_org');
-
-        //
-        // First lets add organisations.
-        //
-
-        $this->sync_add_organisations();
-
-        //
-        // Now lets update the organisations.
-        //
+        $this->set_element_config($config);
 
         // Create the CSV file and run the sync.
-        $this->create_csv('editeddata'); // Create and upload our CSV data file
+        $this->add_csv('organisation_empty_fields_1.csv', 'org');
+
         $this->assertTrue($this->get_element()->sync()); // Run the sync.
         $this->assertCount(2, $DB->get_records('org')); // Check the correct count of organisations.
 
         // Now check each field is populated for organisation idnumber 1.
         $org = $this->get_organisation(1);
-        foreach ($this->importdata as $field => $fielddata) {
-            if ($fielddata["required"]) {
+        foreach ($this->expected1 as $field => $value) {
+            if (in_array($field, $this->requiredfields)) {
                 // For required fields we just want to check they are not empty/null.
-                $this->assertNotEquals('', $org->{$fielddata['tablefieldname']});
-                $this->assertNotNull($org->{$fielddata['tablefieldname']});
+                $this->assertNotEquals('', $org->$field);
+                $this->assertNotNull($org->$field);
             } else {
                 // Check the data matches the value in the CSV.
-                $this->assertEquals($fielddata["editeddata"][0], $org->{$fielddata['tablefieldname']}, 'Failed for field ' . $field);
+                $this->assertEquals($value, $org->$field, 'Failed for field ' . $field);
+            }
+        }
+    }
+
+    public function test_sync_update_organisations_emptyfields_setting_off_populated_fields() {
+        global $DB;
+
+        // Updating organisations.
+        // The 'Empty fields remove data' setting is off.
+        // All the fields in the CSV are populated. (not empty)
+
+        // Set the config.
+        $config = array_merge($this->configcsv, $this->importfields());
+        $this->set_source_config($config);
+        $config = array_merge($this->config, array('csvsaveemptyfields' => false));
+        $this->set_element_config($config);
+
+        // First add an organisation we can update.
+        $organisation = array(
+            'id' => 2,
+            'fullname' => 'Organisation 1',
+            'shortname' => 'org1',
+            'idnumber' => 1,
+            'description' => 'Description',
+            'frameworkid' => 1,
+            'path' => '/2',
+            'depthlevel' => 1,
+            'parentid' => 0,
+            'sortthread' => 02,
+            'visible' => 1,
+            'timevalidfrom' => 0,
+            'timevalidto' => 0,
+            'timecreated' => 0,
+            'timemodified' => 0,
+            'usermodified' => 2,
+            'totarasync' => 1
+        );
+
+        $this->loadDataSet($this->createArrayDataset(array(
+            'org' => array($organisation)
+        )));
+
+        //
+        // Now lets update the organisation.
+        //
+
+        // Create the CSV file and run the sync.
+        // Add import file with edited data and run sync.
+        $this->add_csv('organisation_empty_fields_2.csv', 'org');
+
+        $this->assertTrue($this->get_element()->sync()); // Run the sync.
+        $this->assertCount(2, $DB->get_records('org')); // Check the correct count of organisations.
+
+        // Now check each field is populated for organisation idnumber 1.
+        $org = $this->get_organisation(1);
+        foreach ($this->expected1_edited as $field => $value) {
+            if (in_array($field, $this->requiredfields)) {
+                // For required fields we just want to check they are not empty/null.
+                $this->assertNotEquals('', $org->$field);
+                $this->assertNotNull($org->$field);
+            } else {
+                // Check the data matches the value in the CSV.
+                $this->assertEquals($value, $org->$field, 'Failed for field ' . $field);
             }
         }
     }
 
     public function test_sync_update_organisations_emptyfields_setting_on_populated_fields() {
+        global $DB;
 
         // Updating organisations.
         // The 'Empty fields remove data' setting is on.
         // All the fields in the CSV are populated. (not empty)
 
-        global $DB;
-
         // Set the config.
         $config = array_merge($this->configcsv, $this->importfields());
-        $this->set_config($config, 'totara_sync_source_org_csv');
+        $this->set_source_config($config);
         $config = array_merge($this->config, array('csvsaveemptyfields' => true));
-        $this->set_config($config, 'totara_sync_element_org');
+        $this->set_element_config($config);
 
-        //
-        // First lets add organisations.
-        //
+        // First add an organisation we can update.
+        $organisation = array(
+            'id' => 2,
+            'fullname' => 'Organisation 1',
+            'shortname' => 'org1',
+            'idnumber' => 1,
+            'description' => 'Description',
+            'frameworkid' => 1,
+            'path' => '/2',
+            'depthlevel' => 1,
+            'parentid' => 0,
+            'sortthread' => 02,
+            'visible' => 1,
+            'timevalidfrom' => 0,
+            'timevalidto' => 0,
+            'timecreated' => 0,
+            'timemodified' => 0,
+            'usermodified' => 2,
+            'totarasync' => 1
+        );
 
-        $this->sync_add_organisations();
+        $this->loadDataSet($this->createArrayDataset(array(
+            'org' => array($organisation)
+        )));
 
         //
         // Now lets update the organisations.
         //
 
         // Create the CSV file and run the sync.
-        $this->create_csv('editeddata'); // Create and upload our CSV data file
+        $this->add_csv('organisation_empty_fields_2.csv', 'org');
+
         $this->assertTrue($this->get_element()->sync()); // Run the sync.
         $this->assertCount(2, $DB->get_records('org')); // Check the correct count of organisations.
 
         // Now check each field is populated for organisation idnumber 1.
         $org = $this->get_organisation(1);
-        foreach ($this->importdata as $field => $fielddata) {
-            if ($fielddata["required"]) {
+        foreach ($this->expected1_edited as $field => $value) {
+            if (in_array($field, $this->requiredfields)) {
                 // For required fields we just want to check they are not empty/null.
-                $this->assertNotEquals('', $org->{$fielddata['tablefieldname']});
-                $this->assertNotNull($org->{$fielddata['tablefieldname']});
+                $this->assertNotEquals('', $org->$field);
+                $this->assertNotNull($org->$field);
             } else {
                 // Check the data matches the value in the CSV.
-                $this->assertEquals($fielddata["editeddata"][0], $org->{$fielddata['tablefieldname']}, 'Failed for field ' . $field);
+                $this->assertEquals($value, $org->$field, 'Failed for field ' . $field);
             }
         }
     }
 
     public function test_sync_update_organisations_emptyfields_setting_off_empty_fields() {
+        global $DB;
 
         // Updating organisations.
         // The 'Empty fields remove data' setting is off.
         // All the fields in the CSV are empty.
 
-        global $DB;
-
         // Set the config.
         $config = array_merge($this->configcsv, $this->importfields());
-        $this->set_config($config, 'totara_sync_source_org_csv');
+        $this->set_source_config($config);
         $config = array_merge($this->config, array('csvsaveemptyfields' => false));
-        $this->set_config($config, 'totara_sync_element_org');
+        $this->set_element_config($config);
 
-        //
-        // First lets add organisations.
-        //
+        // First add an organisation we can update.
+        $organisation = array(
+            'id' => 2,
+            'fullname' => 'Organisation 1',
+            'shortname' => 'org1',
+            'idnumber' => 1,
+            'description' => 'Description',
+            'frameworkid' => 1,
+            'path' => '/2',
+            'depthlevel' => 1,
+            'parentid' => 0,
+            'sortthread' => 02,
+            'visible' => 1,
+            'timevalidfrom' => 0,
+            'timevalidto' => 0,
+            'timecreated' => 0,
+            'timemodified' => 0,
+            'usermodified' => 2,
+            'totarasync' => 1
+        );
 
-        $this->sync_add_organisations();
+        $this->loadDataSet($this->createArrayDataset(array(
+            'org' => array($organisation)
+        )));
 
         //
         // Now lets update the organisations.
         //
 
         // Create the CSV file and run the sync.
-        $this->create_csv('emptydata'); // Create and upload our CSV data file with empty fields.
+        $this->add_csv('organisation_empty_fields_3.csv', 'org');
+
+        // Sync CSV with empty fields in non-required columns.
         $this->assertTrue($this->get_element()->sync()); // Run the sync.
         $this->assertCount(2, $DB->get_records('org')); // Check the correct count of organisations.
 
         // Now check each field is populated for organisation idnumber 1.
         $org = $this->get_organisation(1);
-        foreach ($this->importdata as $field => $fielddata) {
-            if ($fielddata["required"]) {
+        foreach ($this->expected1 as $field => $value) {
+            if (in_array($field, $this->requiredfields)) {
                 // For required fields we just want to check they are not empty/null.
-                $this->assertNotEquals('', $org->{$fielddata['tablefieldname']});
-                $this->assertNotNull($org->{$fielddata['tablefieldname']});
+                $this->assertNotEquals('', $org->$field);
+                $this->assertNotNull($org->$field);
             } else {
                 // Check the data matches the value in the CSV.
-                $this->assertEquals($fielddata["newdata"][0], $org->{$fielddata['tablefieldname']}, 'Failed for field ' . $field);
+                $this->assertEquals($value, $org->$field, 'Failed for field ' . $field);
             }
         }
     }
 
     public function test_sync_update_organisations_emptyfields_setting_on_empty_fields() {
+        global $DB;
 
         // Updating organisations.
         // The 'Empty fields remove data' setting is off.
         // All the fields in the CSV are empty.
 
-        global $DB;
-
         // Set the config.
         $config = array_merge($this->configcsv, $this->importfields());
-        $this->set_config($config, 'totara_sync_source_org_csv');
+        $this->set_source_config($config);
         $config = array_merge($this->config, array('csvsaveemptyfields' => true));
-        $this->set_config($config, 'totara_sync_element_org');
+        $this->set_element_config($config);
+
+        // First add an organisation we can update.
+        $organisation = array(
+            'id' => 2,
+            'fullname' => 'Organisation 1',
+            'shortname' => 'org1',
+            'idnumber' => 1,
+            'description' => 'Description',
+            'frameworkid' => 1,
+            'path' => '/2',
+            'depthlevel' => 1,
+            'parentid' => 0,
+            'sortthread' => 02,
+            'visible' => 1,
+            'timevalidfrom' => 0,
+            'timevalidto' => 0,
+            'timecreated' => 0,
+            'timemodified' => 0,
+            'usermodified' => 2,
+            'totarasync' => 1
+        );
+
+        $this->loadDataSet($this->createArrayDataset(array(
+            'org' => array($organisation)
+        )));
 
         //
-        // First lets add organisations.
-        //
-
-        $this->sync_add_organisations();
-
-        //
-        // Now lets update the organisations.
+        // Now lets update the organisation.
         //
 
         // Create the CSV file and run the sync.
-        $this->create_csv('emptydata'); // Create and upload our CSV data file with empty fields.
+        $this->add_csv('organisation_empty_fields_3.csv', 'org');
+
         $this->assertTrue($this->get_element()->sync()); // Run the sync.
         $this->assertCount(2, $DB->get_records('org')); // Check the correct count of organisations.
 
         // Now check each field is populated for organisation idnumber 1.
         $org = $this->get_organisation(1);
-        foreach ($this->importdata as $field => $fielddata) {
-            if ($fielddata["required"]) {
+        foreach ($this->expected2 as $field => $value) {
+            if (in_array($field, $this->requiredfields)) {
                 // For required fields we just want to check they are not empty/null.
-                $this->assertNotEquals('', $org->{$fielddata['tablefieldname']});
-                $this->assertNotNull($org->{$fielddata['tablefieldname']});
+                $this->assertNotEquals('', $org->$field);
+                $this->assertNotNull($org->$field);
             } else {
                 // Check the data matches the value in the CSV.
-                $this->assertEquals($fielddata["default"][0], $org->{$fielddata['tablefieldname']}, 'Failed for field ' . $field);
+                $this->assertEquals($value, $org->$field, 'Failed for field ' . $field);
             }
         }
     }
 
-    public function test_sync_parent() {
-        // TODO: All data, (the parent and child) neesd to be in the CSV.
-        $this->markTestSkipped('HR Import organisation source hierarchy tests need to be written.');
+    public function test_sync_parent_with_emptyfields_setting_off() {
+        global $DB;
+
+        // Set the config.
+        $additional_fields = array('import_parentidnumber' => 1);
+        $config = array_merge($this->configcsv, $this->importfields(), $additional_fields);
+        $this->set_source_config($config);
+        $config = array_merge($this->config, array('csvsaveemptyfields' => 0));
+        $this->set_element_config($config);
+
+        // First add some organisations we can update.
+        $organisation1 = array(
+            'id' => 2,
+            'fullname' => 'Organisation 1',
+            'shortname' => 'org1',
+            'idnumber' => 'ORG1',
+            'description' => 'Description 1',
+            'frameworkid' => 1,
+            'path' => '/2',
+            'depthlevel' => 1,
+            'parentid' => 0,
+            'sortthread' => 02,
+            'visible' => 1,
+            'timevalidfrom' => 0,
+            'timevalidto' => 0,
+            'timecreated' => 0,
+            'timemodified' => 0,
+            'usermodified' => 2,
+            'totarasync' => 1
+        );
+
+        $organisation2 = array(
+            'id' => 3,
+            'fullname' => 'Organisation 2',
+            'shortname' => 'org2',
+            'idnumber' => 'ORG2',
+            'description' => 'Description 2',
+            'frameworkid' => 1,
+            'path' => '/2/3',
+            'depthlevel' => 2,
+            'parentid' => 2,
+            'sortthread' => 02.01,
+            'visible' => 1,
+            'timevalidfrom' => 0,
+            'timevalidto' => 0,
+            'timecreated' => 0,
+            'timemodified' => 0,
+            'usermodified' => 2,
+            'totarasync' => 1
+        );
+
+        $this->loadDataSet($this->createArrayDataset(array(
+            'org' => array($organisation1, $organisation2)
+        )));
+
+        $this->assertCount(3, $DB->get_records('org')); // Check the correct count of organisations.
+
+        // Check that the import and parent was assigned correctly.
+        $organisation1 = $this->get_organisation('ORG1');
+        $organisation2 = $this->get_organisation('ORG2');
+        $this->assertEquals('Organisation 2', $organisation2->fullname);
+        $this->assertEquals($organisation1->id, $organisation2->parentid);
+        $this->assertEquals(2, $organisation2->depthlevel);
+
+        // Create CSV and sync.
+        $this->add_csv('organisation_empty_fields_4.csv', 'org');
+
+        $this->assertCount(3, $DB->get_records('org'));
+        $this->assertTrue($this->get_element()->sync());
+        $this->assertCount(3, $DB->get_records('org'));
+
+        // Get the new record for organisation 2 (it shouldn't have changed).
+        $organisation2 = $this->get_organisation('ORG2');
+        $this->assertEquals($organisation1->id, $organisation2->parentid);
+        $this->assertEquals(2, $organisation2->depthlevel);
+    }
+
+    public function test_sync_parent_with_emptyfields_setting_on() {
+        global $DB;
+
+        // Set the config.
+        $additional_fields = array('import_parentidnumber' => 1);
+        $config = array_merge($this->configcsv, $this->importfields(), $additional_fields);
+        $this->set_source_config($config);
+        $config = array_merge($this->config, array('csvsaveemptyfields' => true));
+        $this->set_element_config($config);
+
+        // First add some organisations we can update.
+        $organisation1 = array(
+            'id' => 2,
+            'fullname' => 'Organisation 1',
+            'shortname' => 'org1',
+            'idnumber' => 'ORG1',
+            'description' => 'Description 1',
+            'frameworkid' => 1,
+            'path' => '/2',
+            'depthlevel' => 1,
+            'parentid' => 0,
+            'sortthread' => 02,
+            'visible' => 1,
+            'timevalidfrom' => 0,
+            'timevalidto' => 0,
+            'timecreated' => 0,
+            'timemodified' => 0,
+            'usermodified' => 2,
+            'totarasync' => 1
+        );
+
+        $organisation2 = array(
+            'id' => 3,
+            'fullname' => 'Organisation 2',
+            'shortname' => 'org2',
+            'idnumber' => 'ORG2',
+            'description' => 'Description 2',
+            'frameworkid' => 1,
+            'path' => '/2/3',
+            'depthlevel' => 2,
+            'parentid' => 2,
+            'sortthread' => 02.01,
+            'visible' => 1,
+            'timevalidfrom' => 0,
+            'timevalidto' => 0,
+            'timecreated' => 0,
+            'timemodified' => 0,
+            'usermodified' => 2,
+            'totarasync' => 1
+        );
+
+        $this->loadDataSet($this->createArrayDataset(array(
+            'org' => array($organisation1, $organisation2)
+        )));
+
+        // Check we are starting with the number of orgs.
+        $this->assertCount(3, $DB->get_records('org'));
+
+        // Check that the import and parent was assigned correctly.
+        $organisation1 = $this->get_organisation('ORG1');
+        $organisation2 = $this->get_organisation('ORG2');
+        $this->assertEquals('Organisation 2', $organisation2->fullname);
+        $this->assertEquals($organisation1->id, $organisation2->parentid);
+
+        // Load fixture CSV.
+        $this->add_csv('organisation_empty_fields_4.csv', 'org');
+
+        $this->assertCount(3, $DB->get_records('org'));
+        $this->assertTrue($this->get_element()->sync());
+        $this->assertCount(3, $DB->get_records('org'));
+
+        // Get the new record for organisation 2.
+        $organisation2 = $this->get_organisation('ORG2');
+        $this->assertEquals(0, $organisation2->parentid); // Organisation ID should have been removed.
+        $this->assertEquals(1, $organisation2->depthlevel);
     }
 
     public function test_sync_type() {
@@ -497,4 +693,38 @@ class tool_totara_sync_org_csv_emptyfields_setting_testcase extends advanced_tes
         $this->markTestSkipped('HR Import organisation source custom field tests still need to be written.');
     }
 
+    public function test_empty_frameworkidnumber_ignore_emptyfields() {
+        global $DB;
+
+        $config = array_merge($this->configcsv, $this->importfields());
+        $this->set_source_config($config);
+        $config = array_merge($this->config, array('csvsaveemptyfields' => false));
+        $this->set_element_config($config);
+
+        $this->add_csv('organisation_empty_fields_5.csv', 'org');
+
+        $this->assertTrue($this->get_element()->sync()); // Run the sync.
+
+        $this->assertCount(1, $DB->get_records('org')); // Check the correct count of organisations.
+    }
+
+
+    /**
+     * An exception is exptected from the sync() function here as the file being
+     * imported contains an empty framework id which is not allowed.
+     *
+     * @expectedException moodle_exception
+     */
+    public function test_empty_frameworkidnumber_save_emptyfields() {
+        global $DB;
+
+        $config = array_merge($this->configcsv, $this->importfields());
+        $this->set_source_config($config);
+        $config = array_merge($this->config, array('csvsaveemptyfields' => true));
+        $this->set_element_config($config);
+
+        $this->add_csv('organisation_empty_fields_5.csv', 'org');
+
+        $this->get_element()->sync(); // Run the sync.
+    }
 }

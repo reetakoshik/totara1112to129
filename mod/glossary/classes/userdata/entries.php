@@ -195,7 +195,7 @@ class entries extends \totara_userdata\userdata\item {
             unset($entry->cmid);
             unset($entry->cmidnumber);
             $event = entry_deleted::create([
-                'context' => $context,
+                'context' => $glossarycontext,
                 'objectid' => $entry->id,
                 'other' => [
                     'concept' => $entry->concept

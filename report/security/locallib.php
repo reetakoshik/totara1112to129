@@ -55,6 +55,7 @@ function report_security_get_issue_list() {
         'report_security_check_cookiesecure',
         'report_security_check_cookiehttponly',
         'report_security_check_persistentlogin',
+        'report_security_check_scormsessionkeepalive',
         'report_security_check_configrw',
         'report_security_check_riskxss',
         'report_security_check_logincsrf',
@@ -67,6 +68,7 @@ function report_security_get_issue_list() {
         'report_security_check_guest',
         'report_security_check_repositoryurl',
         'report_security_check_xxe_risk',
+        'report_security_check_preventexecpath',
     );
 }
 
@@ -732,7 +734,7 @@ function report_security_check_frontpagerole($detailed=false) {
 
     if ($riskycount or !$legacyok) {
         $result->status  = REPORT_SECURITY_CRITICAL;
-        $result->info    = get_string('check_frontpagerole_error', 'report_security', format_string($frontpage_role->name));
+        $result->info    = get_string('check_frontpagerole_error', 'report_security', role_get_name($frontpage_role));
 
     } else {
         $result->status  = REPORT_SECURITY_OK;
@@ -1129,6 +1131,36 @@ function report_security_check_persistentlogin($detailed = false) {
 }
 
 /**
+ * Verifies if the sessionkeepalive setting in scorm is enabled on this site.
+ *
+ * @param bool $detailed
+ * @return stdClass result
+ */
+function report_security_check_scormsessionkeepalive($detailed = false) {
+    global $CFG;
+
+    $result = new stdClass();
+    $result->issue   = 'report_security_check_scormsessionkeepalive';
+    $result->name    = get_string('check_scormsessionkeepalive_name', 'report_security');
+    $result->details = null;
+    $result->link    = "<a href=\"$CFG->wwwroot/$CFG->admin/settings.php?section=modsettingscorm\">".get_string('modulename', 'scorm').'</a>';
+
+    if (!get_config('scorm', 'sessionkeepalive')) {
+        $result->status = REPORT_SECURITY_OK;
+        $result->info = get_string('check_scormsessionkeepalive_ok', 'report_security');
+    } else {
+        $result->status = REPORT_SECURITY_WARNING;
+        $result->info = get_string('check_scormsessionkeepalive_warning', 'report_security');
+    }
+
+    if ($detailed) {
+        $result->details = get_string('check_scormsessionkeepalive_details', 'report_security');
+    }
+
+    return $result;
+}
+
+/**
  * Checks whether a DOM object will load contents of an external file by default when it loads XML.
  *
  * @param bool $detailed
@@ -1189,6 +1221,36 @@ function report_security_check_nodemodules($detailed = false) {
 
     if ($detailed) {
         $result->details = get_string('check_nodemodules_details', 'report_security', ['path' => $CFG->dirroot.'/node_modules']);
+    }
+
+    return $result;
+}
+
+
+/**
+ * Verifies the status of preventexecpath
+ *
+ * @param bool $detailed
+ * @return object result
+ */
+function report_security_check_preventexecpath($detailed = false) {
+    global $CFG;
+
+    $result = new stdClass();
+    $result->issue   = 'report_security_check_preventexecpath';
+    $result->name    = get_string('check_preventexecpath_name', 'report_security');
+    $result->details = null;
+    $result->link    = null;
+
+    if (empty($CFG->preventexecpath)) {
+        $result->status = REPORT_SECURITY_WARNING;
+        $result->info   = get_string('check_preventexecpath_warning', 'report_security');
+        if ($detailed) {
+            $result->details = get_string('check_preventexecpath_details', 'report_security');
+        }
+    } else {
+        $result->status = REPORT_SECURITY_OK;
+        $result->info   = get_string('check_preventexecpath_ok', 'report_security');
     }
 
     return $result;

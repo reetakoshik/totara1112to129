@@ -31,11 +31,6 @@ require_once($CFG->dirroot . '/totara/completionimport/lib.php');
  * A report builder source for Certifications
  */
 class rb_source_completionimport_certification extends rb_base_source {
-
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
-
     /**
      * Constructor
      */
@@ -58,6 +53,7 @@ class rb_source_completionimport_certification extends rb_base_source {
         $this->defaultfilters = array();
         $this->requiredcolumns = array();
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_completionimport_certification');
+        $this->usedcomponents[] = 'totara_completionimport';
         parent::__construct();
     }
 
@@ -157,7 +153,8 @@ class rb_source_completionimport_certification extends rb_base_source {
                 'base',
                 'id',
                 get_string('columnbaseid', 'rb_source_completionimport_certification'),
-                'base.id'
+                'base.id',
+                array('displayfunc' => 'integer')
         );
 
         $columnoptions[] = new rb_column_option(
@@ -165,7 +162,8 @@ class rb_source_completionimport_certification extends rb_base_source {
                 'rownumber',
                 get_string('columnbaserownumber', 'rb_source_completionimport_certification'),
                 'base.rownumber',
-                array('dbdatatype' => 'integer')
+                array('dbdatatype' => 'integer',
+                      'displayfunc' => 'integer')
         );
 
         $columnoptions[] = new rb_column_option(
@@ -174,7 +172,7 @@ class rb_source_completionimport_certification extends rb_base_source {
                 get_string('columnbaseimporterrormsg', 'rb_source_completionimport_certification'),
                 'base.importerrormsg',
                 array(
-                    'displayfunc' => 'importerrormsg',
+                    'displayfunc' => 'completionimport_error_message',
                 )
         );
 
@@ -184,7 +182,7 @@ class rb_source_completionimport_certification extends rb_base_source {
                 get_string('columnbaseimportevidence', 'rb_source_completionimport_certification'),
                 'base.importevidence',
                 array(
-                    'displayfunc' => 'yes_no',
+                    'displayfunc' => 'yes_or_no',
                 )
         );
 
@@ -209,14 +207,16 @@ class rb_source_completionimport_certification extends rb_base_source {
                 'importuser.username',
                 array('joins' => 'importuser',
                       'dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'plaintext')
         );
 
         $columnoptions[] = new rb_column_option(
                 'base',
                 'importuserid',
                 get_string('columnbaseimportuserid', 'rb_source_completionimport_course'),
-                'base.importuserid'
+                'base.importuserid',
+                array('displayfunc' => 'plaintext')
         );
 
         $columnoptions[] = new rb_column_option(
@@ -236,7 +236,8 @@ class rb_source_completionimport_certification extends rb_base_source {
                 get_string('columnbaseusername', 'rb_source_completionimport_certification'),
                 'base.username',
                 array('dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'plaintext')
         );
 
         $columnoptions[] = new rb_column_option(
@@ -245,7 +246,8 @@ class rb_source_completionimport_certification extends rb_base_source {
                 get_string('columnbasecertificationshortname', 'rb_source_completionimport_certification'),
                 'base.certificationshortname',
                 array('dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'plaintext')
         );
 
         $columnoptions[] = new rb_column_option(
@@ -263,14 +265,15 @@ class rb_source_completionimport_certification extends rb_base_source {
                 'completiondate',
                 get_string('columnbasecompletiondate', 'rb_source_completionimport_certification'),
                 'base.completiondate',
-                array('dbdatatype' => 'timestamp')
+                array('displayfunc' => 'plaintext')
         );
 
         $columnoptions[] = new rb_column_option(
                 'base',
                 'duedate',
                 get_string('columnbaseduedate', 'rb_source_completionimport_certification'),
-                'base.duedate'
+                'base.duedate',
+                array('displayfunc' => 'plaintext')
         );
 
         return $columnoptions;
@@ -481,8 +484,17 @@ class rb_source_completionimport_certification extends rb_base_source {
         return $defaultfilters;
     }
 
-
+    /**
+     * Display the error message
+     *
+     * @deprecated Since Totara 12.0
+     * @param $importerrormsg
+     * @param $row
+     * @param $isexport
+     * @return string
+     */
     public function rb_display_importerrormsg($importerrormsg, $row, $isexport) {
+        debugging('rb_source_completionimport_certification::rb_display_importerrormsg has been deprecated since Totara 12.0. Use totara_completionimport\rb\display\completionimport_error_message::display', DEBUG_DEVELOPER);
         $errors = array();
         $errorcodes = explode(';', $importerrormsg);
         foreach ($errorcodes as $errorcode) {

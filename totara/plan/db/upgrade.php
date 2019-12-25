@@ -86,19 +86,19 @@ function xmldb_totara_plan_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2017112000, 'totara', 'plan');
     }
 
-    if ($oldversion < 2018022701) {
+    if ($oldversion < 2018052300) {
         // Clean up orphaned files from any previously deleted evidence.
         totara_plan_upgrade_clean_deleted_evidence_files();
 
-        upgrade_plugin_savepoint(true, 2018022701, 'totara', 'plan');
+        upgrade_plugin_savepoint(true, 2018052300, 'totara', 'plan');
     }
 
-    if ($oldversion < 2018022702) {
+    if ($oldversion < 2018112201) {
         // Rename columns types to type 'plan'.
         reportbuilder_rename_data('columns', 'dp_course', 'course_completion', 'status', 'plan', 'courseprogress');
         reportbuilder_rename_data('filters', 'dp_course', 'course_completion', 'status', 'plan', 'courseprogress');
 
-        upgrade_plugin_savepoint(true, 2018022702, 'totara', 'plan');
+        upgrade_plugin_savepoint(true, 2018112201, 'totara', 'plan');
     }
 
     return true;

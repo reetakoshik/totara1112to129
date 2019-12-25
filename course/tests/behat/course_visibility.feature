@@ -44,14 +44,20 @@ Feature: Test course visibility
       | user     | cohort |
       | learner2 | AUD1   |
     And I log in as "admin"
-    And the following config values are set as admin:
-      | frontpageloggedin | 4 |
-    And I navigate to "Dashboards" node in "Site administration > Appearance"
+    And I am on site homepage
+    And I navigate to "Turn editing on" node in "Front page settings"
+    And I configure the "Available courses" block
+    And I set the following fields to these values:
+      | Display | Courses nested in categories |
+    And I press "Save changes"
+    And I navigate to "Turn editing off" node in "Front page settings"
+    And I navigate to "Dashboards" node in "Site administration > Navigation"
     And I click on "My Learning" "link"
     And I press "Blocks editing on"
     And I add the "Courses" block
     And I log out
 
+  @javascript
   Scenario: Traditional course visibility works as expected
     Given I log in as "trainer1"
     When I click on "Dashboard" in the totara menu
@@ -79,7 +85,6 @@ Feature: Test course visibility
     And I should not see "Calculus"
 
     When I click on "Home" in the totara menu
-    When I click on "Home" "link" in the "Navigation" "block"
     And I follow the more information icon for the "Biology" course
     And I should see "Editing Trainer: Trainer 1"
 
@@ -97,7 +102,6 @@ Feature: Test course visibility
     And I should not see "Calculus"
 
     When I click on "Home" in the totara menu
-    When I click on "Home" "link" in the "Navigation" "block"
     And I follow the more information icon for the "Biology" course
     And I should see "Editing Trainer: Trainer 1"
 
@@ -115,7 +119,6 @@ Feature: Test course visibility
     And I should not see "Calculus"
 
     When I click on "Home" in the totara menu
-    When I click on "Home" "link" in the "Navigation" "block"
     And I follow the more information icon for the "Biology" course
     And I should see "Editing Trainer: Trainer 1"
 
@@ -127,31 +130,28 @@ Feature: Test course visibility
       | Enable audience-based visibility | 1 |
 
     # Make Chemistry visible only to enrolled users.
-    And I click on "Find Learning" in the totara menu
-    And I follow "Chemistry"
+    And I am on "Chemistry" course homepage
     And I navigate to "Edit settings" node in "Course administration"
     And I set the following fields to these values:
       | Visibility | Enrolled users only |
     And I press "Save and display"
 
     # Make Physics visible to enrolled users and selected audiences.
-    And I click on "Find Learning" in the totara menu
-    And I follow "Physics"
+    And I am on "Physics" course homepage
     And I navigate to "Edit settings" node in "Course administration"
     And I set the following fields to these values:
       | Visibility | Enrolled users and members of the selected audiences |
     And I press "Save and display"
 
     # Make Calculus visible to no users.
-    And I click on "Find Learning" in the totara menu
-    And I follow "Calculus"
+    And I am on "Calculus" course homepage
     And I navigate to "Edit settings" node in "Course administration"
     And I set the following fields to these values:
       | Visibility | No users |
     And I press "Save and display"
 
     # Now add these audiences as visible learning.
-    When I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    When I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Cohort 1"
     And I follow "Visible learning"
     And I press "Add courses"
@@ -170,21 +170,18 @@ Feature: Test course visibility
     Then I should see "Biology"
     And I should see "Chemistry"
     And I should see "Physics"
-    And I should not see "Calculus"
     And I click on "Find Learning" in the totara menu
     Then I should see "Biology"
     And I should see "Chemistry"
     And I should see "Physics"
-    And I should not see "Calculus"
+    And I should see "Calculus"
 
     When I click on "Home" in the totara menu
-    When I click on "Home" "link" in the "Navigation" "block"
     And I follow the more information icon for the "Biology" course
     And I should see "Editing Trainer: Trainer 1"
 
     When I log out
     And I log in as "learner1"
-    And I click on "Home" "link" in the "Navigation" "block"
     Then I should see "Biology"
     And I should see "Chemistry"
     And I should see "Physics"
@@ -196,13 +193,12 @@ Feature: Test course visibility
     And I should not see "Calculus"
 
     When I click on "Home" in the totara menu
-    When I click on "Home" "link" in the "Navigation" "block"
     And I follow the more information icon for the "Biology" course
     And I should see "Editing Trainer: Trainer 1"
 
     When I log out
     And I log in as "learner2"
-    And I click on "Home" "link" in the "Navigation" "block"
+    And I click on "Home" in the totara menu
     Then I should see "Biology"
     And I should see "Chemistry"
     And I should see "Physics"
@@ -214,14 +210,13 @@ Feature: Test course visibility
     And I should not see "Calculus"
 
     When I click on "Home" in the totara menu
-    When I click on "Home" "link" in the "Navigation" "block"
 
     And I follow the more information icon for the "Biology" course
     And I should see "Editing Trainer: Trainer 1"
 
     When I log out
     And I log in as "learner3"
-    And I click on "Home" "link" in the "Navigation" "block"
+    And I click on "Home" in the totara menu
     Then I should see "Biology"
     And I should not see "Chemistry"
     And I should not see "Physics"
@@ -233,6 +228,5 @@ Feature: Test course visibility
     And I should not see "Calculus"
 
     When I click on "Home" in the totara menu
-    When I click on "Home" "link" in the "Navigation" "block"
     And I follow the more information icon for the "Biology" course
     And I should see "Editing Trainer: Trainer 1"

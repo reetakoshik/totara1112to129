@@ -26,7 +26,7 @@ require_once('test_helper.php');
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Tests the methods on the \block_totara_featured_links\tile\default_tile class
+ * Tests the methods on the {@link block_totara_featured_links\tile\default_tile} class
  */
 class block_totara_featured_links_external_testcase extends test_helper {
 
@@ -42,6 +42,11 @@ class block_totara_featured_links_external_testcase extends test_helper {
     public function setUp() {
         parent::setUp();
         $this->blockgenerator = $this->getDataGenerator()->get_plugin_generator('block_totara_featured_links');
+    }
+
+    public function tearDown() {
+        parent::tearDown();
+        $this->blockgenerator = null;
     }
 
     /**
@@ -83,10 +88,11 @@ class block_totara_featured_links_external_testcase extends test_helper {
         $this->resetAfterTest();
 
         $instance = $this->blockgenerator->create_instance();
-
         $tile1 = $this->blockgenerator->create_default_tile($instance->id);
+        $this->setUser(null);
+
         try {
-            \block_totara_featured_links\external::remove_tile($tile1->id);
+            block_totara_featured_links\external::remove_tile($tile1->id);
             $this->fail('Removing a tile when not logged in should be prohibited');
         } catch (\Exception $e) {
             $this->assertEquals('Course or activity not accessible. (You are not logged in)', $e->getMessage());
@@ -94,10 +100,11 @@ class block_totara_featured_links_external_testcase extends test_helper {
         $this->assertTrue($DB->record_exists('block_totara_featured_links_tiles', ['id' => $tile1->id]));
         $this->setGuestUser();
         try {
-            \block_totara_featured_links\external::remove_tile($tile1->id);
+            block_totara_featured_links\external::remove_tile($tile1->id);
             $this->fail('Removing a tile when being a guest should not be allowed');
         } catch (\Exception $e) {
-            $this->assertEquals("error/You do not have permissions to edit this tile\n\$a contents: ", $e->getMessage());
+            $message = 'error/'.get_string('cannot_edit_tile', 'block_totara_featured_links').PHP_EOL.'$a contents: ';
+            $this->assertEquals($message, $e->getMessage());
         }
         $this->assertTrue($DB->record_exists('block_totara_featured_links_tiles', ['id' => $tile1->id]));
     }
@@ -121,13 +128,13 @@ class block_totara_featured_links_external_testcase extends test_helper {
             'block-totara-featured-links-tile-'.$tile4->id,
             'block-totara-featured-links-tile-'.$tile2->id,
             'block-totara-featured-links-tile-'.$tile3->id];
-        \block_totara_featured_links\external::reorder_tiles($tile_array);
+        block_totara_featured_links\external::reorder_tiles($tile_array);
         $tile_array = [
             'block-totara-featured-links-tile-'.$tile1->id,
             'block-totara-featured-links-tile-'.$tile4->id,
             'block-totara-featured-links-tile-'.$tile3->id,
             'block-totara-featured-links-tile-'.$tile2->id];
-        \block_totara_featured_links\external::reorder_tiles($tile_array);
+        block_totara_featured_links\external::reorder_tiles($tile_array);
         $this->refresh_tiles($tile1, $tile2, $tile3, $tile4);
 
         $this->assertEquals(1, $tile1->sortorder);
@@ -140,7 +147,7 @@ class block_totara_featured_links_external_testcase extends test_helper {
             'block-totara-featured-links-tile-'.$tile4->id,
             'block-totara-featured-links-tile-'.$tile3->id,
             'block-totara-featured-links-tile-'.$tile2->id];
-        \block_totara_featured_links\external::reorder_tiles($tile_array);
+        block_totara_featured_links\external::reorder_tiles($tile_array);
         $this->refresh_tiles($tile1, $tile2, $tile3, $tile4);
 
         $this->assertEquals(1, $tile1->sortorder);

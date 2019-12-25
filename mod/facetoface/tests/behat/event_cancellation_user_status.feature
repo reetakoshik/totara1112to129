@@ -39,9 +39,7 @@ Feature: Seminar event cancellation status
     And I expand "Enrolments" node
     And I follow "Manage enrol plugins"
     And I click on "Enable" "link" in the "Seminar direct enrolment" "table_row"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name                               | Test Seminar |
       | Description                        | Test Seminar |
@@ -73,8 +71,7 @@ Feature: Seminar event cancellation status
     And I click on "#id_approvaloptions_approval_manager" "css_element"
     And I press "Save and display"
 
-    Then I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    Then I am on "Course 1" course homepage
     And I navigate to "Enrolment methods" node in "Course administration > Users"
     And I set the field "Add method" to "Seminar direct enrolment"
     And I press "Add method"
@@ -82,45 +79,40 @@ Feature: Seminar event cancellation status
 
 #    Users requesting approval
     Given I log in as "learner1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I should see "Sign-up"
-    And I follow "Sign-up"
+    And I am on "Course 1" course homepage
+    And I should see "Request approval"
+    And I follow "Request approval"
     And I should see "Manager Approval"
     And I press "Request approval"
     And I log out
 
     Given I log in as "learner2"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I should see "Sign-up"
-    And I follow "Sign-up"
+    And I am on "Course 1" course homepage
+    And I should see "Request approval"
+    And I follow "Request approval"
     And I should see "Manager Approval"
     And I press "Request approval"
     And I log out
 
 #   Learner Five requesting approval and immediately withdrawing his pending request
     Given I log in as "learner5"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I should see "Sign-up"
-    And I follow "Sign-up"
+    And I am on "Course 1" course homepage
+    And I should see "Request approval"
+    And I follow "Request approval"
     And I should see "Manager Approval"
     And I press "Request approval"
     And I should see "Your request was sent to your manager for approval."
-    Then I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    Then I am on "Course 1" course homepage
     And I should see "It is not possible to sign up for these events (manager request already pending)."
     And I should see "Withdraw pending request"
     And I click on "Withdraw pending request" "link"
     And I press "Confirm"
-    And I should see "Sign-up"
+    And I should see "Request approval"
     And I log out
 
 #   Manager adding Learners 3 and 4 as attendees, approving Learner 1 and declining request for Learner 2
     Given I log in as "manager1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "Attendees" "link"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Learner Three, learner3@example.com" "option"
@@ -158,6 +150,7 @@ Feature: Seminar event cancellation status
     When I follow "Cancellations"
     Then I should see "Learner Five" in the ".cancellations" "css_element"
     And I should not see "Learner Two" in the ".cancellations" "css_element"
+    And I run all adhoc tasks
     And I log out
 
 #  Checking status as learners
@@ -198,8 +191,7 @@ Feature: Seminar event cancellation status
 #  Cancel the event and check status again. Cancelled users should remain in the cancellation tab and declined users
 #  should not appear anywhere
     Given I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test Seminar"
     When I click on "Cancel event" "link" in the "3 / 10" "table_row"
     And I should see "Cancelling event in"
@@ -207,6 +199,7 @@ Feature: Seminar event cancellation status
     And I press "Yes"
     Then I should see "Event cancelled" in the ".alert-success" "css_element"
     When I click on "Attendees" "link" in the "3 / 10" "table_row"
+    And I click on "Cancellations" "link"
     Then I should see "Event cancellation" in the "Learner One" "table_row"
     And I should see "Event cancellation" in the "Learner Three" "table_row"
     And I should see "Event cancellation" in the "Learner Four" "table_row"
@@ -217,8 +210,7 @@ Feature: Seminar event cancellation status
   Scenario: Event cancellation in a Seminar with users that have cancelled their session.
     Given I log out
     When I log in as "learner3"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I should see "Sign-up"
     And I follow "Sign-up"
     And I press "Sign-up"
@@ -227,8 +219,7 @@ Feature: Seminar event cancellation status
     And I log out
 
     Given I log in as "manager1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "Attendees" "link"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Learner One, learner1@example.com" "option"
@@ -246,8 +237,7 @@ Feature: Seminar event cancellation status
     And I log out
 
     When I log in as "learner5"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I should see "Cancel booking"
     And I follow "Cancel booking"
     And I press "Yes"
@@ -255,8 +245,7 @@ Feature: Seminar event cancellation status
     And I log out
 
     When I log in as "manager1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "Attendees" "link"
     Then I should see "Learner One" in the "#facetoface_sessions" "css_element"
     And I should see "Learner Three" in the "#facetoface_sessions" "css_element"
@@ -269,8 +258,7 @@ Feature: Seminar event cancellation status
     And I log out
 
     When I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test Seminar"
     When I click on "Cancel event" "link"
     And I should see "Cancelling event in"
@@ -278,6 +266,7 @@ Feature: Seminar event cancellation status
     And I press "Yes"
     Then I should see "Event cancelled" in the ".alert-success" "css_element"
     When I click on "Attendees" "link"
+    And I click on "Cancellations" "link"
     Then I should see "Event cancellation" in the "Learner One" "table_row"
     And I should see "Event cancellation" in the "Learner Three" "table_row"
     And I should see "User cancellation" in the "Learner Five" "table_row"

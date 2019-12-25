@@ -1,4 +1,4 @@
-@enrol @javascript @totara @enrol_totara_facetoface
+@enrol @javascript @totara @enrol_totara_facetoface @mod_facetoface
 Feature: Users can enrol on courses that have position signup enabled and get signed for appropriate sessions
   In order to participate in courses with seminars
   As a user
@@ -27,8 +27,7 @@ Feature: Users can enrol on courses that have position signup enabled and get si
     And I press "Save changes"
     And I log out
     And I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name                                                            | Test seminar name 1        |
       | Description                                                     | Test seminar description 1 |
@@ -52,8 +51,7 @@ Feature: Users can enrol on courses that have position signup enabled and get si
     And I press "Save changes"
     And I log out
     And I log in as "teacher1"
-    And I follow "Course 2"
-    And I turn editing mode on
+    And I am on "Course 2" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name                                                            | Test seminar name 1        |
       | Description                                                     | Test seminar description 1 |
@@ -79,14 +77,13 @@ Feature: Users can enrol on courses that have position signup enabled and get si
 
   Scenario: Enrol using seminar direct where position asked for but not required
     Given I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     When I add "Seminar direct enrolment" enrolment method with:
       | Custom instance name                          | Test student enrolment |
       | Automatically sign users up to seminar events | 0                      |
     And I log out
     And I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "Sign-up" "link" in the "1 January 2020" "table_row"
     And I press "Sign-up"
     Then I should see "Your request was accepted"
@@ -99,7 +96,6 @@ Feature: Users can enrol on courses that have position signup enabled and get si
       | Automatically sign users up to seminar events | 0                      |
     And I log out
     And I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 2"
-    And I click on "Sign-up" "link" in the "1 January 2020" "table_row"
+    And I am on "Course 2" course homepage
+    And I click on "More info" "link" in the "1 January 2020" "table_row"
     Then I should see "You must have a suitable job assignment to sign up for this seminar activity."

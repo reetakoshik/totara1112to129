@@ -28,9 +28,13 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Return list of marked submissions that have not been mailed out for currently enrolled students
+ *
+ * @deprecated since Totara 12.0
  */
 function facetoface_get_unmailed_reminders() {
     global $CFG, $DB;
+
+    debugging('facetoface_get_unmailed_reminders() function has been deprecated', DEBUG_DEVELOPER);
 
     $submissions = $DB->get_records_sql("
         SELECT
@@ -50,7 +54,7 @@ function facetoface_get_unmailed_reminders() {
         ) dates ON dates.sessionid = se.id
         WHERE
             su.mailedreminder = 0
-    ", array(MDL_F2F_STATUS_BOOKED));
+    ", array(\mod_facetoface\signup\state\booked::get_code()));
 
     if ($submissions) {
         foreach ($submissions as $key => $value) {
@@ -73,9 +77,14 @@ function facetoface_get_unmailed_reminders() {
  * @param array $canceldates Array or a single date to cancel
  * @param string $description Extra message to add in the iCal description
  * @return \stdClass iCal filename and template
+ *
+ * @deprecated since Totara 12.0
  */
 function facetoface_generate_ical($f2f, $session, $method, $user, $dates = null, $canceldates = [], $description = '') {
     global $DB;
+
+    debugging('facetoface_generate_ical() function has been deprecated, this functionality is moved to messaging::generate_ical()',
+        DEBUG_DEVELOPER);
 
     // Checking date overrides.
     if (is_null($dates)) {
@@ -106,7 +115,7 @@ function facetoface_generate_ical($f2f, $session, $method, $user, $dates = null,
 
     // Get user object if only id is given.
     $user = is_object($user) ? $user : $DB->get_record('user', ['id' => $user]);
-    $rooms = facetoface_get_session_rooms($session->id);
+    $rooms = \mod_facetoface\room_list::get_event_rooms($session->id);
 
     // If generating event for a single date, then use REQUEST, otherwise use PUBLISH.
     // Generally publish is used not for events, but for unsolicited invitations and must not
@@ -160,16 +169,21 @@ function facetoface_generate_ical($f2f, $session, $method, $user, $dates = null,
 
         // Get the location data from custom fields if they exist.
         $location = [];
-        if (!empty($date->roomid) && isset($rooms[$date->roomid])) {
-            $room = $rooms[$date->roomid];
-            if (!empty($room->name)) {
-                $location[] = $room->name;
+        if (!empty($date->roomid) && $rooms->contains($date->roomid)) {
+            $room = $rooms->get($date->roomid);
+            $roomdata = $room->to_record();
+
+            // Load the customfields into the roomdata object.
+            customfield_load_data($roomdata, "facetofaceroom", "facetoface_room");
+
+            if (!empty($roomdata->name)) {
+                $location[] = $roomdata->name;
             }
-            if (!empty($room->customfield_building)) {
-                $location[] = $room->customfield_building;
+            if (!empty($roomdata->customfield_building)) {
+                $location[] = $roomdata->customfield_building;
             }
-            if (!empty($room->customfield_location->address)) {
-                $location[] = $room->customfield_location->address;
+            if (!empty($roomdata->customfield_location->address)) {
+                $location[] = $roomdata->customfield_location->address;
             }
         }
         // NOTE: Newlines are meant to be encoded with the literal sequence
@@ -182,7 +196,7 @@ function facetoface_generate_ical($f2f, $session, $method, $user, $dates = null,
         // Possibility of multiple commas, replaced with the single one.
         $LOCATION = preg_replace("/{$delimiter}+/", $delimiter, $location);
 
-        $ORGANISEREMAIL = $CFG->facetoface_fromaddress;
+        $ORGANISEREMAIL = \mod_facetoface\facetoface_user::get_facetoface_user()->email;
 
         if ($method & MDL_F2F_CANCEL) {
             $ROLE = 'NON-PARTICIPANT';
@@ -240,7 +254,7 @@ function facetoface_generate_ical($f2f, $session, $method, $user, $dates = null,
         "END:VCALENDAR\r\n"
     ]);
 
-    // TODO: this is stolen from file_get_unused_draft_itemid(), replace once messaging accepts real files or strings.
+    // This is stolen from file_get_unused_draft_itemid(), replace once messaging accepts real files or strings.
     $contextid = context_user::instance($user->id)->id;
     $fs = get_file_storage();
     $draftitemid = rand(1, 999999999);
@@ -248,7 +262,7 @@ function facetoface_generate_ical($f2f, $session, $method, $user, $dates = null,
         $draftitemid = rand(1, 999999999);
     }
 
-    // TODO: let's just fake the draft area here because it will get automatically cleanup up later in cron if necessary.
+    // Let's just fake the draft area here because it will get automatically cleanup up later in cron if necessary.
     return (object) [
         'file' => $fs->create_file_from_string([
                         'contextid' => $contextid,
@@ -272,6 +286,7 @@ function facetoface_generate_ical($f2f, $session, $method, $user, $dates = null,
  * @param array $olddates previous session dates
  * @param int $onedate Provide ical attachment only for one specified date
  * @return stdClass Object that contains a filename in dataroot directory and ical template
+ *
  * @deprecated Deprecated since Totara 11.1 The function doesn't work properly. Use facetoface_generate_ical() instead.
  */
 function facetoface_get_ical_attachment($method, $facetoface, $session, $user, array $olddates = array(), $onedate = -1) {
@@ -290,7 +305,7 @@ function facetoface_get_ical_attachment($method, $facetoface, $session, $user, a
 
     // First, generate all the VEVENT blocks
     $VEVENTS = '';
-    $rooms = facetoface_get_session_rooms($session->id);
+    $rooms = \mod_facetoface\room_list::get_event_rooms($session->id);
     $newdates = empty($session->sessiondates) ? array() : $session->sessiondates;
     $maxdates = max(count($newdates), count($olddates));
     if ($maxdates == 0) {
@@ -319,7 +334,7 @@ function facetoface_get_ical_attachment($method, $facetoface, $session, $user, a
         WHERE su.userid = ?
             AND su.sessionid = ?
             AND sus.superceded = 1";
-    $params = array($user->id, $session->id, MDL_F2F_STATUS_USER_CANCELLED);
+    $params = array($user->id, $session->id, \mod_facetoface\signup\state\user_cancelled::get_code());
     $usercnt = $DB->count_records_sql($sql, $params);
 
     for ($i = 0; $i < $maxdates; $i++) {
@@ -380,22 +395,27 @@ function facetoface_get_ical_attachment($method, $facetoface, $session, $user, a
         // Get the location data from custom fields if they exist.
         $locationstring = '';
         $delimiter = get_string('icallocationstringdelimiter', 'facetoface');
-        if (!empty($date->roomid) && isset($rooms[$date->roomid])) {
-            $room = $rooms[$date->roomid];
-            if (!empty($room->name)) {
-                $locationstring .= $room->name;
+        if (!empty($date->roomid) && $rooms->contains($date->roomid)) {
+            $room = $rooms->get($date->roomid);
+            $roomdata = $room->to_record();
+
+            // Load the customfields into the roomdata object.
+            customfield_load_data($roomdata, "facetofaceroom", "facetoface_room");
+
+            if (!empty($roomdata->name)) {
+                $locationstring .= $roomdata->name;
             }
-            if (!empty($room->customfield_building)) {
+            if (!empty($roomdata->customfield_building)) {
                 if (!empty($locationstring)) {
                     $locationstring .= $delimiter."\n";
                 }
-                $locationstring .= $room->customfield_building;
+                $locationstring .= $roomdata->customfield_building;
             }
-            if (!empty($room->customfield_location->address)) {
+            if (!empty($roomdata->customfield_location->address)) {
                 if (!empty($locationstring)) {
                     $locationstring .= $delimiter."\n";
                 }
-                $locationstring .= $room->customfield_location->address;
+                $locationstring .= $roomdata->customfield_location->address;
             }
         }
         // NOTE: Newlines are meant to be encoded with the literal sequence
@@ -407,7 +427,7 @@ function facetoface_get_ical_attachment($method, $facetoface, $session, $user, a
         $pattern = "/{$delimiter}+/";
         $LOCATION = preg_replace($pattern, $delimiter, $locationstring);
 
-        $ORGANISEREMAIL = $CFG->facetoface_fromaddress;
+        $ORGANISEREMAIL = \mod_facetoface\facetoface_user::get_facetoface_user()->email;
 
         $ROLE = 'REQ-PARTICIPANT';
         $CANCELSTATUS = '';
@@ -446,14 +466,14 @@ function facetoface_get_ical_attachment($method, $facetoface, $session, $user, a
     $template .= "{$VEVENTS}";
     $template .= "END:VCALENDAR\r\n";
 
-    // TODO: this is stolen from file_get_unused_draft_itemid(), replace once messaging accepts real files or strings.
+    // This is stolen from file_get_unused_draft_itemid(), replace once messaging accepts real files or strings.
     $contextid = context_user::instance($user->id)->id;
     $fs = get_file_storage();
     $draftitemid = rand(1, 999999999);
     while ($files = $fs->get_area_files($contextid, 'user', 'draft', $draftitemid)) {
         $draftitemid = rand(1, 999999999);
     }
-    // TODO: let's just fake the draft area here because it will get automatically cleanup up later in cron if necessary.
+    // Let's just fake the draft area here because it will get automatically cleanup up later in cron if necessary.
     $file = $fs->create_file_from_string(
         array('contextid' => $contextid, 'component' => 'user', 'filearea' => 'draft',
               'itemid' => $draftitemid, 'filepath' => '/', 'filename' => 'ical.ics'),
@@ -472,8 +492,13 @@ function facetoface_get_ical_attachment($method, $facetoface, $session, $user, a
  * Used by facetoface_generate_ical
  * @seconds string signed number, e.g. -343242 or +343242
  * Convert no. of seconds to hhmmss format
+ *
+ * @deprecated since Totara 12.0
  */
 function facetoface_format_secs_to_his($seconds) {
+
+    debugging('facetoface_format_secs_to_his() function has been deprecated', DEBUG_DEVELOPER);
+
     if ( '-' == substr($seconds, 0, 1)) {
         $prefix  = '-';
         $seconds = substr($seconds, 1);
@@ -514,8 +539,13 @@ function facetoface_format_secs_to_his($seconds) {
 /**
  * Generates a timestamp for Ical
  *
+ * @deprecated since Totara 12.0
  */
 function facetoface_ical_generate_timestamp($timestamp) {
+
+    debugging('facetoface_ical_generate_timestamp() function has been deprecated, this functionality is moved to messaging::ical_generate_timestamp()',
+        DEBUG_DEVELOPER);
+
     return gmdate('Ymd', $timestamp) . 'T' . gmdate('His', $timestamp) . 'Z';
 }
 
@@ -524,8 +554,14 @@ function facetoface_ical_generate_timestamp($timestamp) {
  * Escapes data of the text datatype in ICAL documents.
  *
  * See RFC2445 or http://www.kanzaki.com/docs/ical/text.html or a more readable definition
+ *
+ * @deprecated since Totara 12.0
  */
 function facetoface_ical_escape($text, $converthtml=false) {
+
+    debugging('facetoface_ical_escape() function has been deprecated, this functionality is moved to messaging::ical_escape()',
+        DEBUG_DEVELOPER);
+
     if (empty($text)) {
         return '';
     }

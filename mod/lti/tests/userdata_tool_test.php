@@ -66,6 +66,7 @@ class mod_lti_userdata_tool_testcase extends advanced_testcase {
      * @return \stdClass the lti instance.
      */
     private function generate_lti_submissions(\stdClass $course, array $users) {
+        global $DB;
         $values = [
             'course' => $course->id,
             'toolurl' => $this->ltiurl
@@ -73,7 +74,15 @@ class mod_lti_userdata_tool_testcase extends advanced_testcase {
         $instance = $this->getDataGenerator()->create_module('lti', $values);
 
         foreach ($users as $user) {
-            lti_update_grade($instance, $user->id, 133, $this->grade);
+            lti_update_grade($instance, $user->id, $user->id + 99, $this->grade);
+
+            // Add a test historic submission.
+            $history = new stdClass();
+            $history->ltiid = $instance->id;
+            $history->userid = $user->id;
+            $history->launchid = $user->id + 99;
+            $history->timecreated = time();
+            $DB->insert_record('lti_submission_history', $history);
         };
 
         return $instance;
@@ -124,6 +133,7 @@ class mod_lti_userdata_tool_testcase extends advanced_testcase {
 
         $this->assertEquals($totallti, $DB->count_records('lti'));
         $this->assertEquals($totalsubmissions, $DB->count_records('lti_submission'));
+        $this->assertEquals($totalsubmissions, $DB->count_records('lti_submission_history'));
 
         return [$targetuser, $courselti];
     }
@@ -173,7 +183,7 @@ class mod_lti_userdata_tool_testcase extends advanced_testcase {
 
         $this->assertEquals($totallti, $DB->count_records('lti'));
         $this->assertEquals($env->finalsubmissioncount, $DB->count_records('lti_submission'));
-
+        $this->assertEquals($env->finalsubmissioncount, $DB->count_records('lti_submission_history'));
 
         $count = tool::execute_count($env->purgeduser, $env->context);
         $this->assertSame(0, $count, "wrong count after purge");

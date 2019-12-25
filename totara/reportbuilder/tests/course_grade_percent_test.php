@@ -18,84 +18,139 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author Alastair Munro <alastair.munro@totaralearning.com>
+ * @author Simon Player <simon.player@totaralearning.com>
  * @package totara
  * @subpackage reportbuilder
  *
  *
  */
 global $CFG;
-require_once($CFG->dirroot . '/totara/reportbuilder/classes/rb_base_source.php');
-require_once($CFG->dirroot . '/totara/plan/rb_sources/rb_source_dp_course.php');
 require_once($CFG->dirroot . '/completion/completion_completion.php');
 
 /**
  * @group totara_reportbuilder
  */
 class course_grade_percent_test extends advanced_testcase {
+    use totara_reportbuilder\phpunit\report_testing;
 
-    private $reportsource = null;
+    /**
+     * Do the necessary setup.
+     *
+     * @return stdClass
+     */
+    protected function setupdata() {
+        $this->resetAfterTest();
+        $this->setAdminUser();
 
-    protected function setUp() {
-        // Initialise the report source so we can test the display function.
-        $this->reportsource = new rb_source_dp_course(0);
+        $setupdata = new stdClass();
 
-        parent::setup();
+        // Create report.
+        $rid = $this->create_report('courses', 'Test');
+        $config = (new rb_config())->set_nocache(true);
+        $setupdata->report = reportbuilder::create($rid, $config);
+
+        // Mock objects to use in the display function.
+        $setupdata->column = $this->getMockBuilder('\rb_column')
+            ->setConstructorArgs(array('course_completion', 'passgrade', 'passgrade', 'grade_items.gradepass',
+                array('extrafields' => array('rplgrade' => true, 'status' => true, 'maxgrade' => true))))
+            ->getMock();
+        $setupdata->format = "html";
+        $setupdata->row = new stdClass();
+
+        return $setupdata;
     }
 
     public function test_course_grade_percent_rpl() {
-        $item = 'test';
+        $setup = $this->setupdata();
 
-        $row = new stdClass();
-        $row->rplgrade = 30;
-        $row->status = COMPLETION_STATUS_COMPLETEVIARPL;
-        $row->maxgrade = null;
+        $value = 'test';
 
-        $result = $this->reportsource->rb_display_course_grade_percent($item, $row);
-        $this->assertEquals('30.0%', $result);
+        // rplgrade.
+        $extrafieldrow = reportbuilder_get_extrafield_alias($setup->column->type, $setup->column->value, 'rplgrade');
+        $setup->row->$extrafieldrow = 30;
+
+        // status.
+        $extrafieldrow = reportbuilder_get_extrafield_alias($setup->column->type, $setup->column->value, 'status');
+        $setup->row->$extrafieldrow = COMPLETION_STATUS_COMPLETEVIARPL;
+
+        // maxgrade.
+        $extrafieldrow = reportbuilder_get_extrafield_alias($setup->column->type, $setup->column->value, 'maxgrade');
+        $setup->row->$extrafieldrow = null;
+
+        $display = \totara_reportbuilder\rb\display\course_grade_percent::display($value, $setup->format, $setup->row, $setup->column, $setup->report);
+        $this->assertEquals('30.0%', $display);
     }
 
     public function test_course_grade_percent_percentage() {
-        $item = 55;
-        $row = new stdClass();
-        $row->rplgrade = 30;
-        $row->status = COMPLETION_STATUS_COMPLETE;
-        $row->maxgrade = 100;
+        $setup = $this->setupdata();
 
-        $result = $this->reportsource->rb_display_course_grade_percent($item, $row);
-        $this->assertEquals('55.0%', $result);
+        $value = 55;
+
+        // rplgrade.
+        $extrafieldrow = reportbuilder_get_extrafield_alias($setup->column->type, $setup->column->value, 'rplgrade');
+        $setup->row->$extrafieldrow = 30;
+
+        // status.
+        $extrafieldrow = reportbuilder_get_extrafield_alias($setup->column->type, $setup->column->value, 'status');
+        $setup->row->$extrafieldrow = COMPLETION_STATUS_COMPLETE;
+
+        // maxgrade.
+        $extrafieldrow = reportbuilder_get_extrafield_alias($setup->column->type, $setup->column->value, 'maxgrade');
+        $setup->row->$extrafieldrow = 100;
+
+        $display = \totara_reportbuilder\rb\display\course_grade_percent::display($value, $setup->format, $setup->row, $setup->column, $setup->report);
+        $this->assertEquals('55.0%', $display);
 
         // Check a percent that isn't out of 100.
-        $item = 10;
-        $row = new stdClass();
-        $row->rplgrade = 30;
-        $row->status = COMPLETION_STATUS_COMPLETE;
-        $row->maxgrade = 30;
+        $value = 10;
 
-        $result = $this->reportsource->rb_display_course_grade_percent($item, $row);
-        $this->assertEquals('33.3%', $result);
+        // maxgrade.
+        $extrafieldrow = reportbuilder_get_extrafield_alias($setup->column->type, $setup->column->value, 'maxgrade');
+        $setup->row->$extrafieldrow = 30;
+
+        $display = \totara_reportbuilder\rb\display\course_grade_percent::display($value, $setup->format, $setup->row, $setup->column, $setup->report);
+        $this->assertEquals('33.3%', $display);
     }
 
     public function test_course_grade_percent_notempty() {
+        $setup = $this->setupdata();
 
-        $item = 72;
-        $row = new stdClass();
-        $row->rplgrade = null;
-        $row->status = COMPLETION_STATUS_COMPLETE;
-        $row->maxgrade = null;
+        $value = 72;
 
-        $result = $this->reportsource->rb_display_course_grade_percent($item, $row);
-        $this->assertEquals('72', $result);
+        // rplgrade.
+        $extrafieldrow = reportbuilder_get_extrafield_alias($setup->column->type, $setup->column->value, 'rplgrade');
+        $setup->row->$extrafieldrow = null;
+
+        // status.
+        $extrafieldrow = reportbuilder_get_extrafield_alias($setup->column->type, $setup->column->value, 'status');
+        $setup->row->$extrafieldrow = COMPLETION_STATUS_COMPLETE;
+
+        // maxgrade.
+        $extrafieldrow = reportbuilder_get_extrafield_alias($setup->column->type, $setup->column->value, 'maxgrade');
+        $setup->row->$extrafieldrow = null;
+
+        $display = \totara_reportbuilder\rb\display\course_grade_percent::display($value, $setup->format, $setup->row, $setup->column, $setup->report);
+        $this->assertEquals('72', $display);
     }
 
     public function test_course_grade_percent_novalue() {
+        $setup = $this->setupdata();
 
-        $item = null;
-        $row = new stdClass();
-        $row->rplgrade = 30;
-        $row->status = COMPLETION_STATUS_COMPLETE;
-        $row->maxgrade = 30;
+        $value = null;
 
-        $result = $this->reportsource->rb_display_course_grade_percent($item, $row);
-        $this->assertEquals('-', $result);
+        // rplgrade.
+        $extrafieldrow = reportbuilder_get_extrafield_alias($setup->column->type, $setup->column->value, 'rplgrade');
+        $setup->row->$extrafieldrow = 30;
+
+        // status.
+        $extrafieldrow = reportbuilder_get_extrafield_alias($setup->column->type, $setup->column->value, 'status');
+        $setup->row->$extrafieldrow = COMPLETION_STATUS_COMPLETE;
+
+        // maxgrade.
+        $extrafieldrow = reportbuilder_get_extrafield_alias($setup->column->type, $setup->column->value, 'maxgrade');
+        $setup->row->$extrafieldrow = 30;
+
+        $display = \totara_reportbuilder\rb\display\course_grade_percent::display($value, $setup->format, $setup->row, $setup->column, $setup->report);
+        $this->assertEquals('-', $display);
     }
 }

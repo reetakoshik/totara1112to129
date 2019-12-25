@@ -103,7 +103,7 @@ $urlparams = array('assignto' => $assignto,
 $PAGE->set_url(new moodle_url('/totara/hierarchy/prefix/goal/assign/assign.php'), $urlparams);
 $PAGE->set_context($sitecontext);
 $PAGE->set_pagelayout('admin');
-$PAGE->set_totara_menu_selected('mygoals');
+$PAGE->set_totara_menu_selected('\totara_hierarchy\totara\menu\mygoals');
 $PAGE->set_title($straddgoals);
 $PAGE->set_heading($straddgoals);
 
@@ -172,7 +172,7 @@ if ($add) {
         } else {
             // Make the assignment, then create all the current user assignments.
             $relationship->id = $DB->insert_record($type->table, $relationship);
-            $goal->create_user_assignments($assigntype, $relationship, $relationship->includechildren);
+            $goal->update_user_assignments($item, $assigntype, $relationship);
             $eventclass = "\\hierarchy_goal\\event\\assignment_{$type->fullname}_created";
         }
 

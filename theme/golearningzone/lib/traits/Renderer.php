@@ -18,6 +18,7 @@ use GoLearningZone\Pages\Noblocks as NoblocksPage;
 use GoLearningZone\Pages\Dashboard as DashboardPage;
 use GoLearningZone\Pages\Course as CoursePage;
 use GoLearningZone\Pages\DefaultPage as DefaultPage;
+use GoLearningZone\Pages\DefaultgoalPage as DefaultgoalPage;
 use GoLearningZone\Pages\EmptyPage as EmptyPage;
 use GoLearningZone\Pages\MyPublic as MyPublicPage;
 use GoLearningZone\Pages\Popup as PopupPage;
@@ -45,6 +46,13 @@ trait Renderer
     public function render_default()
     {
         $page = new DefaultPage($this);
+        $html = $page->render();
+        return $html;
+    }
+	
+	public function render_defaultgoal()
+    {
+        $page = new DefaultgoalPage($this);
         $html = $page->render();
         return $html;
     }
@@ -99,7 +107,7 @@ trait Renderer
     }
 
     public function render_popup()
-    {       
+    {
         $page = new PopupPage($this);
         $html = $page->render();
         return $html;
@@ -126,7 +134,7 @@ trait Renderer
     }
 
     public function __get($name) 
-    {
+    { 
         return $this->$name;
     }
 }

@@ -1,0 +1,2 @@
+idnumber,timemodified,username,deleted,firstname,lastname,email,firstnamephonetic,lastnamephonetic,middlename,alternatename,city,country,description,url,institution,department,phone1,phone2,address,customfield_textinput,customfield_checkbox
+1,0,user1,0,user1-firstname,user1-lastname,user1@email.com,user1-firstname-phonetic,user1-lastname-phonetic,user1-middlename,user1-alternatename,Brighton,GB,This is the description,https://www.totaralms.com,Totara,Development,"0123456","01234567","Brighton, UK", Text input custom field,1

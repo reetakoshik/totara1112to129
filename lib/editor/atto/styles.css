@@ -69,13 +69,9 @@ div.editor_atto_toolbar button::-moz-focus-inner {
     padding: 0;
 }
 
-div.editor_atto_toolbar button img.icon {
+div.editor_atto_toolbar button .icon {
     padding: 0;
     margin: 2px 0;
-    /* The following is dedicated to the beloved IE8, clashing with Bootstrap. God bless you IE. */
-    vertical-align: text-bottom;
-    width: auto;
-    height: auto;
 }
 
 div.editor_atto_toolbar div.atto_group {
@@ -97,7 +93,7 @@ div.editor_atto_toolbar div.atto_group {
     white-space: nowrap;
 }
 
-.atto_menuentry img {
+.atto_menuentry .icon {
     width: 16px;
     height: 16px;
 }
@@ -154,7 +150,7 @@ div.editor_atto_toolbar div.atto_group {
     cursor: pointer;
 }
 
-.atto_control img {
+.atto_control .icon {
     background-color: white;
 }
 
@@ -181,7 +177,7 @@ div.editor_atto_content:hover .atto_control {
 }
 
 .editor_atto_menu .dropdown-menu > li > a {
-    padding: 3px 14px;
+    margin: 3px 14px;
 }
 
 .editor_atto_menu .open ul.dropdown-menu {
@@ -211,34 +207,18 @@ div.editor_atto_content:hover .atto_control {
 .editor_atto_notification .atto_info,
 .editor_atto_notification .atto_warning {
     display: inline-block;
-    padding: 0.5em;
-    padding-left: 1em;
-    padding-right: 1em;
     border-top: none;
     border-radius: 0 0 8px 8px;
 }
+
 .editor_atto_alert {
     position: fixed;
     z-index: 200; /* must sit atop main menu > sub menu positoned elements in case of :hover action */
     top: 80px;
-    left: 50%;
-    opacity: 0; /* manipulated by Y.Anim */
     box-shadow: 2px 2px 5px 1px #ccc;
-
-    -webkit-transform: translateX(-50%);
-    -ms-transform: translateX(-50%);
     transform: translateX(-50%);
-
-    cursor: pointer;
-}
-.editor_atto_alert .icon {
-    position: absolute;
-    top: 0;
-    right: 3px;
-}
-.dir-rtl .editor_atto_alert .icon {
-    right: auto;
-    left: 3px;
+    /*rtl:ignore*/
+    left: 50%;
 }
 
 .editor_atto_toolbar,

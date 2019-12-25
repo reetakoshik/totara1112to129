@@ -94,6 +94,8 @@ abstract class base {
     public $audiences = [];
     /** @var string comer separated values of the audience that the tile is visible to */
     public $audiences_raw = '';
+    /** @var int|null the id of the parent tile null if there is no parent */
+    public $parentid = 0;
 
     /** @var string The name of the content template */
     protected $content_template = 'block_totara_featured_links/content';
@@ -128,7 +130,12 @@ abstract class base {
         } else if (is_object($tile)) {
             $tile_data = $tile;
         } else {
-            $tile_data = $DB->get_record('block_totara_featured_links_tiles', ['id' => (int)$tile], '*', MUST_EXIST);
+            $tile_data = $DB->get_record(
+                'block_totara_featured_links_tiles',
+                ['id' => (int)$tile],
+                '*',
+                MUST_EXIST
+            );
         }
 
         foreach ($tile_data as $key => $value) {
@@ -136,7 +143,8 @@ abstract class base {
         }
 
         $this->audiences_raw = '';
-        $results = $DB->get_records('cohort_visibility',
+        $results = $DB->get_records(
+            'cohort_visibility',
             [
                 'instanceid' => $this->id,
                 'instancetype' => COHORT_ASSN_ITEMTYPE_FEATURED_LINKS
@@ -156,14 +164,12 @@ abstract class base {
     }
 
     /**
-     * This makes a new tile.
-     * The tile class must be passed
-     * The block id must exist
+     * This makes a new tile of the type from the class the function was called with
      * @param int $blockinstanceid
-     * @return \block_totara_featured_links\tile\base
+     * @return base
      * @throws \coding_exception if the block instance does not exist.
      */
-    public static function add($blockinstanceid) {
+    public static function add($blockinstanceid, int $parentid = 0): base {
         global $DB, $USER;
         $blockinstanceid = (int)$blockinstanceid;
         if (!$DB->record_exists('block_instances', ['id' => $blockinstanceid])) {
@@ -174,20 +180,26 @@ abstract class base {
         /** @var base $tile_instance */
         $tile_instance = new $class_name();
         $tile_instance->blockid = (string)$blockinstanceid;
+        $tile_instance->parentid = $parentid;
 
         if (!isset($tile_instance->data)) {
             $tile_instance->data = new \stdClass();
         }
         // Finds the id for the row.
-        $tile_instance->id = (string)$DB->insert_record('block_totara_featured_links_tiles', $tile_instance, true);
+        $tile_instance->id = (string)$DB->insert_record('block_totara_featured_links_tiles',
+            $tile_instance,
+            true);
 
         $tile_instance->timecreated = (string)time();
         $tile_instance->userid = (string)$USER->id;
         $tile_instance->timemodified = (string)time();
 
-        // Get the ordering for the new tile.
-        $order_values = $DB->get_fieldset_select('block_totara_featured_links_tiles', 'sortorder', "blockid = $blockinstanceid");
-        $tile_instance->sortorder = (string)($order_values ? max($order_values) + 1 : 1); // Sets the minimum position to 1.
+        // Get the approximate ordering for the new tile.
+        $order_values = $DB->get_fieldset_select('block_totara_featured_links_tiles',
+            'sortorder',
+            "blockid = $blockinstanceid AND parentid = $parentid");
+        // Sets the minimum position to 1.
+        $tile_instance->sortorder = (string)($order_values ? max($order_values) + 1 : 1);
 
         $tile_instance->visibility = (string)self::VISIBILITY_SHOW;
         $tile_instance->set_default_visibility();
@@ -201,17 +213,16 @@ abstract class base {
     }
 
     /**
-     * This does the tile defined add
-     * Ie instantiates objects so they can be referenced later
-     * @return null
+     * This does tile specific things when the tile is added
+     * @return void
      */
-    public abstract function add_tile();
+    public abstract function add_tile(): void;
 
     /**
      * Deletes the current tile.
      * @return bool whether or not the tile was successfully removed
      */
-    final public function remove_tile() {
+    final public function remove_tile(): bool {
         global $DB;
         // Delete the tile.
         if (!$DB->get_record('block_totara_featured_links_tiles', ['id' => $this->id])) {
@@ -219,6 +230,8 @@ abstract class base {
         }
         $transaction = $DB->start_delegated_transaction();
         try {
+            // Remove the subtiles if there are any.
+            $DB->delete_records('block_totara_featured_links_tiles', ['parentid' => $this->id]);
             // Remove the row form the tiles table.
             $DB->delete_records('block_totara_featured_links_tiles', ['id' => $this->id]);
             // Remove cohort_visibility records if there are any.
@@ -227,10 +240,10 @@ abstract class base {
                 ['instanceid' => $this->id, 'instancetype' => COHORT_ASSN_ITEMTYPE_FEATURED_LINKS]
             );
             $transaction->allow_commit();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $transaction->rollback($e);
         }
-        self::squash_ordering($this->blockid);
+        self::squash_ordering($this->blockid, $this->parentid);
         return true;
     }
 
@@ -239,7 +252,7 @@ abstract class base {
      * @param base $new_tile the object of the new tile
      * @return void
      */
-    public function copy_files(base &$new_tile) {
+    public function copy_files(base &$new_tile): void {
     }
 
     /**
@@ -248,7 +261,7 @@ abstract class base {
      * @throws \coding_exception You must override this function.
      * @return string
      */
-    public static function get_name() {
+    public static function get_name(): string {
         throw new \coding_exception('Please Override this function');
     }
 
@@ -258,7 +271,7 @@ abstract class base {
      * @param int|\stdClass $tile_data
      * @return base
      */
-    final public static function get_tile_instance($tile_data) {
+    final public static function get_tile_instance($tile_data): base {
         global $DB;
         if (is_int($tile_data) || is_numeric($tile_data)) {
             $tile = $DB->get_record('block_totara_featured_links_tiles', ['id' => $tile_data], '*', MUST_EXIST);
@@ -276,12 +289,16 @@ abstract class base {
      * @param array $parameters This is the parameters for the form
      * @return base_form_content
      */
-    public function get_content_form(array $parameters) {
+    public function get_content_form(array $parameters): base_form_content {
         if ($parameters['blockinstanceid'] != $this->blockid) {
             throw new \coding_exception('The block id in parameters did not match the block id for the tile');
         }
         $data_obj = $this->get_content_form_data();
         $parameters['type'] = $data_obj->type;
+        if (!empty($parameters['parentid']) && empty($data_obj->parentid)) {
+            // If the tile is a sub tile then pass the id of the parent to the form.
+            $data_obj->parentid = $parameters['parentid'];
+        }
         return new $this->content_form($data_obj, $parameters);
     }
 
@@ -290,9 +307,9 @@ abstract class base {
      * @return \stdClass
      * @throws \coding_exception If the block instance does not exist.
      */
-    public function get_content_form_data() {
+    public function get_content_form_data(): \stdClass {
         global $DB;
-        if ($DB->record_exists('block_totara_featured_links_tiles', ['id' => !empty($this->id) ? $this->id : -1])) {
+        if (!empty($this->id) && $DB->record_exists('block_totara_featured_links_tiles', ['id' => $this->id])) {
             if (!$DB->record_exists('block_instances', ['id' => $this->blockid])) {
                 throw new \coding_exception('The block for the tile was not found');
             }
@@ -300,7 +317,7 @@ abstract class base {
             $data_obj->sortorder = $this->sortorder;
         } else { // Is new tile.
             $data_obj = new \stdClass();
-            $data_obj->sortorder = self::get_next_sortorder($this->blockid);
+            $data_obj->sortorder = self::get_next_sortorder($this->blockid, $this->parentid);
         }
         $class_arr = explode('\\', get_class($this));
         $plugin_name = $class_arr[0];
@@ -315,7 +332,7 @@ abstract class base {
      * have a parent context level of user
      * @return bool whether the tile should have visibility options
      */
-    public function is_visibility_applicable() {
+    public function is_visibility_applicable(): bool {
         global $DB;
         $blockinstance = $DB->get_record('block_instances', ['id' => $this->blockid], 'pagetypepattern,parentcontextid', MUST_EXIST);
         $parent_context = \context::instance_by_id($blockinstance->parentcontextid);
@@ -330,7 +347,7 @@ abstract class base {
      * @param array $parameters ['blockinstanceid' => 1, 'tileid' => 2]
      * @return base_form_visibility
      */
-    public function get_visibility_form(array $parameters) {
+    public function get_visibility_form(array $parameters): base_form_visibility {
         global $DB;
 
         if (!isset($parameters['blockinstanceid']) || !isset($parameters['tileid'])) {
@@ -350,7 +367,7 @@ abstract class base {
             throw new \coding_exception('The tile id in the parameters did not match the id of the tile');
         }
         if ($this->id != $parameters['tileid']) {
-            throw new \Exception('The tileid passed and the tile id of the object do not match');
+            throw new \coding_exception('The tileid passed and the tile id of the object do not match');
         }
         if (isset($parameters['tile'])) {
             debugging('Get visibility form $parameters[\'tile\'] is reserved and has been overridden', DEBUG_DEVELOPER);
@@ -365,7 +382,7 @@ abstract class base {
      * This gets the default data to pass to the auth form
      * @return array
      */
-    public function get_visibility_form_data() {
+    public function get_visibility_form_data(): array {
         $data = [
             'visibility' => $this->visibility,
             'audiences_visible' => $this->audiences_raw,
@@ -390,13 +407,13 @@ abstract class base {
      *          'sr-only' => 'value']
      * @return array
      */
-    public abstract function get_accessibility_text();
+    public abstract function get_accessibility_text(): array;
 
     /**
      * This saves the tile object to the data base by calling tile_custom_save and encoding the data
      * @param \stdClass $data
      */
-    final public function save_content($data) {
+    final public function save_content($data): void {
         global $DB;
         if (!empty($data->type)) {
             $this->type = $data->type;
@@ -405,6 +422,10 @@ abstract class base {
         if (!empty($data->sortorder)) {
             $this->sortorder = $data->sortorder;
             unset($data->sortorder);
+        }
+        if (!empty($data->parentid)) {
+            $this->parentid = $data->parentid;
+            unset($data->parentid);
         }
         $this->save_content_tile($data);
         $this->save_ordering();
@@ -421,13 +442,13 @@ abstract class base {
      * @param \stdClass $data
      * @return void
      */
-    public abstract function save_content_tile($data);
+    public abstract function save_content_tile($data): void;
 
     /**
      * This saves the visibility options
      * @param \stdClass $data
      */
-    final public function save_visibility($data) {
+    final public function save_visibility($data): void {
         global $DB;
         $this->visibility = !isset($data->visibility) ? self::VISIBILITY_SHOW : $data->visibility;
 
@@ -455,8 +476,10 @@ abstract class base {
                 if ($data->visibility != self::VISIBILITY_CUSTOM
                     || !in_array($audience->cohortid, explode(',', $data->audiences_visible))
                 ) {
-                    $DB->delete_records('cohort_visibility',
-                        ['instanceid' => $this->id,
+                    $DB->delete_records(
+                        'cohort_visibility',
+                        [
+                            'instanceid' => $this->id,
                             'instancetype' => COHORT_ASSN_ITEMTYPE_FEATURED_LINKS,
                             'cohortid' => $audience->cohortid
                         ]
@@ -493,19 +516,19 @@ abstract class base {
      * @param \stdClass $data all the data from the form
      * @return string
      */
-    public abstract function save_visibility_tile($data);
+    public abstract function save_visibility_tile($data): string;
 
     /**
      * Gets the javascript and $PAGE requirements for the tile type
      */
-    protected function get_requirements() {
+    protected function get_requirements(): void {
     }
 
     /**
      * Gets the data to be passed to the render_content function
      * @return array
      */
-    protected abstract function get_content_template_data();
+    protected abstract function get_content_template_data(): array;
 
     /**
      * renders the tile contents
@@ -514,7 +537,7 @@ abstract class base {
      * @param \renderer_base $renderer
      * @return string
      */
-    public function render_content(\renderer_base $renderer) {
+    public function render_content(\renderer_base $renderer): string {
         $this->get_requirements();
         $data = $this->get_content_template_data();
         return $renderer->render_from_template($this->content_template, $data);
@@ -530,7 +553,7 @@ abstract class base {
      * @return mixed
      */
     public function render_content_wrapper(\renderer_base $renderer, array $settings) {
-        $data = $this->get_content_wrapper_template_data($renderer);
+        $data = $this->get_content_wrapper_template_data($renderer, $settings);
         $data = array_merge($data, $settings);
         return $renderer->render_from_template($this->content_wrapper_template, $data);
     }
@@ -540,7 +563,7 @@ abstract class base {
      * This should only be used by the is_visible() function.
      * @return int (-1 = hidden, 0 = no rule, 1 = showing)
      */
-    public abstract function is_visible_tile();
+    public abstract function is_visible_tile(): int;
 
     /**
      * Returns true if the user is allowed to view the content of this tile.
@@ -552,7 +575,7 @@ abstract class base {
      *
      * @return bool
      */
-    protected function user_can_view_content() {
+    protected function user_can_view_content(): bool {
         return true;
     }
 
@@ -560,7 +583,7 @@ abstract class base {
      * Calculates whether the tile is visible for the user
      * @return bool
      */
-    final public function is_visible() {
+    final public function is_visible(): bool {
         global $USER;
 
         // First up check that the user can view the tiles content.
@@ -683,9 +706,9 @@ abstract class base {
     /**
      * Checks if the user has the capability to edit the tile
      * This is similar to the user_can_edit method in block_base class
-     * @return boolean
+     * @return bool
      */
-    public function can_edit_tile() {
+    public function can_edit_tile(): bool {
         global $USER, $DB;
         $block_context = \context_block::instance($this->blockid);
         if (has_capability('moodle/block:edit', $block_context)) {
@@ -710,16 +733,20 @@ abstract class base {
      * Returns the array of data used to render the tile with the add tile button
      *
      * @param int $blockid the id of the block that the adder tile will be in
+     * @param string|int $parentid the id of the parent tile
      * @return array
      */
-    final public static function export_for_template_add_tile($blockid) {
+    final public static function export_for_template_add_tile($blockid, $parentid = ''): array {
         global $PAGE;
         return [
             'adder' => true,
-            'url' => (string)new \moodle_url('/blocks/totara_featured_links/edit_tile_content.php',
+            'url' => (string)new \moodle_url(
+                '/blocks/totara_featured_links/edit_tile_content.php',
                 [
                     'blockinstanceid' => $blockid,
-                    'return_url' => $PAGE->url->out_as_local_url()]
+                    'return_url' => $PAGE->url->out_as_local_url(),
+                    'parentid' => $parentid
+                ]
             )
         ];
     }
@@ -727,10 +754,17 @@ abstract class base {
     /**
      * Shifts all the sortorder values down to the lowest positive values so -1,3,5 becomes 1,2,3
      * @param int $blockid
+     * @param int $parentid the id of the parent tile
      */
-    final public static function squash_ordering($blockid) {
+    final public static function squash_ordering(int $blockid, int $parentid = 0): void {
         global $DB;
-        $tiles = $DB->get_records('block_totara_featured_links_tiles', ['blockid' => $blockid], 'sortorder ASC');
+        $tiles = $DB->get_records(
+            'block_totara_featured_links_tiles',
+            [
+                'blockid' => $blockid,
+                'parentid' => $parentid
+            ],
+            'sortorder ASC');
         $i = 1;
         foreach ($tiles as $tile) {
             if ($i != $tile->sortorder) {
@@ -746,19 +780,24 @@ abstract class base {
      * @param int $blockid
      * @return int
      */
-    final protected static function get_next_sortorder($blockid) {
+    final protected static function get_next_sortorder(int $blockid, int $parentid = 0): int {
         global $DB;
-        return $DB->count_records(
+        $numberoftiles = $DB->count_records(
             'block_totara_featured_links_tiles',
-            ['blockid' => $blockid]) + 1;
+            [
+                'blockid' => $blockid,
+                'parentid' => $parentid
+            ]
+        );
+        return $numberoftiles + 1;
     }
 
     /**
      * saves the sort to the database
      * Needs to be public for ajax calls
-     * @return null
+     * @return void
      */
-    final public function save_ordering() {
+    final public function save_ordering(): void {
         global $DB;
         // Gets what the sort used to be.
         $current_tile = $DB->get_record('block_totara_featured_links_tiles', ['id' => $this->id], '*', MUST_EXIST);
@@ -769,7 +808,7 @@ abstract class base {
         }
 
         // Shifts all the tiles between the new position and the old position to make room for the tile.
-        $orders = $DB->get_records('block_totara_featured_links_tiles', ['blockid' => $this->blockid]);
+        $orders = $DB->get_records('block_totara_featured_links_tiles', ['blockid' => $this->blockid, 'parentid' => $this->parentid]);
         foreach ($orders as $tile) {
             if ($tile->sortorder >= $old_sortorder && $tile->sortorder <= $this->sortorder) {
                 $tile->sortorder -= 1;
@@ -780,7 +819,7 @@ abstract class base {
         }
         $current_tile->sortorder = $this->sortorder;
         $DB->update_record('block_totara_featured_links_tiles', $current_tile);
-        self::squash_ordering($this->blockid);
+        self::squash_ordering($this->blockid, $this->parentid);
         $this->sortorder = $DB->get_field('block_totara_featured_links_tiles', 'sortorder', ['id' => $this->id]);
         return;
     }
@@ -788,7 +827,7 @@ abstract class base {
     /**
      * Sets the default Visibility values
      */
-    protected function set_default_visibility() {
+    protected function set_default_visibility(): void {
         $this->audiences_raw = '';
         $this->audiences = [''];
         $this->audienceaggregation = (string)self::AGGREGATION_ANY;
@@ -807,64 +846,121 @@ abstract class base {
      * It also renders the tile content.
      * call this method if you are going to override this function
      * not doing so could result in things like tiles that are no editable
+     *
      * @param \renderer_base $renderer
+     * @param array $settings
      * @return array
      */
-    protected function get_content_wrapper_template_data(\renderer_base $renderer) {
-        global $PAGE;
-        $action_menu_items = [];
-        $action_menu_items[] = new \action_menu_link_secondary(
-            new \moodle_url('/blocks/totara_featured_links/edit_tile_content.php',
-                ['blockinstanceid' => $this->blockid, 'tileid' => $this->id, 'return_url' => $PAGE->url->out_as_local_url()]),
-            \core\output\flex_icon::get_icon('edit'),
-            get_string('content_menu_title', 'block_totara_featured_links').'<span class="sr-only">'.get_string('content_menu_title_sr-only', 'block_totara_featured_links',
-        $this->get_accessibility_text()['sr-only']). '</span>',
-            ['type' => 'edit']);
-        if ($this->is_visibility_applicable()) {
-            $action_menu_items[] = new \action_menu_link_secondary(
-                new \moodle_url('/blocks/totara_featured_links/edit_tile_visibility.php',
-                    ['blockinstanceid' => $this->blockid, 'tileid' => $this->id, 'return_url' => $PAGE->url->out_as_local_url()]),
-                \core\output\flex_icon::get_icon('hide'),
-                get_string('visibility_menu_title', 'block_totara_featured_links').'<span class="sr-only">'.get_string('visibility_menu_title_sr-only', 'block_totara_featured_links',
-                $this->get_accessibility_text()['sr-only']).'</span>',
-                ['type' => 'edit_vis']);
-        }
-        $action_menu_items[] = new \action_menu_link_secondary(
-            new \moodle_url('/'),
-            \core\output\flex_icon::get_icon('delete'),
-            get_string('delete_menu_title', 'block_totara_featured_links').'<span class="sr-only">'.get_string('delete_menu_title_sr-only', 'block_totara_featured_links',
-                $this->get_accessibility_text()['sr-only']).'</span>',
-            ['type' => 'remove', 'blockid' => $this->blockid, 'tileid' => $this->id]);
-
+    protected function get_content_wrapper_template_data(\renderer_base $renderer, array $settings = []): array {
         return [
             'tile_id' => $this->id,
             'content' => $this->render_content($renderer),
             'disabled' => (!$this->is_visible()),
             'controls' => $renderer->render(
-                new \action_menu($action_menu_items)
+                new \action_menu($this->get_action_menu_items($settings))
             ),
             'hidden_text' => $this->get_hidden_text()
         ];
     }
 
     /**
+     * Gets the items that go into the edit menu for a tile.
+     *
+     * @param array $settings
+     * @return array
+     */
+    protected function get_action_menu_items($settings = []): array {
+        global $PAGE;
+        $action_menu_items = [];
+        if (!isset($settings['parentid'])) {
+            $settings['parentid'] = null;
+        }
+        $editsr = \html_writer::span(
+            get_string('content_menu_title_sr-only', 'block_totara_featured_links', $this->get_accessibility_text()['sr-only']),
+            'sr-only'
+        );
+        $editurl = new \moodle_url(
+            '/blocks/totara_featured_links/edit_tile_content.php',
+            [
+                'blockinstanceid' => $this->blockid,
+                'tileid' => $this->id,
+                'return_url' => $PAGE->url->out_as_local_url(),
+                'parentid' => $settings['parentid']
+            ]
+        );
+
+        $action_menu_items[] = new \action_menu_link_secondary(
+            $editurl,
+            \core\output\flex_icon::get_icon('edit'),
+            get_string('content_menu_title', 'block_totara_featured_links') . $editsr,
+            ['type' => 'edit']
+        );
+        if ($this->is_visibility_applicable()) {
+            $visibilitysr = \html_writer::span(
+                get_string('visibility_menu_title_sr-only', 'block_totara_featured_links', $this->get_accessibility_text()['sr-only']),
+                'sr-only'
+            );
+            $visibilityurl = new \moodle_url('/blocks/totara_featured_links/edit_tile_visibility.php',
+                [
+                    'blockinstanceid' => $this->blockid,
+                    'tileid' => $this->id,
+                    'return_url' => $PAGE->url->out_as_local_url()
+                ]
+            );
+
+            $action_menu_items[] = new \action_menu_link_secondary(
+                $visibilityurl,
+                \core\output\flex_icon::get_icon('hide'),
+                get_string('visibility_menu_title', 'block_totara_featured_links') . $visibilitysr,
+                ['type' => 'edit_vis']
+            );
+        }
+        $deletesr = \html_writer::span(
+            get_string('delete_menu_title_sr-only', 'block_totara_featured_links',  $this->get_accessibility_text()['sr-only']),
+            'sr-only'
+        );
+        $action_menu_items[] = new \action_menu_link_secondary(
+            new \moodle_url('/'),
+            \core\output\flex_icon::get_icon('delete'),
+            get_string('delete_menu_title', 'block_totara_featured_links') . $deletesr,
+            ['type' => 'remove', 'blockid' => $this->blockid, 'tileid' => $this->id]
+        );
+        return $action_menu_items;
+    }
+
+    /**
      * decodes the raw data variables
      */
-    protected function decode_data() {
+    protected function decode_data(): void {
+        global $CFG;
         $this->data = json_decode($this->dataraw);
         $this->presets = explode(',', $this->presetsraw);
         $this->audiences = explode(',', $this->audiences_raw);
         $this->filter_data_values();
         $this->url_mod = isset($this->data->url) ? $this->data->url : '';
-        if (substr($this->url_mod, 0, 1) == '/') {
-            $this->url_mod = new \moodle_url($this->url_mod);
+        if (substr($this->url_mod, 0, 1) === '/') {
+            // NOTE: do not use moodle_url() here, this is a random URL that might not be supported there.
+            $this->url_mod = $CFG->wwwroot . $this->url_mod;
+        }
+        $this->url_mod = clean_param($this->url_mod, PARAM_URL);
+
+        $options = ['context' => \context_block::instance($this->blockid)];
+
+        if (isset($this->data->heading)) {
+            $this->data->heading = format_string($this->data->heading, true, $options);
+        }
+        if (isset($this->data->textbody)) {
+            $this->data->textbody = format_string($this->data->textbody, true, $options);
+        }
+        if (isset($this->data->alt_text)) {
+            $this->data->alt_text = format_string($this->data->alt_text, true, $options);
         }
     }
 
     /**
      * encodes the data ready to put into the database
      */
-    protected function encode_data() {
+    protected function encode_data(): void {
         $this->dataraw = json_encode($this->data);
         $this->presetsraw = implode(',', $this->presets);
     }
@@ -875,13 +971,20 @@ abstract class base {
      * and the tile template allows for values to be persistent when changing tile types.
      * @return void
      */
-    protected function filter_data_values () {
+    protected function filter_data_values(): void {
+        global $CFG;
         $this->data_filtered = new \stdClass();
         if (empty($this->data)) {
             return;
         }
         foreach ($this->data as $key => $value) {
             if (in_array($key, $this->used_fields)) {
+                if ($key === 'url') {
+                    // Note: URL starting with '/' is a magic value which means this site.
+                    if ($value and substr($value, 0, 1) === '/') {
+                        $value = $CFG->wwwroot . $value;
+                    }
+                }
                 $this->data_filtered->$key = $value;
             }
         }
@@ -895,7 +998,7 @@ abstract class base {
      *
      * @return string of text shown if a tile is hidden but being viewed in edit mode.
      */
-    protected function get_hidden_text() {
+    protected function get_hidden_text(): string {
         return get_string('hidden_text', 'block_totara_featured_links');
     }
 }

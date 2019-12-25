@@ -435,8 +435,8 @@ function search_generate_SQL($parsetree, $datafield, $metafield, $mainidfield, $
                 break;
             case TOKEN_EXACT:
                 $SQLString .= "(($datafield $REGEXP :$name1) OR ($metafield $REGEXP :$name2))";
-                $params[$name1] =  "[[:<:]]".$value."[[:>:]]";
-                $params[$name2] =  "[[:<:]]".$value."[[:>:]]";
+                $params[$name1] = $DB->sql_regex_word_boundary_start() . $value . $DB->sql_regex_word_boundary_end();
+                $params[$name2] = $DB->sql_regex_word_boundary_start() . $value . $DB->sql_regex_word_boundary_end();
                 break;
             case TOKEN_META:
                 if ($metafield != '') {

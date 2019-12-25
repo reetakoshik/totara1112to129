@@ -103,6 +103,7 @@ trait purge_type_trait {
             array(
                 'addtypetoheading' => ($join !== 'base'),
                 'joins' => array($join),
+                'displayfunc' => 'integer'
             )
         );
 
@@ -169,6 +170,7 @@ trait purge_type_trait {
                 'dbdatatype' => 'text',
                 'outputformat' => 'text',
                 'joins' => array($join),
+                'displayfunc' => 'format_text'
             )
         );
 

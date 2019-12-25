@@ -222,6 +222,37 @@ class restore_facetoface_activity_structure_step extends restore_activity_struct
         $data->timecreated = $this->apply_date_offset($data->timecreated);
         $data->createdby = (int)$this->get_mappingid('user', $data->createdby);
 
+        // Fix up statuscode if 'Unable to attend', which does not exist in this version.
+        if ($data->statuscode == 85) {
+            $data->statuscode = \mod_facetoface\signup\state\no_show::get_code();
+        }
+
+        // Fix up 0 grade if backup is from broken versions.
+        if ($data->grade == 0) {
+            $f2fversion = $this->get_task()->get_old_moduleversion();
+            $totaramajor = floor(floatval($this->get_task()->get_info()->totara_release));
+            $totarabuild = 0;
+            preg_match('/(\d{8})/', $this->get_task()->get_info()->totara_build, $matches);
+            if (!empty($matches[1])) {
+                $totarabuild = (int) $matches[1]; // The date of Totara build at the time of the backup.
+            }
+            // Recalculate only for backups made with Totara 12 before TL-20720, and Totara 13 before TL-20400.
+            // TODO: need more complicated solution to backups made after TL-20400 and before TL-20720
+            if (($totaramajor == 12 && $f2fversion < 2018112207)
+                || ($totaramajor == 13 && $f2fversion < 2019030100)
+                // T13 Evergreen
+                || ($totaramajor == 0 && 20181207 <= $totarabuild && $totarabuild < 20190322 && $f2fversion < 2019030100)
+                // T12 Evergreen
+                || ($totaramajor == 0 && 20180919 <= $totarabuild && $totarabuild < 20181207 && $f2fversion < 2018112207)) {
+                try {
+                    $data->grade = \mod_facetoface\signup\state\state::from_code($data->statuscode)::get_grade();
+                } catch (\mod_facetoface\exception\signup_exception $e) {
+                    // Swallow exception and set NULL if the status code is not valid.
+                    $data->grade = null;
+                }
+            }
+        }
+
         // insert the entry record
         $newitemid = $DB->insert_record('facetoface_signups_status', $data);
         $this->set_mapping('facetoface_signups_status', $oldid, $newitemid);
@@ -319,23 +350,20 @@ class restore_facetoface_activity_structure_step extends restore_activity_struct
         }
 
         // Ok, we are on the same site, let's see if the room still exists and use it if there are no conflicts.
-        $room = $DB->get_record('facetoface_room', array('id' => $oldid));
-        if (!$room) {
-            $this->log('original seminar room not found', backup::LOG_WARNING);
-            return;
-        }
-        if ($room->custom != 0) {
+        $room = new \mod_facetoface\room($oldid);
+        if ($room->get_custom()) {
             // This should not ever happen, somebody hacked DB or backup file.
             return;
         }
-        if ($room->allowconflicts == 0) {
-            if (!facetoface_is_room_available($sessiondate->timestart, $sessiondate->timefinish, $room, $sessiondate->sessionid, $facetofaceid)) {
+        if (!$room->get_allowconflicts()) {
+            $seminarevent = new \mod_facetoface\seminar_event($sessiondate->sessionid);
+            if (!$room->is_available($sessiondate->timestart, $sessiondate->timefinish, $seminarevent)) {
                 $this->log('seminar room not available', backup::LOG_WARNING);
                 return;
             }
         }
         // It should be fine to add the room to the session.
-        $DB->set_field('facetoface_sessions_dates', 'roomid', $room->id, array('id' => $sessionsdateid));
+        $DB->set_field('facetoface_sessions_dates', 'roomid', $room->get_id(), array('id' => $sessionsdateid));
     }
 
     protected function process_facetoface_room_custom_field($data) {
@@ -414,23 +442,20 @@ class restore_facetoface_activity_structure_step extends restore_activity_struct
         }
 
         // Ok, we are on the same site, let's see if the asset still exists and use it if there are no conflicts.
-        $asset = $DB->get_record('facetoface_asset', array('id' => $oldid));
-        if (!$asset) {
-            $this->log('original seminar asset not found', backup::LOG_WARNING);
-            return;
-        }
-        if ($asset->custom != 0) {
+        $asset = new \mod_facetoface\asset($oldid);
+        if (!$asset->get_custom()) {
             // This should not ever happen, somebody hacked DB or backup file.
             return;
         }
-        if ($asset->allowconflicts == 0) {
-            if (!facetoface_is_asset_available($sessiondate->timestart, $sessiondate->timefinish, $asset, $sessiondate->sessionid, $facetofaceid)) {
+        if (!$asset->get_allowconflicts()) {
+            $seminarevent = new \mod_facetoface\seminar_event($sessiondate->sessionid);
+            if (!$asset->is_available($sessiondate->timestart, $sessiondate->timefinish, $seminarevent)) {
                 $this->log('seminar asset not available', backup::LOG_WARNING);
                 return;
             }
         }
         // It should be fine to add the asset to the session.
-        $DB->insert_record('facetoface_asset_dates', (object)array('assetid' => $asset->id, 'sessionsdateid' => $sessionsdateid));
+        $DB->insert_record('facetoface_asset_dates', (object)array('assetid' => $asset->get_id(), 'sessionsdateid' => $sessionsdateid));
     }
 
     protected function process_facetoface_asset_custom_field($data) {

@@ -42,29 +42,12 @@ if ($hassiteconfig or has_any_capability($capabilities, $systemcontext)) {
         )
     );
     $ADMIN->add('courses',
-        new admin_externalpage('addcategory', new lang_string('addcategory', 'admin'),
-            new moodle_url('/course/editcategory.php', array('parent' => 0)),
-            array('moodle/category:manage')
-        )
-    );
-    $ADMIN->add('courses',
         new admin_externalpage('restorecourse', new lang_string('restorecourse', 'admin'),
             new moodle_url('/backup/restorefile.php', array('contextid' => context_system::instance()->id)),
             array('moodle/restore:restorefile', 'moodle/backup:downloadfile')
         )
     );
 
-    $ADMIN->add('courses', new admin_externalpage('programmgmt', new lang_string('manageprograms', 'admin'),
-        $CFG->wwwroot . '/totara/program/manage.php',
-        array('totara/program:createprogram', 'totara/program:configuredetails'),
-        totara_feature_disabled('programs')
-    ));
-
-    $ADMIN->add('courses', new admin_externalpage('managecertifications', new lang_string('managecertifications', 'totara_core'),
-        $CFG->wwwroot . '/totara/program/manage.php?viewtype=certification',
-        array('totara/certification:createcertification', 'totara/certification:configurecertification'),
-        totara_feature_disabled('certifications')
-    ));
 
     $ADMIN->add('courses', new admin_externalpage('coursecustomfields', new lang_string('customfields', 'totara_customfield'),
         $CFG->wwwroot . '/totara/customfield/index.php?prefix=course', array('totara/core:coursemanagecustomfield', 'totara/core:programmanagecustomfield')));
@@ -79,10 +62,24 @@ if ($hassiteconfig or has_any_capability($capabilities, $systemcontext)) {
     $temp = new admin_settingpage('coursesettings', new lang_string('coursesettings'));
     require_once($CFG->dirroot.'/course/lib.php');
 
+    // TOTARA changes.
+    // These settings are called images so it saves the file to the images filearea.
+    $temp->add(
+        new admin_setting_configstoredfile(
+            'course/defaultimage',
+            new lang_string('courseimagedefault'),
+            new lang_string('coursedefaultimage_help'),
+            'defaultimage',
+            0,
+            ['accepted_types' => 'web_image']
+        )
+    );
+    // End TOTARA changes.
+
     $choices = array();
     $choices['0'] = new lang_string('hide');
     $choices['1'] = new lang_string('show');
-    $temp->add(new admin_setting_configselect('moodlecourse/visible', new lang_string('visible'), new lang_string('visible_help'),
+    $temp->add(new admin_setting_configselect('moodlecourse/visible', new lang_string('coursevisibility'), new lang_string('coursevisibility_help'),
         1, $choices));
 
     // Add audience visibility.
@@ -119,8 +116,23 @@ if ($hassiteconfig or has_any_capability($capabilities, $systemcontext)) {
     $temp->add(new admin_setting_configselect('moodlecourse/coursedisplay', new lang_string('coursedisplay'),
         new lang_string('coursedisplay_help'), COURSE_DISPLAY_SINGLEPAGE, $choices));
 
-    $temp->add(new admin_setting_configduration('moodlecourse/courseduration', get_string('courseduration'),
-        get_string('courseduration_desc'), YEARSECS));
+    $temp->add(new admin_setting_configcheckbox('moodlecourse/courseenddateenabled', get_string('courseenddateenabled'),
+        get_string('courseenddateenabled_desc'), 1));
+
+    // Totara: Changes made to treat less than an hour as invalid duration.
+    $duration = new admin_setting_configduration(
+        'moodlecourse/courseduration', get_string('courseduration'),
+        get_string('courseduration_desc'), YEARSECS);
+    $temp->add(
+        $duration->set_validator(
+            function ($seconds) {
+                if ($seconds < HOURSECS) {
+                    return get_string('errordurationminonehour', 'admin');
+                }
+                return null;
+            }
+        )
+    );
 
     // Appearance.
     $temp->add(new admin_setting_heading('appearancehdr', new lang_string('appearance'), ''));
@@ -162,9 +174,6 @@ if ($hassiteconfig or has_any_capability($capabilities, $systemcontext)) {
     $temp->add(new admin_setting_configselect('moodlecourse/enablecompletion', new lang_string('completion', 'completion'),
         new lang_string('enablecompletion_help', 'completion'), 1, array(0 => new lang_string('no'), 1 => new lang_string('yes'))));
 
-    $temp->add(new admin_setting_configcheckbox('moodlecourse/completionstartonenrol', new lang_string('completionstartonenrol','completion'),
-        new lang_string('completionstartonenrolhelp', 'completion'), 1));
-
     $temp->add(new admin_setting_heading('progress', new lang_string('progress','completion'), ''));
     $temp->add(new admin_setting_configselect('moodlecourse/enablecompletion', new lang_string('completion','completion'), '',
         1, array(0 => new lang_string('completiondisabled','completion'), 1 => new lang_string('completionenabled','completion'))));
@@ -179,14 +188,6 @@ if ($hassiteconfig or has_any_capability($capabilities, $systemcontext)) {
     $choices[VISIBLEGROUPS] = new lang_string('groupsvisible', 'group');
     $temp->add(new admin_setting_configselect('moodlecourse/groupmode', new lang_string('groupmode'), '', key($choices),$choices));
     $temp->add(new admin_setting_configselect('moodlecourse/groupmodeforce', new lang_string('force'), new lang_string('coursehelpforce'), 0,array(0 => new lang_string('no'), 1 => new lang_string('yes'))));
-
-    $temp->add(new admin_setting_heading('language', new lang_string('language'), ''));
-    $languages=array();
-    $languages[''] = new lang_string('forceno');
-    $languages += get_string_manager()->get_list_of_translations();
-    $temp->add(new admin_setting_configselect('moodlecourse/lang', new lang_string('forcelanguage'), '',key($languages),$languages));
-
-    $temp->add(new admin_setting_configcheckbox('moodlecourse/coursetagging', new lang_string('coursetagging','tag'), new lang_string('coursetagginghelp','tag'), 0));
 
     $ADMIN->add('courses', $temp);
 

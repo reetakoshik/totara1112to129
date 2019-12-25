@@ -29,7 +29,7 @@ class rb_facetoface_interest_embedded extends rb_base_embedded {
     public $hidden, $accessmode, $accesssettings, $shortname;
 
     public function __construct($data) {
-        $this->url = '/mod/facetoface/interestreport.php';
+        $this->url = '/mod/facetoface/reports/interests.php';
         $this->source = 'facetoface_interest';
         $this->shortname = 'facetoface_interest';
         $this->fullname = get_string('embedded:seminarinterest', 'mod_facetoface');

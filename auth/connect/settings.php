@@ -24,16 +24,11 @@
 defined('MOODLE_INTERNAL') || die();
 require_once("{$CFG->libdir}/authlib.php");
 
-/**
- * This script uses $this, that is because it is executing within the auth plugininfo class.
- * @var \core\plugininfo\auth $this
- */
-
 $ADMIN->add('authsettings', new admin_category('authconnectfolder', new lang_string('pluginname', 'auth_connect'),
     $settings->is_hidden()));
 
 $settingspage = new admin_settingpage('authsettingconnect', new lang_string('settings', 'core_plugin'),
-    'moodle/site:config', $this->is_enabled() === false);
+    'moodle/site:config', $settings->is_hidden());
 
 $settingspage->add(new auth_connect_setting_autossoserver());
 

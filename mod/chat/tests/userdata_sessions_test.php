@@ -86,8 +86,8 @@ class mod_chat_userdata_sessions_test extends chat_testcase {
 
         $contexts = sessions::get_compatible_context_levels();
 
-        $this->assertEquals($expected, $contexts,
-            "Session user_data item expect to work with a wide range of contexts", .0, 10, true);
+        $this->assertEqualsCanonicalizing($expected, $contexts,
+            "Session user_data item expect to work with a wide range of contexts");
     }
 
 

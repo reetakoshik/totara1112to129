@@ -1355,7 +1355,7 @@ abstract class repository implements cacheable_object {
                 'url'=>moodle_url::make_draftfile_url($file->get_itemid(), $file->get_filepath(), $file->get_filename())->out(),
                 'id'=>$file->get_itemid(),
                 'file'=>$file->get_filename(),
-                'icon' => $OUTPUT->pix_url(file_extension_icon($thefile, 32))->out(),
+                'icon' => $OUTPUT->image_url(file_extension_icon($thefile, 32))->out(),
             );
         } else {
             return null;
@@ -1401,7 +1401,7 @@ abstract class repository implements cacheable_object {
                     'size' => 0,
                     'date' => $filedate,
                     'path' => array_reverse($path),
-                    'thumbnail' => $OUTPUT->pix_url(file_folder_icon(90))->out(false)
+                    'thumbnail' => $OUTPUT->image_url(file_folder_icon(90))->out(false)
                 );
 
                 //if ($dynamicmode && $child->is_writable()) {
@@ -1438,8 +1438,8 @@ abstract class repository implements cacheable_object {
                     'date' => $filedate,
                     //'source' => $child->get_url(),
                     'source' => base64_encode($source),
-                    'icon'=>$OUTPUT->pix_url(file_file_icon($child, 24))->out(false),
-                    'thumbnail'=>$OUTPUT->pix_url(file_file_icon($child, 90))->out(false),
+                    'icon'=>$OUTPUT->image_url(file_file_icon($child, 24))->out(false),
+                    'thumbnail'=>$OUTPUT->image_url(file_file_icon($child, 90))->out(false),
                 );
                 $filecount++;
             }
@@ -1930,7 +1930,7 @@ abstract class repository implements cacheable_object {
         $meta->id   = $this->id;
         $meta->name = format_string($this->get_name());
         $meta->type = $this->get_typename();
-        $meta->icon = $OUTPUT->pix_url('icon', 'repository_'.$meta->type)->out(false);
+        $meta->icon = $OUTPUT->image_url('icon', 'repository_'.$meta->type)->out(false);
         $meta->supported_types = file_get_typegroup('extension', $this->supported_filetypes());
         $meta->return_types = $this->supported_returntypes();
         $meta->sortorder = $this->options['sortorder'];
@@ -1999,6 +1999,8 @@ abstract class repository implements cacheable_object {
         global $DB;
         if ($downloadcontents) {
             $this->convert_references_to_local();
+        } else {
+            $this->remove_files();
         }
         cache::make('core', 'repositories')->purge();
         try {
@@ -2189,7 +2191,7 @@ abstract class repository implements cacheable_object {
      */
     protected static function prepare_breadcrumb($breadcrumb) {
         global $OUTPUT;
-        $foldericon = $OUTPUT->pix_url(file_folder_icon(24))->out(false);
+        $foldericon = $OUTPUT->image_url(file_folder_icon(24))->out(false);
         $len = count($breadcrumb);
         for ($i = 0; $i < $len; $i++) {
             if (is_array($breadcrumb[$i]) && !isset($breadcrumb[$i]['icon'])) {
@@ -2210,7 +2212,7 @@ abstract class repository implements cacheable_object {
      */
     protected static function prepare_list($list) {
         global $OUTPUT;
-        $foldericon = $OUTPUT->pix_url(file_folder_icon(24))->out(false);
+        $foldericon = $OUTPUT->image_url(file_folder_icon(24))->out(false);
 
         // Reset the array keys because non-numeric keys will create an object when converted to JSON.
         $list = array_values($list);
@@ -2265,7 +2267,7 @@ abstract class repository implements cacheable_object {
                 if ($isfolder) {
                     $file['icon'] = $foldericon;
                 } else if ($filename) {
-                    $file['icon'] = $OUTPUT->pix_url(file_extension_icon($filename, 24))->out(false);
+                    $file['icon'] = $OUTPUT->image_url(file_extension_icon($filename, 24))->out(false);
                 }
             }
 
@@ -2660,6 +2662,17 @@ abstract class repository implements cacheable_object {
         $files = $fs->get_external_files($this->id);
         foreach ($files as $storedfile) {
             $fs->import_external_file($storedfile);
+        }
+    }
+
+    /**
+     * Find all external files linked to this repository and delete them.
+     */
+    public function remove_files() {
+        $fs = get_file_storage();
+        $files = $fs->get_external_files($this->id);
+        foreach ($files as $storedfile) {
+            $storedfile->delete();
         }
     }
 

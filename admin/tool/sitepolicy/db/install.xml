@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="tool/sitepolicy/db" VERSION="20180509" COMMENT="XMLDB file for tool/sitepolicy"
+<XMLDB PATH="admin/tool/sitepolicy/db" VERSION="20180509" COMMENT="XMLDB file for tool/sitepolicy"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+    xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
     <TABLE NAME="tool_sitepolicy_site_policy" COMMENT="A list of site policies">

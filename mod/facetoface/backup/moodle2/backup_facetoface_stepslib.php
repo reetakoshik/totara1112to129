@@ -73,7 +73,9 @@ class backup_facetoface_activity_structure_step extends backup_activity_structur
             'multiplesessions', 'completionstatusrequired', 'managerreserve', 'maxmanagerreserves',
             'reservecanceldays', 'reservedays', 'declareinterest', 'interestonlyiffull',
             'allowcancellationsdefault', 'cancellationscutoffdefault', 'selectjobassignmentonsignup',
-            'forceselectjobassignment', 'approvaltype', 'approvalrole', 'approvalterms', 'approvaladmins'));
+            'forceselectjobassignment', 'approvaltype', 'approvalrole', 'approvalterms', 'approvaladmins',
+            'multisignupfully', 'multisignuppartly', 'multisignupnoshow', 'multisignupmaximum', 'waitlistautoclean'
+        ));
 
         $notifications = new backup_nested_element('notifications');
         $notification = new backup_nested_element('notification', array('id'), array(

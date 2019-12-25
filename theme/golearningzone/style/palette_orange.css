@@ -50,6 +50,11 @@
 [data-palette="orange"].path-totara-program .notifymessage,
 [data-palette="orange"] header .tooltip .tooltiptext {
 	background-color: rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+	 border-radius: 0;
+    border-radius: 9px;
+    border-top-left-radius: 0;
+    border-bottom-right-radius: 0;
+    /*padding: 4px 10px;*/
 }
 
 [data-palette="orange"] .editing_on .region > * { 
@@ -83,7 +88,12 @@
 [data-palette="orange"] input#id_submitbutton2:focus, 
 [data-palette="orange"].path-admin .buttons input[type="submit"]:focus, 
 [data-palette="orange"] td.submit input:focus {
-	background-color: rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 0.7);
+	background-color: rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 0.7); 
+    border-radius: 0;
+    border-radius: 9px;
+    border-top-left-radius: 0;
+    border-bottom-right-radius: 0;
+    /*padding: 4px 10px;*/
 }
 
 [data-palette="orange"] .nav-tabs > li.active > a,
@@ -109,3 +119,130 @@
 [data-palette="orange"]  header .tooltip-bottom:after {
 	border-bottom-color: rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
 }
+
+[data-palette="orange"] #page-admin-course-management .buttons .singlebutton input[type="submit"]
+{
+	background-color: rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+}
+[data-palette="orange"] #page-admin-course-management .buttons .singlebutton input[type="submit"]:hover
+{
+	background-color: rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+}
+
+/*[data-palette="orange"] a {
+	color: rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+	}
+[data-palette="orange"] a:hover {
+	color: rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 0.7);
+}*/
+
+/* css for 1 april yashco */
+
+[data-palette="orange"] .block div.header h2 {
+	color: rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+}
+[data-palette="orange"] .tw-selectMulti__link:hover {
+    background: rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+}
+[data-palette="orange"] .tw-selectMulti__link_active{
+	 background: rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+}
+[data-palette="orange"] .tw-selectMulti__link:hover{
+    color: #fff;
+}
+[data-palette="orange"] .tw-selectMulti__link:hover .tw-selectMulti__link_text, [data-palette="custom"] .tw-selectMulti__link_active .tw-selectMulti__link_text{
+	 color: #fff;
+}
+[data-palette="orange"]  .totara-menu>.totara-menu-nav>.totara-menu-nav-list>.totara-menu-nav-item.selected>.totara-menu-nav-item-link {
+    box-shadow: inset 0 -3px rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+}
+[data-palette="orange"] .totara-menu-subnav-item.selected .totara-menu-subnav-item-link {
+    box-shadow: inset 0 -3px rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+}
+[data-palette="orange"] .totara-menu-subnav-item-link:hover, .totara-menu-subnav-item-link:active {
+    background-color: rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+	color:#fff;
+}
+[data-palette="orange"] .ui-dialog-buttonset button.ui-button:first-child{
+	background:rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1) !important;
+	color:#fff !important;
+	}
+[data-palette="orange"] .setbuttons .moveup{
+	background-color:rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1) !important;
+	color:#fff !important;
+	}
+[data-palette="orange"] .setbuttons .movedown{
+	background-color:rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1) !important;
+	color:#fff !important;
+	}
+[data-palette="orange"] .messagebuttons .moveup{
+	background-color:rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1) !important;
+	color:#fff !important;
+	}
+[data-palette="orange"] .messagebuttons .movedown{
+	background-color:rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1) !important;
+	color:#fff !important;
+	}
+ 
+[data-palette="orange"] .tw-catalogManageBtns__btn { 
+    color: #fff;
+    background-color:rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+	border-color:rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+}	
+[data-palette="orange"] .tw-catalogManageBtns__btn:active, [data-palette="orange"] .tw-catalogManageBtns__btn:focus, [data-palette="orange"] .tw-catalogManageBtns__btn:hover{
+	background:rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 0.7);
+	}		
+[data-palette="orange"] .nav-tabs>li.active>a, [data-palette="orange"] .nav-tabs>li.active>a:hover, [data-palette="orange"] #dialog-tabs .tabs li.ui-tabs-active.ui-state-active a, [data-palette="orange"] #dialog-tabs .tabs li.ui-tabs-active.ui-state-active a:hover{
+    box-shadow: 0 -1px rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+}
+[data-palette="orange"] .tw-catalog .tw-catalogResultsCount{ 
+    color: rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+	}
+[data-palette="orange"] .tw-catalogResultsShare__btn{ 
+    background-color:rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1)
+	}
+[data-palette="orange"] .tw-catalogResultsShare__btn:hover{ 
+    background-color:rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 0.7)
+	}
+/*[data-palette="orange"] .tw-selectTree__current, [data-palette="orange"] .tw-selectSearchText__field, [data-palette="orange"] .tw-catalogItemNarrow__title_featured{
+    border: solid 1px rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1) !important;
+	}*/
+/*[data-palette="orange"] .tw-selectTree__current:hover, [data-palette="orange"] .tw-selectSearchText__field:hover{
+    border: solid 1px rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 0.7) !important;
+	}*/
+[data-palette="orange"] .tw-catalogItemNarrow:hover, [data-palette="orange"] .tw-grid__item_active .tw-catalogItemNarrow{
+    border: solid 3px rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1) !important;
+	}
+[data-palette="orange"] .tw-catalogDetails__arrow::after {
+    border-top-color:rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+	}
+[data-palette="orange"] .tw-catalogDetails__content {
+	border:solid 2px rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+	}
+[data-palette="orange"] .btnSubmitCont a.continueBtn{
+	border: 1px solid rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+	background:rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+	}
+[data-palette="orange"] .btnSubmitCont a.featureBtn{
+	border:solid 1px rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+}
+[data-palette="orange"] .tw-catalogManageBtns .tw-catalog__activePopover .tw-catalogManageBtns__btn {
+    background:rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+    color: #ffffff;
+}
+[data-palette="orange"] .tw-catalogManageBtns__group_options_item_link:focus, [data-palette="orange"] .tw-catalogManageBtns__group_options_item_link:hover, [data-palette="orange"] .tw-selectTree__list_row.tw-selectTree__active {
+    background:rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1) !important;
+	}
+[data-palette="orange"] .tw-selectTree__list_row_link:hover, [data-palette="orange"] .tw-selectTree__list_row.tw-selectTree__active>.tw-selectTree__list_row_link:focus, [data-palette="orange"] .tw-selectTree__list_row.tw-selectTree__active>.tw-selectTree__list_row_link:active	{
+	background:rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1) !important;
+	color:#fff;
+	}	
+[data-palette="orange"]  .searching .search-inline button	{
+	background:rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+}
+[data-palette="orange"]  .searching .search-inline button:hover{
+	background:rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], .7);
+}
+[data-palette="orange"] .totara-menu-nav-list .totara-menu-nav-list:hover .triangle-left, [data-palette="orange"] .totara-menu-nav-list .totara-menu-nav-list:hover .triangle-right {
+	border-color:rgba([[setting:orange_r]], [[setting:orange_g]], [[setting:orange_b]], 1);
+}													

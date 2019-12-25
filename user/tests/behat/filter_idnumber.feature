@@ -14,7 +14,7 @@ Feature: Filter users by idnumber
     And I log in as "admin"
     And I set the following administration settings values:
       | uselegacybrowselistofusersreport | 1 |
-    And I navigate to "Users > Accounts > Browse list of users" in site administration
+    And I navigate to "Users > Browse list of users" in site administration
 
   @javascript
   Scenario: Filtering id numbers - with case "is empty"
@@ -52,10 +52,10 @@ Feature: Filter users by idnumber
     And I should <S2's Vis> "Student2" in the "users" "table"
     And I should <S3's Vis> "Student3" in the "users" "table"
 
-Examples:
-    | Category        | Argument | Admin's Visibility | Teacher's Vis | S1's Vis | S2's Vis | S3's Vis |
-    | contains        | 0        | not see            | see           | see      | see      | see      |
-    | doesn't contain | 2        | see                | not see       | see      | not see  | see      |
-    | is equal to     | 2000000  | not see            | not see       | not see  | see      | not see  |
-    | starts with     | 0        | not see            | see           | see      | not see  | not see  |
-    | ends with       | 0        | not see            | not see       | not see  | see      | see      |
+    Examples:
+      | Category        | Argument | Admin's Visibility | Teacher's Vis | S1's Vis | S2's Vis | S3's Vis |
+      | contains        | 0        | not see            | see           | see      | see      | see      |
+      | doesn't contain | 2        | see                | not see       | see      | not see  | see      |
+      | is equal to     | 2000000  | not see            | not see       | not see  | see      | not see  |
+      | starts with     | 0        | not see            | see           | see      | not see  | not see  |
+      | ends with       | 0        | not see            | not see       | not see  | see      | see      |

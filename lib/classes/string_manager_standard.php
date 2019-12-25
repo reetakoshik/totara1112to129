@@ -398,6 +398,10 @@ class core_string_manager_standard implements core_string_manager {
             }
         }
 
+        // Debugging feature lets you display string identifier and component.
+        if (isset($CFG->debugstringids) && $CFG->debugstringids && optional_param('strings', 0, PARAM_INT)) {
+            $string .= ' {' . $identifier . '/' . $component . '}';
+        }
         return $string;
     }
 

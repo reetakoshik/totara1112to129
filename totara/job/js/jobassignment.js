@@ -130,12 +130,12 @@ M.totara_jobassignment = M.totara_jobassignment || {
         /// Appraiser dialog
         ///
         (function() {
-            var url = M.cfg.wwwroot+'/totara/hierarchy/prefix/position/assign/';
+            var url = M.cfg.wwwroot+'/totara/job/dialog/assign_appraiser_html.php';
 
             totaraSingleSelectDialog(
                 'appraiser',
                 M.util.get_string('chooseappraiser', 'totara_job') + M.totara_jobassignment.config.dialog_display_appraiser,
-                url+'manager.php?userid='+M.totara_jobassignment.config.userid,
+                url+'?userid='+M.totara_jobassignment.config.userid,
                 'appraiserid',
                 'appraisertitle',
                 undefined,

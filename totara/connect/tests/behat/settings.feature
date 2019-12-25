@@ -6,17 +6,17 @@ Feature: Test that Totara Connect may be enabled
   @javascript
   Scenario: Totara Connect server may be enabled
     Given I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable Totara Connect server" to "1"
     And I press "Save changes"
 
-    When I navigate to "Settings" node in "Site administration > Users > Accounts > Totara Connect server"
+    When I navigate to "Settings" node in "Site administration > Users > Totara Connect server"
     Then I should see "Sync user passwords"
 
-    When I navigate to "Client systems" node in "Site administration > Users > Accounts > Totara Connect server"
-     And I press "Add client"
+    When I navigate to "Client systems" node in "Site administration > Users > Totara Connect server"
+    And I press "Add client"
     Then I should see "Name"
-     And I should see "Client URL"
-     And I should see "Client setup secret"
-     And I should see "Restrict to audience"
+    And I should see "Client URL"
+    And I should see "Client setup secret"
+    And I should see "Restrict to audience"
 

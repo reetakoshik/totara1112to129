@@ -26,9 +26,7 @@ Feature: Seminar Manager signup approval changes
       | timmy | manager |
       | sammy | manager |
     And I log in as "teacher"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
-    And I turn editing mode on
+    And I am on "Classroom Connect Course" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name              | Test seminar name        |
       | Description       | Test seminar description |
@@ -56,8 +54,7 @@ Feature: Seminar Manager signup approval changes
   @javascript
   Scenario: The waitlisted report should be correct when the approval type changes
     When I log in as "jimmy"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
+    And I am on "Classroom Connect Course" course homepage
     And I follow "Sign-up"
     Then I should not see "Manager Approval"
 
@@ -66,39 +63,37 @@ Feature: Seminar Manager signup approval changes
 
     When I log out
     And I log in as "timmy"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
+    And I am on "Classroom Connect Course" course homepage
     And I follow "Join waitlist"
     Then I should not see "Manager Approval"
-    And I should see "This event is currently full. By clicking the \"Join waitlist\" button, you will be placed on the event's waitlist."
+    And I should see "This event is currently full. Upon successful sign-up, you will be placed on the event's waitlist."
 
-    Given I press "Sign-up"
+    Given I press "Join waitlist"
     And I log out
     And I log in as "teacher"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
+    And I am on "Classroom Connect Course" course homepage
     And I follow "Test seminar name"
     And I navigate to "Edit settings" in current page administration
-    And I click on "Approval Options" "link"
+    And I expand all fieldsets
     And I click on "#id_approvaloptions_approval_manager" "css_element"
     And I press "Save and display"
     And I log out
 
     When I log in as "sammy"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
-    And I follow "Join waitlist"
+    And I am on "Classroom Connect Course" course homepage
+    And I follow "Request approval"
     Then I should see "Manager Approval"
-    And I should see "This event is currently full. By clicking the \"Join waitlist\" button, you will be placed on the event's waitlist."
+    And I should see "This event is currently full. Upon successful sign-up, you will be placed on the event's waitlist."
     When I press "Request approval"
     Then I should see "Your request was sent to your manager for approval."
+    And I run all adhoc tasks
 
     Given I log out
     And I log in as "manager"
     And I click on "Dashboard" in the totara menu
     Then I should see "Seminar booking request"
     And I click on "View all tasks" "link"
-    And I should see "Sammy Sam" in the "td.user_namelink" "css_element"
+    And I should see "This is to advise that Sammy Sam has requested to be booked into the following course" in the "td.message_values_statement" "css_element"
     And I click on "Attendees" "link" in the "Sammy Sam" "table_row"
     Then I should see "Sammy Sam" in the ".lastrow" "css_element"
 
@@ -106,9 +101,20 @@ Feature: Seminar Manager signup approval changes
     And I click on "Update requests" "button"
     And I log out
 
+    And I log in as "admin"
+    And I am on "Classroom Connect Course" course homepage
+    And I follow "Test seminar name"
+    And I follow "Attendees"
+    And I follow "Wait-list"
+    And I press "Edit this report"
+    And I switch to "Columns" tab
+    And I set the field "newcolumns" to "Approver name"
+    And I press "Add"
+    And I press "Save changes"
+    And I log out
+
     When I log in as "teacher"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Classroom Connect Course"
+    And I am on "Classroom Connect Course" course homepage
     And I follow "Test seminar name"
     And I follow "Attendees"
     Then I should see "Booked" in the "Jimmy Jim" "table_row"

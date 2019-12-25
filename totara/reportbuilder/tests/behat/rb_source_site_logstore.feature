@@ -55,7 +55,8 @@ Feature: Test the site logstore report
     And I log out
 
     And I log in as "admin"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | Site Logs |
       | Source      | Site Logs |

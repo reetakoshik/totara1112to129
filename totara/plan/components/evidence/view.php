@@ -50,7 +50,7 @@ if (!has_capability('totara/plan:accessanyplan', $systemcontext) && !$plan->can_
 $PAGE->set_context($systemcontext);
 $PAGE->set_url('/totara/plan/components/evidence/view.php', array('id' => $id));
 $PAGE->set_pagelayout('report');
-$PAGE->set_totara_menu_selected('learningplans');
+$PAGE->set_totara_menu_selected('\totara_plan\totara\menu\learningplans');
 
 dp_get_plan_base_navlinks($plan->userid);
 $PAGE->navbar->add($plan->name, new moodle_url('/totara/plan/view.php', array('id' => $plan->id)));

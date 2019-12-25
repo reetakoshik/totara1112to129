@@ -416,6 +416,17 @@ class core_coursecatlib_testcase extends advanced_testcase {
         $this->resetAfterTest(true);
         $generator = $this->getDataGenerator();
         $category = $generator->create_category();
+
+        try {
+            // Enable the multilang filter and set it to apply to headings and content.
+            filter_manager::reset_caches();
+            filter_set_global_state('multilang', TEXTFILTER_ON);
+            filter_set_applies_to_strings('multilang', true);
+            $multilang = true;
+        } catch (coding_exception $ex) {
+            $multilang = false;
+        }
+
         $course1 = $generator->create_course(array(
             'category' => $category->id,
             'idnumber' => '006-01',
@@ -459,15 +470,12 @@ class core_coursecatlib_testcase extends advanced_testcase {
         $this->assertTrue($coursecat->resort_courses('timecreated'));
         $this->assertSame(array($c1, $c2, $c3, $c4), array_keys($coursecat->get_courses()));
 
-        try {
-            // Enable the multilang filter and set it to apply to headings and content.
-            filter_manager::reset_caches();
-            filter_set_global_state('multilang', TEXTFILTER_ON);
-            filter_set_applies_to_strings('multilang', true);
+        if ($multilang) {
             $expected = array($c3, $c4, $c1, $c2);
-        } catch (coding_exception $ex) {
+        } else {
             $expected = array($c3, $c4, $c2, $c1);
         }
+
         $this->assertTrue($coursecat->resort_courses('fullname'));
         $this->assertSame($expected, array_keys($coursecat->get_courses()));
     }
@@ -815,15 +823,9 @@ class core_coursecatlib_testcase extends advanced_testcase {
     /**
      * Tests coursecat::get_course_records() with audience visibility on, but without asking the method
      * to check visibility. Therefore all courses should be returned.
-     *
-     * This sets up data which is then carried over to the remaining tests for this method.
-     * See that resetAfterTest = false.
-     *
-     * @return array
      */
     public function test_coursetcat_get_course_records_audvis_on_dontcheck() {
         global $CFG;
-        $this->resetAfterTest(false);
 
         $CFG->audiencevisibility = 1;
         $data = $this->set_up_data_for_coursetcat_get_course_records();
@@ -841,22 +843,17 @@ class core_coursecatlib_testcase extends advanced_testcase {
         $this->assertEquals('notvisible_audienceonly', $courses[$data['notvisible_audienceonly']->id]->fullname);
         $this->assertArrayHasKey($data['visible_nousers']->id, $courses);
         $this->assertEquals('visible_nousers', $courses[$data['visible_nousers']->id]->fullname);
-
-        return $data;
     }
 
     /**
      * Tests coursecat::get_course_records() with audience visibility off, but without asking the method
      * to check visibility. Therefore all courses should be returned.
-     *
-     * @return array
-     * @depends test_coursetcat_get_course_records_audvis_on_dontcheck
      */
-    public function test_coursetcat_get_course_records_audvis_off_dontcheck($data) {
+    public function test_coursetcat_get_course_records_audvis_off_dontcheck() {
         global $CFG;
-        $this->resetAfterTest(false);
 
         $CFG->audiencevisibility = 0;
+        $data = $this->set_up_data_for_coursetcat_get_course_records();
         $this->setUser($data['user']);
 
         $courses  = coursecat::get_course_records('1=1', array(), array(), false);
@@ -871,22 +868,17 @@ class core_coursecatlib_testcase extends advanced_testcase {
         $this->assertEquals('notvisible_audienceonly', $courses[$data['notvisible_audienceonly']->id]->fullname);
         $this->assertArrayHasKey($data['visible_nousers']->id, $courses);
         $this->assertEquals('visible_nousers', $courses[$data['visible_nousers']->id]->fullname);
-
-        return $data;
     }
 
     /**
      * Tests coursecat::get_course_records() with audience visibility on and asks the method
      * to check visibility. Therefore only courses visible to this user should be returned.
-     *
-     * @return array
-     * @depends test_coursetcat_get_course_records_audvis_on_dontcheck
      */
-    public function test_coursetcat_get_course_records_audvis_on_docheck($data) {
+    public function test_coursetcat_get_course_records_audvis_on_docheck() {
         global $CFG;
-        $this->resetAfterTest(false);
 
         $CFG->audiencevisibility = 1;
+        $data = $this->set_up_data_for_coursetcat_get_course_records();
         $this->setUser($data['user']);
 
         $courses  = coursecat::get_course_records('1=1', array(), array(), true);
@@ -900,24 +892,17 @@ class core_coursecatlib_testcase extends advanced_testcase {
         $this->assertArrayHasKey($data['notvisible_audienceonly']->id, $courses);
         $this->assertEquals('notvisible_audienceonly', $courses[$data['notvisible_audienceonly']->id]->fullname);
         $this->assertArrayNotHasKey($data['visible_nousers']->id, $courses);
-
-        return $data;
     }
 
     /**
      * Tests coursecat::get_course_records() with audience visibility off and asks the method
      * to check visibility. Therefore only courses visible to this user should be returned.
-     *
-     * This sets resetAfterTest = true, clearing the data that was generated for this set of tests.
-     *
-     * @return void
-     * @depends test_coursetcat_get_course_records_audvis_on_dontcheck
      */
-    public function test_coursetcat_get_course_records_audvis_off_docheck($data) {
+    public function test_coursetcat_get_course_records_audvis_off_docheck() {
         global $CFG;
-        $this->resetAfterTest(true);
 
         $CFG->audiencevisibility = 0;
+        $data = $this->set_up_data_for_coursetcat_get_course_records();
         $this->setUser($data['user']);
 
         $courses  = coursecat::get_course_records('1=1', array(), array(), true);

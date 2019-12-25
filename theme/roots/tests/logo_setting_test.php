@@ -44,11 +44,13 @@ class theme_roots_site_logo_testcase extends advanced_testcase {
         $expected = array(
             'siteurl' => $CFG->wwwroot .'/',
             'shortname' => $SITE->shortname,
-            'logourl' => $OUTPUT->pix_url('logo', 'totara_core'),
+            'logourl' => $OUTPUT->image_url('logo', 'totara_core'),
             'logoalt' => get_string('totaralogo', 'totara_core'),
             'faviconurl' => $OUTPUT->favicon()
         );
 
         $this->assertEquals($expected, $logolib->export_for_template($OUTPUT));
+
+        $this->assertDebuggingCalled('The class theme_roots\output\site_logo has been deprecated since 12.0. Use totara\core\classes\output\masthead_logo.php instead.');
     }
 }

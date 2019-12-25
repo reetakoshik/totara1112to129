@@ -888,3 +888,20 @@ function wiki_check_updates_since(cm_info $cm, $from, $filter = array()) {
     }
     return $updates;
 }
+
+/**
+ * Sets dynamic information about a course module
+ *
+ * This callback is called from cm_info when checking module availability (incl. $cm->uservisible)
+ *
+ * Main viewing capability in mod_wiki is 'mod/wiki:viewpage' instead of the expected standardised 'mod/wiki:view'.
+ * The method cm_info::is_user_access_restricted_by_capability() does not work for wiki, we need to implement
+ * this callback.
+ *
+ * @param cm_info $cm
+ */
+function wiki_cm_info_dynamic(cm_info $cm) {
+    if (!has_capability('mod/wiki:viewpage', $cm->context, $cm->get_modinfo()->get_user_id())) {
+        $cm->set_available(false);
+    }
+}

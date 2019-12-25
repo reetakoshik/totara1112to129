@@ -32,13 +32,7 @@ class block_totara_quicklinks extends block_base {
 
     function specialization() {
         // After the block has been loaded we customize the block's title display
-        if (!empty($this->config) && !empty($this->config->title)) {
-            // There is a customized block title, display it
-            $this->title = format_string($this->config->title);
-        } else {
-            // No customized block title, use localized remote news feed string
-            $this->title = get_string('quicklinks', 'block_totara_quicklinks');
-        }
+        $this->title = get_string('quicklinks', 'block_totara_quicklinks');
     }
 
     function get_content() {

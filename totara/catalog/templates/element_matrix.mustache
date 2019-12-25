@@ -1,0 +1,98 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Brian Barnes <brian.barnes@totaralearning.com>
+   @package totara_catalog
+}}
+{{!
+
+    @template totara_catalog/element_matrix
+
+    This template generates Totara form action button.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * data-name - Name of the matrix element
+
+    Context variables required for this template:
+    * id - the form element id
+    * name - the form element name
+    * legend_hidden - whether the legend is to be hidden or not
+    * legend - Text to go in the legend (required for accessibility)
+    * rows - Data containing what is required for the individual filter names
+    * potentialfilters - All potential filters for this matrix control.
+       * id - Id of the filter
+       * filtername the human readable name of the filter
+
+    Other context variables for following partials:
+    * totara_catalog/element_matrix__row
+
+    Example context (json):
+    {
+        "id": "htmlid123",
+        "name": "matrix1",
+        "legend_hidden": false,
+        "legend": "This legend",
+        "rows": [
+            {"id": "one", "filtername": "Filter 1", "heading": "Named as 1"},
+            {"id": "two", "filtername": "Filter 2", "heading": "Named as 2"},
+            {"id": "three", "filtername": "Filter 3", "heading": "Named as 3"},
+            {"id": "four", "filtername": "Filter 4", "heading": "Named as 4"}
+        ],
+        "potentialfilters": [
+            {"id": "pot1", "filtername": "Potential filter 1"},
+            {"id": "pot2", "filtername": "Potential filter 2"},
+            {"id": "pot3", "filtername": "Potential filter 3"}
+        ]
+    }
+      
+}}
+<fieldset id="{{id}}" class="tf_element totara_catalog-matrix" data-name="{{name}}">
+    <legend><span class="totara_catalog-matrix_legend{{#legend_hidden}} sr-only{{/legend_hidden}}">{{legend}}</span></legend>
+    <table id="{{id}}_table">
+        <thead>
+            <tr>
+                <th scope="col">{{#str}}source, totara_catalog{{/str}}</th>
+                <th scope="col">{{#str}}filter_heading, totara_catalog{{/str}}</th>
+                <th scope="col">{{#str}}actions, totara_catalog{{/str}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#rows}}
+            {{> totara_catalog/element_matrix__row }}
+            {{/rows}}
+        </tbody>
+    </table>
+
+    <label for="{{id}}_addfilter" class="sr-only">{{#str}}add_another, totara_catalog{{/str}}</label>
+    <select id="{{id}}_addfilter" class="totara_catalog-matrix__addfilter">
+        <option value="">{{#str}}add_another, totara_catalog{{/str}}</option>
+        {{#potentialfilters}}
+            {{#group}}
+                <optgroup label="{{label}}">
+                    {{#options}}
+                        <option value="{{id}}">{{{filtername}}}</option>
+                    {{/options}}
+                </optgroup>
+            {{/group}}
+            {{^group}}<option value="{{id}}">{{filtername}}</option>{{/group}}
+        {{/potentialfilters}}
+    </select>
+</fieldset>

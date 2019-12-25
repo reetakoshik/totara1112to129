@@ -1,3 +1,6 @@
+catalogcertifications,totara_coursecatalog
+catalogcourses,totara_coursecatalog
+catalogprograms,totara_coursecatalog
 placeholder:coursename,totara_coursecatalog
 placeholder:coursepageurl,totara_coursecatalog
 placeholder:dayssincecompletion,totara_coursecatalog

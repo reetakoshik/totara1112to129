@@ -26,9 +26,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 class rb_source_badge_issued extends rb_base_source {
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
+    use \core_course\rb\source\report_trait;
+    use \core_tag\rb\source\report_trait;
+    use \totara_job\rb\source\report_trait;
+    use \totara_cohort\rb\source\report_trait;
 
     public function __construct($groupid, rb_global_restriction_set $globalrestrictionset = null) {
         if ($groupid instanceof rb_global_restriction_set) {
@@ -50,6 +51,8 @@ class rb_source_badge_issued extends rb_base_source {
         $this->defaultfilters = $this->define_defaultfilters();
         $this->requiredcolumns = $this->define_requiredcolumns();
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_badge_issued');
+        $this->usedcomponents[] = 'core_badges';
+        $this->usedcomponents[] = 'totara_cohort';
 
         parent::__construct();
     }
@@ -89,14 +92,15 @@ class rb_source_badge_issued extends rb_base_source {
         );
 
         // Include some standard joins.
-        $this->add_user_table_to_joinlist($joinlist, 'base', 'userid');
-        $this->add_course_table_to_joinlist($joinlist, 'badge', 'courseid');
+        $this->add_core_user_tables($joinlist, 'base', 'userid');
+        $this->add_core_course_tables($joinlist, 'badge', 'courseid');
         // Requires the course join.
-        $this->add_course_category_table_to_joinlist($joinlist,
+        $this->add_core_course_category_tables($joinlist,
             'course', 'category');
-        $this->add_job_assignment_tables_to_joinlist($joinlist, 'base', 'userid', 'INNER');
-        $this->add_core_tag_tables_to_joinlist('core', 'course', $joinlist, 'badge', 'courseid');
-        $this->add_cohort_course_tables_to_joinlist($joinlist, 'badge', 'courseid');
+
+        $this->add_totara_job_tables($joinlist, 'base', 'userid');
+        $this->add_core_tag_tables('core', 'course', $joinlist, 'badge', 'courseid');
+        $this->add_totara_cohort_course_tables($joinlist, 'badge', 'courseid');
 
         return $joinlist;
     }
@@ -138,7 +142,7 @@ class rb_source_badge_issued extends rb_base_source {
                 'badgeimage',
                 get_string('badgeimage', 'rb_source_badge_issued'),
                 'badge.id',
-                array('displayfunc' => 'badgeimage',
+                array('displayfunc' => 'badge_image',
                     'extrafields' => array('userid' => 'base.userid',
                         'uniquehash' => 'base.uniquehash',
                         'badgename' => 'badge.name'),
@@ -149,7 +153,7 @@ class rb_source_badge_issued extends rb_base_source {
                 'issuername',
                 get_string('issuername', 'rb_source_badge_issued'),
                 'badge.issuername',
-                array('displayfunc' => 'issuernamelink',
+                array('displayfunc' => 'badge_issuer_name_link',
                     'extrafields' => array('issuerurl' => 'badge.issuerurl'),
                     'joins' => 'badge')
             ),
@@ -158,28 +162,30 @@ class rb_source_badge_issued extends rb_base_source {
                 'issuercontact',
                 get_string('issuercontact', 'rb_source_badge_issued'),
                 'badge.issuercontact',
-                array('joins' => 'badge')
+                array('joins' => 'badge',
+                      'displayfunc' => 'format_string')
             ),
             new rb_column_option(
                 'badge',
                 'name',
                 get_string('badgename', 'rb_source_badge_issued'),
                 'badge.name',
-                array('joins' => 'badge')
+                array('joins' => 'badge',
+                      'displayfunc' => 'format_string')
             ),
             new rb_column_option(
                 'badge',
                 'type',
                 get_string('badgetype', 'rb_source_badge_issued'),
                 'badge.type',
-                array('displayfunc' => 'badgetype', 'joins' => 'badge')
+                array('displayfunc' => 'badge_type', 'joins' => 'badge')
             ),
             new rb_column_option(
                 'badge',
                 'status',
                 get_string('badgestatus', 'rb_source_badge_issued'),
                 'badge.status',
-                array('displayfunc' => 'badgestatus', 'joins' => 'badge')
+                array('displayfunc' => 'badge_status', 'joins' => 'badge')
             ),
             new rb_column_option(
                 'badge',
@@ -187,19 +193,19 @@ class rb_source_badge_issued extends rb_base_source {
                 get_string('badgedescription', 'rb_source_badge_issued'),
                 'badge.description',
                 array(
-                    'displayfunc' => 'text',
+                    'displayfunc' => 'format_string',
                     'joins' => 'badge',
                 )
             )
         );
 
         // Include some standard columns.
-        $this->add_user_fields_to_columns($columnoptions);
-        $this->add_course_fields_to_columns($columnoptions);
-        $this->add_course_category_fields_to_columns($columnoptions);
-        $this->add_job_assignment_fields_to_columns($columnoptions);
-        $this->add_core_tag_fields_to_columns('core', 'course', $columnoptions);
-        $this->add_cohort_course_fields_to_columns($columnoptions);
+        $this->add_core_user_columns($columnoptions);
+        $this->add_core_course_columns($columnoptions);
+        $this->add_core_course_category_columns($columnoptions);
+        $this->add_totara_job_columns($columnoptions);
+        $this->add_core_tag_columns('core', 'course', $columnoptions);
+        $this->add_totara_cohort_course_columns($columnoptions);
 
         return $columnoptions;
     }
@@ -274,12 +280,12 @@ class rb_source_badge_issued extends rb_base_source {
         );
 
         // Include some standard filters.
-        $this->add_user_fields_to_filters($filteroptions);
-        $this->add_course_fields_to_filters($filteroptions);
-        $this->add_course_category_fields_to_filters($filteroptions);
-        $this->add_job_assignment_fields_to_filters($filteroptions, 'base', 'userid');
-        $this->add_core_tag_fields_to_filters('core', 'course', $filteroptions);
-        $this->add_cohort_course_fields_to_filters($filteroptions);
+        $this->add_core_user_filters($filteroptions);
+        $this->add_core_course_filters($filteroptions);
+        $this->add_core_course_category_filters($filteroptions);
+        $this->add_totara_job_filters($filteroptions, 'base', 'userid');
+        $this->add_core_tag_filters('core', 'course', $filteroptions);
+        $this->add_totara_cohort_course_filters($filteroptions);
 
         return $filteroptions;
     }
@@ -359,12 +365,17 @@ class rb_source_badge_issued extends rb_base_source {
         return array();
     }
 
-    //
-    //
-    // Source specific column display methods.
-    //
-    //
+    /**
+     * Displays issuer name as html link.
+     *
+     * @deprecated Since Totara 12.0
+     * @param string $name
+     * @param object Report row $row
+     * @param bool $isexport
+     * @return string html link
+     */
     public function rb_display_issuernamelink($name, $row, $isexport) {
+        debugging('rb_source_badge_issued::rb_display_issuernamelink has been deprecated since Totara 12.0. Use core_badges\rb\display\badge_issuer_name_link::display', DEBUG_DEVELOPER);
         global $CFG;
         if (empty($name)) {
             return '';
@@ -377,20 +388,49 @@ class rb_source_badge_issued extends rb_base_source {
         return html_writer::tag('a', $name, array('href' => $row->issuerurl));
     }
 
+    /**
+     * Display for badge type
+     *
+     * @deprecated Since Totara 12.0
+     * @param $type
+     * @param $row
+     * @param $isexport
+     * @return string
+     */
     public function rb_display_badgetype($type, $row, $isexport) {
+        debugging('rb_source_badge_issued::rb_display_issuernamelink has been deprecated since Totara 12.0. Use core_badges\rb\display\badge_type::display', DEBUG_DEVELOPER);
         global $CFG;
         require_once($CFG->libdir.'/badgeslib.php');
         return get_string("badgetype_{$type}", 'badges');
     }
 
+    /**
+     * Display for badge status
+     *
+     * @deprecated Since Totara 12.0
+     * @param $status
+     * @param $row
+     * @param $isexport
+     * @return string
+     */
     public function rb_display_badgestatus($status, $row, $isexport) {
+        debugging('rb_source_badge_issued::rb_display_badgestatus has been deprecated since Totara 12.0. Use core_badges\rb\display\badge_status::display', DEBUG_DEVELOPER);
         global $CFG;
         require_once($CFG->libdir.'/badgeslib.php');
         return get_string("badgestatus_{$status}", 'badges');
     }
 
-
+    /**
+     * Display for badge image
+     *
+     * @deprecated Since Totara 12.0
+     * @param $badgeid
+     * @param $row
+     * @param $isexport
+     * @return string
+     */
     public function rb_display_badgeimage($badgeid, $row, $isexport) {
+        debugging('rb_source_badge_issued::rb_display_badgeimage has been deprecated since Totara 12.0. Use core_badges\rb\display\badge_image::display', DEBUG_DEVELOPER);
         global $CFG;
 
         if ($isexport) {

@@ -36,7 +36,7 @@ abstract class test_helper extends advanced_testcase {
      * @param $value
      */
     protected function set_protected_property($object, $property_name, $value) {
-        $reflection = new \ReflectionClass($object);
+        $reflection = new ReflectionClass($object);
         $reflection_property = $reflection->getProperty($property_name);
         $reflection_property->setAccessible(true);
         $reflection_property->setValue($object, $value);
@@ -49,7 +49,7 @@ abstract class test_helper extends advanced_testcase {
      * @return mixed
      */
     protected function get_protected_property($object, $property_name) {
-        $reflection = new \ReflectionClass($object);
+        $reflection = new ReflectionClass($object);
         $reflection_property = $reflection->getProperty($property_name);
         $reflection_property->setAccessible(true);
         return $reflection_property->getValue($object);
@@ -62,7 +62,7 @@ abstract class test_helper extends advanced_testcase {
      * @return mixed
      */
     protected static function call_protected_method($object, $method, array $args = []) {
-        $class = new \ReflectionClass(get_class($object));
+        $class = new ReflectionClass(get_class($object));
         $method = $class->getMethod($method);
         $method->setAccessible(true);
         return $method->invokeArgs($object, $args);
@@ -74,7 +74,7 @@ abstract class test_helper extends advanced_testcase {
      */
     protected function refresh_tiles(&...$tiles) {
         foreach ($tiles as &$tile) {
-            $tile = \block_totara_featured_links\tile\base::get_tile_instance($tile->id);
+            $tile = block_totara_featured_links\tile\base::get_tile_instance($tile->id);
         }
     }
 }

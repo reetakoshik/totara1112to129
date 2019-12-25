@@ -29,38 +29,35 @@ require_once($CFG->dirroot."/totara/plan/lib.php");
  * A unit test for checking whether the email is
  * sending or not base on the user's preference
  * when a new comment is added to their plan
- * Class add_comment_test
  */
-class add_comment_test extends advanced_testcase {
-    /**
-     * @param stdClass $user
-     * @return stdClass
-     * @throws dml_exception
-     */
-    private function create_plan(\stdClass $user): stdClass {
-        global $DB;
-        $plan = [
-            'templateid' => 1,
-            'name' => 'plan 1',
-            'userid' => $user->id,
-            'startdate' => strtotime("2018-01-02"),
-            'enddate' => strtotime("2018-01-03"),
-            'status' => 50,
-            'createdby' => 0
-        ];
+class totara_plan_add_comment_testcase extends advanced_testcase {
 
-        $id = $DB->insert_record("dp_plan", (object) $plan);
-        $plan['id'] = $id;
+    /** @var totara_plan_generator $plangenerator */
+    private $plangenerator = null;
 
-        return (object) $plan;
+    /** @var testing_data_generator $datagenerator */
+    private $datagenerator = null;
+
+    protected function setUp() {
+        parent::setup();
+
+        $this->resetAfterTest();
+
+        $this->datagenerator = $this->getDataGenerator();
+        $this->plangenerator = $this->datagenerator->get_plugin_generator('totara_plan');
+    }
+
+    protected function tearDown() {
+        $this->datagenerator = null;
+        $this->plangenerator = null;
+        parent::tearDown();
     }
 
     /**
      * @param stdClass  $user
-     * @param bool      $issendingemail
-     * @throws dml_exception
+     * @param bool      $issendingemail True if user should be subscribed to an email
      */
-    private function prepare_user_preferences(\stdClass $user, $issendingemail=false): void {
+    private function prepare_user_preferences(\stdClass $user, $issendingemail = false): void {
         global $DB;
 
         $value = $issendingemail ? "email" : "none";
@@ -77,40 +74,85 @@ class add_comment_test extends advanced_testcase {
         ]);
     }
 
-    private function create_comment(\stdClass $user, \stdClass $plan): stdClass {
+    private function create_comment(\stdClass $user, \stdClass $plan, string $content): stdClass {
+        global $DB;
+
         $comment = new \stdClass();
-        $comment->commentarea = "plan_overview";
+        $comment->commentarea = 'plan_overview';
         $comment->contextid = 1;
-        $comment->component ="totara_plan";
-        $comment->content = "Hello world";
+        $comment->component = 'totara_plan';
+        $comment->content = $content;
         $comment->itemid = $plan->id;
         $comment->userid = $user->id;
-        $comment->timecreated=time();
+        $comment->timecreated = time();
+        $DB->insert_record('comments', $comment);
 
         return $comment;
     }
 
-    /**
-     * The test suite of adding a new comment,
-     * and the method would check for user's preferences
-     * to determine whether sending email or not. The result should be not sending
-     *
-     * If the notification is sending out, then the table messages should have new row
-     */
-    public function test_not_sending_email(): void {
-        global $DB;
-        $sql = /** @lang text */"SELECT * FROM {message}";
-        $DB->get_counted_records_sql($sql, null, 0, 0, $before);
+    public function test_totara_plan_comment_add(): void {
+        // Create a plan user.
+        $planuser = $this->datagenerator->create_user();
+        $this->prepare_user_preferences($planuser);
 
-        $this->resetAfterTest(true);
-        $user = $this->getDataGenerator()->create_user();
-        $this->prepare_user_preferences($user);
-        $plan = $this->create_plan($user);
+        // Create a manager user.
+        $manager = $this->datagenerator->create_user();
+        $managerja = \totara_job\job_assignment::create_default($manager->id);
+        $this->prepare_user_preferences($manager, true);
 
-        $comment = $this->create_comment($user, $plan);
-        totara_plan_comment_add($comment);
+        // Assign manager to the plan user.
+        \totara_job\job_assignment::create_default($planuser->id, ['managerjaid' => $managerja->id]);
 
-        $DB->get_counted_records_sql($sql, null, 0, 0, $after);
-        $this->assertEquals($before, $after);
+        // Some other user who should not see the plan.
+        $otheruser = $this->datagenerator->create_user();
+        $this->prepare_user_preferences($otheruser, true);
+
+        $plan = $this->plangenerator->create_learning_plan(['userid' => $planuser->id]);
+
+        $this->setUser($planuser);
+        $sink = $this->redirectEmails();
+        $planuser_comment = $this->create_comment($planuser, $plan, 'Comment 1');
+        totara_plan_comment_add($planuser_comment);
+
+        $emails = $sink->get_messages();
+        $this->assertCount(1, $emails); // Manager gets an email.
+        $sink->clear();
+
+        $this->setUser($otheruser);
+        $otheruser_comment = $this->create_comment($otheruser, $plan, 'Comment 2');
+        totara_plan_comment_add($otheruser_comment);
+
+        $emails = $sink->get_messages();
+        $this->assertCount(1, $emails); // Manager gets an email, plan user is unsubscribed.
+        $sink->clear();
+
+        $this->setUser($manager);
+        $manager_comment = $this->create_comment($manager, $plan, 'Comment 3');
+        totara_plan_comment_add($manager_comment);
+
+        $emails = $sink->get_messages();
+        $this->assertCount(0, $emails); // No one gets an email (plan user is unsubscribed, other user has no access).
+        $sink->clear();
+
+        $this->setUser($planuser);
+        $planuser_comment = $this->create_comment($planuser, $plan, 'Comment 4');
+        totara_plan_comment_add($planuser_comment);
+
+        $emails = $sink->get_messages();
+        $this->assertCount(1, $emails); // Manager gets an email.
+        $sink->clear();
+
+        $roleid = $this->datagenerator->create_role();
+        role_change_permission($roleid, context_system::instance(), 'totara/plan:accessanyplan', CAP_ALLOW);
+        $this->datagenerator->role_assign($roleid, $otheruser->id);
+
+        $this->setUser($planuser);
+        $planuser_comment = $this->create_comment($planuser, $plan, 'Comment 5');
+        totara_plan_comment_add($planuser_comment);
+
+        $emails = $sink->get_messages();
+        $this->assertCount(2, $emails); // Manager gets an email, other user gets an email.
+
+        $sink->close();
     }
 }

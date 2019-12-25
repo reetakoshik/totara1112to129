@@ -23,23 +23,18 @@
 
 // This file defines settingpages and externalpages under the "hierarchies" category
 
-
     // Positions.
-    if (!totara_feature_disabled('positions')) {
-        $ADMIN->add('hierarchies', new admin_category('positions', get_string('positions', 'totara_hierarchy')));
+    $ADMIN->add('positions', new admin_externalpage('positionmanage', get_string('positionmanage', 'totara_hierarchy'),
+        "{$CFG->wwwroot}/totara/hierarchy/framework/index.php?prefix=position",
+        array('totara/hierarchy:viewpositionframeworks'), totara_feature_disabled('positions')));
 
-        $ADMIN->add('positions', new admin_externalpage('positionmanage', get_string('positionmanage', 'totara_hierarchy'),
-            "{$CFG->wwwroot}/totara/hierarchy/framework/index.php?prefix=position",
-            array('totara/hierarchy:viewpositionframeworks')));
-
-        $ADMIN->add('positions', new admin_externalpage('positiontypemanage', get_string('managepositiontypes', 'totara_hierarchy'),
-            "{$CFG->wwwroot}/totara/hierarchy/type/index.php?prefix=position",
-            array('totara/hierarchy:createpositiontype', 'totara/hierarchy:updatepositiontype', 'totara/hierarchy:deletepositiontype')));
-    }
+    $ADMIN->add('positions', new admin_externalpage('positiontypemanage', get_string('managepositiontypes', 'totara_hierarchy'),
+        "{$CFG->wwwroot}/totara/hierarchy/type/index.php?prefix=position",
+        array('totara/hierarchy:createpositiontype', 'totara/hierarchy:updatepositiontype', 'totara/hierarchy:deletepositiontype'),
+        totara_feature_disabled('positions')
+    ));
 
     // Organisations.
-    $ADMIN->add('hierarchies', new admin_category('organisations', get_string('organisations', 'totara_hierarchy')));
-
     $ADMIN->add('organisations', new admin_externalpage('organisationmanage', get_string('organisationmanage', 'totara_hierarchy'),
             "{$CFG->wwwroot}/totara/hierarchy/framework/index.php?prefix=organisation",
             array('totara/hierarchy:vieworganisationframeworks')));
@@ -50,10 +45,6 @@
 
 
     // Competencies.
-    $ADMIN->add('hierarchies', new admin_category('competencies', get_string('competencies', 'totara_hierarchy'),
-        totara_feature_disabled('competencies')
-    ));
-
     $ADMIN->add('competencies', new admin_externalpage('competencymanage', get_string('competencymanage', 'totara_hierarchy'),
         "{$CFG->wwwroot}/totara/hierarchy/framework/index.php?prefix=competency",
         array('totara/hierarchy:viewcompetencyscale', 'totara/hierarchy:viewcompetencyframeworks'),
@@ -66,15 +57,7 @@
         totara_feature_disabled('competencies')
     ));
 
-//    $ADMIN->add('competencies', new admin_externalpage('competencyglobalsettings', get_string('globalsettings', 'competency'), "$CFG->wwwroot/hierarchy/prefix/competency/adminsettings.php",
-//            array('totara/hierarchy:updatecompetency')));
-
     // Goals.
-
-    $ADMIN->add('hierarchies', new admin_category('goals', get_string('goals', 'totara_hierarchy'),
-        totara_feature_disabled('goals')
-    ));
-
     $ADMIN->add('goals', new admin_externalpage('goalmanage', get_string('goalmanage', 'totara_hierarchy'),
             "{$CFG->wwwroot}/totara/hierarchy/framework/index.php?prefix=goal",
             array('totara/hierarchy:creategoalframeworks', 'totara/hierarchy:updategoalframeworks', 'totara/hierarchy:deletegoalframeworks',

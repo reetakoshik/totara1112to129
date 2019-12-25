@@ -77,29 +77,6 @@ function filter_tex_sanitize_formula($texexp) {
 }
 
 /**
- * @param $pathname
- * @param $texexp
- * @return string
- * @deprecated since 10.
- */
-function filter_tex_get_cmd($pathname, $texexp) {
-
-    debugging('filter_tex_get_cmd has been deprecated since Totara 10. Please use the \core\command\executable class.');
-
-    $texexp = filter_tex_sanitize_formula($texexp);
-    $texexp = escapeshellarg($texexp);
-    $executable = filter_tex_get_executable(false);
-
-    if ((PHP_OS == "WINNT") || (PHP_OS == "WIN32") || (PHP_OS == "Windows")) {
-        $executable = str_replace(' ', '^ ', $executable);
-        return "$executable ++ -e  \"$pathname\" -- $texexp";
-
-    } else {
-        return "\"$executable\" -e \"$pathname\" -- $texexp";
-    }
-}
-
-/**
  * Purge all caches when settings changed.
  */
 function filter_tex_updatedcallback($name) {

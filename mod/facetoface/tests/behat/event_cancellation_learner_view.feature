@@ -34,9 +34,7 @@ Feature: Seminar event cancellation learner views
     And I log out
 
     Given I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test Seminar |
       | Description | Test Seminar |
@@ -109,10 +107,10 @@ Feature: Seminar event cancellation learner views
     Given I click on "Attendees" "link" in the "10 February 2025" "table_row"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Learner One, learner1@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I click on "Learner Two, learner2@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     And I press "Confirm"
@@ -120,16 +118,14 @@ Feature: Seminar event cancellation learner views
 
     Given I log out
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I click on "Cancel event" "link" in the "10 February 2025" "table_row"
     And I press "Yes"
 
     When I log out
     And I log in as "learner1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     Then I should see "9:00 AM - 3:00 PM Pacific/Auckland" in the "10 February 2025" "table_row"
     And I should see "Event cancelled" in the "10 February 2025" "table_row"
@@ -144,10 +140,10 @@ Feature: Seminar event cancellation learner views
     Given I click on "Attendees" "link" in the "10 February 2025" "table_row"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Learner One, learner1@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I click on "Learner Two, learner2@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     And I press "Confirm"
@@ -155,8 +151,7 @@ Feature: Seminar event cancellation learner views
 
     Given I log out
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I click on "Cancel event" "link" in the "10 February 2025" "table_row"
     And I press "Yes"
@@ -177,16 +172,16 @@ Feature: Seminar event cancellation learner views
     Given I click on "Attendees" "link" in the "10 April 2030" "table_row"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Learner One, learner1@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I click on "Learner Two, learner2@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I click on "Learner Three, learner2@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I click on "Learner Four, learner2@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     And I press "Confirm"
@@ -216,10 +211,10 @@ Feature: Seminar event cancellation learner views
     Given I click on "Attendees" "link" in the "10 February 2025" "table_row"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Learner One, learner1@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I click on "Learner Two, learner2@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     And I press "Confirm"
@@ -227,8 +222,7 @@ Feature: Seminar event cancellation learner views
 
     Given I log out
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I click on "Cancel event" "link" in the "10 February 2025" "table_row"
     And I press "Yes"

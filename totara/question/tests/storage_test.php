@@ -54,7 +54,7 @@ class question_storage_test extends totara_question_testcase {
         $this->assertTrue(isset($storage->param1));
         $tostore = new stdClass();
         $storage->access_export_storage_fields($tostore);
-        $this->assertInternalType('string', $tostore->param1);
+        $this->assertIsString($tostore->param1);
         $tostore->param1 = str_replace('tested', 'passed', $tostore->param1);
         $storage->access_import_storage_fields($tostore);
         $testparam = $storage->param1;

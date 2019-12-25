@@ -34,7 +34,8 @@ Feature: Check the course upload interface is shown to people with the right cap
 
     When I log in as "staffmanager"
     And I expand "Site administration" node
-    Then I should see "Users" in the "Administration" "block"
+    # Totara fix
+    Then I should see "Audiences" in the "Administration" "block"
     And I should not see "Courses" in the "Administration" "block"
     And I log out
 
@@ -48,7 +49,7 @@ Feature: Check the course upload interface is shown to people with the right cap
     And I log out
 
     When I log in as "coursecreator"
-    And I navigate to "Manage courses and categories" node in "Site administration > Courses"
-    Then I should see "Manage courses and categories" in the "Administration" "block"
+    And I navigate to "Courses and categories" node in "Site administration > Courses"
+    Then I should see "Courses and categories" in the "Administration" "block"
     And I should not see "Upload courses" in the "Administration" "block"
     And I log out

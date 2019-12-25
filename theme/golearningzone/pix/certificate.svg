@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="41px" height="53px" viewBox="0 0 41 53" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 52.6 (67491) - http://www.bohemiancoding.com/sketch -->
+ 
+    <g id="website" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="icons-" transform="translate(-97.000000, -504.000000)" stroke="#000000">
+            <g id="certificate" transform="translate(99.000000, 506.000000)">
+                <path d="M25,12.375 L36.375,12.375 C36.725,12.375 37,12.1 37,11.75 C37,10.6375 36.5125,9.5875 35.6625,8.8875 L26.125,0.9375 C25.4,0.3375 24.5,0.0125 23.55,0.0125 C23.0375,0.0125 22.625,0.425 22.625,0.9375 L22.625,10 C22.625,11.3125 23.6875,12.375 25,12.375 Z" id="Path" stroke-width="3"></path>
+                <path d="M19.3026316,10.6 L19.3026316,1 L3.78947368,1 C1.70526316,1 0,2.728 0,4.84 L0,45.16 C0,47.272 1.70526316,49 3.78947368,49 L32.2105263,49 C34.2947368,49 36,47.272 36,45.16 L36,16 L24.6315789,16 C21.6947368,16 19.3026316,13.576 19.3026316,10.6 Z" id="Path" stroke-width="3"></path>
+                <g id="Group-2" transform="translate(5.000000, 19.000000)">
+                    <circle id="Oval" stroke-width="3" cx="7.8" cy="7" r="7"></circle>
+                    <polyline id="Path-5" stroke-width="2.8" points="3.63636364 12 0 25 7.27272727 18.5 15 25 11.5454545 12"></polyline>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

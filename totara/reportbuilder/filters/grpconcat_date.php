@@ -55,8 +55,8 @@ class rb_filter_grpconcat_date extends rb_filter_date {
 
         $daysbefore = $data['daysbefore'];
         $daysafter = $data['daysafter'];
-        $precond = ' (1 = 0) ';
-        $postcond = ' (1 = 0) ';
+        $precond = ' (1 = 1) ';
+        $postcond = ' (1 = 1) ';
         $params = array();
 
         $fromsql = '';
@@ -131,7 +131,7 @@ class rb_filter_grpconcat_date extends rb_filter_date {
                              {$fromsql}
                                WHERE ja.userid = {$userfield}
                                  AND {$field} != :{$uniquenull}
-                                 AND ( {$precond} OR {$postcond} )
+                                 AND ( {$precond} AND {$postcond} )
                             )";
             return array($sql, $params);
         }

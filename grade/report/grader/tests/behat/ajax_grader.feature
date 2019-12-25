@@ -4,7 +4,6 @@ Feature: Using the AJAX grading feature of Grader report to update grades and fe
   As a teacher
   I need to be able to update and verify grades
 
-
   Background:
     Given the following "courses" exist:
       | fullname | shortname | category | groupmode |
@@ -54,7 +53,7 @@ Feature: Using the AJAX grading feature of Grader report to update grades and fe
       | grade_overridecat | 1 |
       | grade_report_showquickfeedback | 0 |
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "View > Grader report" in the course gradebook
     And I click on student "Student 2" for grade item "Item VU"
     Then I should see a grade field for "Student 2" and grade item "Item VU"
@@ -93,7 +92,7 @@ Feature: Using the AJAX grading feature of Grader report to update grades and fe
     And the following should exist in the "user-grades" table:
       | -1-                | -16-      |
       | Student 1          | 90.00     |
-    And I navigate to "View > Grader report" in the course gradebook
+    And I reload the page
     And the following should exist in the "user-grades" table:
       | -1-                | -6-   | -7-   | -13-      | -16-      |
       | Student 1          | -     | -     | -         | 90.00     |
@@ -106,7 +105,7 @@ Feature: Using the AJAX grading feature of Grader report to update grades and fe
       | grade_overridecat | 1 |
       | grade_report_showquickfeedback | 1 |
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "View > Grader report" in the course gradebook
     And I click on student "Student 2" for grade item "Item VU"
     Then I should see a grade field for "Student 2" and grade item "Item VU"
@@ -127,8 +126,7 @@ Feature: Using the AJAX grading feature of Grader report to update grades and fe
     And I set the field "ajaxfeedback" to "Student 2 SU feedback"
     And I press key "13" in the field "ajaxfeedback"
     # Reload grader report:
-    And I navigate to "View > User report" in the course gradebook
-    And I navigate to "View > Grader report" in the course gradebook
+    And I reload the page
     And the following should exist in the "user-grades" table:
       | -1-       | -7-   | -13-      | -16-  |
       | Student 2 | 33.00 | Very good | 36.00 |
@@ -143,7 +141,7 @@ Feature: Using the AJAX grading feature of Grader report to update grades and fe
       | grade_overridecat | 0 |
       | grade_report_showquickfeedback | 1 |
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "View > Grader report" in the course gradebook
     And I click on student "Student 2" for grade item "Item VU"
     Then I should see a grade field for "Student 2" and grade item "Item VU"
@@ -163,7 +161,7 @@ Feature: Using the AJAX grading feature of Grader report to update grades and fe
       | grade_overridecat | 1 |
       | grade_report_showquickfeedback | 1 |
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "View > Grader report" in the course gradebook
     And I turn editing mode on
     Then I should not see a grade field for "Student 2" and grade item "Item VL"
@@ -194,7 +192,7 @@ Feature: Using the AJAX grading feature of Grader report to update grades and fe
       | grade_overridecat | 0 |
       | grade_report_showquickfeedback | 1 |
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "View > Grader report" in the course gradebook
     And I turn editing mode on
     And I change window size to "large"

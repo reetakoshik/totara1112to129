@@ -28,7 +28,7 @@ require_once($CFG->libdir . '/formslib.php');
 class block_current_learning_edit_form extends block_edit_form {
 
     protected function specific_definition($mform) {
-        $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
+        $mform->addElement('header', 'configheader', get_string('customblocksettings', 'block'));
 
         $mform->addElement('duration', 'config_warningperiod', get_string('itemduewarningperiod', 'block_current_learning'));
         $mform->setDefault('config_warningperiod', block_current_learning::DEFAULT_WARNING_PERIOD);

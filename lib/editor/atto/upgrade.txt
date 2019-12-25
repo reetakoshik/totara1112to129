@@ -1,6 +1,12 @@
 This files describes API changes in the editor_atto code,
 information provided here is intended especially for developers.
 
+=== 12.0 ===
+* Autosave restore notification now uses standard notify_* template.
+* Autosave message (below atto editor) has improved HTML
+* Added support for font icons in editor buttons
+* Collapse button used a font icon
+
 === 10.0 ===
 * New methods added to notify module for finer control of hiding an Atto message.
 * New methods added to notify module for display of a new type of message: alert.

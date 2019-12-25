@@ -1,0 +1,132 @@
+//
+// This file is part of Totara Learn
+//
+// Copyright (C) 2018 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @copyright 2018 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Kevin Hottinger <kevin.hottinger@totaralearning.com>
+// @package   theme_roots
+
+// Variables
+// Colours
+@selectSearchText-color_neutral_2: @totara_style-color_neutral_2;
+@selectSearchText-color_neutral_3: @totara_style-color_neutral_3;
+@selectSearchText-color_neutral_5: @totara_style-color_neutral_5;
+@selectSearchText-color_neutral_7: @totara_style-color_neutral_7;
+@selectSearchText-color_theme: @totara_style-color_theme_1;
+// Spacing
+@selectSearchText-spacing_x_small: @totara_style-spacing_x_small;
+@selectSearchText-spacing_small: @totara_style-spacing_small;
+@selectSearchText-spacing_medium: @totara_style-spacing_medium;
+// Breakpoints
+@selectSearchText-screen_sm_min: @totara_style-screen_sm_min;
+@selectSearchText-screen_md_min: @totara_style-screen_md_min;
+
+.tw-selectSearchText {
+    display: flex;
+    padding: @selectSearchText-spacing_small @selectSearchText-spacing_x_small;
+
+    &__header {
+        height: 100%;
+        margin: auto @selectSearchText-spacing_medium auto 0;
+    }
+
+    &__hint {
+        height: 100%;
+        left: -@selectSearchText-spacing_x_small;
+        margin: auto @selectSearchText-spacing_small auto 0;
+        position: relative;
+    }
+
+    &__field {
+        display: flex;
+        flex-grow: 1;
+        min-width: 0;
+        position: relative;
+
+        &_input {
+            border: 1px solid @selectSearchText-color_neutral_5;
+            border-right: 1px solid transparent;
+            padding: @selectSearchText-spacing_small 2.5em @selectSearchText-spacing_small @selectSearchText-spacing_small;
+            transition: border-color 0.2s ease;
+            width: 100%;
+
+            &:focus {
+                border: 1px solid @selectSearchText-color_theme;
+            }
+        }
+
+        input[type="text"].tw-selectSearchText__field_input {
+            max-width: none;
+
+            &::-ms-clear {
+                display: none;
+            }
+        }
+
+        &_clear {
+            align-items: center;
+            display: flex;
+            font-size: 1.3rem;
+            height: 100%;
+            padding: @selectSearchText-spacing_small;
+            position: absolute;
+            right: 0;
+
+            &:hover {
+                text-decoration: none;
+            }
+
+            .flex-icon {
+                margin: auto 0;
+            }
+        }
+    }
+
+    &__btn {
+        background: @selectSearchText-color_neutral_2;
+        border: 1px solid @selectSearchText-color_neutral_5;
+        border-radius: 0;
+        color: @selectSearchText-color_theme;
+        font-size: inherit;
+        transition: background-color 0.2s ease;
+    }
+
+    &__hidden {
+        display: none;
+    }
+
+    button {
+        &.tw-selectSearchText__btn {
+            margin: 0;
+
+            .fa-search {
+                vertical-align: baseline;
+            }
+
+            &:hover {
+                background: @selectSearchText-color_neutral_3;
+            }
+        }
+    }
+}
+
+@media (min-width: @selectSearchText-screen_sm_min) {
+    .tw-selectSearchText {
+        padding: @selectSearchText-spacing_small;
+    }
+}

@@ -116,17 +116,20 @@ M.core_completion.init = function(Y) {
             e.preventDefault();
             element.set('data-loading', 'true');
 
-            form.one('input[type=image]').simulate("click");
-            require(['core/templates', 'core/str'], function (templates, stringlib) {
-                stringlib.get_string('loading', 'admin').then(function (loading) {
-                    return templates.renderIcon('loading', {alt: loading});
-                }).then(function (html) {
-                    var newstate = form.one('[name=completionstate]').get('value');
-                    if (element.get('data-loading') === 'true') {
-                        element.setContent(html);
-                    }
+            if (form.hasClass('preventjs')) {
+                form.submit();
+            } else {
+                form.simulate('submit');
+                require(['core/templates', 'core/str'], function(templates, stringlib) {
+                    stringlib.get_string('loading', 'admin').then(function(loading) {
+                        return templates.renderIcon('loading', {alt: loading});
+                    }).then(function(html) {
+                        if (element.get('data-loading') === 'true') {
+                            element.setContent(html);
+                        }
+                    });
                 });
-            });
+            }
         });
     });
 

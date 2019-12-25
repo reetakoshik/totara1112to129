@@ -63,14 +63,14 @@ class customfield_url extends customfield_base {
 
         // Why create the labels manually? Because there is no way to make the accessible label visible ...
         $urllabel = html_writer::tag('label', get_string('customfieldtypeurl', 'totara_customfield'), array('for' => 'id_' . $this->inputname . '_url'));
-        $urlgrp[] = $mform->createElement('static', null, null, $urllabel);
+        $urlgrp[] = $mform->createElement('static', uniqid("{$this->inputname}_urllabel_"), null, $urllabel);
         $urlgrp[] = $mform->createElement('text', $this->inputname . '[url]');
         $textlabel = html_writer::tag('label', get_string('customfieldtypeurltext', 'totara_customfield'), array('for' => 'id_' . $this->inputname . '_text'));
-        $urlgrp[] = $mform->createElement('static', null, null, $textlabel);
+        $urlgrp[] = $mform->createElement('static', uniqid("{$this->inputname}_textlabel_"), null, $textlabel);
         $urlgrp[] = $mform->createElement('text', $this->inputname . '[text]');
         $urlgrp[] = $mform->createElement('checkbox', $this->inputname . '[target]');
         $checkboxlabel = html_writer::tag('label', get_string('customfieldtypeurltarget', 'totara_customfield'), array('for' => 'id_' . $this->inputname . '_target'));
-        $urlgrp[] = $mform->createElement('static', null, null, $checkboxlabel);
+        $urlgrp[] = $mform->createElement('static', uniqid("{$this->inputname}_checkboxlabel_"), null, $checkboxlabel);
 
         $mform->addGroup($urlgrp, $urlgrpname, format_string($this->field->fullname), null, false);
         $mform->setType($this->inputname . '[url]', PARAM_URL);
@@ -157,6 +157,11 @@ class customfield_url extends customfield_base {
             $urldata = json_decode($data);
             if (empty($urldata->url)) {
                 return '';
+            }
+
+            // Exporting just the url
+            if (!empty($extradata['isexport'])) {
+                return $urldata->url;
             }
 
             $text = s(empty($urldata->text) ? $urldata->url : format_string($urldata->text));

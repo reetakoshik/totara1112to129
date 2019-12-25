@@ -37,46 +37,41 @@ $offset = optional_param('offset', 0, PARAM_INT);
 $search = optional_param('search', 0, PARAM_INT);
 $selected = optional_param('selected', 0, PARAM_INT);
 
-if (!$facetoface = $DB->get_record('facetoface', array('id' => $facetofaceid))) {
+$seminar = new \mod_facetoface\seminar($facetofaceid);
+if (!$seminar->exists()) {
     print_error('error:incorrectfacetofaceid', 'facetoface');
 }
 
-if (!$course = $DB->get_record('course', array('id' => $facetoface->course))) {
+if (!$course = $DB->get_record('course', array('id' => $seminar->get_course()))) {
     print_error('error:coursemisconfigured', 'facetoface');
 }
 
-if (!$cm = get_coursemodule_from_instance('facetoface', $facetoface->id, $course->id)) {
+if (!$cm = get_coursemodule_from_instance('facetoface', $seminar->get_id(), $course->id)) {
     print_error('error:incorrectcoursemoduleid', 'facetoface');
 }
 
-if ($sessionid) {
-    if (!$session = facetoface_get_session($sessionid)) {
-        print_error('error:incorrectcoursemodulesession', 'facetoface');
-    }
-    if ($session->facetoface != $facetoface->id) {
-        print_error('error:incorrectcoursemodulesession', 'facetoface');
-    }
+$event = new \mod_facetoface\seminar_event($sessionid);
+if (!$event->exists()) {
+    // If it doesn't exist we'll need to set the facetofaceid for the event.
+    $event->set_facetoface($seminar->get_id());
+} else if ($event->get_facetoface() != $seminar->get_id()) {
+    // If the event and seminar don't match up something is wrong.
+    print_error('error:incorrectcoursemodulesession', 'facetoface');
 }
 
 $context = context_module::instance($cm->id);
 
-require_login($course, false, $cm);
+ajax_require_login($course, false, $cm);
 require_sesskey();
 require_capability('mod/facetoface:editevents', $context);
 
 $PAGE->set_context($context);
 $PAGE->set_url('/mod/facetoface/room/ajax/sessionrooms.php', array(
-    'facetofaceid' => $facetofaceid,
-    'sessionid' => $sessionid,
+    'facetofaceid' => $seminar->get_id(),
+    'sessionid' => $event->get_id(),
     'timestart' => $timestart,
     'timefinish' => $timefinish
 ));
-
-// Include the same strings as mod/facetoface/sessions.php, because we override the lang string cache with this ugly hack.
-$PAGE->requires->strings_for_js(array('save', 'delete'), 'totara_core');
-$PAGE->requires->strings_for_js(array('cancel', 'ok', 'edit', 'loadinghelp'), 'moodle');
-$PAGE->requires->strings_for_js(array('chooseassets', 'chooseroom', 'dateselect', 'useroomcapacity', 'nodatesyet',
-    'createnewasset', 'editasset', 'createnewroom', 'editroom'), 'facetoface');
 
 if (empty($timestart) || empty($timefinish)) {
     print_error('notimeslotsspecified', 'facetoface');
@@ -86,40 +81,46 @@ if (empty($timestart) || empty($timefinish)) {
 send_headers('text/html; charset=utf-8', false);
 
 // Setup / loading data
-$allrooms = facetoface_get_available_rooms(0, 0 , 'fr.*', $sessionid, $facetofaceid);
-$availablerooms = facetoface_get_available_rooms($timestart, $timefinish, 'fr.id', $sessionid, $facetofaceid);
-$unavailablerooms = array();
-foreach ($allrooms as $room) {
-    customfield_load_data($room, "facetofaceroom", "facetoface_room");
-    $room->fullname = facetoface_room_to_string($room) . " (" . get_string("capacity", "facetoface") . ": {$room->capacity})";
-    if (!isset($availablerooms[$room->id])) {
-        $unavailablerooms[$room->id] = $room->id;
-        $room->fullname .= get_string('roomalreadybooked', 'facetoface');
+$roomlist = \mod_facetoface\room_list::get_available_rooms(0, 0 , $event);
+$availablerooms = \mod_facetoface\room_list::get_available_rooms($timestart, $timefinish, $event);
+$unavailablerooms = [];
+$allrooms = [];
+
+foreach ($roomlist as $room) {
+    // Note: We'll turn the room class into a stdClass container here until customfields and dialogs play nicely with the room class.
+    $roomdata = $room->to_record();
+
+    $roomdata->fullname = (string)$room . " (" . get_string("capacity", "facetoface") . ": {$roomdata->capacity})";
+    if (!$availablerooms->contains($roomdata->id)) {
+        $unavailablerooms[$roomdata->id] = $roomdata->id;
+        $roomdata->fullname .= get_string('roomalreadybooked', 'facetoface');
     }
-    if ($room->custom) {
-        $room->fullname .= ' (' . get_string('facetoface', 'facetoface') . ': ' . format_string($facetoface->name) . ')';
+    if ($roomdata->custom) {
+        $roomdata->fullname .= ' (' . get_string('facetoface', 'facetoface') . ': ' . format_string($seminar->get_name()) . ')';
     }
+
+    $allrooms[$roomdata->id] = $roomdata;
 }
 
 // Display page.
 $dialog = new totara_dialog_content();
 $dialog->searchtype = 'facetoface_room';
-$dialog->proxy_dom_data(array('id', 'name', 'custom', 'capacity'));
+$dialog->proxy_dom_data(['id', 'name', 'custom', 'capacity']);
 $dialog->items = $allrooms;
 $dialog->disabled_items = $unavailablerooms;
 $dialog->lang_file = 'facetoface';
-$dialog->customdata['facetofaceid'] = $facetofaceid;
+$dialog->customdata['facetofaceid'] = $seminar->get_id();
 $dialog->customdata['timestart'] = $timestart;
 $dialog->customdata['timefinish'] = $timefinish;
-$dialog->customdata['sessionid'] = $sessionid;
+$dialog->customdata['sessionid'] = $event->get_id();
 $dialog->customdata['selected'] = $selected;
 $dialog->customdata['offset'] = $offset;
 $dialog->string_nothingtodisplay = 'error:nopredefinedrooms';
 
 // Additional url parameters needed for pagination in the search tab.
 $dialog->urlparams = array(
-    'facetofaceid' => $facetofaceid,
-    'sessionid'    => $sessionid,
+    'facetofaceid' => $seminar->get_id(),
+    'sessionid'    => $event->get_id(),
     'timestart'    => $timestart,
     'timefinish'   => $timefinish,
     'offset'       => $offset

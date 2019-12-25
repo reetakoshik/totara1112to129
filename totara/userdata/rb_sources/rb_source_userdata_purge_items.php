@@ -30,11 +30,6 @@ final class rb_source_userdata_purge_items extends rb_base_source {
     use \totara_userdata\rb\source\purge_trait,
         \totara_userdata\rb\source\purge_type_trait;
 
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
-    public $cacheable;
-
     public function __construct() {
         $this->usedcomponents[] = 'totara_userdata';
         $this->base = '{totara_userdata_purge_item}';
@@ -79,14 +74,16 @@ final class rb_source_userdata_purge_items extends rb_base_source {
             'purge_item',
             'id',
             'ID',
-            "base.id"
+            "base.id",
+            array('displayfunc' => 'integer')
         );
 
         $columnoptions[] = new rb_column_option(
             'purge_item',
             'name',
             get_string('itemname', 'totara_userdata'),
-            "base.name"
+            "base.name",
+            array('displayfunc' => 'format_string')
         );
 
         $columnoptions[] = new rb_column_option(
@@ -105,7 +102,8 @@ final class rb_source_userdata_purge_items extends rb_base_source {
             'purge_item',
             'component',
             get_string('itemcomponent', 'totara_userdata'),
-            "base.component"
+            "base.component",
+            array('displayfunc' => 'plaintext')
         );
 
         $columnoptions[] = new rb_column_option(

@@ -17,7 +17,7 @@ Feature: The question bank advanced search options expand and collapse work
       | questioncategory | qtype | name                      | questiontext                  |
       | Used category    | essay | Test question to be moved | Write about whatever you want |
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I follow "Course 1"
 
 

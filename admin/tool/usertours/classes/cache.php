@@ -84,7 +84,7 @@ EOF;
         // Attempt to determine whether this is the front page.
         // This is a special case because the frontpage uses a shortened page path making it difficult to detect exactly.
         $isfrontpage = $targetmatch->compare(new \moodle_url('/'), URL_MATCH_BASE);
-        $target = $targetmatch->out_as_local_url();
+        $target = $targetmatch->out_as_local_url(false);
         return array_filter($tours, function($tour) use ($isfrontpage, $target) {
             if ($isfrontpage && $tour->pathmatch === 'FRONTPAGE') {
                 return true;

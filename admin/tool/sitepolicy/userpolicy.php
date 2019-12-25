@@ -38,13 +38,6 @@ $policyversionid = optional_param('policyversionid', 0, PARAM_INT);
 $versionnumber = optional_param('versionnumber', 0, PARAM_INT);
 $consentdata = optional_param('consentdata', '', PARAM_TEXT);
 
-// Check if the user is logged in rather than calling require_login.
-// If they are not logged in then they must, and require_login will redirect them back here if required.
-// If they are logged in then calling require_login would lead to a recursive redirect.
-if (!isloggedin()) {
-    require_login(null, false);
-}
-
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url("/{$CFG->admin}/tool/sitepolicy/userpolicy.php"));
 $PAGE->set_popup_notification_allowed(false);
@@ -54,7 +47,11 @@ if (isset($SESSION->wantsurl)) {
 } else {
     $wantsurl = $CFG->wwwroot . '/';
 }
-$userid = $USER->id;
+
+// UserID will not be set during signup and we dont want to bypass admin settings if guest login is not allowed,
+// so here we can just set the userid to site guest and this should not affect global settings. This will also not
+// indicate that you are currently logged in as guest.
+$userid = empty($USER->id) ? $CFG->siteguest : $USER->id;
 
 if (empty($policyversionid)) {
     $unanswered = \tool_sitepolicy\userconsent::get_unansweredpolicies($userid);
@@ -77,7 +74,7 @@ if (empty($policyversionid)) {
         redirect($wantsurl);
     }
 
-    if (isguestuser()) {
+    if (isguestuser($userid)) {
         // For guest users all policies are always returned
         for ($i = 0; $i < $currentcount; $i++) {
             $current = array_shift($unanswered);
@@ -200,6 +197,7 @@ if ($form->is_cancelled()) {
         $userconsent->set_consentoptionid($option['dataid']);
         $userconsent->set_language($language);
         $userconsent->save();
+        $SESSION->userconsentids[] = $userconsent->get_id();
     }
 
     // Will only get here is $SESSION->tool_sitepolicy_consented not previously set

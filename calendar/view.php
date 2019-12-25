@@ -125,7 +125,7 @@ switch($view) {
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title("$course->shortname: $strcalendar: $pagetitle");
 $PAGE->set_heading($COURSE->fullname);
-$PAGE->set_totara_menu_selected('calendar');
+$PAGE->set_totara_menu_selected('\totara_core\totara\menu\calendar');
 
 /** @var core_calendar_renderer $renderer */
 $renderer = $PAGE->get_renderer('core_calendar');

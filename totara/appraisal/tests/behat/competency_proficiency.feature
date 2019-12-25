@@ -1,4 +1,4 @@
-@totara @totara_appraisal
+@totara @totara_appraisal @totara_core_menu
 Feature: Appraisal question: Competencies from Learning Plan - test that changing proficiency is working
 
   Background:
@@ -145,7 +145,7 @@ Feature: Appraisal question: Competencies from Learning Plan - test that changin
 
     # Make sure manager's manager can see the appraisal but can't change proficiency.
     Given I log in as "teamlead3"
-    And I click on "Performance" in the totara menu
+    And I click on "All Appraisals" in the totara menu
     And I click on "Appraisal competency test" "link"
     And I press "Start"
     Then I should see "This is learner's answer"
@@ -159,7 +159,7 @@ Feature: Appraisal question: Competencies from Learning Plan - test that changin
 
     # Make sure appraiser can see the appraisal but can't change proficiency.
     Given I log in as "appraiser4"
-    And I click on "Performance" in the totara menu
+    And I click on "All Appraisals" in the totara menu
     And I click on "Appraisal competency test" "link"
     And I press "Start"
     Then I should see "This is learner's answer"

@@ -18,10 +18,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author Valerii Kuznetsov <valerii.kuznetsov@totaralms.com>
- * @package totara
- * @subpackage reportbuilder
+ * @package totara_reportbuilder
  *
- * Unit/functional tests to check Record of Learning: Courses reports caching
+ * Unit/functional tests to check Record of Learning: Courses report
  */
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');    ///  It must be included from a Moodle page
@@ -141,17 +140,11 @@ class totara_reportbuilder_rb_plan_courses_embedded_cache_testcase extends repor
      * - Check that user1 has two courses (1 and 3)
      * - Check that user2 has three course (2,3,4)
      * - Check that user3 doesn't have any courses
-     *
-     * @param int $usecache Use cache or not (1/0)
-     * @dataProvider provider_use_cache
      */
-    public function test_plan_courses($usecache) {
+    public function test_plan_courses() {
         $this->resetAfterTest();
-        if ($usecache) {
-            $this->enable_caching($this->report_builder_data['id']);
-        }
         $courseidalias = reportbuilder_get_extrafield_alias('course', 'courselink', 'course_id');
-        $result = $this->get_report_result($this->report_builder_data['shortname'], array('userid' => $this->user1->id,), $usecache);
+        $result = $this->get_report_result($this->report_builder_data['shortname'], ['userid' => $this->user1->id], false);
         $this->assertCount(2, $result);
         $was = array();
         foreach($result as $r) {
@@ -160,7 +153,7 @@ class totara_reportbuilder_rb_plan_courses_embedded_cache_testcase extends repor
             $was[] = $r->course_courselink;
         }
 
-        $result = $this->get_report_result($this->report_builder_data['shortname'], array('userid' => $this->user2->id,), $usecache);
+        $result = $this->get_report_result($this->report_builder_data['shortname'], ['userid' => $this->user2->id], false);
         $this->assertCount(3, $result);
         $was = array();
         foreach($result as $r) {
@@ -169,7 +162,7 @@ class totara_reportbuilder_rb_plan_courses_embedded_cache_testcase extends repor
             $was[] = $r->course_courselink;
         }
 
-        $result = $this->get_report_result($this->report_builder_data['shortname'], array('userid' => $this->user3->id,), $usecache);
+        $result = $this->get_report_result($this->report_builder_data['shortname'], ['userid' => $this->user3->id], false);
         $this->assertCount(0, $result);
     }
 
@@ -178,7 +171,8 @@ class totara_reportbuilder_rb_plan_courses_embedded_cache_testcase extends repor
 
         // Set up report and embedded object for is_capable checks.
         $shortname = $this->report_builder_data['shortname'];
-        $report = reportbuilder_get_embedded_report($shortname, array('userid' => $this->user1->id), false, 0);
+        $config = (new rb_config())->set_embeddata(array('userid' => $this->user1->id));
+        $report = reportbuilder::create_embedded($shortname, $config);
         $embeddedobject = $report->embedobj;
 
         // Test admin can access report.

@@ -36,7 +36,7 @@ require_once($CFG->dirroot . '/totara/reportbuilder/email_setting_schedule.php')
 require_login();
 $PAGE->set_context(context_user::instance($USER->id));
 $PAGE->set_url('/totara/reportbuilder/scheduled.php');
-$PAGE->set_totara_menu_selected('myreports');
+$PAGE->set_totara_menu_selected('\totara_core\totara\menu\myreports');
 
 // Get the report id. This can be in one of two variables because the two forms are constructed differently.
 $reportid = optional_param('reportid', 0, PARAM_INT); //report that a schedule is being added for
@@ -56,7 +56,7 @@ $newreport = empty($id);
 
 if ($newreport) {
     // Try to create report object to catch invalid data.
-    $report = new reportbuilder($reportid);
+    $report = reportbuilder::create($reportid);
     $schedule = new stdClass();
     $schedule->id = 0;
     $schedule->reportid = $reportid;
@@ -78,7 +78,7 @@ if ($newreport) {
     // This will be set accurately when processing the current system users later.
     $schedule->sendtoself = 0;
 
-    $report = new reportbuilder($schedule->reportid);
+    $report = reportbuilder::create($schedule->reportid);
 
     // Does this schedule belong to the current user.
     $myscheduledreport = ($USER->id == $schedule->userid);

@@ -139,16 +139,11 @@ class behat_course extends behat_base {
     public function i_go_to_the_courses_management_page() {
         \behat_hooks::set_step_readonly(false);
 
-        $parentnodes = get_string('administrationsite') . ' > ' . get_string('courses', 'admin');
-
-        // Go to home page.
-        $this->execute("behat_general::i_am_on_homepage");
-
-        // Navigate to course management page via navigation block.
-        $this->execute("behat_navigation::i_navigate_to_node_in",
-            array(get_string('coursemgmt', 'admin'), $parentnodes)
-        );
-
+        // TOTARA: No longer rely on admin navigation, instead to directly to URL
+        // We are testing functionality of page, not how to get there.
+        $url = new moodle_url('/course/management.php');
+        $this->getSession()->visit($this->locate_path($url->out_as_local_url(false)));
+        $this->wait_for_pending_js();
     }
 
     /**
@@ -1833,7 +1828,8 @@ class behat_course extends behat_base {
         \behat_hooks::set_step_readonly(false);
         $coursestr = behat_context_helper::escape(get_string('courses'));
         $mycoursestr = behat_context_helper::escape(get_string('mycourses'));
-        $xpath = "//div[contains(@class,'block')]//li[p/*[string(.)=$coursestr or string(.)=$mycoursestr]]";
+        // Totara: this link is in the new course navigation block
+        $xpath = "//div[contains(@class,'block') and contains(@class,'block_course_navigation')]";
         $this->execute('behat_general::i_click_on_in_the', [get_string('participants'), 'link', $xpath, 'xpath_element']);
     }
 }

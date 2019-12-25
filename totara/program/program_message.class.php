@@ -453,7 +453,7 @@ abstract class prog_message {
         $templatehtml = '';
 
         // Add the message subject
-        $safe_messagesubject = format_string($this->messagesubject);
+        $safe_messagesubject = clean_param($this->messagesubject, PARAM_TEXT);
         if ($updateform) {
             $mform->addElement('text', $prefix.'messagesubject', '', array('size'=>'50', 'maxlength'=>'255', 'id'=>$prefix.'messagesubject'));
             $mform->setType($prefix.'messagesubject', PARAM_TEXT);
@@ -467,7 +467,7 @@ abstract class prog_message {
         $formdataobject->{$prefix.'messagesubject'} = $safe_messagesubject;
 
         // Add the main message
-        $safe_mainmessage = format_string($this->mainmessage);
+        $safe_mainmessage = clean_param($this->mainmessage, PARAM_TEXT);
         if ($updateform) {
             $mform->addElement('textarea', $prefix.'mainmessage', '', array('cols'=>'40', 'rows'=>'5', 'id'=>$prefix.'mainmessage'));
             $mform->setType($prefix.'mainmessage', PARAM_TEXT);
@@ -517,7 +517,7 @@ abstract class prog_message {
         $formdataobject->{$prefix.'notifymanager'} = (bool)$this->notifymanager;
 
         // Add the manager subject
-        $safe_managersubject = !empty($this->managersubject) ? format_string($this->managersubject) : '';
+        $safe_managersubject = clean_param($this->managersubject, PARAM_TEXT);
         if ($updateform) {
             $mform->addElement('text', $prefix.'managersubject', '', array('size'=>'50', 'maxlength'=>'255', 'id'=>$prefix.'managersubject'));
             $mform->setType($prefix.'managersubject', PARAM_TEXT);
@@ -531,7 +531,7 @@ abstract class prog_message {
         $formdataobject->{$prefix.'managersubject'} = $safe_managersubject;
 
         // Add the manager message
-        $safe_managermessage = format_string($this->managermessage);
+        $safe_managermessage = clean_param($this->managermessage, PARAM_TEXT);
         if ($updateform) {
             $mform->addElement('textarea', $prefix.'managermessage', $safe_managermessage, array('cols'=>'40', 'rows'=>'5', 'id' => $prefix . 'managermessage'));
             //$mform->disabledIf($prefix.'managermessage', $prefix.'notifymanager', 'notchecked');
@@ -729,7 +729,7 @@ abstract class prog_noneventbased_message extends prog_message {
                     //to modify the attribute $replacementvars so that it can
                     //convert the time for specific manager language configuration
                     $completiontime = $this->get_completion_time();
-                    if ($completiontime != COMPLETION_TIME_NOT_SET) {
+                    if ($completiontime && $completiontime != COMPLETION_TIME_NOT_SET) {
                         $lang = isset($manager->lang) ? $manager->lang : null;
                         $datetimeformat = get_string_manager()->get_string("strftimedatefulllong", "langconfig", null, $lang);
                         $timezone = core_date::get_user_timezone($manager);

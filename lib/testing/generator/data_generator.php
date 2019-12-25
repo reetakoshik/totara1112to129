@@ -41,6 +41,7 @@ class testing_data_generator {
     /** @var int The number of grade outcomes created */
     protected $gradeoutcomecounter = 0;
     protected $usercounter = 0;
+    protected $userusednames = [];
     protected $categorycount = 0;
     protected $cohortcount = 0;
     protected $coursecount = 0;
@@ -88,6 +89,7 @@ EOD;
      */
     public function reset() {
         $this->usercounter = 0;
+        $this->userusednames = [];
         $this->categorycount = 0;
         $this->coursecount = 0;
         $this->scalecount = 0;
@@ -157,8 +159,17 @@ EOD;
             $firstname = rand(0, 4);
             $lastname = rand(0, 4);
             $female = rand(0, 1);
-            $record['firstname'] = $this->firstnames[($country*10) + $firstname + ($female*5)];
-            $record['lastname'] = $this->lastnames[($country*10) + $lastname + ($female*5)];
+            // Totara: Make sure that the random full user names are unique.
+            $firstname = $this->firstnames[($country*10) + $firstname + ($female*5)];
+            $lastname = $this->lastnames[($country*10) + $lastname + ($female*5)];
+            if (!isset($this->userusednames[$firstname . ' ' . $lastname])) {
+                $record['firstname'] = $firstname;
+                $record['lastname'] = $lastname;
+                $this->userusednames[$record['firstname'] . ' ' . $record['lastname']] = true;
+            } else {
+                $record['firstname'] = $firstname.$i;
+                $record['lastname'] = $lastname.$i;
+            }
 
         } else if (!isset($record['firstname'])) {
             $record['firstname'] = 'Firstname'.$i;
@@ -425,9 +436,16 @@ EOD;
             $record['category'] = $DB->get_field_select('course_categories', "MIN(id)", "parent=0");
         }
 
+        if (!isset($record['startdate'])) {
+            $record['startdate'] = usergetmidnight(time());
+        }
+
         if (isset($record['tags']) && !is_array($record['tags'])) {
             $record['tags'] = preg_split('/\s*,\s*/', trim($record['tags']), -1, PREG_SPLIT_NO_EMPTY);
         }
+
+        // This column is always 1 as it is not used but we need to so the event snapshots don't fail
+        $record['visibleoncoursepage'] = 1;
 
         $course = create_course((object)$record);
         context_course::instance($course->id);
@@ -510,6 +528,18 @@ EOD;
     public function create_module($modulename, $record=null, array $options=null) {
         $generator = $this->get_plugin_generator('mod_'.$modulename);
         return $generator->create_instance($record, $options);
+    }
+
+    /**
+     * Check if module supports generators
+     */
+    public function module_exists($modulename) {
+        try {
+            $this->get_plugin_generator('mod_' . $modulename);
+        } catch (coding_exception $e) {
+            return false;
+        }
+        return true;
     }
 
     /**

@@ -63,11 +63,6 @@ class mod_forum_userdata_posts_testcase extends advanced_testcase {
     private $forum1, $forum2, $forum3;
 
     /**
-     * @var string
-     */
-    private $placeholderpost = '', $placeholderdiscussion = '';
-
-    /**
      * @var mod_forum_generator
      */
     private $generator;
@@ -112,13 +107,6 @@ class mod_forum_userdata_posts_testcase extends advanced_testcase {
         $record->course = $this->course2->id;
         $this->forum3 = self::getDataGenerator()->create_module('forum', $record);
 
-        // Use the site language for the placeholder.
-        $stringmanager = get_string_manager();
-        $syslang = !empty($CFG->lang) ? $CFG->lang : 'en';
-
-        $this->placeholderpost = $stringmanager->get_string('deletedpost', 'forum', null, $syslang);
-        $this->placeholderdiscussion = $stringmanager->get_string('deleteddiscussion', 'forum', null, $syslang);
-
         $this->generator = self::getDataGenerator()->get_plugin_generator('mod_forum');
 
         $this->fs = get_file_storage();
@@ -133,13 +121,12 @@ class mod_forum_userdata_posts_testcase extends advanced_testcase {
         \mod_forum\subscriptions::reset_forum_cache();
 
         // Clean up properties to avoid memory leaks.
-        unset($this->forum1, $this->forum2, $this->forum3);
-        unset($this->course1, $this->course2);
-        unset($this->cat1, $this->cat2);
-        unset($this->user1, $this->user2);
-        unset($this->placeholderpost, $this->placeholderdiscussion);
-        unset($this->generator);
-        unset($this->fs);
+        $this->forum1 = $this->forum2 = $this->forum3 = null;
+        $this->course1 = $this->course2 = null;
+        $this->cat1 = $this->cat2 = null;
+        $this->user1 = $this->user2 = null;
+        $this->generator = null;
+        $this->fs = null;
 
         parent::tearDown();
     }
@@ -233,16 +220,16 @@ class mod_forum_userdata_posts_testcase extends advanced_testcase {
         // **************************************.
 
         // Discussions 1 and 2 changed.
-        $this->assert_discussion_has_name($this->placeholderdiscussion, $discussion1);
-        $this->assert_discussion_has_name($this->placeholderdiscussion, $discussion2);
+        $this->assert_discussion_has_been_deleted($discussion1);
+        $this->assert_discussion_has_been_deleted($discussion2);
         // Discussion 3 hasn't changed.
         $this->assert_discussion_unchanged($discussion3);
 
-        // As posts 1 to 2 represent the discussion topics we expect the discussion placeholder.
-        $this->assert_post_has_subject_message($this->placeholderdiscussion, $post1);
-        $this->assert_post_has_subject_message($this->placeholderdiscussion, $post2);
+        // As posts 1 to 2 represent the discussion topics we expect them to be emptied.
+        $this->assert_post_has_been_deleted($post1);
+        $this->assert_post_has_been_deleted($post2);
         // Post 5 was changed as well.
-        $this->assert_post_has_subject_message($this->placeholderpost, $post5);
+        $this->assert_post_has_been_deleted($post5);
 
         // Posts 3 and 4 are unchanged as they belong to a different user.
         $this->assert_post_unchanged($post3);
@@ -276,9 +263,9 @@ class mod_forum_userdata_posts_testcase extends advanced_testcase {
         // **************************************.
 
         // Discussions and post 1 and 3 (user 1) changed.
-        $this->assert_discussion_has_name($this->placeholderdiscussion, $discussion1forum2);
-        $this->assert_post_has_subject_message($this->placeholderdiscussion, $post1forum2);
-        $this->assert_post_has_subject_message($this->placeholderpost, $post3forum2);
+        $this->assert_discussion_has_been_deleted($discussion1forum2);
+        $this->assert_post_has_been_deleted($post1forum2);
+        $this->assert_post_has_been_deleted($post3forum2);
         // Post 2 (user 2) did not change.
         $this->assert_post_unchanged($post2forum2);
 
@@ -286,9 +273,9 @@ class mod_forum_userdata_posts_testcase extends advanced_testcase {
         // **************************************.
 
         // Discussions and post 1 and 3 (user 1) changed.
-        $this->assert_discussion_has_name($this->placeholderdiscussion, $discussion1forum3);
-        $this->assert_post_has_subject_message($this->placeholderdiscussion, $post1forum3);
-        $this->assert_post_has_subject_message($this->placeholderpost, $post3forum3);
+        $this->assert_discussion_has_been_deleted($discussion1forum3);
+        $this->assert_post_has_been_deleted($post1forum3);
+        $this->assert_post_has_been_deleted($post3forum3);
         // Post 2 (user 2) did not change.
         $this->assert_post_unchanged($post2forum3);
     }
@@ -338,16 +325,16 @@ class mod_forum_userdata_posts_testcase extends advanced_testcase {
         // **************************************.
 
         // Discussions 1 and 2 changed.
-        $this->assert_discussion_has_name($this->placeholderdiscussion, $discussion1);
-        $this->assert_discussion_has_name($this->placeholderdiscussion, $discussion2);
+        $this->assert_discussion_has_been_deleted($discussion1);
+        $this->assert_discussion_has_been_deleted($discussion2);
         // Discussion 3 hasn't changed.
         $this->assert_discussion_unchanged($discussion3);
 
         // As posts 1 to 2 represent the discussion topics we expect the discussion placeholder.
-        $this->assert_post_has_subject_message($this->placeholderdiscussion, $post1);
-        $this->assert_post_has_subject_message($this->placeholderdiscussion, $post2);
+        $this->assert_post_has_been_deleted($post1);
+        $this->assert_post_has_been_deleted($post2);
         // Post 5 was changed as well.
-        $this->assert_post_has_subject_message($this->placeholderpost, $post5);
+        $this->assert_post_has_been_deleted($post5);
 
         // Posts 3 and 4 are unchanged as they belong to a different user.
         $this->assert_post_unchanged($post3);
@@ -357,9 +344,9 @@ class mod_forum_userdata_posts_testcase extends advanced_testcase {
         // **************************************.
 
         // Discussions and post 1 and 3 (user 1) changed.
-        $this->assert_discussion_has_name($this->placeholderdiscussion, $discussion1forum2);
-        $this->assert_post_has_subject_message($this->placeholderdiscussion, $post1forum2);
-        $this->assert_post_has_subject_message($this->placeholderpost, $post3forum2);
+        $this->assert_discussion_has_been_deleted($discussion1forum2);
+        $this->assert_post_has_been_deleted($post1forum2);
+        $this->assert_post_has_been_deleted($post3forum2);
         // Post 2 (user 2) did not change.
         $this->assert_post_unchanged($post2forum2);
 
@@ -440,9 +427,9 @@ class mod_forum_userdata_posts_testcase extends advanced_testcase {
         // **************************************.
 
         // Discussions and post 1 and 3 (user 1) changed.
-        $this->assert_discussion_has_name($this->placeholderdiscussion, $discussion1forum3);
-        $this->assert_post_has_subject_message($this->placeholderdiscussion, $post1forum3);
-        $this->assert_post_has_subject_message($this->placeholderpost, $post3forum3);
+        $this->assert_discussion_has_been_deleted($discussion1forum3);
+        $this->assert_post_has_been_deleted($post1forum3);
+        $this->assert_post_has_been_deleted($post3forum3);
         // Post 2 (user 2) did not change.
         $this->assert_post_unchanged($post2forum3);
 
@@ -506,9 +493,9 @@ class mod_forum_userdata_posts_testcase extends advanced_testcase {
         // **************************************.
 
         // Discussions and post 1 and 3 (user 1) changed.
-        $this->assert_discussion_has_name($this->placeholderdiscussion, $discussion1forum2);
-        $this->assert_post_has_subject_message($this->placeholderdiscussion, $post1forum2);
-        $this->assert_post_has_subject_message($this->placeholderpost, $post3forum2);
+        $this->assert_discussion_has_been_deleted($discussion1forum2);
+        $this->assert_post_has_been_deleted($post1forum2);
+        $this->assert_post_has_been_deleted($post3forum2);
         // Post 2 (user 2) did not change.
         $this->assert_post_unchanged($post2forum2);
 
@@ -892,21 +879,20 @@ class mod_forum_userdata_posts_testcase extends advanced_testcase {
     }
 
     /**
-     * @param string $expectedsubjectmessage
      * @param stdClass $discussion
      */
-    private function assert_discussion_has_name($expectedsubjectmessage, $discussion) {
+    private function assert_discussion_has_been_deleted($discussion) {
         global $DB;
 
         // Reload post.
         $discussion = $DB->get_record('forum_discussions', ['id' => $discussion->id]);
-        $this->assertEquals($expectedsubjectmessage, $discussion->name);
+        $this->assertEquals('', $discussion->name);
     }
 
     /**
      * @param stdClass $discussion
      */
-    private function assert_discussion_unchanged( $discussion) {
+    private function assert_discussion_unchanged($discussion) {
         global $DB;
 
         // Reload post.
@@ -915,16 +901,16 @@ class mod_forum_userdata_posts_testcase extends advanced_testcase {
     }
 
     /**
-     * @param string $expectedsubjectmessage
      * @param stdClass $post
      */
-    private function assert_post_has_subject_message($expectedsubjectmessage, $post) {
+    private function assert_post_has_been_deleted($post) {
         global $DB;
 
         // Reload post.
         $post = $DB->get_record('forum_posts', ['id' => $post->id]);
-        $this->assertEquals($expectedsubjectmessage, $post->subject);
-        $this->assertEquals($expectedsubjectmessage, $post->message);
+        $this->assertEquals('', $post->subject);
+        $this->assertEquals('', $post->message);
+        $this->assertEquals(1, $post->deleted);
     }
 
     /**
@@ -937,6 +923,7 @@ class mod_forum_userdata_posts_testcase extends advanced_testcase {
         $postreloaded = $DB->get_record('forum_posts', ['id' => $post->id]);
         $this->assertEquals($post->subject, $postreloaded->subject);
         $this->assertEquals($post->message, $postreloaded->message);
+        $this->assertEquals($post->deleted, $postreloaded->deleted);
     }
 
 }

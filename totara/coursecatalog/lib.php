@@ -299,26 +299,17 @@ function totara_visibility_where($userid = null, $fieldbaseid = 'course.id', $fi
             return array('1=1', array());
         } else {
             // Normal visibility unless they have the capability to see hidden learning components.
+            list($capsql, $capparams) = get_has_capability_sql($capability, "ctx{$separator}id", $userid);
             $sqlnormalvisible = "
             (({$fieldvisible} = :tcvwnormalvisible) OR
              ({$fieldvisible} = :tcvwnormalvisiblenone AND
-                 EXISTS (
-                     SELECT 1
-                     FROM {role_assignments} ra
-                     INNER JOIN {role_capabilities} rc on rc.roleid = ra.roleid
-                     WHERE ra.contextid = ctx{$separator}id
-                       AND ra.userid = :tcvuseridnormalvisibility
-                       AND rc.capability = :hiddencapability
-                       AND rc.permission = 1
-                   )
+                 {$capsql}
              ))";
-            $params = array(
-                'tcvwnormalvisible' => 1,
-                'tcvwnormalvisiblenone' => 0,
-                'hiddencapability' => $capability,
-                'tcvuseridnormalvisibility' => $userid,
-                'hiddencapability' => $capability,
-            );
+            $params = array_merge([
+                                      'tcvwnormalvisible'     => 1,
+                                      'tcvwnormalvisiblenone' => 0
+                                  ],
+                                  $capparams);
 
             // Add availability sql.
             if ($availabilitysql != '1=1') {
@@ -392,8 +383,13 @@ function totara_visibility_where($userid = null, $fieldbaseid = 'course.id', $fi
                                     'tcvwreportforenrolledonly' => $userid);
         }
 
-        return array("{$sqlnousers} AND ({$sqlall} OR {$sqlselected} OR {$sqlenrolled})",
-                array_merge($paramsnousers, $paramsall, $paramsselected, $paramsenrolled));
+        // Condition above are overridden when user have capability to see hidden content in this context
+        list($capsql, $capparams) = totara_core\access::get_has_capability_sql($capability, "ctx{$separator}id", $userid);
+
+        return [
+            "({$sqlnousers} AND ({$sqlall} OR {$sqlselected} OR {$sqlenrolled}) OR {$capsql})",
+            array_merge($paramsnousers, $paramsall, $paramsselected, $paramsenrolled, $capparams)
+        ];
     }
 }
 

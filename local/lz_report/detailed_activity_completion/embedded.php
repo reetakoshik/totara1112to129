@@ -32,8 +32,8 @@ $data = ['courseid' => $courseid];
 // Verify global restrictions.
 $reportrecord = $DB->get_record('report_builder', array('shortname' => $shortname));
 $globalrestrictionset = rb_global_restriction_set::create_from_page_parameters($reportrecord);
-
-if (!$report = reportbuilder_get_embedded_report($shortname, $data, false, $sid, $globalrestrictionset)) {
+$config = (new \rb_config())->set_embeddata($data)->set_nocache(true);
+if (!$report = \reportbuilder::create_embedded($shortname, $config)) {
     print_error('error:couldnotgenerateembeddedreport', 'totara_reportbuilder');
 }
 

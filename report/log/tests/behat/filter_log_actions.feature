@@ -9,15 +9,13 @@ Feature: In a report, admin can filter log data by action
       | fullname | shortname | category | groupmode |
       | Course 1 | C1 | 0 | 1 |
     And I log in as "admin"
-    And I am on site homepage
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     # Create Action.
     And I add a "Assignment" to section "1" and I fill the form with:
       | Assignment name | Test assignment 1 |
       | Description | Offline text |
       | assignsubmission_file_enabled | 0 |
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     # View Action.
     And I follow "Test assignment 1"
     # Update Action.
@@ -29,7 +27,7 @@ Feature: In a report, admin can filter log data by action
 
   Scenario: View only create actions.
     Given I log in as "admin"
-    When I navigate to "Logs" node in "Site administration > Reports"
+    When I navigate to "Logs" node in "Site administration > Server"
     And I set the field "menumodaction" to "Create"
     And I press "Get these logs"
     Then I should see "Course module created"
@@ -39,7 +37,7 @@ Feature: In a report, admin can filter log data by action
 
   Scenario: View only update actions.
     Given I log in as "admin"
-    When I navigate to "Logs" node in "Site administration > Reports"
+    When I navigate to "Logs" node in "Site administration > Server"
     And I set the field "menumodaction" to "Update"
     And I press "Get these logs"
     Then I should see "Course module updated"
@@ -49,7 +47,7 @@ Feature: In a report, admin can filter log data by action
 
   Scenario: View only view actions.
     Given I log in as "admin"
-    When I navigate to "Logs" node in "Site administration > Reports"
+    When I navigate to "Logs" node in "Site administration > Server"
     And I set the field "menumodaction" to "View"
     And I press "Get these logs"
     Then I should see "The status of the submission has been viewed."
@@ -59,7 +57,7 @@ Feature: In a report, admin can filter log data by action
 
   Scenario: View only delete actions.
     Given I log in as "admin"
-    When I navigate to "Logs" node in "Site administration > Reports"
+    When I navigate to "Logs" node in "Site administration > Server"
     And I set the field "menumodaction" to "Delete"
     And I press "Get these logs"
     Then I should see "Course module deleted"
@@ -69,7 +67,7 @@ Feature: In a report, admin can filter log data by action
 
   Scenario: View only changes.
     Given I log in as "admin"
-    When I navigate to "Logs" node in "Site administration > Reports"
+    When I navigate to "Logs" node in "Site administration > Server"
     And I set the field "menumodaction" to "All changes"
     And I press "Get these logs"
     Then I should see "Course module deleted"
@@ -79,7 +77,7 @@ Feature: In a report, admin can filter log data by action
 
   Scenario: View all actions.
     Given I log in as "admin"
-    When I navigate to "Logs" node in "Site administration > Reports"
+    When I navigate to "Logs" node in "Site administration > Server"
     And I set the field "menumodaction" to "All actions"
     And I press "Get these logs"
     Then I should see "Course module deleted"

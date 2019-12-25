@@ -90,7 +90,7 @@ class rb_base_embedded {
      * If true returned the report is not displayed in the list of all embedded reports.
      * If source is ignored then this method is irrelevant.
      *
-     * @deprecated since Totara 11.12
+     * @deprecated since Totara 12.3
      * @return bool
      */
     public function is_ignored() {

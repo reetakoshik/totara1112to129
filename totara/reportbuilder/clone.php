@@ -42,7 +42,8 @@ admin_externalpage_setup($adminpage);
 
 $output = $PAGE->get_renderer('totara_reportbuilder');
 
-$report = new reportbuilder($id);
+$config = (new rb_config())->set_nocache(true);
+$report = reportbuilder::create($id, $config, false); // No access control for managing of reports here.
 
 $currentdata = [
     'id' => $id,

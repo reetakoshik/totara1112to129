@@ -25,9 +25,7 @@ Feature: Seminar event cancellation attendees view
       | learner3 | C1     | student        |
 
     Given I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test Seminar |
       | Description | Test Seminar |
@@ -57,10 +55,10 @@ Feature: Seminar event cancellation attendees view
     Given I click on "Attendees" "link"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Learner One, learner1@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I click on "Learner Two, learner2@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     And I press "Confirm"
@@ -68,22 +66,19 @@ Feature: Seminar event cancellation attendees view
 
     Given I log out
     And I log in as "learner3"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Sign-up"
     And I press "Sign-up"
 
     Given I log out
     And I log in as "learner1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Cancel booking"
     And I press "Yes"
 
     Given I log out
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I click on "Cancel event" "link" in the "10:00 AM - 4:00 PM Pacific/Auckland" "table_row"
     And I press "Yes"
@@ -91,9 +86,9 @@ Feature: Seminar event cancellation attendees view
   # ----------------------------------------------------------------------------
   Scenario: mod_facetoface_cancel_400: attendees "cancelled" tab view.
     When I click on "Attendees" "link"
-    Then I should see the "Attendees" tab is disabled
     And I should see the "Wait-list" tab is disabled
     And I should see the "Take attendance" tab is disabled
+    And I click on "Cancellations" "link"
     And I should see "User cancellation" in the "Learner One" "table_row"
     And I should see "Event cancellation" in the "Learner Two" "table_row"
     And I should see "Event cancellation" in the "Learner Three" "table_row"
@@ -103,6 +98,7 @@ Feature: Seminar event cancellation attendees view
     When I click on "Attendees" "link"
     And I click on "Message users" "link"
     And I press "Discard message"
+    And I click on "Cancellations" "link"
     Then I should see "User cancellation" in the "Learner One" "table_row"
     And I should see "Event cancellation" in the "Learner Two" "table_row"
     And I should see "Event cancellation" in the "Learner Three" "table_row"
@@ -126,6 +122,7 @@ Feature: Seminar event cancellation attendees view
     # no further.
     # --------------------------------------------------------------------------
     When I click on "Attendees" "link"
+    And I click on "Cancellations" "link"
     Then I should see "Export in Excel format"
     And I should see "Export in ODS format"
     And I should see "Export in CSV format"

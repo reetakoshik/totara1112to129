@@ -1,14 +1,32 @@
 This files describes API changes in /course/*,
 information provided here is intended especially for developers.
 
-=== 11.7 ===
+=== 12.4 ===
 
-* core_course_management_renderer::detail_pair has changed
+ * core_course_renderer::course_section_cm_completion() has been changed to show an activity complete tickmark when a
+   grade item or grade is hidden, rather than a pass/fail tickmark
+
+=== 12 ===
+
+ * External function core_course_external::get_courses_by_field now returns the course filters list and status.
+ * External function core_course_external::get_courses_by_field now returns the end date of the course as well.
+ * External function core_course_external::get_course_contents now return the following additional file fields:
+   - mimetype (the file mime type)
+   - isexternalfile (if is a file reference to a external repository)
+   - repositorytype (the repository name in case is a external file)
+   Those fields are VALUE_OPTIONAL for backwards compatibility.
+ * core_course_renderer::course_section_cm_completion() has changed
+ * core_course_management_renderer::detail_pair has changed
+ * core_course_renderer::frontpage_remote_course() has been deprecated
+ * core_course_renderer::frontpage_remote_host() has been deprecated
+ * core_course_renderer::frontpage_my_courses() has been deprecated
+ * core_course_renderer::frontpage_available_courses() has been deprecated
+ * core_course_renderer::frontpage_combo_list() has been deprecated
+ * Column course.completionstartonenrol has been deprecated and will be removed from the course table in Totara 13
 
 === 11 ===
 
-* Publishing course on a hub (Hub functionality) has been deprecated and will be removed entirely in the next major version.
-
+ * Publishing course on a hub (Hub functionality) has been deprecated and will be removed entirely in the next major version.
 
 === 10 ===
 

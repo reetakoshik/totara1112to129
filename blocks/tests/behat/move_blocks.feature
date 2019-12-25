@@ -1,4 +1,4 @@
-@core @core_block
+@core @core_block @javascript
 Feature: Block region moving
   In order to configure blocks appearance
   As a teacher
@@ -15,8 +15,7 @@ Feature: Block region moving
       | user | course | role |
       | teacher1 | C1 | editingteacher |
     And I log in as "admin"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Turn editing on"
     And I add a "Survey" to section "1" and I fill the form with:
       | Name | Test survey name |
@@ -32,7 +31,7 @@ Feature: Block region moving
     And I press "Save changes"
     And I log out
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Turn editing on"
     And I add the "Comments" block
     And I configure the "Comments" block
@@ -47,3 +46,18 @@ Feature: Block region moving
       | Region  | Right |
     And I press "Save changes"
     And I should see "Comments" in the "//*[@id='region-post' or @id='block-region-side-post']" "xpath_element"
+
+  Scenario: Move blocks to top and bottom regions
+    When I follow "Test book name"
+    And I configure the "Comments" block
+    And I set the following fields to these values:
+      | Region  | Top |
+    And I press "Save changes"
+    And I should see "Comments" in the "//*[@id='region-top' or @id='block-region-top']" "xpath_element"
+
+    When I follow "Test book name"
+    And I configure the "Comments" block
+    And I set the following fields to these values:
+      | Region  | Bottom |
+    And I press "Save changes"
+    And I should see "Comments" in the "//*[@id='region-bottom' or @id='block-region-bottom']" "xpath_element"

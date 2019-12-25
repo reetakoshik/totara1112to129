@@ -27,7 +27,7 @@ Feature: An administrator can filter user accounts by role, cohort and other pro
       | uselegacybrowselistofusersreport | 1 |
     And I add "User Two (two@example.com)" user to "CH1" cohort members
     And I add "User Three (three@example.com)" user to "CH1" cohort members
-    And I navigate to "Users > Accounts > Browse list of users" in site administration
+    And I navigate to "Users > Browse list of users" in site administration
 
   Scenario: Filter user accounts by role and cohort
     When I set the following fields to these values:

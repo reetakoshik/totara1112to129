@@ -115,6 +115,11 @@ if (has_capability('moodle/restore:restorefile', $context) and has_capability('m
 /** @var core_backup_renderer $renderer */
 $renderer = $PAGE->get_renderer('core', 'backup');
 
+// TOTARA: Add button to add/remove for quickaccess menu
+if ($context->contextlevel == CONTEXT_SYSTEM) {
+    \totara_core\quickaccessmenu\helper::add_quickaction_page_button($PAGE, 'restorecourse');
+}
+
 /** @var core_renderer $OUTPUT */
 echo $OUTPUT->header();
 

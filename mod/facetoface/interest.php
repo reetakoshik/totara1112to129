@@ -17,31 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package modules
- * @subpackage facetoface
+ * @author Andrew Hancox <andrewdchancox@googlemail.com>
+ * @author Oleg Demeshev <oleg.demeshev@totaralearning.com>
+ * @package mod_facetoface
  */
 
 require_once('../../config.php');
-require_once('lib.php');
+require_once($CFG->dirroot . '/mod/facetoface/lib.php');
 
 $f = required_param('f', PARAM_INT); // Facetoface ID.
-$confirm = optional_param('confirm', false, PARAM_BOOL);
 
-$facetoface = $DB->get_record('facetoface', array('id' => $f), '*', MUST_EXIST);
-$course = $DB->get_record('course', array('id' => $facetoface->course), '*', MUST_EXIST);
-$cm = get_coursemodule_from_instance('facetoface', $facetoface->id, $course->id, false, MUST_EXIST);
+$seminar = new \mod_facetoface\seminar($f);
+$course = $DB->get_record('course', array('id' => $seminar->get_course()), '*', MUST_EXIST);
+$cm = $seminar->get_coursemodule();
+$interest = \mod_facetoface\interest::from_seminar($seminar);
 
 $redirecturl = new moodle_url('/course/view.php', array('id' => $course->id));
 
 // Are we declaring or withdrawing interest?
-if (facetoface_user_declared_interest($facetoface)) {
-    $declare = false;
-} else {
-    $declare = true;
-    if (!facetoface_activity_can_declare_interest($facetoface)) {
-        print_error('error:cannotdeclareinterest', 'facetoface', $redirecturl);
-    }
+$declare = !$interest->is_user_declared();
+if ($declare && !$interest->can_user_declare()) {
+    print_error('error:cannotdeclareinterest', 'facetoface', $redirecturl);
 }
+
 $context = context_module::instance($cm->id);
 
 $PAGE->set_url('/mod/facetoface/interest.php', array('id' => $cm->id));
@@ -52,32 +50,29 @@ $PAGE->set_cm($cm);
 require_login($course, true, $cm);
 require_capability('mod/facetoface:view', $context);
 
-$title = $course->shortname . ': ' . format_string($facetoface->name);
+$title = $course->shortname . ': ' . format_string($seminar->get_name());
 
 $PAGE->set_title($title);
 $PAGE->set_heading($course->fullname);
 
-$mform = new \mod_facetoface\form\interest(null, array('f' => $f, 'declare' => $declare));
+$mform = new \mod_facetoface\form\interest(null, array('f' => $seminar->get_id(), 'declare' => $declare));
 
 if ($mform->is_cancelled()) {
     redirect($redirecturl);
 } else if ($data = $mform->get_data()) {
     if ($declare) {
         $reason = isset($data->reason) ? $data->reason : '';
-        if ($interestid = facetoface_declare_interest($facetoface, $reason)) {
-            $interestobj = $DB->get_record('facetoface_interest', array('id' => $interestid));
-            \mod_facetoface\event\interest_declared::create_from_instance($interestobj, $context)->trigger();
-        }
+        $interest->set_reason($reason)->declare();
+        \mod_facetoface\event\interest_declared::create_from_instance($interest, $context)->trigger();
     } else {
-        $interestobj = $DB->get_record('facetoface_interest', array('facetoface' => $facetoface->id, 'userid' => $USER->id));
-        if (facetoface_withdraw_interest($facetoface)) {
-            \mod_facetoface\event\interest_withdrawn::create_from_instance($interestobj, $context)->trigger();
-        }
+        $oldinterest = \mod_facetoface\interest::from_seminar($seminar);
+        $interest->withdraw();
+        \mod_facetoface\event\interest_withdrawn::create_from_instance($oldinterest, $context)->trigger();
     }
     redirect($redirecturl);
 }
 
-$pagetitle = format_string($facetoface->name);
+$pagetitle = format_string($seminar->get_name());
 
 echo $OUTPUT->header();
 
@@ -86,18 +81,19 @@ if (empty($cm->visible) and !has_capability('mod/facetoface:viewemptyactivities'
 }
 echo $OUTPUT->box_start();
 if ($declare) {
-    $title = get_string('declareinterestin', 'mod_facetoface', $facetoface->name);
-    $question = get_string('declareinterestinconfirm', 'mod_facetoface', $facetoface->name);
+    $title = get_string('declareinterestin', 'mod_facetoface', $seminar->get_name());
+    $question = get_string('declareinterestinconfirm', 'mod_facetoface', $seminar->get_name());
 } else {
-    $title = get_string('declareinterestwithdrawfrom', 'mod_facetoface', $facetoface->name);
-    $question = get_string('declareinterestwithdrawfromconfirm', 'mod_facetoface', $facetoface->name);
+    $title = get_string('declareinterestwithdrawfrom', 'mod_facetoface', $seminar->get_name());
+    $question = get_string('declareinterestwithdrawfromconfirm', 'mod_facetoface', $seminar->get_name());
 }
 echo $OUTPUT->heading($title, 2);
 
-if ($facetoface->intro) {
+if ($seminar->get_intro()) {
     echo $OUTPUT->box_start('generalbox', 'description');
-    $facetoface->intro = file_rewrite_pluginfile_urls($facetoface->intro, 'pluginfile.php', $context->id, 'mod_facetoface', 'intro', null);
-    echo format_text($facetoface->intro, $facetoface->introformat);
+    $intro = file_rewrite_pluginfile_urls($seminar->get_intro(), 'pluginfile.php', $context->id, 'mod_facetoface', 'intro', null);
+    $seminar->set_intro($intro);
+    echo format_text($seminar->get_intro(), $seminar->get_introformat());
     echo $OUTPUT->box_end();
 }
 

@@ -24,8 +24,7 @@ Feature: Seminar availability based on activity completion
 
     # Add an activity with manual completion.
     And I log in as "admin"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Certificate" to section "1" and I fill the form with:
       | Name             | Certificate 1 |
 
@@ -34,7 +33,6 @@ Feature: Seminar availability based on activity completion
     And I set the following fields to these values:
       | Name             | Test seminar 1 |
       | Description      | Test seminar 1 |
-      | Manager Approval | 0              |
     And I expand all fieldsets
     And I click on "Add restriction..." "button"
     And "Add restriction..." "dialogue" should be visible
@@ -62,7 +60,7 @@ Feature: Seminar availability based on activity completion
 
   Scenario: Signup link is not available until the completion restriction is met
     Given I log in as "student1"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I follow "Course 1"
     Then I should see "Not available unless: The activity Certificate 1 is marked complete"
     And I should not see "Sign-up"
@@ -73,7 +71,7 @@ Feature: Seminar availability based on activity completion
 
   Scenario: Join Waitlist link is not available until the completion restriction is met
     Given I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I follow "Course 1"
     And I click on "Edit event" "link" in the "0 / 10" "table_row"
     And I click on "Delete" "link" in the "1 January 2020" "table_row"
@@ -81,7 +79,7 @@ Feature: Seminar availability based on activity completion
     And I log out
 
     When I log in as "student1"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I follow "Course 1"
     Then I should see "Not available unless: The activity Certificate 1 is marked complete"
     And I should not see "Join waitlist"
@@ -92,7 +90,7 @@ Feature: Seminar availability based on activity completion
 
   Scenario: Signup link is only available for users that meets the user's profile restriction
     Given I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I navigate to "Edit settings" node in "Seminar administration"
     And I expand all fieldsets
@@ -106,20 +104,20 @@ Feature: Seminar availability based on activity completion
     And I log out
 
     When I log in as "student1"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I follow "Course 1"
     Then I should see "Sign-up"
     And I log out
 
     When I log in as "student2"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I follow "Course 1"
     Then I should not see "Sign-up"
     And I log out
 
   Scenario: Join Waitlist link is only available for users that meets the user's profile restriction
     Given I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I navigate to "Edit settings" node in "Seminar administration"
     And I expand all fieldsets
@@ -136,13 +134,13 @@ Feature: Seminar availability based on activity completion
     And I log out
 
     When I log in as "student1"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I follow "Course 1"
     And I should see "Join waitlist"
     And I log out
 
     When I log in as "student2"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I follow "Course 1"
     And I should not see "Join waitlist"
     And I log out

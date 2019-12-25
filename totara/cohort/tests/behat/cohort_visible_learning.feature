@@ -10,7 +10,7 @@ Feature: User is performing actions on audience learning visibility report
       | Audiences 2 | aud2 |
     And I am on a totara site
     And I log in as "admin"
-    And I navigate to "Advanced features" in site administration
+    And I navigate to "System information > Advanced features" in site administration
     And I set the field "Enable audience-based visibility" to "1"
     And I click on "Save changes" "button"
     And I am on "c101" course homepage
@@ -21,7 +21,7 @@ Feature: User is performing actions on audience learning visibility report
     And I follow "Audiences 2"
     And I click on "OK" "button" in the "Course audiences (visible)" "totaradialogue"
     And I click on "Save and display" "button"
-    And I navigate to "Reports > Report builder > Manage user reports" in site administration
+    And I navigate to "Reports > Manage user reports" in site administration
     And I click on "Create report" "button"
     And I set the following fields to these values:
       | Report Name | Audience Visibility |

@@ -23,7 +23,7 @@
 
 namespace block_totara_featured_links\tile;
 
-use totara_form\file_area;
+use core\output\flex_icon;
 
 /**
  * Class gallery_tile
@@ -31,86 +31,168 @@ use totara_form\file_area;
  * the tile is loaded
  * @package block_totara_featured_links
  */
-class gallery_tile extends base {
-    protected $used_fields = ['background_imgs', // array The filenames for all the background images.
-        'textbody', // string The description for the tile.
-        'heading', // string The title for the tile.
-        'url', // string The url that the tile links to.
-        'target', // string The target for the link either '_self' or '_blank'.
-        'alt_text',  // string The text to go in the sr-only span in the anchor tag.
-        'interval', // int The time in seconds between when the background image changes.
-        'background_color', // string The hex value of the background color.
-        'heading_location']; // string The location of the heading either 'top' or 'bottom'.
+class gallery_tile extends base implements meta_tile {
+    protected $used_fields = [
+        'transition',
+        'order',
+        'controls',
+        'autoplay',
+        'interval',
+        'repeat',
+        'pauseonhover',
+    ];
     protected $content_template = 'block_totara_featured_links/content';
     protected $content_wrapper_template = 'block_totara_featured_links/content_wrapper_gallery';
     protected $content_class = 'block-totara-featured-links-content-gallery';
     protected $content_form = '\block_totara_featured_links\tile\gallery_form_content';
     protected $visibility_form = '\block_totara_featured_links\tile\default_form_visibility';
 
+    /** @var array $subtiles and array of {@link base}*/
+    protected $subtiles = [];
+
     /** @var int The default interval (seconds) */
-    protected $default_interval = 4;
+    const DEFAULT_INTERVAL = 4;
+
+    const TRANSITION_SLIDE = 'slide';
+    const TRANSITION_FADE = 'fade';
+    const ORDER_RANDOM = 'random';
+    const ORDER_SEQUENTIAL = 'sequential';
+    const CONTROLS_ARROWS = 'arrows';
+    const CONTROLS_POSITION = 'position_indicator';
+
 
     /**
-     * {@inheritdoc}
+     * Gets all the tiles that are contained by this tile.
+     * @return array of {@link base} but none should be meta_tiles
      */
-    public static function get_name() {
+    public function get_subtiles(): array {
+        return $this->subtiles;
+    }
+
+    /**
+     * gallery_tile constructor.
+     * @param \stdClass|null $tile
+     */
+    public function __construct($tile = null) {
+        global $DB;
+        parent::__construct($tile);
+
+        if (!empty($this->id)) {
+            $subtiles = $DB->get_records('block_totara_featured_links_tiles', ['parentid' => $this->id]);
+
+            usort($subtiles, function ($tile1, $tile2) {
+                if ($tile1->sortorder == $tile2->sortorder) {
+                    assert(false, 'There was two tiles with the same sort order');
+                    return 0;
+                }
+                return ($tile1->sortorder < $tile2->sortorder) ? -1 : 1;
+            });
+
+            foreach ($subtiles as $subtile) {
+                list($plugin_name, $class_name) = explode('-', $subtile->type, 2);
+                $type = "\\$plugin_name\\tile\\$class_name";
+                $this->subtiles[] = new $type($subtile);
+            }
+        }
+    }
+
+    /**
+     * Build the array of subtiles
+     */
+    private function build_subtiles(): void {
+        global $DB;
+        if (empty($this->id)) {
+            throw new \coding_exception('The id on the gallery tile must be set before generating subtlies');
+        }
+
+        $subtiles = $DB->get_records('block_totara_featured_links_tiles', ['parentid' => $this->id]);
+
+        usort($subtiles, function ($tile1, $tile2) {
+            return ($tile2->sortorder - $tile1->sortorder);
+        });
+
+        foreach ($subtiles as $subtile) {
+            list($plugin_name, $class_name) = explode('-', $subtile->type, 2);
+            $type = "\\$plugin_name\\tile\\$class_name";
+            $this->subtiles[] = new $type($subtile);
+        }
+    }
+
+    /**
+     * Gets the name of the tile to display in the edit form
+     *
+     * @throws \coding_exception You must override this function.
+     * @return string
+     */
+    public static function get_name(): string {
         return get_string('multi_name', 'block_totara_featured_links');
     }
 
     /**
-     * {@inheritdoc}
+     * This does the tile defined add
+     * Ie instantiates objects so they can be referenced later
+     * @return void
      */
-    public function add_tile() {
+    public function add_tile(): void {
         return;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function copy_files(base &$new_tile) {
-        if (empty($this->data->background_imgs)) {
-            return;
-        }
-        $fromcontext = \context_block::instance($this->blockid);
-        $tocontext = \context_block::instance($new_tile->blockid);
-        $fs = get_file_storage();
-        // This extra check if file area is empty adds one query if it is not empty but saves several if it is.
-        if (!$fs->is_area_empty($fromcontext->id, 'block_totara_featured_links', 'tile_backgrounds', $this->id, false)) {
-            file_prepare_draft_area($draftitemid,
-                $fromcontext->id,
-                'block_totara_featured_links',
-                'tile_backgrounds',
-                $this->id,
-                ['subdirs' => 0, 'maxbytes' => 0]);
-            file_save_draft_area_files($draftitemid,
-                $tocontext->id,
-                'block_totara_featured_links',
-                'tile_backgrounds',
-                $new_tile->id,
-                ['subdirs' => 0, 'maxbytes' => 0]);
-        }
     }
 
     /**
      * gets the data for the content form
      * @return \stdClass
      */
-    public function get_content_form_data() {
+    public function get_content_form_data(): \stdClass {
         $data_obj = parent::get_content_form_data();
-        // Move background file to the draft area.
-        if (isset($this->data->background_imgs)) {
-            $data_obj->background_imgs = new file_area(\context_block::instance($this->blockid),
-                'block_totara_featured_links',
-                'tile_backgrounds',
-                $this->id);
+        if (!isset($data_obj->transition)) {
+            $data_obj->transition = self::TRANSITION_SLIDE;
+        }
+        if (!isset($data_obj->order)) {
+            $data_obj->order = self::ORDER_SEQUENTIAL;
+        }
+        if (!isset($data_obj->controls)) {
+            $data_obj->controls = [self::CONTROLS_ARROWS, self::CONTROLS_POSITION];
+        }
+        if (!isset($data_obj->autoplay)) {
+            $data_obj->autoplay = 1;
         }
         if (!isset($data_obj->interval)) {
-            $data_obj->interval = 4;
+            $data_obj->interval = self::DEFAULT_INTERVAL;
         }
-        if (!isset($this->data->heading_location)) {
-            $data_obj->heading_location = self::HEADING_TOP;
+        if (!isset($data_obj->repeat)) {
+            $data_obj->repeat = 1;
         }
+        if (!isset($data_obj->pauseonhover)) {
+            $data_obj->pauseonhover = 0;
+        }
+
         return $data_obj;
+    }
+
+    /**
+     * {@inheritdoc}
+     * Also renders the subtiles and passes them through to the template.
+     *
+     * @param \renderer_base $renderer
+     * @param array $settings
+     * @return bool|string
+     */
+    public function render_content_wrapper(\renderer_base $renderer, array $settings) {
+        $data = $this->get_content_wrapper_template_data($renderer, $settings);
+
+        $subtilesettings = $settings;
+        $subtilesettings['editing'] = false;
+        $subtiles = '';
+        foreach ($this->subtiles as $subtile) {
+            if ($subtile->is_visible()) {
+                $subtiles .= $subtile->render_content_wrapper($renderer, $subtilesettings);
+            }
+        }
+        if ($subtiles == '' && (!isset($settings['editing']) || $settings['editing'] == false)) {
+            return '';
+        }
+        $data['subtiles'] = $subtiles;
+        $data = array_merge($data, $settings);
+        return $renderer->render_from_template($this->content_wrapper_template, $data);
     }
 
     /**
@@ -119,100 +201,43 @@ class gallery_tile extends base {
      *      [ 'sr-only' => 'value']
      * @return array
      */
-    public function get_accessibility_text() {
-        $sronly = '';
-        if (!empty($this->data_filtered->alt_text)) {
-            $sronly = $this->data_filtered->alt_text;
-        } else if (!empty($this->data_filtered->heading)) {
-            $sronly = $this->data_filtered->heading;
-        } else if (!empty($this->data_filtered->textbody)) {
-            $sronly = $this->data_filtered->textbody;
-        }
-        return ['sr-only' => $sronly];
+    public function get_accessibility_text(): array {
+        return ['sr-only' => get_string('multi_name', 'block_totara_featured_links')];
     }
 
     /**
      * This defines the saving process for the custom tile fields
-     * This should modify the data variable rather than chang directly saving to the database cause if you don't
-     * what you save will get overridden when the tile is saved to the database.
+     * This should modify the data variable rather than directly saving to the database.
+     * If you do save to the db then what you save will get overridden when the tile is saved.
      * @param \stdClass $data
      * @return void
      */
-    public function save_content_tile($data) {
-        global $CFG;
-        // Saves the Draft area.
-        $draftitemid = file_get_submitted_draft_itemid('background_imgs');
-        $blockcontext = \context_block::instance($this->blockid)->id;
-        if (!empty($draftitemid)) {
-            file_save_draft_area_files($draftitemid,
-                $blockcontext,
-                'block_totara_featured_links', 'tile_backgrounds',
-                $this->id,
-                ['subdirs' => 0, 'maxbytes' => 0]);
-        }
-
-        // Gets the url to the new file.
-        $fs = get_file_storage();
-        $files = $fs->get_area_files(
-            $blockcontext,
-            'block_totara_featured_links',
-            'tile_backgrounds',
-            $this->id,
-            '',
-            false);
-        $this->data->background_imgs = [];
-        foreach ($files as $file) {
-            $this->data->background_imgs[] = $file->get_filename();
-        }
-        /* Checks if the url starts with the wwwroot.
-         * If it does it strips the wwwroot so it can be added back dynamically
-         * Also checks if the url doesn't start with http:// https:// or a / then it adds https://
-         * to stop people from using other protocols like FTP ect.
-        */
-        if (\core_text::substr($data->url, 0, 7) != 'http://'
-            && \core_text::substr($data->url, 0, 8) != 'https://'
-            && \core_text::substr($data->url, 0, 1) != '/') {
-            $data->url = 'http://'.$data->url;
-        }
-        $wwwroot_chopped = preg_replace('/^(https:\/\/)|(http:\/\/)/', '', $CFG->wwwroot);
-        if (\core_text::substr($data->url, 0, strlen($wwwroot_chopped)) == $wwwroot_chopped) {
-            $data->url = \core_text::substr($data->url, strlen($wwwroot_chopped));
-        }
-        if (\core_text::substr($data->url, 0, strlen($CFG->wwwroot)) == $CFG->wwwroot) {
-            $data->url = \core_text::substr($data->url, strlen($CFG->wwwroot));
-        }
-        if ($data->url == '') {
-            $data->url = '/';
-        }
-
-        // Saves the rest of the data for the tile.
-        if (isset($data->alt_text)) {
-            $this->data->alt_text = $data->alt_text;
-        }
-        if (isset($data->url)) {
-            $this->data->url = $data->url;
-        }
-        if (isset($data->heading)) {
-            $this->data->heading = $data->heading;
-        }
-        if (isset($data->textbody)) {
-            $this->data->textbody = $data->textbody;
-        }
-        if (isset($data->background_color)) {
-            $this->data->background_color = $data->background_color;
-        }
-        if (isset($data->target)) {
-            $this->data->target = $data->target;
-        }
+    public function save_content_tile($data): void {
         if (isset($data->interval)) {
             if ($data->interval < 1 && $data->interval != 0) {
                 $data->interval = 1;
             }
             $this->data->interval = $data->interval;
         }
-        if (isset($data->heading_location)) {
-            $this->data->heading_location = $data->heading_location;
+        if (isset($data->transition)) {
+            $this->data->transition = $data->transition;
         }
+        if (isset($data->order)) {
+            $this->data->order = $data->order;
+        }
+        if (isset($data->controls)) {
+            $this->data->controls = $data->controls;
+        }
+        if (isset($data->autoplay)) {
+            $this->data->autoplay = $data->autoplay;
+        }
+        if (isset($data->repeat)) {
+            $this->data->repeat = $data->repeat;
+        }
+        if (isset($data->pauseonhover)) {
+            $this->data->pauseonhover = $data->pauseonhover;
+        }
+
         return;
     }
 
@@ -223,7 +248,7 @@ class gallery_tile extends base {
      * @param \stdClass $data all the data from the form
      * @return string
      */
-    public function save_visibility_tile($data) {
+    public function save_visibility_tile($data): string {
         return '';
     }
 
@@ -231,49 +256,102 @@ class gallery_tile extends base {
      * Gets the data to be passed to the render_content function
      * @return array
      */
-    protected function get_content_template_data() {
+    protected function get_content_template_data(): array {
         $notempty = false;
         if (!empty($this->data_filtered->heading) || !empty($this->data_filtered->textbody)) {
             $notempty = true;
         }
-        return ['heading' => (empty($this->data_filtered->heading) ? '' : $this->data->heading),
-            'textbody' => (empty($this->data_filtered->textbody) ? '' : $this->data->textbody),
+        return [
             'content_class' => (empty($this->content_class) ? '' : $this->content_class),
-            'heading_location' => (empty($this->data_filtered->heading_location) ? '' : $this->data_filtered->heading_location),
             'notempty' => $notempty
         ];
     }
 
     /**
-     * Gets the data for the content wrapper
-     * @param \renderer_base $renderer
+     * Gets the items that go into the edit menu for a tile.
+     *
+     * @param array $settings
      * @return array
      */
-    protected function get_content_wrapper_template_data(\renderer_base $renderer) {
+    protected function get_action_menu_items($settings = []): array {
         global $PAGE;
-        $data = parent::get_content_wrapper_template_data($renderer);
-
-        // Build background urls.
-        $backgrounds = [];
-        if (!empty($this->data_filtered->background_imgs)) {
-            foreach ($this->data_filtered->background_imgs as $image) {
-                $backgrounds[] = (string)\moodle_url::make_pluginfile_url(\context_block::instance($this->blockid)->id,
+        $action_menu_items = [];
+        $action_menu_items[] = new \action_menu_link_secondary(
+            new \moodle_url(
+                '/blocks/totara_featured_links/edit_tile_content.php',
+                [
+                    'blockinstanceid' => $this->blockid,
+                    'tileid' => $this->id,
+                    'return_url' => $PAGE->url->out_as_local_url()
+                ]
+            ),
+            new flex_icon('edit'),
+            get_string('parenttile_content_menu_title', 'block_totara_featured_links') .
+            \html_writer::span(
+                get_string(
+                    'parenttile_content_menu_title_sr-only',
                     'block_totara_featured_links',
-                    'tile_backgrounds',
-                    $this->id,
-                    '/',
-                    $image);
-            }
+                    $this->get_accessibility_text()['sr-only']
+                ),
+                'sr-only'
+            ),
+            ['type' => 'edit']
+        );
+
+        $action_menu_items[] = new \action_menu_link_secondary(
+            new \moodle_url(
+                '/blocks/totara_featured_links/sub_tile_manage.php',
+                ['tileid' => $this->id, 'return_url' => $PAGE->url->out_as_local_url()]
+            ),
+            new flex_icon('edit'),
+            get_string('managesubtiles', 'block_totara_featured_links') .
+            \html_writer::span(
+                get_string(
+                    'managesubtiles_sr-only',
+                    'block_totara_featured_links',
+                    $this->get_accessibility_text()['sr-only']
+                ),
+                'sr-only'
+            ),
+            ['type' => 'edit']
+        );
+
+        if ($this->is_visibility_applicable()) {
+            $action_menu_items[] = new \action_menu_link_secondary(
+                new \moodle_url('/blocks/totara_featured_links/edit_tile_visibility.php',
+                    [
+                        'blockinstanceid' => $this->blockid,
+                        'tileid' => $this->id,
+                        'return_url' => $PAGE->url->out_as_local_url()
+                    ]
+                ),
+                new flex_icon('hide'),
+                get_string('visibility_menu_title', 'block_totara_featured_links') .
+                \html_writer::span(
+                    get_string(
+                        'visibility_menu_title_sr-only',
+                        'block_totara_featured_links',
+                        $this->get_accessibility_text()['sr-only']
+                    ),
+                    'sr-only'
+                ),
+                ['type' => 'edit_vis']);
         }
 
-        $data['background_imgs'] = !empty($backgrounds) ? $backgrounds : false;
-        $data['alt_text'] = $this->get_accessibility_text();
-        $data['background_color'] = (!empty($this->data_filtered->background_color) ?
-            $this->data_filtered->background_color :
-            false);
-        $data['url'] = (!empty($this->url_mod) ? $this->url_mod : false);
-        $data['target'] = (!empty($this->data_filtered->target) ? $this->data->target : false);
-        return $data;
+        $action_menu_items[] = new \action_menu_link_secondary(
+            new \moodle_url('/'),
+            new flex_icon('delete'),
+            get_string('delete_menu_title', 'block_totara_featured_links') .
+            \html_writer::span(
+                get_string(
+                    'delete_menu_title_sr-only',
+                    'block_totara_featured_links',
+                    $this->get_accessibility_text()['sr-only']
+                ),
+                'sr-only'
+            ),
+            ['type' => 'remove', 'blockid' => $this->blockid, 'tileid' => $this->id]);
+        return $action_menu_items;
     }
 
     /**
@@ -281,20 +359,37 @@ class gallery_tile extends base {
      * This should only be used by the is_visible() function.
      * @return int (-1 = hidden, 0 = no rule, 1 = showing)
      */
-    public function is_visible_tile() {
+    public function is_visible_tile(): int {
         return 0;
     }
 
     /**
      * initializes the switcher amd module
      */
-    protected function get_requirements() {
+    protected function get_requirements(): void {
         global $PAGE;
-        $PAGE->requires->js_call_amd('block_totara_featured_links/switcher',
-            'init',
-            [
-                (!isset($this->data->interval) ? $this->default_interval*1000 : $this->data->interval*1000),
-                'block-totara-featured-links-gallery-tile-'.$this->id]
+
+        $interval = $this->data->interval ?? self::DEFAULT_INTERVAL;
+
+        $transition = $this->data_filtered->transition ?? self::TRANSITION_SLIDE;
+        $order = $this->data_filtered->order ?? self::ORDER_SEQUENTIAL;
+        $controls = $this->data_filtered->controls ?? [self::CONTROLS_POSITION, self::CONTROLS_ARROWS];
+        $autoplay = $this->data_filtered->autoplay ?? '1';
+        $repeat = $this->data_filtered->repeat ?? '1';
+        $pauseonhover = $this->data_filtered->pauseonhover ?? '0';
+
+        $PAGE->requires->js_call_amd(
+            'block_totara_featured_links/switcher',
+            'init', [
+                $interval * 1000,
+                'block-totara-featured-links-gallery-tile-'.$this->id,
+                $transition,
+                $order,
+                $controls,
+                $autoplay,
+                $repeat,
+                $pauseonhover
+            ]
         );
     }
 }

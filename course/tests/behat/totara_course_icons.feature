@@ -11,8 +11,8 @@ Feature: An icon can be selected for a course
       | Course full name  | Course 1 |
       | Course short name | C1 |
     When I navigate to "Edit settings" node in "Course administration"
-    Then I should see "Course icon"
-    And I should see "Current icon"
+    And I expand all fieldsets
+    Then I should see "Current icon"
 
     When I click on "Choose icon" "button"
     And I click on "img[title='Event Management']" "css_element" in the "#icon-selectable" "css_element"
@@ -25,7 +25,8 @@ Feature: An icon can be selected for a course
     Then I should see the "Event Management" image in the "#fitem_id_currenticon" "css_element"
     And I should not see the "Emotional Intelligence" image in the "#fitem_id_currenticon" "css_element"
 
-    When I click on "Choose icon" "button"
+    When I expand all fieldsets
+    And I click on "Choose icon" "button"
     And I click on "img[title='Emotional Intelligence']" "css_element" in the "#icon-selectable" "css_element"
     And I click on "OK" "link_or_button" in the "div[aria-describedby='icon-dialog']" "css_element"
     And I wait "1" seconds

@@ -1,4 +1,4 @@
-body {
+ body {
 	background-size: cover;
 }
 
@@ -340,7 +340,7 @@ body {
 	height: 100%;
 	border-radius: 0;
 	box-shadow: none;
-	opacity: 0.6;
+	opacity: 1;
 	box-sizing: border-box;
 	font-size: 14px;
 	padding-left: 50px;
@@ -501,32 +501,32 @@ body[data-color="dark"]#page-login-forgot_password #page {
 
 body[data-color="bright"] .loginbox .loginpanel .subcontent,
 body[data-color="bright"] .loginbox .signuppanel .subcontent {
-	background-color: rgba(244, 244, 244, 1);
+	background-color: #ccc;
 }
 
 body[data-color="bright"] .loginbox .loginpanel h2,
 body[data-color="bright"] .loginbox .signuppanel h2 {
-	border-bottom: 1px solid rgba(244, 244, 244, 1);
+	border-bottom: 1px solid #ccc;
     background-color: white;
 }
 
 body[data-color="bright"] .loginbox.twocolumns .loginpanel,
 body[data-color="bright"] .loginbox.twocolumns .signuppanel {
-	background-color: rgba(244, 244, 244, 1);
+	background-color: #ccc;
 }
 
 body[data-color="bright"] .loginbox .loginpanel .loginsub,
 body[data-color="bright"] .loginbox .signuppanel .subcontent {
-	border-top: 3px solid white;
+	border-top: 3px solid #fff;
 }
 
 body[data-color="bright"] .loginbox .desc,
 body[data-color="bright"].path-login #page {
-	color: black;
+	color: #000;
 }
 
 body[data-color="bright"]#page-login-forgot_password #page {
-	color: black;
+	color: #000;
 }
 
 /*IE hacks*/
@@ -534,4 +534,85 @@ body[data-color="bright"]#page-login-forgot_password #page {
 .loginbox.onecolumn {
 	margin-top: 150px\0;
 	margin-bottom: 20px\0;
+}
+
+/* css for 5 sept 2019 login page */
+.signuppanel{
+	display:none;
+	}
+.loginpanel {
+    float:none !important;
+    margin:0 auto;
+	}
+.loginbox.twocolumns .loginpanel{
+	width: 40%;
+	margin:0 auto;
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	}
+.loginbox .loginpanel h2{
+	font-weight: 100 !important;
+    font-size: 25pt;
+    text-align: center;
+}
+body .loginbox .loginpanel .subcontent form .loginform .form-label {
+        z-index: 99!important;
+    background-position: center;
+    width: 44px;
+    margin-left: 6px;
+	    margin-top: 15px;
+}
+#page-footer {
+    padding: 14px 0 2px 0;
+}
+ 
+footer .social-links {
+    padding-top: 11px;
+	}
+.loginbox.twocolumns, .loginbox.onecolumn {
+    margin-bottom: 0;
+    margin-top: -80px;
+	}
+ .loginbox .loginpanel .subcontent form .loginform .form-input {
+    height: 60px;
+ 	}
+.loginbox .loginpanel .subcontent form .loginform .form-input input {
+    border-radius: 0;
+    border-radius: 10px;
+    height: 52px;
+    max-width: 390px;
+	width:100%;
+}
+.loginbox .loginpanel .subcontent form #loginbtn { 
+    top: -25px;
+    position: relative;
+    border-radius: 0 !important;
+    padding: 11px 20px;
+}
+.loginbox .loginpanel h2 {
+    font-weight: 100!important;
+    font-size: 25pt;
+    text-align: center;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+.loginbox .subcontent { 
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+body .loginform input:-internal-autofill-selected {
+	background-color:#fff !important;
+}
+.loginbox .loginpanel .subcontent form .loginform .form-input input:focus{
+	border:0;
+	background-color:#fff;
+	}
+ .loginpanel .guestsub.text-center.subcontent {
+   display: none;
+}
+
+@media (max-width: 1199px) {
+.loginbox.twocolumns .loginpanel {
+    width: 50%;
+}
 }

@@ -35,7 +35,7 @@ class totara_core_flex_icon_helper_testcase extends advanced_testcase {
         $this->resetAfterTest();
 
         $icons = flex_icon_helper::get_icons($CFG->theme);
-        $this->assertInternalType('array', $icons);
+        $this->assertIsArray($icons);
 
         purge_all_caches();
         $this->assertSame($icons, flex_icon_helper::get_icons($CFG->theme));

@@ -737,8 +737,8 @@ class grade_report_grader extends grade_report {
                 if (empty($suspendedstring)) {
                     $suspendedstring = get_string('userenrolmentsuspended', 'grades');
                 }
-                $usercell->text .= html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('i/enrolmentsuspended'), 'title'=>$suspendedstring,
-                        'alt'=>$suspendedstring, 'class'=>'usersuspendedicon'));
+                $icon = $OUTPUT->pix_icon('i/enrolmentsuspended', $suspendedstring);
+                $usercell->text .= html_writer::tag('span', $icon, array('class'=>'usersuspendedicon'));
             }
 
             $userrow->cells[] = $usercell;
@@ -768,7 +768,14 @@ class grade_report_grader extends grade_report {
                 $fieldcell = new html_table_cell();
                 $fieldcell->attributes['class'] = 'userfield user' . $field;
                 $fieldcell->header = false;
-                $fieldcell->text = $user->{$field};
+
+                // TOTARA - Escape potential XSS in idnumber field.
+                if ($field == 'idnumber') {
+                    $fieldcell->text = s($user->{$field});
+                } else {
+                    $fieldcell->text = $user->{$field};
+                }
+
                 $userrow->cells[] = $fieldcell;
             }
 

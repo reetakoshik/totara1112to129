@@ -25,7 +25,7 @@ namespace block_totara_featured_links\form\validator;
 
 defined('MOODLE_INTERNAL') || die();
 
-use \totara_form\element_validator;
+use totara_form\element_validator;
 
 /**
  * Makes sure the interval for a gallery tile is valid before the form is submitted

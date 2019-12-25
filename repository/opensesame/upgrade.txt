@@ -1,0 +1,10 @@
+This files describes API changes in /repository/opensesame/*,
+information provided here is intended especially for developers.
+
+=== 12.0 ===
+
+* Deprecated the following report builder display functions and replaced with display classes
+  * rb_source_opensesame::rb_display_coursetitle, please call repository_opensesame\rb\display\opensesame_course_title::display() instead.
+  * rb_source_opensesame::rb_display_visibility, please call repository_opensesame\rb\display\opensesame_visibility::display() instead.
+  * rb_source_opensesame::rb_display_mobilecompatibility, please call repository_opensesame\rb\display\opensesame_mobile_compatibility::display() instead.
+  * rb_source_opensesame::rb_display_shortdesc, please call repository_opensesame\rb\display\opensesame_shortdesc::display() instead.

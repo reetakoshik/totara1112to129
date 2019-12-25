@@ -42,8 +42,8 @@ class totara_certification_observer_testcase extends reportcache_advanced_testca
 
     protected function tearDown() {
         $this->users = null;
-        $this->course1 = null;
-        $this->certif1 = null;
+        $this->course1 = $this->course2 = $this->course3 = $this->course4 = null;
+        $this->certif1 = $this->certif2 = null;
         parent::tearDown();
     }
 

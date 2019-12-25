@@ -3165,6 +3165,8 @@ class admin_setting_configmulticheckbox2 extends admin_setting_configmulticheckb
 class admin_setting_configselect extends admin_setting {
     /** @var array Array of choices value=>label */
     public $choices;
+    /** @var array Array of choices grouped using optgroups */
+    public $optgroups;
 
     /**
      * Constructor
@@ -3175,7 +3177,19 @@ class admin_setting_configselect extends admin_setting {
      * @param array $choices array of $value=>$label for each selection
      */
     public function __construct($name, $visiblename, $description, $defaultsetting, $choices) {
-        $this->choices = $choices;
+        // Look for optgroup and single options.
+        if (is_array($choices)) {
+            $this->choices = array();
+            foreach ($choices as $key => $val) {
+                if (is_array($val)) {
+                    $this->optgroups[$key] = $val;
+                    $this->choices = $this->choices + $val; // Array merge doesn't work for numeric keys
+                } else {
+                    $this->choices[$key] = $val;
+                }
+            }
+        }
+
         parent::__construct($name, $visiblename, $description, $defaultsetting);
     }
 
@@ -3308,6 +3322,27 @@ class admin_setting_configselect extends admin_setting {
         }
 
         $options = [];
+        $template = 'core_admin/setting_configselect';
+
+        if (!empty($this->optgroups)) {
+            $optgroups = [];
+            foreach ($this->optgroups as $label => $choices) {
+                $optgroup = array('label' => $label, 'options' => []);
+                foreach ($choices as $value => $name) {
+                    $optgroup['options'][] = [
+                        'value' => $value,
+                        'name' => $name,
+                        'selected' => (string) $value == $data
+                    ];
+                    unset($this->choices[$value]);
+                }
+                $optgroups[] = $optgroup;
+            }
+            $context->options = $options;
+            $context->optgroups = $optgroups;
+            $template = 'core_admin/setting_configselect_optgroup';
+        }
+
         foreach ($this->choices as $value => $name) {
             $options[] = [
                 'value' => $value,
@@ -3317,7 +3352,7 @@ class admin_setting_configselect extends admin_setting {
         }
         $context->options = $options;
 
-        $element = $OUTPUT->render_from_template('core_admin/setting_configselect', $context);
+        $element = $OUTPUT->render_from_template($template, $context);
 
         return format_admin_setting($this, $this->visiblename, $element, $this->description, true, $warning, $defaultinfo, $query);
     }
@@ -3440,6 +3475,29 @@ class admin_setting_configmultiselect extends admin_setting_configselect {
 
         $defaults = [];
         $options = [];
+        $template = 'core_admin/setting_configmultiselect';
+
+        if (!empty($this->optgroups)) {
+            $optgroups = [];
+            foreach ($this->optgroups as $label => $choices) {
+                $optgroup = array('label' => $label, 'options' => []);
+                foreach ($choices as $value => $name) {
+                    if (in_array($value, $default)) {
+                        $defaults[] = $name;
+                    }
+                    $optgroup['options'][] = [
+                        'value' => $value,
+                        'name' => $name,
+                        'selected' => in_array($value, $data)
+                    ];
+                    unset($this->choices[$value]);
+                }
+                $optgroups[] = $optgroup;
+            }
+            $context->optgroups = $optgroups;
+            $template = 'core_admin/setting_configmultiselect_optgroup';
+        }
+
         foreach ($this->choices as $value => $name) {
             if (in_array($value, $default)) {
                 $defaults[] = $name;
@@ -3460,7 +3518,7 @@ class admin_setting_configmultiselect extends admin_setting_configselect {
             $defaultinfo = get_string('none');
         }
 
-        $element = $OUTPUT->render_from_template('core_admin/setting_configmultiselect', $context);
+        $element = $OUTPUT->render_from_template($template, $context);
 
         return format_admin_setting($this, $this->visiblename, $element, $this->description, true, '', $defaultinfo, $query);
     }
@@ -3577,6 +3635,9 @@ class admin_setting_configduration extends admin_setting {
     /** @var int default duration unit */
     protected $defaultunit;
 
+    /** @var callback|null custom validator */
+    protected $validator;
+
     /**
      * Constructor
      * @param string $name unique ascii name, either 'mysetting' for settings that in config,
@@ -3597,6 +3658,20 @@ class admin_setting_configduration extends admin_setting {
             $this->defaultunit = 86400;
         }
         parent::__construct($name, $visiblename, $description, $defaultsetting);
+    }
+
+    /**
+     * Sets a new custom validator.
+     * @param callback|null $validator - custom validator function that takes a parameter
+     * @return admin_setting_configduration
+     * @since Totara 11.13, 12.4, 13.0
+     */
+    public function set_validator($validator) {
+        if (!is_null($validator) && !is_callable($validator)) {
+            throw new coding_exception('A custom validator must be callable.');
+        }
+        $this->validator = $validator;
+        return $this;
     }
 
     /**
@@ -3679,9 +3754,27 @@ class admin_setting_configduration extends admin_setting {
             return '';
         }
 
+        if (!is_numeric($data['v'])) {
+            return get_string('errornonnumeric', 'admin');
+        }
+
         $seconds = (int)($data['v']*$data['u']);
         if ($seconds < 0) {
             return get_string('errorsetting', 'admin');
+        }
+
+        // Totara: custom validator function
+        if ($this->validator) {
+            $error = call_user_func($this->validator, $seconds);
+            if (is_null($error)) {
+                // null means ok.
+            } else if (is_string($error) && strlen($error) > 0) {
+                // non-empty string means validation error.
+                return $error;
+            } else {
+                // any other return value is not acceptable.
+                throw coding_exception('A custom validator must return a non-empty string or null.');
+            }
         }
 
         $result = $this->config_write($this->name, $seconds);
@@ -4246,6 +4339,7 @@ class admin_setting_bloglevel extends admin_setting_configselect {
 /**
  * Special select - lists on the frontpage - hacky
  *
+ * @deprecated since Totara 12
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_setting_courselist_frontpage extends admin_setting {
@@ -4259,6 +4353,7 @@ class admin_setting_courselist_frontpage extends admin_setting {
      */
     public function __construct($loggedin) {
         global $CFG;
+        debugging(__CLASS__ . 'has been deprecated as it is no longer used.', DEBUG_DEVELOPER);
         require_once($CFG->dirroot.'/course/lib.php');
         $name        = 'frontpage'.($loggedin ? 'loggedin' : '');
         $visiblename = get_string('frontpage'.($loggedin ? 'loggedin' : ''),'admin');
@@ -6652,14 +6747,12 @@ class admin_setting_manageauths extends admin_setting {
 
         //add always enabled plugins first
         $displayname = $displayauths['manual'];
-        $settings = "<a href=\"auth_config.php?auth=manual\">{$txt->settings}</a>";
-        //$settings = "<a href=\"settings.php?section=authsettingmanual\">{$txt->settings}</a>";
+        $settings = "<a href=\"settings.php?section=authsettingmanual\">{$txt->settings}</a>";
         $usercount = $DB->count_records('user', array('auth'=>'manual', 'deleted'=>0));
         $table->data[] = array($displayname, $usercount, '', '', $settings, '', '');
         $displayname = $displayauths['nologin'];
-        $settings = "<a href=\"auth_config.php?auth=nologin\">{$txt->settings}</a>";
         $usercount = $DB->count_records('user', array('auth'=>'nologin', 'deleted'=>0));
-        $table->data[] = array($displayname, $usercount, '', '', $settings, '', '');
+        $table->data[] = array($displayname, $usercount, '', '', '', '', '');
 
 
         // iterate through auth plugins and add to the display table
@@ -6716,7 +6809,7 @@ class admin_setting_manageauths extends admin_setting {
             if (file_exists($CFG->dirroot.'/auth/'.$auth.'/settings.php')) {
                 $settings = "<a href=\"settings.php?section=authsetting$auth\">{$txt->settings}</a>";
             } else {
-                $settings = "<a href=\"auth_config.php?auth=$auth\">{$txt->settings}</a>";
+                $settings = '';
             }
 
             // Uninstall link.
@@ -7065,18 +7158,18 @@ class admin_setting_manageantiviruses extends admin_setting {
                 if ($updowncount > 1) {
                     $updownurl = $baseurl;
                     $updownurl->params(array('action' => 'up', 'antivirus' => $antivirus));
-                    $updownimg = html_writer::img($OUTPUT->pix_url('t/up'), 'up', array('class' => 'iconsmall'));
+                    $updownimg = $OUTPUT->pix_icon('t/up', get_string('moveup'));
                     $updown = html_writer::link($updownurl, $updownimg);
                 } else {
-                    $updown .= html_writer::img($OUTPUT->pix_url('spacer'), '', array('class' => 'iconsmall'));
+                    $updown .= $OUTPUT->pix_icon('spacer', '');
                 }
                 if ($updowncount < $antiviruscount) {
                     $updownurl = $baseurl;
                     $updownurl->params(array('action' => 'down', 'antivirus' => $antivirus));
-                    $updownimg = html_writer::img($OUTPUT->pix_url('t/down'), 'down', array('class' => 'iconsmall'));
+                    $updownimg = $OUTPUT->pix_icon('t/down', get_string('movedown'));
                     $updown = html_writer::link($updownurl, $updownimg);
                 } else {
-                    $updown .= html_writer::img($OUTPUT->pix_url('spacer'), '', array('class' => 'iconsmall'));
+                    $updown .= $OUTPUT->pix_icon('spacer', '');
                 }
                 ++ $updowncount;
             }
@@ -7182,14 +7275,14 @@ class admin_setting_managelicenses extends admin_setting {
 
             if ($value->enabled == 1) {
                 $hideshow = html_writer::link($url.'&action=disable&license='.$value->shortname,
-                    html_writer::tag('img', '', array('src'=>$OUTPUT->pix_url('t/hide'), 'class'=>'iconsmall', 'alt'=>'disable')));
+                    $OUTPUT->pix_icon('t/hide', get_string('disable')));
             } else {
                 $hideshow = html_writer::link($url.'&action=enable&license='.$value->shortname,
-                    html_writer::tag('img', '', array('src'=>$OUTPUT->pix_url('t/show'), 'class'=>'iconsmall', 'alt'=>'enable')));
+                    $OUTPUT->pix_icon('t/show', get_string('enable')));
             }
 
             if ($value->shortname == $CFG->sitedefaultlicense) {
-                $displayname .= ' '.html_writer::tag('img', '', array('src'=>$OUTPUT->pix_url('t/locked'), 'class'=>'iconsmall', 'alt'=>get_string('default'), 'title'=>get_string('default')));
+                $displayname .= ' '.$OUTPUT->pix_icon('t/locked', get_string('default'));
                 $hideshow = '';
             }
 
@@ -7801,7 +7894,10 @@ function admin_externalpage_setup($section, $extrabutton = '', array $extraurlpa
     $PAGE->set_context(null); // hack - set context to something, by default to system context
 
     $site = get_site();
-    require_login();
+
+    // TOTARA: Do not automatically log guest users in. If guests are allowed to access the page they will need to choose to log in
+    // as a guest, or of course log in with a valid account.
+    require_login(null, false);
 
     if (!empty($options['pagelayout'])) {
         // A specific page layout has been requested.
@@ -7839,6 +7935,12 @@ function admin_externalpage_setup($section, $extrabutton = '', array $extraurlpa
 
     if (!$actualurl) {
         $actualurl = $extpage->url;
+        $quickaccessmenuadd = true;
+    } else {
+        // Totara: The logic here is that if this is not the real admin page,
+        // then we would not be allowing bookmarking it by default.
+        // If necessary dev can add it manually later on page using correct page name.
+        $quickaccessmenuadd = false;
     }
 
     $PAGE->set_url($actualurl, $extraurlparams);
@@ -7884,6 +7986,11 @@ function admin_externalpage_setup($section, $extrabutton = '', array $extraurlpa
             $url = new moodle_url($PAGE->url, array('adminedit'=>'1', 'sesskey'=>sesskey()));
         }
         $PAGE->set_button($OUTPUT->single_button($url, $caption, 'get'));
+    }
+
+    // TOTARA: Add the button to add/remove current page to the quick access menu.
+    if ($quickaccessmenuadd and !$extpage->is_hidden()) {
+        \totara_core\quickaccessmenu\helper::add_quickaction_page_button($PAGE, $extpage->name);
     }
 
     $PAGE->set_title("$SITE->shortname: " . implode(": ", $visiblepathtosection));
@@ -8039,6 +8146,7 @@ function admin_write_settings($formdata) {
     $enforcedsettings = \totara_flavour\helper::get_enforced_settings();
 
     $count = 0;
+    $olddata = array();
     foreach ($settings as $fullname=>$setting) {
         $plugin = is_null($setting->plugin) ? 'moodle' : $setting->plugin;
         if (isset($enforcedsettings[$plugin][$setting->name])) {
@@ -8047,6 +8155,7 @@ function admin_write_settings($formdata) {
         }
         /** @var $setting admin_setting */
         $original = $setting->get_setting();
+        $olddata[$fullname] = $original;
         $error = $setting->write_setting($data[$fullname]);
         if ($error !== '') {
             $adminroot->errors[$fullname] = new stdClass();
@@ -8074,6 +8183,19 @@ function admin_write_settings($formdata) {
 
     // now reload all settings - some of them might depend on the changed
     admin_get_root(true);
+
+    //trigger admin settings changed events
+    $event = core\event\admin_settings_changed::create(
+        [
+            'context' => \context_system::instance(),
+            'other' =>
+             [
+                 'olddata' => $olddata
+             ]
+        ]
+    );
+    $event->trigger();
+
     return $count;
 }
 
@@ -10024,9 +10146,13 @@ class admin_setting_configfilepicker extends admin_setting {
         $this->fp_options = $fp_options;
         $this->filecontext = context_system::instance();
 
-        $full_name_args = explode('_',$this->get_full_name());
-        $this->component = $full_name_args[1];
-        $this->filearea = $full_name_args[2];
+        $bits = explode('/', $name);
+        if (count($bits) != 2) {
+            debugging('The name of the admin settings file picker was not in the form {component}/{filearea}');
+            return;
+        }
+        $this->component = $bits[0];
+        $this->filearea = $bits[1];
     }
 
     /**
@@ -10068,7 +10194,10 @@ class admin_setting_configfilepicker extends admin_setting {
             $file = reset($files);
             $link = moodle_url::make_file_url("{$CFG->wwwroot}/pluginfile.php", "/{$contextid}/{$this->component}/{$this->filearea}/{$fileid}/{$file->get_filename()}");
 
-            return ($this->config_write($this->name, $link->out()) ? '' : get_string('errorsetting', 'admin'));
+            // TOTARA: do NOT store the site's domain inside the database, in case the site is moving from this domain to a different
+            // domain. If it is the case, then the default image is pretty screwed up.
+            $a = str_replace($CFG->wwwroot, "", $link->out());
+            return ($this->config_write($this->name, $a) ? '' : get_string('errorsetting', 'admin'));
         } else if (empty($setting)) {
             return ($this->config_write($this->name, $this->defaultsetting) ? '' : get_string('errorsetting', 'admin'));
         } else {
@@ -10093,8 +10222,10 @@ class admin_setting_configfilepicker extends admin_setting {
         $fs = get_file_storage();
 
         $setting = $this->get_setting();
-        $setting = str_replace($CFG->wwwroot, '', $setting, $replaced);
-        if (isloggedin() && $replaced && !empty($setting)) {
+
+        // Taking out $CFG->wwwroot here, otherwise, it will break the filepicker.
+        $setting = str_replace($CFG->wwwroot, "", $setting);
+        if (isloggedin() && !empty($setting)) {
             $itemidargs = explode('/', $setting);
             $itemid = isset($itemidargs[5]) ? $itemidargs[5] : 0;
             $itemname = isset($itemidargs[6]) ? $itemidargs[6] : 0;

@@ -1,4 +1,4 @@
-@block @block_comments
+@block @block_comments @javascript
 Feature: Add a comment to the comments block
   In order to comment on a conversation or a topic
   As a user
@@ -17,24 +17,16 @@ Feature: Add a comment to the comments block
       | teacher1 | C1 | editingteacher |
       | student1 | C1 | student |
     And I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add the "Comments" block
     And I log out
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
 
-  @javascript
-  Scenario: Add a comment with Javascript enabled
+  Scenario: Add a comment
     When I add "I'm a comment from student1" comment to comments block
     Then I should see "I'm a comment from student1"
 
-  Scenario: Add a comment with Javascript disabled
-    When I follow "Show comments"
-    And I add "I'm a comment from student1" comment to comments block
-    Then I should see "I'm a comment from student1"
-
-  @javascript
   Scenario: Test comment block pagination
     When I add "Super test comment 01" comment to comments block
     And I add "Super test comment 02" comment to comments block

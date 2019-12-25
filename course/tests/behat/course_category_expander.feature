@@ -23,13 +23,13 @@ Feature: Find learning course category management
         | c1bc2     | c1bc2     | cat1b    | 1       |
     And I log in as "admin"
     And I set the following administration settings values:
-        | Enhanced catalog | 0 |
+      | catalogtype | moodle |
     And I press "Save changes"
     And I log out
 
   Scenario: Test course expansion as a normal user
     Given I log in as "user1"
-    When I click on "Find Learning" in the totara menu
+    When I click on "Courses" in the totara menu
     Then I should not see "top1"
     And I should not see "top2"
     And I should not see "c1c1"
@@ -39,6 +39,7 @@ Feature: Find learning course category management
     And I should not see "c1bc2"
 
     # Some of these will be hidden
+
     When I click on "Expand all" "link"
     Then I should not see "top1"
     And I should see "top2"

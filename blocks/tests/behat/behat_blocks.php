@@ -24,6 +24,7 @@
  */
 
 // NOTE: no MOODLE_INTERNAL test here, this file may be required by behat before including /config.php.
+use Behat\Mink\Exception\DriverException;
 use Behat\Mink\Exception\ElementNotFoundException as ElementNotFoundException;
 
 require_once(__DIR__ . '/../../../lib/behat/behat_base.php');
@@ -39,22 +40,34 @@ require_once(__DIR__ . '/../../../lib/behat/behat_base.php');
 class behat_blocks extends behat_base {
 
     /**
-     * Adds the selected block. Editing mode must be previously enabled.
+     * Adds the selected block to the left column region. Editing mode must be previously enabled.
      *
      * @Given /^I add the "(?P<block_name_string>(?:[^"]|\\")*)" block$/
      * @param string $blockname
      */
     public function i_add_the_block($blockname) {
-        $this->execute('behat_forms::i_set_the_field_to',
-            array("bui_addblock", $this->escape($blockname))
-        );
+        $this->i_add_the_block_to_region($blockname, 'side-pre');
+    }
 
-        // If we are running without javascript we need to submit the form.
+    /**
+     * Adds the selected block to a given region. Editing mode must be previously enabled.
+     *
+     * @Given /^I add the "(?P<block_name_string>(?:[^"]|\\")*)" block to the "(?P<region_string>(?:[^"]|\\")*)" region$/
+     * @param string $blockname
+     */
+    public function i_add_the_block_to_region($blockname, $regionname) {
         if (!$this->running_javascript()) {
-            $this->execute('behat_general::i_click_on_in_the',
-                array(get_string('go'), "button", "#add_block", "css_element")
-            );
+            throw new DriverException('Adding blocks requires JavaScript.');
         }
+
+        $this->execute(
+            "behat_general::i_click_on_in_the",
+            array('.addBlock--trigger', 'css_element', '#block-region-' . $regionname, 'css_element')
+        );
+        $this->execute(
+            "behat_general::i_click_on",
+            array(".addBlock .popover .addBlockPopover--results_list_item[data-addblockpopover-blocktitle='" . $this->escape($blockname) . "']", "css_element")
+        );
     }
 
     /**
@@ -136,7 +149,7 @@ class behat_blocks extends behat_base {
      * @param string $title
      */
     public function i_should_see_the_block($title) {
-        $this->execute('behat_general::assert_element_contains_text', array($this->escape($title), '.block', 'css_element'));
+        $this->execute('behat_general::should_exist', [ $this->get_block_xpath($title), 'xpath_element' ]);
     }
 
     /**
@@ -146,9 +159,29 @@ class behat_blocks extends behat_base {
      * @param string $title
      */
     public function i_should_not_see_the_block($title) {
-        $xpathliteral = \behat_context_helper::escape($title);
-        $xpath = '//div[contains(concat(\' \', normalize-space(@class), \' \'), \' block \')]//h2[text()[contains(.,'.$xpathliteral.')]]';
-        $this->execute('behat_general::should_not_exist', array($xpath, 'xpath_element'));
+        $this->execute('behat_general::should_not_exist', [ $this->get_block_xpath($title), 'xpath_element' ]);
+    }
+
+    /**
+     * Confirms that I can see a block with the given title in the given region.
+     *
+     * @Given /^I should see the "([^"]*)" block in the "([^"]*)" region$/
+     * @param string $title
+     */
+    public function i_should_see_the_block_in_region($title, $region) {
+        $xpath = '//aside[@id="block-region-' . $region . '"]' . $this->get_block_xpath($title);
+        $this->execute('behat_general::should_exist', [ $xpath, 'xpath_element' ]);
+    }
+
+    /**
+     * Get block xpath commonly needed by methods.
+     *
+     * @param string $title
+     * @return string
+     */
+    private function get_block_xpath(string $title): string {
+        $xpathliteral = behat_context_helper::escape($title);
+        return '//div[contains(concat(\' \', normalize-space(@class), \' \'), \' block \')]//h2[text()[contains(.,' . $xpathliteral . ')]]';
     }
 
     /**
@@ -158,7 +191,10 @@ class behat_blocks extends behat_base {
      * @param string $blockname
      */
     public function the_add_block_selector_should_contain_block($blockname) {
-        $this->execute('behat_forms::the_select_box_should_contain', [get_string('addblock'), $blockname]);
+        $this->execute(
+            'behat_general::should_exist',
+            [ ".addBlockPopover--results_list_item[data-addblockpopover-blocktitle='" . $blockname . "']", "css_element" ]
+        );
     }
 
     /**
@@ -168,6 +204,9 @@ class behat_blocks extends behat_base {
      * @param string $blockname
      */
     public function the_add_block_selector_should_not_contain_block($blockname) {
-        $this->execute('behat_forms::the_select_box_should_not_contain', [get_string('addblock'), $blockname]);
+        $this->execute(
+            'behat_general::should_not_exist',
+            [ ".addBlockPopover--results_list_item[data-addblockpopover-blocktitle='" . $blockname . "']", "css_element" ]
+        );
     }
 }

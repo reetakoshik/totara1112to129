@@ -41,7 +41,7 @@ class certification_tile extends program_tile {
      *
      * @return string
      */
-    public static function get_name() {
+    public static function get_name(): string {
         return get_string('certification_name', 'block_totara_featured_links');
     }
 
@@ -52,7 +52,7 @@ class certification_tile extends program_tile {
      * {@inheritdoc}
      * @return \stdClass
      */
-    public function get_content_form_data() {
+    public function get_content_form_data(): \stdClass {
         $dataobj = parent::get_content_form_data();
         if (!empty($this->get_program())) {
             $dataobj->certification_name = $this->get_program()->fullname;
@@ -68,7 +68,7 @@ class certification_tile extends program_tile {
      *
      * @param \stdClass $data
      */
-    public function save_content_tile ($data) {
+    public function save_content_tile($data): void {
         if (isset($data->certification_name_id)) {
             $this->data->programid = $data->certification_name_id;
         }
@@ -79,7 +79,7 @@ class certification_tile extends program_tile {
      * {@inheritdoc}
      * @return array
      */
-    public function get_accessibility_text() {
+    public function get_accessibility_text(): array {
         return [
             'sr-only' => get_string(
                 'certification_sr-only',
@@ -96,7 +96,7 @@ class certification_tile extends program_tile {
      *
      * @return string of text shown if a tile is hidden but being viewed in edit mode.
      */
-    protected function get_hidden_text() {
+    protected function get_hidden_text(): string {
         if (empty($this->get_program())) {
             return get_string('certification_has_been_deleted', 'block_totara_featured_links');
         } else {

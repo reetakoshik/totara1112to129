@@ -1,4 +1,4 @@
-@block @block_activity_results
+@block @block_activity_results @javascript
 Feature: The activity results block can have administrator set defaults
   In order to be customize the activity results block
   As an admin
@@ -24,8 +24,7 @@ Feature: The activity results block can have administrator set defaults
       | config_gradeformat | 2 | block_activity_results |
       | config_nameformat  | 2 | block_activity_results |
     And I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Assignment" to section "1" and I fill the form with:
       | Assignment name | Test assignment |
       | Description | Offline text |
@@ -48,8 +47,7 @@ Feature: The activity results block can have administrator set defaults
       | config_showworst        | 0 | block_activity_results |
       | config_showworst_locked | 1 | block_activity_results |
     And I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Assignment" to section "1" and I fill the form with:
       | Assignment name | Test assignment |
       | Description | Offline text |

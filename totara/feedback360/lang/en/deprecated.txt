@@ -1,7 +1,0 @@
-deletefeedback360questions,totara_feedback360
-deletefeedback360assignments,totara_feedback360
-feedback360selectform,totara_feedback360
-feedback360selectform_help,totara_feedback360
-newrequest,totara_feedback360
-noavailableforms,totara_feedback360
-nofeedback360requested,totara_feedback360

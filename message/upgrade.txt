@@ -1,7 +1,7 @@
 This files describes API changes in /message/ messaging system,
 information provided here is intended especially for developers.
 
-=== 11.3 ===
+=== 12 ===
 
 * String helpers are no longer used in the following templates, string data is passed via context data:
 ** message/templates/message_area_context.mustache

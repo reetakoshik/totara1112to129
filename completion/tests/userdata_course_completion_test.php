@@ -37,7 +37,6 @@ class core_completion_userdata_course_completion_testcase extends advanced_testc
      * @throws dml_exception
      */
     public function test_with_no_data() {
-        $this->resetAfterTest(true);
         global $DB;
 
         $user = $this->getDataGenerator()->create_user();
@@ -96,7 +95,6 @@ class core_completion_userdata_course_completion_testcase extends advanced_testc
      * @param $category
      * @param array $users
      * @return stdClass
-     * @throws coding_exception
      */
     private function create_course_and_completions($category, array $users) {
         /* @var mod_choice_generator $choicegenerator */
@@ -185,14 +183,7 @@ class core_completion_userdata_course_completion_testcase extends advanced_testc
         $this->assertEquals($expected, $count);
     }
 
-    /**
-     * @return array
-     * @throws coding_exception
-     * @throws dml_exception
-     */
     public function test_export_system_context() {
-        $this->resetAfterTest(false);
-
         $testdata = $this->create_completion_data();
 
         $user1 = $testdata['user1'];
@@ -213,18 +204,10 @@ class core_completion_userdata_course_completion_testcase extends advanced_testc
         $this->assert_count_with_userid(12, $export->data['course_completion_log'], $user1->id);
         $this->assertCount(6, $export->data['block_totara_stats']);
         $this->assert_count_with_userid(6, $export->data['block_totara_stats'], $user1->id);
-
-        return $testdata;
     }
 
-    /**
-     * @param $testdata
-     * @throws coding_exception
-     * @throws dml_exception
-     * @depends test_export_system_context
-     */
-    public function test_count_system_context($testdata) {
-        $this->resetAfterTest(false);
+    public function test_count_system_context() {
+        $testdata = $this->create_completion_data();
 
         $target_user = new \totara_userdata\userdata\target_user($testdata['user1']);
         $count = \core_completion\userdata\course_completion::execute_count($target_user, context_system::instance());
@@ -234,15 +217,10 @@ class core_completion_userdata_course_completion_testcase extends advanced_testc
         return $testdata;
     }
 
-    /**
-     * @param $testdata
-     * @throws coding_exception
-     * @throws dml_exception
-     * @depends test_count_system_context
-     */
-    public function test_purge_system_context($testdata) {
-        $this->resetAfterTest(true);
+    public function test_purge_system_context() {
         global $DB;
+
+        $testdata = $this->create_completion_data();
 
         $user1 = $testdata['user1'];
         $user2 = $testdata['user2'];
@@ -285,13 +263,7 @@ class core_completion_userdata_course_completion_testcase extends advanced_testc
         $this->assertEquals(0, $count);
     }
 
-    /**
-     * @return array
-     * @throws coding_exception
-     */
     public function test_export_coursecat_context() {
-        $this->resetAfterTest(false);
-
         $testdata = $this->create_completion_data();
 
         $user1 = $testdata['user1'];
@@ -310,18 +282,10 @@ class core_completion_userdata_course_completion_testcase extends advanced_testc
         $this->assert_count_with_userid(8, $export->data['course_completion_log'], $user1->id);
         $this->assertCount(4, $export->data['block_totara_stats']);
         $this->assert_count_with_userid(4, $export->data['block_totara_stats'], $user1->id);
-
-        return $testdata;
     }
 
-    /**
-     * @param $testdata
-     * @throws coding_exception
-     * @throws dml_exception
-     * @depends test_export_coursecat_context
-     */
-    public function test_count_coursecat_context($testdata) {
-        $this->resetAfterTest(false);
+    public function test_count_coursecat_context() {
+        $testdata = $this->create_completion_data();
 
         $target_user = new \totara_userdata\userdata\target_user($testdata['user1']);
         $count = \core_completion\userdata\course_completion::execute_count($target_user, context_coursecat::instance($testdata['category2']->id));
@@ -331,15 +295,10 @@ class core_completion_userdata_course_completion_testcase extends advanced_testc
         return $testdata;
     }
 
-    /**
-     * @param $testdata
-     * @throws coding_exception
-     * @throws dml_exception
-     * @depends test_count_coursecat_context
-     */
-    public function test_purge_coursecat_context($testdata) {
-        $this->resetAfterTest(true);
+    public function test_purge_coursecat_context() {
         global $DB;
+
+        $testdata = $this->create_completion_data();
 
         $user1 = $testdata['user1'];
         $user2 = $testdata['user2'];
@@ -396,13 +355,7 @@ class core_completion_userdata_course_completion_testcase extends advanced_testc
         $this->assertEquals(0, $count);
     }
 
-    /**
-     * @return array
-     * @throws coding_exception
-     */
     public function test_export_course_context() {
-        $this->resetAfterTest(false);
-
         $testdata = $this->create_completion_data();
 
         $user1 = $testdata['user1'];
@@ -422,18 +375,10 @@ class core_completion_userdata_course_completion_testcase extends advanced_testc
         $this->assert_count_with_userid(4, $export->data['course_completion_log'], $user1->id);
         $this->assertCount(2, $export->data['block_totara_stats']);
         $this->assert_count_with_userid(2, $export->data['block_totara_stats'], $user1->id);
-
-        return $testdata;
     }
 
-    /**
-     * @param $testdata
-     * @throws coding_exception
-     * @throws dml_exception
-     * @depends test_export_course_context
-     */
-    public function test_count_course_context($testdata) {
-        $this->resetAfterTest(false);
+    public function test_count_course_context() {
+        $testdata = $this->create_completion_data();
 
         $target_user = new \totara_userdata\userdata\target_user($testdata['user1']);
         $count = \core_completion\userdata\course_completion::execute_count($target_user, context_course::instance($testdata['course3']->id));
@@ -443,15 +388,10 @@ class core_completion_userdata_course_completion_testcase extends advanced_testc
         return $testdata;
     }
 
-    /**
-     * @param $testdata
-     * @throws coding_exception
-     * @throws dml_exception
-     * @depends test_count_course_context
-     */
-    public function test_purge_course_context($testdata) {
-        $this->resetAfterTest(true);
+    public function test_purge_course_context() {
         global $DB;
+
+        $testdata = $this->create_completion_data();
 
         $user1 = $testdata['user1'];
         $user2 = $testdata['user2'];
@@ -511,12 +451,8 @@ class core_completion_userdata_course_completion_testcase extends advanced_testc
      * Ensure that purging occurs without error when a user has been deleted.
      *
      * We don't need to do this for each context.
-     *
-     * @throws coding_exception
-     * @throws dml_exception
      */
     public function test_purge_deleted_user() {
-        $this->resetAfterTest(true);
         global $DB;
 
         $testdata = $this->create_completion_data();

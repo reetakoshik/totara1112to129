@@ -24,73 +24,201 @@
 @font-size-h4: ceil((14px * 1.25));
 @block-totara-featured-links-title-font-weight: bold;
 
+@indicator-arrow-size: 28px;
+
 // Default Tile.
-.block-totara-featured-links-layout > div .block-totara-featured-links-content {
-    position: absolute;
+.block-totara-featured-links-layout {
+    & > div .block-totara-featured-links-content {
+        position: absolute;
 
-    width: 100%;
-    box-sizing: border-box;
-    max-height: 100%;
+        width: 100%;
+        left: 0;
+        box-sizing: border-box;
+        max-height: 100%;
 
-    overflow: hidden;
+        overflow: hidden;
 
-    background: rgba(0, 0, 0, .5);
-    color: @block-totara-featured-links-heading-color;
+        background: rgba(0, 0, 0, .5);
+        color: @block-totara-featured-links-heading-color;
 
-    &.block-totara-featured-links-content-top {
-        top: 0;
-        bottom: auto;
+        &.block-totara-featured-links-content-top {
+            top: 0;
+            bottom: auto;
+        }
+        &.block-totara-featured-links-content-bottom {
+            top: auto;
+            bottom: 0;
+        }
+
+        h3 {
+            font-size: @font-size-h4;
+            margin-bottom: @padding-vertical;
+            font-weight: @block-totara-featured-links-title-font-weight;
+        }
+        p {
+            margin-bottom: @padding-vertical;
+        }
+        padding: @padding-small-vertical;
     }
-    &.block-totara-featured-links-content-bottom {
-        top: auto;
-        bottom: 0;
-    }
-
-    h3 {
-        font-size: @font-size-h4;
-        margin-bottom: @padding-vertical;
-        font-weight: @block-totara-featured-links-title-font-weight;
-    }
-    p {
-        margin-bottom: @padding-vertical;
-    }
-    padding: @padding-small-vertical;
-
 }
 
 // Gallery tile.
-.block-totara-featured-links-gallery-images {
+.block-totara-featured-links-gallery-subtiles {
     position: absolute;
     top: 0;
-    left: 0;
+    right: 0;
     width: 100%;
     height: 100%;
     overflow: hidden;
-    text-align: center;
-    div {
-        z-index: 1;
-        width: 100%;
-        height: 100%;
-        background-size: cover;
-        background-position: 50%;
-        position: absolute;
-        top: 0;
-        left: 0;
+    background-color: #666666;
 
-        &:before {
-            content: '';
-            display: inline-block;
-            height: 100%;
-            vertical-align: middle;
+    div.block-totara-featured-links-tile {
+        margin: 0;
+        z-index: 1;
+        height: 100%;
+        &.block-totara-featured-links-tile-large,
+        &.block-totara-featured-links-tile-medium,
+        &.block-totara-featured-links-tile-small {
+            width: 100%;
         }
     }
-}
 
-.block-totara-featured-links-content-gallery {
-    z-index: 3;
+    &.slick-slider {
+        position: absolute;
+        height: 100%;
+    }
+    .slick-list {
+        height: 100%;
+        .slick-track {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+        }
+    }
+    .slick-arrow {
+        z-index: 4;
+        height: 100%;
+        width: 40px;
+        color: #ffffff;
+
+        &:before {
+            opacity: 0.5;
+            font-family: inherit;
+            font-size: @indicator-arrow-size;
+            color: #ffffff;
+
+            position: absolute;
+            top: calc(~"50% - " @indicator-arrow-size / 2);
+        }
+
+        &:hover:before {
+            opacity: 1;
+        }
+
+        &.slick-prev {
+            left: 0;
+            &:hover {
+                background: linear-gradient(to right,
+                    hsla(0, 0%, 0%, 0.5) 0%,
+                    hsla(0, 0%, 0%, 0.3654) 19%,
+                    hsla(0, 0%, 0%, 0.27) 34%,
+                    hsla(0, 0%, 0%, 0.191) 47%,
+                    hsla(0, 0%, 0%, 0.139) 56.5%,
+                    hsla(0, 0%, 0%, 0.099) 65%,
+                    hsla(0, 0%, 0%, 0.066) 73%,
+                    hsla(0, 0%, 0%, 0.039) 80.2%,
+                    hsla(0, 0%, 0%, 0.021) 86.1%,
+                    hsla(0, 0%, 0%, 0.0105) 91%,
+                    hsla(0, 0%, 0%, 0.004) 95.2%,
+                    hsla(0, 0%, 0%, 0.001) 98.2%,
+                    hsla(0, 0%, 0%, 0) 100%
+                );
+            }
+            &:before {
+                left: 8px;
+            }
+            &:active {
+                color: #e5e5e5;
+            }
+        }
+
+        &.slick-next {
+            right: 0;
+            &:hover {
+                background: linear-gradient(to left,
+                    hsla(0, 0%, 0%, 0.5) 0%,
+                    hsla(0, 0%, 0%, 0.3654) 19%,
+                    hsla(0, 0%, 0%, 0.27) 34%,
+                    hsla(0, 0%, 0%, 0.191) 47%,
+                    hsla(0, 0%, 0%, 0.139) 56.5%,
+                    hsla(0, 0%, 0%, 0.099) 65%,
+                    hsla(0, 0%, 0%, 0.066) 73%,
+                    hsla(0, 0%, 0%, 0.039) 80.2%,
+                    hsla(0, 0%, 0%, 0.021) 86.1%,
+                    hsla(0, 0%, 0%, 0.0105) 91%,
+                    hsla(0, 0%, 0%, 0.004) 95.2%,
+                    hsla(0, 0%, 0%, 0.001) 98.2%,
+                    hsla(0, 0%, 0%, 0) 100%
+                );
+            }
+            &:before {
+                right: 8px;
+            }
+            &:active {
+                color: #e5e5e5;
+            }
+        }
+    }
+    .slick-list {
+        z-index: 2;
+    }
+    .slick-dots {
+        bottom: 0;
+        z-index: 5;
+        margin: 2px;
+        padding-bottom: 8px;
+        pointer-events: none;
+
+        button {
+            opacity: 0.8;
+            width: 8px;
+            height: 8px;
+            padding: 0;
+            background-color: #ffffff;
+            border-radius: 4px;
+            border: 1px @brand-primary solid;
+            &:before {
+                content: "";
+                width: 8px;
+                height: 8px;
+            }
+        }
+
+        li {
+            width: unset;
+            height: unset;
+            margin: 0;
+            padding: 8px 4px;
+            pointer-events: initial;
+        }
+        li:last-child {
+            margin-right: 0;
+        }
+
+        li.slick-active button {
+            background-color: @brand-primary;
+            border-color: #ffffff;
+        }
+    }
 }
 
 // Course tile
 .block-totara-featured-links-content.block-totara-featured-links-course .progress {
     margin-bottom: 0;
+}
+
+// Edit subtiles for
+.block-totara-featured-links-finish-button {
+    padding-top: 32px;
 }

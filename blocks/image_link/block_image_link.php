@@ -10,9 +10,9 @@ class block_image_link extends block_base
         return true;
     }
 
-    public function hide_header() {
-        return $this->imageUrl() ? true : false;
-    }
+    // public function hide_header() {
+    //     return $this->imageUrl() ? true : false;
+    // }
 
     public function get_content() {
         if ($this->content !== null) {
@@ -33,23 +33,33 @@ class block_image_link extends block_base
         $headerStyle = $color ? "style=\"background-color: $color; color: white;\"" : '';
         $topColor = $color ? $color : '#f3f3f3';
         $bodyStyle = $imageUrl ? "style=\"border-top: 3px solid $topColor; background-image: url($imageUrl); \"" : '';
+        if($headerStyle){
+            $id = '#inst'.$this->instance->id;
+     
+            echo '<style type="text/css">
+              '.$id.' .header{
+             background-color:'.$color.'; } 
+            </style>';
+
+         }
 
         $this->content =  new stdClass;
 
         if ($imageUrl) {
             $this->content->text = 
-                "<div class=\"header $headerClass\" $headerStyle>".
+                "
+                <div $bodyStyle class=\"image\">
+                    <a href=\"$link\" $target></a>
+                </div>";
+        }
+        /*<div class=\"header $headerClass\" $headerStyle>".
                     "<h2>
                         <a href=\"$link\" $target>
                             $caption
                         </a>
                     </h2>
                 </div>
-                <div $bodyStyle class=\"image\">
-                    <a href=\"$link\" $target></a>
-                </div>";
-        }
-        
+        */
         return $this->content;
     }
 

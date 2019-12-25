@@ -29,8 +29,6 @@ require_once("{$CFG->dirroot}/lib/modinfolib.php");
 
 /**
  * Test suite of checking the compabilities of the configs within facetoface
- *
- * Class facetoface_cm_info_view_test
  * @see facetoface_cm_info_view
  */
 class mod_facetoface_cm_info_view_testcase extends advanced_testcase {

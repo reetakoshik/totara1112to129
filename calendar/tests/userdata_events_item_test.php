@@ -169,7 +169,8 @@ class core_calendar_userdata_events_testcase extends advanced_testcase {
         $sessiondate->sessiontimezone = 'Pacific/Auckland';
         $sessionid = $facetofacegenerator->add_session(['facetoface' => $facetoface->id, 'sessiondates' => [$sessiondate]]);
         $sessiondata = facetoface_get_session($sessionid);
-        facetoface_add_session_to_calendar($sessiondata, $facetoface, 'user', $data->user1->id, 'session');
+        $seminarevent = new \mod_facetoface\seminar_event($sessionid);
+        \mod_facetoface\calendar::add_seminar_event($seminarevent, 'user', $data->user1->id, 'session');
         $extradata->sessions[] = $sessiondata;
 
         $sessiondate = new stdClass();
@@ -178,7 +179,8 @@ class core_calendar_userdata_events_testcase extends advanced_testcase {
         $sessiondate->sessiontimezone = 'Pacific/Auckland';
         $sessionid = $facetofacegenerator->add_session(['facetoface' => $facetoface->id, 'sessiondates' => [$sessiondate]]);
         $sessiondata = facetoface_get_session($sessionid);
-        facetoface_add_session_to_calendar($sessiondata, $facetoface, 'user', $data->user1->id, 'session');
+        $seminarevent = new \mod_facetoface\seminar_event($sessionid);
+        \mod_facetoface\calendar::add_seminar_event($seminarevent, 'user', $data->user1->id, 'session');
         $extradata->sessions[] = $sessiondata;
 
         return $extradata;

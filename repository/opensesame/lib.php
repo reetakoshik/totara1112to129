@@ -56,7 +56,7 @@ class repository_opensesame extends repository {
         );
 
         $bundles = $DB->get_records('repository_opensesame_bdls', array(), 'name ASC');
-        $foldericon = $OUTPUT->pix_url(file_folder_icon(90))->out(false);
+        $foldericon = $OUTPUT->image_url(file_folder_icon(90))->out(false);
 
         if ($path === '' or empty($bundles[$path])) {
             foreach ($bundles as $bundle) {
@@ -93,8 +93,8 @@ class repository_opensesame extends repository {
           ORDER BY p.title ASC";
         $packages = $DB->get_records_sql($sql, array('bundleid' => $path));
 
-        $scormicon = $OUTPUT->pix_url('icon', 'mod_scorm')->out(false);
-        $osicon = $OUTPUT->pix_url('icon', 'repository_opensesame')->out(false);
+        $scormicon = $OUTPUT->image_url('icon', 'mod_scorm')->out(false);
+        $osicon = $OUTPUT->image_url('icon', 'repository_opensesame')->out(false);
 
         foreach ($packages as $package) {
             $file = $fs->get_file($syscontext->id, 'repository_opensesame', 'packages', $package->id, '/', $package->zipfilename);

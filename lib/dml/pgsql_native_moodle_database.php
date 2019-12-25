@@ -369,6 +369,12 @@ class pgsql_native_moodle_database extends moodle_database {
                 if ($matches[5] === 'id') {
                     continue;
                 }
+                // Totara: Full text search has a special index format.
+                $fulltextsearch = false;
+                if (strpos($matches[5], 'to_tsvector') === 0) {
+                    $matches[5] = preg_replace('/^to_tsvector\(\'.*\'::regconfig, /', '', $matches[5]);
+                    $fulltextsearch = true;
+                }
                 $columns = explode(',', $matches[5]);
                 foreach ($columns as $k=>$column) {
                     $column = trim($column);
@@ -379,7 +385,7 @@ class pgsql_native_moodle_database extends moodle_database {
                     $columns[$k] = $this->trim_quotes($column);
                 }
                 $indexes[$row['indexname']] = array('unique'=>!empty($matches[1]),
-                                              'columns'=>$columns);
+                                              'columns'=>$columns, 'fulltextsearch'=>$fulltextsearch);
             }
             pg_free_result($result);
         }
@@ -1246,7 +1252,11 @@ class pgsql_native_moodle_database extends moodle_database {
             debugging('Potential SQL injection detected, sql_like() expects bound parameters (? or :named)');
         }
 
-        // postgresql does not support accent insensitive text comparisons, sorry
+        if (!$this->is_fts_accent_sensitive() && !$accentsensitive) {
+            $fieldname = "unaccent({$fieldname})";
+            $param = "unaccent({$param})";
+        }
+
         if ($casesensitive) {
             $LIKE = $notlike ? 'NOT LIKE' : 'LIKE';
         } else {
@@ -1345,6 +1355,26 @@ class pgsql_native_moodle_database extends moodle_database {
 
     public function sql_regex($positivematch=true) {
         return $positivematch ? '~*' : '!~*';
+    }
+
+    /**
+     * Returns the driver specific syntax for the beginning of a word boundary.
+     *
+     * @since Totara 12.4
+     * @return string or empty if not supported
+     */
+    public function sql_regex_word_boundary_start(): string {
+        return '[[:<:]]';
+    }
+
+    /**
+     * Returns the driver specific syntax for the end of a word boundary.
+     *
+     * @since Totara 12.4
+     * @return string or empty if not supported
+     */
+    public function sql_regex_word_boundary_end(): string {
+        return '[[:>:]]';
     }
 
     /**
@@ -1551,5 +1581,94 @@ class pgsql_native_moodle_database extends moodle_database {
         $count = $recordset->get_count_without_limits();
 
         return $recordset;
+    }
+
+    /**
+     * Build a natural language search subquery using database specific search functions.
+     *
+     * @since Totara 12
+     *
+     * @param string $table        database table name
+     * @param array  $searchfields ['field_name'=>weight, ...] eg: ['high'=>3, 'medium'=>2, 'low'=>1]
+     * @param string $searchtext   natural language search text
+     * @return array [sql, params[]]
+     */
+    protected function build_fts_subquery(string $table, array $searchfields, string $searchtext): array {
+        $language = $this->get_ftslanguage();
+        $paramname = $this->get_unique_param('fts');
+
+        $accentsensitive = $this->is_fts_accent_sensitive();
+
+        if (preg_match('/^\s*"[^"]+"\s*$/', $searchtext)) {
+            // One exact phrase search.
+            $searchtext = trim($searchtext);
+            $searchtext = trim($searchtext, '"');
+            $serverinfo = $this->get_server_info();
+            if (version_compare($serverinfo['version'], '9.6', '<')) {
+                // Old PostgreSQL version, bad luck, the results will be less accurate.
+                $q = "plainto_tsquery('{$language}',"
+                    . ($accentsensitive ? ":{$paramname}" : "unaccent(:{$paramname})") . ")";
+            } else {
+                $q = "phraseto_tsquery('{$language}',"
+                    . ($accentsensitive ? ":{$paramname}" : "unaccent(:{$paramname})") . ")";
+            }
+        } else if ($this->get_fts_mode($searchtext) === self::SEARCH_MODE_BOOLEAN) {
+            // Using 'simple' here, because sometimes the search text does not mean anything for specific language.
+            $language = 'simple';
+            $q = "to_tsquery('{$language}', "
+                . ($accentsensitive ? ":{$paramname}" : "unaccent(:{$paramname})") . ")";
+            $searchtext = str_replace('*', ':*', $searchtext);
+        } else {
+            $q = "plainto_tsquery('{$language}',"
+                . ($accentsensitive ? ":{$paramname}" : "unaccent(:{$paramname})") . ")";
+        }
+
+        $score = array();
+        $condition = array();
+        foreach ($searchfields as $field => $weight) {
+            if (!$accentsensitive) {
+                $field = "unaccent({$field})";
+            }
+            $score[] = "COALESCE(ts_rank(to_tsvector('{$language}',{$field}),query),0)*{$weight}";
+            $condition[] = "query @@ to_tsvector('{$language}',{$field})";
+        }
+
+        $scoresum = implode(' + ', $score);
+        $where = implode(' OR ', $condition);
+        $sql = "SELECT basesearch.id, {$scoresum} AS score
+                  FROM {{$table}} basesearch, {$q} query
+                 WHERE {$where}";
+
+        return array("({$sql})", array($paramname => $searchtext));
+    }
+
+    /**
+     * Returns false as PgSQL testing showed that for the queries tested 2 queries was faster than a counted recordset.
+     *
+     * Overridden despite the value matching the default as we know based upon performance testing that false is the correct result.
+     * For results on performance testing of paginated results see parent class.
+     *
+     * @since Totara 12.4
+     * @return bool
+     */
+    public function recommends_counted_recordset(): bool {
+        return false;
+    }
+
+    /**
+     * Check if accent sensitivity is currently active or not.
+     *
+     * This function's name contains 'fts' which indicates that it is part of FTS functionality although
+     * it is not specifically related to FTS as UNACCENT is a DB wide function. The reason for 'fts' in
+     * the name is because in other databases it is specifically used for FTS queries and only in PGSQL
+     * can UNACCENT be used in normal queries as well to flatten accents.
+     *
+     * @return bool
+     */
+    public function is_fts_accent_sensitive(): bool {
+        $sql = "SELECT COUNT(*) FROM pg_extension WHERE extname = 'unaccent'";
+
+        // If extension is not created then it means accent sensitivity is on.
+        return empty($this->get_field_sql($sql));
     }
 }

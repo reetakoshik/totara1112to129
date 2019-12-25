@@ -111,7 +111,9 @@ require_login();
 $PAGE->set_context($context);
 
 $reportid = required_param('reportid', PARAM_INT);
-$report = new reportbuilder($reportid);
+
+$config = (new rb_config())->set_nocache(true);
+$report = reportbuilder::create($reportid, $config, false); // No access control for managing of reports here.
 
 $capability = $report->embedded ? 'totara/reportbuilder:manageembeddedreports' : 'totara/reportbuilder:managereports';
 require_capability($capability, context_system::instance());

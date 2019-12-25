@@ -29,11 +29,6 @@ defined('MOODLE_INTERNAL') || die();
 final class rb_source_userdata_export_types extends rb_base_source {
     use \totara_userdata\rb\source\export_type_trait;
 
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
-    public $cacheable;
-
     public function __construct() {
         $this->usedcomponents[] = 'totara_userdata';
         $this->base = '{totara_userdata_export_type}';

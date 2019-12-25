@@ -41,9 +41,24 @@ Feature: Test audience with organisation type menu field.
       | Dyn1       | A1       | 2          |
 
   @javascript
+  Scenario: Text organisation with custom menu field empty validation.
+    Given I log in as "admin"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
+    And I follow "Dyn1"
+    And I switch to "Rule sets" tab
+    And I set the field "addrulesetmenu" to "Organisation type menu"
+    And I click on "Save" "button" in the "Add rule" "totaradialogue"
+    Then I should see "Please select one or more options" in the "Add rule" "totaradialogue"
+    # The dialog should remain open, so attempt to set a value and save again.
+    When I set the field "equal" to "Equal to"
+    And I set the field "listofvalues[]" to "IT"
+    And I click on "Save" "button" in the "Add rule" "totaradialogue"
+    Then I should see "Audience rules changed"
+
+  @javascript
   Scenario: Test organisation with custom menu field and dynamic audience with equals rule.
     Given I log in as "admin"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Dyn1"
     And I switch to "Rule sets" tab
     Then I set the field "addrulesetmenu" to "Organisation type menu"
@@ -60,7 +75,7 @@ Feature: Test audience with organisation type menu field.
   @javascript
   Scenario: Test organisation with custom menu field and dynamic audience with not equals rule.
     Given I log in as "admin"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Dyn1"
     And I switch to "Rule sets" tab
     Then I set the field "addrulesetmenu" to "Organisation type menu"

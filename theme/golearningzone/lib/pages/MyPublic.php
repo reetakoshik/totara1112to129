@@ -9,7 +9,7 @@ class MyPublic extends Base
     use ThemeTrait;
 
     public function render()
-    {
+    {   
         $renderer = $this->renderer;
         $template = 'theme_golearningzone/my_public';
 

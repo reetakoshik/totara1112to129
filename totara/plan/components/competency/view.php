@@ -59,7 +59,7 @@ $systemcontext = context_system::instance();
 $PAGE->set_context($systemcontext);
 $PAGE->set_url('/totara/plan/components/competency/view.php', array('id' => $id, 'itemid' => $caid));
 $PAGE->set_pagelayout('report');
-$PAGE->set_totara_menu_selected('learningplans');
+$PAGE->set_totara_menu_selected('\totara_plan\totara\menu\learningplans');
 
 $plancompleted = $plan->status == DP_PLAN_STATUS_COMPLETE;
 /** @var dp_competency_component $component */

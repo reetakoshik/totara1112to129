@@ -498,8 +498,7 @@ function feedback_print_recent_mod_activity($activity, $courseid, $detail, $modn
     if ($detail) {
         $modname = $modnames[$activity->type];
         echo '<div class="title">';
-        echo "<img src=\"" . $OUTPUT->pix_url('icon', $activity->type) . "\" ".
-             "class=\"icon\" alt=\"$modname\" />";
+        echo $OUTPUT->pix_icon('icon', $modname, $activity->type);
         echo "<a href=\"$CFG->wwwroot/mod/feedback/view.php?id={$activity->cmid}\">{$activity->name}</a>";
         echo '</div>';
     }
@@ -1012,13 +1011,15 @@ function feedback_check_is_switchrole() {
  * @param string $sort
  * @param int $startpage
  * @param int $pagecount
- * @return object the userrecords
+ * @param bool $includestatus to return if the user started or not the feedback among the complete user record
+ * @return array array of user ids or user objects when $includestatus set to true
  */
 function feedback_get_incomplete_users(cm_info $cm,
                                        $group = false,
                                        $sort = '',
                                        $startpage = false,
-                                       $pagecount = false) {
+                                       $pagecount = false,
+                                       $includestatus = false) {
 
     global $DB;
 
@@ -1026,7 +1027,8 @@ function feedback_get_incomplete_users(cm_info $cm,
 
     //first get all user who can complete this feedback
     $cap = 'mod/feedback:complete';
-    $fields = 'u.id, u.username';
+    $allnames = get_all_user_name_fields(true, 'u');
+    $fields = 'u.id, ' . $allnames . ', u.picture, u.email, u.imagealt';
     if (!$allusers = get_users_by_capability($context,
                                             $cap,
                                             $fields,
@@ -1040,25 +1042,35 @@ function feedback_get_incomplete_users(cm_info $cm,
     }
     // Filter users that are not in the correct group/grouping.
     $info = new \core_availability\info_module($cm);
-    $allusers = $info->filter_user_list($allusers);
+    $allusersrecords = $info->filter_user_list($allusers);
 
-    $allusers = array_keys($allusers);
+    $allusers = array_keys($allusersrecords);
 
     //now get all completeds
     $params = array('feedback'=>$cm->instance);
-    if (!$completedusers = $DB->get_records_menu('feedback_completed', $params, '', 'id, userid')) {
-        return $allusers;
+    if ($completedusers = $DB->get_records_menu('feedback_completed', $params, '', 'id, userid')) {
+        // Now strike all completedusers from allusers.
+        $allusers = array_diff($allusers, $completedusers);
     }
-
-    //now strike all completedusers from allusers
-    $allusers = array_diff($allusers, $completedusers);
 
     //for paging I use array_slice()
     if ($startpage !== false AND $pagecount !== false) {
         $allusers = array_slice($allusers, $startpage, $pagecount);
     }
 
-    return $allusers;
+    // Check if we should return the full users objects.
+    if ($includestatus) {
+        $userrecords = [];
+        $startedusers = $DB->get_records_menu('feedback_completedtmp', ['feedback' => $cm->instance], '', 'id, userid');
+        $startedusers = array_flip($startedusers);
+        foreach ($allusers as $userid) {
+            $allusersrecords[$userid]->feedbackstarted = isset($startedusers[$userid]);
+            $userrecords[] = $allusersrecords[$userid];
+        }
+        return $userrecords;
+    } else {    // Return just user ids.
+        return $allusers;
+    }
 }
 
 /**
@@ -1508,6 +1520,7 @@ function feedback_get_template_list($course, $onlyownorpublic = '') {
  */
 function feedback_get_item_class($typ) {
     global $CFG;
+    require_once($CFG->dirroot.'/mod/feedback/item/feedback_item_class.php');
 
     //get the class of item-typ
     $itemclass = 'feedback_item_'.$typ;
@@ -3587,4 +3600,68 @@ function feedback_archive_display_list($archives, $params) {
         }
     }
     $table->print_html();
+}
+
+/**
+ * Check if the module has any update that affects the current user since a given time.
+ *
+ * @param  cm_info $cm course module data
+ * @param  int $from the time to check updates from
+ * @param  array $filter if we need to check only specific updates
+ * @return stdClass an object with the different type of areas indicating if they were updated or not
+ * @since Moodle 3.3
+ */
+function feedback_check_updates_since(cm_info $cm, $from, $filter = array()) {
+    global $DB, $USER, $CFG;
+
+    $updates = course_check_module_updates_since($cm, $from, array(), $filter);
+
+    // Check for new attempts.
+    $updates->attemptsfinished = (object) array('updated' => false);
+    $updates->attemptsunfinished = (object) array('updated' => false);
+    $select = 'feedback = ? AND userid = ? AND timemodified > ?';
+    $params = array($cm->instance, $USER->id, $from);
+
+    $attemptsfinished = $DB->get_records_select('feedback_completed', $select, $params, '', 'id');
+    if (!empty($attemptsfinished)) {
+        $updates->attemptsfinished->updated = true;
+        $updates->attemptsfinished->itemids = array_keys($attemptsfinished);
+    }
+    $attemptsunfinished = $DB->get_records_select('feedback_completedtmp', $select, $params, '', 'id');
+    if (!empty($attemptsunfinished)) {
+        $updates->attemptsunfinished->updated = true;
+        $updates->attemptsunfinished->itemids = array_keys($attemptsunfinished);
+    }
+
+    // Now, teachers should see other students updates.
+    if (has_capability('mod/feedback:viewreports', $cm->context)) {
+        $select = 'feedback = ? AND timemodified > ?';
+        $params = array($cm->instance, $from);
+
+        if (groups_get_activity_groupmode($cm) == SEPARATEGROUPS) {
+            $groupusers = array_keys(groups_get_activity_shared_group_members($cm));
+            if (empty($groupusers)) {
+                return $updates;
+            }
+            list($insql, $inparams) = $DB->get_in_or_equal($groupusers);
+            $select .= ' AND userid ' . $insql;
+            $params = array_merge($params, $inparams);
+        }
+
+        $updates->userattemptsfinished = (object) array('updated' => false);
+        $attemptsfinished = $DB->get_records_select('feedback_completed', $select, $params, '', 'id');
+        if (!empty($attemptsfinished)) {
+            $updates->userattemptsfinished->updated = true;
+            $updates->userattemptsfinished->itemids = array_keys($attemptsfinished);
+        }
+
+        $updates->userattemptsunfinished = (object) array('updated' => false);
+        $attemptsunfinished = $DB->get_records_select('feedback_completedtmp', $select, $params, '', 'id');
+        if (!empty($attemptsunfinished)) {
+            $updates->userattemptsunfinished->updated = true;
+            $updates->userattemptsunfinished->itemids = array_keys($attemptsunfinished);
+        }
+    }
+
+    return $updates;
 }

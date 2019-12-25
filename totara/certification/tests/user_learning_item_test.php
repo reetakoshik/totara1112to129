@@ -36,15 +36,14 @@ class totara_certification_user_learning_item_testcase extends advanced_testcase
     protected function tearDown() {
         $this->generator = null;
         $this->program_generator = null;
-        $this->course1 = null;
+        $this->completion_generator = null;
+        $this->course1 = $this->course2 = null;
         $this->certification1 = null;
         $this->user1 = null;
         parent::tearDown();
     }
 
     public function setUp() {
-        global $DB;
-
         $this->resetAfterTest(true);
         parent::setUp();
 

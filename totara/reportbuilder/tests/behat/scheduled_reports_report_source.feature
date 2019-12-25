@@ -28,7 +28,8 @@ Feature: Test the scheduled reports report source.
       | Audience #2 | 2        | Audience #2 | System       | 0         |
       | Audience #3 | 2        | Audience #3 | System       | 0         |
     And I log in as "admin"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "All scheduled reports"
     And I set the field "Source" to "Scheduled reports"
     And I press "Create report"
@@ -42,7 +43,8 @@ Feature: Test the scheduled reports report source.
     And I add the "Scheduler actions" column to the report
     And I press "Save changes"
 
-    Given I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "Test Report#1"
     And I set the field "Source" to "User"
     And I press "Create report"
@@ -50,7 +52,8 @@ Feature: Test the scheduled reports report source.
     And I set the field "All users can view this report" to "1"
     And I press "Save changes"
 
-    Given I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "Test Report#2"
     And I set the field "Source" to "Appraisal Status"
     And I press "Create report"
@@ -58,7 +61,8 @@ Feature: Test the scheduled reports report source.
     And I set the field "All users can view this report" to "1"
     And I press "Save changes"
 
-    Given I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "Test Report#3"
     And I set the field "Source" to "User"
     And I press "Create report"

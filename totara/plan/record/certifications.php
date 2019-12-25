@@ -108,7 +108,8 @@ if ($history) {
     }
 }
 // Set report.
-if (!$report = reportbuilder_get_embedded_report($shortname, $data, false, $sid)) {
+$config = (new rb_config())->set_sid($sid)->set_embeddata($data);
+if (!$report = reportbuilder::create_embedded($shortname, $config)) {
     print_error('error:couldnotgenerateembeddedreport', 'totara_reportbuilder');
 }
 
@@ -144,7 +145,7 @@ $PAGE->set_title($strheading);
 $PAGE->set_button($report->edit_button());
 $PAGE->set_heading(format_string($SITE->fullname));
 
-$menuitem = ($ownplan) ? 'recordoflearning' : 'myteam';
+$menuitem = ($ownplan) ? '\totara_plan\totara\menu\recordoflearning' : '\totara_core\totara\menu\myteam';
 $PAGE->set_totara_menu_selected($menuitem);
 dp_display_plans_menu($userid, 0, $usertype, 'certifications', $rolstatus);
 

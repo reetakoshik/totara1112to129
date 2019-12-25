@@ -387,10 +387,11 @@ class core_backup_renderer extends plugin_renderer_base {
             $attrs = array('type' => 'submit', 'name' => 'continue', 'value' => get_string('next'), 'class' => 'proceedbutton', 'id' => 'id_submitbutton');
             $html .= html_writer::empty_tag('input', $attrs);
             $html .= html_writer::end_tag('div');
-            $html .= html_writer::end_tag('form');
-        } else {
-            $html .= html_writer::end_tag('form');
         }
+
+        // Totara: Close the 'bcs-new-course backup-section' div, then the form.
+        $html .= html_writer::end_tag('div');
+        $html .= html_writer::end_tag('form');
 
         $html .= html_writer::start_tag('div', array('class' => 'buttons'));
         $html .= $this->output->single_button($prevstageurl, get_string('previous'), 'post');
@@ -431,6 +432,8 @@ class core_backup_renderer extends plugin_renderer_base {
         $html .= html_writer::start_tag('div', array('class' => 'fgroup'));
         $attrs = array('type' => 'submit', 'name' => 'continue', 'value' => get_string('next'), 'class' => 'proceedbutton', 'id' => 'id_submitbutton');
         $html .= html_writer::empty_tag('input', $attrs);
+        $html .= html_writer::end_tag('div');
+        // Totara: Close the 'bcs-new-course backup-section' div, then the form.
         $html .= html_writer::end_tag('div');
         $html .= html_writer::end_tag('form');
 
@@ -498,10 +501,11 @@ class core_backup_renderer extends plugin_renderer_base {
             $attrs = array('type' => 'submit', 'name' => 'continue', 'value' => get_string('next'), 'class' => 'proceedbutton', 'id' => 'id_submitbutton');
             $html .= html_writer::empty_tag('input', $attrs);
             $html .= html_writer::end_tag('div');
-            $html .= html_writer::end_tag('form');
-        } else {
-            $html .= html_writer::end_tag('form');
         }
+
+        // Totara: Close the 'bcs-new-course backup-section' div, then the form.
+        $html .= html_writer::end_tag('div');
+        $html .= html_writer::end_tag('form');
 
         $html .= html_writer::start_tag('div', array('class' => 'buttons'));
         $html .= $this->output->single_button($prevstageurl, get_string('previous'), 'post');
@@ -921,7 +925,6 @@ class core_backup_renderer extends plugin_renderer_base {
         $output .= html_writer::start_tag('div', array('class' => 'ics-results'));
 
         if ($countsearchresults === 0)  {
-            $output .= html_writer::empty_tag('br');
             $output .= get_string('nomatchingcoursesforsearch', 'backup', $component->get_search());
         } else {
             // Output table with the results.

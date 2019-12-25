@@ -75,7 +75,8 @@ $tagcollid = $tag->tagcollid;
 
 // set the relatedtags field of the $tag object that will be passed to the form
 $data = $tag->to_object();
-$data->relatedtags = core_tag_tag::get_item_tags_array('core', 'tag', $tag->id);
+$data->relatedtags = core_tag_tag::get_item_tags_array('core', 'tag', $tag->id,
+    core_tag_tag::BOTH_STANDARD_AND_NOT, 0, false); // Totara: Do not encode the special characters
 
 $options = new stdClass();
 $options->smiley = false;

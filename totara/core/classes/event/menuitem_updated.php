@@ -47,7 +47,7 @@ class menuitem_updated extends \core\event\base {
     /**
      * Create instance of event.
      *
-     * @param $itemid
+     * @param int $itemid
      * @return menuitem_updated
      */
     public static function create_from_item($itemid) {

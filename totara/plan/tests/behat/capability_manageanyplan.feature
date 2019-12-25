@@ -1,4 +1,4 @@
-@totara @totara_plan
+@totara @totara_plan @javascript
 Feature: Verify capability manageanyplan.
 
   Background:
@@ -44,7 +44,7 @@ Feature: Verify capability manageanyplan.
 
     # Login as admin and give the site manager the manageanyplan capability.
     When I log in as "admin"
-    And I navigate to "Define roles" node in "Site administration > Users > Permissions"
+    And I navigate to "Define roles" node in "Site administration > Permissions"
     And I follow "Site Manager"
     And I press "Edit"
     And I set the field "Filter" to "manageanyplan"
@@ -68,7 +68,6 @@ Feature: Verify capability manageanyplan.
     Then I should see "Evidence created"
     And I log out
 
-  @javascript
   Scenario: Check a user can access and approve the plan with manageanyplan capability.
 
     # Login as the learner and navigate to the learning plan.
@@ -110,7 +109,7 @@ Feature: Verify capability manageanyplan.
 
     # As the manager, access the learners plans.
     When I log in as "manager2"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "firstname1 lastname1"
     And I click on "Learning Plans" "link" in the ".userprofile" "css_element"
     # Access the learners plans and verify it hasn't been approved.
@@ -124,12 +123,11 @@ Feature: Verify capability manageanyplan.
     Then I should see "You are viewing firstname1 lastname1's plan"
     And I should see "Plan \"learner1 Learning Plan\" has been approved"
 
-  @javascript
   Scenario: Check a user can amend plan courses with manageanyplan capability.
 
     # As the manager, access the learners plans.
     Given I log in as "manager2"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "firstname1 lastname1"
     And I click on "Learning Plans" "link" in the ".userprofile" "css_element"
     # Access the learners plan.
@@ -202,12 +200,11 @@ Feature: Verify capability manageanyplan.
     And I click on "Remove selected links" "button" in the "#dp-component-evidence-container" "css_element"
     Then I should see "The selected linked evidence have been removed from this course"
 
-  @javascript
   Scenario: Check a user can amend plan competencies with manageanyplan capability.
 
     # As the manager, access the learners plans.
     Given I log in as "manager2"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "firstname1 lastname1"
     And I click on "Learning Plans" "link" in the ".userprofile" "css_element"
     # Access the learners plan.
@@ -276,12 +273,11 @@ Feature: Verify capability manageanyplan.
     And I click on "Remove selected links" "button" in the "#dp-component-evidence-container" "css_element"
     Then I should see "The selected linked evidence have been removed from this competency"
 
-  @javascript
   Scenario: Check a user can amend plan objectives with manageanyplan capability.
 
     # As the manager, access the learners plans.
     Given I log in as "manager2"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "firstname1 lastname1"
     And I click on "Learning Plans" "link" in the ".userprofile" "css_element"
     # Access the learners plan.
@@ -344,12 +340,11 @@ Feature: Verify capability manageanyplan.
     And I click on "Remove selected links" "button" in the "#dp-component-evidence-container" "css_element"
     Then I should see "The selected linked evidence have been removed from this objective"
 
-  @javascript
   Scenario: Check a user can amend plan programs with manageanyplan capability.
 
     # As the manager, access the learners plans.
     Given I log in as "manager2"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "firstname1 lastname1"
     And I click on "Learning Plans" "link" in the ".userprofile" "css_element"
     # Access the learners plan.
@@ -389,3 +384,92 @@ Feature: Verify capability manageanyplan.
     When I click on "input" "css_element" in the "#linkedevidencelist_r0" "css_element"
     And I click on "Remove selected links" "button" in the "#dp-component-evidence-container" "css_element"
     Then I should see "The selected linked evidence have been removed from this program"
+
+  Scenario: manageanyplan has precedence over plan template permissions
+    Given I log in as "admin"
+    When I navigate to "Manage templates" node in "Site administration > Learning Plans"
+    And I click on "Edit" "link" in the "Learning Plan (Default)" "table_row"
+    And I follow "Workflow"
+    And I click on "Custom workflow" "radio"
+    And I press "Advanced workflow settings"
+    And I set the field "viewmanager" to "Deny"
+    And I set the field "createmanager" to "Deny"
+    And I set the field "updatemanager" to "Deny"
+    And I press "Save changes"
+    Then I should see "Plan settings successfully updated"
+
+    # Admin can view and create plans.
+    When I navigate to "Browse list of users" node in "Site administration > Users"
+    And I follow "firstname1 lastname1"
+    And I click on "Learning Plans" "link" in the ".profile_tree" "css_element"
+    Then I should see "You are viewing firstname1 lastname1's plans."
+    And I should see "firstname1 lastname1's current and completed learning plans are shown below."
+    And I should not see "You do not currently have permission to create a Learning Plan."
+    When I press "Create new learning plan"
+    And I set the field "Plan name" to "Learning Plan admin created"
+    And I press "Create plan"
+    Then I should see "Plan creation successful"
+    And I log out
+
+    # Manager 2 is not the learners manager but does have the totara/plan:manageanyplan capability so can create plans,
+    # even though the plan template has deny for manager.
+    When I log in as "manager2"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
+    And I follow "firstname1 lastname1"
+    And I click on "Learning Plans" "link" in the ".profile_tree" "css_element"
+    Then I should see "You are viewing firstname1 lastname1's plans."
+    And I should see "firstname1 lastname1's current and completed learning plans are shown below."
+    And I should not see "You do not currently have permission to create a Learning Plan."
+    And I should see "You can create a new learning plan by clicking \"Create a new learning plan\" to the right of the screen."
+    When I press "Create new learning plan"
+    And I set the field "Plan name" to "Learning Plan manager2 created"
+    And I press "Create plan"
+    Then I should see "Plan creation successful"
+    And I log out
+
+    # Now remove the totara/plan:manageanyplan capability.
+    # Manager 2 should not be able to create a new plan as the plan template is set as deny for manager.
+    When the following "permission overrides" exist:
+      | capability                 | permission | role        | contextlevel | reference |
+      | totara/plan:manageanyplan  | Prohibit   | manager     | System       |           |
+    When I log in as "manager2"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
+    And I follow "firstname1 lastname1"
+    And I click on "Learning Plans" "link" in the ".profile_tree" "css_element"
+    Then I should see "firstname1 lastname1's current and completed learning plans are shown below."
+    And I should see "You do not currently have permission to create a Learning Plan."
+    And I log out
+
+    # Manager 3 is the learners manager but does not have totara/plan:manageanyplan capability.
+    # They should not be able to create plans.
+    # The plan template is set as deny for manager.
+    When I log in as "manager3"
+    And I click on "Team" in the totara menu
+    And I follow "firstname1 lastname1"
+    And I click on "Learning Plans" "link" in the ".profile_tree" "css_element"
+    Then I should see "firstname1 lastname1's current and completed learning plans are shown below."
+    And I should see "You do not currently have permission to create a Learning Plan."
+    And I log out
+
+    # Now add the totara/plan:manageanyplan capability.
+    # Manager 3 should now be able to create plans.
+    When the following "roles" exist:
+      | shortname   |
+      | planmanager |
+    And the following "role assigns" exist:
+      | user     | role        | contextlevel | reference |
+      | manager3 | planmanager | System       |           |
+    And the following "permission overrides" exist:
+      | capability                 | permission | role             | contextlevel | reference |
+      | totara/plan:manageanyplan  | Allow      | planmanager      | System       |           |
+    And I log in as "manager3"
+    And I click on "Team" in the totara menu
+    And I follow "firstname1 lastname1"
+    And I click on "Learning Plans" "link" in the ".profile_tree" "css_element"
+    Then I should see "You are viewing firstname1 lastname1's plans."
+
+    When I press "Create new learning plan"
+    And I set the field "Plan name" to "Learning Plan manager3 created"
+    And I press "Create plan"
+    Then I should see "Plan creation successful"
+    And I log out

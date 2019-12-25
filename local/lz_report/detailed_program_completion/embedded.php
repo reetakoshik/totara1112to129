@@ -1,5 +1,6 @@
 <?php
-
+error_reporting(E_ALL | E_STRICT);
+ini_set('display_errors', '1');
 require_once(__DIR__.'/../../../config.php');
 require_once(__DIR__.'/../etc/config.php');
 require_once($CFG->dirroot.'/totara/reportbuilder/lib.php');
@@ -29,8 +30,8 @@ $data = ['programid' => $programid];
 // Verify global restrictions.
 $reportrecord = $DB->get_record('report_builder', array('shortname' => $shortname));
 $globalrestrictionset = rb_global_restriction_set::create_from_page_parameters($reportrecord);
-
-if (!$report = reportbuilder_get_embedded_report($shortname, $data, false, $sid, $globalrestrictionset)) {
+$config = (new \rb_config())->set_embeddata($data)->set_nocache(true);
+if (!$report = \reportbuilder::create_embedded($shortname, $config)) {
     print_error('error:couldnotgenerateembeddedreport', 'totara_reportbuilder');
 }
 

@@ -39,7 +39,7 @@ Feature: Test reported learners in appraisal assignments
       | manager2 | set2   |
 
     And I log in as "admin"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Dynamic 1"
     And I switch to "Rule sets" tab
     And I set the field "addrulesetmenu" to "Positions"
@@ -57,7 +57,7 @@ Feature: Test reported learners in appraisal assignments
     And the following "pages" exist in "totara_appraisal" plugin:
       | appraisal   | stage      | name      |
       | Appraisal1  | App1_Stage | App1_Page |
-     And the following "questions" exist in "totara_appraisal" plugin:
+    And the following "questions" exist in "totara_appraisal" plugin:
       | appraisal   | stage      | page      | name     | type          | default | ExtraInfo                          |
       | Appraisal1  | App1_Stage | App1_Page | App1-Q1  | ratingnumeric | 2       | Range:1-10,Display:slider          |
 
@@ -103,7 +103,7 @@ Feature: Test reported learners in appraisal assignments
     And I should see "Manager Two"
 
     # Remove users from the dynamic audience
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner Two"
     And I click the delete icon for the "Job 1" job assignment
     And I click on "Yes, delete" "button"
@@ -422,7 +422,7 @@ Feature: Test reported learners in appraisal assignments
     And "Manager Two" row "Status" column of "appraisal_detail" table should contain "On Target"
 
     # Remove user from audience who hasn't completed the appraisal
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner Three"
     And I click the delete icon for the "Job 1" job assignment
     And I click on "Yes, delete" "button"
@@ -560,7 +560,7 @@ Feature: Test reported learners in appraisal assignments
     And "Manager Two" row "Status" column of "appraisal_detail" table should contain "On Target"
 
     # Remove user from audience who completed the appraisal
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner One"
     And I click the delete icon for the "Job 1" job assignment
     And I click on "Yes, delete" "button"
@@ -740,7 +740,7 @@ Feature: Test reported learners in appraisal assignments
     And I should not see "Learner Five"
 
     # Remove original user from audience who hasn't completed the appraisal
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner Three"
     And I click the delete icon for the "Job 1" job assignment
     And I click on "Yes, delete" "button"
@@ -788,7 +788,7 @@ Feature: Test reported learners in appraisal assignments
     And I should not see "Learner Five"
 
     # Remove user from audience who completed the appraisal
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner One"
     And I click the delete icon for the "Job 1" job assignment
     And I click on "Yes, delete" "button"
@@ -865,7 +865,7 @@ Feature: Test reported learners in appraisal assignments
     # Change the audience before closure to get some "Assignment Cancelled" users
     # Remove user from audience who hasn't completed the appraisal
     When I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner Three"
     And I click the delete icon for the "Job 1" job assignment
     And I click on "Yes, delete" "button"
@@ -910,7 +910,7 @@ Feature: Test reported learners in appraisal assignments
     And "Manager Two" row "Status" column of "appraisal_detail" table should contain "On Target"
 
     # Remove user from audience who completed the appraisal
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner One"
     And I click the delete icon for the "Job 1" job assignment
     And I click on "Yes, delete" "button"
@@ -1049,7 +1049,7 @@ Feature: Test reported learners in appraisal assignments
     And I should not see "Learner Five"
 
     # Remove original user from audience who hasn't completed the appraisal
-    When I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    When I navigate to "Audiences" node in "Site administration > Audiences"
     And I click on "Set 2" "link"
     And I click on "Edit members" "link"
     And I click on "Manager Two (mtwo@example.com)" "option" in the "#removeselect" "css_element"
@@ -1099,7 +1099,7 @@ Feature: Test reported learners in appraisal assignments
     And I should not see "Learner Five"
 
     # Remove user from audience who completed the appraisal
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner Two"
     And I click the delete icon for the "Job 1" job assignment
     And I click on "Yes, delete" "button"

@@ -1,0 +1,24 @@
+/*aside .header.colored {
+   display: none!important;
+}*/
+
+ .homeHeader{
+	/*background:#f2f6f5;*/
+	padding:0px 0px 0px 0px!important;
+	background-color:transparent;
+} 
+ 
+.block div.header{
+	    padding:14px 10px 8px 14px;
+/*    background-color: #f2f6f5;*/
+background-color:transparent;
+    color: rgba(0,0,0,.8);
+    min-height: 38px;
+    border-bottom: 0;
+    box-sizing: border-box;
+}
+.block .content {
+    border-top:0;
+    padding: 10px 5px;
+   background-color: #ffffff;
+	}

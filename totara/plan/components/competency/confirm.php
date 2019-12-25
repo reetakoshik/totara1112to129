@@ -27,6 +27,7 @@ require_once($CFG->dirroot.'/totara/plan/lib.php');
 
 $PAGE->set_context(context_system::instance());
 require_login();
+require_sesskey();
 
 // Check if Learning plans are enabled.
 check_learningplan_enabled();
@@ -57,13 +58,13 @@ $plan = new development_plan($id);
 $componentname = 'competency';
 $component = $plan->get_component($componentname);
 
-if (!$plan->can_update()) {
+if (!$plan->can_update() && !$plan->can_request_approval()) {
     print_error('error:cannotupdateitems', 'totara_plan');
 }
 
 // Basic access control checks
 if (!$component->can_update_items()) {
-    print_error('error:cannotupdateitems', 'totara_plan');
+    print_error('error:cannotupdatecompetencies', 'totara_plan');
 }
 
 // get array of competencies already assigned

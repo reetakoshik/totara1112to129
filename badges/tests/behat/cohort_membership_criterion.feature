@@ -17,8 +17,8 @@ Feature: Verify badge issue based on cohort / audience completion criterion.
 
     # Create a badge.
     When I log in as "admin"
-    And I navigate to "Add a new badge" node in "Site administration > Badges"
-    And I follow "Add a new badge"
+    And I navigate to "Manage badges" node in "Site administration > Badges"
+    And I click on "Add a new badge" "button"
     And I set the following fields to these values:
       | Name        | Audience Badge             |
       | Description | Audience Badge description |
@@ -55,7 +55,7 @@ Feature: Verify badge issue based on cohort / audience completion criterion.
 
   Scenario: Verify audience badge can still be enabled and issued when multiple criteria is only partially available.
 
-    Given I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    Given I navigate to "Audiences" node in "Site administration > Audiences"
     When I click on "Delete" "link" in the "Audience 2" "table_row"
     Then I should see "Do you really want to delete audience 'Audience 2'?"
 
@@ -84,7 +84,7 @@ Feature: Verify badge issue based on cohort / audience completion criterion.
   Scenario: Verify audience badge can't be enabled and when no criteria is available.
 
     # Delete the audiences so all the badge criteria is missing.
-    Given I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    Given I navigate to "Audiences" node in "Site administration > Audiences"
     When I click on "Delete" "link" in the "Audience 1" "table_row"
     Then I should see "Do you really want to delete audience 'Audience 1'?"
 

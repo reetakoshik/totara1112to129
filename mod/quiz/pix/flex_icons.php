@@ -23,6 +23,15 @@
  */
 
 /* Developer documentation is in /pix/flex_icons.php file. */
+$icons = array(
+    'mod_feedback|navflagged' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-flag',
+                ),
+        ),
+);
 
 $aliases = array(
     'mod_quiz|icon' => 'checklist',

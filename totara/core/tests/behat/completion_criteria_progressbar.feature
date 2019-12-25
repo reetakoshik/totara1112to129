@@ -15,8 +15,8 @@ Feature: Test progress bar percentange is displayed according to criteria comple
     | user2    | user      | two      | u2@example.com |
     | user3    | user      | three    | u3@example.com |
     And the following "courses" exist:
-    | fullname | shortname | summary          | format | enablecompletion | completionstartonenrol |
-    | Course 1 | C1        | Course summary 1 | topics | 1                | 1                      |
+    | fullname | shortname | summary          | format | enablecompletion |
+    | Course 1 | C1        | Course summary 1 | topics | 1                |
     And the following "course enrolments" exist:
     | user  | course | role    |
     | user1 | C1     | student |
@@ -24,9 +24,7 @@ Feature: Test progress bar percentange is displayed according to criteria comple
     | user3 | C1     | student |
 #     Create Courses 1 Assignment 1.
     Then I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I press "Turn editing on"
+    And I am on "Course 1" course homepage with editing mode on
     And I wait until the page is ready
     And I add a "Certificate" to section "1" and I fill the form with:
     | Name                | Certificate 1 |
@@ -46,8 +44,7 @@ Feature: Test progress bar percentange is displayed according to criteria comple
     # Complete Certificate 1 as user 1 but don't access Certificate 2.
     Then I log out
     And I log in as "user1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Certificate 1"
     # Confirm the status of the courses for user1.
     And I click on "Record of Learning" in the totara menu
@@ -57,8 +54,7 @@ Feature: Test progress bar percentange is displayed according to criteria comple
     # Complete Certificate 2 as user 2 but don't access Certificate 1.
     Then I log out
     And I log in as "user2"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Certificate 2"
     # Confirm the status of the courses for user1.
     And I click on "Record of Learning" in the totara menu
@@ -68,7 +64,8 @@ Feature: Test progress bar percentange is displayed according to criteria comple
     And I log out
     # See a Record of learning report for all users.
     And I log in as "admin"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | Record of Learning          |
       | Source      | Record of Learning: Courses |
@@ -80,8 +77,8 @@ Feature: Test progress bar percentange is displayed according to criteria comple
     And I delete the "Progress (and approval status)" column from the report
     And I add the "User's Fullname" column to the report
     And I add the "Course Name" column to the report
-    And I add the "Progress (% complete)" column to the report
-    And I add the "Course progress" column to the report
+    And I add the "Progress (%)" column to the report
+    And I add the "Progress" column to the report
     And I press "Save changes"
     When I follow "View This Report"
     Then the "reportbuilder-table" table should contain the following:

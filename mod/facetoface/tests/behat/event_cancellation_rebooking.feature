@@ -25,13 +25,11 @@ Feature: Seminar event cancellation rebooking
       | learner3 | C1     | student        |
 
     Given I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name                                   | Test Seminar |
       | Description                            | Test Seminar |
-      | Users can sign-up to multiple events   | 0            |
+      | How many times the user can sign-up?   | 1            |
     And I follow "View all events"
 
     Given I follow "Add a new event"
@@ -58,10 +56,10 @@ Feature: Seminar event cancellation rebooking
     Given I click on "Attendees" "link"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Learner One, learner1@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I click on "Learner Two, learner2@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     And I press "Confirm"
@@ -69,15 +67,13 @@ Feature: Seminar event cancellation rebooking
 
     Given I log out
     And I log in as "learner3"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Sign-up"
     And I press "Sign-up"
 
     Given I log out
     And I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I follow "Add a new event"
     And I follow "show-selectdate0-dialog"
@@ -106,30 +102,28 @@ Feature: Seminar event cancellation rebooking
     Given I click on "Attendees" "link" in the "10 February 2030" "table_row"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Learner One, learner1@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I click on "Learner Two, learner2@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
 
     When I follow "View results"
-    Then I should see "This user is already signed-up" in the "Learner One" "table_row"
-    And I should see "This user is already signed-up" in the "Learner Two" "table_row"
+    Then I should see "Existing sign-up(s) for this seminar" in the "Learner One" "table_row"
+    And I should see "Existing sign-up(s) for this seminar" in the "Learner Two" "table_row"
     And I press "Close"
 
     Given I log out
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I click on "Cancel event" "link" in the "10 February 2025" "table_row"
     And I press "Yes"
 
     Given I log out
     And I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     Then I should see "Booking open" in the "10 February 2030" "table_row"
     And I should see "Event cancelled" in the "10 February 2025" "table_row"
@@ -151,16 +145,14 @@ Feature: Seminar event cancellation rebooking
   Scenario: mod_facetoface_cancel_601: Individual learner rebooking after a cancelled event
     Given I log out
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I click on "Cancel event" "link" in the "10 February 2025" "table_row"
     And I press "Yes"
 
     Given I log out
     And I log in as "learner1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     Then I should see "Booking open" in the "10 February 2030" "table_row"
     Then I should see "19" in the "10 February 2030" "table_row"
@@ -173,8 +165,7 @@ Feature: Seminar event cancellation rebooking
 
     Given I log out
     And I log in as "learner2"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     Then I should see "Booking open" in the "10 February 2030" "table_row"
     Then I should see "18" in the "10 February 2030" "table_row"
@@ -187,8 +178,7 @@ Feature: Seminar event cancellation rebooking
 
     Given I log out
     And I log in as "learner3"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     Then I should see "Booking open" in the "10 February 2030" "table_row"
     Then I should see "17" in the "10 February 2030" "table_row"

@@ -78,15 +78,15 @@ function xmldb_totara_appraisal_upgrade($oldversion) {
     }
 
     // TL-17131 Appraisal snapshots not deleted when user is deleted.
-    if ($oldversion < 2018022701) {
+    if ($oldversion < 2018041600) {
 
         totara_appraisal_remove_orphaned_snapshots();
 
         // Main savepoint reached.
-        upgrade_plugin_savepoint(true, 2018022701, 'totara', 'appraisal');
+        upgrade_plugin_savepoint(true, 2018041600, 'totara', 'appraisal');
     }
 
-    if ($oldversion < 2018022704) {
+    if ($oldversion < 2018112202) {
 
         // Define field usercompleted to be added to appraisal_stage_data.
         $table = new xmldb_table('appraisal_stage_data');
@@ -107,7 +107,7 @@ function xmldb_totara_appraisal_upgrade($oldversion) {
         }
 
         // Appraisal savepoint reached.
-        upgrade_plugin_savepoint(true, 2018022704, 'totara', 'appraisal');
+        upgrade_plugin_savepoint(true, 2018112202, 'totara', 'appraisal');
     }
 
     return true;

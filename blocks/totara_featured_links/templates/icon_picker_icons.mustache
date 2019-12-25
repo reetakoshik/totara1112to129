@@ -1,0 +1,61 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2017 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Andrew McGhie <andrew.mcghie@totaralearning.com>
+   @package block_totara_featured_links
+}}
+{{!
+
+    @template block_totara_featured_links/icon_picker_icons
+
+    This template creates the modal for a icon picker form item
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * icons an array of arrays. The arrays should all contain a 'identifier' key that is the identifier for a flex_icon
+        and only one of them should contain a 'selected' key set to true.
+
+    Other context variables for following partials:
+     * none
+
+    Example context (json):
+      {
+          "icons": [
+              {"identifier": "core|caret-right"},
+              {"identifier": "core|caret-left"},
+              {"identifier": "core|cog",
+                  'selected': true
+              }
+          ]
+      }
+}}
+<div class="icon-picker-icons">
+    <span id="icon-picker-selected-icon" class="hidden"></span>
+    <ul class="list">
+        {{#icons}}
+            <li class="icon-picker-item {{#selected}}selected{{/selected}}" data-flex-icon-identifier="{{identifier}}">
+                {{#data}}{{#context}}{{> &&template}}{{/context}}{{/data}}
+            </li>
+        {{/icons}}
+    </ul>
+</div>

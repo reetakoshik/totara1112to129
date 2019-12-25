@@ -147,10 +147,25 @@ class postgres_sql_generator extends sql_generator {
      * @throws coding_exception Thrown if the xmldb_index does not validate with the xmldb_table.
      */
     public function getCreateIndexSQL($xmldb_table, $xmldb_index) {
-        $sqls = parent::getCreateIndexSQL($xmldb_table, $xmldb_index);
+        if ($error = $xmldb_index->validateDefinition($xmldb_table)) {
+            throw new coding_exception($error);
+        }
 
         $hints = $xmldb_index->getHints();
         $fields = $xmldb_index->getFields();
+        if (in_array('full_text_search', $hints)) {
+            $tablename = $this->getTableName($xmldb_table);
+            $fieldname = reset($fields);
+            $indexname = $this->getNameForObject($xmldb_table->getName(), $fieldname, 'fts');
+            $language = $this->mdb->get_ftslanguage();
+
+            $sqls = array();
+            $sqls[] = "CREATE INDEX {$indexname} ON {$tablename} USING GIN(to_tsvector('{$language}', {$fieldname}))";
+            return $sqls;
+        }
+
+        $sqls = parent::getCreateIndexSQL($xmldb_table, $xmldb_index);
+
         if (in_array('varchar_pattern_ops', $hints) and count($fields) == 1) {
             // Add the pattern index and keep the normal one, keep unique only the standard index to improve perf.
             foreach ($sqls as $sql) {
@@ -739,5 +754,25 @@ class postgres_sql_generator extends sql_generator {
         $sqls[] = "DROP TABLE IF EXISTS {$tablestable} CASCADE";
 
         $this->mdb->change_database_structure($sqls);
+    }
+
+    /**
+     * Get statement to switch FTS accent sensitivity.
+     *
+     * @param bool $switch If accent sensitivity should be enabled/disabled.
+     * @return array
+     */
+    public function get_fts_change_accent_sensitivity_sql(bool $switch): array {
+        $sqls = [];
+
+        // First confirm if accent sensitivity is not already on the correct setting.
+        if ($switch === $this->mdb->is_fts_accent_sensitive()) {
+            return $sqls;
+        }
+
+        // Drop extension if accent sensitivity required otherwise create it.
+        $sqls[] = $switch ? 'DROP EXTENSION UNACCENT' : 'CREATE EXTENSION UNACCENT';
+
+        return $sqls;
     }
 }

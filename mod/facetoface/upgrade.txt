@@ -1,6 +1,151 @@
 This files describes API changes in /mod/facetoface/*,
 information provided here is intended especially for developers.
 
+=== 12.7 ===
+
+* signup\condition\user_is_enrolable::pass() has been updated to allow suspended users to be enrolled into seminar event
+* mod_facetoface_renderer::attendees_export_form() has been changed to attach an aria-label attribute to the <select> element
+* mod_facetoface_renderer::display_bulk_actions_picker has been changed to attach a <label> element to a form field
+
+=== 12.6 ===
+
+* seminar_event_list::form_seminar() has been renamed to seminar_event_list::from_seminar()
+* mod_facetoface_renderer::print_userlist_table() has been updated to format user idnumbers before output
+
+=== 12.3 ===
+
+* mod_facetoface_renderer::render_seminar_event has been changed to prevent a record not found exception if a user has a deleted job assignment
+
+=== 12.0 ===
+
+* Deprecated the following report builder display functions and replaced with display classes
+  * rb_facetoface_base_source::rb_display_coded_link_user(), please call mod_facetoface\rb\display\display\f2f_coded_user_link::display() instead.
+  * rb_facetoface_base_source::rb_display_f2f_approval(), please call mod_facetoface\rb\display\display\f2f_approval::display() instead.
+  * rb_facetoface_base_source::rb_display_room_name_link(), please call mod_facetoface\rb\display\display\f2f_room_name_link::display() instead.
+  * rb_facetoface_base_source::rb_display_asset_name_link(), please call mod_facetoface\rb\display\display\f2f_asset_name_link::display() instead.
+  * rb_facetoface_base_source::rb_display_no_yes(), please call mod_facetoface\rb\display\display\f2f_no_yes::display() instead.
+  * rb_facetoface_base_source::rb_display_conflicts(), please call totara_reportbuilder\rb\display\yes_or_no::display() instead.
+  * rb_facetoface_base_source::rb_display_numattendeeslink(), please call mod_facetoface\rb\display\display\f2f_num_attendees_link::display() instead.
+  * rb_source_facetoface_asset::rb_display_actions(), please call mod_facetoface\rb\display\display\f2f_asset_actions::display() instead.
+  * rb_source_facetoface_events::rb_display_actions(), please call mod_facetoface\rb\display\display\f2f_session_actions::display() instead.
+  * rb_source_facetoface_events::rb_display_session_spaces(), please call mod_facetoface\rb\display\display\f2f_session_spaces::display() instead.
+  * rb_source_facetoface_events::rb_display_approver().
+  * rb_source_facetoface_rooms::rb_display_actions(), please call mod_facetoface\rb\display\display\f2f_actions::display() instead.
+  * rb_source_facetoface_sessions::rb_display_allcustomfieldssignupmanage(), please call mod_facetoface\rb\display\display\f2f_all_signup_customfields_manage::display() instead.
+  * rb_source_facetoface_sessions::rb_display_job_assignment_edit(), please call mod_facetoface\rb\display\display\f2f_job_assignment_edit::display() instead.
+  * rb_source_facetoface_sessions::rb_display_link_user(), please call mod_facetoface\rb\display\display\f2f_user_link::display() instead.
+  * rb_source_facetoface_sessions::rb_display_link_user_icon(), please call mod_facetoface\rb\display\display\f2f_user_icon_link::display() instead.
+  * rb_source_facetoface_sessions::rb_display_approveremail(), please call mod_facetoface\rb\display\display\f2f_approver_email::display() instead.
+  * rb_source_facetoface_sessions::rb_display_approvername(), please call mod_facetoface\rb\display\display\f2f_approver_name::display() instead.
+  * rb_source_facetoface_sessions::rb_display_user(), please call mod_facetoface\rb\display\display\f2f_user::display() instead.
+  * rb_source_facetoface_signin::rb_display_signature(), please call mod_facetoface\rb\display\display\f2f_signature::display() instead.
+  * rb_source_facetoface_signin::rb_display_position_type().
+  * rb_source_facetoface_signin::rb_display_link_f2f_bookedby(), please call mod_facetoface\rb\display\display\f2f_booked_by_link::display() instead.
+  * rb_source_facetoface_signin::rb_display_link_f2f_actionedby().
+  * rb_source_facetoface_signin::rb_display_link_user(), please call mod_facetoface\rb\display\display\f2f_user_link::display() instead.
+  * rb_source_facetoface_signin::rb_display_link_user_icon(), please call mod_facetoface\rb\display\display\f2f_user_icon_link::display() instead.
+  * rb_source_facetoface_signin::rb_display_user(), please call mod_facetoface\rb\display\display\f2f_user::display() instead.
+  * rb_source_facetoface_summary::rb_display_actions(), please call mod_facetoface\rb\display\display\f2f_actions::display() instead.
+  * rb_source_facetoface_summary::rb_display_session_spaces(), please call mod_facetoface\rb\display\display\f2f_session_spaces::display() instead.
+  * rb_source_facetoface_summary::rb_display_approver().
+  * rb_source_facetoface_sessions::rb_display_show_cancelled_status(), please call mod_facetoface\rb\display\display\f2f_session_cancelled_status::display() instead.
+* facetoface_eventhandler_role_unassigned() function has been deprecated as unused.
+* facetoface_approval_settings() function has been deprecated, please use mod_form::get_data()
+* facetoface_fix_settings() function has been deprecated, please use mod_form::get_data()
+* facetoface_declare_interest() function has been deprecated, please use interest::declare() instead
+* facetoface_user_declared_interest() function has been deprecated, please use interest::is_user_declared() instead
+* facetoface_activity_can_declare_interest() function has been deprecated, please use interest::can_user_declare() instead
+* facetoface_generate_ical() function has been deprecated, please use messaging::generate_ical()
+* facetoface_get_unmailed_reminders() function has been deprecated
+* facetoface_format_secs_to_his() function has been deprecated
+* facetoface_ical_generate_timestamp() function has been deprecated, please use messaging::ical_generate_timestamp()
+* facetoface_ical_escape() function has been deprecated, please use messaging::ical_escape()
+* facetoface_get_asset() function has been deprecated, please use mod_facetoface\asset class constructor
+* facetoface_process_asset_form() function has been deprecated, this functionality is now handled by the asset form
+* facetoface_delete_asset() function has been deprecated, please use mod_facetoface\asset->delete()
+* facetoface_get_available_assets() function has been deprecated, please use mod_facetoface\asset::get_available()
+* facetoface_is_asset_available() function has been deprecated, please use mod_facetoface\asset->is_available()
+* facetoface_asset_has_conflicts() function has been deprecated, please use mod_facetoface\asset->has_conflicts()
+* facetoface_delete_reservations() function has been deprecated, please use reservations::delete()
+* facetoface_get_session_reservations() function has been deprecated, please use reservations::get()
+* facetoface_can_reserve_or_allocate() function has been deprecated, please use reservations::can_reserve_or_allocate()
+* facetoface_limit_reserveinfo_to_capacity_left() function has been deprecated, please use reservations::limit_info_to_capacity_left()
+* facetoface_limit_reserveinfo_by_session_date() function has been deprecated, please use reservations::limit_info_by_session_date()
+* facetoface_add_reservations() function has been deprecated, please use reservations::add()
+* facetoface_remove_reservations() function has been deprecated, please use reservations::remove()
+* facetoface_get_other_reservations() function has been deprecated, please use reservations::get_others()
+* facetoface_get_staff_to_allocate() function has been deprecated, please use reservations::get_staff_to_allocate()
+* facetoface_user_can_be_unallocated() function has been deprecated, please use reservations::user_can_be_unallocated()
+* facetoface_replace_reservations() function has been deprecated, please use reservations::replace()
+* facetoface_allocate_spaces() function has been deprecated, please use reservations::allocate_spaces()
+* facetoface_remove_allocations() function has been deprecated, please use reservations::remove_allocations()
+* facetoface_count_reservations function has been deprecated, please use reservations::count()
+* facetoface_count_allocations() function has been deprecated, please use reservations::count_allocations()
+* facetoface_remove_reservations_after_deadline() function has been deprecated, please use reservations::remove_after_deadline()
+* facetoface_delete_room() function has been deprecated, please use room::delete()
+* facetoface_get_used_rooms() function has been deprecated, please use room_list::get_seminar_rooms()
+* facetoface_get_session_rooms() function has been deprecated, please use room_list::get_event_rooms()
+* facetoface_get_available_rooms() function has been deprecated, please use room_list::get_available()
+* facetoface_is_room_available() function has been deprecated, please use room::is_available()
+* facetoface_room_has_conflicts() function has been deprecated, please use room::has_conflicts()
+* facetoface_process_room_form() function has been deprecated, please use renderer function get_room_details_html()
+* facetoface_room_get_address() has been deprecated, please use room::get_display_customfields()
+* facetoface_room_to_string() has been deprecated, please use room::__toString()
+* facetoface_notification::send_to_roleapprovers() function has been deprecated, please use facetoface_notification::send_to_roleapprovers_adhoc()
+* facetoface_notification::send_to_adminapprovers() function has been deprecated, please use facetoface_notification::send_to_adminapprovers_adhoc()
+* facetoface_display_approver() function has been deprecated, please use renderer::display_approver()
+* facetoface_has_unarchived_signups() function has been deprecated, please use seminar::has_unarchived_signups()
+* facetoface_print_calendar_session() function has been deprecated, please use core_calendar_renderer::facetoface_print_calendar_session()
+* facetoface_grade_item_delete() function has been deprecated, please use seminar::grade_item_delete()
+* facetoface_add_session() function has been deprecated, please use seminar_event::save()
+* facetoface_update_session() function has been deprecated, please use seminar_event::save()
+* facetoface_cleanup_session_data() function has been deprecated, please use seminar_event::cleanup_capacity()
+* facetoface_print_session() function has been deprecated, please use renderer::renderer::render_seminar_event()
+* facetoface_print_session_list() function has been deprecated, please use renderer::print_session_list()
+* facetoface_delete_signups() function has been deprecated, please use signup::delete()
+* facetoface_user_import() has been deprecated, please use signup_helper::signup()
+* facetoface_user_signup() has been deprecated, please use signup_helper::signup()
+* facetoface_can_user_signup() has been deprecated, please use signup::can_signup()
+* facetoface_approval_required() has been deprecated, please use seminar::is_approval_required()
+* facetoface_manager_needed() has been deprecated, please use seminar::is_manager_required()
+* facetoface_download_attendance() function has been deprecated, please use attendees/export.php
+* facetoface_write_worksheet_header() function has been deprecated, please use attendees/export.php
+* facetoface_update_calendar_entries() function has been deprecated, please use calendar::update_entries()
+* facetoface_delete_user_calendar_events() function has been deprecated, please use calendar::delete_user_events()
+* facetoface_remove_session_from_calendar() function has been deprecated, please use calendar::remove_seminar_event()
+* facetoface_add_session_to_calendar() function has been deprecated, please use calendar::add_seminar_event()
+* facetoface_remove_all_calendar_entries() function has been deprecated, please use calendar::remove_all_entries()
+* facetoface_update_user_calendar_events() function has been deprecated
+* facetoface_get_customfield_filters() function has been deprecated, please use calendar::get_customfield_filters()
+* facetoface_display_bulk_actions_picker() function has been deprecated, please use renderer::display_bulk_actions_picker()
+* facetoface_get_attendance_status() function has been deprecated, please use attendees_list_helper::get_status()
+* facetoface_get_status() function has been deprecated, please use state::from_code($statuscode)::get_string()
+* attendees_add_confirm::get_user_list is static now, please update any calls to it
+* facetoface_is_signup_by_waitlist() function has been deprecated, please use signup::can_switch()
+* facetoface_send_cancellation_notice() function has been deprecated, please use notice_sender::signup_cancellation_notice() or notice_sender::event_cancellation_notice()
+* facetoface_send_decline_notice() function has been deprecated, please use notice_sender::decline()
+* facetoface_send_datetime_change_notice() function has been deprecated, please use notice_sender::event_datetime_changed() or notice_sender::signup_datetime_changed()
+* facetoface_send_confirmation_notice() function has been deprecated, please use notice_sender::confirm_booking() or notice_sender::confirm_waitlist()
+* facetoface_send_trainer_confirmation_notice() function has been deprecated, please use notice_sender::trainer_confirmation()
+* facetoface_send_trainer_session_cancellation_notice() function has been deprecated, please use notice_sender::event_trainer_cancellation()
+* facetoface_send_trainer_session_unassignment_notice() function has been deprecated, please use notice_sender::event_trainer_unassigned()
+* facetoface_send_request_notice() function has been deprecated, please use notice_sender::request_manager()
+* facetoface_send_rolerequest_notice() function has been deprecated, please use notice_sender::request_role()
+* facetoface_send_adminrequest_notice() function has been deprecated, please use notice_sender::request_admin()
+* facetoface_user_cancel() function has been deprecated, please use signup_helper::user_cancel()
+* facetoface_user_cancel_submission() function has been deprecated, please use signup_helper::user_cancel()
+* facetoface_cancel_session() function has been deprecated, please use seminar_event::cancel()
+* facetoface_validate_user_signup() function has been deprecated, please use signup_helper::can_user_signup()
+* facetoface_take_attendance() function has been deprecated, please use signup_helper::process_attendance()
+* facetoface_take_individual_attendance() function has been deprecated, please use signup_helper::process_attendance()
+* facetoface_validate_user_import() function has been deprecated, please use signup::debug_transitions()
+* facetoface_update_attendees() function has been deprecated, please use signup_helper::update_attendees()
+* facetoface_is_signup_cancelled() function has been deprecated, please use signup_helper::is_cancelled()
+* facetoface_approve_requests() function has been deprecated, please use signup::switch_state()
+* facetoface_update_signup_status() function has been deprecated, please use signup::switch_state()
+* facetoface_check_signup() function has been deprecated, please use state::is_not_happening()()
+* facetoface_update_grades() function has been changed; recalculate grade based on facetoface_signups_status.statuscode when the third argument is true (by default)
+
 === 11.1 ===
 
 * Deprecated function facetoface_get_ical_attachment. It was not working properly. Instead use facetoface_generate_ical(), note different arguments!
@@ -15,4 +160,3 @@ information provided here is intended especially for developers.
 * facetoface_get_customfield_data function has been deprecated, please use customfield_get_data function instead.
 * Deprecated method rb_facetoface_base_source::rb_display_link_f2f_session. This method was replaced with event_date_link class.
 * Deprecated method rb_source_facetoface_summary::rb_display_link_f2f_session_in_timezone. This method was replaced with event_date_link class.
-

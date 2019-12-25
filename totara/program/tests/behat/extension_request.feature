@@ -28,8 +28,7 @@ Feature: Request extensions in programs
     And I log in as "admin"
     And I set the following administration settings values:
       | Enable program extension requests | 1 |
-    And I click on "Programs" in the totara menu
-    And I click on "Program toggle request" "link"
+    And I am on "Program toggle request" program homepage
     And I press "Edit program details"
     And I click on "Details" "link" in the "#program-overview" "css_element"
     And I set the following fields to these values:
@@ -37,26 +36,23 @@ Feature: Request extensions in programs
     And I press "Save changes"
     And I click on "Assignments" "link" in the "#program-overview" "css_element"
     And I click on "Set due date" "link"
-    And I click on "Day(s)" "option" in the "#timeperiod" "css_element"
-    And I click on "Program enrollment date" "option" in the "#eventtype" "css_element"
+    And I set the field "timeperiod" to "Day(s)"
+    And I set the field "eventtype" to "Program enrollment date"
     And I set the following fields to these values:
       | timeamount | 2 |
     And I click on "Set time relative to event" "button" in the "completion-dialog" "totaradialogue"
     And I wait "1" seconds
-    And I press "Save changes"
     And I log out
 
   Scenario: Program extension request enable (site and program level), manager assigned and program about to expire
     Given I log in as "student1"
-    And I click on "Programs" in the totara menu
-    And I click on "Program toggle request" "link"
+    And I am on "Program toggle request" program homepage
     Then I should see "Request an extension"
     And I log out
 
   Scenario: Program extension request enable in site level but not in the program level, manager assigned and program about to expire
     Given I log in as "admin"
-    And I click on "Programs" in the totara menu
-    And I click on "Program toggle request" "link"
+    And I am on "Program toggle request" program homepage
     And I press "Edit program details"
     And I click on "Details" "link" in the "#program-overview" "css_element"
     And I set the following fields to these values:
@@ -65,8 +61,7 @@ Feature: Request extensions in programs
     And I log out
 
     When I log in as "student1"
-    And I click on "Programs" in the totara menu
-    And I click on "Program toggle request" "link"
+    And I am on "Program toggle request" program homepage
     Then I should not see "Request an extension"
 
   Scenario: Program extension request not enable in site level but enable in the program level, manager assigned and program about to expire
@@ -76,14 +71,12 @@ Feature: Request extensions in programs
     And I log out
 
     When I log in as "student1"
-    And I click on "Programs" in the totara menu
-    And I click on "Program toggle request" "link"
+    And I am on "Program toggle request" program homepage
     Then I should not see "Request an extension"
 
   Scenario: Program extension request not enable in site or program level, manager assigned and program about to expire
     Given I log in as "admin"
-    And I click on "Programs" in the totara menu
-    And I click on "Program toggle request" "link"
+    And I am on "Program toggle request" program homepage
     And I press "Edit program details"
     And I click on "Details" "link" in the "#program-overview" "css_element"
     And I set the following fields to these values:
@@ -94,15 +87,13 @@ Feature: Request extensions in programs
     And I log out
 
     When I log in as "student1"
-    And I click on "Programs" in the totara menu
-    And I click on "Program toggle request" "link"
+    And I am on "Program toggle request" program homepage
     Then I should not see "Request an extension"
 
   Scenario: Manager assigned, program about to expire, user made a extension request and
             program extension request disable in the program level.
     Given I log in as "student1"
-    And I click on "Programs" in the totara menu
-    And I click on "Program toggle request" "link"
+    And I am on "Program toggle request" program homepage
     And I click on "Request an extension" "link"
     And I set the following fields to these values:
       | extensionreason | I need an extension |
@@ -111,8 +102,7 @@ Feature: Request extensions in programs
     And I log out
 
     When I log in as "admin"
-    And I click on "Programs" in the totara menu
-    And I click on "Program toggle request" "link"
+    And I am on "Program toggle request" program homepage
     And I press "Edit program details"
     And I click on "Details" "link" in the "#program-overview" "css_element"
     And I set the following fields to these values:
@@ -121,14 +111,13 @@ Feature: Request extensions in programs
     And I log out
 
     When I log in as "student1"
-    And I click on "Programs" in the totara menu
-    And I click on "Program toggle request" "link"
+    And I am on "Program toggle request" program homepage
     Then I should not see "Pending extension request"
     And I log out
 
   Scenario: Program extension request enable in site and program level, no manager assigned and program about to expire
     Given I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Sam Student"
     And I click on "jobassignment1" "link"
     And I click on "Delete" "link" in the "#managertitle" "css_element"
@@ -136,14 +125,12 @@ Feature: Request extensions in programs
     And I log out
 
     When I log in as "student1"
-    And I click on "Programs" in the totara menu
-    And I click on "Program toggle request" "link"
+    And I am on "Program toggle request" program homepage
     Then I should not see "Request an extension"
 
   Scenario: Learner makes a request in the future. Manager is able to see it and grant it.
     Given I log in as "student1"
-    And I click on "Programs" in the totara menu
-    And I click on "Program toggle request" "link"
+    And I am on "Program toggle request" program homepage
     And I click on "Request an extension" "link"
     And I set the following fields to these values:
       | extensionreason     | I need an extension |
@@ -165,19 +152,17 @@ Feature: Request extensions in programs
     And I click on "Team" in the totara menu
     And I click on "1" "link" in the "Sam Student" "table_row"
     Then I should see "14 January 2025, 2:55 PM"
-    When I click on "Grant" "option" in the ".approval" "css_element"
+    When I set the field with xpath "//select[contains(@class,'approval')]" to "Grant"
     And I press "Update Extensions"
     Then I should see "All extensions successfully updated"
     When I log out
     And I log in as "student1"
-    And I click on "Programs" in the totara menu
-    And I click on "Program toggle request" "link"
+    And I am on "Program toggle request" program homepage
     Then I should see "Due date: 14 January 2025, 2:55 PM"
 
   Scenario: Learner makes a request in the future. Manager is able to see it and deny it.
     Given I log in as "student1"
-    And I click on "Programs" in the totara menu
-    And I click on "Program toggle request" "link"
+    And I am on "Program toggle request" program homepage
     When I click on "Request an extension" "link"
     And I set the following fields to these values:
       | extensionreason     | I need an extension |
@@ -191,19 +176,18 @@ Feature: Request extensions in programs
     And I click on "Team" in the totara menu
     And I click on "1" "link" in the "Sam Student" "table_row"
     Then I should see "14 January 2025, 2:55 PM"
-    When I click on "Deny" "option" in the ".approval" "css_element"
+    When I set the field with xpath "//select[contains(@class,'approval')]" to "Deny"
     And I press "Update Extensions"
     Then I should see "All extensions successfully updated"
     When I log out
     And I log in as "student1"
-    And I click on "Programs" in the totara menu
-    And I click on "Program toggle request" "link"
+    And I am on "Program toggle request" program homepage
     Then I should not see "Due date: 14 January 2025, 2:55 PM"
 
   Scenario: Extension request setting is saved when adding a program
     Given I log in as "admin"
-    And I click on "Programs" in the totara menu
-    And I press "Create Program"
+    And I navigate to "Manage programs" node in "Site administration > Programs"
+    And I press "Add a new program"
     And I set the following fields to these values:
       | Allow extension requests | 0 |
     And I press "Save changes"
@@ -211,8 +195,8 @@ Feature: Request extensions in programs
     And the following fields match these values:
       | Allow extension requests | 0 |
 
-    When I click on "Programs" in the totara menu
-    And I press "Create Program"
+    When I navigate to "Manage programs" node in "Site administration > Programs"
+    And I press "Add a new program"
     And I set the following fields to these values:
       | Allow extension requests | 1 |
     And I press "Save changes"
@@ -222,8 +206,8 @@ Feature: Request extensions in programs
 
     When I set the following administration settings values:
       | Enable program extension requests | 0 |
-    And I click on "Programs" in the totara menu
-    And I press "Create Program"
+    And I navigate to "Manage programs" node in "Site administration > Programs"
+    And I press "Add a new program"
     Then I should not see "Allow extension requests"
     When I press "Save changes"
     Then I should see "Program creation successful"

@@ -1,6 +1,13 @@
 This files describes API changes in /mod/choice/*,
 information provided here is intended especially for developers.
 
+=== 12 ===
+
+* mod_choice_renderer::display_publish_name_vertical() has changed
+* mod_choice_external::delete_choice_responses has changed behaviour - if a teacher
+  calls this function with no responses specified then only their own responses will
+  be deleted, rather than all responses for all users within the choice.
+
 === 10 ===
 
 * Events mod_choice\event\answer_submitted and mod_choice\event\answer_updated

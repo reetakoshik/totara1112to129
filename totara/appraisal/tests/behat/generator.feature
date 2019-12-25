@@ -75,7 +75,7 @@ Feature: Verify appraisal data generators.
     And I follow "Appraisal 1"
     Then I should see "Appraisal 1"
 
-    When I follow "Content"
+    When I switch to "Content" tab
     Then I should see "Stage 1-1"
     And I should see "31 Dec 2035"
     And I should see "1 Jan 2036"
@@ -98,7 +98,7 @@ Feature: Verify appraisal data generators.
 
     When I click on "Messages" "link" in the ".tabtree" "css_element"
     Then I should see "Message 1" in the "1" "table_row"
-    Then I should see "Appraisal activation" in the "1" "table_row"
+    Then I should see "Assignee gains access to the appraisal" in the "1" "table_row"
     Then I should see "Immediate" in the "1" "table_row"
     Then I should see "Learner" in the "1" "table_row"
     Then I should see "Manager" in the "1" "table_row"

@@ -105,6 +105,7 @@ class rb_filter_option {
      * Optional string representing how the field should be grouped
      * when filtering
      *
+     * @deprecated since Totara 12
      * @access public;
      * @var string
      */
@@ -140,6 +141,12 @@ class rb_filter_option {
         $this->field = isset($field) ? $field : '';
         $this->joins = isset($joins) ? $joins : array();
         $this->grouping = isset($grouping) ? $grouping : 'none';
+
+        if (!PHPUNIT_TEST) {
+            if (isset($this->grouping) and $this->grouping !== 'none') {
+                debugging("Filter option grouping was deprecated, use subqueries instead in {$this->type}-{$this->value}", DEBUG_DEVELOPER);
+            }
+        }
     }
 
     /**

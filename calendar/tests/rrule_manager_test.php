@@ -43,6 +43,12 @@ class core_calendar_rrule_manager_testcase extends advanced_testcase {
     /** @var calendar_event a dummy event */
     protected $event;
 
+    protected function tearDown() {
+        $this->event = null;
+
+        parent::tearDown();
+    }
+
     /**
      * Set up method.
      */

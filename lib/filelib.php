@@ -432,7 +432,7 @@ function file_prepare_draft_area(&$draftitemid, $contextid, $component, $fileare
             // at this point there should not be any draftfile links yet,
             // because this is a new text from database that should still contain the @@pluginfile@@ links
             // this happens when developers forget to post process the text
-            $text = str_replace("\"$CFG->httpswwwroot/draftfile.php", "\"$CFG->httpswwwroot/brokenfile.php#", $text);
+            $text = str_replace("\"$CFG->wwwroot/draftfile.php", "\"$CFG->wwwroot/brokenfile.php#", $text);
         }
     } else {
         // nothing to do
@@ -693,11 +693,11 @@ function file_get_drafarea_files($draftitemid, $filepath = '/') {
 
             if ($file->is_directory()) {
                 $item->filesize = 0;
-                $item->icon = $OUTPUT->pix_url(file_folder_icon(24))->out(false);
+                $item->icon = $OUTPUT->image_url(file_folder_icon(24))->out(false);
                 $item->type = 'folder';
                 $foldername = explode('/', trim($item->filepath, '/'));
                 $item->fullname = trim(array_pop($foldername), '/');
-                $item->thumbnail = $OUTPUT->pix_url(file_folder_icon(90))->out(false);
+                $item->thumbnail = $OUTPUT->image_url(file_folder_icon(90))->out(false);
             } else {
                 // do NOT use file browser here!
                 $item->mimetype = get_mimetype_description($file);
@@ -708,8 +708,8 @@ function file_get_drafarea_files($draftitemid, $filepath = '/') {
                 }
                 $itemurl = moodle_url::make_draftfile_url($draftitemid, $item->filepath, $item->filename);
                 $item->url = $itemurl->out();
-                $item->icon = $OUTPUT->pix_url(file_file_icon($file, 24))->out(false);
-                $item->thumbnail = $OUTPUT->pix_url(file_file_icon($file, 90))->out(false);
+                $item->icon = $OUTPUT->image_url(file_file_icon($file, 24))->out(false);
+                $item->thumbnail = $OUTPUT->image_url(file_file_icon($file, 90))->out(false);
 
                 // The call to $file->get_imageinfo() fails with an exception if the file can't be read on the file system.
                 // We still want to add such files to the list, so the owner can view and delete them if needed. So, we only call
@@ -878,6 +878,7 @@ function file_save_draft_area_files($draftitemid, $contextid, $component, $filea
 
         $newhashes = array();
         $filecount = 0;
+        $context = context::instance_by_id($contextid, MUST_EXIST);
         foreach ($draftfiles as $file) {
             if (!$options['subdirs'] && $file->get_filepath() !== '/') {
                 continue;
@@ -886,8 +887,11 @@ function file_save_draft_area_files($draftitemid, $contextid, $component, $filea
                 continue;
             }
             if (!$file->is_directory()) {
-                if ($options['maxbytes'] and $options['maxbytes'] < $file->get_filesize()) {
-                    // oversized file - should not get here at all
+                // Check to see if this file was uploaded by someone who can ignore the file size limits.
+                $fileusermaxbytes = get_user_max_upload_file_size($context, $options['maxbytes'], 0, 0, $file->get_userid());
+                if ($fileusermaxbytes != USER_CAN_IGNORE_FILE_SIZE_LIMITS
+                        && ($options['maxbytes'] and $options['maxbytes'] < $file->get_filesize())) {
+                    // Oversized file.
                     continue;
                 }
                 if ($options['maxfiles'] != -1 and $options['maxfiles'] <= $filecount) {
@@ -1529,7 +1533,8 @@ function mimeinfo($element, $filename) {
         foreach ($filenames as $filename) {
             foreach ($iconpostfixes as $size => $postfix) {
                 $fullname = $CFG->dirroot.'/pix/f/'.$filename.$postfix;
-                if ($iconsize >= $size && (file_exists($fullname.'.png') || file_exists($fullname.'.gif'))) {
+                if ($iconsize >= $size &&
+                        (file_exists($fullname.'.svg') || file_exists($fullname.'.png') || file_exists($fullname.'.gif'))) {
                     return $filename.$postfix;
                 }
             }
@@ -1587,7 +1592,7 @@ function mimeinfo_from_type($element, $mimetype) {
  * Usage:
  * <code>
  * // $file - instance of stored_file or file_info
- * $icon = $OUTPUT->pix_url(file_file_icon($file))->out();
+ * $icon = $OUTPUT->image_url(file_file_icon($file))->out();
  * echo html_writer::empty_tag('img', array('src' => $icon, 'alt' => get_mimetype_description($file)));
  * </code>
  * or
@@ -1636,7 +1641,7 @@ function file_file_icon($file, $size = null) {
  *
  * Usage:
  * <code>
- * $icon = $OUTPUT->pix_url(file_folder_icon())->out();
+ * $icon = $OUTPUT->image_url(file_folder_icon())->out();
  * echo html_writer::empty_tag('img', array('src' => $icon));
  * </code>
  * or
@@ -1655,7 +1660,8 @@ function file_folder_icon($iconsize = null) {
     if (!array_key_exists($iconsize, $cached)) {
         foreach ($iconpostfixes as $size => $postfix) {
             $fullname = $CFG->dirroot.'/pix/f/folder'.$postfix;
-            if ($iconsize >= $size && (file_exists($fullname.'.png') || file_exists($fullname.'.gif'))) {
+            if ($iconsize >= $size &&
+                    (file_exists($fullname.'.svg') || file_exists($fullname.'.png') || file_exists($fullname.'.gif'))) {
                 $cached[$iconsize] = 'f/folder'.$postfix;
                 break;
             }
@@ -1667,12 +1673,12 @@ function file_folder_icon($iconsize = null) {
 /**
  * Returns the relative icon path for a given mime type
  *
- * This function should be used in conjunction with $OUTPUT->pix_url to produce
+ * This function should be used in conjunction with $OUTPUT->image_url to produce
  * a return the full path to an icon.
  *
  * <code>
  * $mimetype = 'image/jpg';
- * $icon = $OUTPUT->pix_url(file_mimetype_icon($mimetype))->out();
+ * $icon = $OUTPUT->image_url(file_mimetype_icon($mimetype))->out();
  * echo html_writer::empty_tag('img', array('src' => $icon, 'alt' => get_mimetype_description($mimetype)));
  * </code>
  *
@@ -1711,12 +1717,12 @@ function file_mimetype_flex_icon($mimetype, $alt = '', $classes = '') {
 /**
  * Returns the relative icon path for a given file name
  *
- * This function should be used in conjunction with $OUTPUT->pix_url to produce
+ * This function should be used in conjunction with $OUTPUT->image_url to produce
  * a return the full path to an icon.
  *
  * <code>
  * $filename = '.jpg';
- * $icon = $OUTPUT->pix_url(file_extension_icon($filename))->out();
+ * $icon = $OUTPUT->image_url(file_extension_icon($filename))->out();
  * echo html_writer::empty_tag('img', array('src' => $icon, 'alt' => '...'));
  * </code>
  *
@@ -3067,7 +3073,10 @@ class curl {
             }
         } else {
             // Remove newlines, they are not allowed in headers.
-            $this->header[] = preg_replace('/[\r\n]/', '', $header);
+            $newvalue = preg_replace('/[\r\n]/', '', $header);
+            if (!in_array($newvalue, $this->header)) {
+                $this->header[] = $newvalue;
+            }
         }
     }
 
@@ -4087,7 +4096,7 @@ function file_pluginfile($relativepath, $forcedownload, $preview = null) {
         $filename = array_pop($args);
 
         if ($filearea === 'badgeimage') {
-            if ($filename !== 'f1' && $filename !== 'f2') {
+            if ($filename !== 'f1' && $filename !== 'f2' && $filename !== 'f3') {
                 send_file_not_found();
             }
             if (!$file = $fs->get_file($context->id, 'badges', 'badgeimage', $badge->id, '/', $filename.'.png')) {
@@ -4232,7 +4241,7 @@ function file_pluginfile($relativepath, $forcedownload, $preview = null) {
                 // also if login is required for profile images and is not logged in or guest
                 // do not use require_login() because it is expensive and not suitable here anyway
                 $theme = theme_config::load($themename);
-                redirect($theme->pix_url('u/'.$filename, 'moodle')); // intentionally not cached
+                redirect($theme->image_url('u/'.$filename, 'moodle')); // intentionally not cached
             }
 
             if (!$file = $fs->get_file($context->id, 'user', 'icon', 0, '/', $filename.'.png')) {
@@ -4431,6 +4440,65 @@ function file_pluginfile($relativepath, $forcedownload, $preview = null) {
 
     // ========================================================================================================================
     } else if ($component === 'course') {
+
+        // Totara: default image for course backgrounds in grid catalogue.
+        if ($filearea === 'defaultimage') {
+            if ($CFG->forcelogin) {
+                require_login();
+            }
+            if ($context->contextlevel != CONTEXT_SYSTEM) {
+                send_file_not_found();
+            }
+            if (count($args) < 2) {
+                send_file_not_found();
+            }
+
+            $themerev = array_shift($args);
+            $lifetime = 60;
+            if ($themerev > 0) {
+                $lifetime = 60 * 60 * 2;
+            }
+
+            $filename = array_shift($args);
+            $fs = get_file_storage();
+            $files = $fs->get_area_files($context->id, 'course', 'defaultimage', 0, "timemodified DESC", false);
+            if (!$files) {
+                send_file_not_found();
+            }
+            $file = reset($files);
+
+            \core\session\manager::write_close(); // Unlock session during file serving.
+            send_stored_file($file, $lifetime, 0, $forcedownload, ['preview' => $preview, 'filename' => $filename]);
+        }
+        // Totara: one image per course for background in grid catalogue.
+        if ($filearea === 'images') {
+            if ($CFG->forcelogin) {
+                require_login();
+            }
+            if ($context->contextlevel != CONTEXT_COURSE) {
+                send_file_not_found();
+            }
+            if (count($args) < 2) {
+                send_file_not_found();
+            }
+
+            $courserev = array_shift($args);
+            $lifetime = 60;
+            if ($courserev > 0) {
+                $lifetime = 60 * 60;
+            }
+
+            $fs = get_file_storage();
+            $files = $fs->get_area_files($context->id, 'course', 'images', 0, "timemodified DESC", false);
+            if (!$files) {
+                send_file_not_found();
+            }
+            $file = reset($files);
+
+            \core\session\manager::write_close(); // Unlock session during file serving.
+            send_stored_file($file, $lifetime, 0, $forcedownload, array('preview' => $preview));
+        }
+
         if ($context->contextlevel != CONTEXT_COURSE) {
             send_file_not_found();
         }

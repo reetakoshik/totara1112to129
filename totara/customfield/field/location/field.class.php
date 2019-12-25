@@ -70,7 +70,7 @@ class customfield_location extends customfield_base {
             return $syncitem;
         }
 
-        $address = $syncitem->$fieldname;
+        $address = clean_param($syncitem->$fieldname, PARAM_TEXT);
         // Make data in format required by @see customfield_location::prepare_form_location_data_for_db()
         $syncitem->{$fieldname . 'address'} = $address;
         $syncitem->{$fieldname . 'display'} = GMAP_DISPLAY_ADDRESS_ONLY;

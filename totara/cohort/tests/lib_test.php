@@ -190,7 +190,7 @@ class totara_cohort_lib_testcase extends advanced_testcase {
         $sink = $this->redirectEvents();
         $return = totara_cohort_add_association($this->cohort_set->id, $this->course->id, COHORT_ASSN_ITEMTYPE_COURSE, COHORT_ASSN_VALUE_VISIBLE);
         // Check that the return value matches an cohort_visibility record.
-        $this->assertInternalType('integer', $return);
+        $this->assertIsInt($return);
         $this->assertTrue($return > 0);
         $record = $DB->get_record('cohort_visibility', array('id' => $return), '*', MUST_EXIST);
         $this->assertEquals($this->cohort_set->id, $record->cohortid);
@@ -228,7 +228,7 @@ class totara_cohort_lib_testcase extends advanced_testcase {
         // Now add the course as enrolled learning.
         $return = totara_cohort_add_association($this->cohort_set->id, $this->course->id, COHORT_ASSN_ITEMTYPE_COURSE, COHORT_ASSN_VALUE_ENROLLED);
         // Check that we got back an enrolment id.
-        $this->assertInternalType('integer', $return);
+        $this->assertIsInt($return);
         $this->assertTrue($return > 0);
         $enrolinstance = $DB->get_record('enrol', array('id' => $return), '*', MUST_EXIST);
         $this->assertSame('cohort', $enrolinstance->enrol);

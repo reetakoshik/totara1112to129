@@ -234,7 +234,7 @@ class mod_quiz_attempt_walkthrough_testcase extends advanced_testcase {
 
 
     public function get_correct_response_for_variants() {
-        return array(array(1, 9.9), array(2, 8.5), array(5, 14.2), array(10, 6.8, true));
+        return array(array(1, 9.9), array(2, 8.5), array(5, 14.2), array(10, 6.8));
     }
 
     protected $quizwithvariants = null;
@@ -244,10 +244,8 @@ class mod_quiz_attempt_walkthrough_testcase extends advanced_testcase {
      *
      * @dataProvider get_correct_response_for_variants
      */
-    public function test_quiz_with_question_with_variants_attempt_walkthrough($variantno, $correctresponse, $done = false) {
+    public function test_quiz_with_question_with_variants_attempt_walkthrough($variantno, $correctresponse) {
         global $SITE;
-
-        $this->resetAfterTest($done);
 
         $this->setAdminUser();
 

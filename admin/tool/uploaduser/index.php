@@ -72,6 +72,7 @@ $strcannotassignrole        = get_string('cannotassignrole', 'error');
 $struserauthunsupported     = get_string('userauthunsupported', 'error');
 $stremailduplicate          = get_string('useremailduplicate', 'error');
 
+$strinvalidemail            = get_string('invalidemail');
 $strinvalidpasswordpolicy   = get_string('invalidpasswordpolicy', 'error');
 $errorstr                   = get_string('error');
 
@@ -385,7 +386,7 @@ if ($formdata = $mform2->is_cancelled()) {
 
         // add default values for remaining fields
         $formdefaults = array();
-        if ($updatetype != UU_UPDATE_FILEOVERRIDE && $updatetype != UU_UPDATE_NOCHANGES) {
+        if (!$existinguser || ($updatetype != UU_UPDATE_FILEOVERRIDE && $updatetype != UU_UPDATE_NOCHANGES)) {
             foreach ($STD_FIELDS as $field) {
                 if (isset($user->$field)) {
                     continue;
@@ -623,7 +624,11 @@ if ($formdata = $mform2->is_cancelled()) {
                                 }
                             }
                             if (!validate_email($user->email)) {
-                                $upt->track('email', get_string('invalidemail'), 'warning');
+                                // Totara: Do not upload users with invalid email addresses.
+                                $upt->track('email', $strinvalidemail, 'warning');
+                                $upt->track('status', $strinvalidemail, 'error');
+                                $userserrors++;
+                                continue 2;
                             }
                         }
 
@@ -803,7 +808,11 @@ if ($formdata = $mform2->is_cancelled()) {
                 }
             }
             if (!validate_email($user->email)) {
-                $upt->track('email', get_string('invalidemail'), 'warning');
+                // Totara: Do not upload users with invalid email addresses.
+                $upt->track('email', $strinvalidemail, 'warning');
+                $upt->track('status', $strinvalidemail, 'error');
+                $userserrors++;
+                continue;
             }
 
             if (empty($user->lang)) {

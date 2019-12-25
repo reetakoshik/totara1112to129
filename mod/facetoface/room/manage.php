@@ -22,13 +22,14 @@
  * @package mod_facetoface
  */
 
+use mod_facetoface\room;
+
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/mod/facetoface/lib.php');
 
-$delete = optional_param('delete', 0, PARAM_INT);
-$show = optional_param('show', 0, PARAM_INT);
-$hide = optional_param('hide', 0, PARAM_INT);
+$id = optional_param('id', 0, PARAM_INT);
+$action = optional_param('action', '', PARAM_ALPHA);
 $confirm = optional_param('confirm', 0, PARAM_BOOL);
 $debug = optional_param('debug', 0, PARAM_INT);
 
@@ -37,57 +38,73 @@ admin_externalpage_setup('modfacetofacerooms');
 
 $returnurl = new moodle_url('/admin/settings.php', array('section' => 'modsettingfacetoface'));
 
-$report = reportbuilder_get_embedded_report('facetoface_rooms', array(), false, 0);
+$report = reportbuilder::create_embedded('facetoface_rooms');
 $redirectto = new moodle_url('/mod/facetoface/room/manage.php', $report->get_current_url_params());
 
 // Handle actions.
-if ($delete) {
-    if (!$room = $DB->get_record('facetoface_room', array('id' => $delete, 'custom' => 0))) {
-        return($returnurl);
+if ($action === 'delete') {
+    if (empty($id)) {
+        print_error('error:roomdoesnotexist', 'facetoface', $returnurl);
     }
 
-    $roominuse = $DB->count_records('facetoface_sessions_dates', array('roomid' => $delete));
+    $room = new room($id);
+    if ($room->get_custom()) {
+        print_error('error:roomnotpublished', 'facetoface', $returnurl);
+    }
+
+    $roominuse = $DB->count_records('facetoface_sessions_dates', array('roomid' => $id));
     if ($roominuse) {
         print_error('error:roomisinuse', 'facetoface', $returnurl);
     }
 
     if (!$confirm) {
         echo $OUTPUT->header();
-        $confirmurl = new moodle_url($redirectto, array('delete' => $delete, 'confirm' => 1, 'sesskey' => sesskey()));
-        echo $OUTPUT->confirm(get_string('deleteroomconfirm', 'facetoface', format_string($room->name)), $confirmurl, $redirectto);
+        $confirmurl = new moodle_url($redirectto, array('action' => 'delete', 'id' => $id, 'confirm' => 1, 'sesskey' => sesskey()));
+        echo $OUTPUT->confirm(get_string('deleteroomconfirm', 'facetoface', format_string($room->get_name())), $confirmurl, $redirectto);
         echo $OUTPUT->footer();
         die;
     }
 
     require_sesskey();
-    facetoface_delete_room($delete);
+    $room->delete();
+    unset($room);
 
     totara_set_notification(get_string('roomdeleted', 'facetoface'), $redirectto, array('class' => 'notifysuccess'));
 
-} else if ($show) {
-
-    require_sesskey();
-    if (!$room = $DB->get_record('facetoface_room', array('id' => $show, 'custom' => 0))) {
+} else if ($action === 'show') {
+    if (empty($id)) {
         print_error('error:roomdoesnotexist', 'facetoface', $returnurl);
     }
 
-    $DB->update_record('facetoface_room', array('id' => $show, 'hidden' => 0));
+    require_sesskey();
+    $room = new room($id);
+    if ($room->get_custom()) {
+        print_error('error:roomnotpublished', 'facetoface', $returnurl);
+    }
+
+    $room->show();
+    $room->save();
 
     totara_set_notification(get_string('roomshown', 'facetoface'), $redirectto, array('class' => 'notifysuccess'));
 
-} else if ($hide) {
-
-    require_sesskey();
-    if (!$room = $DB->get_record('facetoface_room', array('id' => $hide, 'custom' => 0))) {
+} else if ($action === 'hide') {
+    if (empty($id)) {
         print_error('error:roomdoesnotexist', 'facetoface', $returnurl);
     }
 
-    $DB->update_record('facetoface_room', array('id' => $hide, 'hidden' => 1));
+    require_sesskey();
+    $room = new room($id);
+    if ($room->get_custom()) {
+        print_error('error:roomnotpublished', 'facetoface', $returnurl);
+    }
+
+    $room->hide();
+    $room->save();
 
     totara_set_notification(get_string('roomhidden', 'facetoface'), $redirectto, array('class' => 'notifysuccess'));
 }
 
-$PAGE->set_button($report->edit_button());
+$PAGE->set_button($report->edit_button() . $PAGE->button);
 /** @var totara_reportbuilder_renderer $reportrenderer */
 $reportrenderer = $PAGE->get_renderer('totara_reportbuilder');
 

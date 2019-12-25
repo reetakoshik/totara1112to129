@@ -1,0 +1,8 @@
+This files describes API changes in /enrol/enrol_totara_facetoface,
+information provided here is intended especially for developers.
+
+=== 12 ===
+
+* Removed deprecated methods:
+  * enrol_totara_facetoface_statushandler()
+  * enrol_totara_facetoface_deletedhandler()

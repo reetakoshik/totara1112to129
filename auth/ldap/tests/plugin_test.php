@@ -96,37 +96,37 @@ class auth_ldap_plugin_testcase extends advanced_testcase {
 
 
         // Configure the plugin a bit.
-        set_config('host_url', TEST_AUTH_LDAP_HOST_URL, 'auth/ldap');
-        set_config('start_tls', 0, 'auth/ldap');
-        set_config('ldap_version', 3, 'auth/ldap');
-        set_config('ldapencoding', 'utf-8', 'auth/ldap');
-        set_config('pagesize', '2', 'auth/ldap');
-        set_config('bind_dn', TEST_AUTH_LDAP_BIND_DN, 'auth/ldap');
-        set_config('bind_pw', TEST_AUTH_LDAP_BIND_PW, 'auth/ldap');
-        set_config('user_type', 'rfc2307', 'auth/ldap');
-        set_config('contexts', 'ou=users,'.$topdn, 'auth/ldap');
-        set_config('search_sub', 0, 'auth/ldap');
-        set_config('opt_deref', LDAP_DEREF_NEVER, 'auth/ldap');
-        set_config('user_attribute', 'cn', 'auth/ldap');
-        set_config('memberattribute', 'memberuid', 'auth/ldap');
-        set_config('memberattribute_isdn', 0, 'auth/ldap');
-        set_config('creators', 'cn=creators,'.$topdn, 'auth/ldap');
-        set_config('removeuser', AUTH_REMOVEUSER_KEEP, 'auth/ldap');
+        set_config('host_url', TEST_AUTH_LDAP_HOST_URL, 'auth_ldap');
+        set_config('start_tls', 0, 'auth_ldap');
+        set_config('ldap_version', 3, 'auth_ldap');
+        set_config('ldapencoding', 'utf-8', 'auth_ldap');
+        set_config('pagesize', '2', 'auth_ldap');
+        set_config('bind_dn', TEST_AUTH_LDAP_BIND_DN, 'auth_ldap');
+        set_config('bind_pw', TEST_AUTH_LDAP_BIND_PW, 'auth_ldap');
+        set_config('user_type', 'rfc2307', 'auth_ldap');
+        set_config('contexts', 'ou=users,'.$topdn, 'auth_ldap');
+        set_config('search_sub', 0, 'auth_ldap');
+        set_config('opt_deref', LDAP_DEREF_NEVER, 'auth_ldap');
+        set_config('user_attribute', 'cn', 'auth_ldap');
+        set_config('memberattribute', 'memberuid', 'auth_ldap');
+        set_config('memberattribute_isdn', 0, 'auth_ldap');
+        set_config('coursecreatorcontext', 'cn=creators,'.$topdn, 'auth_ldap');
+        set_config('removeuser', AUTH_REMOVEUSER_KEEP, 'auth_ldap');
 
-        set_config('field_map_email', 'mail', 'auth/ldap');
-        set_config('field_updatelocal_email', 'oncreate', 'auth/ldap');
-        set_config('field_updateremote_email', '0', 'auth/ldap');
-        set_config('field_lock_email', 'unlocked', 'auth/ldap');
+        set_config('field_map_email', 'mail', 'auth_ldap');
+        set_config('field_updatelocal_email', 'oncreate', 'auth_ldap');
+        set_config('field_updateremote_email', '0', 'auth_ldap');
+        set_config('field_lock_email', 'unlocked', 'auth_ldap');
 
-        set_config('field_map_firstname', 'givenName', 'auth/ldap');
-        set_config('field_updatelocal_firstname', 'oncreate', 'auth/ldap');
-        set_config('field_updateremote_firstname', '0', 'auth/ldap');
-        set_config('field_lock_firstname', 'unlocked', 'auth/ldap');
+        set_config('field_map_firstname', 'givenName', 'auth_ldap');
+        set_config('field_updatelocal_firstname', 'oncreate', 'auth_ldap');
+        set_config('field_updateremote_firstname', '0', 'auth_ldap');
+        set_config('field_lock_firstname', 'unlocked', 'auth_ldap');
 
-        set_config('field_map_lastname', 'sn', 'auth/ldap');
-        set_config('field_updatelocal_lastname', 'oncreate', 'auth/ldap');
-        set_config('field_updateremote_lastname', '0', 'auth/ldap');
-        set_config('field_lock_lastname', 'unlocked', 'auth/ldap');
+        set_config('field_map_lastname', 'sn', 'auth_ldap');
+        set_config('field_updatelocal_lastname', 'oncreate', 'auth_ldap');
+        set_config('field_updateremote_lastname', '0', 'auth_ldap');
+        set_config('field_lock_lastname', 'unlocked', 'auth_ldap');
 
 
         $this->assertEquals(2, $DB->count_records('user'));
@@ -182,7 +182,7 @@ class auth_ldap_plugin_testcase extends advanced_testcase {
         $this->assertEquals(2, $DB->count_records('role_assignments', array('roleid'=>$creatorrole->id)));
 
 
-        set_config('removeuser', AUTH_REMOVEUSER_SUSPEND, 'auth/ldap');
+        set_config('removeuser', AUTH_REMOVEUSER_SUSPEND, 'auth_ldap');
 
         /** @var auth_plugin_ldap $auth */
         $auth = get_auth_plugin('ldap');
@@ -246,7 +246,7 @@ class auth_ldap_plugin_testcase extends advanced_testcase {
         $this->assertEquals(2, $DB->count_records('role_assignments'));
         $this->assertEquals(2, $DB->count_records('role_assignments', array('roleid'=>$creatorrole->id)));
 
-        set_config('removeuser', AUTH_REMOVEUSER_FULLDELETE, 'auth/ldap');
+        set_config('removeuser', AUTH_REMOVEUSER_FULLDELETE, 'auth_ldap');
 
         /** @var auth_plugin_ldap $auth */
         $auth = get_auth_plugin('ldap');
@@ -297,6 +297,76 @@ class auth_ldap_plugin_testcase extends advanced_testcase {
         $this->assertEquals(2, $DB->count_records('role_assignments'));
         $this->assertEquals(2, $DB->count_records('role_assignments', array('roleid'=>$creatorrole->id)));
 
+        // Test custom fields.
+        /** @var totara_core_generator $totaragenerator */
+        $totaragenerator = $this->getDataGenerator()->get_plugin_generator('totara_core');
+        $field = $totaragenerator->create_custom_profile_field(array('datatype' => 'text', 'name' => 'Pokus', 'shortname' => 'pokus'));
+        set_config('field_map_profile_field_pokus', 'uidnumber', 'auth_ldap');
+        set_config('field_updatelocal_profile_field_pokus', 'oncreate', 'auth_ldap');
+        set_config('field_updateremote_profile_field_pokus', '0', 'auth_ldap');
+        set_config('field_lock_profile_field_pokus', 'unlocked', 'auth_ldap');
+        /** @var auth_plugin_ldap $auth */
+        $auth = get_auth_plugin('ldap'); // Must reload config here!!!
+
+        $this->create_ldap_user($connection, $topdn, 6);
+        ob_start();
+        $sink = $this->redirectEvents();
+        $auth->sync_users(true);
+        $sink->close();
+        ob_end_clean();
+        $this->assertEquals(7, $DB->count_records('user', array('auth' => 'ldap')));
+        $user1 = $DB->get_record('user', array('username' => 'username1'), '*', MUST_EXIST);
+        $user6 = $DB->get_record('user', array('username' => 'username6'), '*', MUST_EXIST);
+        $this->assertSame(false, $DB->get_field('user_info_data', 'data', array('userid' => $user1->id, 'fieldid' => $field->id)));
+        $this->assertSame('2006', $DB->get_field('user_info_data', 'data', array('userid' => $user6->id, 'fieldid' => $field->id)));
+
+        set_config('field_map_profile_field_pokus', 'gidNumber', 'auth_ldap');
+        set_config('field_updatelocal_profile_field_pokus', 'onlogin', 'auth_ldap');
+        /** @var auth_plugin_ldap $auth */
+        $auth = get_auth_plugin('ldap'); // Must reload config here!!!
+        ob_start();
+        $sink = $this->redirectEvents();
+        $auth->sync_users(true);
+        $sink->close();
+        ob_end_clean();
+        $this->assertEquals(7, $DB->count_records('user', array('auth' => 'ldap')));
+        $user1 = $DB->get_record('user', array('username' => 'username1'), '*', MUST_EXIST);
+        $user6 = $DB->get_record('user', array('username' => 'username6'), '*', MUST_EXIST);
+        $this->assertSame('1001', $DB->get_field('user_info_data', 'data', array('userid' => $user1->id, 'fieldid' => $field->id)));
+        $this->assertSame('1006', $DB->get_field('user_info_data', 'data', array('userid' => $user6->id, 'fieldid' => $field->id)));
+
+        $this->create_ldap_user($connection, $topdn, 7);
+
+        $errorcode = null;
+        $user7 = authenticate_user_login('username7', 'pass7', false, $errorcode);
+        $this->assertSame('username7', $user7->username);
+        $this->assertSame('ldap', $user7->auth);
+        $this->assertSame('0', $user7->deleted);
+        $this->assertSame('0', $user7->suspended);
+        $this->assertSame('1007', $DB->get_field('user_info_data', 'data', array('userid' => $user7->id, 'fieldid' => $field->id)));
+
+        set_config('field_map_profile_field_pokus', 'uidnumber', 'auth_ldap');
+        /** @var auth_plugin_ldap $auth */
+        $auth = get_auth_plugin('ldap'); // Must reload config here!!!
+        ob_start();
+        $sink = $this->redirectEvents();
+        $auth->sync_users(false);
+        $sink->close();
+        ob_end_clean();
+        $this->assertEquals(8, $DB->count_records('user', array('auth' => 'ldap')));
+        $user1 = $DB->get_record('user', array('username' => 'username1'), '*', MUST_EXIST);
+        $user6 = $DB->get_record('user', array('username' => 'username6'), '*', MUST_EXIST);
+        $user7 = $DB->get_record('user', array('username' => 'username7'), '*', MUST_EXIST);
+        $this->assertSame('1001', $DB->get_field('user_info_data', 'data', array('userid' => $user1->id, 'fieldid' => $field->id)));
+        $this->assertSame('1006', $DB->get_field('user_info_data', 'data', array('userid' => $user6->id, 'fieldid' => $field->id)));
+        $this->assertSame('1007', $DB->get_field('user_info_data', 'data', array('userid' => $user7->id, 'fieldid' => $field->id)));
+
+        $user7 = authenticate_user_login('username7', 'pass7', false, $errorcode);
+        $this->assertSame('username7', $user7->username);
+        $this->assertSame('ldap', $user7->auth);
+        $this->assertSame('0', $user7->deleted);
+        $this->assertSame('0', $user7->suspended);
+        $this->assertSame('2007', $DB->get_field('user_info_data', 'data', array('userid' => $user7->id, 'fieldid' => $field->id)));
 
         $this->recursive_delete($connection, TEST_AUTH_LDAP_DOMAIN, 'dc=moodletest');
         ldap_close($connection);
@@ -411,39 +481,39 @@ class auth_ldap_plugin_testcase extends advanced_testcase {
         ldap_add($connection, 'ou='.$o['ou'].','.$topdn, $o);
 
         // Configure the plugin a bit.
-        set_config('host_url', TEST_AUTH_LDAP_HOST_URL, 'auth/ldap');
-        set_config('start_tls', 0, 'auth/ldap');
-        set_config('ldap_version', 3, 'auth/ldap');
-        set_config('ldapencoding', 'utf-8', 'auth/ldap');
-        set_config('pagesize', '2', 'auth/ldap');
-        set_config('bind_dn', TEST_AUTH_LDAP_BIND_DN, 'auth/ldap');
-        set_config('bind_pw', TEST_AUTH_LDAP_BIND_PW, 'auth/ldap');
-        set_config('user_type', 'rfc2307', 'auth/ldap');
-        set_config('contexts', 'ou=users,'.$topdn, 'auth/ldap');
-        set_config('search_sub', 0, 'auth/ldap');
-        set_config('opt_deref', LDAP_DEREF_NEVER, 'auth/ldap');
-        set_config('user_attribute', 'cn', 'auth/ldap');
-        set_config('memberattribute', 'memberuid', 'auth/ldap');
-        set_config('memberattribute_isdn', 0, 'auth/ldap');
-        set_config('creators', 'cn=creators,'.$topdn, 'auth/ldap');
-        set_config('removeuser', AUTH_REMOVEUSER_KEEP, 'auth/ldap');
+        set_config('host_url', TEST_AUTH_LDAP_HOST_URL, 'auth_ldap');
+        set_config('start_tls', 0, 'auth_ldap');
+        set_config('ldap_version', 3, 'auth_ldap');
+        set_config('ldapencoding', 'utf-8', 'auth_ldap');
+        set_config('pagesize', '2', 'auth_ldap');
+        set_config('bind_dn', TEST_AUTH_LDAP_BIND_DN, 'auth_ldap');
+        set_config('bind_pw', TEST_AUTH_LDAP_BIND_PW, 'auth_ldap');
+        set_config('user_type', 'rfc2307', 'auth_ldap');
+        set_config('contexts', 'ou=users,'.$topdn, 'auth_ldap');
+        set_config('search_sub', 0, 'auth_ldap');
+        set_config('opt_deref', LDAP_DEREF_NEVER, 'auth_ldap');
+        set_config('user_attribute', 'cn', 'auth_ldap');
+        set_config('memberattribute', 'memberuid', 'auth_ldap');
+        set_config('memberattribute_isdn', 0, 'auth_ldap');
+        set_config('creators', 'cn=creators,'.$topdn, 'auth_ldap');
+        set_config('removeuser', AUTH_REMOVEUSER_KEEP, 'auth_ldap');
 
-        set_config('field_map_email', 'mail', 'auth/ldap');
-        set_config('field_updatelocal_email', 'oncreate', 'auth/ldap');
-        set_config('field_updateremote_email', '0', 'auth/ldap');
-        set_config('field_lock_email', 'unlocked', 'auth/ldap');
+        set_config('field_map_email', 'mail', 'auth_ldap');
+        set_config('field_updatelocal_email', 'oncreate', 'auth_ldap');
+        set_config('field_updateremote_email', '0', 'auth_ldap');
+        set_config('field_lock_email', 'unlocked', 'auth_ldap');
 
-        set_config('field_map_firstname', 'givenName', 'auth/ldap');
-        set_config('field_updatelocal_firstname', 'oncreate', 'auth/ldap');
-        set_config('field_updateremote_firstname', '0', 'auth/ldap');
-        set_config('field_lock_firstname', 'unlocked', 'auth/ldap');
+        set_config('field_map_firstname', 'givenName', 'auth_ldap');
+        set_config('field_updatelocal_firstname', 'oncreate', 'auth_ldap');
+        set_config('field_updateremote_firstname', '0', 'auth_ldap');
+        set_config('field_lock_firstname', 'unlocked', 'auth_ldap');
 
-        set_config('field_map_lastname', 'sn', 'auth/ldap');
-        set_config('field_updatelocal_lastname', 'oncreate', 'auth/ldap');
-        set_config('field_updateremote_lastname', '0', 'auth/ldap');
-        set_config('field_lock_lastname', 'unlocked', 'auth/ldap');
-        set_config('passtype', 'md5', 'auth/ldap');
-        set_config('create_context', 'ou=users,'.$topdn, 'auth/ldap');
+        set_config('field_map_lastname', 'sn', 'auth_ldap');
+        set_config('field_updatelocal_lastname', 'oncreate', 'auth_ldap');
+        set_config('field_updateremote_lastname', '0', 'auth_ldap');
+        set_config('field_lock_lastname', 'unlocked', 'auth_ldap');
+        set_config('passtype', 'md5', 'auth_ldap');
+        set_config('create_context', 'ou=users,'.$topdn, 'auth_ldap');
 
         $this->assertEquals(2, $DB->count_records('user'));
         $this->assertEquals(0, $DB->count_records('role_assignments'));

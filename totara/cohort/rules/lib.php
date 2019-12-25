@@ -94,8 +94,17 @@ function cohort_rules_get_rule_definition($rulegroup, $rulename) {
 function cohort_rules_get_menu_options() {
     static $rulesmenu = false;
 
+    $reset = false;
+    if (defined('PHPUNIT_TEST') && PHPUNIT_TEST) {
+        // If it is a phpunit test running, then probably we should reset the rules menu for the 
+        // multiple tests
+        unset($rulesmenu);
+        $rulesmenu = false;
+        $reset = true;
+    }
+
     if (!$rulesmenu) {
-        $rules = cohort_rules_list();
+        $rules = cohort_rules_list($reset);
 
         // Set up the list of rules for use in menus.
         $rulesmenu = array();
@@ -214,30 +223,6 @@ function cohort_rule_create_rule($rulesetid, $type, $name) {
     $event->trigger();
 
     return $todb->id;
-}
-
-
-/**
- * Take a rule's description and wrap it in the HTML it needs to fit into the rules form
- * @deprecated since Totara 9.0
- * @param int $ruleid
- * @param string $description
- * @param string $rulegroup
- * @param string $rulename
- * @param boolean $first
- * @param string $operator
- * @param boolean $brokenrule
- * @return string
- */
-function cohort_rule_form_html($ruleid, $description, $rulegroup = '', $rulename = '', $first = false, $operator = '',
-                               $brokenrule = false) {
-    // If you are here our appologise.
-    // As part of Totara 9.0 we rearranged how this was working cleaning up the output to use a list and cleaned up the JS handling
-    // of rule changes.
-    // For this reason the HTML returned by this method would likely have left to a breakage for you.
-    // As such it has been removed and you will need to update your code.
-    debugging('cohort_rule_form_html has been deprecated and no longer functions. Please see the code for details', DEBUG_DEVELOPER);
-    return '';
 }
 
 /**

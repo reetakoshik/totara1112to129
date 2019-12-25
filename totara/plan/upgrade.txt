@@ -1,6 +1,53 @@
 This files describes API changes in Learning plans,
 information provided here is intended especially for developers.
 
+=== 12.9 ===
+
+* dp_get_plans() added third argument $checkcanview
+
+=== 12.5 ===
+
+* dp_can_view_users_plans() has a new parameter $viewerid to allow access checks for any user. It defaults to the current user.
+
+=== 12.0 ===
+
+Removed deprecated methods:
+  * development_plan::get_manager()
+  * development_plan::send_alert()
+  * dp_base_component::display_back_to_index_link()
+* evidence_display_attachment() has been deprecated and should not longer be used. Please
+  consider using display_evidence_detail() instead.
+* Deprecated the following report builder display functions and replaced with display classes
+  * rb_source_dp_certification::rb_display_link_program_icon(), please call totara_program\rb\display\program_icon_link::display() instead.
+  * rb_source_dp_certification::rb_display_historylink(), please call totara_plan\rb\display\plan_history_link::display() instead.
+  * rb_source_dp_certification::rb_display_progress(), please call totara_certification\rb\display\certif_progress::display() instead.
+  * rb_source_dp_certification_history::rb_display_link_program_icon(), please call totara_program\rb\display\program_icon_link::display() instead.
+  * rb_source_dp_competency::rb_display_status_history_link(), please call totara_plan\rb\display\plan_history_link::display() instead.
+  * rb_source_dp_competency::rb_display_proficiency_and_approval().
+  * rb_source_dp_competency::rb_display_competencyeditstatus(), please call totara_plan\rb\display\plan_competency_edit_status::display() instead.
+  * rb_source_dp_competency::rb_display_proficiency_and_approval_menu(), please call totara_plan\rb\display\plan_competency_proficiency_and_approval_menu::display() instead.
+  * rb_source_dp_course::rb_display_course_completion_progress(), please call totara_plan\rb\display\plan_course_completion_progress::display() instead.
+  * rb_source_dp_course::rb_display_course_completion_progress_and_approval(), please call totara_plan\rb\display\plan_course_completion_progress_and_approval::display() instead.
+  * rb_source_dp_course::rb_display_course_completion_progresspercentage(), please call totara_plan\rb\display\plan_course_completion_progress_percentage::display() instead.
+  * rb_source_dp_course::rb_display_course_completion_previous_completion(), please call totara_plan\rb\display\plan_course_completion_previous_completion::display() instead.
+  * rb_source_dp_evidence::rb_display_viewevidencelink(), please call totara_plan\rb\display\plan_evidence_view_link::display() instead.
+  * rb_source_dp_evidence::rb_display_evidenceview(), please call totara_plan\rb\display\plan_evidence_name_link::display() instead.
+  * rb_source_dp_evidence::rb_display_evidencelink(), please call totara_plan\rb\display\plan_evidence_view_link::display() instead.
+  * rb_source_dp_evidence::rb_display_actionlinks(), please call totara_plan\rb\display\plan_evidence_action_links::display() instead.
+  * rb_source_dp_evidence::rb_display_evidenceinuse(), please call totara_plan\rb\display\plan_evidence_in_use::display() instead.
+  * rb_source_dp_evidence::rb_display_description().
+  * rb_source_dp_objective::rb_display_objectivelink(), please call totara_plan\rb\display\plan_objective_name_link::display() instead.
+  * rb_source_dp_objective::rb_display_proficiency_and_approval(), please call totara_plan\rb\display\plan_objective_status::display() instead.
+  * rb_source_dp_program::rb_display_program_completion_progress().
+  * rb_source_dp_program::rb_display_prog_date().
+  * rb_source_dp_program::rb_display_mandatory_status(), please call totara_program\rb\display\program_mandatory_status::display() instead.
+  * rb_source_dp_program::rb_display_recurring_status(), please call totara_program\rb\display\program_recurring_status::display() instead.
+  * rb_source_dp_program::rb_display_link_program_icon(), please call totara_program\rb\display\program_icon_link::display() instead.
+  * rb_source_dp_program::rb_display_program_previous_completion(), please call totara_program\rb\display\program_previous_completions::display() instead.
+  * rb_source_dp_program_recurring::rb_display_link_program_icon(), please call totara_program\rb\display\program_icon_link::display() instead.
+  * rb_source_dp_program_recurring::rb_display_program_completion_status(), please call totara_program\rb\display\program_completion_status::display() instead.
+  * rb_source_dp_program_recurring::rb_display_completion_date(), please call totara_program\rb\display\program_completion_date::display() instead.
+
 === 10 ===
 
 Added isexport param to rb_source_dp_certification::rb_display_link_program_icon.

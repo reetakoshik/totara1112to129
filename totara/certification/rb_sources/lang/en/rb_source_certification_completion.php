@@ -29,8 +29,6 @@ $string['sourcetitle'] = 'Certification Completion';
 $string['status'] = 'Status';
 $string['type_certif'] = 'Certification';
 $string['type_certcompletion'] = 'Certification Completion';
-$string['type_prog'] = 'Certification';
-$string['type_progcompletion'] = 'Certification Completion';
 
 // Red-amber-green status column / filter.
 $string['filter:problem'] = 'Expired or Overdue';

@@ -26,9 +26,11 @@ global $CFG;
 require_once($CFG->dirroot . '/mod/facetoface/rb_sources/rb_facetoface_base_source.php');
 
 class rb_source_facetoface_events extends rb_facetoface_base_source {
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $sourcetitle;
+    use \core_course\rb\source\report_trait;
+    use \totara_reportbuilder\rb\source\report_trait;
+    use \mod_facetoface\rb\traits\required_columns;
+    use \mod_facetoface\rb\traits\post_config;
+    use \totara_cohort\rb\source\report_trait;
 
     public function __construct($groupid, rb_global_restriction_set $globalrestrictionset = null) {
         if ($groupid instanceof rb_global_restriction_set) {
@@ -49,6 +51,7 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
         $this->paramoptions = $this->define_paramoptions();
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_facetoface_events');
         $this->add_customfields();
+        $this->usedcomponents[] = 'totara_cohort';
 
         parent::__construct();
     }
@@ -62,22 +65,7 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
     }
 
     public function define_joinlist() {
-        $global_restriction_join_su = $this->get_global_report_restriction_join('su', 'userid');
         $joinlist = array();
-
-        $joinlist[] = new rb_join(
-            'attendees',
-            'LEFT',
-            "(SELECT su.sessionid, count(ss.id) AS number
-                FROM {facetoface_signups} su
-                {$global_restriction_join_su}
-                JOIN {facetoface_signups_status} ss
-                    ON su.id = ss.signupid
-                WHERE ss.superceded=0 AND ss.statuscode >= " . MDL_F2F_STATUS_APPROVED ."
-                GROUP BY su.sessionid)",
-            "attendees.sessionid = base.id",
-            REPORT_BUILDER_RELATION_ONE_TO_ONE
-        );
 
         $joinlist[] = new rb_join(
             'facetoface',
@@ -88,18 +76,6 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
         );
 
         $joinlist[] = new rb_join(
-            'allattendees',
-            'LEFT',
-            "(SELECT su.sessionid, su.userid, ss.id AS ssid, ss.statuscode
-                FROM {facetoface_signups} su
-                {$global_restriction_join_su}
-                JOIN {facetoface_signups_status} ss
-                    ON su.id = ss.signupid
-                WHERE ss.superceded = 0)",
-            'allattendees.sessionid = base.id',
-            REPORT_BUILDER_RELATION_ONE_TO_ONE
-        );
-        $joinlist[] = new rb_join(
             'sessiondate',
             'LEFT',
             '{facetoface_sessions_dates}',
@@ -108,15 +84,13 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
         );
 
         $this->add_grouped_session_status_to_joinlist($joinlist, 'base', 'id');
-        $this->add_course_table_to_joinlist($joinlist, 'facetoface', 'course');
-        $this->add_course_category_table_to_joinlist($joinlist, 'course', 'category');
-        $this->add_job_assignment_tables_to_joinlist($joinlist, 'allattendees', 'userid');
-        $this->add_user_table_to_joinlist($joinlist, 'allattendees', 'userid');
-        $this->add_user_table_to_joinlist($joinlist, 'base', 'usermodified', 'modifiedby');
+        $this->add_core_course_tables($joinlist, 'facetoface', 'course');
+        $this->add_core_course_category_tables($joinlist, 'course', 'category');
+        $this->add_core_user_tables($joinlist, 'base', 'usermodified', 'modifiedby');
         $this->add_facetoface_session_roles_to_joinlist($joinlist, 'base.id');
         $this->add_facetoface_currentuserstatus_to_joinlist($joinlist);
-        $this->add_context_table_to_joinlist($joinlist, 'course', 'id', CONTEXT_COURSE, 'INNER');
-        $this->add_cohort_course_tables_to_joinlist($joinlist, 'facetoface', 'course');
+        $this->add_context_tables($joinlist, 'course', 'id', CONTEXT_COURSE, 'INNER');
+        $this->add_totara_cohort_course_tables($joinlist, 'facetoface', 'course');
 
         return $joinlist;
     }
@@ -124,102 +98,144 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
     public function define_columnoptions() {
         global $DB;
         $usernamefieldscreator = totara_get_all_user_name_fields_join('modifiedby');
+        $global_restriction_join_su = $this->get_global_report_restriction_join('su', 'userid');
 
         $columnoptions = array(
             new rb_column_option(
                 'session',
                 'totalnumattendees',
                 get_string('totalnumattendees', 'rb_source_facetoface_summary'),
-                '(CASE WHEN allattendees.statuscode >= ' . MDL_F2F_STATUS_REQUESTED . ' THEN 1 ELSE NULL END)',
+                "(SELECT COUNT('x')
+                    FROM {facetoface_signups} su
+                    {$global_restriction_join_su}
+                    JOIN {facetoface_signups_status} ss ON su.id = ss.signupid
+                   WHERE ss.superceded = 0 AND ss.statuscode >= " . \mod_facetoface\signup\state\requested::get_code() . " AND su.sessionid = base.id)",
                 array(
-                    'joins' => array('allattendees'),
-                    'grouping' => 'count',
-                    'dbdatatype' => 'integer'
+                    'dbdatatype' => 'integer',
+                    'displayfunc' => 'integer',
+                    'iscompound' => true,
+                    'issubquery' => true,
                 )
             ),
             new rb_column_option(
                 'session',
                 'waitlistattendees',
                 get_string('waitlistattendees', 'rb_source_facetoface_summary'),
-                '(CASE WHEN allattendees.statuscode = ' . MDL_F2F_STATUS_WAITLISTED . ' THEN 1 ELSE NULL END)',
+                "(SELECT COUNT('x')
+                    FROM {facetoface_signups} su
+                    {$global_restriction_join_su}
+                    JOIN {facetoface_signups_status} ss ON su.id = ss.signupid
+                   WHERE ss.superceded = 0 AND ss.statuscode = " . \mod_facetoface\signup\state\waitlisted::get_code() . " AND su.sessionid = base.id)",
                 array(
-                    'joins' => array('allattendees'),
-                    'grouping' => 'count',
-                    'dbdatatype' => 'integer'
+                    'dbdatatype' => 'integer',
+                    'displayfunc' => 'integer',
+                    'iscompound' => true,
+                    'issubquery' => true,
                 )
             ),
             new rb_column_option(
                 'session',
                 'numspaces',
                 get_string('numspaces', 'rb_source_facetoface_summary'),
-                '(CASE WHEN allattendees.statuscode >= ' . MDL_F2F_STATUS_APPROVED . ' THEN 1 ELSE NULL END)',
-                array('joins' => array('allattendees'),
-                    'grouping' => 'count',
-                    'displayfunc' => 'session_spaces',
+                "(SELECT COUNT('x')
+                    FROM {facetoface_signups} su
+                    {$global_restriction_join_su}
+                    JOIN {facetoface_signups_status} ss ON su.id = ss.signupid
+                   WHERE ss.superceded = 0 AND ss.statuscode >= " . \mod_facetoface\signup\state\waitlisted::get_code() . " AND su.sessionid = base.id)",
+                array(
+                    'dbdatatype' => 'integer',
+                    'displayfunc' => 'f2f_session_spaces',
                     'extrafields' => array('overall_capacity' => 'base.capacity'),
-                    'dbdatatype' => 'integer'
+                    'iscompound' => true,
+                    'issubquery' => true,
                 )
             ),
             new rb_column_option(
                 'session',
                 'cancelledattendees',
                 get_string('cancelledattendees', 'rb_source_facetoface_summary'),
-                '(CASE WHEN allattendees.statuscode IN (' . MDL_F2F_STATUS_USER_CANCELLED . ', ' . MDL_F2F_STATUS_SESSION_CANCELLED . ') THEN 1 ELSE NULL END)',
+                "(SELECT COUNT('x')
+                    FROM {facetoface_signups} su
+                    {$global_restriction_join_su}
+                    JOIN {facetoface_signups_status} ss ON su.id = ss.signupid
+                   WHERE ss.superceded = 0 AND (ss.statuscode = " . \mod_facetoface\signup\state\user_cancelled::get_code() . " OR ss.statuscode = " . \mod_facetoface\signup\state\event_cancelled::get_code() . ") AND su.sessionid = base.id)",
                 array(
-                    'joins' => array('allattendees'),
-                    'grouping' => 'count',
-                    'dbdatatype' => 'integer'
+                    'dbdatatype' => 'integer',
+                    'displayfunc' => 'integer',
+                    'iscompound' => true,
+                    'issubquery' => true,
                 )
             ),
             new rb_column_option(
                 'session',
                 'fullyattended',
                 get_string('fullyattended', 'rb_source_facetoface_summary'),
-                '(CASE WHEN allattendees.statuscode = ' . MDL_F2F_STATUS_FULLY_ATTENDED . ' THEN 1 ELSE NULL END)',
+                "(SELECT COUNT('x')
+                    FROM {facetoface_signups} su
+                    {$global_restriction_join_su}
+                    JOIN {facetoface_signups_status} ss ON su.id = ss.signupid
+                   WHERE ss.superceded = 0 AND ss.statuscode = " . \mod_facetoface\signup\state\fully_attended::get_code() . " AND su.sessionid = base.id)",
                 array(
-                    'joins' => array('allattendees'),
-                    'grouping' => 'count',
-                    'dbdatatype' => 'integer'
+                    'dbdatatype' => 'integer',
+                    'displayfunc' => 'integer',
+                    'iscompound' => true,
+                    'issubquery' => true,
                 )
             ),
             new rb_column_option(
                 'session',
                 'partiallyattended',
                 get_string('partiallyattended', 'rb_source_facetoface_summary'),
-                '(CASE WHEN allattendees.statuscode = ' . MDL_F2F_STATUS_PARTIALLY_ATTENDED . ' THEN 1 ELSE NULL END)',
+                "(SELECT COUNT('x')
+                    FROM {facetoface_signups} su
+                    {$global_restriction_join_su}
+                    JOIN {facetoface_signups_status} ss ON su.id = ss.signupid
+                   WHERE ss.superceded = 0 AND ss.statuscode = " . \mod_facetoface\signup\state\partially_attended::get_code() . " AND su.sessionid = base.id)",
                 array(
-                    'joins' => array('allattendees'),
-                    'grouping' => 'count',
-                    'dbdatatype' => 'integer'
+                    'dbdatatype' => 'integer',
+                    'displayfunc' => 'integer',
+                    'iscompound' => true,
+                    'issubquery' => true,
                 )
             ),
             new rb_column_option(
                 'session',
                 'noshowattendees',
                 get_string('noshowattendees', 'rb_source_facetoface_summary'),
-                '(CASE WHEN allattendees.statuscode = ' . MDL_F2F_STATUS_NO_SHOW . ' THEN 1 ELSE NULL END)',
+                "(SELECT COUNT('x')
+                    FROM {facetoface_signups} su
+                    {$global_restriction_join_su}
+                    JOIN {facetoface_signups_status} ss ON su.id = ss.signupid
+                   WHERE ss.superceded = 0 AND ss.statuscode = " . \mod_facetoface\signup\state\no_show::get_code() . " AND su.sessionid = base.id)",
                 array(
-                    'joins' => array('allattendees'),
-                    'grouping' => 'count',
-                    'dbdatatype' => 'integer'
+                    'dbdatatype' => 'integer',
+                    'displayfunc' => 'integer',
+                    'iscompound' => true,
+                    'issubquery' => true,
                 )
             ),
             new rb_column_option(
                 'session',
                 'declinedattendees',
                 get_string('declinedattendees', 'rb_source_facetoface_summary'),
-                '(CASE WHEN allattendees.statuscode = ' . MDL_F2F_STATUS_DECLINED . ' THEN 1 ELSE NULL END)',
+                "(SELECT COUNT('x')
+                    FROM {facetoface_signups} su
+                    {$global_restriction_join_su}
+                    JOIN {facetoface_signups_status} ss ON su.id = ss.signupid
+                   WHERE ss.superceded = 0 AND ss.statuscode = " . \mod_facetoface\signup\state\declined::get_code() . " AND su.sessionid = base.id)",
                 array(
-                    'joins' => array('allattendees'),
-                    'grouping' => 'count',
-                    'dbdatatype' => 'integer'
+                    'dbdatatype' => 'integer',
+                    'displayfunc' => 'integer',
+                    'iscompound' => true,
+                    'issubquery' => true,
                 )
             ),
             new rb_column_option(
                 'session',
                 'details',
                 get_string('sessdetails', 'rb_source_facetoface_sessions'),
-                'base.details'
+                'base.details',
+                array('displayfunc' => 'format_string')
             ),
             new rb_column_option(
                 'session',
@@ -236,7 +252,8 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
                 get_string('minbookings', 'rb_source_facetoface_summary'),
                 'base.mincapacity',
                 array(
-                    'dbdatatype' => 'integer'
+                    'dbdatatype' => 'integer',
+                    'displayfunc' => 'integer'
                 )
             ),
         );
@@ -248,7 +265,8 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
                 get_string('normalcost', 'rb_source_facetoface_summary'),
                 'base.normalcost',
                 array(
-                    'dbdatatype' => 'decimal'
+                    'dbdatatype' => 'decimal',
+                    'displayfunc' => 'format_string'
                 )
             );
             if (!get_config(null, 'facetoface_hidediscount')) {
@@ -258,7 +276,8 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
                     get_string('discountcost', 'rb_source_facetoface_summary'),
                     'base.discountcost',
                     array(
-                        'dbdatatype' => 'decimal'
+                        'dbdatatype' => 'decimal',
+                        'displayfunc' => 'format_string'
                     )
                 );
             }
@@ -270,7 +289,8 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
             get_string('sessionid', 'rb_source_facetoface_room_assignments'),
             'base.id',
             array(
-                'dbdatatype' => 'integer'
+                'dbdatatype' => 'integer',
+                'displayfunc' => 'integer'
             )
         );
 
@@ -280,17 +300,24 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
             get_string('sesscapacity', 'rb_source_facetoface_sessions'),
             'base.capacity',
             array(
-                'dbdatatype' => 'integer'
+                'dbdatatype' => 'integer',
+                'displayfunc' => 'integer'
             )
         );
         $columnoptions[] = new rb_column_option(
             'session',
             'numattendees',
             get_string('numattendees', 'rb_source_facetoface_sessions'),
-            'attendees.number',
+            "(SELECT COUNT('x')
+                FROM {facetoface_signups} su
+                {$global_restriction_join_su}
+                JOIN {facetoface_signups_status} ss ON su.id = ss.signupid
+               WHERE ss.superceded = 0 AND ss.statuscode >= " . \mod_facetoface\signup\state\waitlisted::get_code() ." AND su.sessionid = base.id)",
             array(
-                'joins' => 'attendees',
-                'dbdatatype' => 'integer'
+                'dbdatatype' => 'integer',
+                'displayfunc' => 'integer',
+                'iscompound' => true,
+                'issubquery' => true,
             )
         );
 
@@ -298,15 +325,20 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
             'session',
             'numattendeeslink',
             get_string('numattendeeslink', 'rb_source_facetoface_summary'),
-            'attendees.number',
+            "(SELECT COUNT('x')
+                FROM {facetoface_signups} su
+                {$global_restriction_join_su}
+                JOIN {facetoface_signups_status} ss ON su.id = ss.signupid
+               WHERE ss.superceded = 0 AND ss.statuscode >= " . \mod_facetoface\signup\state\waitlisted::get_code() ." AND su.sessionid = base.id)",
             array(
-                'joins' => array('attendees'),
                 'dbdatatype' => 'integer',
-                'displayfunc' => 'numattendeeslink',
+                'displayfunc' => 'f2f_num_attendees_link',
                 'defaultheading' => get_string('numattendees', 'rb_source_facetoface_sessions'),
                 'extrafields' => array(
                     'session' => 'base.id'
-                )
+                ),
+                'iscompound' => true,
+                'issubquery' => true,
             )
         );
 
@@ -316,8 +348,12 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
             get_string('eventtimecreated', 'rb_source_facetoface_events'),
             "base.timecreated",
             array(
-                'displayfunc' => 'nice_datetime',
+                'joins' => 'sessiondate',
+                'displayfunc' => 'event_date',
                 'dbdatatype' => 'timestamp',
+                'extrafields' => array(
+                    'timezone' => 'sessiondate.sessiontimezone'
+                )
             )
         );
 
@@ -327,8 +363,12 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
             get_string('lastupdated', 'rb_source_facetoface_events'),
             "base.timemodified",
             array(
-                'displayfunc' => 'nice_datetime',
+                'joins' => 'sessiondate',
+                'displayfunc' => 'event_date',
                 'dbdatatype' => 'timestamp',
+                'extrafields' => array(
+                    'timezone' => 'sessiondate.sessiontimezone'
+                )
             )
         );
 
@@ -340,7 +380,7 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
                   ELSE " . $DB->sql_concat_join("' '", $usernamefieldscreator) . " END",
             array(
                 'joins' => 'modifiedby',
-                'displayfunc' => 'link_user',
+                'displayfunc' => 'f2f_user_link',
                 'extrafields' => array_merge(array('id' => 'modifiedby.id'), $usernamefieldscreator),
             )
         );
@@ -351,8 +391,8 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
         $this->add_facetoface_currentuserstatus_to_columns($columnoptions);
 
         // Include some standard columns.
-        $this->add_course_category_fields_to_columns($columnoptions);
-        $this->add_course_fields_to_columns($columnoptions);
+        $this->add_core_course_category_columns($columnoptions);
+        $this->add_core_course_columns($columnoptions);
 
         return $columnoptions;
     }
@@ -374,7 +414,7 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
                 FROM {facetoface_sessions} s
                 LEFT JOIN {facetoface_signups} su ON (su.sessionid = s.id)
                 LEFT JOIN {facetoface_signups_status} ss
-                    ON (su.id = ss.signupid AND ss.superceded = 0 AND ss.statuscode >= " . MDL_F2F_STATUS_BOOKED . ")
+                    ON (su.id = ss.signupid AND ss.superceded = 0 AND ss.statuscode >= " . \mod_facetoface\signup\state\booked::get_code() . ")
                 WHERE 1=1
                 GROUP BY s.id)",
 
@@ -536,8 +576,8 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
         $this->add_facetoface_currentuserstatus_to_filters($filteroptions);
 
         // Add session custom fields to filters.
-        $this->add_course_category_fields_to_filters($filteroptions);
-        $this->add_course_fields_to_filters($filteroptions);
+        $this->add_core_course_category_filters($filteroptions);
+        $this->add_core_course_filters($filteroptions);
 
         return $filteroptions;
     }
@@ -572,7 +612,17 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
         return $defaultcolumns;
     }
 
+    /**
+     * Display evet actions
+     *
+     * @deprecated Since Totara 12.0
+     * @param $session
+     * @param $row
+     * @param bool $isexport
+     * @return null|string
+     */
     public function rb_display_actions($session, $row, $isexport = false) {
+        debugging('rb_source_facetoface_events::rb_display_actions has been deprecated since Totara 12.0. Use mod_facetoface\rb\display\f2f_session_actions::display', DEBUG_DEVELOPER);
         global $OUTPUT;
 
         if ($isexport) {
@@ -586,7 +636,7 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
         }
 
         return html_writer::link(
-            new moodle_url('/mod/facetoface/attendees.php', array('s' => $session)),
+            new moodle_url('/mod/facetoface/attendees/view.php', array('s' => $session)),
             $OUTPUT->pix_icon('t/cohort', get_string("attendees", "facetoface"))
         );
     }
@@ -594,21 +644,26 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
     /**
      * Spaces left on session.
      *
+     * @deprecated Since Totara 12.0
      * @param string $count Number of signups
      * @param object $row Report row
      * @return string Display html
      */
     public function rb_display_session_spaces($count, $row) {
+        debugging('rb_source_facetoface_events::rb_display_session_spaces has been deprecated since Totara 12.0. Use mod_facetoface\rb\display\f2f_session_spaces::display', DEBUG_DEVELOPER);
         $spaces = $row->overall_capacity - $count;
         return ($spaces > 0 ? $spaces : 0);
     }
 
     /**
      * Show if manager's approval required
+     *
+     * @deprecated Since Totara 12.0
      * @param bool $required True when approval required
      * @param stdClass $row
      */
     public function rb_display_approver($required, $row) {
+        debugging('rb_source_facetoface_events::rb_display_approver has been deprecated since Totara 12.0', DEBUG_DEVELOPER);
         if ($required) {
             return get_string('manager', 'core_role');
         } else {
@@ -622,52 +677,7 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
     protected function define_requiredcolumns() {
         $requiredcolumns = array();
 
-        $requiredcolumns[] = new rb_column(
-            'visibility',
-            'id',
-            '',
-            "course.id",
-            array(
-                'joins' => 'course',
-                'required' => 'true',
-                'hidden' => 'true'
-            )
-        );
-
-        $requiredcolumns[] = new rb_column(
-            'visibility',
-            'visible',
-            '',
-            "course.visible",
-            array(
-                'joins' => 'course',
-                'required' => 'true',
-                'hidden' => 'true'
-            )
-        );
-
-        $requiredcolumns[] = new rb_column(
-            'visibility',
-            'audiencevisible',
-            '',
-            "course.audiencevisible",
-            array(
-                'joins' => 'course',
-                'required' => 'true',
-                'hidden' => 'true')
-        );
-
-        $requiredcolumns[] = new rb_column(
-            'ctx',
-            'id',
-            '',
-            "ctx.id",
-            array(
-                'joins' => 'ctx',
-                'required' => 'true',
-                'hidden' => 'true'
-            )
-        );
+        $this->add_audiencevisibility_columns($requiredcolumns);
 
         $context = context_system::instance();
         if (has_any_capability(['mod/facetoface:viewattendees'], $context)) {
@@ -680,7 +690,7 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
                     'noexport' => true,
                     'nosort' => true,
                     'extrafields' => array('facetofaceid' => 'base.facetoface'),
-                    'displayfunc' => 'actions',
+                    'displayfunc' => 'f2f_session_actions',
                 )
             );
         }
@@ -689,8 +699,8 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
     }
 
     protected function add_customfields() {
-        $this->add_custom_fields_for('facetoface_session', 'base', 'facetofacesessionid', $this->joinlist, $this->columnoptions, $this->filteroptions);
-        $this->add_custom_fields_for('facetoface_sessioncancel', 'base', 'facetofacesessioncancelid', $this->joinlist, $this->columnoptions, $this->filteroptions);
+        $this->add_totara_customfield_component('facetoface_session', 'base', 'facetofacesessionid', $this->joinlist, $this->columnoptions, $this->filteroptions);
+        $this->add_totara_customfield_component('facetoface_sessioncancel', 'base', 'facetofacesessioncancelid', $this->joinlist, $this->columnoptions, $this->filteroptions);
     }
 
     protected function define_paramoptions() {
@@ -706,10 +716,6 @@ class rb_source_facetoface_events extends rb_facetoface_base_source {
      * @param reportbuilder $report
      */
     public function post_config(reportbuilder $report) {
-        $userid = $report->reportfor;
-        if (isset($report->embedobj->embeddedparams['userid'])) {
-            $userid = $report->embedobj->embeddedparams['userid'];
-        }
-        $report->set_post_config_restrictions($report->post_config_visibility_where('course', 'course', $userid));
+        $this->add_audiencevisibility_config($report);
     }
 }

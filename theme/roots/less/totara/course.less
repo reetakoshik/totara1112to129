@@ -134,8 +134,8 @@
 }
 
 .activity img.activityicon {
-    margin-right: 6px;
     vertical-align: text-bottom;
+    width: 1.3em;
 }
 
 .section .activity .activityinstance,
@@ -367,8 +367,6 @@
     }
 }
 
-#site-news-forum h2,
-#frontpage-course-list h2,
 #frontpage-category-names h2,
 #frontpage-category-combo h2 {
     margin-bottom: 9px;
@@ -436,7 +434,7 @@ input.titleeditor {
     text-align: center;
 }
 
-#page-admin-course-manage {
+#page-admin-course-management {
     #movecourses {
         td {
             img {
@@ -446,6 +444,14 @@ input.titleeditor {
             img.icon {
                 padding: 0;
             }
+        }
+    }
+    .buttons {
+        margin-left: 0;
+        padding-left: 0;
+
+        .singlebutton input[type="submit"] {
+            .btn-default;
         }
     }
 }
@@ -1204,7 +1210,7 @@ input.titleeditor {
  * Tidy-up course management page, standardising
  * layout and appearance.
  */
-#page-course-management {
+#page-admin-course-management {
     #course-category-listings {
         margin-bottom: @padding-large-vertical * 2;
     }
@@ -1262,4 +1268,13 @@ input.titleeditor {
             }
         }
     }
+}
+
+#coursesearch {
+    margin-bottom: @totara_style-spacing_medium;
+}
+
+// Completely hide a text box that manages access restrictions json
+#id_availabilityconditionsheader #id_availabilityconditionsjson {
+    display: none;
 }

@@ -491,7 +491,7 @@ M.core_availability.List.prototype.addChild = function(newItem) {
         // Create connecting label (text will be filled in later by updateHtml).
         this.inner.one('.availability-children').appendChild(Y.Node.create(
                 '<div class="availability-connector">' +
-                '<span class="label"></span>' +
+                '<span class="label label-default"></span>' +
                 '</div>'));
     }
     // Add item to array and to HTML.

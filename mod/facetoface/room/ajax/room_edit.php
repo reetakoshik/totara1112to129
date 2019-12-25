@@ -21,37 +21,43 @@
  * @package mod_facetoface
  */
 
+define('AJAX_SCRIPT', true);
+
+use \mod_facetoface\room;
+
 require_once(__DIR__ . '/../../../../config.php');
 require_once($CFG->dirroot . '/mod/facetoface/lib.php');
+require_once($CFG->dirroot . '/totara/customfield/fieldlib.php');
 
 $id = required_param('id', PARAM_INT);   // Room id.
 $facetofaceid = required_param('f', PARAM_INT);   // Face-to-face id.
 $sessionid = optional_param('s', 0, PARAM_INT);
 
-$facetoface = $DB->get_record('facetoface', array('id' => $facetofaceid), '*', MUST_EXIST);
-$course = $DB->get_record('course', array('id' => $facetoface->course), '*', MUST_EXIST);
-$cm = get_coursemodule_from_instance('facetoface', $facetoface->id, $facetoface->course, false, MUST_EXIST);
-if ($sessionid) {
-    $session = $DB->get_record('facetoface_sessions', array('id' => $sessionid, 'facetoface' => $facetoface->id), '*', MUST_EXIST);
-} else {
-    $session = false;
+$seminar = new \mod_facetoface\seminar($facetofaceid);
+$course = $DB->get_record('course', array('id' => $seminar->get_course()), '*', MUST_EXIST);
+$cm = $seminar->get_coursemodule();
+
+$event = new \mod_facetoface\seminar_event($sessionid);
+if (!$event->exists()) {
+    $event->set_facetoface($seminar->get_id());
 }
 
 $context = context_module::instance($cm->id);
-require_login($course, false, $cm, false, true);
+ajax_require_login($course, false, $cm, false, true);
 require_capability('mod/facetoface:editevents', $context);
-
 require_sesskey();
 
 if ($id) {
-    // Only custom rooms can be changed here!
-    $room = $DB->get_record('facetoface_room', array('id' => $id, 'custom' => 1), '*', MUST_EXIST);
-    if (!facetoface_is_room_available(0, 0, $room, $sessionid, $facetoface->id)) {
-        // They should never get here, any error will do.
-        print_error('error');
+    $room = new room($id);
+    if ($room->exists()) {
+        // Only custom rooms can be changed here!
+        if (!$room->is_available(0, 0, $event)) {
+            // They should never get here, any error will do.
+            print_error('Error: Room is unavailable in this seminar event');
+        }
     }
 } else {
-    $room = false;
+    $room = room::create_custom_room();
 }
 
 // Legacy Totara HTML ajax, this should be converted to json + AJAX_SCRIPT.
@@ -60,26 +66,21 @@ send_headers('text/html; charset=utf-8', false);
 $PAGE->set_context($context);
 $PAGE->set_url('/mod/facetoface/room/ajax/room_edit.php');
 
-$form = facetoface_process_room_form($room, $facetoface, $session,
-    function($room) {
-        echo json_encode(array('id' => $room->id, 'name' => $room->name, 'capacity' => $room->capacity, 'custom' => $room->custom));
-        exit();
-    },
-    null
-);
+$customdata = ['room' => $room, 'seminar' => $seminar, 'event' => $event, 'editoroptions' => $TEXTAREA_OPTIONS];
+$form = new \mod_facetoface\form\editroom(null, $customdata, 'post', '', array('class' => 'dialog-nobind'), true, null, 'mform_modal');
 
-// Include the same strings as mod/facetoface/sessions.php, because we override the lang string cache with this ugly hack.
-$PAGE->requires->strings_for_js(array('save', 'delete'), 'totara_core');
-$PAGE->requires->strings_for_js(array('cancel', 'ok', 'edit', 'loadinghelp'), 'moodle');
-$PAGE->requires->strings_for_js(array('chooseassets', 'chooseroom', 'dateselect', 'useroomcapacity', 'nodatesyet',
-    'createnewasset', 'editasset', 'createnewroom', 'editroom'), 'facetoface');
+if ($data = $form->get_data()) {
+    $data->custom = empty($data->notcustom);
+    $room = \mod_facetoface\room_helper::save($data);
+    echo json_encode(array('id' => $room->get_id(), 'name' => $room->get_name(), 'custom' => $room->get_custom()));
+} else {
+    // This is required because custom fields may use AMD module for JS and we can't re-initialise AMD
+    // which will happen if we call get_end_code() without setting the first arg to false.
+    // It must be called before form->display and importantly before get_end_code.
+    $amdsnippets = $PAGE->requires->get_raw_amd_js_code();
 
-// This is required because custom fields may use AMD module for JS and we can't re-initialise AMD
-// which will happen if we call get_end_code() without setting the first arg to false.
-// It must be called before form->display and importantly before get_end_code.
-$amdsnippets = $PAGE->requires->get_raw_amd_js_code();
-
-$form->display();
-echo $PAGE->requires->get_end_code(false);
-// Finally add our AMD code into the page.
-echo html_writer::script(implode(";\n", $amdsnippets));
+    $form->display();
+    echo $PAGE->requires->get_end_code(false);
+    // Finally add our AMD code into the page.
+    echo html_writer::script(implode(";\n", $amdsnippets));
+}

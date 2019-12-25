@@ -19,8 +19,7 @@ Feature: Completion logs are created
       | cert1   | user001 |
 
   Scenario: The certification window open and expired messages are sent
-    Given I click on "Certifications" in the totara menu
-    And I follow "Cert 1"
+    Given I am on "Cert 1" certification homepage
     And I press "Edit certification details"
     And I click on "Completion" "link" in the ".tabtree" "css_element"
     And I click on "Edit completion records" "link" in the "fn_001 ln_001" "table_row"

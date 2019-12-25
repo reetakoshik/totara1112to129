@@ -43,7 +43,7 @@ $PAGE->set_context($context);
 $PAGE->set_url('/totara/plan/add.php', array('userid' => $userid));
 $PAGE->set_pagelayout('report');
 $ownplan = ($userid == $USER->id);
-$menuitem = ($ownplan) ? 'learningplans' : 'myteam';
+$menuitem = ($ownplan) ? '\totara_plan\totara\menu\learningplans' : '\totara_core\totara\menu\myteam';
 $PAGE->set_totara_menu_selected($menuitem);
 
 ///
@@ -52,7 +52,7 @@ $PAGE->set_totara_menu_selected($menuitem);
 
 $role = $ownplan ? 'learner' : 'manager';
 $can_manage = dp_can_manage_users_plans($userid);
-$can_create = dp_role_is_allowed_action($role, 'create');
+$can_create = has_capability('totara/plan:manageanyplan', \context_system::instance()) ? true : dp_role_is_allowed_action($role, 'create');
 
 if (!$can_manage || !$can_create) {
     print_error('error:nopermissions', 'totara_plan');

@@ -86,8 +86,8 @@ class mod_wiki_userdata_collaborative_versions_test extends wiki_testcase {
 
         $contexts = collaborative_versions::get_compatible_context_levels();
 
-        $this->assertEquals($expected, $contexts,
-            "Collaborative versions wiki user_data item is expected to work with a wide range of contexts", .0, 10, true);
+        $this->assertEqualsCanonicalizing($expected, $contexts,
+            "Collaborative versions wiki user_data item is expected to work with a wide range of contexts");
     }
 
     public function test_it_exports_collaborative_wiki_versions_for_system_context() {

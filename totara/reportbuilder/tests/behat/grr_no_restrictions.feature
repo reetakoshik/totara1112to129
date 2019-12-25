@@ -18,7 +18,8 @@ Feature: Create global report no restrictions
     And I set the following administration settings values:
       | Enable report restrictions | 1 |
     And I press "Save changes"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | User report |
       | Source      | User        |
@@ -29,7 +30,7 @@ Feature: Create global report no restrictions
     And I switch to "Access" tab
     And I set the field "All users can view this report" to "1"
     And I press "Save changes"
-    And I navigate to "Global report restrictions" node in "Site administration > Reports > Report builder"
+    And I navigate to "Global report restrictions" node in "Site administration > Reports"
     And I press "New restriction"
     And I set the following fields to these values:
       | Name        | test restriction      |

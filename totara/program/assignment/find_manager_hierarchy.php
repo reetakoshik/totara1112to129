@@ -23,7 +23,6 @@
  */
 
 require_once(__DIR__ . '/../../../config.php');
-require_once($CFG->dirroot . '/totara/core/dialogs/dialog_content_manager.class.php');
 require_once($CFG->dirroot . '/totara/program/lib.php');
 require_once($CFG->dirroot . '/totara/job/dialog/assign_manager.php');
 

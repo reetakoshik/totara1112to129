@@ -403,7 +403,7 @@ M.totara_programassignment = M.totara_programassignment || {
                     bodyContent  : result,
                     width        : 900,
                     centered     : true,
-                    modal        : false,
+                    modal        : true,
                     render       : true
                 });
                 M.totara_programassignment.datesDialogue.show();
@@ -598,18 +598,6 @@ program_assignment = new function() {
     this.categories = [];
     this.num_deleted_items = 0;
     this.num_added_items = 0;
-    /**
-     * total_count
-     * @deprecated since 10
-     * @type {number}
-     */
-    this.total_count = 0;
-    /**
-     * is_setup
-     * @deprecated since 10
-     * @type {boolean}
-     */
-    this.is_setup = false;
     this.is_modified = false;
 
     this.add_category = function(category) {
@@ -628,29 +616,6 @@ program_assignment = new function() {
             });
         });
         return result;
-    };
-
-    /**
-     * @deprecated since 10
-     */
-    this.update_total_user_count = function() {
-        var count = 0;
-        $.each(this.categories, function(index, category) {
-            count += category.user_count;
-        });
-        this.total_count = count;
-
-        if (this.is_setup) {
-            $('.overall_total span.total').html(this.total_count);
-        }
-    };
-
-    /**
-     * @deprecated since 10
-     */
-    this.setup = function() {
-        this.is_setup = true;
-        this.update_total_user_count();
     };
 };
 
@@ -680,12 +645,6 @@ function category(id, name, find_url, title, programid) {
 
     // Add a span for printing the total number
     this.user_count = 0;
-    /**
-     * user_count_label
-     * @deprecated since 10
-     * @type {any}
-     */
-    this.user_count_label = $('.user_count',this.element);
 
     /**
      ** Adds an item
@@ -810,20 +769,6 @@ function category(id, name, find_url, title, programid) {
         } else {
             this.table.show();
         }
-    };
-
-    /**
-     * @deprecated since 10
-     */
-    this.update_user_count = function() {
-        this.user_count = 0;
-        for (var x in this.items) {
-            this.user_count += this.items[x].users;
-
-        }
-        $(this.user_count_label).text(this.user_count);
-
-        this.main.update_total_user_count();
     };
 
     var self = this;

@@ -341,8 +341,42 @@ class xmldb_index extends xmldb_object {
             return 'Invalid xmldb_index->validateDefinition() call, $xmldb_table si required.';
         }
 
+        $hints = $this->getHints();
+        $fields = $this->getFields();
+
+        if (in_array('full_text_search', $hints)) {
+            if (count($fields) !== 1) {
+                throw new coding_exception('Full text search index must be over one text field only');
+            }
+            if (count($hints) !== 1) {
+                throw new coding_exception('Full text search index must be the only hint');
+            }
+            if ($this->getUnique()) {
+                throw new coding_exception('Full text search index cannot be unique');
+            }
+            $fieldname = reset($fields);
+            /** @var xmldb_field $field */
+            if (!$field = $xmldb_table->getField($fieldname)) {
+                // Bad luck, the fields are not present.
+                return null;
+            }
+            if ($field->getType() != XMLDB_TYPE_TEXT) {
+                throw new coding_exception('Full text search index can be used for text fields only');
+            }
+            if ($field->getNotNull()) {
+                // We need to know the nullability when changing mysql collation.
+                throw new coding_exception('Full text search index can be used for text fields that allow nulls only');
+            }
+            if ($field->getDefault() != null) {
+                // This should never happen because it is changed to null automatically with debugging message.
+                throw new coding_exception('Full text search index can be used for text fields with no default');
+            }
+            return null;
+        }
+
+        // Check index sizes.
         $total = 0;
-        foreach ($this->getFields() as $fieldname) {
+        foreach ($fields as $fieldname) {
             if (!$field = $xmldb_table->getField($fieldname)) {
                 // argh, we do not have the fields loaded yet, this should not happen during install
                 continue;

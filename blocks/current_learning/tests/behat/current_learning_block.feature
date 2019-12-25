@@ -1,4 +1,4 @@
-@totara @block @block_current_learning @totara_courseprogressbar
+@totara @block @block_current_learning @totara_courseprogressbar @totara_programprogressbar
 Feature: Test Current Learning block
 
   Background:
@@ -35,13 +35,13 @@ Feature: Test Current Learning block
     # Add an image to the private files block to use later in the program.
     And I click on "Dashboard" in the totara menu
     And I press "Customise this page"
-    And I select "Private files" from the "Add a block" singleselect
+    And I add the "Private files" block
     And I follow "Manage private files..."
     And I upload "mod/workshop/tests/fixtures/moodlelogo.png" file to "Files" filemanager
     And I click on "Save changes" "button"
 
     # Edit the program.
-    And I navigate to "Manage programs" node in "Site administration > Courses"
+    And I navigate to "Manage programs" node in "Site administration > Programs"
     And I click on "Miscellaneous" "link"
     And I click on "Test Program 1" "link"
     And I click on "Edit program details" "button"
@@ -60,7 +60,7 @@ Feature: Test Current Learning block
     And I should see image with alt text "It's a picture"
 
     # Add the program content.
-    And I click on "Content" "link"
+    And I switch to "Content" tab
     And I click on "addcontent_ce" "button" in the "#edit-program-content" "css_element"
     And I click on "Miscellaneous" "link" in the "addmulticourse" "totaradialogue"
     And I click on "Course 2" "link" in the "addmulticourse" "totaradialogue"
@@ -105,11 +105,11 @@ Feature: Test Current Learning block
       | user     | course | role           |
       | learner1 | course1| student        |
     And I log in as "admin"
-    And I navigate to "Manage programs" node in "Site administration > Courses"
+    And I navigate to "Manage programs" node in "Site administration > Programs"
     And I click on "Miscellaneous" "link"
     And I click on "Test Program 1" "link"
     And I click on "Edit program details" "button"
-    And I click on "Content" "link"
+    And I switch to "Content" tab
     And I click on "addcontent_ce" "button" in the "#edit-program-content" "css_element"
     And I click on "Miscellaneous" "link" in the "addmulticourse" "totaradialogue"
     And I click on "Course 2" "link" in the "addmulticourse" "totaradialogue"
@@ -212,8 +212,7 @@ Feature: Test Current Learning block
     And I log in as "admin"
 
     # Set course completion criteria
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "Course completion" node in "Course administration"
     And I expand all fieldsets
     And I set the field "Label - course1 label1" to "1"
@@ -245,7 +244,7 @@ Feature: Test Current Learning block
     Then I should see "All of the following criteria"
 
   @javascript
-  Scenario: Learner can see course progress in the Current Learning block
+  Scenario: Learner can see course and program progress in the Current Learning block
     Given the following "programs" exist in "totara_program" plugin:
       | fullname                | shortname |
       | Test Program 1          | program1  |
@@ -280,16 +279,14 @@ Feature: Test Current Learning block
 
     And I log in as "admin"
     # Set course completion criteria
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "Course completion" node in "Course administration"
     And I expand all fieldsets
     And I set the field "Label - course1 label1" to "1"
     And I set the field "Label - course1 label2" to "1"
     And I press "Save changes"
 
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 2"
+    And I am on "Course 2" course homepage
     And I navigate to "Course completion" node in "Course administration"
     And I expand all fieldsets
     And I set the field "id_activity_aggregation" to "2"
@@ -299,8 +296,7 @@ Feature: Test Current Learning block
 
     # Don't add course completion for Course 3
 
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 4"
+    And I am on "Course 4" course homepage
     And I navigate to "Course completion" node in "Course administration"
     And I expand all fieldsets
     And I set the field "Label - course4 label1" to "1"
@@ -313,18 +309,15 @@ Feature: Test Current Learning block
 
     When I log in as "learner1"
     # Complete some activities
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "Not completed: course1 label1. Select to mark as complete." "link"
     Then I should see "Completed: course1 label1. Select to mark as not complete."
 
-    When I click on "Find Learning" in the totara menu
-    And I follow "Course 2"
+    When I am on "Course 2" course homepage
     And I click on "Not completed: course2 label1. Select to mark as complete." "link"
     Then I should see "Completed: course2 label1. Select to mark as not complete."
 
-    When I click on "Find Learning" in the totara menu
-    And I follow "Course 3"
+    When I am on "Course 3" course homepage
     And I click on "Not completed: course3 label1. Select to mark as complete." "link"
     Then I should see "Completed: course3 label1. Select to mark as not complete."
 
@@ -355,6 +348,7 @@ Feature: Test Current Learning block
     And I log in as "learner1"
     And I click on "Dashboard" in the totara menu
     Then I should see "Test Program 1" in the "Current Learning" "block"
+    And I should see "30%" in the "//li[contains(@class, 'block_current_learning-program')]/div[contains(., 'Test Program 1')]" "xpath_element"
     And I should not see "Course 1" in the "Current Learning" "block"
     And I should not see "Course 2" in the "Current Learning" "block"
     And I should not see "Course 3" in the "Current Learning" "block"

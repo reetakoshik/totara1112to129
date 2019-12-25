@@ -17,15 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Totara navigation edit page.
- *
- * @package    totara
+ * @package    totara_core
  * @subpackage navigation
  * @author     Oleg Demeshev <oleg.demeshev@totaralms.com>
  */
 namespace totara_core\totara\menu;
-
-use \totara_core\totara\menu\menu as menu;
 
 class calendar extends \totara_core\totara\menu\item {
 
@@ -39,10 +35,6 @@ class calendar extends \totara_core\totara\menu\item {
 
     public function get_default_sortorder() {
         return 85000;
-    }
-
-    public function get_default_visibility() {
-        return menu::SHOW_WHEN_REQUIRED;
     }
 
     protected function get_default_parent() {

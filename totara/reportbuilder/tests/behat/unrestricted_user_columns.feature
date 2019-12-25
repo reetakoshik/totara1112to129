@@ -28,7 +28,8 @@ Feature: Test unrestricted user columns can be added and viewed by the admin
       | user5  | P1       | 1        | user4    |
       | user6  | P1       | 1        | user4    |
     And I log in as "admin"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | User report |
       | Source      | User        |
@@ -45,7 +46,7 @@ Feature: Test unrestricted user columns can be added and viewed by the admin
     And I press "Save changes"
 
   Scenario: Test that I can add and view unrestricted user columns in report builder with email visible
-    Given I navigate to "User policies" node in "Site administration > Users > Permissions"
+    Given I navigate to "User policies" node in "Site administration > Permissions"
     And I set the following fields to these values:
       | s__showuseridentity[email] | 1 |
     And I press "Save changes"
@@ -87,7 +88,7 @@ Feature: Test unrestricted user columns can be added and viewed by the admin
     And I should not see "user4@example.invalid" in the "job_assignment_allmanagerunobsemails" report column for "User Five"
 
   Scenario: Test that I can add and view unrestricted user columns in report builder when email is hidden
-    Given I navigate to "User policies" node in "Site administration > Users > Permissions"
+    Given I navigate to "User policies" node in "Site administration > Permissions"
     And I set the following fields to these values:
       | s__showuseridentity[email] | 0 |
     And I press "Save changes"
@@ -133,7 +134,7 @@ Feature: Test unrestricted user columns can be added and viewed by the admin
     Given I set the following system permissions of "Authenticated user" role:
       | capability | permission |
       | moodle/site:viewuseridentity | Allow |
-    And I navigate to "User policies" node in "Site administration > Users > Permissions"
+    And I navigate to "User policies" node in "Site administration > Permissions"
     And I set the following fields to these values:
       | s__showuseridentity[email] | 0 |
     And I press "Save changes"
@@ -162,7 +163,7 @@ Feature: Test unrestricted user columns can be added and viewed by the admin
     Given I set the following system permissions of "Authenticated user" role:
       | capability | permission |
       | moodle/site:viewuseridentity | Allow |
-    And I navigate to "User policies" node in "Site administration > Users > Permissions"
+    And I navigate to "User policies" node in "Site administration > Permissions"
     And I set the following fields to these values:
       | s__showuseridentity[email] | 1 |
     And I press "Save changes"

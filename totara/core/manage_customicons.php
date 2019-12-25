@@ -27,33 +27,27 @@ require_once($CFG->dirroot . '/totara/core/customicon_form.php');
 require_once($CFG->dirroot .'/totara/core/utils.php');
 require_once($CFG->dirroot .'/lib/formslib.php');
 require_once($CFG->dirroot .'/totara/core/lib.php');
-
-require_login();
-
-$context = context_system::instance();
-require_capability('moodle/site:config', $context);
+require_once($CFG->libdir . '/adminlib.php');
 
 $heading = get_string('customicons', 'totara_core');
 $url = new moodle_url('/totara/core/manage_customicons.php');
 
-$PAGE->set_url($url);
-$PAGE->set_pagelayout('admin');
-$PAGE->set_context($context);
+admin_externalpage_setup('customicons');
+
 $PAGE->set_title($heading);
-$PAGE->set_heading($SITE->fullname);
 $PAGE->navbar->add($heading, $url);
 
 $component = 'totara_core';
 $filetypes = array('course', 'program');
 $options = array('maxbytes' => $CFG->maxbytes,
     'subdirs'        => 0,
-    'maxfiles'       => 99,
+    'maxfiles'       => EDITOR_UNLIMITED_FILES,
     'accepted_types' => 'web_image');
 
 $data = new stdClass();
 $data->id = 1;
 foreach ($filetypes as $ft) {
-    file_prepare_standard_filemanager($data, $ft, $options, $context, $component, $ft, 0);
+    file_prepare_standard_filemanager($data, $ft, $options, $PAGE->context, $component, $ft, 0);
 }
 
 $form = new upload_icon_form(null, array('data' => $data, 'filemanageroptions' => $options));
@@ -66,7 +60,7 @@ if ($form->is_cancelled()) {
     totara_resize_images_filearea($usercontext->id, 'user', 'draft', $data->course_filemanager, 35, 35, true);
     totara_resize_images_filearea($usercontext->id, 'user', 'draft', $data->program_filemanager, 35, 35, true);
     foreach ($filetypes as $ft) {
-        $formdata = file_postupdate_standard_filemanager($data, $ft, $options, $context, $component, $ft, 0);
+        $formdata = file_postupdate_standard_filemanager($data, $ft, $options, $PAGE->context, $component, $ft, 0);
     }
     totara_set_notification(get_string('successuploadicon', 'totara_core'), null, array('class' => 'notifysuccess'));
 }

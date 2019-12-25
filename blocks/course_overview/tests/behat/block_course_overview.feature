@@ -1,4 +1,4 @@
-@block @block_course_overview
+@block @block_course_overview @javascript
 Feature: View the course overview block on the dashboard and test it's functionality
   In order to view the course overview block on the dashboard
   As an admin
@@ -110,7 +110,6 @@ Feature: View the course overview block on the dashboard and test it's functiona
     And I follow "messages"
     And I should see "No messages"
 
-  @javascript
   Scenario: View the block by a user with the welcome area and the user having messages.
     Given the following config values are set as admin:
       | showwelcomearea | 1 | block_course_overview |
@@ -161,8 +160,7 @@ Feature: View the course overview block on the dashboard and test it's functiona
     And I log in as "admin"
     And I navigate to "Manage enrol plugins" node in "Site administration > Plugins > Enrolments"
     And I click on "Enable" "link" in the "Course meta link" "table_row"
-    And I am on site homepage
-    And I follow "Course 2"
+    And I am on "Course 2" course homepage
     And I navigate to "Enrolment methods" node in "Users"
     And I add "Course meta link" enrolment method with:
       | Link course | C1 |

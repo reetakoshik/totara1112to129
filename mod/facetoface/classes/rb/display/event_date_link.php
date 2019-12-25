@@ -52,7 +52,7 @@ class event_date_link extends \totara_reportbuilder\rb\display\base {
         if ($format != 'html') {
             return $date;
         }
-        return $OUTPUT->action_link(new \moodle_url('/mod/facetoface/attendees.php', array('s' => $sessionid)), $date);
+        return $OUTPUT->action_link(new \moodle_url('/mod/facetoface/attendees/view.php', array('s' => $sessionid)), $date);
     }
 
     /**

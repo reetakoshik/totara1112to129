@@ -18,17 +18,17 @@ Feature: Verify circular line management cannot be created.
   Scenario: Check line management is defined correctly.
     Given I log in as "admin"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob1 Learner1"
     And I follow "learnerjob"
     Then I should see "Dave1 Manager1" in the "#managertitle" "css_element"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Dave1 Manager1"
     And I follow "managerjob"
     Then I should see "Frank1 Director1" in the "#managertitle" "css_element"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Frank1 Director1"
     Then I should see "directorjob"
 
@@ -39,7 +39,7 @@ Feature: Verify circular line management cannot be created.
 
     Given I log in as "admin"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Frank1 Director1"
     And I follow "directorjob"
     And I press "Choose manager"
@@ -63,7 +63,7 @@ Feature: Verify circular line management cannot be created.
 
     Given I log in as "admin"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Frank1 Director1"
     And I follow "directorjob"
     And I press "Choose manager"
@@ -87,7 +87,7 @@ Feature: Verify circular line management cannot be created.
 
     Given I log in as "admin"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Charlie1 Ceo1"
     And I follow "ceojob"
     And I press "Choose manager"
@@ -101,7 +101,7 @@ Feature: Verify circular line management cannot be created.
     When I press "Update job assignment"
     Then I should see "Job assignment saved"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Frank1 Director1"
     And I follow "directorjob"
     And I press "Choose manager"
@@ -117,7 +117,7 @@ Feature: Verify circular line management cannot be created.
     And I should see "Selecting this job assignment will create a circular management structure. Please select another." in the ".error" "css_element"
 
     # Remove the erroneous manager from the CEO.
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Charlie1 Ceo1"
     And I follow "ceojob"
     And I follow "Delete"
@@ -125,7 +125,7 @@ Feature: Verify circular line management cannot be created.
     Then I should see "Job assignment saved"
 
     # Add the correct manager and update the job assignment.
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Frank1 Director1"
     And I follow "directorjob"
     And I press "Choose manager"

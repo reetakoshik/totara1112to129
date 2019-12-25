@@ -23,8 +23,7 @@ Feature: Seminar event custom field validation works as expected
       | forceunique        | 1                 |
     And I press "Save changes"
 
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 13901"
+    And I am on "Course 13901" course homepage
     And I follow "View all events"
 
     And I follow "Add a new event"

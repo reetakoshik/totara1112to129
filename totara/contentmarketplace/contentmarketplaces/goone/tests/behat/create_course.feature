@@ -1,4 +1,4 @@
-@totara_contentmarketplace @contentmarketplace_goone @javascript @_switch_window
+@totara @totara_contentmarketplace @contentmarketplace_goone @javascript @_switch_window
 Feature: Create a course from the Go1 content marketplace
   As an admin
   I should be able to navigate the content marketplace and create a course
@@ -7,7 +7,6 @@ Feature: Create a course from the Go1 content marketplace
     Given I am on a totara site
     And I log in as "admin"
     And I navigate to "Setup Content Marketplaces" node in "Site administration > Content Marketplace"
-    And I click on "Enable content marketplaces" "button"
     And I should see "Enable" in the ".contentmarketplace_goone" "css_element"
     When I click on "Enable" "link" in the ".contentmarketplace_goone" "css_element"
     And I switch to "setup" window
@@ -45,8 +44,8 @@ Feature: Create a course from the Go1 content marketplace
       | Course full name  | Basic First Aid |
       | Course short name | Basic First Aid |
     When I set the following Totara form fields to these values:
-      | Course short name  | bsr |
-      | Course creation    | 2   |
+      | Course short name                                                 | bsr |
+      | Create a new single activity course for the selected content item | 2   |
     And I click on "Create and view course" "button"
     Then I should see "bsr" in the ".breadcrumb" "css_element"
     And I should see "Basic First Aid"
@@ -100,7 +99,7 @@ Feature: Create a course from the Go1 content marketplace
     And I should see "Epilepsy and the Older Person"
 
     When I set the following Totara form fields to these values:
-      | Course creation | 2 |
+      | Create a new single activity course for each selected content item | 2 |
     And I click on "Create 5 courses" "button"
     And I should see "5 new courses have been created"
     And I should see "Basic First Aid"

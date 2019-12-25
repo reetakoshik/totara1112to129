@@ -436,6 +436,9 @@ class core_useragent {
         if (strpos($useragent, 'Firefox') === false && strpos($useragent, 'Iceweasel') === false) {
             return false;
         }
+        if (self::is_google_image_proxy()) {
+            return false;
+        }
         if (empty($version)) {
             return true; // No version specified..
         }
@@ -467,6 +470,9 @@ class core_useragent {
         // Do not look for dates any more, we expect real Firefox version here.
         $useragent = self::get_user_agent_string();
         if ($useragent === false) {
+            return false;
+        }
+        if (self::is_google_image_proxy()) {
             return false;
         }
         if (empty($version)) {
@@ -917,6 +923,23 @@ class core_useragent {
     }
 
     /**
+     * Returns true if this is the Google Image proxy.
+     *
+     * The google image proxy is used by services such as gmail.
+     * It rewrites image URLs.
+     * It does not support SVG images, but will rewrite them anyway.
+     *
+     * @return bool
+     */
+    public static function is_google_image_proxy(): bool {
+        $useragent = self::get_user_agent_string();
+        if ($useragent === false) {
+            return false;
+        }
+        return (stripos($useragent, 'GoogleImageProxy') !== false);
+    }
+
+    /**
      * Check if the user agent matches a given brand.
      *
      * Known brand: 'Windows','Linux','Macintosh','SGI','SunOS','HP-UX'
@@ -926,7 +949,7 @@ class core_useragent {
      */
     public static function check_browser_operating_system($brand) {
         $useragent = self::get_user_agent_string();
-        return ($useragent !== false && preg_match("/$brand/i", $useragent));
+        return ($useragent !== false && stripos($useragent, $brand) !== false);
     }
 
     /**
@@ -990,6 +1013,9 @@ class core_useragent {
         if ($instance->supportssvg === null) {
             if ($instance->useragent === false) {
                 // Can't be sure, just say no.
+                $instance->supportssvg = false;
+            } else if (self::is_google_image_proxy()) {
+                // Google image proxy does not support SVG images.
                 $instance->supportssvg = false;
             } else if (self::check_ie_version('0') and !self::check_ie_version('9')) {
                 // IE < 9 doesn't support SVG. Say no.

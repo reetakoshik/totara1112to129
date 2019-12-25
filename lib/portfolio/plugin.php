@@ -168,7 +168,7 @@ abstract class portfolio_plugin_base {
      * @return bool
      */
     public function has_user_config() {
-        return false;
+        return true;
     }
 
     /**

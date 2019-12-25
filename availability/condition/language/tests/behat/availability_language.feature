@@ -21,9 +21,7 @@ Feature: Adding language activity access restriction
   Scenario: Test language condition allows student access
     # Basic setup.
     Given I log in as "admin"
-    And I am on site homepage
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
 
     # Add a page.
     And I add a "Page" to section "1"
@@ -42,8 +40,7 @@ Feature: Adding language activity access restriction
     # Log in as student
     When I log out
     And I log in as "student1"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "Test Page 1" in the "region-main" "region"
     And I follow "Test Page 1"
     Then I should see "Test Page 1"

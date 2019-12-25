@@ -25,7 +25,7 @@ namespace block_totara_featured_links\form\validator;
 
 defined('MOODLE_INTERNAL') || die();
 
-use \totara_form\element_validator;
+use totara_form\element_validator;
 
 /**
  * Class is_subclass_of_tile_base

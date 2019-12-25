@@ -83,12 +83,12 @@ class mod_facetoface_notification_form extends moodleform {
 
             $group = array();
             $group[] = $mform->createElement('advcheckbox', 'booked', get_string('status_booked', 'facetoface'));
-            $group[] = $mform->createElement('radio', 'booked_type', '',
-                    get_string('recipients_allbooked', 'facetoface'), MDL_F2F_RECIPIENTS_ALLBOOKED);
-            $group[] = $mform->createElement('radio', 'booked_type', '',
-                    get_string('recipients_attendedonly', 'facetoface'), MDL_F2F_RECIPIENTS_ATTENDED);
-            $group[] = $mform->createElement('radio', 'booked_type', '',
-                    get_string('recipients_noshowsonly', 'facetoface'), MDL_F2F_RECIPIENTS_NOSHOWS);
+            $group[] = &$mform->createElement('select','booked_type', '', array(
+                0 => get_string('selectwithdot', 'facetoface'),
+                MDL_F2F_RECIPIENTS_ALLBOOKED => get_string('recipients_allbooked', 'facetoface'),
+                MDL_F2F_RECIPIENTS_ATTENDED => get_string('recipients_attendedonly', 'facetoface'),
+                MDL_F2F_RECIPIENTS_NOSHOWS => get_string('recipients_noshowsonly', 'facetoface')
+            ), array('id' => 'f2f-booked-type'));
 
             $group[] = $mform->createElement('advcheckbox', 'waitlisted', get_string('status_waitlisted', 'facetoface'));
             $group[] = $mform->createElement('advcheckbox', 'cancelled', get_string('status_user_cancelled', 'facetoface'));
@@ -100,13 +100,10 @@ class mod_facetoface_notification_form extends moodleform {
             $mform->setType('booked', PARAM_BOOL);
             $mform->disabledIf('booked_type', 'booked', 'notchecked');
             $mform->setType('booked_type', PARAM_INT);
-
-            // Set correct values and defaults for interdependent elements.
-            $booked_checked = $notification->booked > 0 ? true : false;
-            $booked_type = $booked_checked ? $notification->booked : MDL_F2F_RECIPIENTS_ALLBOOKED;
-            $notification->booked = $booked_checked ? $booked_checked : $notification->booked;
-            $mform->setDefault('booked', $booked_checked);
-            $mform->setDefault('booked_type', $booked_type);
+            if (!empty($notification->booked)) {
+                $mform->setDefault('booked', true);
+                $mform->setDefault('booked_type', $notification->booked);
+            }
 
             $mform->setType('waitlisted', PARAM_BOOL);
             $mform->setType('cancelled', PARAM_BOOL);
@@ -131,11 +128,9 @@ class mod_facetoface_notification_form extends moodleform {
         }
 
         // Display message content settings.
-        $mform->addElement('text', 'title', get_string('title', 'facetoface'), array('size' => 50));
+        $mform->addElement('text', 'title', get_string('title', 'facetoface'));
         $mform->addRule('title', null, 'required', null, 'client');
         $mform->setType('title', PARAM_TEXT);
-        // The title is limited to 255 chars. We copy what forum post subject does and add client side validation.
-        $mform->addRule('title', get_string('error:notificationtitletoolong', 'mod_facetoface'), 'maxlength', 255, 'client');
 
         $mform->addElement('editor', 'body_editor', get_string('body', 'facetoface'));
         $mform->addHelpButton('body_editor', 'body', 'facetoface');
@@ -180,16 +175,17 @@ class mod_facetoface_notification_form extends moodleform {
     function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        // Title is limited to 255 chars, there is client side validation and this is the server side validation.
-        if (!isset($errors['title']) && core_text::strlen($data['title']) > 255) {
-            $errors['title'] = get_string('error:notificationtitletoolong', 'mod_facetoface');
-        }
-
         $mform =& $this->_form;
 
         if ($mform->elementExists('recipients')) {
             $recipients = $mform->getElement('recipients');
             $elements = $recipients->getElements();
+
+            // Validating the booked type here
+            $errors = $this->validate_booked_type();
+            if (!empty($errors)) {
+                return $errors;
+            }
 
             $rc = array('booked', 'waitlisted', 'cancelled', 'requested');
             $has_val = false;
@@ -208,5 +204,69 @@ class mod_facetoface_notification_form extends moodleform {
         }
 
         return $errors;
+    }
+
+    /**
+     * A method to validate whether the booked type is being set or not, if the checkbox booked
+     * is being checked. Since there is no default booked type anymore, therefore user has to
+     * do this manually, and it might be missed out (either accientally or tempt to do so).
+     *
+     * @return array
+     */
+    private function validate_booked_type(): array {
+        global $PAGE;
+
+        /** @var MoodleQuickForm_group $recipients */
+        $recipients =& $this->_form->getElement('recipients');
+        $elements = $recipients->getElements();
+
+        $errors = array();
+        foreach ($elements as $index => $element) {
+            if ($element->getName() === 'booked' && $element->getValue()) {
+                $hasbookedtype = true;
+                continue;
+            }
+
+            if ($hasbookedtype && $element->getName() === 'booked_type') {
+                // Since this booked_type element is not a multple select element, therefore it
+                // will always has an only one value at index 0.
+                $values = $element->getValue();
+                if (empty($values[0])) {
+                    // It fail there validation here.
+                    $elements[$index]->updateAttributes(array(
+                        'data-error' => 'error'
+                    ));
+
+                    // Reloading the elements for recipients element, so that it is updated.
+                    $recipients->setElements($elements);
+
+                    // Adding string for page here, as the form is failing to validate, and it
+                    // need to notify user
+                    $PAGE->requires->string_for_js('required', 'core');
+
+                    // Make it having data here, so that moodle form can fail the validation, and
+                    // force the user to provide the data for the missing fields.
+                    return array('booked_type' => '');
+                }
+                break;
+            }
+        }
+        return array();
+    }
+
+    /**
+     * Setting default values of the form, and modify the method here to tweak the recipients
+     * default data. Overiding this method, because {$notification->booked} is a value of
+     * constants, rather zero and one, therefore, with the {parent::set_data} function, it would
+     * not understand those values.
+     *
+     * @inheritdoc
+     * @param stdClass|array $defaultvalues
+     * @return void
+     */
+    public function set_data($defaultvalues) {
+        parent::set_data($defaultvalues);
+        $notification = (object)(array) $defaultvalues;
+        $this->_form->setDefault('booked', !empty($notification->booked));
     }
 }

@@ -77,7 +77,7 @@
     {{#options}}
         <div class="totara_form_element_radios_radio{{#horizontal}} totara_form_element_radios_radio_inline{{/horizontal}}">
             <input type="radio" id="{{oid}}" {{#frozen}}disabled data-{{/frozen}}name="{{name}}" value="{{value}}" {{#checked}}checked{{/checked}} {{#required}}required{{/required}} />
-            <label for="{{oid}}">{{{text}}}</label>
+            <label for="{{oid}}">{{{text}}}</label><span class="tf_loading" style="display: none;">{{#pix}} i/loading, core, loading, totara_core{{/pix}}</span>
         </div>
     {{/options}}
     </div>

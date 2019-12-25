@@ -27,11 +27,18 @@
 
 defined('MOODLE_INTERNAL') || die();
 global $DB, $CFG;
+require_once(__DIR__ . '/upgradelib.php');
+
+//NOTE: do not use any APIs here, this is strictly for low level DB modifications that are required
+//      to get through the core upgrade steps.
 
 $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
 // Always update all language packs if we can, because they are used in Totara upgrades/install.
 totara_upgrade_installed_languages();
+
+// Add parentid to context table and create context_map table.
+totara_core_upgrade_context_tables();
 
 // Add custom Totara completion field to prevent fatal problems during upgrade.
 $table = new xmldb_table('course_completions');
@@ -39,6 +46,16 @@ $field = new xmldb_field('invalidatecache', XMLDB_TYPE_INTEGER, '1', null, null,
 if (!$dbman->field_exists($table, $field)) {
     $dbman->add_field($table, $field);
 }
+
+// Update the indexes on the course_info_data table.
+$table = new xmldb_table('course_completion_criteria');
+$index = new xmldb_index('moduleinstance', XMLDB_INDEX_NOTUNIQUE, array('moduleinstance'));
+if (!$dbman->index_exists($table, $index)) {
+    $dbman->add_index($table, $index);
+}
+
+// Migrate old block titles to the new common config storage.
+totara_core_migrate_old_block_titles();
 
 // One-off fix for incorrect default setting from Moodle.
 if (!get_config('scorm', 'protectpackagedownloads')) {

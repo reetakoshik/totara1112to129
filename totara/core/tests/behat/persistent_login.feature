@@ -103,7 +103,7 @@ Feature: Test persistent login feature
     And I set the field "Remember my login" to "1"
     And I press "Log in"
     And I should see "Admin User"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "user one"
     And I follow "Log in as"
     And I should see "You are logged in as user one"
@@ -168,7 +168,7 @@ Feature: Test persistent login feature
     And I should see "Prvni Uzivatel"
     And I use magic for persistent login to purge cookies
     And I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Prvni Uzivatel"
     And I follow "Edit profile"
     And I set the field "New password" to "Userpass-1"
@@ -241,10 +241,10 @@ Feature: Test persistent login feature
     Given I am on a totara site
     And I log in as "admin"
 
-    When I navigate to "Security overview" node in "Site administration > Reports"
+    When I navigate to "Security overview" node in "Site administration > Security"
     Then I should see "OK" in the "Persistent login" "table_row"
 
     When I set the following administration settings values:
       | Persistent login | 1 |
-    And I navigate to "Security overview" node in "Site administration > Reports"
+    And I navigate to "Security overview" node in "Site administration > Security"
     Then I should see "Warning" in the "Persistent login" "table_row"

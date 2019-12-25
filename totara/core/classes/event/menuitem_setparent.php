@@ -34,6 +34,8 @@ defined('MOODLE_INTERNAL') || die();
  *      - string shortname: Short name of menu item.
  * }
  *
+ * @deprecated since Totara 12.0
+ *
  * @author Oleg Demeshev <oleg.demeshev@totaralms.com>
  * @package totara_core
  */

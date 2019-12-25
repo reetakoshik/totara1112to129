@@ -22,17 +22,20 @@ a:active {
 }
 
 .mform .btn-cancel {
-    color: [[setting:linkcolor]];
+    color: [[setting:buttoncolor-readable-text]];
 }
 
-button,
 input.submit,
 input[type="submit"],
 input[type="reset"],
 input[type="button"],
-#id_buttonfield,
+button,
+.btn,
 a.link-as-button,
-a.btn {
+a.btn,
+#id_buttonfield,
+#page-footer a:link.btn
+{
     color: [[setting:buttoncolor-readable-text]];
     background-color: [[setting:buttoncolor]];
     border-color: [[setting:buttoncolor]];
@@ -42,10 +45,13 @@ input.submit:hover,
 input[type="submit"]:hover,
 input[type="reset"]:hover,
 input[type="button"]:hover,
-#id_buttonfield:hover,
 button:hover,
+.btn:hover,
 a.link-as-button:hover,
-a.btn:hover {
+a.btn:hover,
+#id_buttonfield:hover,
+#page-footer a:link.btn:hover
+{
     color:[[setting:buttoncolor-readable-text]];
     background-color:[[setting:buttoncolor-darker-perc]];
 }
@@ -54,47 +60,230 @@ input.submit:active,
 input[type="submit"]:active,
 input[type="reset"]:active,
 input[type="button"]:active,
-#id_buttonfield:active,
 button:active,
+.btn:active,
 a.link-as-button:active,
 a.btn:active,
+#id_buttonfield:active,
+#page-footer a:link.btn:active,
+
 input.submit:focus,
 input[type="submit"]:focus,
 input[type="reset"]:focus,
 input[type="button"]:focus,
-#id_buttonfield:focus,
 button:focus,
+.btn:focus,
 a.link-as-button:focus,
 a.btn:focus,
+#id_buttonfield:focus,
+#page-footer a:link.btn:focus,
+
+input.submit:active:focus,
+input[type="submit"]:active:focus,
+input[type="reset"]:active:focus,
+input[type="button"]:active:focus,
+button:active:focus,
+.btn:active:focus,
+a.link-as-button:active:focus,
+a.btn:active:focus,
+#id_buttonfield:active:focus,
+#page-footer a:link.btn:active:focus,
+
 input.submit:active:hover,
 input[type="submit"]:active:hover,
 input[type="reset"]:active:hover,
 input[type="button"]:active:hover,
-#id_buttonfield:active:hover,
 button:active:hover,
+.btn:active:hover,
 a.link-as-button:active:hover,
-a.btn:active:hover {
+a.btn:active:hover,
+#id_buttonfield:active:hover,
+#page-footer a:link.btn:active:hover
+{
     color:[[setting:buttoncolor-readable-text]];
     background-color:[[setting:buttoncolor-dark-perc]];
 }
 
 button.disabled,
-input.form-submit.disabled,
 input[type="button"].disabled,
 input[type="submit"].disabled,
 input[type="reset"].disabled,
 button[disabled],
-input.form-submit[disabled],
 input[type="button"][disabled],
 input[type="submit"][disabled],
-input[type="reset"][disabled] {
-    color:#888888;
+input[type="reset"][disabled],
+fieldset[disabled] button:hover,
+fieldset[disabled] input[type="button"],
+fieldset[disabled] input[type="submit"],
+fieldset[disabled] input[type="reset"],
+
+button.disabled:hover,
+input[type="button"].disabled:hover,
+input[type="submit"].disabled:hover,
+input[type="reset"].disabled:hover,
+button[disabled]:hover,
+input[type="button"][disabled]:hover,
+input[type="submit"][disabled]:hover,
+input[type="reset"][disabled]:hover,
+fieldset[disabled] button:hover,
+fieldset[disabled] input[type="button"]:hover,
+fieldset[disabled] input[type="submit"]:hover,
+fieldset[disabled] input[type="reset"]:hover,
+
+button.disabled:focus,
+input[type="button"].disabled:focus,
+input[type="submit"].disabled:focus,
+input[type="reset"].disabled:focus,
+button[disabled]:focus,
+input[type="button"][disabled]:focus,
+input[type="submit"][disabled]:focus,
+input[type="reset"][disabled]:focus,
+fieldset[disabled] button:focus,
+fieldset[disabled] input[type="button"]:focus,
+fieldset[disabled] input[type="submit"]:focus,
+fieldset[disabled] input[type="reset"]:focus,
+
+button.disabled.focus,
+input[type="button"].disabled.focus,
+input[type="submit"].disabled.focus,
+input[type="reset"].disabled.focus,
+button[disabled].focus,
+input[type="button"][disabled].focus,
+input[type="submit"][disabled].focus,
+input[type="reset"][disabled].focus,
+fieldset[disabled] button.focus,
+fieldset[disabled] input[type="button"].focus,
+fieldset[disabled] input[type="submit"].focus,
+fieldset[disabled] input[type="reset"].focus
+{
+    color:[[setting:buttoncolor-readable-text]];
     background-color:[[setting:buttoncolor-lighter-perc]];
 }
+
+input.form-submit,
+input#id_submitbutton,
+input#id_submitbutton2,
+.path-admin .buttons input[type="submit"],
+.btn-primary,
+input.btn-primary,
+a.btn-primary,
+.tw-catalogDetailsLink__option_btn
+{
+    color: [[setting:primarybuttoncolor-readable-text]];
+    background-color: [[setting:primarybuttoncolor]];
+    border-color: [[setting:primarybuttoncolor]];
+}
+
+input.form-submit:hover,
+input#id_submitbutton:hover,
+input#id_submitbutton2:hover,
+.path-admin .buttons input[type="submit"]:hover,
+.btn-primary:hover,
+input.btn-primary:hover,
+a.btn-primary:hover,
+.tw-catalogDetailsLink__option_btn:hover
+{
+    color:[[setting:primarybuttoncolor-readable-text]];
+    background-color:[[setting:primarybuttoncolor-darker-perc]];
+}
+
+input.form-submit:active,
+input#id_submitbutton:active,
+input#id_submitbutton2:active,
+.path-admin .buttons input[type="submit"]:active,
+.btn-primary:active,
+input.btn-primary:active,
+a.btn-primary:active,
+.tw-catalogDetailsLink__option_btn:active,
+
+input.form-submit:focus,
+input#id_submitbutton:focus,
+input#id_submitbutton2:focus,
+.path-admin .buttons input[type="submit"]:focus,
+.btn-primary:focus,
+input.btn-primary:focus,
+a.btn-primary:focus,
+.tw-catalogDetailsLink__option_btn:focus,
+
+input.form-submit:active:focus,
+input#id_submitbutton:active:focus,
+input#id_submitbutton2:active:focus,
+.path-admin .buttons input[type="submit"]:active:focus,
+.btn-primary:active:focus,
+input.btn-primary:active:focus,
+a.btn-primary:active:focus,
+.tw-catalogDetailsLink__option_btn:active:focus,
+
+input.form-submit:active:hover,
+input#id_submitbutton:active:hover,
+input#id_submitbutton2:active:hover,
+.path-admin .buttons input[type="submit"]:active:hover,
+.btn-primary:active:hover,
+input.btn-primary:active:hover,
+a.btn-primary:active:hover,
+.tw-catalogDetailsLink__option_btn:active:hover
+{
+    color:[[setting:primarybuttoncolor-readable-text]];
+    background-color:[[setting:primarybuttoncolor-dark-perc]];
+}
+
+input.form-submit.disabled,
+input#id_submitbutton.disabled,
+input#id_submitbutton2.disabled,
+.path-admin .buttons input[type="submit"].disabled,
+input.form-submit[disabled],
+input#id_submitbutton[disabled],
+fieldset[disabled] input.form-submit,
+.btn-primary.disabled,
+a.btn-primary.disabled,
+.tw-catalogDetailsLink__option_btn.disabled,
+
+input.form-submit.disabled:hover,
+input#id_submitbutton.disabled:hover,
+input#id_submitbutton2.disabled:hover,
+.path-admin .buttons input[type="submit"].disabled:hover,
+input.form-submit[disabled]:hover,
+input#id_submitbutton[disabled]:hover,
+fieldset[disabled] input.form-submit:hover,
+.btn-primary.disabled:hover,
+a.btn-primary.disabled:hover,
+.tw-catalogDetailsLink__option_btn.disabled:hover,
+
+input.form-submit.disabled:focus,
+input#id_submitbutton.disabled:focus,
+input#id_submitbutton2.disabled:focus,
+.path-admin .buttons input[type="submit"].disabled:focus,
+input.form-submit[disabled]:focus,
+input#id_submitbutton[disabled]:focus,
+fieldset[disabled] input.form-submit:focus,
+.btn-primary.disabled:focus,
+a.btn-primary.disabled:focus,
+.tw-catalogDetailsLink__option_btn.disabled:focus,
+
+input.form-submit.disabled.focus,
+input#id_submitbutton.disabled.focus,
+input#id_submitbutton2.disabled.focus,
+.path-admin .buttons input[type="submit"].disabled.focus,
+input.form-submit[disabled].focus,
+input#id_submitbutton[disabled].focus,
+fieldset[disabled] input.form-submit.focus,
+.btn-primary.disabled.focus,
+a.btn-primary.disabled.focus,
+.tw-catalogDetailsLink__option_btn.disabled.focus
+{
+    color:#888888;
+    background-color:[[setting:primarybuttoncolor-lighter-perc]];
+}
+
 
 #page-footer,
 .navbar-inner {
     background-color: [[setting:headerbgc]];
+}
+
+#page-footer .performanceinfo li,
+#page-footer .performanceinfo p {
+    color: [[setting:navtextcolor]];
 }
 
 .ie8 .navbar-inner,
@@ -195,12 +384,70 @@ body, h1, h2, h3, h4, h5, h6, p, ul, ol, dl, input, textarea {
     background-color: [[setting:linkcolor]];
 }
 
+/** Navigation text colour **/
+.totara_core__QuickAccess .totara_core__QuickAccess_group-list li a,
+.totara_core__QuickAccess .totara_core__QuickAccess_footer > a,
+.totaraNav_prim--toggleNav a,
+.totaraNav_prim--toggleNav a:active,
+.totaraNav_prim--toggleNav a:hover,
+.totaraNav_prim--toggleNav a:visited,
+.totaraNav_prim--side,
+.totaraNav_prim--side .usermenu a.toggle-display,
+.totaraNav_prim--side .usermenu a.toggle-display:focus,
+.totaraNav_prim--side .usermenu a.toggle-display:hover,
+.totaraNav_prim--list a,
+.totaraNav_prim--list a:active,
+.totaraNav_prim--list a:hover,
+.totaraNav_prim--list a:visited {
+    color: [[setting:navtextcolor]];
+}
+
+/** Navigation background colour **/
+.totara_core__QuickAccess .totara_core__QuickAccess_menu,
+.totaraNav_prim--list .navExpand--list,
+.totaraNav_prim {
+    background-color: [[setting:headerbgc]];
+}
+
+/** Navigation active/hover colour **/
+.totaraNav_prim--toggleNav a:focus,
+.totaraNav_prim--toggleNav a:hover,
+.totaraNav_prim--side .popover-region .nav-link:focus,
+.totaraNav_prim--side .popover-region .nav-link:hover,
+.totaraNav_prim--side .usermenu a.toggle-display:focus,
+.totaraNav_prim--side .usermenu a.toggle-display:hover,
+.totaraNav_prim--list a:focus,
+.totaraNav_prim--list a:hover {
+    background: [[setting:headerbgc-dark]];
+}
+
 @media (min-width: 768px) {
     .totara-menu-nav-item .totara-menu-nav-item .totara-menu-nav-item-link {
         background-color: #F0F2F4;
     }
     .totara-menu-nav-item.selected .totara-menu-nav-item.selected .totara-menu-nav-item-link:hover, .totara-menu .totara-menu-nav-item .totara-menu-nav-item .totara-menu-nav-item-link:hover {
         background-color: #DDE1E5;
+    }
+}
+
+@media (min-width: 992px) {
+    /** Navigation focus colour **/
+    .totaraNav--list_item_expanded > a.totaraNav_prim--list_item_link {
+        background: [[setting:headerbgc-dark-perc]];
+    }
+
+    /** Navigation selected colour **/
+    .totaraNav_prim--list_item_selected a.totaraNav_prim--list_item_link {
+        background-color: [[setting:buttoncolor]];
+        color: [[setting:buttoncolor-readable-text]];
+    }
+    .totaraNav_prim--list_item_selected .totaraNav_prim--list_item_link:active,
+    .totaraNav_prim--list_item_selected .totaraNav_prim--list_item_link:hover {
+        color: [[setting:buttoncolor-readable-text]];
+    }
+
+    a.totaraNav_sub--list_item_link {
+        color: #3d444b;
     }
 }
 

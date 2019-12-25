@@ -5,7 +5,7 @@ Feature: Test menu correctly highlights the custom dashboard menu
   I want to see the correct custom dashboard page highlighted in the Totara menu
 
   @javascript
-  Scenario: Default Totara dashboard menu should not be highlighted when Custom dashboard menu is used and vise versa
+  Scenario: Default Totara dashboard menu should not be highlighted when Custom dashboard menu is used and vice versa
     Given I am on a totara site
     And I log in as "admin"
     And the following totara_dashboards exist:
@@ -14,64 +14,60 @@ Feature: Test menu correctly highlights the custom dashboard menu
       | Dashboard 3 | 2         |
       | Dashboard 4 | 2         |
 
-    And I navigate to "Main menu" node in "Site administration > Appearance"
+    And I navigate to "Main menu" node in "Site administration > Navigation"
     And I press "Add new menu item"
-    And I set the following fields to these values:
+    And I set the following Totara form fields to these values:
+      | Type                     | Parent        |
       | Menu title               | My dashboards |
-      | Menu default url address | /             |
-    And I press "Add new menu item"
+    And I press "Add"
 
     And I press "Add new menu item"
-    And I set the following fields to these values:
+    And I set the following Totara form fields to these values:
       | Parent item              | My dashboards                    |
       | Menu title               | Dashboard 2                      |
-      | Menu default url address | /totara/dashboard/index.php?id=2 |
-    And I press "Add new menu item"
+      | Menu url address         | /totara/dashboard/index.php?id=2 |
+    And I press "Add"
 
     And I press "Add new menu item"
-    And I set the following fields to these values:
+    And I set the following Totara form fields to these values:
       | Parent item              | My dashboards                    |
       | Menu title               | Dashboard 3                      |
-      | Menu default url address | /totara/dashboard/index.php?id=3 |
-    And I press "Add new menu item"
+      | Menu url address         | /totara/dashboard/index.php?id=3 |
+    And I press "Add"
 
     And I press "Add new menu item"
-    And I set the following fields to these values:
+    And I set the following Totara form fields to these values:
       | Parent item              | My dashboards                    |
       | Menu title               | Dashboard 4                      |
-      | Menu default url address | /totara/dashboard/index.php?id=4 |
-    And I press "Add new menu item"
+      | Menu url address         | /totara/dashboard/index.php?id=4 |
+    And I press "Add"
 
     And I click on "Home" in the totara menu
     When I click on "Dashboard 2" in the totara menu
-    Then the "class" attribute of "//*[@id='totaramenu']/ul/li[a/text()='My dashboards']" "xpath_element" should contain "selected"
-    And the "class" attribute of "//*[@id='totaramenu']/ul/li[a/text()='My dashboards']" "xpath_element" should contain "child-selected"
-    And the "class" attribute of "//nav[@class='totara-menu-subnav']/ul/li[a/text()='Dashboard 2']" "xpath_element" should contain "selected"
-    And the "class" attribute of "//nav[@class='totara-menu-subnav']/ul/li[a/text()='Dashboard 3']" "xpath_element" should not contain "selected"
-    And the "class" attribute of "//nav[@class='totara-menu-subnav']/ul/li[a/text()='Dashboard 4']" "xpath_element" should not contain "selected"
-    And the "class" attribute of "//*[@id='totaramenu']/ul/li[a/text()='Dashboard']" "xpath_element" should not contain "selected"
+    Then Totara menu item "My dashboards" should be highlighted
+    And Totara menu item "Dashboard" should not be highlighted
+    And Totara sub menu item "Dashboard 2" should be highlighted
+    And Totara sub menu item "Dashboard 3" should not be highlighted
+    And Totara sub menu item "Dashboard 4" should not be highlighted
 
     When I click on "Dashboard 3" in the totara menu
-    Then the "class" attribute of "//*[@id='totaramenu']/ul/li[a/text()='My dashboards']" "xpath_element" should contain "selected"
-    And the "class" attribute of "//*[@id='totaramenu']/ul/li[a/text()='My dashboards']" "xpath_element" should contain "child-selected"
-    And the "class" attribute of "//nav[@class='totara-menu-subnav']/ul/li[a/text()='Dashboard 2']" "xpath_element" should not contain "selected"
-    And the "class" attribute of "//nav[@class='totara-menu-subnav']/ul/li[a/text()='Dashboard 3']" "xpath_element" should contain "selected"
-    And the "class" attribute of "//nav[@class='totara-menu-subnav']/ul/li[a/text()='Dashboard 4']" "xpath_element" should not contain "selected"
-    And the "class" attribute of "//*[@id='totaramenu']/ul/li[a/text()='Dashboard']" "xpath_element" should not contain "selected"
+    Then Totara menu item "My dashboards" should be highlighted
+    And Totara menu item "Dashboard" should not be highlighted
+    And Totara sub menu item "Dashboard 2" should not be highlighted
+    And Totara sub menu item "Dashboard 3" should be highlighted
+    And Totara sub menu item "Dashboard 4" should not be highlighted
 
     When I click on "Dashboard 4" in the totara menu
-    Then the "class" attribute of "//*[@id='totaramenu']/ul/li[a/text()='My dashboards']" "xpath_element" should contain "selected"
-    And the "class" attribute of "//*[@id='totaramenu']/ul/li[a/text()='My dashboards']" "xpath_element" should contain "child-selected"
-    And the "class" attribute of "//nav[@class='totara-menu-subnav']/ul/li[a/text()='Dashboard 2']" "xpath_element" should not contain "selected"
-    And the "class" attribute of "//nav[@class='totara-menu-subnav']/ul/li[a/text()='Dashboard 3']" "xpath_element" should not contain "selected"
-    And the "class" attribute of "//nav[@class='totara-menu-subnav']/ul/li[a/text()='Dashboard 4']" "xpath_element" should contain "selected"
-    And the "class" attribute of "//*[@id='totaramenu']/ul/li[a/text()='Dashboard']" "xpath_element" should not contain "selected"
+    Then Totara menu item "My dashboards" should be highlighted
+    And Totara menu item "Dashboard" should not be highlighted
+    And Totara sub menu item "Dashboard 2" should not be highlighted
+    And Totara sub menu item "Dashboard 3" should not be highlighted
+    And Totara sub menu item "Dashboard 4" should be highlighted
 
     When I click on "Dashboard" in the totara menu
-    Then the "class" attribute of "//*[@id='totaramenu']/ul/li[a/text()='Dashboard']" "xpath_element" should contain "selected"
-    And the "class" attribute of "//*[@id='totaramenu']/ul/li[a/text()='Dashboard']" "xpath_element" should not contain "child-selected"
-    And the "class" attribute of "//*[@id='totaramenu']/ul/li[a/text()='My dashboards']" "xpath_element" should not contain "selected"
-    And the "class" attribute of "//*[@id='totaramenu']/ul/li[a/text()='My dashboards']" "xpath_element" should not contain "child-selected"
-    And the "class" attribute of "//*[@id='totaramenu']/ul/li/ul/li[a/text()='Dashboard 2']" "xpath_element" should not contain "selected"
-    And the "class" attribute of "//*[@id='totaramenu']/ul/li/ul/li[a/text()='Dashboard 3']" "xpath_element" should not contain "selected"
-    And the "class" attribute of "//*[@id='totaramenu']/ul/li/ul/li[a/text()='Dashboard 4']" "xpath_element" should not contain "selected"
+    Then Totara menu item "Dashboard" should be highlighted
+    Then Totara menu item "My dashboards" should not be highlighted
+# collapsed subitems are accessible too, this is not about real 'visibility'
+    And I should see "Dashboard 2" in the totara menu
+    And I should see "Dashboard 3" in the totara menu
+    And I should see "Dashboard 4" in the totara menu

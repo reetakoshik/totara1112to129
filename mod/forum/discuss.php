@@ -219,8 +219,20 @@ if (! $post = forum_get_post_full($parent)) {
     print_error("notexists", 'forum', "$CFG->wwwroot/mod/forum/view.php?f=$forum->id");
 }
 
-if (!forum_user_can_see_post($forum, $discussion, $post, null, $cm)) {
+if (!forum_user_can_see_post($forum, $discussion, $post, null, $cm, false)) {
     print_error('noviewdiscussionspermission', 'forum', "$CFG->wwwroot/mod/forum/view.php?id=$forum->id");
+}
+
+// We need to make sure we get the first post to determine if the whole discussion is marked as deleted
+if ($post->id != $discussion->firstpost) {
+    $firstpost = forum_get_post_full($discussion->firstpost);
+} else {
+    $firstpost = $post;
+}
+
+$discussionname = $discussion->name;
+if ($firstpost->deleted) {
+    $discussionname = get_string('forumdiscussiondeleted', 'mod_forum');
 }
 
 if ($mark == 'read' or $mark == 'unread') {
@@ -242,13 +254,13 @@ if (empty($forumnode)) {
 } else {
     $forumnode->make_active();
 }
-$node = $forumnode->add(format_string($discussion->name), new moodle_url('/mod/forum/discuss.php', array('d'=>$discussion->id)));
+$node = $forumnode->add(format_string($discussionname), new moodle_url('/mod/forum/discuss.php', array('d'=>$discussion->id)));
 $node->display = false;
 if ($node && $post->id != $discussion->firstpost) {
     $node->add(format_string($post->subject), $PAGE->url);
 }
 
-$PAGE->set_title("$course->shortname: ".format_string($discussion->name));
+$PAGE->set_title("$course->shortname: ".format_string($discussionname));
 $PAGE->set_heading($course->fullname);
 $PAGE->set_button($searchform);
 $renderer = $PAGE->get_renderer('mod_forum');
@@ -256,7 +268,7 @@ $renderer = $PAGE->get_renderer('mod_forum');
 echo $OUTPUT->header();
 
 echo $OUTPUT->heading(format_string($forum->name), 2);
-echo $OUTPUT->heading(format_string($discussion->name), 3, 'discussionname');
+echo $OUTPUT->heading(format_string($discussionname), 3, 'discussionname');
 
 if (forum_discussion_is_locked($forum, $discussion)) {
     echo $OUTPUT->notification(get_string('discussionlocked', 'forum'), 'info');

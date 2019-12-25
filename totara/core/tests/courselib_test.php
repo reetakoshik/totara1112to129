@@ -79,11 +79,12 @@ class totara_core_courselib_testcase extends reportcache_advanced_testcase {
     protected function tearDown() {
         ob_end_clean();
         $this->messagesink->close();
+        $this->messagesink = null;
         $this->data_generator = null;
         $this->completion_generator = null;
         $this->facetoface_generator = null;
-        $this->messagesink = null;
-        $this->user1 = null;
+        $this->user1 = $this->user2 = $this->user3 = $this->user4 = $this->user5 = $this->user6 = null;
+
         parent::tearDown();
     }
 
@@ -112,14 +113,14 @@ class totara_core_courselib_testcase extends reportcache_advanced_testcase {
         );
         $f2fmoduleoptions = array(
             'completion' => COMPLETION_TRACKING_AUTOMATIC,
-            'completionstatusrequired' => json_encode(array(MDL_F2F_STATUS_FULLY_ATTENDED))
+            'completionstatusrequired' => json_encode(array(\mod_facetoface\signup\state\fully_attended::get_code()))
         );
         $facetoface = $this->facetoface_generator->create_instance($facetofacedata, $f2fmoduleoptions);
 
-        // Session that has already finished.
+        // Session will be moved to the past after signups
         $sessiondate = new stdClass();
-        $sessiondate->timestart = time() - DAYSECS;
-        $sessiondate->timefinish = time() - DAYSECS + 60;
+        $sessiondate->timestart = time() + DAYSECS;
+        $sessiondate->timefinish = time() + DAYSECS + 60;
         $sessiondate->sessiontimezone = 'Pacific/Auckland';
         $sessiondata = array(
             'facetoface' => $facetoface->id,
@@ -172,18 +173,26 @@ class totara_core_courselib_testcase extends reportcache_advanced_testcase {
         $this->assertFalse($course1info->is_course_complete($this->user5->id));
         $this->assertFalse($course1info->is_course_complete($this->user6->id));
 
+        $seminarevent = new \mod_facetoface\seminar_event($session->id);
         // User1, 4 and 6 attend the facetoface.
-        facetoface_user_signup($session, $facetoface, $course, NULL, MDL_F2F_INVITE, MDL_F2F_STATUS_BOOKED, $this->user1->id);
-        facetoface_user_signup($session, $facetoface, $course, NULL, MDL_F2F_INVITE, MDL_F2F_STATUS_BOOKED, $this->user4->id);
-        facetoface_user_signup($session, $facetoface, $course, NULL, MDL_F2F_INVITE, MDL_F2F_STATUS_BOOKED, $this->user6->id);
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($this->user1->id, $seminarevent));
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($this->user4->id, $seminarevent));
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($this->user6->id, $seminarevent));
+
+        $sessiondate = new stdClass();
+        $sessiondate->timestart = time() - DAYSECS;
+        $sessiondate->timefinish = time() - DAYSECS + 60;
+        $sessiondate->sessiontimezone = 'Pacific/Auckland';
+        facetoface_save_dates($session->id, [$sessiondate]);
+
         $f2fsignups =
             $DB->get_records('facetoface_signups', array('sessionid' => $session->id), '', 'userid, id');
-        $attendancedata = new stdClass();
-        $attendancedata->s = $session->id;
-        $attendancedata->{'submissionid_'.$f2fsignups[$this->user1->id]->id} = MDL_F2F_STATUS_FULLY_ATTENDED;
-        $attendancedata->{'submissionid_'.$f2fsignups[$this->user4->id]->id} = MDL_F2F_STATUS_FULLY_ATTENDED;
-        $attendancedata->{'submissionid_'.$f2fsignups[$this->user6->id]->id} = MDL_F2F_STATUS_FULLY_ATTENDED;
-        facetoface_take_attendance($attendancedata);
+        $attendancedata = [
+            $f2fsignups[$this->user1->id]->id => \mod_facetoface\signup\state\fully_attended::get_code(),
+            $f2fsignups[$this->user4->id]->id => \mod_facetoface\signup\state\fully_attended::get_code(),
+            $f2fsignups[$this->user6->id]->id => \mod_facetoface\signup\state\fully_attended::get_code()
+        ];
+        \mod_facetoface\signup_helper::process_attendance($seminarevent, $attendancedata);
 
         $completion_task = new \core\task\completion_regular_task();
         $completion_task->execute();

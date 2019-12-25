@@ -1,0 +1,6 @@
+userstatus:session_cancelled,rb_source_facetoface_events
+sessdate,rb_source_facetoface_sessions
+sessdatefinish,rb_source_facetoface_sessions
+sessstart,rb_source_facetoface_sessions
+sessfinish,rb_source_facetoface_sessions
+sessdatelink,rb_source_facetoface_sessions

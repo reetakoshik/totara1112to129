@@ -88,7 +88,7 @@ class session_signin_sheet_exported extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/facetoface/signinsheet.php', array('sessionid' => $this->other['sessionid']));
+        return new \moodle_url('/mod/facetoface/reports/signinsheet.php', array('sessionid' => $this->other['sessionid']));
     }
 
     /**

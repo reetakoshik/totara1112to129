@@ -95,7 +95,7 @@ class rb_bookings_embedded extends rb_base_embedded {
 
         // also limited to single user by embedded params
         $this->embeddedparams = array(
-            'status' => '!' . MDL_F2F_STATUS_USER_CANCELLED,
+            'status' => '!' . \mod_facetoface\signup\state\user_cancelled::get_code(),
         );
         if (isset($userid)) {
             $this->embeddedparams['userid'] = $userid;

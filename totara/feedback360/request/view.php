@@ -84,7 +84,7 @@ $PAGE->set_pagelayout('admin');
 $owner = $DB->get_record('user', array('id' => $userid));
 if ($USER->id == $userid) {
     $strmyfeedback = get_string('myfeedback', 'totara_feedback360');
-    $PAGE->set_totara_menu_selected('feedback360');
+    $PAGE->set_totara_menu_selected('\totara_feedback360\totara\menu\feedback360');
     $PAGE->navbar->add(get_string('feedback360', 'totara_feedback360'), new moodle_url('/totara/feedback360/index.php'));
     $PAGE->navbar->add($strmyfeedback);
     $PAGE->set_title($strviewrequest);
@@ -92,7 +92,7 @@ if ($USER->id == $userid) {
 } else {
     $userxfeedback = get_string('userxfeedback360', 'totara_feedback360', fullname($owner));
     if (totara_feature_visible('myteam')) {
-        $PAGE->set_totara_menu_selected('myteam');
+        $PAGE->set_totara_menu_selected('\totara_core\totara\menu\myteam');
         $PAGE->navbar->add(get_string('team', 'totara_core'), new moodle_url('/my/teammembers.php'));
     }
     $PAGE->navbar->add($userxfeedback);

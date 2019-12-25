@@ -50,7 +50,7 @@ Feature: Reset dashboard layout for all users
 
   Scenario: Reset dashboard when deleted users exist
     When I log in as "admin"
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     Then I should see "Bob1 Learner1"
     And I should see "Sam2 Learner2"
 
@@ -78,13 +78,13 @@ Feature: Reset dashboard layout for all users
       | User deletion | Keep username, email and ID number (legacy) |
     And I press "Save changes"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     Then I should see "Bob1 Learner1"
     And I should see "Sam2 Learner2"
 
     When I follow "Delete Bob1 Learner1"
     And I press "Delete"
-    And I navigate to "Deleted user accounts" node in "Site administration > Users > User data management"
+    And I navigate to "Deleted user accounts" node in "Site administration > User data management"
     Then I should see "Bob1 Learner1"
     And "Undelete Bob1 Learner1" "link" should exist
 
@@ -102,7 +102,7 @@ Feature: Reset dashboard layout for all users
     And I log out
 
     When I log in as "admin"
-    And I navigate to "Deleted user accounts" node in "Site administration > Users > User data management"
+    And I navigate to "Deleted user accounts" node in "Site administration > User data management"
     And I follow "Undelete Bob1 Learner1"
     And I press "Undelete"
     Then I should see "Undeleted Bob1 Learner1"

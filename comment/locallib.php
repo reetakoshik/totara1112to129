@@ -68,7 +68,7 @@ class comment_manager {
                        ON u.id=c.userid
               ORDER BY c.timecreated ASC";
         $rs = $DB->get_recordset_sql($sql, null, $start, $this->perpage);
-        $formatoptions = array('overflowdiv' => true);
+        $formatoptions = array('overflowdiv' => true, 'blanktarget' => true);
         foreach ($rs as $item) {
             // Set calculated fields
             $item->fullname = fullname($item);
@@ -154,16 +154,23 @@ class comment_manager {
             echo $OUTPUT->notification(get_string('nocomments', 'moodle'));
             return false;
         }
+        $candelete = has_capability('moodle/comment:delete', context_system::instance());
 
         $table = new html_table();
-        $table->head = array (
-            html_writer::checkbox('selectall', '', false, get_string('selectall'), array('id' => 'comment_select_all',
-                'class' => 'm-r-1')),
-            get_string('author', 'search'),
-            get_string('content'),
-            get_string('action')
-        );
-        $table->colclasses = array ('leftalign', 'leftalign', 'leftalign', 'leftalign');
+        // Totara: do not show delete options if current user doesn't have capability.
+        if ($candelete) {
+            $table->head = array (
+                html_writer::checkbox('selectall', '', false, get_string('selectall'), array('id' => 'comment_select_all',
+                    'class' => 'm-r-1')),
+                get_string('author', 'search'),
+                get_string('content'),
+                get_string('action')
+            );
+            $table->colclasses = array ('leftalign', 'leftalign', 'leftalign', 'leftalign');
+        } else {
+            $table->head = array(get_string('author', 'search'), get_string('content'));
+            $table->colclasses = array('leftalign', 'leftalign');
+        }
         $table->attributes = array('class'=>'admintable generaltable');
         $table->id = 'commentstable';
         $table->data = array();
@@ -174,13 +181,18 @@ class comment_manager {
             if (!empty($this->plugintype)) {
                 $context_url = plugin_callback($this->plugintype, $this->pluginname, 'comment', 'url', array($c));
             }
-            $checkbox = html_writer::checkbox('comments', $c->id, false);
-            $action = html_writer::link(new moodle_url($link, array('commentid' => $c->id)), get_string('delete'));
-            if (!empty($context_url)) {
-                $action .= html_writer::empty_tag('br');
-                $action .= html_writer::link($context_url, get_string('commentincontext'), array('target'=>'_blank'));
+            // Totara: do not show delete options if current user doesn't have capability.
+            if ($candelete) {
+                $checkbox = html_writer::checkbox('comments', $c->id, false);
+                $action = html_writer::link(new moodle_url($link, array('commentid' => $c->id)), get_string('delete'));
+                if (!empty($context_url)) {
+                    $action .= html_writer::empty_tag('br');
+                    $action .= html_writer::link($context_url, get_string('commentincontext'), array('target'=>'_blank'));
+                }
+                $table->data[] = array($checkbox, $c->fullname, $c->content, $action);
+            } else {
+                $table->data[] = array($c->fullname, $c->content);
             }
-            $table->data[] = array($checkbox, $c->fullname, $c->content, $action);
         }
         echo html_writer::table($table);
         echo $OUTPUT->paging_bar($count, $page, $this->perpage, $CFG->wwwroot.'/comment/index.php');

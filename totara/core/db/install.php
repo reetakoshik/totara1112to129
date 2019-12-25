@@ -95,10 +95,6 @@ function xmldb_totara_core_install() {
 
     $systemcontext->mark_dirty();
 
-    // Set up frontpage.
-    set_config('frontpage', '');
-    set_config('frontpageloggedin', '');
-
     // Turn completion on in Totara when upgrading from Moodle.
     set_config('enablecompletion', 1);
     set_config('enablecompletion', 1, 'moodlecourse');
@@ -152,6 +148,13 @@ function xmldb_totara_core_install() {
     // Conditionally launch add field status.
     if (!$dbman->field_exists($table, $field)) {
         $dbman->add_field($table, $field);
+    }
+
+    $index = new xmldb_index('status', XMLDB_INDEX_NOTUNIQUE, array('status'));
+
+    // Conditionally launch add index status.
+    if (!$dbman->index_exists($table, $index)) {
+        $dbman->add_index($table, $index);
     }
 
     $field = new xmldb_field('renewalstatus', XMLDB_TYPE_INTEGER, '2', null, null, null, '0');
@@ -277,6 +280,104 @@ function xmldb_totara_core_install() {
     $table = new xmldb_table('course');
     $field = new xmldb_field('fullname', XMLDB_TYPE_CHAR, '1333', null, XMLDB_NOTNULL, null);
     $dbman->change_field_precision($table, $field);
+
+    // ==== Moodle 3.3.7 merge cleanup start =====
+
+    // Dealing with oauth2 plugins which we didn't take as of Totara 12.
+    // If the plugin is taken at some stage, the code below as well as this comment may be removed.
+
+    if (get_config('auth_oauth2', 'version') && !file_exists("{$CFG->dirroot}/auth/oauth2/version.php")) {
+        if (!$DB->count_records('user', array('auth' => 'oauth2'))) {
+            // NOTE: tables with 'auth_oauth2' prefix get deleted automatically.
+            uninstall_plugin('auth', 'oauth2');
+        }
+    }
+
+    // Dealing with repository onedrive plugin which we didn't take as of Totara 12. (Requires oauth see above)
+    // If the plugin is taken at some stage, the code below as well as this comment may be removed.
+    if (get_config('repository_onedrive', 'version') && !file_exists("{$CFG->dirroot}/repository/onedrive/version.php")) {
+        if ($dbman->table_exists('repository_onedrive_access')) {
+            if (!$DB->count_records('repository_onedrive_access')) {
+                // NOTE: tables with 'repository_onedrive' prefix get deleted automatically.
+                uninstall_plugin('repository', 'onedrive');
+            }
+        }
+    }
+
+    // Delete oauth2 tool if not used because it was not merged from Moodle 3.3.7 to Totara 12.
+    if (get_config('tool_oauth2', 'version') && !file_exists("{$CFG->dirroot}/admin/tool/oauth2/version.php")) {
+        if ($dbman->table_exists('oauth2_issuer')) {
+            if (!$DB->count_records('oauth2_issuer')) {
+                // Note: we keep the tables from lib/db/install.xml
+                uninstall_plugin('tool', 'oauth2');
+            }
+        }
+    }
+
+    // Uninstall other plugins without stored data that were not merged from Moodle 3.3.7 to Totara 12.
+    $plugins = array(
+        'block_myoverview' => "{$CFG->dirroot}/blocks/myoverview/version.php",
+        'fileconverter_googledrive' => "{$CFG->dirroot}/files/converter/googledrive/version.php",
+        'fileconverter_unoconv' => "{$CFG->dirroot}/files/converter/unoconv/version.php",
+    );
+    foreach ($plugins as $component => $versionfile) {
+        if (file_exists($versionfile)) {
+            continue;
+        }
+        if (!get_config($component, 'version')) {
+            continue;
+        }
+        list($type, $name) = explode('_', $component, 2);
+        uninstall_plugin($type, $name);
+        if ($component === 'fileconverter_unoconv') {
+            unset_config('pathtounoconv');
+        }
+    }
+
+    // Disable linking of admin categories introduced in new Moodle admin interface.
+    if (get_config('linkadmincategories')) {
+        set_config('linkadmincategories', 0);
+    }
+
+    // ==== End of Moodle 3.3.7 merge cleanup =====
+
+    // Increase course_request fullname column to match the fullname column in the "course" table.
+    $table = new xmldb_table('course_request');
+    $field = new xmldb_field('fullname', XMLDB_TYPE_CHAR, '1333', null, XMLDB_NOTNULL, null);
+    $dbman->change_field_precision($table, $field);
+
+    // Increase course_request shortname column to match the shortname column in the "course" table.
+    $table = new xmldb_table('course_request');
+    $field = new xmldb_field('shortname', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null);
+    $index = new xmldb_index('shortname', XMLDB_INDEX_NOTUNIQUE, array('shortname'));
+    // Conditionally launch drop index name to amend the field precision.
+    if ($dbman->index_exists($table, $index)) {
+        $dbman->drop_index($table, $index);
+    }
+    // Change the field precision.
+    $dbman->change_field_precision($table, $field);
+    // Add back our 'shortname' index after the table has been amended.
+    if (!$dbman->index_exists($table, $index)) {
+        $dbman->add_index($table, $index);
+    }
+
+    // Upgrade the old frontpage block bits when upgrading from Moodle.
+    totara_core_migrate_frontpage_display();
+
+    // Add course navigation blocks when upgrading from Moodle.
+    totara_core_add_course_navigation();
+
+    // This code moved here from lib/db/upgrade.php because it was excluded from
+    // Totara 12 during the merge from Moodle 3.3.9. This code and comment should
+    // be removed from here if a merge from a Moodle version higher than 3.6.4
+    // were to occur, effectively moving this back into Moodle core upgrade.php
+
+    // Conditionally add field requireconfirmation to oauth2_issuer.
+    $table = new xmldb_table('oauth2_issuer');
+    $field = new xmldb_field('requireconfirmation', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1', 'sortorder');
+    if (!$dbman->field_exists($table, $field)) {
+        $dbman->add_field($table, $field);
+    }
 
     return true;
 }

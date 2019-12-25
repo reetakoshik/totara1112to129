@@ -4,7 +4,7 @@ Feature: All customfields column generator
   As an admin
   I need to be able to add "All ... custom fields" column
 
- Background:
+  Background:
     Given I am on a totara site
     And the following "users" exist:
       | username | firstname | lastname | email                |
@@ -86,9 +86,7 @@ Feature: All customfields column generator
     And I press "Save changes"
 
   Scenario: Enable all customfields column and check that report displays all customfields and their values correctly
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test seminar name        |
       | Description | Test seminar description |
@@ -114,7 +112,7 @@ Feature: All customfields column generator
     When I click on "Attendees" "link"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Sam1 Student1, student1@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     And I set the following fields to these values:

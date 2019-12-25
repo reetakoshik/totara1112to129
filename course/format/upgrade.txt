@@ -2,6 +2,17 @@ This files describes API changes for course formats,
 information provided here is intended especially for developers.
 Overview of this plugin type at http://docs.moodle.org/dev/Course_formats
 
+=== 12.5 ===
+
+* Method create_course() will populate the new course with empty sections if $data->numsections is provided even if
+  "numsections" is not an option defined by the course format.
+* course/changenumsections.php can now be used to insert sections at any positions
+
+=== 12 ===
+
+* format_section_renderer_base::section_edit_control_menu() has changed
+* format_section_renderer_base::section_edit_controls() has changed
+
 === 10 ===
 
 * Course format may use the inplace_editable template to allow quick editing of section names, see

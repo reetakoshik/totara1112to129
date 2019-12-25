@@ -1,0 +1,107 @@
+//
+// This file is part of Totara Learn
+//
+// Copyright (C) 2018 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @copyright 2018 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Kevin Hottinger <kevin.hottinger@totaralearning.com>
+// @package   theme_roots
+
+// Colours
+@catalogManageBtns-color_neutral_1: @totara_style-color_neutral_1;
+@catalogManageBtns-color_neutral_2: @totara_style-color_neutral_2;
+@catalogManageBtns-color_neutral_5: @totara_style-color_neutral_5;
+@catalogManageBtns-color_neutral_7: @totara_style-color_neutral_7;
+@catalogManageBtns-color_theme_1: @totara_style-color_theme_1;
+// Spacing
+@catalogManageBtns-spacing_x_small: @totara_style-spacing_x_small;
+@catalogManageBtns-spacing_small: @totara_style-spacing_small;
+// Shadows
+@catalogManageBtns-shadow_1: @totara_style-shadow_1;
+// Font Size
+@catalogManageBtns-btn_font_size: @totara_style-font_heading_label_small_size;
+
+
+.tw-catalogManageBtns {
+    position: relative;
+    text-align: right;
+
+    &__btn {
+        border: 1px solid @catalogManageBtns-color_neutral_5;
+        border-radius: 3px;
+        color: @catalogManageBtns-color_theme_1;
+        cursor: pointer;
+        display: inline-block;
+        font-size: @catalogManageBtns-btn_font_size;
+        margin: @catalogManageBtns-spacing_x_small;
+        padding: @catalogManageBtns-spacing_small;
+        transition: background-color 0.2s ease;
+
+        &:active,
+        &:focus,
+        &:hover {
+            background: @catalogManageBtns-color_neutral_2;
+            color: @catalogManageBtns-color_neutral_7;
+            outline: 0;
+            text-decoration: none;
+        }
+    }
+
+    &__group {
+        display: inline-block;
+
+        &_options {
+            background: @catalogManageBtns-color_neutral_1;
+            border: 1px solid @catalogManageBtns-color_neutral_5;
+            box-shadow: @catalogManageBtns-shadow_1;
+            display: none;
+            list-style: none;
+            margin: 0;
+            padding: @catalogManageBtns-spacing_x_small 0;
+            position: absolute;
+            right: @catalogManageBtns-spacing_x_small;
+            text-align: left;
+            z-index: 2;
+
+            &_item {
+                padding: 0;
+
+                &_link {
+                    display: block;
+                    padding: @catalogManageBtns-spacing_x_small @catalogManageBtns-spacing_small;
+
+                    &:focus,
+                    &:hover {
+                        background: @catalogManageBtns-color_neutral_2;
+                        text-decoration: none;
+                    }
+                }
+            }
+        }
+    }
+    .tw-catalog__activePopover {
+        .tw-catalogManageBtns__btn {
+            background: @catalogManageBtns-color_neutral_2;
+            color: @catalogManageBtns-color_neutral_7;
+            outline: 0;
+        }
+
+        .tw-catalogManageBtns__group_options {
+            display: block;
+        }
+    }
+}

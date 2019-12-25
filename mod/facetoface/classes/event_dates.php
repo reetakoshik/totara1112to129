@@ -112,6 +112,16 @@ class event_dates {
      * @return array errors ('timestart' => string, 'timefinish' => string, 'assetids' => string, 'roomid' => string)
      */
     public static function validate($timestart, $timefinish, $roomid, $assetids, $sessionid, $facetofaceid) {
+        $seminar = new seminar($facetofaceid);
+        $seminarevent = new seminar_event($sessionid);
+
+        // If we are creating a new event we'll need to set the facetofaceid.
+        if (!$seminarevent->exists()) {
+            if ($seminar->exists()) {
+                $seminarevent->set_facetoface($facetofaceid);
+            }
+        }
+
         $errors = array();
         // Validate start time.
         if ($timestart > $timefinish) {
@@ -123,11 +133,12 @@ class event_dates {
         // Validate room.
         if (!empty($roomid)) {
             // Check if the room is available.
-            $room = facetoface_get_room($roomid);
-            if (!$room) {
+            $room = new \mod_facetoface\room($roomid);
+            if (!$room->exists()) {
+                // This will likely never be reached as room creation uses a MUST_EXIST database call.
                 $errors['roomid'] = get_string('roomdeleted', 'facetoface');
-            } else if (!facetoface_is_room_available($timestart, $timefinish, $room, $sessionid, $facetofaceid)) {
-                $link = \html_writer::link(new \moodle_url('/mod/facetoface/room.php', array('roomid' => $roomid)), $room->name,
+            } else if (!$room->is_available($timestart, $timefinish, $seminarevent)) {
+                $link = \html_writer::link(new \moodle_url('/mod/facetoface/reports/rooms.php', array('roomid' => $roomid)), $room->get_name(),
                     array('target' => '_blank'));
                 // We should not get here because users should be able to select only available slots.
                 $errors['roomid'] = get_string('error:isalreadybooked', 'facetoface', $link);
@@ -137,11 +148,12 @@ class event_dates {
         // Validate assets.
         if (!empty($assetids)) {
             foreach ($assetids as $assetid) {
-                $asset = facetoface_get_asset($assetid);
-                if (!$asset) {
+                $asset = new asset($assetid);
+                if (!$asset->exists()) {
+                    // This will likely never be reached as asset creation uses a MUST_EXIST database call.
                     $errors['assetid'][] = get_string('assetdeleted', 'facetoface');
-                } else if (!facetoface_is_asset_available($timestart, $timefinish, $asset, $sessionid, $facetofaceid)) {
-                    $link = \html_writer::link(new \moodle_url('/mod/facetoface/asset.php', array('assetid' => $assetid)), $asset->name,
+                } else if (!$asset->is_available($timestart, $timefinish, $seminarevent)) {
+                    $link = \html_writer::link(new \moodle_url('/mod/facetoface/reports/assets.php', array('assetid' => $assetid)), $asset->get_name(),
                         array('target' => '_blank'));
                     // We should not get here because users should be able to select only available slots.
                     $errors['assetid'][] = get_string('error:isalreadybooked', 'facetoface', $link);

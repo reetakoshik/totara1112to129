@@ -6,7 +6,7 @@ Feature: Create users with custom profile fields
 
   Scenario: Can create multiple users without specifying value for unique required custom field
     Given I log in as "admin"
-    And I navigate to "User profile fields" node in "Site administration > Users > Accounts"
+    And I navigate to "User profile fields" node in "Site administration > Users"
     And I set the following fields to these values:
       | datatype | text |
     #redirect
@@ -18,7 +18,7 @@ Feature: Create users with custom profile fields
       | Should the data be unique       | Yes               |
       | Who is this field visible to    | Not visible       |
     And I press "Save changes"
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I press "Add a new user"
     And I set the following fields to these values:
       | Username                        | user1             |
@@ -45,7 +45,7 @@ Feature: Create users with custom profile fields
 
   Scenario: Can create users with custom fields
     Given I log in as "admin"
-    And I navigate to "User profile fields" node in "Site administration > Users > Accounts"
+    And I navigate to "User profile fields" node in "Site administration > Users"
     And I set the following fields to these values:
       | datatype | text |
     #redirect
@@ -67,7 +67,7 @@ BBB
 CCC
 """
     And I press "Save changes"
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I press "Add a new user"
     And I expand all fieldsets
     And I set the following fields to these values:

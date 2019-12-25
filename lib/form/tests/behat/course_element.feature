@@ -23,11 +23,15 @@ Feature: Test that the course form element works
     And the following "activities" exist:
       | activity   | name              | course               | idnumber  |
       | feedback   | frontpagefeedback | Acceptance test site | feedback0 |
+    And I log in as "admin"
+    And I turn editing mode on
+    And I add the "Main menu" block
+    And I log out
 
   Scenario: User can select courses using the course form element
     When I log in as "user1"
     And I am on site homepage
-    And I click on "frontpagefeedback" "link"
+    And I click on "frontpagefeedback" "link" in the "Main menu" "block"
     And I click on "Map feedback to courses" "link"
 
     # Searching for "c" finds all three no-hidden courses.
@@ -82,7 +86,7 @@ Feature: Test that the course form element works
     # Admin adds site course.
     When I log in as "admin"
     And I am on site homepage
-    And I click on "frontpagefeedback" "link"
+    And I click on "frontpagefeedback" "link" in the "Main menu" "block"
     And I click on "Map feedback to courses" "link"
     And I search for "Acceptance" in the "Courses" autocomplete
     Then I should see "Acceptance test site" in the ".form-autocomplete-suggestions" "css_element"
@@ -95,7 +99,7 @@ Feature: Test that the course form element works
     # Normal user can add and save without removing the site course.
     When I log in as "user1"
     And I am on site homepage
-    And I click on "frontpagefeedback" "link"
+    And I click on "frontpagefeedback" "link" in the "Main menu" "block"
     And I click on "Mapped courses" "link"
     Then I should see "Acceptance test site" in the "//div[@id='fitem_id_mappedcourses']" "xpath_element"
     When I search for "1" in the "Courses" autocomplete
@@ -121,7 +125,7 @@ Feature: Test that the course form element works
     # Admin adds hidden course.
     When I log in as "admin"
     And I am on site homepage
-    And I click on "frontpagefeedback" "link"
+    And I click on "frontpagefeedback" "link" in the "Main menu" "block"
     And I click on "Map feedback to courses" "link"
     And I search for "4" in the "Courses" autocomplete
     Then I should see "course4" in the ".form-autocomplete-suggestions" "css_element"
@@ -134,7 +138,7 @@ Feature: Test that the course form element works
     # Normal user can add and save without removing the hidden course.
     When I log in as "user1"
     And I am on site homepage
-    And I click on "frontpagefeedback" "link"
+    And I click on "frontpagefeedback" "link" in the "Main menu" "block"
     And I click on "Mapped courses" "link"
     Then I should see "course4" in the "//div[@id='fitem_id_mappedcourses']" "xpath_element"
     When I search for "1" in the "Courses" autocomplete

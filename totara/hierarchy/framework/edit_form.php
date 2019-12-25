@@ -17,9 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package totara
- * @subpackage hierarchy
+ * @author Simon Coggins <simon.coggins@totaralms.com>
+ * @package totara_hierarchy
  */
+
+defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/lib/formslib.php');
 require_once($CFG->dirroot . '/totara/hierarchy/lib.php');
@@ -40,8 +42,6 @@ class framework_edit_form extends moodleform {
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'visible');
         $mform->setType('visible', PARAM_INT);
-        $mform->addElement('hidden', 'sortorder');
-        $mform->setType('sortorder', PARAM_INT);
         $mform->addElement('hidden', 'hidecustomfields');
         $mform->setType('hidecustomfields', PARAM_INT);
         $mform->addElement('hidden', 'prefix', $prefix);
@@ -49,12 +49,12 @@ class framework_edit_form extends moodleform {
 
         $mform->addElement('text', 'fullname', get_string('name'), 'maxlength="254" size="50"');
         $mform->addRule('fullname', get_string($prefix.'missingnameframework', 'totara_hierarchy'), 'required', null, 'client');
-        $mform->setType('fullname', PARAM_MULTILANG);
+        $mform->setType('fullname', PARAM_TEXT);
 
         if (!empty($CFG->showhierarchyshortnames)) {
             $mform->addElement('text', 'shortname', get_string('shortnameframework', 'totara_hierarchy'), 'maxlength="100" size="20"');
             $mform->addHelpButton('shortname', $prefix.'frameworkshortname', 'totara_hierarchy');
-            $mform->setType('shortname', PARAM_MULTILANG);
+            $mform->setType('shortname', PARAM_TEXT);
         }
 
         $mform->addElement('text', 'idnumber', get_string($prefix.'frameworkidnumber', 'totara_hierarchy'), 'maxlength="100"  size="10"');

@@ -52,7 +52,8 @@ class test_lock {
      */
     public static function acquire($framework) {
         global $CFG;
-        $datarootpath = $CFG->{$framework . '_dataroot'} . '/' . $framework;
+        // Totara: always use real dataroot here.
+        $datarootpath = $CFG->dataroot . '/' . $framework;
         $lockfile = $datarootpath . '/lock';
         if (!file_exists($datarootpath)) {
             // Dataroot not initialised yet.

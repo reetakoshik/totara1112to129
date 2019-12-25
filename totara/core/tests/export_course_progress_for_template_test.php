@@ -33,7 +33,7 @@ require_once($CFG->dirroot . '/totara/core/renderer.php');
 /**
  * Progress information generation test
  */
-class core_export_course_progress_for_template_testcase extends externallib_advanced_testcase {
+class totara_core_export_course_progress_for_template_testcase extends externallib_advanced_testcase {
 
     /**
      * Test not tracked
@@ -95,8 +95,6 @@ class core_export_course_progress_for_template_testcase extends externallib_adva
     public function test_export_for_template_tracked_with_criteria() {
         global $DB, $CFG, $PAGE;
 
-        $this->resetAfterTest(false);
-
         $CFG->enablecompletion = true;
         $student = $this->getDataGenerator()->create_user(['idnumber' => 'export_student']);
 
@@ -121,14 +119,25 @@ class core_export_course_progress_for_template_testcase extends externallib_adva
         $this->assertTrue(property_exists($data, 'pbar'));
     }
 
-    /**
-     * Test tracked with criteria later disabled
-     * @depends test_export_for_template_tracked_with_criteria
-     */
     public function test_export_for_template_tracked_later_disabled() {
         global $DB, $CFG, $PAGE;
 
-        $this->resetAfterTest(true);
+        $CFG->enablecompletion = true;
+        $student = $this->getDataGenerator()->create_user(['idnumber' => 'export_student']);
+
+        $course = $this->getDataGenerator()->create_course(array('idnumber' => 'test_course'));
+
+        $data = $this->getDataGenerator()->create_module('data', array('course' => $course->id));
+
+        $cmdata = get_coursemodule_from_id('data', $data->cmid);
+
+        $studentrole = $DB->get_record('role', array('shortname' => 'student'));
+        $this->getDataGenerator()->enrol_user($student->id, $course->id, $studentrole->id);
+
+        /** @var core_completion_generator $cgen */
+        $cgen = $this->getDataGenerator()->get_plugin_generator('core_completion');
+        $cgen->enable_completion_tracking($course);
+        $cgen->set_activity_completion($course->id, array($data));
 
         $student = $DB->get_record('user', ['idnumber' => 'export_student'], '*', MUST_EXIST);
         $course = $DB->get_record('course', ['idnumber' => 'test_course'], '*', MUST_EXIST);

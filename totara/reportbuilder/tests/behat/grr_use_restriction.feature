@@ -18,7 +18,8 @@ Feature: Create global report use restrictions
     And I set the following administration settings values:
       | Enable report restrictions | 1 |
     And I press "Save changes"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | User report |
       | Source      | User        |
@@ -29,7 +30,7 @@ Feature: Create global report use restrictions
     And I switch to "Access" tab
     And I set the field "All users can view this report" to "1"
     And I press "Save changes"
-    And I navigate to "Global report restrictions" node in "Site administration > Reports > Report builder"
+    And I navigate to "Global report restrictions" node in "Site administration > Reports"
     And I press "New restriction"
     And I set the following fields to these values:
       | Name        | test restriction      |
@@ -110,7 +111,7 @@ Feature: Create global report use restrictions
       | user1 | CH0    |
       | user2 | CH0    |
       | user3 | CH0    |
-    And I navigate to "Global report restrictions" node in "Site administration > Reports > Report builder"
+    And I navigate to "Global report restrictions" node in "Site administration > Reports"
     And I click on "Edit" "link" in the "test restriction" "table_row"
     Given I switch to "Users allowed to select restriction" tab
     And I set the field "menugroupselector" to "Audience"
@@ -162,7 +163,7 @@ Feature: Create global report use restrictions
     And the following "cohorts" exist:
       | name             | idnumber | cohorttype |
       | Dynamic audience | A1       | 2          |
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Dynamic audience"
     And I switch to "Rule sets" tab
     And I set the field "id_addrulesetmenu" to "Last name"
@@ -171,7 +172,7 @@ Feature: Create global report use restrictions
     And I click on "Save" "button" in the "Add rule" "totaradialogue"
     And I wait "1" seconds
     And I press "Approve changes"
-    And I navigate to "Global report restrictions" node in "Site administration > Reports > Report builder"
+    And I navigate to "Global report restrictions" node in "Site administration > Reports"
     And I click on "Edit" "link" in the "test restriction" "table_row"
     Given I switch to "Users allowed to select restriction" tab
     And I set the field "menugroupselector" to "Audience"
@@ -231,7 +232,7 @@ Feature: Create global report use restrictions
       | user1 | ORG001       |
       | user2 | ORG001       |
       | user3 | ORG001       |
-    And I navigate to "Global report restrictions" node in "Site administration > Reports > Report builder"
+    And I navigate to "Global report restrictions" node in "Site administration > Reports"
     And I click on "Edit" "link" in the "test restriction" "table_row"
     Given I switch to "Users allowed to select restriction" tab
     And I set the field "menugroupselector" to "Organisation"

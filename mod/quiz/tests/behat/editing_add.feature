@@ -18,7 +18,7 @@ Feature: Edit quiz page - adding things
       | activity   | name   | intro                           | course | idnumber |
       | quiz       | Quiz 1 | Quiz 1 for testing the Add menu | C1     | quiz1    |
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Quiz 1"
     And I navigate to "Edit quiz" in current page administration
     Then I should see "Editing quiz: Quiz 1"

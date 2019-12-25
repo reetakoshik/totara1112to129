@@ -306,7 +306,7 @@ function tm_alert_send($eventdata) {
     }
     $eventdata->notification = 1;
 
-    if (!isset($eventdata->contexturl)) {
+    if (empty($eventdata->contexturl)) {
         $eventdata->contexturl     = '';
         $eventdata->contexturlname = '';
     } else {
@@ -314,7 +314,15 @@ function tm_alert_send($eventdata) {
         if ($eventdata->contexturl instanceof moodle_url) {
             $contexturl = $eventdata->contexturl->out();
         }
-        $eventdata->fullmessagehtml .= html_writer::empty_tag('br') . html_writer::empty_tag('br') . get_string('viewdetailshere', 'totara_message', $contexturl);
+        $context_link_html = html_writer::empty_tag('br')
+            . html_writer::empty_tag('br')
+            . get_string('viewdetailshere', 'totara_message', $contexturl);
+
+        // Don't append the link if it's already appended.
+        // This can easily happen if this method is called with the same $eventdata object repeatedly.
+        if (strpos($eventdata->fullmessagehtml, $context_link_html) === false) {
+            $eventdata->fullmessagehtml .= $context_link_html;
+        }
     }
 
     $result = tm_message_send($eventdata);

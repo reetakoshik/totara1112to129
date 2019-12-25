@@ -30,6 +30,7 @@ $string['default'] = 'Default';
 $string['disabled'] = 'Disabled';
 $string['disabled_help'] = 'Disabled scheduled tasks are not executed from cron, however they can still be executed manually via the CLI tool.';
 $string['edittaskschedule'] = 'Edit task schedule: {$a}';
+$string['eventscheduledtaskupdated'] = 'Scheduled task updated';
 $string['faildelay'] = 'Fail delay';
 $string['lastruntime'] = 'Last run';
 $string['nextruntime'] = 'Next run';

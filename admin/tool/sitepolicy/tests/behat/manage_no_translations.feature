@@ -35,7 +35,7 @@ Feature: Manage sitepolicy translations when site only has primary language
     Then I should see "View" in the "1" "table_row"
     When I follow "View"
     Then the "title" attribute of "language" "select" should contain "No languages found. To add translation you must first install the desired languages. Go to 'Language packs' or contact your system administrator."
-    
+
     # Delete the test policy.
     When I follow "Back to all versions"
     Then I should see "Manage \"A translatable policy\" policy"

@@ -317,16 +317,18 @@ var funccompletiondate =  function(element) {
     element = $(element);
     var parent = element.parent();
     if (!element.val().match(M.util.get_string('datepickerlongyearregexjs', 'totara_core'))){
-        parent.addClass('error');
         if ($('#id_error_completiondate').length == 0) {
-            parent.prepend('<span id="id_error_completiondate" class="error">' +
-                M.util.get_string('error:baddate','totara_cohort') +
-                '</span>');
+            require(['core/templates'], function (templates) {
+                templates.renderIcon('times-circle-danger').done(function (icon) {
+                    parent.prepend('<span id="id_error_completiondate" class="error">' +
+                        icon + M.util.get_string('error:baddate','totara_cohort') +
+                        '</span>');
+                });
+            });
         }
         return false;
     } else {
         $('#id_error_completiondate').remove();
-        parent.removeClass('error');
         return true;
     }
 };
@@ -336,16 +338,73 @@ var funccompletionduration = function(element) {
     element = $(element);
     var parent = element.parent();
     if (!element.val().match(/[1-9]+[0-9]*/)){
-        parent.addClass('error');
         if ( $('#id_error_completiondurationdate').length == 0 ) {
-            parent.prepend('<span id="id_error_completiondurationdate" class="error">' +
-                M.util.get_string('error:badduration','totara_cohort') +
-                '</span>');
+            require(['core/templates'], function (templates) {
+                templates.renderIcon('times-circle-danger').done(function (icon) {
+                    parent.prepend('<span id="id_error_completiondurationdate" class="error">' +
+                        icon + M.util.get_string('error:badduration','totara_cohort') +
+                        '</span>');
+                });
+            });
         }
         return false;
     } else {
         $('#id_error_completiondurationdate').remove();
-        parent.removeClass('error');
+        return true;
+    }
+};
+
+// Function to validate certification status checkboxes.
+var funccertifstatus = function(element) {
+    element = $(element);
+
+    var currentlycertified = $('#certifstatus_currentlycertified').is(':checked');
+    var currentlyexpired = $('#certifstatus_currentlyexpired').is(':checked');
+    var nevercertified = $('#certifstatus_nevercertified').is(':checked');
+
+    $('#certifstatus_currentlycertified').val(currentlycertified ? 1 : 0);
+    $('#certifstatus_currentlyexpired').val(currentlyexpired ? 1 : 0);
+    $('#certifstatus_nevercertified').val(nevercertified ? 1 : 0);
+
+    if (!currentlycertified && !currentlyexpired && !nevercertified) {
+        if ( $('#id_error_certifstatus').length == 0 ) {
+            require(['core/templates'], function (templates) {
+                templates.renderIcon('times-circle-danger').done(function (icon) {
+                    element.prepend('<span id="id_error_certifstatus" class="error">' +
+                        icon + M.util.get_string('certifoptionsselectone','totara_cohort') +
+                        '</span>');
+                });
+            });
+        }
+        return false;
+    } else {
+        $('#id_error_certifstatus').remove();
+        return true;
+    }
+};
+
+// Function to validate certification assignment status checkboxes.
+var funccertifassignmentstatus = function(element) {
+    element = $(element);
+    var assigned = $('#certifassignmentstatus_assigned').is(':checked');
+    var unassigned = $('#certifassignmentstatus_unassigned').is(':checked');
+
+    $('#certifassignmentstatus_assigned').val(assigned ? 1 : 0);
+    $('#certifassignmentstatus_unassigned').val(unassigned ? 1 : 0);
+
+    if (!assigned && !unassigned) {
+        if ( $('#id_error_certifassignmentstatus').length == 0 ) {
+            require(['core/templates'], function (templates) {
+                templates.renderIcon('times-circle-danger').done(function (icon) {
+                    element.prepend('<span id="id_error_certifassignmentstatus" class="error">' +
+                        icon + M.util.get_string('certifoptionsselectone','totara_cohort') +
+                        '</span>');
+                });
+            });
+        }
+        return false;
+    } else {
+        $('#id_error_certifassignmentstatus').remove();
         return true;
     }
 };
@@ -386,6 +445,16 @@ $(document).on('change', '#completiondate', function(element) {
 // Validate duration field when changing.
 $(document).on('change', '#completiondurationdate', function() {
     $('#completiondurationdate').get(0).cohort_validation_func = funccompletionduration;
+});
+
+// Validate certification status fields when changing.
+$(document).on('change', '#certifstatus', function() {
+    $('#certifstatus').get(0).cohort_validation_func = funccertifstatus;
+});
+
+// Validate certification assignment status fields when changing.
+$(document).on('change', '#certifassignmentstatus', function() {
+    $('#certifassignmentstatus').get(0).cohort_validation_func = funccertifassignmentstatus;
 });
 
 // Validate when radio buttons selected.
@@ -530,7 +599,7 @@ totaraDialog_handler_cohortruletreeview.prototype._save = function() {
     extrafields.each(
         function(intIndex) {
             if (typeof(this.cohort_validation_func) == 'function') {
-                success = success && this.cohort_validation_func(this);
+                success = this.cohort_validation_func(this) && success;
             }
         }
     );

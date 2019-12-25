@@ -10,7 +10,8 @@ Feature: Enable/disable password field based on authentication selected.
   Scenario: Verify the password field is enabled/disabled based on authentication selected when creating a new user.
 
     Given I log in as "admin"
-    When I navigate to "Add a new user" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
+    And I press "Add a new user"
     Then the "New password" "field" should be enabled
     And "Language" "field" should exist
     And I set the field "auth" to "Web services authentication"
@@ -26,7 +27,7 @@ Feature: Enable/disable password field based on authentication selected.
       | username | firstname | lastname | email                |
       | learner1 | Leonard   | Learner1 | learner1@example.com |
     And I log in as "admin"
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "Edit" "link" in the "Leonard Learner1" "table_row"
     Then "Language" "field" should not exist
     And the "New password" "field" should be enabled

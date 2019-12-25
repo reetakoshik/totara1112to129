@@ -18,7 +18,8 @@ Feature: Use the multi-item course filter
     And I log in as "admin"
     And the following config values are set as admin:
       | audiencevisibility | 1 |
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
 
   @javascript
   Scenario: Use filter with Courses report source

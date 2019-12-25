@@ -23,8 +23,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$ADMIN->add('users', new admin_category('userdata', new lang_string('pluginname', 'totara_userdata')));
-
 $temp = new admin_settingpage('userdatasettings', new lang_string('settings', 'totara_userdata'), 'totara/userdata:config');
 $temp->add(new totara_userdata_admin_setting_purge_type_select(
     'suspended',

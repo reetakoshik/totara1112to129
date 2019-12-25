@@ -30,6 +30,7 @@ use availability_grouping\condition;
  * Unit tests for the condition.
  *
  * @package availability_grouping
+ * @group availability
  * @copyright 2014 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

@@ -25,10 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 class rb_source_goal_summary extends rb_base_source {
-    public $base, $joinlist, $columnoptions, $filteroptions, $paramoptions;
-    public $defaultcolumns, $defaultfilters, $embeddedparams;
-    public $sourcetitle, $shortname, $scheduleable, $cacheable;
-
+    public $shortname;
 
     /**
      * Stored during post_config so that it can be used later.
@@ -58,6 +55,7 @@ class rb_source_goal_summary extends rb_base_source {
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_goal_summary');
         $this->shortname = 'goal_summary';
         $this->cacheable = false;
+        $this->usedcomponents[] = 'totara_hierarchy';
 
         parent::__construct();
     }
@@ -131,14 +129,15 @@ class rb_source_goal_summary extends rb_base_source {
                 'base.fullname',
                 array('defaultheading' => get_string('goalnameheading', 'rb_source_goal_summary'),
                       'dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'format_string')
             ),
             new rb_column_option(
                 'goal',
                 'namesummarylink',
                 get_string('goalnamesummarylinkcolumn', 'rb_source_goal_summary'),
                 'base.fullname',
-                array('displayfunc' => 'namesummarylink',
+                array('displayfunc' => 'goal_name_summary_link',
                       'extrafields' => array('goalid' => "base.id"),
                       'defaultheading' => get_string('goalnamesummarylinkheading', 'rb_source_goal_summary'))
             ),
@@ -149,7 +148,8 @@ class rb_source_goal_summary extends rb_base_source {
                 'COALESCE(numberassigned.c, 0)',
                 array('joins' => 'numberassigned',
                       'defaultheading' => get_string('goalnumberofusersassignedheading', 'rb_source_goal_summary'),
-                      'dbdatatype' => 'integer'
+                      'dbdatatype' => 'integer',
+                      'displayfunc' => 'integer'
                 )
             ),
             new rb_column_option(
@@ -158,6 +158,7 @@ class rb_source_goal_summary extends rb_base_source {
                 get_string('goalscalevaluescolumn', 'rb_source_goal_summary'),
                 'scalevalues_',
                 array('columngenerator' => 'scalevalues',
+                      'displayfunc' => 'integer',
                       'defaultheading' => get_string('goalscalevaluesheading', 'rb_source_goal_summary'))
             ),
             new rb_column_option(
@@ -166,7 +167,8 @@ class rb_source_goal_summary extends rb_base_source {
                 get_string('goaltypename', 'rb_source_goal_summary'),
                 'goaltype.fullname',
                 array(
-                    'joins' => 'goaltype'
+                    'joins' => 'goaltype',
+                    'displayfunc' => 'format_string'
                 )
             ),
             new rb_column_option(
@@ -374,8 +376,15 @@ class rb_source_goal_summary extends rb_base_source {
 
     /**
      * Link goal's name to summary report.
+     *
+     * @deprecated Since Totara 12.0
+     * @param string $name
+     * @param object Report row $row
+     * @param bool $isexport optional false
+     * @return string html link
      */
     public function rb_display_namesummarylink($name, $row, $isexport = false) {
+        debugging('rb_source_goal_summary::rb_display_namesummarylink has been deprecated since Totara 12.0. Please use totara_hierarchy\rb\display\goal_name_summary_link::display', DEBUG_DEVELOPER);
         if ($isexport) {
             return $name;
         }

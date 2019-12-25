@@ -24,13 +24,25 @@
 global $CFG;
 require_once($CFG->dirroot . '/totara/reportbuilder/filters/select.php');
 
-/**
- * TODO - This filter used to be "Equals" but is now "Contains", it would be nice to add a selector with more options.
- *
- * NOTE: This filter assumes that simple mode is enabled, see the
- *       add_job_custom_field_filters() function for an example.
- */
 class rb_filter_grpconcat_menu extends rb_filter_select {
+
+    /**
+     * Constructor
+     *
+     * @param string  $type         The filter type (from the db or embedded source)
+     * @param string  $value        The filter value (from the db or embedded source)
+     * @param integer $advanced     If the filter should be shown by default (0) or only
+     *                              when advanced options are shown (1)
+     * @param integer $region       Which region this filter appears in.
+     * @param reportbuilder $report The report this filter is for
+     * @param array   $defaultvalue Default value for the filter
+     */
+    public function __construct($type, $value, $advanced, $region, $report, $defaultvalue) {
+        parent::__construct($type, $value, $advanced, $region, $report, $defaultvalue);
+
+        // Always simple mode to ensure single value select.
+        $this->options['simplemode'] = true;
+    }
 
     /**
      * Returns the condition to be used with SQL where
@@ -42,8 +54,13 @@ class rb_filter_grpconcat_menu extends rb_filter_select {
 
         $value = $data['value'];
         $field = $this->get_field();
-        $likeparam = array();
 
+        if ($value == '') {
+            // return 1=1 instead of TRUE for MSSQL support
+            return [' 1=1 ', []];
+        }
+
+        $likeparam = array();
         $uniqueparam = rb_unique_param('mnfilter');
         $likesql = $DB->sql_like($field, ":{$uniqueparam}", true, true, false);
         $likeparam["{$uniqueparam}"] = '%' . $DB->sql_like_escape($value) . '%';

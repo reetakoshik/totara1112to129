@@ -194,7 +194,6 @@ $string['nativesqlsrv'] = 'SQL*Server Microsoft (native/sqlsrv)';
 $string['nativesqlsrvhelp'] = 'Now you need to configure the database where most Totara data will be stored.
 This database must already have been created and a username and password created to access it. Table prefix is mandatory.';
 $string['nativesqlsrvnodriver'] = 'Microsoft Drivers for SQL Server for PHP are not installed or not configured properly.';
-$string['nativesqlsrvnonwindows'] = 'Microsoft Drivers for SQL Server for PHP are available only for Windows OS.';
 $string['ociextensionisnotpresentinphp'] = 'PHP has not been properly configured with the OCI8 extension so that it can communicate with Oracle.  Please check your php.ini file or recompile PHP.';
 $string['pass'] = 'Pass';
 $string['paths'] = 'Paths';
@@ -255,3 +254,8 @@ $string['welcomep60'] = 'The following pages will lead you through some easy to 
 $string['welcomep70'] = 'Click the "Next" button below to continue with the set up of <strong>Totara</strong>.';
 $string['wwwroot'] = 'Web address';
 $string['wwwrooterror'] = 'The \'Web Address\' does not appear to be valid - this Totara installation doesn\'t appear to be there. The value below has been reset.';
+
+/*
+ * @deprecated since Moodle 3.3
+ */
+$string['nativesqlsrvnonwindows'] = 'Microsoft Drivers for SQL Server for PHP are available only for Windows OS.';

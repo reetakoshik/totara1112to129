@@ -1694,25 +1694,6 @@ abstract class dp_base_component {
         }
     }
 
-
-    /**
-     * Display a link to the plan index page.
-     * @deprecated Since Totara 9.0
-     *
-     * @return string
-     */
-    function display_back_to_index_link() {
-        global $OUTPUT;
-
-        debugging("display_back_to_index_link has been deprecated as back links are not standard navigation in Totara.");
-
-        $url = new moodle_url('/totara/plan/component.php', array('id' => $this->plan->id, 'c' => $this->component));
-        $link = $OUTPUT->action_link($url,
-            get_string('backtoallx', 'totara_plan', get_string("{$this->component}plural", 'totara_plan')));
-
-        return html_writer::tag('p', $link);
-    }
-
     /**
      * Display approval functionality for a component assignment
      *

@@ -45,9 +45,6 @@ class mod_feedback_archive_testcase extends advanced_testcase {
         $this->assertTrue(feedback_supports(FEATURE_ARCHIVE_COMPLETION));
     }
 
-    /**
-     * @depends test_module_supports_archive_completion
-     */
     public function test_archive() {
         global $DB;
 

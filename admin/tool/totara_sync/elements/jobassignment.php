@@ -44,20 +44,9 @@ class totara_sync_element_jobassignment extends totara_sync_element {
      * @param MoodleQuickForm $mform
      */
     public function config_form(&$mform) {
-        // Empty CSV field setting.
-        $emptyfieldopt = array(
-            false => get_string('emptyfieldskeepdata', 'tool_totara_sync'),
-            true => get_string('emptyfieldsremovedata', 'tool_totara_sync')
-        );
 
         $mform->addElement('selectyesno', 'sourceallrecords', get_string('sourceallrecords', 'tool_totara_sync'));
         $mform->addElement('static', 'sourceallrecordsdesc', '', get_string('sourceallrecordsdesc', 'tool_totara_sync'));
-
-        $mform->addElement('select', 'csvsaveemptyfields', get_string('emptyfieldsbehaviourhierarchy', 'tool_totara_sync'), $emptyfieldopt);
-        $default = !empty($this->config->csvsaveemptyfields);
-        $mform->disabledIf('csvsaveemptyfields', 'source_jobassignment', 'neq', 'totara_sync_source_jobassignment_csv');
-        $mform->setDefault('csvsaveemptyfields', $default);
-        $mform->addHelpButton('csvsaveemptyfields', 'emptyfieldsbehaviourhierarchy', 'tool_totara_sync');
 
         // Check that we've never linked on job assignment id number before.
         $previouslylinkedonjobassignmentidnumber = get_config('totara_sync_element_jobassignment', 'previouslylinkedonjobassignmentidnumber');
@@ -74,6 +63,7 @@ class totara_sync_element_jobassignment extends totara_sync_element {
         $mform->setDefault('allow_update', 1);
         $mform->addElement('checkbox', 'allow_delete', get_string('delete', 'tool_totara_sync'));
         $mform->setDefault('allow_delete', 1);
+        $mform->setExpanded('crud');
     }
 
     /**

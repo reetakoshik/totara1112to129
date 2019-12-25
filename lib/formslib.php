@@ -254,6 +254,9 @@ abstract class moodleform {
         $this->_form->setDefault('_qf__'.$this->_formname, 1);
         $this->_form->_setDefaultRuleMessages();
 
+        // Hook to inject logic after the definition was provided.
+        $this->after_definition();
+
         // we have to know all input types before processing submission ;-)
         $this->_process_submission($method);
     }
@@ -1012,6 +1015,24 @@ abstract class moodleform {
     protected abstract function definition();
 
     /**
+     * After definition hook.
+     *
+     * This is useful for intermediate classes to inject logic after the definition was
+     * provided without requiring developers to call the parent {{@link self::definition()}}
+     * as it's not obvious by design. The 'intermediate' class is 'MyClass extends
+     * IntermediateClass extends moodleform'.
+     *
+     * Classes overriding this method should always call the parent. We may not add
+     * anything specifically in this instance of the method, but intermediate classes
+     * are likely to do so, and so it is a good practice to always call the parent.
+     *
+     * @return void
+     */
+    protected function after_definition() {
+        
+    }
+
+    /**
      * Dummy stub method - override if you need to setup the form depending on current
      * values. This method is called after definition(), data submission and set_data().
      * All form setup that is dependent on form values should go in here.
@@ -1283,31 +1304,15 @@ abstract class moodleform {
      *                      $enhancement = 'smartselect';
      *                      $options = array('selectablecategories' => true|false)
      *
-     * @since Moodle 2.0
      * @param string|element $element form element for which Javascript needs to be initalized
      * @param string $enhancement which init function should be called
      * @param array $options options passed to javascript
      * @param array $strings strings for javascript
+     * @deprecated since Moodle 3.3 MDL-57471
      */
     function init_javascript_enhancement($element, $enhancement, array $options=array(), array $strings=null) {
-        global $PAGE;
-        if (is_string($element)) {
-            $element = $this->_form->getElement($element);
-        }
-        if (is_object($element)) {
-            $element->_generateId();
-            $elementid = $element->getAttribute('id');
-            $PAGE->requires->js_init_call('M.form.init_'.$enhancement, array($elementid, $options));
-            if (is_array($strings)) {
-                foreach ($strings as $string) {
-                    if (is_array($string)) {
-                        call_user_func_array(array($PAGE->requires, 'string_for_js'), $string);
-                    } else {
-                        $PAGE->requires->string_for_js($string, 'moodle');
-                    }
-                }
-            }
-        }
+        debugging('$mform->init_javascript_enhancement() is deprecated and no longer does anything. '.
+            'smartselect uses should be converted to the searchableselector form element.', DEBUG_DEVELOPER);
     }
 
     /**
@@ -1437,6 +1442,11 @@ class MoodleQuickForm extends HTML_QuickForm_DHTMLRulesTableless {
     /** @var array dependent state for the element/'s */
     var $_dependencies = array();
 
+    /**
+     * @var array elements that will become hidden based on another element
+     */
+    protected $_hideifs = array();
+
     /** @var array Array of buttons that if pressed do not result in the processing of the form. */
     var $_noSubmitButtons=array();
 
@@ -1484,6 +1494,16 @@ class MoodleQuickForm extends HTML_QuickForm_DHTMLRulesTableless {
      * @var bool
      */
     protected $clientvalidation = false;
+
+    /**
+     * Is this a 'disableIf' dependency ?
+     */
+    const DEP_DISABLE = 0;
+
+    /**
+     * Is this a 'hideIf' dependency?
+     */
+    const DEP_HIDE = 1;
 
     /**
      * Class constructor - same parameters as HTML_QuickForm_DHTMLRulesTableless
@@ -2454,8 +2474,7 @@ require(["core/event", "jquery"], function(Event, $) {
             foreach ($conditions as $condition=>$values) {
                 $result[$dependentOn][$condition] = array();
                 foreach ($values as $value=>$dependents) {
-                    $result[$dependentOn][$condition][$value] = array();
-                    $i = 0;
+                    $result[$dependentOn][$condition][$value][self::DEP_DISABLE] = array();
                     foreach ($dependents as $dependent) {
                         $elements = $this->_getElNamesRecursive($dependent);
                         if (empty($elements)) {
@@ -2466,7 +2485,29 @@ require(["core/event", "jquery"], function(Event, $) {
                             if ($element == $dependentOn) {
                                 continue;
                             }
-                            $result[$dependentOn][$condition][$value][] = $element;
+                            $result[$dependentOn][$condition][$value][self::DEP_DISABLE][] = $element;
+                        }
+                    }
+                }
+            }
+        }
+        foreach ($this->_hideifs as $dependenton => $conditions) {
+            $result[$dependenton] = array();
+            foreach ($conditions as $condition => $values) {
+                $result[$dependenton][$condition] = array();
+                foreach ($values as $value => $dependents) {
+                    $result[$dependenton][$condition][$value][self::DEP_HIDE] = array();
+                    foreach ($dependents as $dependent) {
+                        $elements = $this->_getElNamesRecursive($dependent);
+                        if (!in_array($dependent, $elements)) {
+                            // Always want to hide the main element, even if it contains sub-elements as well.
+                            $elements[] = $dependent;
+                        }
+                        foreach ($elements as $element) {
+                            if ($element == $dependenton) {
+                                continue;
+                            }
+                            $result[$dependenton][$condition][$value][self::DEP_HIDE][] = $element;
                         }
                     }
                 }
@@ -2553,6 +2594,40 @@ require(["core/event", "jquery"], function(Event, $) {
             $this->_dependencies[$dependentOn][$condition][$value] = array();
         }
         $this->_dependencies[$dependentOn][$condition][$value][] = $elementName;
+    }
+
+    /**
+     * Adds a dependency for $elementName which will be hidden if $condition is met.
+     * If $condition = 'notchecked' (default) then the condition is that the $dependentOn element
+     * is not checked. If $condition = 'checked' then the condition is that the $dependentOn element
+     * is checked. If $condition is something else (like "eq" for equals) then it is checked to see if the value
+     * of the $dependentOn element is $condition (such as equal) to $value.
+     *
+     * When working with multiple selects, the dependentOn has to be the real name of the select, meaning that
+     * it will most likely end up with '[]'. Also, the value should be an array of required values, or a string
+     * containing the values separated by pipes: array('red', 'blue') or 'red|blue'.
+     *
+     * @param string $elementname the name of the element which will be hidden
+     * @param string $dependenton the name of the element whose state will be checked for condition
+     * @param string $condition the condition to check
+     * @param mixed $value used in conjunction with condition.
+     */
+    public function hideIf($elementname, $dependenton, $condition = 'notchecked', $value = '1') {
+        // Multiple selects allow for a multiple selection, we transform the array to string here as
+        // an array cannot be used as a key in an associative array.
+        if (is_array($value)) {
+            $value = implode('|', $value);
+        }
+        if (!array_key_exists($dependenton, $this->_hideifs)) {
+            $this->_hideifs[$dependenton] = array();
+        }
+        if (!array_key_exists($condition, $this->_hideifs[$dependenton])) {
+            $this->_hideifs[$dependenton][$condition] = array();
+        }
+        if (!array_key_exists($value, $this->_hideifs[$dependenton][$condition])) {
+            $this->_hideifs[$dependenton][$condition][$value] = array();
+        }
+        $this->_hideifs[$dependenton][$condition][$value][] = $elementname;
     }
 
     /**
@@ -2811,7 +2886,7 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
         $formid = $form->getAttribute('id');
         parent::startForm($form);
         if ($form->isFrozen()){
-            $this->_formTemplate = "\n<div class=\"mform frozen\">\n{content}\n</div>";
+            $this->_formTemplate = "\n<div id=\"$formid\" class=\"mform frozen\">\n{collapsebtns}\n{content}\n</div>";
         } else {
             $this->_formTemplate = "\n<form{attributes}>\n\t<div style=\"display: none;\">{hidden}</div>\n{collapsebtns}\n{content}\n</form>";
             $this->_hiddenHtml .= $form->_pageparams;

@@ -329,6 +329,13 @@ class program {
             certif_delete(CERTIFTYPE_PROGRAM, $this->certifid);
         }
 
+        // Delete all completion records associated with this program
+        $DB->delete_records('prog_completion', ['programid' => $this->id]);
+        $DB->delete_records('prog_completion_history', ['programid' => $this->id]);
+
+        // Delete program log entries
+        $DB->delete_records('prog_completion_log', ['programid' => $this->id]);
+
         // delete all tag instances.
         core_tag_tag::remove_all_item_tags('totara_program', 'prog', $this->id);
 
@@ -349,28 +356,7 @@ class program {
         );
         $event->trigger();
 
-        return true;
-    }
-
-
-    /**
-     * @deprecated since Totara 10. Use prog_conditionally_delete_completion instead.
-     *
-     * Deletes the completion records for the program for the specified user.
-     *
-     * @param int $userid
-     * @param bool $deletecompleted Whether to force deletion of records for completed programs
-     * @return bool Deletion true|Exception
-     */
-    public function delete_completion_record($userid, $deletecompleted=false) {
-        debugging('certification_event_handler::unassigned() is deprecated, call certif_conditionally_delete_completion directly instead.', DEBUG_DEVELOPER);
-
-        global $DB;
-
-        if ($deletecompleted === true || !prog_is_complete($this->id, $userid)) {
-            $DB->delete_records('prog_completion', array('programid' => $this->id, 'userid' => $userid));
-            prog_log_completion($this->id, $userid, 'Deleted prog_completion in deprecated function program::delete_completion_record');
-        }
+        \totara_program\progress\program_progress_cache::mark_program_cache_stale($this->id);
 
         return true;
     }
@@ -400,6 +386,8 @@ class program {
         if (!prog_check_availability($this->availablefrom, $this->availableuntil)) {
             return PROG_UPDATE_ASSIGNMENTS_UNAVAILABLE;
         }
+
+        \totara_program\progress\program_progress_cache::mark_program_cache_stale($this->id);
 
         // Get program assignments.
         $progassignments = $this->assignments->get_assignments();
@@ -967,6 +955,8 @@ class program {
     public function unassign_learners($userids) {
         global $DB, $USER;
 
+        \totara_program\progress\program_progress_cache::mark_program_cache_stale($this->id);
+
         //get the courses in this program
         $sql = "SELECT DISTINCT courseid
                   FROM {prog_courseset_course} csc
@@ -1280,6 +1270,8 @@ class program {
 
         $progcompleted_eventtrigger = false;
 
+        \totara_program\progress\program_progress_cache::mark_program_cache_stale($this->id);
+
         // if the program is being marked as complete we need to trigger an
         // event to any listening modules
         if (array_key_exists('status', $completionsettings)) {
@@ -1428,26 +1420,8 @@ class program {
      * @return float
      */
     public function get_progress($userid) {
-        // first check if the whole program has been completed
-        if (prog_is_complete($this->id, $userid)) {
-            return (float)100;
-        }
-
-        $certifpath = get_certification_path_user($this->certifid, $userid);
-        $courseset_groups = $this->content->get_courseset_groups($certifpath, true);
-        $courseset_group_count = count($courseset_groups);
-        $courseset_group_complete_count = 0;
-
-        foreach ($courseset_groups as $courseset_group) {
-            if (prog_courseset_group_complete($courseset_group, $userid, false)) {
-                $courseset_group_complete_count++;
-            }
-        }
-
-        if ($courseset_group_count > 0) {
-            return (float)($courseset_group_complete_count / $courseset_group_count) * 100;
-        }
-        return 0;
+        $progressinfo = \totara_program\progress\program_progress::get_user_progressinfo($this, $userid);
+        return $progressinfo->get_percentagecomplete();
     }
 
     /**
@@ -1950,12 +1924,6 @@ class program {
         return $out;
     }
 
-    public function display_link_program_icon($programname, $program_id, $program_icon, $userid = null) {
-        // Deprecate instead of remove incase someone is using this.
-        debugging('$program->display_link_program_icon() is deprecated, use the lib function prog_display_link_icon() instead', DEBUG_DEVELOPER);
-        prog_display_link_icon($program_id, $userid);
-    }
-
     /**
      * Generates the HTML to display the current number of exceptions and a link
      * to the exceptions report for the program
@@ -1991,7 +1959,23 @@ class program {
      * @return string
      */
     public function display_current_status() {
-        global $PAGE, $CFG, $DB;
+        global $PAGE;
+
+        $data = $this->get_current_status();
+
+        $renderer = $PAGE->get_renderer('totara_program');
+        return $renderer->render_current_status($data);
+    }
+
+    /**
+     * Creates data object needed to display current status of a
+     * program
+     *
+     * @return stdClass
+     */
+    public function get_current_status() {
+        global $DB, $CFG;
+
         require_once($CFG->dirroot . '/totara/cohort/lib.php');
 
         $data = new stdClass();
@@ -1999,7 +1983,7 @@ class program {
         $data->exceptions = $this->assignments->count_user_assignment_exceptions();
         $data->total = $this->assignments->count_total_user_assignments();
         $data->audiencevisibilitywarning = false;
-        $data->assignmentsdeferred = $this->assignmentsdeferred;
+        $data->assignmentsdeferred = (int)$this->assignmentsdeferred;
 
         if (!empty($CFG->audiencevisibility)) {
             $coursesnovisible = $this->content->get_visibility_coursesets(TOTARA_SEARCH_OP_NOT_EQUAL, COHORT_VISIBLE_ALL);
@@ -2019,20 +2003,20 @@ class program {
                 $data->assignments > 0 ||
                 $this->audiencevisible == COHORT_VISIBLE_AUDIENCE && $DB->record_exists_sql($audiencesql, $audienceparams)) {
                 $data->statusstr = 'programlive';
-                $data->statusclass = 'notifynotice';
+                $data->notification_state = core\output\notification::NOTIFY_WARNING;
             } else {
                 $data->statusstr = 'programnotlive';
-                $data->statusclass = 'notifymessage';
+                $data->notification_state = core\output\notification::NOTIFY_INFO;
             }
 
         } else {
             if ($this->visible ||
                 $data->assignments > 0) {
                 $data->statusstr = 'programlive';
-                $data->statusclass = 'notifynotice';
+                $data->notification_state = core\output\notification::NOTIFY_WARNING;
             } else {
                 $data->statusstr = 'programnotlive';
-                $data->statusclass = 'notifymessage';
+                $data->notification_state = core\output\notification::NOTIFY_INFO;
             }
         }
 
@@ -2049,8 +2033,9 @@ class program {
             $data->statusstr = 'nolongeravailabletolearners';
         }
 
-        $renderer = $PAGE->get_renderer('totara_program');
-        return $renderer->render_current_status($data);
+        $data->expired = $this->has_expired();
+
+        return $data;
     }
 
     /**
@@ -2109,20 +2094,6 @@ class program {
         }
 
         return false;
-    }
-
-    /**
-     * Checks accessibility of the program for user if the user parameter is
-     * passed to the function otherwise checks if the program is generally
-     * accessible.
-     *
-     * @deprecated since Totara 10
-     * @param object $user If this parameter is included check availability to this user
-     * @return boolean
-     */
-    public function is_accessible($user = null) {
-        debugging('$program->is_accessible() is deprecated, use the lib function prog_is_accessible() instead', DEBUG_DEVELOPER);
-        return prog_is_accessible($this, $user);
     }
 
     /**
@@ -2474,6 +2445,103 @@ class program {
         }
 
         return has_any_capability($allowed_capabilities, $this->get_context(), $user);
+    }
+
+    /**
+     * Saves the contents of the image field.
+     * Will remove any previous images and replace with the one uploaded
+     *
+     * @param int $imagedata the data from the image field on the form
+     */
+    public function save_image($imagedata) {
+        // Only upload if the module is enabled.
+        if ($this->is_certif()) {
+            if (totara_feature_disabled('certifications')) {
+                return;
+            }
+        } else {
+            if (totara_feature_disabled('programs')) {
+                return;
+            }
+        }
+
+        $image = $this->get_image();
+        if ($image) {
+            $fs = get_file_storage();
+            $fs->delete_area_files(
+                $this->context->id,
+                'totara_program',
+                'images',
+                $this->id
+            );
+        }
+        file_save_draft_area_files(
+            $imagedata,
+            $this->context->id,
+            'totara_program',
+            'images',
+            $this->id,
+            [
+                'maxfiles' => 1,
+            ]
+        );
+    }
+
+    /**
+     * Return a url to the image associated with the program.
+     *
+     * @return string
+     */
+    public function get_image() {
+        global $CFG, $OUTPUT;
+        $fs = get_file_storage();
+        $files = array_values(
+            $fs->get_area_files(
+                $this->context->id,
+                'totara_program',
+                'images',
+                $this->id
+            )
+        );
+        // There has not being any files uploaded to the program so check the defaults.
+        if (empty($files)) {
+
+            $filearea = $this->is_certif() ?
+                'totara_certification_default_image' :
+                'totara_program_default_image';
+
+            $files = array_values(
+                $fs->get_area_files(
+                    context_system::instance()->id,
+                    'totara_core',
+                    $filearea,
+                    0
+                )
+            );
+        }
+        // There have not being any files uploaded so return the default default image.
+        if (empty($files)) {
+            if ($this->is_certif()) {
+                $component = 'totara_certification';
+            } else {
+                $component = 'totara_program';
+            }
+            $url = $OUTPUT->image_url('defaultimage', $component);
+            return $url->out();
+        }
+        $files = array_values(array_filter($files, function($file) {
+            return !$file->is_directory();
+        }));
+        assert(count($files) <= 1, 'There should only be one image for the program but there was ' . count($files));
+        $file = moodle_url::make_pluginfile_url(
+            $files[0]->get_contextid(),
+            $files[0]->get_component(),
+            $files[0]->get_filearea(),
+            $files[0]->get_itemid(),
+            $files[0]->get_filepath(),
+            $files[0]->get_filename()
+        );
+        return $file->out();
     }
 }
 

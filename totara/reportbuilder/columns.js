@@ -18,9 +18,10 @@
  *
  * @author Eugene Venter <eugene@catalyst.net.nz>
  * @author Dave Wallace <dave.wallace@kineo.co.nz>
- * @package totara
- * @subpackage reportbuilder
+ * @package totara_reportbuilder
  */
+
+/* global $ */
 M.totara_reportbuildercolumns = M.totara_reportbuildercolumns || {
 
     Y: null,
@@ -35,6 +36,7 @@ M.totara_reportbuildercolumns = M.totara_reportbuildercolumns || {
     upicon: '',
     downicon: '',
     spacer: '',
+    warningicon: '',
 
     /**
      * module initialisation method called by php js_init_call()
@@ -68,8 +70,9 @@ M.totara_reportbuildercolumns = M.totara_reportbuildercolumns || {
             iconscache.push(templates.renderIcon('arrow-up', M.util.get_string('moveup', 'totara_reportbuilder')));
             iconscache.push(templates.renderIcon('arrow-down', M.util.get_string('movedown', 'totara_reportbuilder')));
             iconscache.push(templates.renderIcon('spacer'));
+            iconscache.push(templates.renderIcon('warning', M.util.get_string('deprecatedcolumn', 'totara_reportbuilder'), 'warn-deprecated'));
 
-            $.when.apply($, iconscache).then(function (loadingicon, hideicon, showicon, deleteicon, upicon, downicon, spacer) {
+            $.when.apply($, iconscache).then(function (loadingicon, hideicon, showicon, deleteicon, upicon, downicon, spacer, warningicon) {
                 that.loadingimg = loadingicon;
                 that.hideicon = hideicon;
                 that.showicon = showicon;
@@ -77,6 +80,7 @@ M.totara_reportbuildercolumns = M.totara_reportbuildercolumns || {
                 that.upicon = upicon;
                 that.downicon = downicon;
                 that.spacer = spacer;
+                that.warningicon = warningicon;
                 // Do setup.
                 that.rb_init_col_rows();
             });
@@ -132,7 +136,12 @@ M.totara_reportbuildercolumns = M.totara_reportbuildercolumns || {
                     group.remove();
                 }
             });
-
+            // One group means we have only 'None' left after removing incompatible options.
+            // So, hide the entire advanced options selector.
+            if (advancedSelector.children().length === 1) {
+                advancedSelector.hide();
+                advancedSelector.val('');
+            }
         } else {
             advancedSelector.hide();
             customHeadingCheckbox.show();
@@ -147,11 +156,67 @@ M.totara_reportbuildercolumns = M.totara_reportbuildercolumns || {
             headingElement.prop('disabled', true);
             headingElement.val(newHeading);
         }
+
+        // Add warning icon for a deprecated column if needed,
+        // Or remove existing one if switching to a good column.
+        var deprecated = $(column_selector).find(':selected').data('deprecated');
+        if (deprecated == true) {
+            if ($(column_selector).next('.warn-deprecated').length == 0) {
+                $(column_selector).after(module.warningicon);
+            }
+        } else {
+            if ($(column_selector).next('.warn-deprecated').length > 0) {
+                $(column_selector).next('.warn-deprecated').remove();
+            }
+        }
     },
 
     /**
+     * Add a warning if any selected columns are not compatible with selected aggregations.
      *
+     * Unfortunately, we have to scan through all selected columns and options to always show
+     * correct information in our warnings.
      */
+    rb_check_col_compatibility: function() {
+        var module = this;
+
+        require(['core/notification'], function(notification) {
+            var warnings = document.getElementsByClassName('rb-column-warning');
+            while (warnings.length > 0) {
+                warnings[0].remove();
+            }
+
+            // Looks through all selected columns.
+            $('select.column_selector').each(function() {
+                var colName = $(this).val();
+
+                // If column is a sub-query, loop through the advanced settings of other selected columns
+                // to check if aggregations are used anywhere.
+                if (colName != 0 && this.options[this.selectedIndex].getAttribute('data-issubquery') === "1") {
+                    $('select.advanced_selector').each(function() {
+                        var advancedSelectorVal = $(this).val();
+                        if (advancedSelectorVal.indexOf('aggregate_') !== -1) {
+                            var advancedSelector = $('select.column_selector', $(this).parents('tr:first'));
+                            var aggregatedHeading = module.config.rb_column_headings[$(advancedSelector).val()];
+                            var subqueryHeading = module.config.rb_column_headings[colName];
+
+                            var warning = M.util.get_string('warnincompatiblecolumns', 'totara_reportbuilder', {
+                                subquery: subqueryHeading,
+                                aggregated: aggregatedHeading
+                            });
+
+                            notification.addNotification({
+                                message: warning,
+                                type: 'warning',
+                                extraclasses: 'rb-column-warning'
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    },
+
     rb_init_col_rows: function(){
 
         var module = this;
@@ -165,6 +230,7 @@ M.totara_reportbuildercolumns = M.totara_reportbuildercolumns || {
         $('select.column_selector').on('change', function() {
             window.onbeforeunload = null;
             module.rb_update_col_row(this);
+            module.rb_check_col_compatibility();
         });
 
         // handle changes to the advanced pulldowns
@@ -173,6 +239,7 @@ M.totara_reportbuildercolumns = M.totara_reportbuildercolumns || {
             window.onbeforeunload = null;
             var column_selector = $('select.column_selector', $(this).parents('tr:first'));
             module.rb_update_col_row(column_selector);
+            module.rb_check_col_compatibility();
         });
 
         // handle changes to the customise checkbox
@@ -208,18 +275,21 @@ M.totara_reportbuildercolumns = M.totara_reportbuildercolumns || {
             module.rb_update_col_row(this);
         });
 
+        // Check for column compatibility issues.
+        module.rb_check_col_compatibility();
+
         // Set up delete button events
-        this.rb_init_deletebuttons();
+        module.rb_init_deletebuttons();
 
         // Set up hide button events
-        this.rb_init_hidebuttons();
+        module.rb_init_hidebuttons();
 
         // Set up show button events
-        this.rb_init_showbuttons();
+        module.rb_init_showbuttons();
 
         // Set up 'move' button events
-        this.rb_init_movedown_btns();
-        this.rb_init_moveup_btns();
+        module.rb_init_movedown_btns();
+        module.rb_init_moveup_btns();
     },
 
     /**
@@ -312,7 +382,7 @@ M.totara_reportbuildercolumns = M.totara_reportbuildercolumns || {
 
                         newHeadingBox.attr('name', 'heading'+colid);
                         newHeadingBox.attr('id', 'id_heading'+colid);
-                        newHeadingBox.closest('tr').attr('colid', colid);
+                        newHeadingBox.closest('tr').attr('data-colid', colid);
 
                         // Append a new col select box
                         newcolinput.find('input[name=newheading]').val('');
@@ -361,10 +431,18 @@ M.totara_reportbuildercolumns = M.totara_reportbuildercolumns || {
             }
 
             var colrow = $(this).closest('tr');
+            var colid = colrow.data('colid');
+            var deprecated = $('select#id_column'+colid+'.column_selector').find(':selected').data('deprecated');
             $.ajax({
                 url: M.cfg.wwwroot + '/totara/reportbuilder/ajax/column.php',
                 type: "POST",
-                data: ({action: 'delete', sesskey: module.config.user_sesskey, id: module.config.rb_reportid, cid: colrow.attr('colid')}),
+                data: ({
+                    action: 'delete',
+                    sesskey: module.config.user_sesskey,
+                    id: module.config.rb_reportid,
+                    cid: colid,
+                    deprecated: deprecated
+                }),
                 beforeSend: function() {
                     clickedbtn.replaceWith(module.loadingimg);
                 },
@@ -396,7 +474,11 @@ M.totara_reportbuildercolumns = M.totara_reportbuildercolumns || {
                         }
 
                         if (optgroup.find('option[value='+delcol.type+'-'+delcol.value+']').length == 0) {
-                            optgroup.append('<option value="'+delcol.type+'-'+delcol.value+'">'+module.config.rb_column_headings[delcol.type+'-'+delcol.value]+'</option>');
+                            var heading = module.config.rb_column_headings[delcol.type+'-'+delcol.value];
+                            if (delcol.deprecated == true) {
+                                heading = M.util.get_string('deprecated', 'totara_reportbuilder', heading);
+                            }
+                            optgroup.append('<option value="'+delcol.type+'-'+delcol.value+'" data-deprecated='+delcol.deprecated+'>'+heading+'</option>');
                         }
 
                         // Remove deleted col from 'default sort column' selector
@@ -440,13 +522,13 @@ M.totara_reportbuildercolumns = M.totara_reportbuildercolumns || {
             $.ajax({
                 url: M.cfg.wwwroot + '/totara/reportbuilder/ajax/column.php',
                 type: "POST",
-                data: ({action: 'hide', sesskey: module.config.user_sesskey, id: module.config.rb_reportid, cid: colrow.attr('colid')}),
+                data: ({action: 'hide', sesskey: module.config.user_sesskey, id: module.config.rb_reportid, cid: colrow.data('colid')}),
                 beforeSend: function() {
                     clickedbtn.find('img').replaceWith(module.loadingimg);
                 },
                 success: function(o) {
                     if (o.success) {
-                        var colid = colrow.attr('colid');
+                        var colid = colrow.data('colid');
 
                         var showbtn = module.rb_get_btn_show(module.config.rb_reportid, colid);
                         clickedbtn.replaceWith(showbtn);
@@ -484,13 +566,13 @@ M.totara_reportbuildercolumns = M.totara_reportbuildercolumns || {
             $.ajax({
                 url: M.cfg.wwwroot + '/totara/reportbuilder/ajax/column.php',
                 type: "POST",
-                data: ({action: 'show', sesskey: module.config.user_sesskey, id: module.config.rb_reportid, cid: colrow.attr('colid')}),
+                data: ({action: 'show', sesskey: module.config.user_sesskey, id: module.config.rb_reportid, cid: colrow.data('colid')}),
                 beforeSend: function() {
                     clickedbtn.find('img').replaceWith(module.loadingimg);
                 },
                 success: function(o) {
                     if (o.success) {
-                        var colid = colrow.attr('colid');
+                        var colid = colrow.data('colid');
 
                         var showbtn = module.rb_get_btn_hide(module.config.rb_reportid, colid);
                         clickedbtn.replaceWith(showbtn);
@@ -550,7 +632,7 @@ M.totara_reportbuildercolumns = M.totara_reportbuildercolumns || {
             $.ajax({
                 url: M.cfg.wwwroot + '/totara/reportbuilder/ajax/column.php',
                 type: "POST",
-                data: ({action: 'movedown', sesskey: module.config.user_sesskey, id: module.config.rb_reportid, cid: colrow.attr('colid')}),
+                data: ({action: 'movedown', sesskey: module.config.user_sesskey, id: module.config.rb_reportid, cid: colrow.data('colid')}),
                 beforeSend: function() {
                     lowersibling.html(module.loadingimg);
                     colrow.html(module.loadingimg);
@@ -624,7 +706,7 @@ M.totara_reportbuildercolumns = M.totara_reportbuildercolumns || {
             $.ajax({
                 url: M.cfg.wwwroot + '/totara/reportbuilder/ajax/column.php',
                 type: "POST",
-                data: ({action: 'moveup', sesskey: module.config.user_sesskey, id: module.config.rb_reportid, cid: colrow.attr('colid')}),
+                data: ({action: 'moveup', sesskey: module.config.user_sesskey, id: module.config.rb_reportid, cid: colrow.data('colid')}),
                 beforeSend: function() {
                     uppersibling.html(module.loadingimg);
                     colrow.html(module.loadingimg);
@@ -678,7 +760,7 @@ M.totara_reportbuildercolumns = M.totara_reportbuildercolumns || {
         optionbox.empty();
 
         // Replace with btns with updated ones
-        var colid = colrow.attr('colid');
+        var colid = colrow.data('colid');
         var deletebtn = this.rb_get_btn_delete(this.config.rb_reportid, colid);
         var upbtn = this.spacer;
         if (colrow.prev('tr').find('select.column_selector').length > 0) {

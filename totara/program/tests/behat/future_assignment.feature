@@ -29,14 +29,11 @@ Feature: User assignments with due date base on first login
     Given I log in as "admin"
     And I set the following administration settings values:
       | enableprogramcompletioneditor | 1 |
-    And I click on "Programs" in the totara menu
-    And I click on "Assignment Program Tests" "link"
+    And I am on "Assignment Program Tests" program homepage
     And I click on "Edit program details" "button"
     And I click on "Assignments" "link"
 
-    And I click on "Individuals" "option" in the "#menucategory_select_dropdown" "css_element"
-    And I click on "Add" "button" in the "#category_select" "css_element"
-    And I click on "Add individuals to program" "button"
+    And I set the field "Add a new" to "Individuals"
     And I click on "fn_001 ln_001 (user001@example.com)" "link" in the "add-assignment-dialog-5" "totaradialogue"
     And I click on "Ok" "button" in the "add-assignment-dialog-5" "totaradialogue"
     And I wait "1" seconds
@@ -49,9 +46,7 @@ Feature: User assignments with due date base on first login
     And I click on "Set time relative to event" "button" in the "Completion criteria" "totaradialogue"
     And I wait "1" seconds
 
-    And I click on "Audiences" "option" in the "#menucategory_select_dropdown" "css_element"
-    And I click on "Add" "button" in the "#category_select" "css_element"
-    And I click on "Add audiences to program" "button"
+    And I set the field "Add a new" to "Audiences"
     And I click on "Audience1" "link" in the "add-assignment-dialog-3" "totaradialogue"
     And I click on "Ok" "button" in the "add-assignment-dialog-3" "totaradialogue"
     And I wait "1" seconds
@@ -64,14 +59,11 @@ Feature: User assignments with due date base on first login
     And I click on "Set time relative to event" "button" in the "Completion criteria" "totaradialogue"
     And I wait "1" seconds
 
-    And I press "Save changes"
-    And I press "Save all changes"
     Then I should see "3 learner(s) assigned: 3 active, 0 exception(s)"
     And I should see "Complete within 4 Week(s) of First login"
     And I should see "View dates"
     And I should see "Not yet known"
     And I should not see "No due date"
-    And I should not see "Set due date"
     And I should not see "Program assignment changes have been deferred"
 
     When I click on "Completion" "link"
@@ -103,13 +95,11 @@ Feature: User assignments with due date base on first login
 
     When I log out
     And I log in as "admin"
-    And I click on "Programs" in the totara menu
-    And I click on "Assignment Program Tests" "link"
+    And I am on "Assignment Program Tests" program homepage
     And I click on "Edit program details" "button"
     And I click on "Assignments" "link"
     Then I should see "Complete within 4 Week(s) of First login"
     And I should see "View dates"
-    And I should see "Set due date"
     And I should not see "Not yet known"
     And I should not see "No due date"
 
@@ -130,29 +120,21 @@ Feature: User assignments with due date base on first login
     Given I log in as "admin"
     And I set the following administration settings values:
       | enableprogramcompletioneditor | 1 |
-    And I click on "Programs" in the totara menu
-    And I click on "Assignment Program Tests" "link"
+    And I am on "Assignment Program Tests" program homepage
     And I click on "Edit program details" "button"
     And I click on "Assignments" "link"
 
-    And I click on "Individuals" "option" in the "#menucategory_select_dropdown" "css_element"
-    And I click on "Add" "button" in the "#category_select" "css_element"
-    And I click on "Add individuals to program" "button"
+    And I set the field "Add a new" to "Individuals"
     And I click on "fn_001 ln_001 (user001@example.com)" "link" in the "add-assignment-dialog-5" "totaradialogue"
     And I click on "Ok" "button" in the "add-assignment-dialog-5" "totaradialogue"
     And I wait "1" seconds
 
-    And I click on "Audiences" "option" in the "#menucategory_select_dropdown" "css_element"
-    And I click on "Add" "button" in the "#category_select" "css_element"
-    And I click on "Add audiences to program" "button"
+    And I set the field "Add a new" to "Audiences"
     And I click on "Audience1" "link" in the "add-assignment-dialog-3" "totaradialogue"
     And I click on "Ok" "button" in the "add-assignment-dialog-3" "totaradialogue"
     And I wait "1" seconds
 
-    And I press "Save changes"
-    And I press "Save all changes"
     Then I should see "3 learner(s) assigned: 3 active, 0 exception(s)"
-    And I should see "Set due date"
     And I should see "View dates"
     And I should see "No due date"
     And I should not see "Not yet set"
@@ -174,13 +156,11 @@ Feature: User assignments with due date base on first login
     And I click on "Set time relative to event" "button" in the "Completion criteria" "totaradialogue"
     And I wait "1" seconds
 
-    And I press "Save changes"
     Then I should see "3 learner(s) assigned: 3 active, 0 exception(s)"
     And I should see "Complete within 4 Week(s) of First login"
     And I should see "View dates"
     And I should see "Not yet known"
     And I should not see "No due date"
-    And I should not see "Set due date"
     And I should not see "Program assignment changes have been deferred"
 
     When I click on "Completion" "link"
@@ -212,13 +192,11 @@ Feature: User assignments with due date base on first login
 
     When I log out
     And I log in as "admin"
-    And I click on "Programs" in the totara menu
-    And I click on "Assignment Program Tests" "link"
+    And I am on "Assignment Program Tests" program homepage
     And I click on "Edit program details" "button"
     And I click on "Assignments" "link"
     Then I should see "Complete within 4 Week(s) of First login"
     And I should see "View dates"
-    And I should see "Set due date"
     And I should not see "Not yet known"
     And I should not see "No due date"
 
@@ -246,14 +224,11 @@ Feature: User assignments with due date base on first login
     Given I log in as "admin"
     And I set the following administration settings values:
       | enableprogramcompletioneditor | 1 |
-    And I click on "Programs" in the totara menu
-    And I click on "Assignment Program Tests" "link"
+    And I am on "Assignment Program Tests" program homepage
     And I click on "Edit program details" "button"
     And I click on "Assignments" "link"
 
-    And I click on "Individuals" "option" in the "#menucategory_select_dropdown" "css_element"
-    And I click on "Add" "button" in the "#category_select" "css_element"
-    And I click on "Add individuals to program" "button"
+    And I set the field "Add a new" to "Individuals"
     And I click on "fn_001 ln_001 (user001@example.com)" "link" in the "add-assignment-dialog-5" "totaradialogue"
     And I click on "Ok" "button" in the "add-assignment-dialog-5" "totaradialogue"
     And I wait "1" seconds
@@ -266,9 +241,7 @@ Feature: User assignments with due date base on first login
     And I click on "Set time relative to event" "button" in the "Completion criteria" "totaradialogue"
     And I wait "1" seconds
 
-    And I click on "Audiences" "option" in the "#menucategory_select_dropdown" "css_element"
-    And I click on "Add" "button" in the "#category_select" "css_element"
-    And I click on "Add audiences to program" "button"
+    And I set the field "Add a new" to "Audiences"
     And I click on "Audience1" "link" in the "add-assignment-dialog-3" "totaradialogue"
     And I click on "Ok" "button" in the "add-assignment-dialog-3" "totaradialogue"
     And I wait "1" seconds
@@ -281,8 +254,6 @@ Feature: User assignments with due date base on first login
     And I click on "Set time relative to event" "button" in the "Completion criteria" "totaradialogue"
     And I wait "1" seconds
 
-    And I press "Save changes"
-    And I press "Save all changes"
     Then I should see "3 learner(s) assigned: 3 active, 0 exception(s)"
     And I should see "Complete within 4 Week(s) of First login"
     And I should see "View dates"
@@ -314,29 +285,21 @@ Feature: User assignments with due date base on first login
     Given I log in as "admin"
     And I set the following administration settings values:
       | enableprogramcompletioneditor | 1 |
-    And I click on "Programs" in the totara menu
-    And I click on "Assignment Program Tests" "link"
+    And I am on "Assignment Program Tests" program homepage
     And I click on "Edit program details" "button"
     And I click on "Assignments" "link"
 
-    And I click on "Individuals" "option" in the "#menucategory_select_dropdown" "css_element"
-    And I click on "Add" "button" in the "#category_select" "css_element"
-    And I click on "Add individuals to program" "button"
+    And I set the field "Add a new" to "Individuals"
     And I click on "fn_001 ln_001 (user001@example.com)" "link" in the "add-assignment-dialog-5" "totaradialogue"
     And I click on "Ok" "button" in the "add-assignment-dialog-5" "totaradialogue"
     And I wait "1" seconds
 
-    And I click on "Audiences" "option" in the "#menucategory_select_dropdown" "css_element"
-    And I click on "Add" "button" in the "#category_select" "css_element"
-    And I click on "Add audiences to program" "button"
+    And I set the field "Add a new" to "Audiences"
     And I click on "Audience1" "link" in the "add-assignment-dialog-3" "totaradialogue"
     And I click on "Ok" "button" in the "add-assignment-dialog-3" "totaradialogue"
     And I wait "1" seconds
 
-    And I press "Save changes"
-    And I press "Save all changes"
     Then I should see "3 learner(s) assigned: 3 active, 0 exception(s)"
-    And I should see "Set due date"
     And I should see "View dates"
     And I should see "No due date"
     And I should not see "Not yet set"
@@ -358,7 +321,6 @@ Feature: User assignments with due date base on first login
     And I click on "Set time relative to event" "button" in the "Completion criteria" "totaradialogue"
     And I wait "1" seconds
 
-    And I press "Save changes"
     Then I should see "3 learner(s) assigned: 3 active, 0 exception(s)"
     And I should see "Complete within 4 Week(s) of First login"
     And I should see "View dates"

@@ -5,7 +5,8 @@ Feature: Set admin settings value
   I need to set admin setting value and verify it is applied
 
   Background:
-    Given the following "courses" exist:
+    Given I am on a totara site
+    And the following "courses" exist:
       | fullname | shortname | category |
       | Course fullname | C_shortname | 0 |
     And I log in as "admin"

@@ -39,10 +39,11 @@ require_once($CFG->dirroot . '/totara/completionimport/lib.php');
  */
 class totara_completionimport_course_upload_testcase extends advanced_testcase {
 
-    protected $user1, $user2, $course1, $course2, $course3;
+    protected $user1, $course1;
 
     protected function tearDown() {
         $this->user1 = null;
+        $this->course1 = null;
         parent::tearDown();
     }
 

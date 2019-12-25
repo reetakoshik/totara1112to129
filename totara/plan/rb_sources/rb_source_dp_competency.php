@@ -31,11 +31,17 @@ require_once($CFG->dirroot . '/totara/plan/lib.php');
  * A report builder source for DP competencies
  */
 class rb_source_dp_competency extends rb_base_source {
+    use \totara_job\rb\source\report_trait;
 
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
     public $dp_plans;
+
+    /**
+     * A hash of competency scales. The key is the framework id, and the value
+     * is an array as returned by get_records_menu() of the competency scale
+     * for that framework
+     * @var array
+     */
+    public $compscales = array();
 
 
     /**
@@ -78,6 +84,7 @@ class rb_source_dp_competency extends rb_base_source {
         $this->requiredcolumns = array();
         $this->dp_plans = array();
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_dp_competency');
+        $this->usedcomponents[] = 'totara_plan';
         parent::__construct();
     }
 
@@ -215,8 +222,8 @@ from
                 'competency'
         );
 
-        $this->add_user_table_to_joinlist($joinlist, 'base','userid');
-        $this->add_job_assignment_tables_to_joinlist($joinlist, 'base', 'userid');
+        $this->add_core_user_tables($joinlist, 'base','userid');
+        $this->add_totara_job_tables($joinlist, 'base', 'userid');
 
         return $joinlist;
     }
@@ -239,7 +246,8 @@ from
                     'defaultheading' => get_string('plan', 'rb_source_dp_competency'),
                     'joins' => 'dp_competency',
                     'dbdatatype' => 'char',
-                    'outputformat' => 'text'
+                    'outputformat' => 'text',
+                    'displayfunc' => 'format_string'
                 )
         );
         $columnoptions[] = new rb_column_option(
@@ -250,7 +258,7 @@ from
                 array(
                     'defaultheading' => get_string('plan', 'rb_source_dp_competency'),
                     'joins' => 'dp_competency',
-                    'displayfunc' => 'planlink',
+                    'displayfunc' => 'plan_link',
                     'extrafields' => array( 'plan_id' => 'dp_competency.planid' )
                 )
         );
@@ -296,7 +304,8 @@ from
                     'defaultheading' => get_string('plantemplate', 'rb_source_dp_competency'),
                     'joins' => 'template',
                     'dbdatatype' => 'char',
-                    'outputformat' => 'text'
+                    'outputformat' => 'text',
+                    'displayfunc' => 'format_string'
                 )
         );
         $columnoptions[] = new rb_column_option(
@@ -331,7 +340,8 @@ from
                     'defaultheading' => get_string('competencyname', 'rb_source_dp_competency'),
                     'joins' => 'competency',
                     'dbdatatype' => 'char',
-                    'outputformat' => 'text'
+                    'outputformat' => 'text',
+                    'displayfunc' => 'format_string'
                 )
         );
 
@@ -355,7 +365,8 @@ from
                 array(
                     'joins' => 'priority',
                     'dbdatatype' => 'char',
-                    'outputformat' => 'text'
+                    'outputformat' => 'text',
+                    'displayfunc' => 'format_string'
                 )
         );
 
@@ -378,7 +389,7 @@ from
                 array(
                     'defaultheading' => 'Plan',
                     'joins' => 'dp_competency',
-                    'displayfunc' => 'competencyeditstatus',
+                    'displayfunc' => 'plan_competency_edit_status',
                     'extrafields' => array( 'planid' => 'dp_competency.planid' )
                 )
         );
@@ -391,7 +402,8 @@ from
                 array(
                     'joins' => 'comp_type',
                     'dbdatatype' => 'char',
-                    'outputformat' => 'text'
+                    'outputformat' => 'text',
+                    'displayfunc' => 'format_string'
                 )
             );
 
@@ -401,7 +413,8 @@ from
                 get_string('competencytypeid', 'rb_source_dp_competency'),
                 'competency.typeid',
                 array(
-                    'joins' => 'competency'
+                    'joins' => 'competency',
+                    'displayfunc' => 'integer'
                 )
         );
 
@@ -422,7 +435,8 @@ from
                 array(
                     'joins' => array('dp_competency', 'scale_value', 'evidence_scale_value'),
                     'dbdatatype' => 'char',
-                    'outputformat' => 'text'
+                    'outputformat' => 'text',
+                    'displayfunc' => 'format_string'
                 )
         );
 
@@ -461,7 +475,7 @@ from
                 END',
                 array(
                     'joins' => array('dp_competency', 'scale_value', 'evidence_scale_value', 'competency'),
-                    'displayfunc' => 'proficiency_and_approval_menu',
+                    'displayfunc' => 'plan_competency_proficiency_and_approval_menu',
                     'defaultheading' => get_string('competencyproficiency', 'rb_source_dp_competency'),
                     'extrafields' => array(
                         'approved' => 'dp_competency.approved',
@@ -485,7 +499,8 @@ from
                 get_string('courses', 'rb_source_dp_competency'),
                 'linkedcourses.count',
                 array(
-                    'joins' => 'linkedcourses'
+                    'joins' => 'linkedcourses',
+                    'displayfunc' => 'integer'
                 )
         );
 
@@ -495,14 +510,14 @@ from
                 get_string('statushistorylinkcolumn', 'rb_source_dp_competency'),
                 'base.userid',
                 array('defaultheading' => get_string('statushistorylinkheading', 'rb_source_dp_competency'),
-                      'displayfunc' => 'status_history_link',
+                      'displayfunc' => 'plan_competency_status_history_link',
                       'extrafields' => array('competencyid' => 'base.competencyid'),
                       'noexport' => true,
                       'nosort' => true)
         );
 
-        $this->add_user_fields_to_columns($columnoptions);
-        $this->add_job_assignment_fields_to_columns($columnoptions);
+        $this->add_core_user_columns($columnoptions);
+        $this->add_totara_job_columns($columnoptions);
 
         return $columnoptions;
     }
@@ -553,8 +568,8 @@ from
                 )
         );
 
-        $this->add_user_fields_to_filters($filteroptions);
-        $this->add_job_assignment_fields_to_filters($filteroptions, 'base', 'userid');
+        $this->add_core_user_filters($filteroptions);
+        $this->add_totara_job_filters($filteroptions, 'base', 'userid');
 
         return $filteroptions;
     }
@@ -628,7 +643,17 @@ from
         return $defaultcolumns;
     }
 
+    /**
+     * Display competency status history link
+     *
+     * @deprecated Since Totara 12.0
+     * @param $userid
+     * @param $row
+     * @param bool $isexport
+     * @return string
+     */
     public function rb_display_status_history_link($userid, $row, $isexport = false) {
+        debugging('rb_source_dp_competency::rb_display_status_history_link has been deprecated since Totara 12.0. Use totara_plan\rb\display\plan_competency_status_history_link::display', DEBUG_DEVELOPER);
         if ($isexport) {
             return '';
         }
@@ -643,7 +668,16 @@ from
         return html_writer::link($url, get_string('statushistorylinkheading', 'rb_source_dp_competency'));
     }
 
+    /**
+     * Display proficiency and approval
+     *
+     * @deprecated Since Totara 12.0
+     * @param $status
+     * @param $row
+     * @return string
+     */
     function rb_display_proficiency_and_approval($status, $row) {
+        debugging('rb_source_dp_competency::rb_display_proficiency_and_approval has been deprecated since Totara 12.0', DEBUG_DEVELOPER);
         global $CFG;
         // needed for approval constants
         require_once($CFG->dirroot . '/totara/plan/lib.php');
@@ -668,11 +702,13 @@ from
 
     /**
      * Displays an icon linked to the "add competency evidence" page for this competency
+     *
+     * @deprecated Since Totara 12.0
      * @param $competencyid
      * @param $row
      */
     public function rb_display_competencyeditstatus($competencyid, $row) {
-
+        debugging('rb_source_dp_competency::rb_display_competencyeditstatus has been deprecated since Totara 12.0. Use totara_plan\rb\display\plan_competency_edit_status::display', DEBUG_DEVELOPER);
         $planid = isset($row->planid) ? $row->planid : null;
         if ($planid) {
 
@@ -692,23 +728,17 @@ from
         }
     }
 
-
-    /**
-     * A hash of competency scales. The key is the framework id, and the value
-     * is an array as returned by get_records_menu() of the competency scale
-     * for that framework
-     * @var array
-     */
-    private $compscales = array();
-
     /**
      * Displays the competency's proficiency/approval status, and if the current user would have permission
      * to change the competency's status via the competency page of the learning plan, it gives them
      * a drop-down menu to change the status, which saves changes via Javascript
+     *
+     * @deprecated Since Totara 12.0
      * @param unknown_type $status
      * @param unknown_type $row
      */
     public function rb_display_proficiency_and_approval_menu($status, $row) {
+        debugging('rb_source_dp_competency::rb_display_proficiency_and_approval_menu has been deprecated since Totara 12.0. Use totara_plan\rb\display\plan_competency_proficiency_and_approval_menu::display', DEBUG_DEVELOPER);
         global $CFG, $DB;
         // needed for approval constants
         require_once($CFG->dirroot . '/totara/plan/lib.php');
@@ -760,7 +790,8 @@ from
                 $action = "var response; ".
                           "response = \$.get(".
                               "'{$CFG->wwwroot}/totara/plan/components/competency/update-competency-setting.php".
-                              "?competencyid={$competencyid}".
+                              "?sesskey=" . sesskey() .
+                              "&competencyid={$competencyid}" .
                               "&planid={$planid}".
                               "&prof=' + $(this).val()".
                               "); ";

@@ -33,6 +33,7 @@ require_once($CFG->libdir . '/completionlib.php');
  * Unit tests for the completion condition.
  *
  * @package availability_completion
+ * @group availability
  * @copyright 2014 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

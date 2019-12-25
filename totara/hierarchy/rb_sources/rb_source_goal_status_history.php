@@ -27,10 +27,9 @@ defined('MOODLE_INTERNAL') || die();
 require_once('rb_source_goal_details.php');
 
 class rb_source_goal_status_history extends rb_base_source {
-    public $base, $joinlist, $columnoptions, $filteroptions, $paramoptions;
-    public $contentoptions, $defaultcolumns, $defaultfilters, $embeddedparams;
-    public $sourcetitle, $shortname;
+    use \totara_job\rb\source\report_trait;
 
+    public $shortname;
 
     public function __construct($groupid, rb_global_restriction_set $globalrestrictionset = null) {
         global $DB;
@@ -63,6 +62,7 @@ class rb_source_goal_status_history extends rb_base_source {
         $this->defaultcolumns = $this->define_defaultcolumns();
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_goal_status_history');
         $this->shortname = 'goal_status_history';
+        $this->usedcomponents[] = 'totara_hierarchy';
 
         parent::__construct();
     }
@@ -101,8 +101,8 @@ class rb_source_goal_status_history extends rb_base_source {
             )
         );
 
-        $this->add_user_table_to_joinlist($joinlist, 'base', 'userid');
-        $this->add_job_assignment_tables_to_joinlist($joinlist, 'base', 'userid');
+        $this->add_core_user_tables($joinlist, 'base', 'userid');
+        $this->add_totara_job_tables($joinlist, 'base', 'userid');
 
         return $joinlist;
     }
@@ -136,6 +136,7 @@ class rb_source_goal_status_history extends rb_base_source {
                       'dbdatatype' => 'char',
                       'outputformat' => 'text',
                       'capability' => 'totara/hierarchy:viewallgoals',
+                      'displayfunc' => 'format_string'
                     )
             ),
             new rb_column_option(
@@ -144,7 +145,7 @@ class rb_source_goal_status_history extends rb_base_source {
                 get_string('goalscopecolumn', 'rb_source_goal_status_history'),
                 'base.scope',
                 array('defaultheading' => get_string('goalscopeheading', 'rb_source_goal_status_history'),
-                      'displayfunc' => 'scope')
+                      'displayfunc' => 'goal_scope')
             ),
             new rb_column_option(
                 'history',
@@ -154,7 +155,8 @@ class rb_source_goal_status_history extends rb_base_source {
                 array('joins' => 'scalevalue',
                       'defaultheading' => get_string('goalscalevalueheading', 'rb_source_goal_status_history'),
                       'dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'format_string')
             ),
             new rb_column_option(
                 'history',
@@ -172,15 +174,15 @@ class rb_source_goal_status_history extends rb_base_source {
                 $DB->sql_concat_join("' '", $usernamefields),
                 array('defaultheading' => get_string('goalusermodifiedheading', 'rb_source_goal_status_history'),
                       'joins' => 'usermodified',
-                      'displayfunc' => 'fullname_link_user',
+                      'displayfunc' => 'user_link',
                       'extrafields' => array_merge(array('id' => 'usermodified.id'), $usernamefields),
                       'dbdatatype' => 'char',
                       'outputformat' => 'text')
             )
         );
 
-        $this->add_user_fields_to_columns($columnoptions);
-        $this->add_job_assignment_fields_to_columns($columnoptions);
+        $this->add_core_user_columns($columnoptions);
+        $this->add_totara_job_columns($columnoptions);
 
         return $columnoptions;
     }
@@ -218,8 +220,8 @@ class rb_source_goal_status_history extends rb_base_source {
             )
         );
 
-        $this->add_user_fields_to_filters($filteroptions);
-        $this->add_job_assignment_fields_to_filters($filteroptions, 'base', 'userid');
+        $this->add_core_user_filters($filteroptions);
+        $this->add_totara_job_filters($filteroptions, 'base', 'userid');
 
         return $filteroptions;
     }
@@ -319,14 +321,30 @@ class rb_source_goal_status_history extends rb_base_source {
         return $scalevalues;
     }
 
-
+    /**
+     * Display goal scope
+     *
+     * @deprecated Since Totara 12.0
+     * @param $scope
+     * @return mixed
+     */
     public function rb_display_scope($scope) {
+        debugging('rb_source_goal_status_history::rb_display_scope has been deprecated since Totara 12.0. Use totara_hierarchy\rb\display\goal_scope::display', DEBUG_DEVELOPER);
         $scopes = $this->rb_filter_scope();
 
         return $scopes[$scope];
     }
 
+    /**
+     * Display users fullname with link
+     * @deprecated Since Totara 12.0
+     * @param $user
+     * @param $row
+     * @param bool $isexport
+     * @return string
+     */
     function rb_display_fullname_link_user($user, $row, $isexport = false) {
+        debugging('rb_source_goal_status_history::rb_display_fullname_link_user has been deprecated since Totara 12.0. Use totara_reportbuilder\rb\display\user_link::display', DEBUG_DEVELOPER);
         $user = fullname($row);
         return $this->rb_display_link_user($user, $row, $isexport);
     }

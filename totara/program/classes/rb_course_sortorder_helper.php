@@ -42,11 +42,13 @@ final class rb_course_sortorder_helper implements \cache_data_source {
      * Returns a string to use as the field argument for an rb_column_option instance.
      *
      * @param string $field
+     * @param string $programid db field
+     * @param string $courseid db filed
      * @return string
      */
-    public static function get_column_field_definition(string $field): string {
+    public static function get_column_field_definition(string $field, string $programid = 'program.id', string $courseid = 'course.id'): string {
         global $DB;
-        return 'COALESCE(' . $DB->sql_concat('program.id', "'|'", 'course.id', "'|'", 'COALESCE(' . $field . ', \'-\')') . ', \'-\')';
+        return 'COALESCE(' . $DB->sql_concat($programid, "'|'", $courseid, "'|'", 'COALESCE(' . $field . ', \'-\')') . ', \'-\')';
     }
 
     /**

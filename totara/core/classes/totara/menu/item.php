@@ -17,33 +17,188 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Totara navigation edit page.
- *
- * @package    totara
+ * @package    totara_core
  * @subpackage navigation
  * @author     Oleg Demeshev <oleg.demeshev@totaralms.com>
  * @author     Chris Wharton <chris.wharton@catalyst-eu.net>
  */
 namespace totara_core\totara\menu;
 
-use \totara_core\totara\menu\menu as menu;
-
 class item {
+    /** @var int maximum visible depth of menu items */
+    const MAX_DEPTH = 3;
 
-    // @var properties of menu node.
-    protected $id, $parentid, $title, $url, $classname, $sortorder;
-    protected $depth, $path, $custom, $customtitle, $visibility, $targetattr;
-    protected $name, $parent;
+    /** @var int menu item is always hidden */
+    const VISIBILITY_HIDE = 0;
+
+    /** @var int menu item is visible (default items may have extra checks) */
+    const VISIBILITY_SHOW = 1;
+
+    /** @var int use complex visibility rules - this may very slow */
+    const VISIBILITY_CUSTOM = 3;
 
     /**
-     * Set values for node's properties.
-     *
-     * @param object $node
+     * Any access rule operator.
+     * @const AGGREGATION_ANY One or more are required.
      */
-    public function __construct($node) {
-        foreach ((object)$node as $key => $value) {
-            $this->{$key} = $value;
+    const AGGREGATION_ANY = 0;
+
+    /**
+     * All access rule operator.
+     * @const AGGREGATION_ALL All are required.
+     */
+    const AGGREGATION_ALL = 1;
+
+    /** @var int item id */
+    protected $id;
+
+    /** @var int parent recod id, 0 means top item */
+    protected $parentid;
+
+    /** @var string for custom items it is the title, for default items it is overridden title if customtitle is 1 */
+    protected $title;
+
+    /** @var string url for custom item, not used for containers or default items */
+    protected $url;
+
+    /** @var string PHP classname prefixed with backslash */
+    protected $classname;
+
+    /** @var int sort order */
+    protected $sortorder;
+
+    /** @var int 1 means this is a custom item or container, 0 is a default item or container */
+    protected $custom;
+
+    /** @var int always 1 for custom items or containers, 0 means use lang pack for default items and containers */
+    protected $customtitle;
+
+    /** @var int self::VISIBILITY_HIDE, self::VISIBILITY_SHOW or self::VISIBILITY_CUSTOM */
+    protected $visibility;
+
+    /** @var int used for show/hide UI toggle so that the custom visibility is not lost */
+    protected $visibilityold;
+
+    /** @var string either '_self, '_blank' or '' */
+    protected $targetattr;
+
+    /** @var int last modification timestamp */
+    protected $timemodified;
+
+    /**
+     * Internal flag for detection of incorrect constructor use,
+     * this will be removed after we make constructor private.
+     * @var bool
+     */
+    private static $preventpublicconstructor = true;
+
+    /**
+     * Private constructor, use item::create_instance() instead.
+     *
+     * @param \stdClass|array $record
+     */
+    public function __construct($record) {
+        if (self::$preventpublicconstructor) {
+            debugging('Deprecated item::__construct() call, use item::create_instance() instead.', DEBUG_DEVELOPER);
         }
+        self::$preventpublicconstructor = true;
+
+        $this->classname = '\\' . static::class;
+        $record = (object)(array)$record;
+
+        // Extra tests until we make this constructor private.
+        if (empty($record->id)) {
+            debugging('Incorrect item::__construct() call, fake data is not allowed any more, use real database record', DEBUG_DEVELOPER);
+        }
+        if ($record->classname !== $record->classname) {
+            debugging('Incorrect item::__construct() call, classname mismatch', DEBUG_DEVELOPER);
+        }
+
+        // NOTE: These assignments intentionally trigger notices when invalid/incomplete database record submitted.
+        $this->id = $record->id;
+        $this->parentid = $record->parentid;
+        $this->title = $record->title;
+        $this->url = $record->url;
+        $this->sortorder = $record->sortorder;
+        $this->customtitle = $record->customtitle;
+        $this->visibility = $record->visibility;
+        $this->visibilityold = $record->visibilityold;
+        $this->targetattr = $record->targetattr;
+        $this->timemodified = $record->timemodified;
+
+        // Make sure the important fields are consistent with item type.
+        if ($this->classname === '\totara_core\totara\menu\item' or $this->classname === '\totara_core\totara\menu\container') {
+            $this->custom = '1';
+            $this->customtitle = '1';
+        } else {
+            $this->custom = '0';
+        }
+    }
+
+    /**
+     * Create instance of item from db record.
+     *
+     * @param \stdClass|array $record
+     * @return null|item
+     */
+    final public static function create_instance($record) {
+        $record = (object)(array)$record;
+
+        if (empty($record->id)) {
+            debugging('Incorrect constructor call, fake data is not allowed any more, use real database record', DEBUG_DEVELOPER);
+            return null;
+        }
+
+        if (!$record->classname) { // This will trigger notice if invalid data supplied.
+            return null;
+        }
+
+        if ($record->custom) {
+            if ($record->classname !== '\totara_core\totara\menu\item' and $record->classname !== '\totara_core\totara\menu\container') {
+                return null;
+            }
+        } else {
+            if ($record->classname === '\totara_core\totara\menu\item' or $record->classname === '\totara_core\totara\menu\container') {
+                return null;
+            }
+        }
+
+        $classname = $record->classname;
+        if (!class_exists($classname)) {
+            return null;
+        }
+
+        try {
+            self::$preventpublicconstructor = false;
+            $instance = new $classname($record);
+        } catch (\Throwable $e) {
+            return null;
+        }
+
+        if (!($instance instanceof item)) {
+            return null;
+        }
+
+        return $instance;
+    }
+
+
+    /**
+     * Is this item a custom item/container?
+     *
+     * @return bool false if default item/container
+     */
+    final public function is_custom() {
+        return (bool)$this->custom;
+    }
+
+    /**
+     * Is this item a container?
+     *
+     * @return bool
+     */
+    final public function is_container() {
+        return ($this instanceof container);
     }
 
     /**
@@ -65,33 +220,48 @@ class item {
     }
 
     /**
-     * Set node parent id.
+     * @deprecated since Totara 12.0
      */
     public function set_parentid($parentid = 0) {
-        $this->parentid = $parentid;
+        debugging('item::set_parentid() was deprecated, do not use it');
     }
 
     /**
      * Returns node formatted title.
-     * Check for customtitle flag, if it is not set then returns default title.
-     * Otherwise returns modified title by client.
      *
      * @return string node title
      */
     public function get_title() {
-        if (empty($this->customtitle)) {
+        if ($this->custom) {
+            return format_string($this->title);
+        }
+        if (!$this->customtitle) {
             $this->title = $this->get_default_title();
         }
         return format_string($this->title);
     }
 
     /**
-     * Check if get_default_title() method exists, if not throw exception.
+     * Returns localised title for default items and containers.
+     *
+     * This can be overridden via admin interface.
      *
      * @return string
      */
     protected function get_default_title() {
+        // NOTE: this must be overridden in all default item and container classes.
         throw new \coding_exception('Menu item get_default_title() method is missing', get_called_class());
+    }
+
+    /**
+     * Returns info to create help icon for this item
+     * in Main menu administration UI.
+     *
+     * @return null|array help information in array: string name and component
+     */
+    public function get_default_admin_help() {
+       // NOTE: Override if you want to provide a help icon in admin interface.
+        return null;
     }
 
     /**
@@ -100,133 +270,183 @@ class item {
      * Otherwise returns modified url by client.
      *
      * @param bool $replaceparams replace ##params##
-     * @return string node url
+     * @return string node url, &s are not encoded
      */
     public function get_url($replaceparams = true) {
-        if ((int)$this->custom == 0) {
-            $this->url = $this->get_default_url();
+        if (!$this->custom) {
+            // URLs of default items cannot be altered.
+            return $this->get_default_url();
         }
         if (!$replaceparams) {
             return $this->url;
         }
-        return menu::replace_url_parameter_placeholders($this->url);
+        return self::replace_url_parameter_placeholders($this->url);
     }
 
     /**
-     * Check if get_default_url() method exists, if not throw exception.
+     * Replace url placeholders in menu items.
+     *
+     * @param string $url
+     * @return string final node URL, &s are not encoded
+     */
+    final public static function replace_url_parameter_placeholders($url) {
+        global $USER, $COURSE;
+
+        $search = array(
+            '##userid##',
+            '##username##',
+            '##useremail##',
+            '##courseid##',
+        );
+        $replace = array(
+            isset($USER->id) ? $USER->id : 0,
+            isset($USER->username) ? urlencode($USER->username) : '',
+            isset($USER->email) ? urlencode($USER->email) : '',
+            isset($COURSE->id) ? $COURSE->id : SITEID,
+        );
+
+        $url =  str_replace($search, $replace, $url);
+
+        // Make sure there are no nasty surprises.
+        $url = purify_uri($url, false, false);
+        if ($url === '') {
+            $url = '#';
+        }
+
+        return $url;
+    }
+
+    /**
+     * Return URL for default item.
      *
      * @return string
      */
     protected function get_default_url() {
+        // NOTE: this must be overridden in all default item classes.
         throw new \coding_exception('Menu item get_default_url() method is missing', get_called_class());
     }
 
     /**
      * Returns node classname.
      *
-     * @return string node classname
+     * @return string node classname prefix with backslash
      */
-    public function get_classname() {
+    final public function get_classname() {
         return $this->classname;
     }
 
     /**
      * Returns the visibility of a particular node.
      *
-     * If $calculated is true, this method calls {@link check_visibility()} to assess
-     * the visibility and always returns menu::SHOW_ALWAYS or menu::HIDE_ALWAYS.
+     * NOTE: parameter $calculate was removed in Totara 12.0,
+     *       this now returns the visibility selected by admin
+     *       in main menu administration interface.
      *
-     * If $calculated is false, this method returns the raw visibility, which could
-     * also be menu::SHOW_WHEN_REQUIRED.
-     *
-     * @param bool $calculated Whether or not to convert SHOW_WHEN_REQUIRED to an actual state.
-     * @return int One of menu::SHOW_WHEN_REQUIRED, menu::SHOW_ALWAYS or menu::HIDE_ALWAYS
+     * @return int
      */
-    public function get_visibility($calculated = true) {
-        if ($this->is_disabled()) {
-            // Disabled features are always hidden!
-            return menu::HIDE_ALWAYS;
-        }
-        if (!isset($this->visibility)) {
-            $this->visibility = $this->get_default_visibility();
-        }
-        if ($calculated && $this->visibility == menu::SHOW_WHEN_REQUIRED) {
-            return $this->check_visibility();
-        }
-        if ($calculated && $this->visibility == menu::SHOW_CUSTOM) {
-            return $this->get_visibility_custom();
-        }
+    final public function get_visibility() {
         return $this->visibility;
     }
 
     /**
-     * Real-time check of visibility for SHOW_WHEN_REQUIRED. Override
-     * in subclasses with specific visibility rules for the class.
+     * Returns localised visibility name.
      *
-     * @return int Either menu::SHOW_ALWAYS or menu::HIDE_ALWAYS.
+     * NOTE: this can be overridden to better explain
+     *       why something is disabled.
+     *
+     * @return string
      */
-    protected function check_visibility() {
-        return menu::SHOW_ALWAYS;
+    public function get_visibility_description() {
+        if ($this->visibility == self::VISIBILITY_HIDE) {
+            return get_string('menuitem:hide', 'totara_core');
+        }
+        if ($this->visibility == self::VISIBILITY_CUSTOM) {
+            return get_string('menuitem:showcustom', 'totara_core');
+        }
+        if ($this->custom or $this instanceof container) {
+            // Access control for container makes little sense, so use simple Show string.
+            return get_string('menuitem:show', 'totara_core');
+        } else {
+            return get_string('menuitem:showwhenrequired', 'totara_core');
+        }
     }
 
     /**
-     * Check if get_default_visibility() method exists, if not throw exception.
+     * Is this item visible for current user?
+     *
+     * @return bool
+     */
+    final public function is_visible() {
+        if ($this->visibility == self::VISIBILITY_HIDE) {
+            return false;
+        }
+        if (!$this->check_visibility()) {
+            return false;
+        }
+        if ($this->visibility == self::VISIBILITY_CUSTOM) {
+            return $this->get_visibility_custom();
+        }
+        return true;
+    }
+
+    /**
+     * Real-time check of visibility.
+     *
+     * NOTE: Since Totara 12.0 this is now checked even if custom visibility is selected by admin,
+     *       the reason is that only the item knows for sure if the link works or not
+     *       and it improves performance too.
+     *
+     * @return bool true means URL will work for current user if item is not disabled
+     */
+    protected function check_visibility() {
+        // NOTE: Override in subclasses with specific visibility rules for the class,
+        //       do not check is_disabled() because this method will not be called if item is disabled.
+        return true;
+    }
+
+    /**
+     * Returns initial visibility setting for new default items and containers.
      *
      * @return bool
      */
     public function get_default_visibility() {
-        throw new \coding_exception('Menu item get_default_visibility() method is missing', get_called_class());
+        return true;
     }
 
     /**
      * Is this menu item completely disabled?
-     * If yes it will not be visible in admin UI and also for end users.
+     * If yes it will not be visible for end users.
      *
      * @return bool
      */
     public function is_disabled() {
-        // Note: override with true if feature disable.
+        // NOTE: override with true if feature is disabled.
         return false;
     }
 
     /**
-     * Returns node original class name, wihtout namespace string.
+     * Returns node original class name.
      *
-     * @return string node class name
+     * @return string node name
      */
-    public function get_name() {
-        if ((int)$this->custom == 1) {
-            $this->name = 'item' . $this->id;
-        } else {
-            $this->name = $this->get_original_classname($this->classname);
-        }
-        return $this->name;
+    final public function get_name() {
+        return 'totaramenuitem' . $this->id;
     }
 
     /**
-     * Returns node original parent class name, wihtout namespace string.
+     * Returns node parent class name
      *
-     * @return string node parent class name
+     * @return string parent node name
      */
-    public function get_parent() {
-        // If parent is empty then it is database record or new item from class.
-        if ((int)$this->id == 0) {
-            $this->parent = $this->get_default_parent();
-        } else {
-            if ((int)$this->parentid > 0) {
-                $this->parent = $this->get_original_classname($this->parent);
-                // Check if menu item created through UI
-                if ($this->parent == 'item') {
-                    $this->parent .= $this->parentid;
-                }
-            }
+    final public function get_parent() {
+        if ($this->parentid) {
+            return 'totaramenuitem' . $this->parentid;
         }
-        return $this->parent;
+        return '';
     }
 
     /*
-     * Returns the default parent of this type of menu item. Defaults to top level ('root')
-     * unless overridden in a subclass.
+     * Returns the initial parent container for new default item or container.
      *
      * @return string Name of parent classname or 'root' for top level.
      */
@@ -235,10 +455,9 @@ class item {
     }
 
     /*
-     * Returns the default sort order of this type of menu item. Defaults to null (no preference)
-     * unless overridden in a subclass.
+     * Returns the initial sort order for new default item or container.
      *
-     * @return int|null Preferred sort order when this item is first added, or null for no preference.
+     * @return int|null Preferred sort order when this item is first added, null means at to the end of parent container.
      */
     public function get_default_sortorder() {
         return null;
@@ -246,39 +465,36 @@ class item {
 
     /**
      * Returns node html target attribute.
-     * Values for target attributes are _blank|_parent|_top|framename
+     * Values for target attributes are nothing or _blank
      *
      * @return string node html target attribute.
      */
     public function get_targetattr() {
-        if ((int)$this->id == 0) {
-            $this->targetattr = $this->get_default_targetattr();
+        if ($this->is_container()) {
+            return '';
         }
-        return $this->targetattr;
-    }
-
-    /*
-     * Return value for url link target attribute.
-     * Default value _self, <a href="http://mydomain.com">My page</a>.
-     * Customer value _blank|_parent|_top|framename, <a target="_blank" href="http://mydomain.com">My page</a>.
-     *
-     * @return string node target attribute
-     */
-    protected function get_default_targetattr() {
-        return menu::TARGET_ATTR_SELF;
+        if (!$this->custom) {
+            // New windows should be limited to external content, prevent them for default items,
+            // in the work case developers may override this method in their default item.
+            return '';
+        }
+        if ($this->targetattr === '_blank') {
+            return '_blank';
+        }
+        return '';
     }
 
     /**
-     * Parse namespace classname and returns original class name.
-     * Coming string is "totara_core\totara\menu\myclassname".
-     * Returns "myclassname".
+     * Method for obtaining a item setting.
      *
-     * @param string $classname
-     * @return string
+     * @param string $type Identifies the class using the setting.
+     * @param string $name Identifies the particular setting.
+     * @return string|null The value of the setting $name or null if it doesn't exist.
      */
-    private function get_original_classname($classname) {
-        $path = \core_text::strrchr($classname, "\\");
-        return \core_text::substr($path, 1);
+    public function get_setting($type, $name) {
+        global $DB;
+        return $DB->get_field('totara_navigation_settings', 'value',
+            array('itemid' => $this->id, 'type' => $type, 'name' => $name));
     }
 
     /**
@@ -287,7 +503,7 @@ class item {
      *
      * @return bool true if item is visible to current user.
      */
-    protected function get_visibility_custom() {
+    final protected function get_visibility_custom() {
         global $DB;
 
         // The set of rules for this menu item.
@@ -340,9 +556,9 @@ class item {
             }
         }
 
-        if ($visibility == menu::AGGREGATION_ANY) {
+        if ($visibility == self::AGGREGATION_ANY) {
             return in_array(true, $result); // Any true result.
-        } else if ($visibility == menu::AGGREGATION_ALL) {
+        } else if ($visibility == self::AGGREGATION_ALL) {
             return !in_array(false, $result); // None false results.
         } else {
             return false;
@@ -350,12 +566,51 @@ class item {
     }
 
     /**
+     * The list of available preset rules to select from.
+     *
+     * @return string[] $choices Rules to select from.
+     */
+    final public static function get_visibility_preset_rule_choices() {
+        $choices = array(
+            'is_logged_in'              => get_string('menuitem:rulepreset_is_logged_in', 'totara_core'),
+            'is_not_logged_in'          => get_string('menuitem:rulepreset_is_not_logged_in', 'totara_core'),
+            'is_guest'                  => get_string('menuitem:rulepreset_is_guest', 'totara_core'),
+            'is_not_guest'              => get_string('menuitem:rulepreset_is_not_guest', 'totara_core'),
+            'is_site_admin'             => get_string('menuitem:rulepreset_is_site_admin', 'totara_core'),
+            'can_view_required_learning'=> get_string('menuitem:rulepreset_can_view_required_learning', 'totara_core'),
+            'can_view_my_team'          => get_string('menuitem:rulepreset_can_view_my_team', 'totara_core'),
+            'can_view_my_reports'       => get_string('menuitem:rulepreset_can_view_my_reports', 'totara_core'),
+            'can_view_certifications'   => get_string('menuitem:rulepreset_can_view_certifications', 'totara_core'),
+            'can_view_programs'         => get_string('menuitem:rulepreset_can_view_programs', 'totara_core'),
+            'can_view_allappraisals'    => get_string('menuitem:rulepreset_can_view_allappraisals', 'totara_core'),
+            'can_view_latestappraisal'  => get_string('menuitem:rulepreset_can_view_latest_appraisal', 'totara_core'),
+            'can_view_appraisal'        => get_string('menuitem:rulepreset_can_view_appraisal', 'totara_core'),
+            'can_view_feedback_360s'    => get_string('menuitem:rulepreset_can_view_feedback_360s', 'totara_core'),
+            'can_view_my_goals'         => get_string('menuitem:rulepreset_can_view_my_goals', 'totara_core'),
+            'can_view_learning_plans'   => get_string('menuitem:rulepreset_can_view_learning_plans', 'totara_core'),
+        );
+
+        return $choices;
+    }
+
+    /**
+     * Preset rules not compatible with the current menu item. For example, setting a rule that to be able
+     * to view reports page one should be able to view report page leads to an infinite loop and should not
+     * be an option users can select from.
+     *
+     * @return string[] A list of rules to exclude when configuring a menu item
+     */
+    public function get_incompatible_preset_rules(): array {
+        return [];
+    }
+
+    /**
      * Checks the preset rules for this menu item.
      *
-     * To add another rule, just add to the switch statement, and {@link menu::get_preset_rule_choices()}.
+     * To add another rule, just add to the switch statement, and {@link item::get_visibility_preset_rule_choices()}.
      *
      * @param object $rule The rule that applies to the particular menu item.
-     * @param int $visibility Logical operator for combining multiple results - one of the menu::AGGREGATION_* constants.
+     * @param int $visibility Logical operator for combining multiple results - one of the item::AGGREGATION_* constants.
      * @return bool $result True if the item is visible.
      */
     private function get_visibility_by_preset_rule($rule, $visibility) {
@@ -420,9 +675,9 @@ class item {
             }
         }
 
-        if ($visibility == menu::AGGREGATION_ANY) {
+        if ($visibility == self::AGGREGATION_ANY) {
             return in_array(true, $result); // Any true result.
-        } else if ($visibility == menu::AGGREGATION_ALL) {
+        } else if ($visibility == self::AGGREGATION_ALL) {
             return !in_array(false, $result); // None false results.
         } else {
             return false;
@@ -438,19 +693,31 @@ class item {
      * @return bool True if the current user can see that type of menu item.
      */
     private function check_menu_item_visibility($menuclass) {
-        /** @var \totara_core\totara\menu\item $menuinstance */
-        $menuinstance = new $menuclass(array());
-        $visibility = $menuinstance->get_visibility();
-        return (bool) $visibility == menu::SHOW_ALWAYS;
+        global $DB;
+
+        $record = $DB->get_record('totara_navigation', array('classname' => $menuclass, 'custom' => 0));
+        if (!$record) {
+            return false;
+        }
+
+        $item = self::create_instance($record);
+        if (!$item) {
+            return false;
+        }
+
+        if ($item->is_disabled()) {
+            return false;
+        }
+
+        return $item->is_visible();
     }
 
     /**
      * Checks the role rules for this menu item.
      *
      * @param object $rule The rule that applies to the particular menu item.
-     * @param int $aggregation Logical operator for combining multiple results - one of the menu::AGGREGATION_* constants.
+     * @param int $aggregation Logical operator for combining multiple results - one of the item::AGGREGATION_* constants.
      * @param string $contextsetting If 'site', check for role in the system context. If 'any' check for role in any context.
-     *
      * @return bool $result True if the item is visible.
      */
     private function get_visibility_by_role($rule, $aggregation, $contextsetting) {
@@ -502,9 +769,9 @@ class item {
         }
 
         $userroles = array_values($userroles);
-        if ($aggregation == menu::AGGREGATION_ANY) {
+        if ($aggregation == self::AGGREGATION_ANY) {
             return (count(array_intersect($allowedroles, $userroles)) != 0);
-        } else if ($aggregation == menu::AGGREGATION_ALL) {
+        } else if ($aggregation == self::AGGREGATION_ALL) {
             return (count(array_intersect($allowedroles, $userroles)) == count($allowedroles));
         } else {
             return false;
@@ -515,7 +782,7 @@ class item {
      * Checks the audience rules for this menu item.
      *
      * @param object $rule The rule that applies to the particular menu item.
-     * @param int $visibility Logical operator for combining multiple results - one of the menu::AGGREGATION_* constants.
+     * @param int $visibility Logical operator for combining multiple results - one of the item::AGGREGATION_* constants.
      * @return bool True if user has access rights.
      */
     private function get_visibility_by_audience($rule, $visibility) {
@@ -532,9 +799,9 @@ class item {
                  WHERE userid = ?";
         $useraudiences = $DB->get_fieldset_sql($sql, array($USER->id));
 
-        if ($visibility == menu::AGGREGATION_ANY) {
+        if ($visibility == self::AGGREGATION_ANY) {
             return (count(array_intersect($allowedaudiences, $useraudiences)) != 0);
-        } else if ($visibility == menu::AGGREGATION_ALL) {
+        } else if ($visibility == self::AGGREGATION_ALL) {
             return (count(array_intersect($allowedaudiences, $useraudiences)) == count($allowedaudiences));
         } else {
             return false;

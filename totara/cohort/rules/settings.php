@@ -31,6 +31,7 @@ require_once($CFG->dirroot . '/totara/cohort/rules/ui.php');
 require_once($CFG->dirroot . '/totara/cohort/rules/sqlhandler.php');
 require_once($CFG->dirroot . '/totara/cohort/rules/sqlhandlers/inlist.php');
 require_once($CFG->dirroot . '/totara/cohort/rules/sqlhandlers/date.php');
+require_once($CFG->dirroot . '/totara/cohort/rules/sqlhandlers/certification_status.php');
 require_once($CFG->dirroot . '/totara/cohort/rules/sqlhandlers/completion.php');
 require_once($CFG->dirroot . '/totara/cohort/rules/sqlhandlers/manager.php');
 require_once($CFG->dirroot . '/totara/cohort/rules/sqlhandlers/userstatus.php');
@@ -49,9 +50,9 @@ define('COHORT_RULES_TYPE_TEXT', 0);
  */
 function cohort_rules_list($reset = false){
     global $CFG, $DB;
-    static $rules = false;
+    static $rules = false; // This is no good for phpunit tests
 
-    if (!$rules || $reset) {
+    if (!$rules || $reset || PHPUNIT_TEST) {
         $rules = array();
 
         // User's idnumber
@@ -258,6 +259,16 @@ function cohort_rules_list($reset = false){
             }
         }
 
+        // User authentication
+        $rules[] = new cohort_rule_option(
+            'user',
+            'authenticationtype',
+            new cohort_rule_ui_authentication_type(
+                get_string('ruledesc-user-authenticationtype', 'totara_cohort')
+            ),
+            new cohort_rule_sqlhandler_in_userfield_char('auth', COHORT_RULES_TYPE_MENU)
+        );
+
         // Audience rules applied across all job assignments.
         $rules[] = new cohort_rule_option(
             'alljobassign',
@@ -357,28 +368,28 @@ function cohort_rules_list($reset = false){
                 case 'menu':
                     $options = explode("\n", $field->param1);
                     $dialog = new cohort_rule_ui_menu(
-                        get_string('usersposx', 'totara_cohort', $field->name),
+                        get_string('usersposx', 'totara_cohort', format_string($field->name)),
                         array_combine($options, $options)
                     );
                     $sqlhandler = new cohort_rule_sqlhandler_in_poscustomfield($id, $field->datatype);
                     break;
                 case 'text':
                     $dialog = new cohort_rule_ui_text(
-                        get_string('usersposx', 'totara_cohort', $field->name),
+                        get_string('usersposx', 'totara_cohort', format_string($field->name)),
                         get_string('separatemultiplebycommas', 'totara_cohort')
                     );
                     $sqlhandler = new cohort_rule_sqlhandler_in_poscustomfield($id, $field->datatype);
                     break;
                 case 'datetime':
                     $dialog = new cohort_rule_ui_date(
-                        get_string('usersposx', 'totara_cohort', $field->name)
+                        get_string('usersposx', 'totara_cohort', format_string($field->name))
                     );
                     $sqlhandler = new cohort_rule_sqlhandler_date_poscustomfield($id, $field->datatype);
                     break;
 
                 case 'checkbox':
                     $dialog = new cohort_rule_ui_checkbox(
-                        get_string('usersposx', 'totara_cohort', $field->name),
+                        get_string('usersposx', 'totara_cohort', format_string($field->name)),
                         // Because it may result in major dataloss change the strings vice versa.
                         array(
                             1 => get_string('checkboxno', 'totara_cohort'),
@@ -399,7 +410,7 @@ function cohort_rules_list($reset = false){
                 "poscustomfield{$id}",
                 $dialog,
                 $sqlhandler,
-                s($field->name)
+                s(format_string($field->name))
             );
         }
 
@@ -464,27 +475,27 @@ function cohort_rules_list($reset = false){
                 case 'menu':
                     $options = explode("\n", $field->param1);
                     $dialog = new cohort_rule_ui_menu(
-                        get_string('usersorgx', 'totara_cohort', $field->name),
+                        get_string('usersorgx', 'totara_cohort', format_string($field->name)),
                         array_combine($options, $options)
                     );
                     $sqlhandler = new cohort_rule_sqlhandler_in_orgcustomfield($id, $field->datatype);
                     break;
                 case 'text':
                     $dialog = new cohort_rule_ui_text(
-                        get_string('usersorgx', 'totara_cohort', $field->name),
+                        get_string('usersorgx', 'totara_cohort', format_string($field->name)),
                         get_string('separatemultiplebycommas', 'totara_cohort')
                     );
                     $sqlhandler = new cohort_rule_sqlhandler_in_orgcustomfield($id, $field->datatype);
                     break;
                 case 'datetime':
                     $dialog = new cohort_rule_ui_date(
-                        get_string('usersorgx', 'totara_cohort', $field->name)
+                        get_string('usersorgx', 'totara_cohort', format_string($field->name))
                     );
                     $sqlhandler = new cohort_rule_sqlhandler_date_orgcustomfield($id, $field->datatype);
                     break;
                 case 'checkbox':
                     $dialog = new cohort_rule_ui_checkbox(
-                        get_string('usersorgx', 'totara_cohort', $field->name),
+                        get_string('usersorgx', 'totara_cohort', format_string($field->name)),
                         // Because it may result in major dataloss change the strings vice versa.
                         array(
                             1 => get_string('checkboxno', 'totara_cohort'),
@@ -505,7 +516,7 @@ function cohort_rules_list($reset = false){
                 "orgcustomfield{$id}",
                 $dialog,
                 $sqlhandler,
-                s($field->name)
+                s(format_string($field->name))
             );
         }
 
@@ -602,6 +613,31 @@ function cohort_rules_list($reset = false){
                     COHORT_PICKER_PROGRAM_COMPLETION
                 ),
                 new cohort_rule_sqlhandler_completion_duration_started_program()
+            );
+        }
+
+        // Certification rules.
+        if (totara_feature_visible('certifications')) {
+            // Certification status.
+            $rules[] = new cohort_rule_option(
+                'learning',
+                'certificationstatus',
+                new cohort_rule_ui_picker_certification_status(
+                    get_string('ruledesc-learning-certificationstatus', 'totara_cohort'),
+                    COHORT_PICKER_CERTIFICATION_COMPLETION
+                ),
+                new cohort_rule_sqlhandler_certification_status()
+            );
+
+            // Certification completion date.
+            $rules[] = new cohort_rule_option(
+                'learning',
+                'certificationcompletiondate',
+                new cohort_rule_ui_picker_certification_completion_date(
+                    get_string('ruledesc-learning-certificationcompletiondate', 'totara_cohort'),
+                    COHORT_PICKER_CERTIFICATION_COMPLETION
+                ),
+                new cohort_rule_sqlhandler_completion_date_certification()
             );
         }
 

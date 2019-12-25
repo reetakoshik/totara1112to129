@@ -24,7 +24,7 @@ Feature: Access to full profiles of users
 
   Scenario: Viewing full profiles with default settings
     When I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     # Another student's full profile is not visible
     And I navigate to course participants
     And I follow "Student 2"
@@ -47,7 +47,7 @@ Feature: Access to full profiles of users
     Given the following config values are set as admin:
       |  forceloginforprofiles | 0 |
     When I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to course participants
     And I follow "Student 2"
     And I follow "Full profile"
@@ -59,7 +59,7 @@ Feature: Access to full profiles of users
       | moodle/user:viewdetails | Allow |
     And I log out
     When I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to course participants
     And I follow "Student 2"
     And I follow "Full profile"
@@ -74,11 +74,11 @@ Feature: Access to full profiles of users
   @javascript
   Scenario: Viewing full profiles of someone with the course contact role
     Given I log in as "admin"
-    And I navigate to "Courses" node in "Site administration > Appearance"
+    And I navigate to "Course settings" node in "Site administration > Courses"
     And I set the following fields to these values:
       | Course creator | 1 |
     And I press "Save changes"
-    And I navigate to "Assign system roles" node in "Site administration > Users > Permissions"
+    And I navigate to "Assign system roles" node in "Site administration > Permissions"
     And I follow "Course creator"
     And I click on "//div[@class='userselector']/descendant::option[contains(., 'Student 3')]" "xpath_element"
     And I press "Add"
@@ -91,8 +91,7 @@ Feature: Access to full profiles of users
   @javascript
   Scenario: View full profiles of someone in the same group in a course with separate groups.
     Given I log in as "admin"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "Edit settings" node in "Course administration"
     And I set the following fields to these values:
       | Group mode | Separate groups |
@@ -106,8 +105,7 @@ Feature: Access to full profiles of users
     And I should see "The details of this user are not available to you"
     And I log out
     And I log in as "admin"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "Users > Groups" in current page administration
     And I press "Create group"
     And I set the following fields to these values:

@@ -82,6 +82,28 @@ class mariadb_native_moodle_database extends mysqli_native_moodle_database {
     }
 
     /**
+     * Returns the driver specific syntax for the beginning of a word boundary.
+     *
+     * @since Totara 12.4
+     * @return string or empty if not supported
+     */
+    public function sql_regex_word_boundary_start(): string {
+        // MariaDB doesn't have regexp issue specific to MySQL, so override it.
+        return '[[:<:]]';
+    }
+
+    /**
+     * Returns the driver specific syntax for the end of a word boundary.
+     *
+     * @since Totara 12.4
+     * @return string or empty if not supported
+     */
+    public function sql_regex_word_boundary_end(): string {
+        // MariaDB doesn't have regexp issue specific to MySQL, so override it.
+        return '[[:>:]]';
+    }
+
+    /**
      * Returns database server info array
      * @return array Array containing 'description' and 'version' info
      */
@@ -118,6 +140,20 @@ class mariadb_native_moodle_database extends mysqli_native_moodle_database {
         if ($this->external) {
             return parent::transactions_supported();
         }
+        return true;
+    }
+
+    /**
+     * Returns true as MariaDB testing showed that for the queries tested 2 queries was faster than a counted recordset.
+     *
+     * Testing showed that MariaDB 10.2, 10.3, and 10.4 when using counted recordsets performed quicker than two independent queries
+     * on a paginated recordset.
+     * For results on performance testing of paginated results see parent class.
+     *
+     * @since Totara 12.4
+     * @return bool
+     */
+    public function recommends_counted_recordset(): bool {
         return true;
     }
 }

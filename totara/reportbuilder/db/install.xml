@@ -133,45 +133,6 @@
         <INDEX NAME="userid" UNIQUE="false" FIELDS="userid" COMMENT="Index on the userid field"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="report_builder_group" COMMENT="Defines activity groups">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Name of the activity group"/>
-        <FIELD NAME="preproc" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Name of the pre-processor used by this activity group"/>
-        <FIELD NAME="baseitem" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Unique reference to the base item for this activity group"/>
-        <FIELD NAME="assigntype" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Name of the method for assigning activities to this group"/>
-        <FIELD NAME="assignvalue" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Value used by some assign types to store information about assignments"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-      </KEYS>
-    </TABLE>
-    <TABLE NAME="report_builder_group_assign" COMMENT="Assigns activities to groups">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the group to assign an activity to"/>
-        <FIELD NAME="itemid" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the item to assign to the group"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="repobuilgrouassi_gro_fk" TYPE="foreign" FIELDS="groupid" REFTABLE="report_builder_group" REFFIELDS="id"/>
-        <KEY NAME="groupid-itemid" TYPE="unique" FIELDS="groupid, itemid" COMMENT="Prevent an item being assigned to the same group multiple times"/>
-      </KEYS>
-    </TABLE>
-    <TABLE NAME="report_builder_preproc_track" COMMENT="Stores which items have been preprocessed and when, to avoid processing unchanged items">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the group the item belongs to"/>
-        <FIELD NAME="itemid" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the item that has been processed"/>
-        <FIELD NAME="lastchecked" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Timestamp of when the item was last checked"/>
-        <FIELD NAME="disabled" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If none zero, the item is disabled, so will no longer be processed. This is used to prevent repeatedly attempting to process items which have a problem."/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="repobuilpreptrac_gro_fk" TYPE="foreign" FIELDS="groupid" REFTABLE="report_builder_group" REFFIELDS="id"/>
-        <KEY NAME="groupid-itemid" TYPE="unique" FIELDS="groupid, itemid" COMMENT="To prevent an item being tracked twice within the same group"/>
-      </KEYS>
-    </TABLE>
     <TABLE NAME="report_builder_schedule" COMMENT="Storing details of scheduled reports">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>

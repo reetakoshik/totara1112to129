@@ -113,11 +113,13 @@ if (!empty($CFG->enableprogramcompletioneditor) &&
 
 // Exceptions Report Tab
 // Only show if there are exceptions or you are on the exceptions tab already
-if (has_capability('totara/program:handleexceptions', $context) && ($exceptions || (substr($currenttab, 0, 10) == 'exceptions'))) {
+if (has_capability('totara/program:handleexceptions', $context)) {
     $exceptioncount = $exceptions ? $exceptions : '0';
     $toprow[] = new tabobject('exceptions', $CFG->wwwroot.'/totara/program/exceptions.php?id='.$id, get_string('exceptions', 'totara_program', $exceptioncount));
     if (substr($currenttab, 0, 10) == 'exceptions'){
         $activated[] = 'exceptions';
+    } else if (!($exceptions || (substr($currenttab, 0, 10) == 'exceptions'))) {
+        $inactive[] = 'exceptions';
     }
 }
 

@@ -13,7 +13,7 @@ Feature: Test hierarchy generator.
       | fullname        | idnumber   |
       | Position type 1 | POSTYPE001 |
     Given I log in as "admin"
-    And I navigate to "Manage types" node in "Site administration > Hierarchies > Positions"
+    And I navigate to "Manage types" node in "Site administration > Positions"
     And I should see "Position type 1"
     # Test position hierarchy type is added to position hierarchy.
     And the following "textinput field for hierarchy type" exist in "totara_hierarchy" plugin:
@@ -23,7 +23,7 @@ Feature: Test hierarchy generator.
     And the following "hierarchy type assignments" exist in "totara_hierarchy" plugin:
       | hierarchy | field | typeidnumber | idnumber | value |
       | position  | text  | POSTYPE001   | POS001   | Apple |
-    And I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    And I navigate to "Manage positions" node in "Site administration > Positions"
     And I follow "Position Framework 001"
     And I should see "Position"
     And I should see "Type: Position type 1"
@@ -41,7 +41,7 @@ Feature: Test hierarchy generator.
       | fullname            | idnumber   |
       | Organisation type 1 | ORGTYPE001 |
     Given I log in as "admin"
-    And I navigate to "Manage types" node in "Site administration > Hierarchies > Organisations"
+    And I navigate to "Manage types" node in "Site administration > Organisations"
     And I should see "Organisation type 1"
     # Test organisation hierarchy type is added to organisation hierarchy.
     And the following "textinput field for hierarchy type" exist in "totara_hierarchy" plugin:
@@ -50,7 +50,7 @@ Feature: Test hierarchy generator.
     And the following "hierarchy type assignments" exist in "totara_hierarchy" plugin:
       | hierarchy    | field | typeidnumber | idnumber | value |
       | organisation | text  | ORGTYPE001   | ORG001   | Apple |
-    And I navigate to "Manage organisations" node in "Site administration > Hierarchies > Organisations"
+    And I navigate to "Manage organisations" node in "Site administration > Organisations"
     And I follow "Organisation Framework 001"
     And I should see "Organisation"
     And I should see "Type: Organisation type 1"
@@ -68,7 +68,7 @@ Feature: Test hierarchy generator.
       | fullname          | idnumber    |
       | Competency type 1 | COMPTYPE001 |
     Given I log in as "admin"
-    And I navigate to "Manage types" node in "Site administration > Hierarchies > Competencies"
+    And I navigate to "Manage types" node in "Site administration > Competencies"
     And I should see "Competency type 1"
     # Test competency hierarchy type is added to competency hierarchy.
     And the following "textinput field for hierarchy type" exist in "totara_hierarchy" plugin:
@@ -77,7 +77,7 @@ Feature: Test hierarchy generator.
     And the following "hierarchy type assignments" exist in "totara_hierarchy" plugin:
       | hierarchy  | field | typeidnumber | idnumber | value |
       | competency | text  | COMPTYPE001  | COMP001  | Apple |
-    And I navigate to "Manage competencies" node in "Site administration > Hierarchies > Competencies"
+    And I navigate to "Manage competencies" node in "Site administration > Competencies"
     And I follow "Competency Framework 001"
     And I should see "Competency"
     And I should see "Type: Competency type 1"
@@ -95,7 +95,7 @@ Feature: Test hierarchy generator.
       | fullname    | idnumber    |
       | Goal type 1 | GOALTYPE001 |
     Given I log in as "admin"
-    And I navigate to "Manage company goal types" node in "Site administration > Hierarchies > Goals"
+    And I navigate to "Manage company goal types" node in "Site administration > Goals"
     And I should see "Goal type 1"
     # Test goal hierarchy type is added to goal hierarchy.
     And the following "textinput field for hierarchy type" exist in "totara_hierarchy" plugin:
@@ -104,7 +104,7 @@ Feature: Test hierarchy generator.
     And the following "hierarchy type assignments" exist in "totara_hierarchy" plugin:
       | hierarchy | field | typeidnumber | idnumber | value |
       | goal      | text  | GOALTYPE001  | GOAL001  | Apple |
-    And I navigate to "Manage goals" node in "Site administration > Hierarchies > Goals"
+    And I navigate to "Manage goals" node in "Site administration > Goals"
     And I follow "Goal Framework 001"
     And I should see "Goal"
     And I should see "Type: Goal type 1"

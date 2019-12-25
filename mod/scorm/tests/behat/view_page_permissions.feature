@@ -41,9 +41,7 @@ Feature: mod_scorm: check view SCORM page permissions
       | ji   | C1     | JustInfo    |
       | bo   | C1     | Both        |
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "SCORM package" to section "1"
     And I set the following fields to these values:
       | Name        | SCORM viewing page permission test |
@@ -57,8 +55,7 @@ Feature: mod_scorm: check view SCORM page permissions
   Scenario: SCORM view page content according to permissions
     When I log out
     And I log in as "jr"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "SCORM viewing page permission test"
     # All users who can access the SCORM see the info tab. We also never redirect to reports by default.
     Then I should see "Info"
@@ -73,8 +70,7 @@ Feature: mod_scorm: check view SCORM page permissions
 
     When I log out
     And I log in as "ji"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "SCORM viewing page permission test"
     # In Totara the Info tab is not displayed if it is the only tab present.
     Then I should not see "Info"
@@ -83,8 +79,7 @@ Feature: mod_scorm: check view SCORM page permissions
 
     When I log out
     And I log in as "bo"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "SCORM viewing page permission test"
     Then I should see "Info"
     And I should see "Grading method: Highest attempt"
@@ -108,8 +103,7 @@ Feature: mod_scorm: check view SCORM page permissions
 
     When I log out
     And I log in as "guest"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "SCORM viewing page permission test"
     # In Totara the Info tab is not displayed if it is the only tab present.
     Then I should not see "Info"

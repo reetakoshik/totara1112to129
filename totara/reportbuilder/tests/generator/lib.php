@@ -302,6 +302,7 @@ class totara_reportbuilder_generator extends component_generator_base {
      * for the report
      *
      * @param array $record
+     * @return int $record id
      */
     public function create_default_standard_report($record) {
         global $DB;
@@ -359,6 +360,7 @@ class totara_reportbuilder_generator extends component_generator_base {
             $so+= 1;
         }
 
+        return $id;
     }
 }
 
@@ -510,6 +512,8 @@ class totara_reportbuilder_cache_generator extends testing_data_generator {
      *   - completiontype The type, one of COMPLETIONTYPE_ALL, COMPLETIONTYPE_SOME, COMPLETIONTYPE_OPTIONAL
      *   - certifpath The certification path for this set, one of CERTIFPATH_STD, CERTIFPATH_RECERT
      *   - mincourses int The minimum number of courses the user is required to complete (only relevant with COMPLETIONTYPE_SOME)
+     *   - coursesumfield int Id of custom field created by totara_customfield_generator::create_multiselect (only relevant with COMPLETIONTYPE_SOME)
+     *   - coursesumfieldtotal int The required minimum score required to complete (only relevant with COMPLETIONTYPE_SOME)
      *   - timeallowed int The minimum time, in seconds, which users are expected to be able to finish in.
      *   - courses array An array of courses created by create_course.
      *
@@ -546,6 +550,8 @@ class totara_reportbuilder_cache_generator extends testing_data_generator {
             $completiontype = (isset($detail['completiontype'])) ? $detail['completiontype'] : COMPLETIONTYPE_ALL;
             $certifpath = (isset($detail['certifpath'])) ? $detail['certifpath'] : CERTIFPATH_STD;
             $mincourses = (isset($detail['mincourses'])) ? (int)$detail['mincourses'] : 0;
+            $coursesumfield = (isset($detail['coursesumfield'])) ? (int)$detail['coursesumfield'] : 0;
+            $coursesumfieldtotal = (isset($detail['coursesumfieldtotal'])) ? (int)$detail['coursesumfieldtotal'] : 0;
             $timeallowed = (isset($detail['timeallowed'])) ? (int)$detail['timeallowed'] : 0;
 
             switch ($courseset->contenttype) {
@@ -572,7 +578,7 @@ class totara_reportbuilder_cache_generator extends testing_data_generator {
                         // Add a competency to the competency courseset.
                         $compdata = new stdClass();
                         $compdata->{$courseset->get_set_prefix() . 'competencyid'} = $competency->id;
-                        $certifcontent->add_competency(1, $compdata);
+                        $courseset->add_competency($compdata);
                     }
                     break;
 
@@ -584,6 +590,8 @@ class totara_reportbuilder_cache_generator extends testing_data_generator {
             $courseset->completiontype = $completiontype;
             $courseset->certifpath = $certifpath;
             $courseset->mincourses = $mincourses;
+            $courseset->coursesumfield = $coursesumfield;
+            $courseset->coursesumfieldtotal = $coursesumfieldtotal;
             $courseset->timeallowed = $timeallowed;
         }
 

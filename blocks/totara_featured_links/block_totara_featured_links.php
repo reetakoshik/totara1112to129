@@ -24,6 +24,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 use block_totara_featured_links\tile\base;
+use block_totara_featured_links\tile\meta_tile;
 
 /**
  * Class block_totara_featured_links
@@ -55,7 +56,7 @@ class block_totara_featured_links extends block_base {
 
     /**
      * Generates and returns the content of the block
-     * @return stdClass
+     * @return \stdClass
      */
     public function get_content() {
         if ($this->content !== null) {
@@ -65,14 +66,14 @@ class block_totara_featured_links extends block_base {
         $editing = $this->page->user_is_editing();
 
         if (!isset($this->content)) {
-            $this->content = new stdClass();
+            $this->content = new \stdClass();
         }
 
         $data = [
             'tile_data' => [],
             'editing' => $editing,
             'size' => $this->config->size,
-            'title' => $this->config->title,
+            'title' => $this->get_title(),
             'manual_id' => $this->config->manual_id,
             'instanceid' => $this->instance->id,
             'shape' => isset($this->config->shape) ? $this->config->shape : 'square'
@@ -123,10 +124,9 @@ class block_totara_featured_links extends block_base {
      * @return bool
      */
     public function instance_create() {
-        $this->config = new stdClass();
+        $this->config = new \stdClass();
         $this->config->size = 'medium';
         $this->config->shape = 'square';
-        $this->config->title = get_string('pluginname', 'block_totara_featured_links');
         $this->config->manual_id = '';
 
         $this->instance_config_commit();
@@ -158,11 +158,16 @@ class block_totara_featured_links extends block_base {
 
     /**
      * gets the tiles for a specific block id and returns all their data
+     * Only gets the top level tiles not subtiles.
      * @return array
      */
     private function get_tiles() {
         global $DB;
-        $results = $DB->get_records('block_totara_featured_links_tiles', ['blockid' => $this->instance->id], 'sortorder ASC');
+        $results = $DB->get_records(
+            'block_totara_featured_links_tiles',
+            ['blockid' => $this->instance->id, 'parentid' => 0],
+            'sortorder ASC'
+        );
         return $results;
     }
 
@@ -180,32 +185,51 @@ class block_totara_featured_links extends block_base {
      * @return boolean
      */
     public function instance_copy($fromid) {
-        // Copy the tiles from the old block to the new one.
-        global $DB, $USER;
-        $from_block_tiles = $DB->get_records('block_totara_featured_links_tiles', ['blockid' => $fromid]);
-        foreach ($from_block_tiles as $tile) {
-            $old_tile = base::get_tile_instance($tile);
-            if (!$old_tile->is_visible()) {
-                continue;
-            }
-            $new_tile = clone $old_tile;
-            $new_tile->userid = $USER->id;
-            $new_tile->blockid = $this->instance->id;
-            $new_tile->visibility = base::VISIBILITY_SHOW;
-            $new_tile->presetsraw = '';
-            $new_tile->tilerules = '';
-            $new_tile->audienceaggregation = base::AGGREGATION_ANY;
-            $new_tile->presetsaggregation = base::AGGREGATION_ANY;
-            $new_tile->overallaggregation = base::AGGREGATION_ANY;
-            $new_tile->audienceshowing = 0;
-            $new_tile->presetshowing = 0;
-            $new_tile->tilerulesshowing = 0;
-            unset($new_tile->id);
-            $new_tile->id = $DB->insert_record('block_totara_featured_links_tiles', $new_tile, true);
-            $old_tile->copy_files($new_tile);
+        global $DB;
+        // Sort on parent id.
+        $from_block_tiles = $DB->get_records('block_totara_featured_links_tiles', ['blockid' => $fromid, 'parentid' => 0]);
+        foreach ($from_block_tiles as $toplevelparentdata) {
+            $tile = base::get_tile_instance($toplevelparentdata);
+            $this->clone_tile($tile);
         }
         base::squash_ordering($this->instance->id);
         return true;
+    }
+
+    /**
+     * Clones a tile including all its subtiles.
+     *
+     * @param $tile
+     * @param int $parentid
+     */
+    private function clone_tile($tile, int $parentid = 0) {
+        global $USER, $DB;
+        if (!$tile->is_visible()) {
+            return;
+        }
+        $newtile = clone $tile;
+        $newtile->userid = $USER->id;
+        $newtile->parentid = $parentid;
+        $newtile->blockid = $this->instance->id;
+        $newtile->visibility = base::VISIBILITY_SHOW;
+        $newtile->presetsraw = '';
+        $newtile->tilerules = '';
+        $newtile->audienceaggregation = base::AGGREGATION_ANY;
+        $newtile->presetsaggregation = base::AGGREGATION_ANY;
+        $newtile->overallaggregation = base::AGGREGATION_ANY;
+        $newtile->audienceshowing = 0;
+        $newtile->presetshowing = 0;
+        $newtile->tilerulesshowing = 0;
+        unset($newtile->id);
+        $newtile->id = $DB->insert_record('block_totara_featured_links_tiles', $newtile, true);
+        $tile->copy_files($newtile);
+
+        if ($tile instanceof meta_tile) {
+            foreach ($tile->get_subtiles() as $subtile) {
+                $this->clone_tile($subtile, $newtile->id);
+            }
+            base::squash_ordering($this->instance->id, $newtile->id);
+        }
     }
 
     /**
@@ -213,7 +237,7 @@ class block_totara_featured_links extends block_base {
      * @return bool
      */
     public function hide_header() {
-        return empty($this->config->title);
+        return empty($this->get_title());
     }
 
     /**
@@ -221,15 +245,10 @@ class block_totara_featured_links extends block_base {
      */
     public function specialization() {
         if (isset($this->config)) {
-            if (empty($this->config->title)) {
-                $this->title = get_string('pluginname', 'block_totara_featured_links');
-            } else {
-                $this->title = $this->config->title;
-            }
 
             if (!empty($this->config->data)) {
                 if (!isset($this->content)) {
-                    $this->content = new stdClass();
+                    $this->content = new \stdClass();
                 }
                 $this->get_content();
             }

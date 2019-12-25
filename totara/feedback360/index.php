@@ -55,7 +55,7 @@ if ($USER->id == $userid) {
         print_error('error:accessdenied', 'totara_feedback360');
     }
 
-    $PAGE->set_totara_menu_selected('feedback360');
+    $PAGE->set_totara_menu_selected('\totara_feedback360\totara\menu\feedback360');
     $PAGE->navbar->add(get_string('feedback360', 'totara_feedback360'), new moodle_url('/totara/feedback360/index.php'));
     $PAGE->navbar->add($strmyfeedback);
     $PAGE->set_title($strmyfeedback);
@@ -68,7 +68,7 @@ if ($USER->id == $userid) {
 
     $userxfeedback = get_string('userxfeedback360', 'totara_feedback360', fullname($user));
     if (totara_feature_visible('myteam')) {
-        $PAGE->set_totara_menu_selected('myteam');
+        $PAGE->set_totara_menu_selected('\totara_core\totara\menu\myteam');
         $PAGE->navbar->add(get_string('team', 'totara_core'), new moodle_url('/my/teammembers.php'));
     }
     $PAGE->navbar->add($userxfeedback);

@@ -23,8 +23,6 @@
 
 namespace totara_dashboard\totara\menu;
 
-use \totara_core\totara\menu\menu as menu;
-
 class dashboard extends \totara_core\totara\menu\item {
 
     protected function get_default_title() {
@@ -39,15 +37,11 @@ class dashboard extends \totara_core\totara\menu\item {
         return 20000;
     }
 
-    public function get_default_visibility() {
-        return menu::SHOW_WHEN_REQUIRED;
-    }
-
     protected function check_visibility() {
         global $CFG, $USER;
 
         if (!isloggedin() or isguestuser()) {
-            return menu::HIDE_ALWAYS;
+            return false;
         }
 
         static $cache = null;
@@ -56,13 +50,12 @@ class dashboard extends \totara_core\totara\menu\item {
         }
 
         require_once($CFG->dirroot . '/totara/dashboard/lib.php');
-
-        if (totara_feature_visible('totaradashboard')
-            && count(\totara_dashboard::get_user_dashboards($USER->id))) {
-            $cache = menu::SHOW_ALWAYS;
+        if (count(\totara_dashboard::get_user_dashboards($USER->id))) {
+            $cache = true;
         } else {
-            $cache = menu::HIDE_ALWAYS;
+            $cache = false;
         }
+
         return $cache;
     }
 

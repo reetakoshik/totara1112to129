@@ -165,7 +165,7 @@ function groups_get_grouping_by_idnumber($courseid, $idnumber) {
  * @param int $groupid ID of the group.
  * @param string $fields (default is all fields)
  * @param int $strictness (IGNORE_MISSING - default)
- * @return stdGlass group object
+ * @return bool|\stdClass group object or false if not found
  */
 function groups_get_group($groupid, $fields='*', $strictness=IGNORE_MISSING) {
     global $DB;
@@ -302,38 +302,54 @@ function groups_get_user_groups($courseid, $userid=0) {
         $userid = $USER->id;
     }
 
-    $sql = "SELECT g.id, gg.groupingid
-              FROM {groups} g
-                   JOIN {groups_members} gm   ON gm.groupid = g.id
-              LEFT JOIN {groupings_groups} gg ON gg.groupid = g.id
-             WHERE gm.userid = ? AND g.courseid = ?";
-    $params = array($userid, $courseid);
+    $cache = cache::make('core', 'user_group_groupings');
 
-    $rs = $DB->get_recordset_sql($sql, $params);
+    // Try to retrieve group ids from the cache.
+    $usergroups = $cache->get($userid);
 
-    if (!$rs->valid()) {
-        $rs->close(); // Not going to iterate (but exit), close rs
+    if ($usergroups === false) {
+        $sql = "SELECT g.id, g.courseid, gg.groupingid
+                  FROM {groups} g
+                  JOIN {groups_members} gm ON gm.groupid = g.id
+             LEFT JOIN {groupings_groups} gg ON gg.groupid = g.id
+                 WHERE gm.userid = ?";
+
+        $rs = $DB->get_recordset_sql($sql, array($userid));
+
+        $usergroups = array();
+        $allgroups  = array();
+
+        foreach ($rs as $group) {
+            if (!array_key_exists($group->courseid, $allgroups)) {
+                $allgroups[$group->courseid] = array();
+            }
+            $allgroups[$group->courseid][$group->id] = $group->id;
+            if (!array_key_exists($group->courseid, $usergroups)) {
+                $usergroups[$group->courseid] = array();
+            }
+            if (is_null($group->groupingid)) {
+                continue;
+            }
+            if (!array_key_exists($group->groupingid, $usergroups[$group->courseid])) {
+                $usergroups[$group->courseid][$group->groupingid] = array();
+            }
+            $usergroups[$group->courseid][$group->groupingid][$group->id] = $group->id;
+        }
+        $rs->close();
+
+        foreach (array_keys($allgroups) as $cid) {
+            $usergroups[$cid]['0'] = array_keys($allgroups[$cid]); // All user groups in the course.
+        }
+
+        // Cache the data.
+        $cache->set($userid, $usergroups);
+    }
+
+    if (array_key_exists($courseid, $usergroups)) {
+        return $usergroups[$courseid];
+    } else {
         return array('0' => array());
     }
-
-    $result    = array();
-    $allgroups = array();
-
-    foreach ($rs as $group) {
-        $allgroups[$group->id] = $group->id;
-        if (is_null($group->groupingid)) {
-            continue;
-        }
-        if (!array_key_exists($group->groupingid, $result)) {
-            $result[$group->groupingid] = array();
-        }
-        $result[$group->groupingid][$group->id] = $group->id;
-    }
-    $rs->close();
-
-    $result['0'] = array_keys($allgroups); // all groups
-
-    return $result;
 }
 
 /**
@@ -1132,4 +1148,51 @@ function groups_user_groups_visible($course, $userid, $cm = null) {
         }
     }
     return false;
+}
+
+/**
+ * Returns the users in the specified groups.
+ *
+ * This function does not return complete user objects by default. It returns the user_picture basic fields.
+ *
+ * @param array $groupsids The list of groups ids to check
+ * @param array $extrafields extra fields to be included in result
+ * @param int $sort optional sorting of returned users
+ * @return array|bool Returns an array of the users for the specified group or false if no users or an error returned.
+ * @since  Moodle 3.3
+ */
+function groups_get_groups_members($groupsids, $extrafields=null, $sort='lastname ASC') {
+    global $DB;
+
+    $userfields = user_picture::fields('u', $extrafields);
+    list($insql, $params) = $DB->get_in_or_equal($groupsids);
+
+    return $DB->get_records_sql("SELECT $userfields
+                                   FROM {user} u, {groups_members} gm
+                                  WHERE u.id = gm.userid AND gm.groupid $insql
+                               GROUP BY $userfields
+                               ORDER BY $sort", $params);
+}
+
+/**
+ * Returns users who share group membership with the specified user in the given actiivty.
+ *
+ * @param stdClass|cm_info $cm course module
+ * @param int $userid user id (empty for current user)
+ * @return array a list of user
+ * @since  Moodle 3.3
+ */
+function groups_get_activity_shared_group_members($cm, $userid = null) {
+    global $USER;
+
+    if (empty($userid)) {
+        $userid = $USER;
+    }
+
+    $groupsids = array_keys(groups_get_activity_allowed_groups($cm, $userid));
+    // No groups no users.
+    if (empty($groupsids)) {
+        return [];
+    }
+    return groups_get_groups_members($groupsids);
 }

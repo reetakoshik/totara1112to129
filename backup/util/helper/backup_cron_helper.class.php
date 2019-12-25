@@ -442,6 +442,10 @@ abstract class backup_cron_automated_helper {
         $skipped = 0;
         $sql = "SELECT bc.courseid FROM {backup_courses} bc WHERE bc.courseid NOT IN (SELECT c.id FROM {course} c)";
         $rs = $DB->get_recordset_sql($sql);
+        // Totara: Records in set may be changed, which could lock MSSQL unless pre-loaded.
+        if ($DB->get_dbfamily() === 'mssql') {
+            $rs->preload();
+        }
         foreach ($rs as $deletedcourse) {
             //Doesn't exist, so delete from backup tables
             $DB->delete_records('backup_courses', array('courseid'=>$deletedcourse->courseid));

@@ -86,7 +86,7 @@ class totara_core_flex_icon_testcase extends advanced_testcase {
         $icon = new flex_icon('edit');
         $this->assertInstanceOf('pix_icon', $icon);
         $this->assertSame('flexicon', $icon->pix);
-        $this->assertSame(array('alt' => '', 'class' => 'smallicon'), $icon->attributes);
+        $this->assertSame(array('alt' => '', 'class' => ''), $icon->attributes);
         $this->assertSame('core', $icon->component);
 
         $icon = new flex_icon('core|i/edit', array('alt' => 'Alt text', 'classes' => 'xx zz'));
@@ -96,7 +96,7 @@ class totara_core_flex_icon_testcase extends advanced_testcase {
 
         $icon = new flex_icon('mod_book|chapter', array());
         $this->assertSame('flexicon', $icon->pix);
-        $this->assertSame(array('alt' => '', 'class' => 'smallicon'), $icon->attributes);
+        $this->assertSame(array('alt' => '', 'class' => ''), $icon->attributes);
         $this->assertSame('mod_book', $icon->component);
     }
 
@@ -240,12 +240,12 @@ class totara_core_flex_icon_testcase extends advanced_testcase {
         $this->assertSame('mod_forum|icon', $flexicon->identifier);
 
         $CFG->slasharguments = 1;
-        $pixurl = $PAGE->theme->pix_url('i/edit', 'core');
+        $pixurl = $PAGE->theme->image_url('i/edit', 'core');
         $flexicon = flex_icon::create_from_pix_url($pixurl);
         $expected = new flex_icon('core|i/edit');
         $this->assertEquals($expected, $flexicon);
 
-        $pixurl = $PAGE->theme->pix_url('xxx/zzz', 'eee');
+        $pixurl = $PAGE->theme->image_url('xxx/zzz', 'eee');
         $flexicon = flex_icon::create_from_pix_url($pixurl);
         $this->assertNull($flexicon);
 
@@ -253,7 +253,7 @@ class totara_core_flex_icon_testcase extends advanced_testcase {
         $this->assertNull($flexicon);
 
         $CFG->slasharguments = 0;
-        $pixurl = $PAGE->theme->pix_url('i/edit', 'core');
+        $pixurl = $PAGE->theme->image_url('i/edit', 'core');
         $flexicon = flex_icon::create_from_pix_url($pixurl);
         $expected = new flex_icon('core|i/edit');
         $this->assertEquals($expected, $flexicon);
@@ -335,7 +335,7 @@ class totara_core_flex_icon_testcase extends advanced_testcase {
     public function test_pix_icon_url() {
         global $PAGE, $CFG;
 
-        $url = $PAGE->theme->pix_url('i/edit', 'core');
+        $url = $PAGE->theme->image_url('i/edit', 'core');
         $this->assertInstanceOf('moodle_url', $url);
         $this->assertSame("https://www.example.com/moodle/theme/image.php/_s/{$CFG->theme}/core/1/i/edit", $url->out());
     }

@@ -18,21 +18,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author David Curry <david.curry@totaralms.com>
+ * @author Oleg Demeshev <oleg.demeshev@totaralearning.com>
  * @package mod_facetoface
  */
+
+define('AJAX_SCRIPT', true);
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/mod/facetoface/lib.php');
 
 require_sesskey();
 ajax_require_login();
-
-// Check that approval_admin is active in facetoface_approvaloptions.
-$settingsoptions = isset($CFG->facetoface_approvaloptions) ? $CFG->facetoface_approvaloptions : '';
-$approvaloptions = explode(',', $settingsoptions);
-if (!in_array('approval_admin', $approvaloptions)) {
-    print_error('error:approvaladminnotactive', 'facetoface');
-}
 
 $cid = required_param('cid', PARAM_INT);
 // Users is optional as the no users may have been selected.
@@ -41,14 +37,16 @@ $users = optional_param('users', '', PARAM_SEQUENCE);
 $context = context_course::instance($cid);
 $PAGE->set_context($context);
 require_capability('moodle/course:manageactivities', $context);
+\mod_facetoface\approver::require_active_admin();
 
 // The JS code relies on this div, so even if no users are selected we must print it.
 $out = html_writer::start_tag('div', array('id' => 'activityapproverbox', 'class' => 'activity_approvers'));
 
 if (!empty($users)) {
+    $renderer = $PAGE->get_renderer('mod_facetoface');
     foreach (explode(',', trim($users, ',')) as $userid) {
         $user = core_user::get_user($userid);
-        $out .= facetoface_display_approver($user, true);
+        $out .= $renderer->display_approver($user, true);
     }
 }
 

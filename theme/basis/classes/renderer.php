@@ -29,6 +29,8 @@ class theme_basis_renderer extends theme_roots_renderer {
 
     /**
      * Implements standard 'convenience method' renderer pattern.
+     *
+     * @deprecated since 12.0
      */
     public function page_footer_nav($menudata) {
         $renderable = new theme_basis\output\page_footer_nav($menudata);
@@ -37,6 +39,8 @@ class theme_basis_renderer extends theme_roots_renderer {
 
     /**
      * Render method for page_footer_nav renderables.
+     *
+     * @deprecated since 12.0
      */
     protected function render_page_footer_nav($renderable) {
         $templatecontext = $renderable->export_for_template($this);

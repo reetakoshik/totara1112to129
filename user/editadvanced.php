@@ -31,9 +31,6 @@ require_once($CFG->dirroot.'/user/profile/lib.php');
 require_once($CFG->dirroot.'/user/lib.php');
 require_once($CFG->dirroot.'/webservice/lib.php');
 
-// HTTPS is required in this page when $CFG->loginhttps enabled.
-$PAGE->https_required();
-
 $id     = optional_param('id', $USER->id, PARAM_INT);    // User id; -1 if creating new user.
 $course = optional_param('course', SITEID, PARAM_INT);   // Course id (defaults to Site).
 $returnto = optional_param('returnto', null, PARAM_ALPHANUMEXT);  // Code determining where to return to after save.
@@ -78,7 +75,8 @@ if ($id == -1) {
     $user->deleted = 0;
     $user->timezone = '99';
     require_capability('moodle/user:create', $systemcontext);
-    admin_externalpage_setup('addnewuser', '', array('id' => -1));
+    // TOTARA: This is no longer associated with a admin menu item
+    //admin_externalpage_setup('addnewuser', '', array('id' => -1));
 } else {
     // Editing existing user.
     if (!has_capability('moodle/user:update', $systemcontext)) {
@@ -136,7 +134,8 @@ useredit_load_preferences($user);
 profile_load_data($user);
 
 // User interests.
-$user->interests = core_tag_tag::get_item_tags_array('core', 'user', $id);
+$user->interests = core_tag_tag::get_item_tags_array('core', 'user', $id,
+    core_tag_tag::BOTH_STANDARD_AND_NOT, 0, false); // Totara: Do not encoded the special characters
 
 if ($user->id !== -1) {
     $usercontext = context_user::instance($user->id);
@@ -314,6 +313,10 @@ if ($usernew = $userform->get_data()) {
         }
     }
 
+    if (optional_param('viewprofile', '', PARAM_TEXT)) {
+        $customreturn = null;
+        $returnto = 'profile';
+    }
     if ($user->id == $USER->id) {
         // Override old $USER session variable.
         foreach ((array)$usernew as $variable => $value) {
@@ -346,9 +349,6 @@ if ($usernew = $userform->get_data()) {
     }
     // Never reached..
 }
-
-// Make sure we really are on the https page when https login required.
-$PAGE->verify_https_required();
 
 
 // Display page header.

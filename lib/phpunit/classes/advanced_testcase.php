@@ -33,8 +33,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class advanced_testcase extends base_testcase {
-    /** @var bool automatically reset everything? null means log changes */
-    private $resetAfterTest;
+    /** @var bool Totara: always reset after each test, use basic_testcase if you want logging of unexpected state changes */
+    private $resetAfterTest = true;
 
     /** @var int timestamp used for current time asserts */
     private $currenttimestart;
@@ -98,6 +98,11 @@ abstract class advanced_testcase extends base_testcase {
         } else {
             // reset but log what changed
             self::resetAllData(true);
+        }
+
+        if (!defined('PHPUNIT_DISABLE_UNRESET_PROPERTIES_CHECK') || !PHPUNIT_DISABLE_UNRESET_PROPERTIES_CHECK) {
+            // Check for properties which are not reset on tearDown.
+            $this->checkForUnresetProperties();
         }
 
         // make sure test did not forget to close transaction
@@ -206,13 +211,19 @@ abstract class advanced_testcase extends base_testcase {
     }
 
     /**
-     * Reset everything after current test.
-     * @param bool $reset true means reset state back, false means keep all data for the next test,
-     *      null means reset state and show warnings if anything changed
+     * Totara: Do not use, advanced testcase always resets state after each test,
+     * this is required for parallel test execution. Also tests should not be
+     * used as data provider because they would be executed repeatedly.
+     *
+     * @deprecated since Totara 13, 12.8, 11.17
+     *
+     * @param bool $reset
      * @return void
      */
     public function resetAfterTest($reset = true) {
-        $this->resetAfterTest = $reset;
+        if (!$reset) {
+            debugging('Do not use resetAfterTest(false) any more, reset is mandatory after every test now', DEBUG_DEVELOPER);
+        }
     }
 
     /**
@@ -236,38 +247,50 @@ abstract class advanced_testcase extends base_testcase {
      *
      * Discards the debugging message if successful.
      *
-     * @param null|string $debugmessage null means any
+     * @param null|string|array $debugmessages null means any
      * @param null|string $debuglevel null means any
      * @param string $message
      */
-    public function assertDebuggingCalled($debugmessage = null, $debuglevel = null, $message = '') {
+    public function assertDebuggingCalled($debugmessages = null, $debuglevel = null, $message = '') {
         $debugging = $this->getDebuggingMessages();
         $debugdisplaymessage = "\n".phpunit_util::display_debugging_messages(true);
         $this->resetDebugging();
 
+        $expectedmessages = $debugmessages;
+        if (!is_array($expectedmessages)) {
+            $expectedmessages = [$expectedmessages];
+        }
+        $expectedcount = count($expectedmessages);
         $count = count($debugging);
 
-        if ($count == 0) {
+        if ($count === 0) {
             if ($message === '') {
                 $message = 'Expectation failed, debugging() not triggered.';
             }
             $this->fail($message);
         }
-        if ($count > 1) {
+        if ($count !== $expectedcount) {
             if ($message === '') {
-                $message = 'Expectation failed, debugging() triggered '.$count.' times.'.$debugdisplaymessage;
+                $message = 'Expectation failed, debugging() triggered '.$count.' times, expected '.$expectedcount.' times.'.$debugdisplaymessage;
             }
             $this->fail($message);
         }
-        $this->assertEquals(1, $count);
+        $this->assertEquals($expectedcount, $count);
 
-        $message .= $debugdisplaymessage;
-        $debug = reset($debugging);
-        if ($debugmessage !== null) {
-            $this->assertSame($debugmessage, $debug->message, $message);
+        if ($debugmessages !== null) {
+            // Compare messages.
+            $actual = [];
+            foreach ($debugging as $debug) {
+                $actual[] = $debug->message;
+            }
+
+            $this->assertEquals($expectedmessages, $actual, $message . $debugdisplaymessage);
         }
+
         if ($debuglevel !== null) {
-            $this->assertSame($debuglevel, $debug->level, $message);
+            foreach ($debugging as $debug) {
+                $this->assertSame($debuglevel, $debug->level, $message);
+            }
         }
     }
 
@@ -477,12 +500,42 @@ abstract class advanced_testcase extends base_testcase {
     }
 
     /**
+     * Check for properties which are not reset on tearDown.
+     *
+     * @return void
+     */
+    public function checkForUnresetProperties() {
+        $reflectionclass = new ReflectionClass($this);
+        $defaultproperties = $reflectionclass->getDefaultProperties();
+        foreach ($reflectionclass->getProperties() as $property) {
+            if ($property->isStatic()
+                || $property->getDeclaringClass()->getName() != get_class($this)
+            ) {
+                continue;
+            }
+            $property->setAccessible(true);
+            // If property was defined with a value and value did not change don't complain.
+            if (isset($defaultproperties[$property->getName()])
+                && $defaultproperties[$property->getName()] == $property->getValue($this)){
+                continue;
+            }
+            // Otherwise if property was not set to null fail the build
+            if ($property->getValue($this) !== null) {
+                $message = sprintf("Property '%s' defined in '%s' was not reset after the test!\n".
+                    "Please either find a way to avoid using a class variable or make sure it get's unset ".
+                    "in the tearDown method to avoid creating memory leaks.", $property->getName(), get_class($this));
+                $this->fail($message);
+            }
+        }
+    }
+
+    /**
      * Overrides one lang string in current language.
      *
      * NOTE: resetAfterTest must be enabled before calling this method,
      *       the changes are then reverted automatically.
      *
-     * @since Totara 11.8
+     * @since Totara 12
      *
      * @param string $string
      * @param string $component
@@ -676,5 +729,16 @@ abstract class advanced_testcase extends base_testcase {
         }
 
         $this->totalwaitforsecond += (microtime(true) - $microstart);
+    }
+
+    /**
+     * Execute all adhoc tasks in queue
+     */
+    public function execute_adhoc_tasks() {
+        $now = time();
+        while ($task = \core\task\manager::get_next_adhoc_task($now)) {
+            $task->execute();
+            \core\task\manager::adhoc_task_complete($task);
+        }
     }
 }

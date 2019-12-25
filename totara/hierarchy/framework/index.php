@@ -41,6 +41,7 @@ $hide        = optional_param('hide', 0, PARAM_INT);
 $show        = optional_param('show', 0, PARAM_INT);
 $moveup      = optional_param('moveup', 0, PARAM_INT);
 $movedown    = optional_param('movedown', 0, PARAM_INT);
+$format      = optional_param('format', '', PARAM_TEXT);
 
 hierarchy::check_enable_hierarchy($prefix);
 
@@ -53,14 +54,16 @@ if (!($canviewframeworks || $canviewscales)) {
     print_error('accessdenied', 'admin');
 }
 
+$url_params = array('prefix' => $prefix);
+$baseurl = new moodle_url('/totara/hierarchy/framework/index.php', $url_params);
+
 if ($canmanage) {
     // Setup page as admin and check permissions.
     admin_externalpage_setup($prefix.'manage', '', array('prefix' => $prefix));
 } else {
     // Non admin page set up.
     $detailsstr = get_string($prefix . 'details', 'totara_hierarchy');
-    $url_params = array('prefix' => $prefix);
-    $PAGE->set_url(new moodle_url('/totara/hierarchy/framework/index', $url_params));
+    $PAGE->set_url($baseurl);
     $PAGE->set_context($sitecontext);
     $PAGE->set_pagelayout('admin');
     $PAGE->set_title($detailsstr);
@@ -69,6 +72,12 @@ if ($canmanage) {
 ///
 /// Process any actions
 ///
+
+if ($format != '') {
+    \totara_hierarchy\event\frameworks_all_exported::create_from_instance($prefix)->trigger();
+    $hierarchy->export_data($format, true);
+    die;
+}
 
 if ($canupdateframeworks) {
     // Hide or show a framework.
@@ -208,6 +217,9 @@ if ($canviewframeworks) {
         $templatedata->noframeworkmessage = get_string($prefix.'noframeworks', 'totara_hierarchy');
     }
 }
+
+$templatedata->exportbuttons = $hierarchy->export_frameworks_select_for_template($baseurl, !$frameworks);
+
 echo $OUTPUT->render_from_template('totara_hierarchy/admin_frameworks', $templatedata);
 
 // Display scales.

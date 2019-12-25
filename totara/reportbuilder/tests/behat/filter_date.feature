@@ -7,7 +7,8 @@ Feature: Use the reportbuilder date filter
   Scenario: Reportbuilder date filter validation
     Given I am on a totara site
     And I log in as "admin"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "Test user report"
     And I set the field "Source" to "User"
     And I press "Create report"
@@ -120,7 +121,9 @@ Feature: Use the reportbuilder date filter
       | Course 18 | C18       | 1484726400 |
       | Course 19 | C19       | 1484737200 |
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
+    And I set the following administration settings values:
+      | catalogtype | enhanced |
+    And I click on "Courses" in the totara menu
     And I press "Edit this report"
     And I switch to "Filters" tab
     And I select "Course Start Date" from the "newstandardfilter" singleselect
@@ -133,7 +136,7 @@ Feature: Use the reportbuilder date filter
     And I set the following fields to these values:
       | Timezone | Europe/London |
     And I press "Update profile"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I set the following fields to these values:
       | course-startdate_sck        | 1       |
       | course-startdate_sdt[day]   | 16      |
@@ -172,7 +175,7 @@ Feature: Use the reportbuilder date filter
     And I set the following fields to these values:
       | Timezone | America/Los_Angeles |
     And I press "Update profile"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I set the following fields to these values:
       | course-startdate_sck        | 1       |
       | course-startdate_sdt[day]   | 16      |
@@ -211,7 +214,7 @@ Feature: Use the reportbuilder date filter
     And I set the following fields to these values:
       | Timezone | Pacific/Auckland |
     And I press "Update profile"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I set the following fields to these values:
       | course-startdate_sck        | 1       |
       | course-startdate_sdt[day]   | 16      |
@@ -247,7 +250,9 @@ Feature: Use the reportbuilder date filter
   Scenario: Report builder date filter validation
     Given I am on a totara site
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
+    And I set the following administration settings values:
+      | catalogtype | enhanced |
+    And I click on "Courses" in the totara menu
     And I click on "Edit this report" "link_or_button"
     And I switch to "Filters" tab
     And I set the field "newsidebarfilter" to "Course Start Date"
@@ -263,7 +268,9 @@ Feature: Use the reportbuilder date filter
   Scenario: Report builder date filter validation for range of dates
     Given I am on a totara site
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
+    And I set the following administration settings values:
+      | catalogtype | enhanced |
+    And I click on "Courses" in the totara menu
     And I click on "Edit this report" "link_or_button"
     And I switch to "Filters" tab
     And I set the field "newstandardfilter" to "Course Start Date"

@@ -1,0 +1,27 @@
+/* this css style version 12.5 for 11 Sept 2019 new css design */
+ 
+.tw-catalogManageBtns__btn { 
+    font-size: 16px !important; 
+    padding: 2px 16px !important; 
+	}
+.tw-catalogManageBtns__btn.btn:hover {
+    padding-top: 3px !important;
+    padding-bottom: 3px !important;
+} 
+.tw-catalogManageBtns__btn.btn {
+    margin-top: 0;
+	}
+
+.tw-selectTree__expandable .tw-selectTree__current, .tw-selectTree__expandable .tw-selectSearchText__field {
+    border: solid 1px #5d6663!important;
+	}
+.tw-catalogResultsSort { 
+    z-index: 99;
+}
+.userloggedinas .usermenu .moodle-actionmenu .toggle-display .userbutton .avatars img{
+	margin-top:0 !important;
+}
+/*.avatar.current img, .avatar.realuser img {
+    margin-top: 0 !important;
+}*/
+ 

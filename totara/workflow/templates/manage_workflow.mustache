@@ -1,0 +1,56 @@
+{{!
+   This file is part of Totara Learn
+
+ * Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Simon Coggins <simon.coggins@totaralearning.com>
+   @package totara_workflow
+}}
+{{!
+    @template totara_workflow/manage_workflow
+
+    Partial designed to be used from within the totara_workflow/manage_workflows template.
+
+    Relies on inheriting managername, wwwroot and sesskey context data from parent context.
+
+    Example context (json):
+    {
+        "name": "Test workflow",
+        "description": "This is my test workflow",
+        "url": "http://example.com/",
+        "imageurl": "http://via.placeholder.com/100x100",
+        "enabled": 1,
+        "managercomponent": "component_name",
+        "manager": "wfmanager",
+        "workflowcomponent": "component_name",
+        "workflow": "wfname"
+    }
+}}
+<tr{{^enabled}} class="dimmed_text"{{/enabled}}>
+    <td>{{ name }}</td>
+    <td>{{ description }}</td>
+    <td>{{ managername }}</td>
+    <td>
+    {{#enabled}}
+    <a
+    href="{{wwwroot}}/totara/workflow/index.php?action=disable&sesskey={{sesskey}}&managercomponent={{managercomponent}}&manager={{manager}}&workflowcomponent={{workflowcomponent}}&workflow={{workflow}}">{{#flex_icon}}hide,disable,totara_workflow{{/flex_icon}}</a>
+    {{/enabled}}
+    {{^enabled}}
+    <a
+    href="{{wwwroot}}/totara/workflow/index.php?action=enable&sesskey={{sesskey}}&managercomponent={{managercomponent}}&manager={{manager}}&workflowcomponent={{workflowcomponent}}&workflow={{workflow}}">{{#flex_icon}}show,enable,totara_workflow{{/flex_icon}}</a>
+    {{/enabled}}
+    </td>
+</tr>

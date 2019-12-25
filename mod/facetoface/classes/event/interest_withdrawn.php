@@ -48,24 +48,24 @@ class interest_withdrawn extends \core\event\base {
     /**
      * Create instance of event.
      *
-     * @param \stdClass $facetoface_insterest
+     * @param \interest $interest
      * @param \context_module $context
      * @return interest_withdrawn
      */
-    public static function create_from_instance(\stdClass $facetoface_insterest, \context_module $context) {
+    public static function create_from_instance(\mod_facetoface\interest $interest, \context_module $context) {
         $data = array(
             'context'  => $context,
-            'objectid' => $facetoface_insterest->id,
+            'objectid' => $interest->get_id(),
             'other' => array(
-                'facetoface' => $facetoface_insterest->facetoface
+                'facetoface' => $interest->get_facetoface()
             )
         );
 
         self::$preventcreatecall = false;
         $event = self::create($data);
         self::$preventcreatecall = true;
-        $event->add_record_snapshot('facetoface_interest', $facetoface_insterest);
-        $event->instance = $facetoface_insterest;
+        $event->add_record_snapshot('facetoface_interest', $interest->get_properties());
+        $event->instance = $interest;
 
         return $event;
     }

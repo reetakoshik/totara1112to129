@@ -137,22 +137,36 @@ if (!is_writable($CFG->phpunit_dataroot)) {
         phpunit_bootstrap_error(PHPUNIT_EXITCODE_CONFIGERROR, '$CFG->phpunit_dataroot directory is not writable, can not run tests!');
     }
 }
-if (!file_exists("$CFG->phpunit_dataroot/phpunittestdir.txt")) {
-    if ($dh = opendir($CFG->phpunit_dataroot)) {
-        while (($file = readdir($dh)) !== false) {
-            if ($file === 'phpunit' or $file === '.' or $file === '..' or $file === '.DS_Store') {
-                continue;
-            }
-            phpunit_bootstrap_error(PHPUNIT_EXITCODE_CONFIGERROR, '$CFG->phpunit_dataroot directory is not empty, can not run tests! Is it used for anything else?');
-        }
-        closedir($dh);
-        unset($dh);
-        unset($file);
-    }
 
-    // now we are 100% sure this dir is used only for phpunit tests
-    testing_initdataroot($CFG->phpunit_dataroot, 'phpunit');
+// Totara: decide which instance to use.
+if (!defined('PHPUNIT_INSTANCE')) {
+    if (getenv('TEST_TOKEN') !== false) {
+        // Running paratest.
+        define('PHPUNIT_PARATEST', true);
+
+        // NOTE: test tokens are inconsistent for different runners, see https://github.com/paratestphp/paratest/issues/213
+        $token = getenv('TEST_TOKEN');
+
+        if (!is_numeric($token)) {
+            echo "Invalid paratest token\n";
+            exit(1);
+        }
+
+        $token = str_pad((string)$token, 2, '0', STR_PAD_LEFT);
+        if (!file_exists($CFG->phpunit_dataroot . '/' . $token)) {
+            echo "Environemnt not initialised\n";
+            exit(1);
+        }
+        define('PHPUNIT_INSTANCE', $token);
+
+    } else {
+        // Normal run or paratest is just starting.
+        define('PHPUNIT_INSTANCE', '00');
+    }
 }
+
+// Totara: Make sure the dataroot is ready.
+testing_initdataroot($CFG->phpunit_dataroot . '/' . PHPUNIT_INSTANCE, 'phpunit');
 
 // verify db prefix
 if (!isset($CFG->phpunit_prefix)) {
@@ -167,15 +181,14 @@ if (isset($CFG->prefix) and $CFG->prefix === $CFG->phpunit_prefix) {
 
 // override CFG settings if necessary and throw away extra CFG settings
 $CFG->wwwroot   = 'https://www.example.com/moodle';
-$CFG->dataroot  = $CFG->phpunit_dataroot;
-$CFG->prefix    = $CFG->phpunit_prefix;
+$CFG->dataroot  = $CFG->phpunit_dataroot . '/' . PHPUNIT_INSTANCE;
+$CFG->prefix    = $CFG->phpunit_prefix . PHPUNIT_INSTANCE;
 $CFG->dbtype    = isset($CFG->phpunit_dbtype) ? $CFG->phpunit_dbtype : $CFG->dbtype;
 $CFG->dblibrary = isset($CFG->phpunit_dblibrary) ? $CFG->phpunit_dblibrary : $CFG->dblibrary;
 $CFG->dbhost    = isset($CFG->phpunit_dbhost) ? $CFG->phpunit_dbhost : $CFG->dbhost;
 $CFG->dbname    = isset($CFG->phpunit_dbname) ? $CFG->phpunit_dbname : $CFG->dbname;
 $CFG->dbuser    = isset($CFG->phpunit_dbuser) ? $CFG->phpunit_dbuser : $CFG->dbuser;
 $CFG->dbpass    = isset($CFG->phpunit_dbpass) ? $CFG->phpunit_dbpass : $CFG->dbpass;
-$CFG->prefix    = isset($CFG->phpunit_prefix) ? $CFG->phpunit_prefix : $CFG->prefix;
 $CFG->dboptions = isset($CFG->phpunit_dboptions) ? $CFG->phpunit_dboptions : $CFG->dboptions;
 
 $allowed = array('wwwroot', 'dataroot', 'dirroot', 'admin', 'directorypermissions', 'filepermissions',

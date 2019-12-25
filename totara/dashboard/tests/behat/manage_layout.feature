@@ -13,7 +13,7 @@ Feature: Perform basic dashboard layout changes
   @javascript
   Scenario: Add block to master dashboard
     Given I log in as "admin"
-    And I navigate to "Dashboards" node in "Site administration > Appearance"
+    And I navigate to "Dashboards" node in "Site administration > Navigation"
     And I click on "Dashboard for edit" "link"
     And I press "Blocks editing on"
     And I add the "Latest announcements" block
@@ -24,7 +24,7 @@ Feature: Perform basic dashboard layout changes
   @javascript
   Scenario: Delete block from master dashboard
     Given I log in as "admin"
-    And I navigate to "Dashboards" node in "Site administration > Appearance"
+    And I navigate to "Dashboards" node in "Site administration > Navigation"
     And I click on "Dashboard for edit" "link"
     And I press "Blocks editing on"
     And I add the "Latest announcements" block

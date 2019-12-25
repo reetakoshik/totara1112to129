@@ -284,6 +284,27 @@ class totara_job_job_assignment_testcase extends advanced_testcase {
         $this->assertEquals($savedata['description'], $retrieveddata->description_editor['text']);
         $this->assertEquals(FORMAT_HTML, $retrieveddata->description_editor['format']);
         $this->assertGreaterThan(0, $retrieveddata->description_editor['itemid']);
+
+        // Test that whitespace job assignment names are handled correctly.
+        $savedata = array(
+            'userid' => $this->users[5]->id,
+            'fullname' => ' ',
+            'shortname' => 'shortname2',
+            'idnumber' => 'id2',
+            'description' => 'description pre-processed',
+            'positionid' => 123,
+            'organisationid' => 234,
+            'startdate' => 1234567,
+            'enddate' => 2345678,
+            'managerjaid' => $managerja->id, // User 2.
+            'tempmanagerjaid' => $tempmanagerja->id, // User 3.
+            'tempmanagerexpirydate' => 3456789,
+            'appraiserid' => $this->users[4]->id,
+        );
+        $jobassignment = \totara_job\job_assignment::create($savedata);
+
+        $retrieveddata = $jobassignment->get_data();
+        $this->assertNotEquals($savedata['fullname'], $retrieveddata->fullname);
     }
 
     /**

@@ -17,16 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Totara navigation edit page.
- *
- * @package    totara
+ * @package    totara_feedback360
  * @subpackage navigation
  * @author     Oleg Demeshev <oleg.demeshev@totaralms.com>
  */
 
 namespace totara_feedback360\totara\menu;
-
-use \totara_core\totara\menu\menu as menu;
 
 class feedback360 extends \totara_core\totara\menu\item {
 
@@ -38,22 +34,18 @@ class feedback360 extends \totara_core\totara\menu\item {
         return '/totara/feedback360/index.php';
     }
 
-    public function get_default_visibility() {
-        return menu::SHOW_WHEN_REQUIRED;
-    }
-
     public function get_default_sortorder() {
         return 43000;
     }
 
     protected function check_visibility() {
         global $CFG, $USER;
-        static $cache = null;
 
-        if (!totara_feature_visible('feedback360')) {
-            $cache = null;
-            return menu::HIDE_ALWAYS;
+        if (!isloggedin() or isguestuser()) {
+            return false;
         }
+
+        static $cache = null;
 
         if (isset($cache)) {
             return $cache;
@@ -61,9 +53,9 @@ class feedback360 extends \totara_core\totara\menu\item {
 
         require_once($CFG->dirroot . '/totara/feedback360/lib.php');
         if (\feedback360::can_view_feedback360s($USER->id)) {
-            $cache = menu::SHOW_ALWAYS;
+            $cache = true;
         } else {
-            $cache = menu::HIDE_ALWAYS;
+            $cache = false;
         }
         return $cache;
     }
@@ -79,5 +71,9 @@ class feedback360 extends \totara_core\totara\menu\item {
 
     protected function get_default_parent() {
         return '\totara_appraisal\totara\menu\appraisal';
+    }
+
+    public function get_incompatible_preset_rules(): array {
+        return ['can_view_feedback_360s'];
     }
 }

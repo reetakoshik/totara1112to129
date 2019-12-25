@@ -23,16 +23,15 @@
 
 namespace block_totara_featured_links\tile;
 
-use block_totara_featured_links\form\element\colorpicker;
-use block_totara_featured_links\form\validator\alt_text_required;
-use block_totara_featured_links\form\validator\is_color;
 use block_totara_featured_links\form\validator\valid_interval;
+use totara_form\form\clientaction\hidden_if;
 use totara_form\form\element\checkbox;
+use totara_form\form\element\checkboxes;
 use totara_form\form\element\filemanager;
+use totara_form\form\element\number;
 use totara_form\form\element\radios;
+use totara_form\form\element\select;
 use totara_form\form\element\text;
-use totara_form\form\element\textarea;
-use totara_form\form\validator\element_filemanager;
 use totara_form\group;
 
 /**
@@ -45,62 +44,72 @@ class gallery_form_content extends base_form_content {
     /**
      * The tile specific content options
      * @param group $group
-     * @return null
+     * @return void
      */
     public function specific_definition(group $group) {
-        $url = $group->add(new text('url', get_string('url_title', 'block_totara_featured_links'), PARAM_URL), 2);
-        $url->add_help_button('url_title', 'block_totara_featured_links');
-        $url->set_attribute('required', true);
 
-        $group->add(new checkbox('target', get_string('link_target_label', 'block_totara_featured_links'), '_blank', '_self'), 3);
-
-        $group->add(new text('heading', get_string('tile_title', 'block_totara_featured_links'), PARAM_TEXT), 4);
-
-        $group->add(new textarea('textbody', get_string('tile_description', 'block_totara_featured_links'), PARAM_TEXT), 5);
-
-        $group->add(new radios('heading_location', get_string('heading_location', 'block_totara_featured_links'), [
-            base::HEADING_TOP => get_string('top_heading', 'block_totara_featured_links'),
-            base::HEADING_BOTTOM => get_string('bottom_heading', 'block_totara_featured_links')
-        ]), 6);
-
-        $file = $group->add(
-            new filemanager(
-                'background_imgs',
-                get_string('tile_gallery_background', 'block_totara_featured_links'),
-                ['subdirs' => 0,
-                    'maxbytes' => 0,
-                    'accept' => ['web_image'],
-                    'context' => \context_block::instance($this->get_parameters()['blockinstanceid'])]
-            ),
-            7
+        $group->add(
+            new radios(
+                'transition',
+                get_string('transition', 'block_totara_featured_links'),
+                [
+                    gallery_tile::TRANSITION_SLIDE => get_string('slide', 'block_totara_featured_links'),
+                    gallery_tile::TRANSITION_FADE => get_string('fade', 'block_totara_featured_links')
+                ]
+            )
         );
-        $file->add_validator(new element_filemanager());
-        $file->add_help_button('tile_gallery_background', 'block_totara_featured_links');
+        $group->add(
+            new radios(
+                'order',
+                get_string('order', 'block_totara_featured_links'),
+                [
+                    gallery_tile::ORDER_RANDOM => get_string('random', 'block_totara_featured_links'),
+                    gallery_tile::ORDER_SEQUENTIAL => get_string('sequential', 'block_totara_featured_links')
+                ]
+            )
+        );
+        $group->add(
+            new checkboxes(
+                'controls',
+                get_string('controls', 'block_totara_featured_links'),
+                [
+                    gallery_tile::CONTROLS_ARROWS => get_string('arrows', 'block_totara_featured_links'),
+                    gallery_tile::CONTROLS_POSITION => get_string('position_indicator', 'block_totara_featured_links')
+                ]
+            )
+        );
+        $group->add(
+            new checkbox(
+                'repeat',
+                get_string('repeat', 'block_totara_featured_links')
+            )
+        );
+        $autoplay = $group->add(
+            new checkbox(
+                'autoplay',
+                get_string('autoplay', 'block_totara_featured_links')
+            )
+        );
 
-        $interval = $group->add(new text('interval', get_string('interval', 'block_totara_featured_links'), PARAM_TEXT), 8);
+        $interval = $group->add(new text('interval', get_string('interval', 'block_totara_featured_links'), PARAM_TEXT));
         $interval->add_validator(new valid_interval());
         $interval->add_help_button('interval', 'block_totara_featured_links');
+        $this->model->add_clientaction(new hidden_if($interval))->is_equal($autoplay, '0');
 
-        $alt_text = $group->add(new text('alt_text', get_string('tile_alt_text', 'block_totara_featured_links'), PARAM_TEXT), 9);
-        $alt_text->add_validator(new alt_text_required(null, 'background_imgs'));
-        $alt_text->add_help_button('tile_alt_text', 'block_totara_featured_links');
-
-        $background = $group->add(
-            new colorpicker(
-                'background_color',
-                get_string('tile_background_color', 'block_totara_featured_links'),
-                PARAM_TEXT
-            ),
-            10
+        $pauseonhover = $group->add(
+            new checkbox(
+                'pauseonhover',
+                get_string('pauseonhover', 'block_totara_featured_links')
+            )
         );
-        $background->add_validator(new is_color());
+        $this->model->add_clientaction(new hidden_if($pauseonhover))->is_equal($autoplay, '0');
         return;
     }
 
     /**
      * The form requires the javascript and css for spectrum as well as passing in the strings
      */
-    public function requirements () {
+    public function requirements() {
         parent::requirements();
         global $PAGE;
         $PAGE->requires->css(new \moodle_url('/blocks/totara_featured_links/spectrum/spectrum.css'));
@@ -108,5 +117,35 @@ class gallery_form_content extends base_form_content {
         $PAGE->requires->strings_for_js(['cancel', 'choose', 'more'], 'moodle');
         $PAGE->requires->js_call_amd('block_totara_featured_links/spectrum', 'spectrum');
         $PAGE->add_body_class('contains-spectrum-colorpicker');
+    }
+
+    /**
+     * Gets that url that the form will redirect to when it gets saved
+     *
+     * @param base $tile_instance the instance of the tile that the form is for
+     * @return string
+     */
+    public function get_next_url(base $tile_instance): string {
+        if ($this->get_parameters()['tileid'] == 0) {
+            $manage_subtile_url = new \moodle_url(
+                '/blocks/totara_featured_links/sub_tile_manage.php',
+                ['tileid' => $tile_instance->id, 'return_url' => parent::get_next_url($tile_instance)]
+            );
+            return $manage_subtile_url->out_as_local_url();
+        }
+        return parent::get_next_url($tile_instance);
+    }
+
+    /**
+     * Adds the action buttons to the form
+     * This adds the save button if editing and
+     * Save and edit if creating a gallery tile for the first time
+     */
+    protected function add_action_buttons(): void {
+        if (empty($this->get_parameters()['tileid'])) {
+            $this->model->add_action_buttons(true, get_string('save_edit', 'block_totara_featured_links'));
+        } else {
+            $this->model->add_action_buttons();
+        }
     }
 }

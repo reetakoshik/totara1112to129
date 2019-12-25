@@ -1,10 +1,9 @@
-@local @totara_contentmarketplace @contentmarketplace_goone
+@totara @totara_contentmarketplace @contentmarketplace_goone
 Feature: Disabling a content marketplace
 
   Scenario: An enabled marketplace has several actions
     Given I am on a totara site
     And the following config values are set as admin:
-      | enablecontentmarketplaces | 1 |  |
       | enabled | 1 | contentmarketplace_goone |
     And I log in as "admin"
     When I navigate to "Manage Content Marketplaces" node in "Site administration > Content Marketplace"
@@ -17,7 +16,6 @@ Feature: Disabling a content marketplace
   Scenario: A disabled marketplace has several actions disabled
     Given I am on a totara site
     And the following config values are set as admin:
-      | enablecontentmarketplaces | 1 |  |
       | enabled | 0 | contentmarketplace_goone |
     And I log in as "admin"
     When I navigate to "Manage Content Marketplaces" node in "Site administration > Content Marketplace"
@@ -31,7 +29,6 @@ Feature: Disabling a content marketplace
   Scenario: An enabled marketplace can be disabled
     Given I am on a totara site
     And the following config values are set as admin:
-      | enablecontentmarketplaces | 1 |  |
       | enabled | 1 | contentmarketplace_goone |
     And I log in as "admin"
     And I navigate to "Manage Content Marketplaces" node in "Site administration > Content Marketplace"
@@ -46,7 +43,6 @@ Feature: Disabling a content marketplace
   Scenario: An enabled marketplace can be disabled
     Given I am on a totara site
     And the following config values are set as admin:
-      | enablecontentmarketplaces | 1 |  |
       | enabled | 0 | contentmarketplace_goone |
     And I log in as "admin"
     And I navigate to "Manage Content Marketplaces" node in "Site administration > Content Marketplace"

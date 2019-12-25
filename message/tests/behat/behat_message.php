@@ -90,6 +90,9 @@ class behat_message extends behat_base {
 
         $this->execute('behat_general::wait_until_the_page_is_ready');
 
+        // Refresh last step action time because we called non-readonly steps in this method. Otherwise the following click may fail for timeout reasons.
+        behat_hooks::refresh_last_step_action();
+
         // Need to limit the click to the search results because the 'view-contact-profile' elements
         // can occur in two separate divs on the page.
         $this->execute('behat_general::i_click_on_in_the',

@@ -31,10 +31,7 @@ final class rb_source_scheduled_reports extends rb_base_source {
     use \totara_reportbuilder\rb\source\report_trait;
     use \totara_reportbuilder\rb\source\report_schedule_trait;
     use \totara_reportbuilder\rb\source\report_saved_trait;
-
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
+    use \totara_job\rb\source\report_trait;
 
     private $reporturl;
 
@@ -84,6 +81,8 @@ final class rb_source_scheduled_reports extends rb_base_source {
         $this->requiredcolumns = [];
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_scheduled_reports');
 
+        $this->cacheable = false;
+
         parent::__construct();
     }
 
@@ -109,8 +108,8 @@ final class rb_source_scheduled_reports extends rb_base_source {
     protected function define_joinlist() {
         $joinlist = [];
 
-        $this->add_user_table_to_joinlist($joinlist, 'base', 'userid');
-        $this->add_job_assignment_tables_to_joinlist($joinlist, 'base', 'userid');
+        $this->add_core_user_tables($joinlist, 'base', 'userid');
+        $this->add_totara_job_tables($joinlist, 'base', 'userid');
 
         return $joinlist;
     }
@@ -124,8 +123,8 @@ final class rb_source_scheduled_reports extends rb_base_source {
     protected function define_columnoptions() {
         $columnoptions = [];
 
-        $this->add_user_fields_to_columns($columnoptions);
-        $this->add_job_assignment_fields_to_columns($columnoptions);
+        $this->add_core_user_columns($columnoptions);
+        $this->add_totara_job_columns($columnoptions);
 
         return $columnoptions;
     }
@@ -138,8 +137,8 @@ final class rb_source_scheduled_reports extends rb_base_source {
         global $CFG;
         $filteroptions = [];
 
-        $this->add_user_fields_to_filters($filteroptions);
-        $this->add_job_assignment_fields_to_filters($filteroptions);
+        $this->add_core_user_filters($filteroptions);
+        $this->add_totara_job_filters($filteroptions);
 
         return $filteroptions;
     }

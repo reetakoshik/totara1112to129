@@ -42,10 +42,7 @@ class block_totara_report_graph_edit_form extends block_edit_form {
         require_once($CFG->dirroot . '/blocks/moodleblock.class.php');
         require_once($CFG->dirroot . '/blocks/totara_report_graph/block_totara_report_graph.php');
 
-        $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
-
-        $mform->addElement('text', 'config_title', get_string('title', 'block_totara_report_graph'));
-        $mform->setType('config_title', PARAM_TEXT);
+        $mform->addElement('header', 'configheader', get_string('customblocksettings', 'block'));
 
         $prevreport = false;
         if (!empty($this->block->config->reportorsavedid)) {

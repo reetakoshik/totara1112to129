@@ -8,20 +8,21 @@ Feature: Test menu correctly highlights the course catalog page when enhanced ca
   Scenario: Enhanced catalog menu links should not be highlighted when it is disabled and viewing course index page
     Given I am on a totara site
     And I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
-    And I set the field "Enhanced catalog" to "0"
+    And I navigate to "Advanced features" node in "Site administration > System information"
+    And I set the field "Catalogue default view" to "moodle"
     And I press "Save changes"
-    And I navigate to "Main menu" node in "Site administration > Appearance"
+    And I navigate to "Main menu" node in "Site administration > Navigation"
     And I press "Add new menu item"
-    And I set the following fields to these values:
+    And I set the following Totara form fields to these values:
       | Menu title | Enhanced catalog |
-      | Menu default url address | /totara/coursecatalog/courses.php |
-    And I press "Add new menu item"
+      | Menu url address | /totara/coursecatalog/courses.php |
+    And I press "Add"
     Then I should see "Enhanced catalog" in the totara menu
     When I follow "Enhanced catalog"
-    Then the "class" attribute of "//*[@id='totaramenu']/ul/li[a/text()='Enhanced catalog']" "xpath_element" should contain "selected"
-    And the "class" attribute of "//*[@id='totaramenu']//ul/li[a/text()='Find Learning']" "xpath_element" should not contain "selected"
+    Then Totara menu item "Enhanced catalog" should be highlighted
+    And Totara menu item "Find Learning" should not be highlighted
     When I follow "Find Learning"
-    Then the "class" attribute of "//*[@id='totaramenu']/ul/li[a/text()='Find Learning']" "xpath_element" should contain "selected"
-    And the "class" attribute of "//*[@id='totaramenu']/ul/li[a/text()='Enhanced catalog']" "xpath_element" should not contain "selected"
+    And I follow "Courses"
+    Then Totara menu item "Find Learning" should be highlighted
+    And Totara menu item "Enhanced catalog" should not be highlighted
 

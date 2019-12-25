@@ -44,7 +44,8 @@ $renderer = $PAGE->get_renderer('totara_reportbuilder');
 $reportrecord = $DB->get_record('report_builder', array('shortname' => 'appraisal_detail'));
 $globalrestrictionset = rb_global_restriction_set::create_from_page_parameters($reportrecord);
 
-if (!$report = reportbuilder_get_embedded_report('appraisal_detail', null, false, $sid, $globalrestrictionset)) {
+$config = (new rb_config())->set_sid($sid)->set_global_restriction_set($globalrestrictionset);
+if (!$report = reportbuilder::create_embedded('appraisal_detail', $config)) {
     print_error('error:couldnotgenerateembeddedreport', 'totara_reportbuilder');
 }
 

@@ -81,6 +81,7 @@ $string['error:tempmanagerexpirynotset'] = 'An expiry date for the temporary man
 $string['error:tempmanagerhasjobassignment'] = 'Please select the temporary managers existing job assignment';
 $string['error:tempmanagernotselected'] = 'Please select a temporary manager';
 $string['error:userownmanager'] = 'A user cannot be assigned as their own manager';
+$string['eventjobassignmentdeleted'] = 'User job assignment deleted';
 $string['eventjobassignmentupdated'] = 'User job assignment updated';
 $string['eventjobassignmentviewed'] = 'User job assignment viewed';
 $string['globalsettings'] = 'Global Settings';

@@ -13,14 +13,14 @@ Feature: User remove the value of profile custom field that had already been use
     And I am on a totara site
     And I log in as "admin"
 
-    And I navigate to "Users > Accounts > Browse list of users" in site administration
+    And I navigate to "Users > Browse list of users" in site administration
     And I follow "kian bomba"
     And I follow "Edit profile"
     And I follow "Other fields"
     And I set the field "profile_field_hw" to "abcde"
     And I click on "Update profile" "button"
 
-    And I navigate to "Users > Accounts > Audiences" in site administration
+    And I navigate to "Audiences > Audiences" in site administration
     And I follow "cohort 1"
     And I follow "Rule sets"
 
@@ -32,13 +32,13 @@ Feature: User remove the value of profile custom field that had already been use
   Scenario: User delete the value of custom field in a profile page
     then expecting the audience rules page to have a message about deleted value
 
-    Given I navigate to "Users > Accounts > Browse list of users" in site administration
+    Given I navigate to "Users > Browse list of users" in site administration
     And I follow "kian bomba"
     And I follow "Edit profile"
     And I follow "Other fields"
     And I set the field "profile_field_hw" to ""
     And I click on "Update profile" "button"
-    And I navigate to "Users  > Accounts > Audiences" in site administration
+    And I navigate to "Audiences > Audiences" in site administration
     When I follow "cohort 1"
     And I follow "Rule sets"
     Then I should see "Deleted (ID: abcde)"

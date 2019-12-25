@@ -21,8 +21,7 @@ Feature: Restore course completion report rpl
       | label    | label1 | label1 | C1     | label1   | 1          |
       | label    | label2 | label2 | C1     | label2   | 1          |
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "Course completion" node in "Course administration"
     And I expand all fieldsets
     And I click on "criteria_activity_value[1]" "checkbox"
@@ -39,15 +38,14 @@ Feature: Restore course completion report rpl
   Scenario: Restore the course with course completions and all completion results via Recycle bin
     # As a student, complete one activity
     When I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I click on "Not completed: label1. Select to mark as complete." "link"
     And I click on "Not completed: label2. Select to mark as complete." "link"
     And I log out
 
     # Set course completion via RPL
     And I log in as "admin"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "Course completion" node in "Course administration > Reports"
     And I complete the course via rpl for "Student 2" with text "Completed via RPL 1"
 
@@ -57,8 +55,7 @@ Feature: Restore course completion report rpl
     And I press "Continue"
     And I click on "Recycle bin" "link"
     And I click on "Restore" "link" in the "Course 1" "table_row"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "Course completion" node in "Course administration > Reports"
     And I should see "Completed" in the "Student 1" "table_row"
     And I click on "Show RPL" "link" in the "Student 2" "table_row"

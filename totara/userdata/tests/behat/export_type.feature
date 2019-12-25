@@ -22,7 +22,7 @@ Feature: Manage user data export types
 
   Scenario: Create user data export type
     Given I log in as "manager"
-    And I navigate to "Export types" node in "Site administration > Users > User data management"
+    And I navigate to "Export types" node in "Site administration > User data management"
     When I press "Add export type"
     And I set the following Totara form fields to these values:
     | Full name     | First export type       |
@@ -44,7 +44,7 @@ Feature: Manage user data export types
     And I should see "Email"
 
     # Test duplicate id detection.
-    When I navigate to "Export types" node in "Site administration > Users > User data management"
+    When I navigate to "Export types" node in "Site administration > User data management"
     And I press "Add export type"
     And I set the following Totara form fields to these values:
       | Full name     | First export type       |
@@ -71,7 +71,7 @@ Feature: Manage user data export types
 
   Scenario: Update user data export type
     Given I log in as "manager"
-    And I navigate to "Export types" node in "Site administration > Users > User data management"
+    And I navigate to "Export types" node in "Site administration > User data management"
     And I press "Add export type"
     And I set the following Totara form fields to these values:
       | Full name     | First export type                  |
@@ -110,7 +110,7 @@ Feature: Manage user data export types
 
   Scenario: Duplicate user data export type
     Given I log in as "manager"
-    And I navigate to "Export types" node in "Site administration > Users > User data management"
+    And I navigate to "Export types" node in "Site administration > User data management"
     And I press "Add export type"
     And I set the following Totara form fields to these values:
       | Full name     | First export type       |
@@ -145,7 +145,7 @@ Feature: Manage user data export types
 
   Scenario: Delete user data export type
     Given I log in as "manager"
-    And I navigate to "Export types" node in "Site administration > Users > User data management"
+    And I navigate to "Export types" node in "Site administration > User data management"
     And I press "Add export type"
     And I set the following Totara form fields to these values:
       | Full name     | First export type       |

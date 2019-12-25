@@ -24,11 +24,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 class rb_source_connect_servers extends rb_base_source {
-
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
-
     public function __construct() {
         $this->usedcomponents[] = 'auth_connect';
         $this->base = '{auth_connect_servers}';

@@ -14,7 +14,7 @@ Installation
 1. Install Node.js and npm in your OS - the only supported version is LTS v8 with npm v5
 2. run 'npm install' in the root directory to install all required npm modules in expected versions
 3. either install grunt-cli globally using 'npm install grunt-cli -g' (you may be required to use sudo)
-4. or install grunt locally via 'npm install grunt-cli' (you will have to use './node_modules/.bin/grunt' later)
+4. or you can run './node_modules/.bin/grunt' from the dirroot directory
 
 
 Execution

@@ -242,7 +242,9 @@ class item extends item_base implements item_has_progress {
             if (!empty($content['program'])) {
                 foreach ($content['program'] as $planprogram) {
                     $item = program::one($this->user, $planprogram->programid);
-                    $this->programs[] = $item;
+                    if ($item) {
+                        $this->programs[] = $item;
+                    }
                 }
             }
         }

@@ -27,11 +27,19 @@ require_once($CFG->libdir.'/formslib.php');
 
 class block_totara_program_completion_edit_form extends block_edit_form {
 
+    /**
+     * Enable general settings
+     *
+     * @return bool
+     */
+    protected function has_general_settings() {
+        return true;
+    }
+
     protected function specific_definition($mform) {
         global $CFG, $PAGE;
-
         require_once($CFG->dirroot.'/blocks/totara_program_completion/locallib.php');
-
+        parent::specific_definition($mform);
         $mform = $this->_form;
 
         // Javascript include.
@@ -46,11 +54,7 @@ class block_totara_program_completion_edit_form extends block_edit_form {
 
         $PAGE->requires->js_call_amd('block_totara_program_completion/edit', 'init',
             array('blockid' => $this->block->instance->id, 'programsselected' => $programids));
-
-        $mform->addElement('text', 'config_title', get_string('title', 'block_totara_program_completion'),
-                array('size' => '25'));
-        $mform->setType('config_title', PARAM_TEXT);
-
+        $mform->addElement('header', 'configheader', get_string('customblocksettings', 'block'));
         $mform->addElement('text', 'config_titlelink', get_string('titlelink', 'block_totara_program_completion'),
                 array('size' => '25'));
         $mform->setType('config_titlelink', PARAM_URL);

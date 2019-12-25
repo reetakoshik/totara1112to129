@@ -29,7 +29,7 @@ require_once($CFG->dirroot . '/totara/reportbuilder/lib.php');
 
 admin_externalpage_setup('totaraconnectclients');
 
-$report = reportbuilder_get_embedded_report('connect_clients', array(), false, 0);
+$report = reportbuilder::create_embedded('connect_clients');
 
 echo $OUTPUT->header();
 

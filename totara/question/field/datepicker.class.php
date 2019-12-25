@@ -38,6 +38,9 @@ class question_datepicker extends question_base{
     public function get_xmldb() {
         $fields = array();
         $fields[$this->get_prefix_form()] = new xmldb_field($this->get_prefix_db(), XMLDB_TYPE_INTEGER, 10);
+        if (!empty($this->param1['withtimezone'])) {
+            $fields[$this->get_prefix_form() . 'tz'] = new xmldb_field($this->get_prefix_db() . 'tz', XMLDB_TYPE_TEXT);
+        }
         return $fields;
     }
 
@@ -66,6 +69,9 @@ class question_datepicker extends question_base{
         $form->setType('stopyear', PARAM_INT);
 
         $form->addElement('advcheckbox', 'withtime', '', get_string('dateincludetime', 'totara_question'));
+
+        $form->addElement('advcheckbox', 'withtimezone', '', get_string('dateincludetimezone', 'totara_question'));
+        $form->disabledIf('withtimezone', 'withtime');
     }
 
     protected function define_validate($data, $files) {
@@ -80,6 +86,7 @@ class question_datepicker extends question_base{
         $toform->startyear = $this->param1['startyear'];
         $toform->stopyear = $this->param1['stopyear'];
         $toform->withtime = $this->param1['withtime'];
+        $toform->withtimezone = !empty($this->param1['withtimezone']);
         return $toform;
     }
 
@@ -88,6 +95,7 @@ class question_datepicker extends question_base{
         $param1['startyear'] = $fromform->startyear;
         $param1['stopyear'] = $fromform->stopyear;
         $param1['withtime'] = $fromform->withtime;
+        $param1['withtimezone'] = $fromform->withtime && !empty($fromform->withtimezone);
         $this->param1 = $param1;
         return $fromform;
     }
@@ -103,12 +111,54 @@ class question_datepicker extends question_base{
         }
     }
 
+    public function edit_set(stdClass $data, $source) {
+        if ($source == 'form') {
+            $datetimeformfield = $this->get_prefix_form();
+            $this->values = ['datetime' => $data->$datetimeformfield];
+
+            if (!empty($this->param1['withtimezone'])) {
+                $timezoneformfield = $this->get_prefix_form() . '_timezone';
+                if (isset($data->$timezoneformfield)) {
+                    $this->values['timezone'] = $data->$timezoneformfield;
+                } else {
+                    // The timezone property is not set if the date form element was disabled.
+                    $this->values['timezone'] = '';
+                }
+            }
+        } else { // From DB.
+            $datetimeformfield = $this->get_prefix_db();
+            $this->values = ['datetime' => $data->$datetimeformfield];
+
+            if (!empty($this->param1['withtimezone'])) {
+                $timezoneformfield = $this->get_prefix_db() . 'tz';
+                $this->values['timezone'] = $data->$timezoneformfield;
+            }
+        }
+    }
+
     public function edit_get($dest) {
         $data = new stdClass();
-        $name = $this->get_prefix_form();
 
-        if ($dest == 'form' && $this->values[$name] == 0) {
-            $data->$name = null;
+        if ($dest == 'form') {
+            $datetimeformfield = $this->get_prefix_form();
+            if ($this->values['datetime'] == 0) {
+                $data->$datetimeformfield = null;
+            } else {
+                $data->$datetimeformfield = $this->values['datetime'];
+
+                if (!empty($this->param1['withtimezone'])) {
+                    $timezoneformfield = $this->get_prefix_form() . '_timezone';
+                    $data->$timezoneformfield = $this->values['timezone'];
+                }
+            }
+        } else { // For DB.
+            $datetimeformfield = $this->get_prefix_db();
+            $data->$datetimeformfield = $this->values['datetime'];
+
+            if (!empty($this->param1['withtimezone'])) {
+                $timezoneformfield = $this->get_prefix_db() . 'tz';
+                $data->$timezoneformfield = $this->values['timezone'];
+            }
         }
 
         return $data;
@@ -124,8 +174,9 @@ class question_datepicker extends question_base{
         $attributes = array(
             'startyear' => $this->param1['startyear'],
             'stopyear'  => $this->param1['stopyear'],
-            'timezone'  => 99,
-            'optional'  => !$this->required
+            'timezone'  => $this->values['timezone'] ?? 99,
+            'optional'  => !$this->required,
+            'showtimezone' => $this->param1['withtime'] && !empty($this->param1['withtimezone']),
         );
 
         // Check if they wanted to include time as well.
@@ -142,6 +193,12 @@ class question_datepicker extends question_base{
     public function to_html($value) {
         if ($this->param1['withtime']) {
             $format = get_string('strfdateattime', 'langconfig');
+
+            if (!empty($this->param1['withtimezone'])) {
+                $datetime = $this->storage->get_element()->values['datetime'];
+                $timezone = $this->storage->get_element()->values['timezone'];
+                return userdate($datetime, $format, $timezone) . ' ' . $timezone;
+            }
         } else {
             $format = get_string('strfdateshortmonth', 'langconfig');
         }

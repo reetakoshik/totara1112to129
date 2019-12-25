@@ -29,9 +29,24 @@ namespace totara_reportbuilder\rb\display;
  *
  * @author Petr Skoda <petr.skoda@totaralearning.com>
  * @package totara_reportbuilder
+ *
+ * @deprecated Since Totara 12.0
  */
 class formatstring extends base {
+
+    /**
+     * Handle the display
+     *
+     * @deprecated Since Totara 12.0
+     * @param string $value
+     * @param string $format
+     * @param \stdClass $row
+     * @param \rb_column $column
+     * @param \reportbuilder $report
+     * @return string
+     */
     public static function display($value, $format, \stdClass $row, \rb_column $column, \reportbuilder $report) {
+        debugging('totara_reportbuilder\rb\display\formatstring::display has been deprecated since Totara 12.0. Use totara_reportbuilder\rb\display\format_string::display', DEBUG_DEVELOPER);
         $value = format_string($value, true, array('context' => \context_system::instance()));
         if ($format === 'html') {
             return $value;

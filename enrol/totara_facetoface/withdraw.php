@@ -55,11 +55,12 @@ if ($confirm) {
         'userid' => $USER->id,
         'courseid' => $course->id,
         'superceded' => 0,
-        'statuscode' => MDL_F2F_STATUS_REQUESTED,
+        'statuscode' => \mod_facetoface\signup\state\requested::get_code(),
     );
     $requests = $DB->get_records_sql($sql, $params);
     foreach ($requests as $request) {
-        facetoface_update_signup_status($request->signupid, MDL_F2F_STATUS_USER_CANCELLED, $USER->id);
+        $signup = new \mod_facetoface\signup($request->signupid);
+        $signup->switch_state(\mod_facetoface\signup\state\user_cancelled::class);
     }
 
     // Should not be necessary as event would have deleted the pending record, but just in case.

@@ -25,6 +25,3 @@
 $string['email'] = 'Send email notifications to';
 $string['ifemailleftempty'] = 'Leave empty to send notifications to {$a}';
 $string['pluginname'] = 'Email';
-
-// Deprecated since Totara 10
-$string['emailonlyfromnoreplyaddress'] = 'Always send email from the no-reply address?';

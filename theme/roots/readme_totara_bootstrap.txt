@@ -11,6 +11,8 @@ These were:
         - https://github.com/twbs/bootstrap/commit/1956146787d686f5771ae51f7b96f3a3ad62ce09
  * Fix/xss issues on data attributes
         - https://github.com/twbs/bootstrap/commit/2a5ba23ce8f041f3548317acc992ed8a736b609d
+ * Fix/XSS issues on popover 
+        - https://github.com/twbs/bootstrap/commit/2c8abb9a4393addc5ffb39e649e09391c2fee701
 
-If upgrading to the js file to match Bootstrap 3.4.0 or any latest release above that (e.g. 4.2.1 or above), you do not
+If upgrading to the js file to match Bootstrap 3.4.1 or any latest release above that (e.g. 4.3.1 or above), you do not
 need to reapply these changes as they will already be there.

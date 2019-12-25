@@ -45,9 +45,6 @@ class mod_scorm_archive_testcase extends advanced_testcase {
         $this->assertTrue(scorm_supports(FEATURE_ARCHIVE_COMPLETION));
     }
 
-    /**
-     * @depends test_module_supports_archive_completion
-     */
     public function test_archive() {
         global $CFG, $DB;
 

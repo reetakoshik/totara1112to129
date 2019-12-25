@@ -25,7 +25,8 @@ Feature: Confirm global report restrictions work accross multiple reports
     And I log in as "admin"
     And I set the following administration settings values:
       | Enable report restrictions | 1 |
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | User report |
       | Source      | User        |
@@ -36,7 +37,8 @@ Feature: Confirm global report restrictions work accross multiple reports
     And I switch to "Access" tab
     And I set the field "All users can view this report" to "1"
     And I press "Save changes"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | Audience report  |
       | Source      | Audience Members |
@@ -47,7 +49,7 @@ Feature: Confirm global report restrictions work accross multiple reports
     And I switch to "Access" tab
     And I set the field "All users can view this report" to "1"
     And I press "Save changes"
-    And I navigate to "Global report restrictions" node in "Site administration > Reports > Report builder"
+    And I navigate to "Global report restrictions" node in "Site administration > Reports"
     And I press "New restriction"
     And I set the following fields to these values:
       | Name        | test restriction 1    |
@@ -69,7 +71,7 @@ Feature: Confirm global report restrictions work accross multiple reports
     And I click on "User Three" "link" in the "Assign a group to restriction" "totaradialogue"
     And I click on "Save" "button" in the "Assign a group to restriction" "totaradialogue"
     And I wait "1" seconds
-    And I navigate to "Global report restrictions" node in "Site administration > Reports > Report builder"
+    And I navigate to "Global report restrictions" node in "Site administration > Reports"
     And I press "New restriction"
     And I set the following fields to these values:
       | Name        | test restriction 2    |

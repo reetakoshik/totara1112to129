@@ -24,263 +24,308 @@
  */
 
 use core\output\flex_icon;
-use core\output\mustache_flex_icon_helper;
+use totara_core\path_whitelist; // Totara: path_whitelist
 
 defined('MOODLE_INTERNAL') || die();
 
-class mustache_flex_icon_helper_testcase extends basic_testcase {
+class mustache_flex_icon_helper_testcase extends advanced_testcase {
 
     /**
-     * @var core_renderer
+     * Creates a new mustache instance, cloned from the real one, ready for testing.
+     *
+     * @return array
      */
-    protected static $renderer;
+    private static function get_mustache() {
 
-    /**
-     * @var \Mustache_Engine
-     */
-    protected static $engine;
-
-
-    public static function setUpBeforeClass() {
-
-        global $CFG;
-
-        require_once("{$CFG->dirroot}/lib/mustache/src/Mustache/Autoloader.php");
-        Mustache_Autoloader::register();
-
-        self::$renderer = new \core_renderer(new moodle_page(), '/');
-        // Get the engine from the renderer. We do this once cause its mad.
-        $class = new ReflectionClass(self::$renderer);
-        $method = $class->getMethod('get_mustache');
-        $method->setAccessible(true);
-        self::$engine = $method->invoke(self::$renderer);
+        $page = new \moodle_page();
+        $renderer = $page->get_renderer('core');
+        $reflection = new ReflectionMethod($renderer, 'get_mustache');
+        $reflection->setAccessible(true);
+        /** @var Mustache_Engine $mustache */
+        $mustache = $reflection->invoke($renderer);
+        // Clone it, we want the real mustache loader to still have access to the templates.
+        $mustache = clone($mustache);
+        // Set a new loader so that we can add templates for testing.
+        $loader = new Mustache_Loader_ArrayLoader([]);
+        $mustache->setLoader($loader);
+        return [$mustache, $loader, $renderer, $page];
     }
 
     /**
-     * Returns a LambdaHelper populated with the given contextdata.
-     *
-     * @param array|stdClass $contextdata
-     * @return Mustache_LambdaHelper
+     * Test the get_mustache method returns what we require.
      */
-    protected function get_lambda_helper($contextdata = []) {
-        return new \Mustache_LambdaHelper(self::$engine, new \Mustache_Context($contextdata));
+    public function test_get_mustache() {
+        list($mustache, $loader, $renderer, $page) = $this->get_mustache();
+        self::assertInstanceOf(Mustache_Engine::class, $mustache);
+        self::assertInstanceOf(Mustache_Loader_ArrayLoader::class, $loader);
+        self::assertInstanceOf(core_renderer::class, $renderer);
+        self::assertInstanceOf(moodle_page::class, $page);
     }
 
     /**
      * It should generate the same output as rendering the renderable without customdata.
-     *
-     * @covers \core\output\mustache_flex_icon_helper::__construct
-     * @covers \core\output\mustache_flex_icon_helper::flex_icon
      */
-    public function test_flex_icon_output_without_customdata() {
+    public function test_valid_usage() {
 
-        $identifier = 'permissions-check';
-        $mustachehelper = new mustache_flex_icon_helper(self::$renderer);
+        /**
+         * @var Mustache_Engine $mustache
+         * @var Mustache_Loader_ArrayLoader $loader
+         * @var core_renderer $renderer
+         * @var moodle_page $page
+         */
+        list($mustache, $loader, $renderer, $page) = $this->get_mustache();
 
-        $expected = self::$renderer->render(new flex_icon($identifier));
-        $actual = $mustachehelper->flex_icon($identifier, $this->get_lambda_helper());
+        // Identifier only.
+        $loader->setTemplate('test', '{{#flex_icon}}permissions-check{{/flex_icon}}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('permissions-check')),
+            $mustache->render('test')
+        );
 
-        $this->assertEquals($expected, $actual);
+        // PIX Identifier only.
+        $loader->setTemplate('test', '{{#flex_icon}}core|t/edit{{/flex_icon}}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('core|t/edit')),
+            $mustache->render('test')
+        );
 
+        // Two piece flex icon.
+        $loader->setTemplate('test', '{{#flex_icon}}alarm-danger{{/flex_icon}}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('alarm-danger')),
+            $mustache->render('test')
+        );
+
+        // Variable identifier.
+        $loader->setTemplate('test', '{{#flex_icon}}{{test_icon}}{{/flex_icon}}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('settings')),
+            $mustache->render('test', ['test_icon' => 'settings'])
+        );
+
+        // Identifier + alt
+        $loader->setTemplate('test', '{{#flex_icon}}alarm-danger,delete{{/flex_icon}}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('alarm-danger', ['alt' => get_string('delete')])),
+            $mustache->render('test')
+        );
+
+        // Identifier + alt: variable spacing 1
+        $loader->setTemplate('test', '{{#flex_icon}} alarm-danger , delete {{/flex_icon}}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('alarm-danger', ['alt' => get_string('delete')])),
+            $mustache->render('test')
+        );
+
+        // Identifier + alt: variable spacing 2
+        $loader->setTemplate('test', '{{# flex_icon }}  alarm-danger  ,  delete  {{/ flex_icon }}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('alarm-danger', ['alt' => get_string('delete')])),
+            $mustache->render('test')
+        );
+
+        // Identifier + alt: variable spacing 3
+        $loader->setTemplate('test', '{{#  flex_icon  }}  alarm-danger  ,  delete  {{/  flex_icon  }}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('alarm-danger', ['alt' => get_string('delete')])),
+            $mustache->render('test')
+        );
+
+        // Variable identifier with get_string alt.
+        $loader->setTemplate('test', '{{#flex_icon}}{{identifier}}, {{alt}}{{/flex_icon}}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('core|i/edit', ['alt' => get_string('delete')])),
+            $mustache->render('test', ['identifier' => 'core|i/edit', 'alt' => 'delete'])
+        );
+
+        // Variable identifier with get_string alt + component.
+        $loader->setTemplate('test', '{{#flex_icon}}{{identifier}}, {{alt}}, {{component}}{{/flex_icon}}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('core|i/edit', ['alt' => get_string('delete')])),
+            $mustache->render('test', ['identifier' => 'core|i/edit', 'alt' => 'delete', 'component' => 'core'])
+        );
+
+        // Variable identifier with get_string alt + component + classes.
+        $loader->setTemplate('test', '{{#flex_icon}}{{identifier}}, {{alt}}, {{component}}, size-large test{{/flex_icon}}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('core|i/edit', ['alt' => get_string('delete'), 'classes' => 'size-large test'])),
+            $mustache->render('test', ['identifier' => 'core|i/edit', 'alt' => 'delete', 'component' => 'core'])
+        );
+
+        // Variable identifier with get_string alt + component + classes: Variable spacing
+        $loader->setTemplate('test', '{{# flex_icon }} {{identifier}} , {{alt}} , {{component}} , size-large test {{/ flex_icon }}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('core|i/edit', ['alt' => get_string('delete'), 'classes' => 'size-large test'])),
+            $mustache->render('test', ['identifier' => 'core|i/edit', 'alt' => 'delete', 'component' => 'core'])
+        );
     }
 
-    /**
-     * It should generate the same output as rendering the renderable with customdata.
-     *
-     * @covers \core\output\mustache_flex_icon_helper::flex_icon
-     */
-    public function test_flex_icon_output_with_customdata() {
+    public function test_deprecated_usage() {
+        /**
+         * @var Mustache_Engine $mustache
+         * @var Mustache_Loader_ArrayLoader $loader
+         * @var core_renderer $renderer
+         * @var moodle_page $page
+         */
+        list($mustache, $loader, $renderer, $page) = $this->get_mustache();
 
-        $identifier = 'permissions-check';
-        $customdata = array(
-            'classes' => 'ft-state-success ft-size-700'
+        // Static identifier + JSON encoded classes.
+        $loader->setTemplate('test', '{{#flex_icon}}permissions-check, {"classes": "ft-state-success ft-size-700"}{{/flex_icon}}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('permissions-check', ['classes' => 'ft-state-success ft-size-700'])),
+            $mustache->render('test')
         );
-        $helperstring = "{$identifier}, " . json_encode($customdata);
 
-        $mustachehelper = new mustache_flex_icon_helper(self::$renderer);
+        // Variable identifier with JSON encoded classes.
+        $loader->setTemplate('test', '{{#flex_icon}}{{test_icon}}, {"classes":"ft-state-success ft-size-700"}{{/flex_icon}}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('settings', ['classes' => 'ft-state-success ft-size-700'])),
+            $mustache->render('test', ['test_icon' => 'settings'])
+        );
 
-        $expected = self::$renderer->render(new flex_icon($identifier, $customdata));
-        $actual = $mustachehelper->flex_icon($helperstring, $this->get_lambda_helper());
+        // Variable identifier with JSON encoded alt.
+        $loader->setTemplate('test', '{{#flex_icon}}{{test_icon}}, {"alt":"{{alt}}"}{{/flex_icon}}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('settings', ['alt' => 'Test fun'])),
+            $mustache->render('test', ['test_icon' => 'settings', 'alt' => 'Test fun'])
+        );
 
-        $this->assertEquals($expected, $actual);
+        // Variable identifier with JSON encoded alt using string helper.
+        $loader->setTemplate('test', '{{#flex_icon}}{{test_icon}}, {"alt":"{{#str}}delete{{/str}}"}{{/flex_icon}}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('settings')),
+            $mustache->render('test', ['test_icon' => 'settings'])
+        );
+        $this->assertDebuggingCalled([
+            'Legacy flex icon helper API in use, please use the flex icon template instead.',
+            'Legacy flex icon helper API in use, please use the flex icon template instead.',
+            'Legacy flex icon helper API in use, please use the flex icon template instead.',
+            'Escaped content contains unexpected mustache processing queues. It will be lost.',
+            'Legacy flex icon helper API in use, please use the flex icon template instead.'
+        ]);
 
+        // Variable identifier with JSON encoded alt using string helper.
+        $loader->setTemplate('test', '{{#flex_icon}}settings, {"alt":"{{#str}}added, moodle,{{#str}}delete{{/str}}{{/str}}"}{{/flex_icon}}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('settings', ['alt' =>''])),
+            $mustache->render('test')
+        );
+        $this->assertDebuggingCalled([
+            'Escaped content contains unexpected mustache processing queues. It will be lost.',
+            'Legacy flex icon helper API in use, please use the flex icon template instead.'
+        ]);
+
+        // Variable identifier, alt, and classes.
+        $loader->setTemplate('test', '{{#flex_icon}}{{test_icon}}, {"alt": "{{alt}}", "classes": "{{classes}}"}{{/flex_icon}}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('core|i/edit', ['alt' => 'Test fun', 'classes' => 'test testing'])),
+            $mustache->render('test', ['test_icon' => 'core|i/edit', 'alt' => 'Test fun', 'classes' => 'test testing'])
+        );
+        $this->assertDebuggingCalled('Legacy flex icon helper API in use, please use the flex icon template instead.');
+
+        // Variable identifier, alt, and classes.
+        $loader->setTemplate('test', '{{#flex_icon}}{{test_icon}}, {"data-test": "monkeys"}{{/flex_icon}}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('core|i/edit', ['data-test' => 'monkeys'])),
+            $mustache->render('test', ['test_icon' => 'core|i/edit'])
+        );
+        $this->assertDebuggingCalled('Legacy flex icon helper API in use, please use the flex icon template instead.');
     }
 
     /**
      * It should throw an exception if helper JSON cannot be parsed.
-     *
-     * @covers \core\output\mustache_flex_icon_helper::flex_icon
      */
-    public function test_flex_icon_throws() {
+    public function test_invalid_usage() {
 
-        $malformedjson = '{ this # is not valid JSON : 7 \ }';
-        $helperstring = "cog, {$malformedjson}";
+        /**
+         * @var Mustache_Engine $mustache
+         * @var Mustache_Loader_ArrayLoader $loader
+         * @var core_renderer $renderer
+         * @var moodle_page $page
+         */
+        list($mustache, $loader, $renderer, $page) = $this->get_mustache();
 
-        $mustachehelper = new mustache_flex_icon_helper(self::$renderer);
-
-        $this->expectException('coding_exception');
-        $mustachehelper->flex_icon($helperstring, $this->get_lambda_helper());
-
-    }
-
-    /**
-     * It should generate the same output as rendering the renderable with customdata.
-     *
-     * @covers \core\output\mustache_flex_icon_helper::flex_icon
-     */
-    public function test_flex_icon_output_with_variable_identifier() {
-
-        $actualidentifier = 'settings';
-        $variableidentifier = '{{test_icon}}';
-        $customdata = array(
-            'classes' => 'ft-state-success ft-size-700'
+        // Variable identifier with variable alt
+        $loader->setTemplate('test', '{{#flex_icon}}{{test_icon}}, {{alt}}{{/flex_icon}}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('settings')),
+            $mustache->render('test', ['test_icon' => 'settings', 'alt' => 'Test fun'])
         );
-        $helperstring = "{$variableidentifier}, " . json_encode($customdata);
+        $this->assertDebuggingCalled('Invalid alt identifier for flex icon, it must be a string identifier.');
 
-        $expected = self::$renderer->render(new flex_icon($actualidentifier, $customdata));
+        // Pix identifier, with variable component (invalid, not a string identifier).
+        $loader->setTemplate('test', '{{#flex_icon}}{{identifier}}, {{alt}}, {{component}}{{/flex_icon}}');
+        $this->assertEquals(
+            $renderer->render(new flex_icon('core|i/edit')),
+            $mustache->render('test', ['identifier' => 'core|i/edit', 'alt' => 'delete', 'component' => 'Totara Core'])
+        );
+        $this->assertDebuggingCalled('Invalid alt component for flex icon, it must be a string component.');
 
-        $lambdahelper = $this->get_lambda_helper(['test_icon' => $actualidentifier]);
-        $mustachehelper = new mustache_flex_icon_helper(self::$renderer);
-        $actual = $mustachehelper->flex_icon($helperstring, $lambdahelper);
-
-        $this->assertEquals($expected, $actual);
+        // Invalid JSON.
+        $loader->setTemplate('test', '{{#flex_icon}}cog, { this # is not valid JSON : 7 \ }{{/flex_icon}}');
+        try {
+            $mustache->render('test', ['test_icon' => 'settings']);
+            $this->fail('An exception was expected');
+        } catch (Exception $e) {
+            $this->assertInstanceOf(coding_exception::class, $e);
+            $this->assertSame('Coding error detected, it must be fixed by a programmer: flex_icon helper was unable to decode JSON', $e->getMessage());
+        }
     }
 
-    /**
-     * It should generate the same output as rendering the renderable with customdata.
-     *
-     * @covers \core\output\mustache_flex_icon_helper::flex_icon
-     */
-    public function test_flex_icon_output_with_variable_alt() {
-
-        $actualidentifier = 'settings';
-        $helperstring = '{{test_icon}}, { "alt": "{{alt}}" }';
-
-        $expected = self::$renderer->render(new flex_icon($actualidentifier, ['alt' => get_string('settings')]));
-
-        $lambdahelper = $this->get_lambda_helper(['test_icon' => $actualidentifier, 'alt' => get_string('settings')]);
-        $mustachehelper = new mustache_flex_icon_helper(self::$renderer);
-        $actual = $mustachehelper->flex_icon($helperstring, $lambdahelper);
-
-        $this->assertEquals($expected, $actual);
-
-    }
-
-    /**
-     * It should generate the same output as rendering the renderable with customdata.
-     *
-     * @covers \core\output\mustache_flex_icon_helper::flex_icon
-     */
-    public function test_flex_icon_output_with_complex_structure() {
-
-        $actualidentifier = 'core|i/edit';
-        $helperstring = '{{test_icon}}, { "alt": "{{alt}}", "classes": "{{classes}}" }';
-
-        $expected = self::$renderer->render(new flex_icon($actualidentifier, ['alt' => get_string('settings'), 'classes' => 'test testing']));
-
-        $lambdahelper = $this->get_lambda_helper(['test_icon' => $actualidentifier, 'alt' => get_string('settings'), 'classes' => 'test testing']);
-        $mustachehelper = new mustache_flex_icon_helper(self::$renderer);
-        $actual = $mustachehelper->flex_icon($helperstring, $lambdahelper);
-
-        $this->assertEquals($expected, $actual);
-
-    }
-
-    /**
-     * Test core, components, and standard plugins to ensure that we are aware of all potentially
-     * abusable helper uses.
-     */
-    public function test_no_exploitable_flex_icon_helper_uses() {
+    public function test_no_exploitable_flex_helper_uses() {
         global $CFG;
 
-        $directories = [
-            $CFG->dirroot . '/lib/templates'
-        ];
-
-        $subsystems = \core_component::get_core_subsystems();
-        foreach ($subsystems as $directory) {
-            if (empty($directory)) {
-                continue;
-            }
-            $directory .= '/templates';
-            if (file_exists($directory) && is_dir($directory)) {
-                $directories[] = $directory;
-            }
-        }
-
-        $manager = \core_plugin_manager::instance();
-        foreach ($manager->get_plugins() as $plugintype_class => $plugins) {
-            foreach ($plugins as $plugin_class => $plugin) {
-                /** @var \core\plugininfo\base $plugin */
-                if (!$plugin->is_standard()) {
-                    continue;
-                }
-                $directory = $CFG->dirroot . $plugin->get_dir() . '/templates';
-                if (file_exists($directory) && is_dir($directory)) {
-                    $directories[] = $directory;
-                }
-            }
-        }
+        $dir_iterator = new RecursiveDirectoryIterator($CFG->dirroot);
+        $iterator = new RecursiveIteratorIterator($dir_iterator, RecursiveIteratorIterator::SELF_FIRST);
 
         // OK, so we are about to scan all mustache templates to look for abuses.
         // There should be none, but if there are valid cases that are found to be false positive then we
         // can list them here and know that they have been manually validated as safe.
         // If you are adding to this list you need approval from the security experts.
-        $whitelist = [
-            $CFG->dirroot . '/lib/templates/test.mustache', // Test cases for Mustache.
-            $CFG->dirroot . '/lib/templates/modal.mustache', // No user data variables involved.
-            $CFG->dirroot . '/message/output/popup/templates/message_popover.mustache', // No user data variables involved.
-            $CFG->dirroot . '/message/output/popup/templates/notification_popover.mustache', // No user data variables involved.
-            $CFG->dirroot . '/totara/contentmarketplace/contentmarketplaces/goone/templates/thumbnail.mustache', // No user data variables involved.
-            $CFG->dirroot . '/totara/form/templates/element_filemanager.mustache', // No user data variables involved.
-            $CFG->dirroot . '/totara/form/templates/element_filepicker.mustache', // No user data variables involved.
-            $CFG->dirroot . '/totara/form/templates/required_suffix.mustache', // No user data variables involved.
-            $CFG->dirroot . '/blocks/current_learning/templates/program_singlecourse_row.mustache', // Only variable is programmatically created.
-            $CFG->dirroot . '/blocks/current_learning/templates/program_row.mustache', // Only variable is programmatically created.
-        ];
+        $whitelist = new path_whitelist([
+            $CFG->dirroot . '/lib/templates/test.mustache', // A mustache test file. Must not contain anything exploitable.
+        ]); // Totara: path_whitelist
+
         $recursivehelpers = [];
-        $variablesinhelpers = [];
-        foreach ($directories as $directory) {
-            foreach (new DirectoryIterator($directory) as $file) {
-                /** @var SplFileInfo $file */
-                if ($file->isFile() && $file->getExtension() === 'mustache') {
-                    $path = $file->getPathname();
-                    $whitelistkey = array_search($path, $whitelist);
-                    if (!is_readable($path)) {
-                        $this->fail('Mustache template is not readable by unit test suite "'.$path.'"');
+        foreach ($iterator as $file) {
+            /** @var SplFileInfo $file */
+            if ($file->isFile() && $file->getExtension() === 'mustache') {
+                $path = $file->getPathname();
+                $whitelistkey = $whitelist->search($path); // Totara: path_whitelist
+                if (!is_readable($path)) {
+                    $this->fail('Mustache template is not readable by unit test suite "'.$path.'"');
+                }
+                $content = file_get_contents($path);
+                $content = str_replace("\n", '', $content);
+                $result = self::has_flex_icon_helper_containing_recursive_helpers($content);
+                if ($result) {
+                    if ($whitelistkey !== false) {
+                        // It's OK, its on the whitelist.
+                        $whitelist->remove($whitelistkey); // Totara: path_whitelist
+                        continue;
                     }
-                    $content = file_get_contents($path);
-                    $content = str_replace("\n", '', $content);
-                    $result = self::has_flex_icon_helper_containing_recursive_helpers($content);
-                    if ($result) {
-                        if ($whitelistkey !== false) {
-                            // It's OK, its on the whitelist.
-                            unset($whitelist[$whitelistkey]);
-                            continue;
-                        }
-                        $recursivehelpers[] = str_replace($CFG->dirroot, '', $path).' :: '.$result;
+                    $recursivehelpers[] = str_replace($CFG->dirroot, '', $path).' :: '.$result;
+                }
+                $result = self::has_flex_icon_helper_containing_variables($content);
+                if ($result) {
+                    if ($whitelistkey !== false) {
+                        // It's OK, its on the whitelist.
+                        $whitelist->remove($whitelistkey); // Totara: path_whitelist
+                        continue;
                     }
-                    $result = self::has_flex_icon_helper_containing_variables($content);
-                    if ($result) {
-                        if ($whitelistkey !== false) {
-                            // It's OK, its on the whitelist.
-                            unset($whitelist[$whitelistkey]);
-                            continue;
-                        }
-                        $variablesinhelpers[] = str_replace($CFG->dirroot, '', $path).' :: '.$result;
-                    }
+                    $variablesinhelpers[] = str_replace($CFG->dirroot, '', $path).' :: '.$result;
                 }
             }
         }
 
         if (!empty($recursivehelpers)) {
-            $this->fail('Templates containing flex_icon helper uses which contain recursive helper calls found'."\n * ".join("\n * ", $recursivehelpers));
+            $this->fail('Templates containing flex helper uses which contain recursive helper calls found'."\n * ".join("\n * ", $recursivehelpers));
         }
         if (!empty($variablesinhelpers)) {
-            $this->fail('Templates containing variables in flex_icon helpers.'."\n * ".join("\n * ", $variablesinhelpers));
+            $this->fail('Templates containing variables in flex helpers.'."\n * ".join("\n * ", $variablesinhelpers));
         }
-        if (!empty($whitelist)) {
-            $this->fail('Items on the whitelist were not found to contain vulnerabilities.'."\n".join("\n", $whitelist));
+        if (!$whitelist->is_empty()) { // Totara: path_whitelist
+            $this->fail('Items on the whitelist were not found to contain vulnerabilities.'."\n".$whitelist->join("\n"));
         }
     }
 
@@ -302,7 +347,6 @@ class mustache_flex_icon_helper_testcase extends basic_testcase {
         // One.
         self::assertSame(1, self::has_flex_icon_helper_containing_variables('{{#flex_icon}}{{test}}{{/flex_icon}}'));
         self::assertSame(1, self::has_flex_icon_helper_containing_variables('{{# flex_icon }} {{ test }} {{/ flex_icon }}'));
-        self::assertSame(1, self::has_flex_icon_helper_containing_variables('{{#  flex_icon  }} {{  test  }}  {{/  flex_icon  }}'));
         self::assertSame(1, self::has_flex_icon_helper_containing_variables('{{#flex_icon}}{{{test}}}{{/flex_icon}}'));
         self::assertSame(1, self::has_flex_icon_helper_containing_variables('{{#flex_icon}}{{{{test}}}}{{/flex_icon}}'));
         self::assertSame(1, self::has_flex_icon_helper_containing_variables('{{#flex_icon}}  {{test}}  {{/flex_icon}}'));
@@ -316,8 +360,8 @@ class mustache_flex_icon_helper_testcase extends basic_testcase {
         self::assertSame(3, self::has_flex_icon_helper_containing_variables('{{# flex_icon }} {{ test }}, {{ test }} {{/ flex_icon }} {{# flex_icon }} {{ test }} {{/ flex_icon }}'));
     }
 
-    private static function has_flex_icon_helper_containing_variables($template) {
-        preg_match_all('@(\{{2}[#/][^\}]+\}{2}|\{{2,3}[^\}]+\}{2,3})@', $template, $matches);
+    private static function has_flex_icon_helper_containing_variables(string $template) {
+        preg_match_all('@(\{{2}[#/][^\}]+\}{2}|\{{2,3}[^\}!]+\}{2,3})@', $template, $matches);
         $helper = 'flex_icon';
         $helperlevel = 0;
         $count = 0;
@@ -352,14 +396,14 @@ class mustache_flex_icon_helper_testcase extends basic_testcase {
         // One.
         self::assertSame(1, self::has_flex_icon_helper_containing_recursive_helpers('{{#flex_icon}}{{#flex_icon}}{{test}}{{/flex_icon}}{{/flex_icon}}'));
         self::assertSame(1, self::has_flex_icon_helper_containing_recursive_helpers('{{#flex_icon}}{{#str}}test{{/str}}{{/flex_icon}}'));
-        self::assertSame(1, self::has_flex_icon_helper_containing_recursive_helpers('{{# flex_icon }}{{# str }} test {{/ str }} {{/ flex_icon }}'));
+        self::assertSame(1, self::has_flex_icon_helper_containing_recursive_helpers('{{# flex_icon }} {{# str }} test {{/ str }} {{/ flex_icon }}'));
         self::assertSame(2, self::has_flex_icon_helper_containing_recursive_helpers('{{#flex_icon}}{{#str}}{{#flex_icon}}test{{/flex_icon}}{{/str}}{{/flex_icon}}'));
 
         // Multiple.
         self::assertSame(2, self::has_flex_icon_helper_containing_recursive_helpers('{{#flex_icon}}{{#flex_icon}}{{#flex_icon}}{{test}}{{/flex_icon}}{{/flex_icon}}{{/flex_icon}}'));
     }
 
-    private static function has_flex_icon_helper_containing_recursive_helpers($template) {
+    private static function has_flex_icon_helper_containing_recursive_helpers(string $template) {
         preg_match_all('@\{{2}[#/][^\}]+\}{2}@', $template, $matches);
         $helper = 'flex_icon';
         $level = 0;

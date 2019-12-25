@@ -28,12 +28,10 @@ class mod_facetoface_manage_reserve_testcase extends \advanced_testcase {
      * Test that allocations do not depend on free space
      */
     public function test_limit_reserveinfo_to_capacity_empty() {
-        global $CFG;
-        require_once($CFG->dirroot . '/mod/facetoface/lib.php');
-
         $reserveinfo = $this->seed_reservations();
 
-        $result = facetoface_limit_reserveinfo_to_capacity_left(42, $reserveinfo, 0);
+        $seminarevent = self::mock_seminar_event(42);
+        $result = \mod_facetoface\reservations::limit_info_to_capacity_left($seminarevent, $reserveinfo, 0);
 
         // Allocation should not be affected
         $this->assertEquals(3, $result['allocated'][42]);
@@ -49,12 +47,10 @@ class mod_facetoface_manage_reserve_testcase extends \advanced_testcase {
      * Test that reservation is limited by non-zero capacity
      */
     public function test_limit_reserveinfo_to_capacity_one() {
-        global $CFG;
-        require_once($CFG->dirroot . '/mod/facetoface/lib.php');
-
         $reserveinfo = $this->seed_reservations();
 
-        $result = facetoface_limit_reserveinfo_to_capacity_left(42, $reserveinfo, 1);
+        $seminarevent = self::mock_seminar_event(42);
+        $result = \mod_facetoface\reservations::limit_info_to_capacity_left($seminarevent, $reserveinfo, 1);
 
         // Allocation should not be affected
         $this->assertEquals(3, $result['allocated'][42]);
@@ -72,12 +68,10 @@ class mod_facetoface_manage_reserve_testcase extends \advanced_testcase {
      */
     //
     public function test_limit_reserveinfo_to_capacity_enough() {
-        global $CFG;
-        require_once($CFG->dirroot . '/mod/facetoface/lib.php');
-
         $reserveinfo = $this->seed_reservations();
 
-        $result = facetoface_limit_reserveinfo_to_capacity_left(42, $reserveinfo, 10);
+        $seminarevent = self::mock_seminar_event(42);
+        $result = \mod_facetoface\reservations::limit_info_to_capacity_left($seminarevent, $reserveinfo, 10);
 
         // Allocation should not be affected
         $this->assertEquals(3, $result['allocated'][42]);
@@ -141,6 +135,8 @@ class mod_facetoface_manage_reserve_testcase extends \advanced_testcase {
         $manager = $this->getDataGenerator()->create_user();
         $course1 = $this->getDataGenerator()->create_course();
 
+        $this->getDataGenerator()->enrol_user($user1->id, $course1->id);
+
         /** @var mod_facetoface_generator $facetofacegenerator */
         $facetofacegenerator = $this->getDataGenerator()->get_plugin_generator('mod_facetoface');
 
@@ -158,14 +154,14 @@ class mod_facetoface_manage_reserve_testcase extends \advanced_testcase {
                 ]
             ]
         ]);
-        $session1 = facetoface_get_session($session1id);
+        $session1 = new \mod_facetoface\seminar_event($session1id);
 
-        facetoface_add_reservations($session1, $manager->id, 2, 0);
+        \mod_facetoface\reservations::add($session1, $manager->id, 2, 0);
         $sink = $this->redirectMessages();
-        facetoface_user_signup($session1, $facetoface, $course1, '', MDL_F2F_TEXT, MDL_F2F_STATUS_BOOKED, $user1->id);
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user1->id, new \mod_facetoface\seminar_event($session1->get_id()))->set_skipmanagernotification());
         $sink->close();
 
-        $records = facetoface_get_users_by_status($session1->id, MDL_F2F_STATUS_BOOKED, '', true);
+        $records = facetoface_get_users_by_status($session1->get_id(), \mod_facetoface\signup\state\booked::get_code(), '', true);
         $this->assertCount(3, $records);
         $signupcnt = 0;
         foreach ($records as $record) {
@@ -175,4 +171,22 @@ class mod_facetoface_manage_reserve_testcase extends \advanced_testcase {
         }
         $this->assertEquals(2, $signupcnt);
     }
+
+    /**
+     * Create mock of seminar event without storing it in database.
+     * It is not generator.
+     * @param $id
+     * @return \mod_facetoface\seminar_event
+     */
+    protected static function mock_seminar_event(int $id) : \mod_facetoface\seminar_event {
+        $seminarevent = new \mod_facetoface\seminar_event();
+
+        $reflection = new \ReflectionClass($seminarevent);
+        $property = $reflection->getProperty('id');
+        $property->setAccessible(true);
+        $property->setValue($seminarevent, $id);
+
+        return $seminarevent;
+    }
+
 }

@@ -27,11 +27,6 @@ defined('MOODLE_INTERNAL') || die();
  * A report builder source for the "job_assignment" table.
  */
 class rb_source_job_assignments extends rb_base_source {
-
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
-
     /**
      * Constructor
      *
@@ -131,10 +126,10 @@ class rb_source_job_assignments extends rb_base_source {
             ),
         );
 
-        $this->add_user_table_to_joinlist($joinlist, 'base', 'userid', 'auser');
-        $this->add_user_table_to_joinlist($joinlist, 'managerja', 'userid', 'manager');
-        $this->add_user_table_to_joinlist($joinlist, 'base', 'appraiserid', 'appraiser');
-        $this->add_user_table_to_joinlist($joinlist, 'tempmanagerja', 'userid', 'tempmanager');
+        $this->add_core_user_tables($joinlist, 'base', 'userid', 'auser');
+        $this->add_core_user_tables($joinlist, 'managerja', 'userid', 'manager');
+        $this->add_core_user_tables($joinlist, 'base', 'appraiserid', 'appraiser');
+        $this->add_core_user_tables($joinlist, 'tempmanagerja', 'userid', 'tempmanager');
 
         return $joinlist;
     }
@@ -150,6 +145,7 @@ class rb_source_job_assignments extends rb_base_source {
             array(
                 'dbdatatype' => 'char',
                 'outputformat' => 'text',
+                'displayfunc' => 'format_string'
             )
         );
         $columnoptions[] = new rb_column_option(
@@ -160,6 +156,7 @@ class rb_source_job_assignments extends rb_base_source {
             array(
                 'dbdatatype' => 'char',
                 'outputformat' => 'text',
+                'displayfunc' => 'plaintext'
             )
         );
         $columnoptions[] = new rb_column_option(
@@ -194,7 +191,7 @@ class rb_source_job_assignments extends rb_base_source {
             )
         );
 
-        $this->add_user_fields_to_columns($columnoptions, 'auser', 'user', false);
+        $this->add_core_user_columns($columnoptions, 'auser', 'user', false);
 
         $columnoptions[] = new rb_column_option(
             'pos',
@@ -219,6 +216,7 @@ class rb_source_job_assignments extends rb_base_source {
                 'outputformat' => 'text',
                 'addtypetoheading' => true,
                 'joins' => array('pos'),
+                'displayfunc' => 'format_string'
             )
         );
         $columnoptions[] = new rb_column_option(
@@ -231,6 +229,7 @@ class rb_source_job_assignments extends rb_base_source {
                 'outputformat' => 'text',
                 'addtypetoheading' => true,
                 'joins' => array('pos'),
+                'displayfunc' => 'plaintext'
             )
         );
         $columnoptions[] = new rb_column_option(
@@ -243,6 +242,7 @@ class rb_source_job_assignments extends rb_base_source {
                 'outputformat' => 'text',
                 'addtypetoheading' => true,
                 'joins' => 'postype',
+                'displayfunc' => 'format_string'
             )
         );
         $columnoptions[] = new rb_column_option(
@@ -256,6 +256,7 @@ class rb_source_job_assignments extends rb_base_source {
                 'outputformat' => 'text',
                 'addtypetoheading' => true,
                 'joins' => 'postype',
+                'displayfunc' => 'plaintext'
             )
         );
         $columnoptions[] = new rb_column_option(
@@ -268,6 +269,7 @@ class rb_source_job_assignments extends rb_base_source {
                 'outputformat' => 'text',
                 'addtypetoheading' => true,
                 'joins' => 'posframework',
+                'displayfunc' => 'format_string'
             )
         );
         $columnoptions[] = new rb_column_option(
@@ -290,7 +292,7 @@ class rb_source_job_assignments extends rb_base_source {
             'pos.visible',
             array(
                 'addtypetoheading' => true,
-                'displayfunc' => 'yes_no',
+                'displayfunc' => 'yes_or_no',
             )
         );
 
@@ -318,6 +320,7 @@ class rb_source_job_assignments extends rb_base_source {
                 'outputformat' => 'text',
                 'addtypetoheading' => true,
                 'joins' => array('org'),
+                'displayfunc' => 'format_string'
             )
         );
         $columnoptions[] = new rb_column_option(
@@ -330,6 +333,7 @@ class rb_source_job_assignments extends rb_base_source {
                 'outputformat' => 'text',
                 'addtypetoheading' => true,
                 'joins' => array('org'),
+                'displayfunc' => 'format_string'
             )
         );
         $columnoptions[] = new rb_column_option(
@@ -342,6 +346,7 @@ class rb_source_job_assignments extends rb_base_source {
                 'outputformat' => 'text',
                 'addtypetoheading' => true,
                 'joins' => 'orgtype',
+                'displayfunc' => 'format_string'
             )
         );
         $columnoptions[] = new rb_column_option(
@@ -367,6 +372,7 @@ class rb_source_job_assignments extends rb_base_source {
                 'outputformat' => 'text',
                 'addtypetoheading' => true,
                 'joins' => 'orgframework',
+                'displayfunc' => 'format_string'
             )
         );
         $columnoptions[] = new rb_column_option(
@@ -389,13 +395,13 @@ class rb_source_job_assignments extends rb_base_source {
             'org.visible',
             array(
                 'addtypetoheading' => true,
-                'displayfunc' => 'yes_no',
+                'displayfunc' => 'yes_or_no',
             )
         );
 
-        $this->add_user_fields_to_columns($columnoptions, 'manager', 'manager', true);
-        $this->add_user_fields_to_columns($columnoptions, 'appraiser', 'appraiser', true);
-        $this->add_user_fields_to_columns($columnoptions, 'tempmanager', 'tempmanager', true);
+        $this->add_core_user_columns($columnoptions, 'manager', 'manager', true);
+        $this->add_core_user_columns($columnoptions, 'appraiser', 'appraiser', true);
+        $this->add_core_user_columns($columnoptions, 'tempmanager', 'tempmanager', true);
 
         $columnoptions[] = new rb_column_option(
             'tempmanager',
@@ -445,7 +451,7 @@ class rb_source_job_assignments extends rb_base_source {
             'date'
         );
 
-        $this->add_user_fields_to_filters($filteroptions, 'user', false);
+        $this->add_core_user_filters($filteroptions, 'user', false);
 
         $filteroptions[] = new rb_filter_option(
             'pos',
@@ -579,11 +585,11 @@ class rb_source_job_assignments extends rb_base_source {
             )
         );
 
-        $this->add_user_fields_to_filters($filteroptions, 'manager', true);
+        $this->add_core_user_filters($filteroptions, 'manager', true);
 
-        $this->add_user_fields_to_filters($filteroptions, 'appraiser', true);
+        $this->add_core_user_filters($filteroptions, 'appraiser', true);
 
-        $this->add_user_fields_to_filters($filteroptions, 'tempmanager', true);
+        $this->add_core_user_filters($filteroptions, 'tempmanager', true);
 
         return $filteroptions;
     }

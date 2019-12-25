@@ -1014,6 +1014,29 @@ class core_moodlelib_testcase extends advanced_testcase {
                 shorten_text($text, 1));
     }
 
+    public function test_shorten_filename() {
+        // Test filename that contains more than 100 characters.
+        $filename = 'sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium totam rem';
+        $this->assertSame('sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium tot',
+            shorten_filename($filename));
+        // Filename contains extension.
+        $this->assertSame('sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium tot.zip',
+            shorten_filename($filename . '.zip'));
+        // Limit filename to 50 chars.
+        $this->assertSame('sed ut perspiciatis unde omnis iste natus error si',
+            shorten_filename($filename, 50));
+        $this->assertSame('sed ut perspiciatis unde omnis iste natus error si.zip',
+            shorten_filename($filename . '.zip', 50));
+
+        // Test filename that contains less than 100 characters.
+        $filename = 'sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque';
+        $this->assertSame('sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque',
+            shorten_filename($filename));
+        // Filename contains extension.
+        $this->assertSame('sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque.zip',
+            shorten_filename($filename . '.zip'));
+    }
+
     public function test_usergetdate() {
         global $USER, $CFG, $DB;
         $this->resetAfterTest();
@@ -1730,33 +1753,33 @@ class core_moodlelib_testcase extends advanced_testcase {
 
         $yes = get_string('yes');
         $yesexpected = 'Yes';
-        $this->assertInternalType('string', $yes);
+        $this->assertIsString($yes);
         $this->assertSame($yesexpected, $yes);
 
         $yes = get_string('yes', 'moodle');
-        $this->assertInternalType('string', $yes);
+        $this->assertIsString($yes);
         $this->assertSame($yesexpected, $yes);
 
         $yes = get_string('yes', 'core');
-        $this->assertInternalType('string', $yes);
+        $this->assertIsString($yes);
         $this->assertSame($yesexpected, $yes);
 
         $yes = get_string('yes', '');
-        $this->assertInternalType('string', $yes);
+        $this->assertIsString($yes);
         $this->assertSame($yesexpected, $yes);
 
         $yes = get_string('yes', null);
-        $this->assertInternalType('string', $yes);
+        $this->assertIsString($yes);
         $this->assertSame($yesexpected, $yes);
 
         $yes = get_string('yes', null, 1);
-        $this->assertInternalType('string', $yes);
+        $this->assertIsString($yes);
         $this->assertSame($yesexpected, $yes);
 
         $days = 1;
         $numdays = get_string('numdays', 'core', '1');
         $numdaysexpected = $days.' days';
-        $this->assertInternalType('string', $numdays);
+        $this->assertIsString($numdays);
         $this->assertSame($numdaysexpected, $numdays);
 
         $yes = get_string('yes', null, null, true);
@@ -1768,7 +1791,7 @@ class core_moodlelib_testcase extends advanced_testcase {
         $test = new lang_string('yes', null, null, true);
         $testexpected = get_string('numdays', 'core', get_string('yes'));
         $testresult = get_string('numdays', null, $test);
-        $this->assertInternalType('string', $testresult);
+        $this->assertIsString($testresult);
         $this->assertSame($testexpected, $testresult);
 
         // Test using a lang_string object as the $a argument for an object
@@ -2201,8 +2224,6 @@ class core_moodlelib_testcase extends advanced_testcase {
         // Test config we know to exist.
         $this->assertSame($CFG->dataroot, get_config('core', 'dataroot'));
         $this->assertSame($CFG->phpunit_dataroot, get_config('core', 'phpunit_dataroot'));
-        $this->assertSame($CFG->dataroot, get_config('core', 'phpunit_dataroot'));
-        $this->assertSame(get_config('core', 'dataroot'), get_config('core', 'phpunit_dataroot'));
 
         // Test setting a config var that already exists.
         set_config('phpunit_test_get_config_1', 'test a');
@@ -2211,8 +2232,8 @@ class core_moodlelib_testcase extends advanced_testcase {
 
         // Test cache invalidation.
         $cache = cache::make('core', 'config');
-        $this->assertInternalType('array', $cache->get('core'));
-        $this->assertInternalType('array', $cache->get('mod_forum'));
+        $this->assertIsArray($cache->get('core'));
+        $this->assertIsArray($cache->get('mod_forum'));
         set_config('phpunit_test_get_config_1', 'test b');
         $this->assertFalse($cache->get('core'));
         set_config('phpunit_test_get_config_4', 'test c', 'mod_forum');

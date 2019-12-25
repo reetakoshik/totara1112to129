@@ -25,7 +25,8 @@ namespace block_totara_featured_links\form\validator;
 
 defined('MOODLE_INTERNAL') || die();
 
-use \totara_form\element_validator;
+use block_totara_featured_links\tile\base;
+use totara_form\element_validator;
 
 /**
  * Class visibility_form_custom_validator
@@ -43,7 +44,7 @@ class visibility_form_custom_validator extends element_validator {
         $preset_showing = empty($data['preset_showing']) ? 0 : $data['preset_showing'];
         $audience_showing = empty($data['audience_showing']) ? 0 : $data['audience_showing'];
         $tile_rules_showing = empty($data['tile_rules_showing']) ? 0 : $data['tile_rules_showing'];
-        if ($visibility_type == \block_totara_featured_links\tile\base::VISIBILITY_CUSTOM && $preset_showing == '0' && $audience_showing == '0' && $tile_rules_showing == '0') {
+        if ($visibility_type == base::VISIBILITY_CUSTOM && $preset_showing == '0' && $audience_showing == '0' && $tile_rules_showing == '0') {
             $this->element->add_error(get_string('error_no_rule', 'block_totara_featured_links'));
         }
     }

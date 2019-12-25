@@ -111,7 +111,7 @@ Feature: The program tile should work as expected
     And I click on "OK" "button" in the "Select program" "totaradialogue"
     And I click on "Save changes" "button"
 
-    When I navigate to "Manage programs" node in "Site administration > Courses"
+    When I navigate to "Manage programs" node in "Site administration > Programs"
     And I follow "Miscellaneous"
     And I click on "//*[@title='Delete']" "xpath_element"
     And I click on "Continue" "button"

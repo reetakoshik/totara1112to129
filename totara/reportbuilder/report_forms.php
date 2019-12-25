@@ -477,7 +477,7 @@ class report_builder_edit_columns_form extends moodleform {
     protected $grouped;
 
     function definition() {
-        global $CFG, $OUTPUT, $DB;
+        global $OUTPUT, $DB;
         $mform =& $this->_form;
         $this->report = $this->_customdata['report'];
         $report = $this->report;
@@ -518,11 +518,12 @@ class report_builder_edit_columns_form extends moodleform {
                 html_writer::tag('th', get_string('customiseheading', 'totara_reportbuilder'), array('colspan' => 2)) .
                 html_writer::tag('th', get_string('options', 'totara_reportbuilder') . html_writer::end_tag('tr')));
 
-            $columnsselect = $report->get_columns_select();
+            $columnsList = $report->get_columns_select();
             $defaultoptions = array('' => get_string('noneselected', 'totara_reportbuilder'));
 
             $badcolumns = array();
             $goodcolumns = array();
+            $deprecatedcolumns = false;
             foreach ($rawcolumns as $rawcolumn) {
                 $key = $rawcolumn->type . '-' . $rawcolumn->value;
                 if (!isset($report->columnoptions[$key]) or !empty($report->columnoptions[$key]->required)) {
@@ -535,7 +536,16 @@ class report_builder_edit_columns_form extends moodleform {
                     unset($rawcolumns[$rawcolumn->id]);
                     continue;
                 }
+                // Deprecated columns are still valid, but we want to warn people against using them.
+                if (!empty($report->columnoptions[$key]->deprecated)) {
+                    $deprecatedcolumns = true;
+                }
                 $goodcolumns[$rawcolumn->id] = $rawcolumn;
+            }
+
+            // Add a message about deprecated columns if there are any.
+            if ($deprecatedcolumns) {
+                $mform->addElement('html', $OUTPUT->notification(get_string('warndeprecatedcolumns', 'totara_reportbuilder'), 'warning'));
             }
 
             if ($goodcolumns) {
@@ -551,10 +561,11 @@ class report_builder_edit_columns_form extends moodleform {
                     }
                     if (!isset($column->required) || !$column->required) {
                         $field = "{$column->type}-{$column->value}";
-                        $mform->addElement('html', html_writer::start_tag('tr', array('colid' => $cid)) .
+                        $mform->addElement('html', html_writer::start_tag('tr', array('data-colid' => $cid)) .
                             html_writer::start_tag('td'));
-                        $mform->addElement('selectgroups', "column{$cid}", '', $columnsselect, array('class' => 'column_selector'));
+                        $columnselect = $this->create_columns_select_groups($mform, "column{$cid}", $columnsList, ['class' => 'column_selector']);
                         $mform->setDefault("column{$cid}", $field);
+                        $mform->addElement($columnselect);
                         $mform->addElement('html', html_writer::end_tag('td') . html_writer::start_tag('td'));
 
                         $advanced = '';
@@ -638,11 +649,13 @@ class report_builder_edit_columns_form extends moodleform {
             }
 
             $mform->addElement('html', html_writer::start_tag('tr') . html_writer::start_tag('td'));
-            $newcolumnsselect = array_merge(
-                array(
-                    get_string('new') => array(0 => get_string('addanothercolumn', 'totara_reportbuilder'))
-                ),
-                $columnsselect);
+
+            // Add a "new column" option to the new column selector.
+            $newcolumnOption = new stdClass();
+            $newcolumnOption->name = get_string('addanothercolumn', 'totara_reportbuilder');
+            $newcolumnOption->attributes = [];
+            $newcolumnsselect = array_merge([get_string('new') => [0 => $newcolumnOption]], $columnsList);
+
             // Remove already-added cols from the new col selector
             $cleanednewcolselect = $newcolumnsselect;
             foreach ($newcolumnsselect as $okey => $optgroup) {
@@ -657,8 +670,10 @@ class report_builder_edit_columns_form extends moodleform {
             }
             $newcolumnsselect = $cleanednewcolselect;
             unset($cleanednewcolselect);
-            $mform->addElement('selectgroups', 'newcolumns', '', $newcolumnsselect,
-                                    array('class' => 'column_selector new_column_selector'));
+
+            $newcolumn = $this->create_columns_select_groups($mform, 'newcolumns', $newcolumnsselect,
+                                                                ['class' => 'column_selector new_column_selector']);
+            $mform->addElement($newcolumn);
             $mform->addElement('html', html_writer::end_tag('td') . html_writer::start_tag('td'));
             $mform->addElement('selectgroups', 'newadvanced', '', $advoptions,
                                     array('class' => 'advanced_selector new_advanced_selector'));
@@ -693,7 +708,7 @@ class report_builder_edit_columns_form extends moodleform {
                     $deleteurl = new moodle_url('/totara/reportbuilder/columns.php',
                         array('d' => '1', 'id' => $id, 'cid' => $bad['id']));
 
-                    $mform->addElement('html', html_writer::start_tag('tr', array('colid' => $bad['id'])) .
+                    $mform->addElement('html', html_writer::start_tag('tr', array('data-colid' => $bad['id'])) .
                         html_writer::tag('td', $bad['type']) .
                         html_writer::tag('td', $bad['value']) .
                         html_writer::tag('td', $bad['heading']) .
@@ -733,7 +748,7 @@ class report_builder_edit_columns_form extends moodleform {
 
         // Do not mess with $OUTPUT here, we need to get decent quickforms template
         // which also includes error placeholder here.
-        $select_elementtemplate = '<div class="fitem"><div class="fselectgroups<!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</div>';
+        $select_elementtemplate = '<div class="fitem"><div class="rb-inline fselectgroups<!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</div>';
         $check_elementtemplate ='<div class="fitem"><div class="fcheckbox<!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</div>';
         $text_elementtemplate = '<div class="fitem"><div class="ftext<!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</div>';
 
@@ -747,6 +762,35 @@ class report_builder_edit_columns_form extends moodleform {
             $renderer->setElementTemplate($check_elementtemplate, 'customheading' . $cid);
             $renderer->setElementTemplate($text_elementtemplate, 'heading' . $cid);
         }
+    }
+
+    /**
+     * Generates a custom selectgroups element for column selector with data attributes in options.
+     *
+     * @param moodleform $mform          Form where we are adding our element
+     * @param string     $id             Select element id
+     * @param array      $list           List of options to fill the select
+     * @param array      $attr           Element's attributes
+     * @param array      $unused         This parameter is deprecated and no longer used
+     *
+     * @return mixed
+     */
+    private function create_columns_select_groups(&$mform, string $id, array $list, array $attr, array $unused = null) {
+        $element = $mform->createElement('selectgroups', $id, '', null, $attr);
+
+        $group = 0;
+        foreach ($list as $heading => $values) {
+            $element->addOptGroup($heading, []);
+            foreach ($values as $key => $option) {
+                $attributes = [];
+                foreach ($option->attributes as $aname => $avalue) {
+                    $attributes['data-' . $aname] = $avalue;
+                }
+                $element->addOption($group, $option->name, $key, $attributes);
+            }
+            $group++;
+        }
+        return $element;
     }
 
 

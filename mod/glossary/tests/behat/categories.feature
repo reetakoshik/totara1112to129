@@ -30,7 +30,7 @@ Feature: Glossary entries can be organised in categories
     And I log out
 # Log in as a teacher and make sure nothing is yet autolinked
     And I log in as "teacher1"
-    When I follow "Course 1"
+    When I am on "Course 1" course homepage
     Then I should see "CategoryAutoLinks"
     And I should see "CategoryNoLinks"
     And "a.glossary.autolink" "css_element" should not exist

@@ -64,7 +64,7 @@ class block_gaccess extends block_list {
         }
 
         // Quick and simple way to prevent block from showing up on users My Moodle if their email does not match the Google registered domain.
-        $domain = (get_config('blocks/gaccess','domainname') ? get_config('blocks/gaccess','domainname') : get_config('auth/gsaml','domainname'));
+        $domain = (get_config('blocks/gaccess','domainname') ? get_config('blocks/gaccess','domainname') : false);
 
         if ($this->content !== NULL) {
             return $this->content;
@@ -124,11 +124,10 @@ class block_gaccess extends block_list {
         foreach ($google_services as $gs) {
 
             if (!empty($gs['icon_name'])) {
-                $icon = "<img src=\"".$OUTPUT->pix_url($gs['icon_name'], 'block_gaccess')."\" alt=\"".$gs['service']."\" />";
-            }
-            else {
+                $icon = $OUTPUT->pix_icon($gs['icon_name'], $gs['service'], 'block_gaccess');
+            } else {
                 // Default to a check graphic
-                $icon = "<img src=\"".$OUTPUT->pix_url('i/valid')."\" alt=\"$service\" />";
+                $icon = $OUTPUT->pix_icon('i/valid', $gs['service']);
             }
             $this->content->items[] = "<a ".$target.". title=\"".$gs['service']."\"  href=\"".$gs['relayurl']."\">".$icon . '&nbsp;' . $gs['service']."</a>";
         }

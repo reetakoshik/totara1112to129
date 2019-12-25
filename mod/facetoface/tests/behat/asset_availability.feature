@@ -35,9 +35,7 @@ Feature: Seminar asset availability
       | Allow asset booking conflicts | 0               |
     And I press "Add an asset"
     And I click on "Hide from users when choosing an asset on the Add/Edit event page" "link" in the "Asset 3" "table_row"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test Seminar 1 |
       | Description | test           |
@@ -48,8 +46,7 @@ Feature: Seminar asset availability
 
   Scenario: Time based seminar asset conflicts
     Given I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test Seminar 1"
     And I follow "Add a new event"
     And I click on "Edit session" "link"
@@ -260,8 +257,7 @@ Feature: Seminar asset availability
 
   Scenario: Hiding related seminar asset availability
     Given I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test Seminar 1"
     And I follow "Add a new event"
     And I set the following fields to these values:
@@ -297,8 +293,7 @@ Feature: Seminar asset availability
     And I click on "Hide from users when choosing an asset on the Add/Edit event page" "link" in the "Asset 1" "table_row"
     And I log out
     And I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test Seminar 1"
 
     When I follow "Add a new event"
@@ -356,8 +351,7 @@ Feature: Seminar asset availability
 
   Scenario: Custom seminar asset availability
     Given I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test Seminar 1"
     And I follow "Add a new event"
     And I set the following fields to these values:
@@ -449,8 +443,7 @@ Feature: Seminar asset availability
     And I click on "Cancel" "button" in the "Choose assets" "totaradialogue"
     And I press "Cancel"
 
-    When I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    When I am on "Course 1" course homepage
     And I follow "Test Seminar 2"
     And I follow "Add a new event"
     And I click on "Select asset" "link"
@@ -464,8 +457,7 @@ Feature: Seminar asset availability
     And I log out
 
     When I log in as "teacher2"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test Seminar 2"
     And I follow "Add a new event"
     And I click on "Select asset" "link"
@@ -477,8 +469,7 @@ Feature: Seminar asset availability
     And I click on "Cancel" "button" in the "Choose assets" "totaradialogue"
     And I press "Cancel"
 
-    When I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    When I am on "Course 1" course homepage
     And I follow "Test Seminar 1"
     And I follow "Add a new event"
     And I click on "Select asset" "link"
@@ -492,8 +483,7 @@ Feature: Seminar asset availability
 
   Scenario: Seminar switch site asset to not allow conflicts
     Given I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test Seminar 1"
     And I follow "Add a new event"
     And I set the following fields to these values:
@@ -544,8 +534,7 @@ Feature: Seminar asset availability
     Then I should see "Asset has conflicting usage"
     And I press "Cancel"
 
-    When I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    When I am on "Course 1" course homepage
     And I follow "Test Seminar 1"
     And I click on "Edit event" "link" in the "0 / 30" "table_row"
     And I click on "Edit session" "link"
@@ -571,8 +560,7 @@ Feature: Seminar asset availability
 
   Scenario: Seminar switch custom asset to not allow conflicts
     Given I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test Seminar 1"
     And I follow "Add a new event"
     And I set the following fields to these values:
@@ -649,8 +637,7 @@ Feature: Seminar asset availability
 
   Scenario: Reportbuilder seminar asset availability filter
     Given I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test Seminar 1"
     And I follow "Add a new event"
     And I set the following fields to these values:

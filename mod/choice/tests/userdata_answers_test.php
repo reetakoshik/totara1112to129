@@ -33,7 +33,7 @@ use mod_choice\userdata\answers;
  *
  * @group totara_userdata
  */
-class mod_choice_userstatus_archived_answers_testcase extends advanced_testcase {
+class mod_choice_userdata_answers_testcase extends advanced_testcase {
 
     /**
      * Runs the purge, export and count methods when no choice data exists in the system.
@@ -138,12 +138,7 @@ class mod_choice_userstatus_archived_answers_testcase extends advanced_testcase 
         return $data;
     }
 
-    /**
-     * @return array of data to be used by dependent test.
-     */
     public function test_export_in_system_context() {
-        $this->resetAfterTest(false);
-
         $data = $this->create_answer_data();
 
         $export = answers::execute_export(new target_user($data['user1']), context_system::instance());
@@ -154,17 +149,10 @@ class mod_choice_userstatus_archived_answers_testcase extends advanced_testcase 
         foreach ($export->data as $answer) {
             $this->assertEquals($data['user1']->id, $answer->userid);
         }
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @return array of data to be used by dependent test.
-     * @depends test_export_in_system_context
-     */
-    public function test_count_in_system_context($data) {
-        $this->resetAfterTest(false);
+    public function test_count_in_system_context() {
+        $data = $this->create_answer_data();
 
         $count = answers::execute_count(new target_user($data['user1']), context_system::instance());
 
@@ -173,12 +161,8 @@ class mod_choice_userstatus_archived_answers_testcase extends advanced_testcase 
         return $data;
     }
 
-    /**
-     * @param $data
-     * @depends test_count_in_system_context
-     */
-    public function test_purge_in_system_context($data) {
-        $this->resetAfterTest(true);
+    public function test_purge_in_system_context() {
+        $data = $this->create_answer_data();
 
         $eventsink = $this->redirectEvents();
 
@@ -208,12 +192,7 @@ class mod_choice_userstatus_archived_answers_testcase extends advanced_testcase 
         $this->assertEquals(0, $count);
     }
 
-    /**
-     * @return array of data to be used by dependent test.
-     */
     public function test_export_in_category_context() {
-        $this->resetAfterTest(false);
-
         $data = $this->create_answer_data();
 
         $export = answers::execute_export(new target_user($data['user1']), context_coursecat::instance($data['category2']->id));
@@ -228,31 +207,18 @@ class mod_choice_userstatus_archived_answers_testcase extends advanced_testcase 
             // exporting within category 2 only.
             $this->assertNotEquals($data['choice1']->id, $answer->choiceid);
         }
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @return array of data to be used by dependent test.
-     * @depends test_export_in_category_context
-     */
-    public function test_count_in_category_context($data) {
-        $this->resetAfterTest(false);
+    public function test_count_in_category_context() {
+        $data = $this->create_answer_data();
 
         $count = answers::execute_count(new target_user($data['user1']), context_coursecat::instance($data['category2']->id));
 
         $this->assertEquals(3, $count);
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @depends test_count_in_category_context
-     */
-    public function test_purge_in_category_context($data) {
-        $this->resetAfterTest(true);
+    public function test_purge_in_category_context() {
+        $data = $this->create_answer_data();
 
         $eventsink = $this->redirectEvents();
 
@@ -281,12 +247,7 @@ class mod_choice_userstatus_archived_answers_testcase extends advanced_testcase 
         $this->assertEquals(0, $count);
     }
 
-    /**
-     * @return array of data to be used by dependent test.
-     */
     public function test_export_in_course_context() {
-        $this->resetAfterTest(false);
-
         $data = $this->create_answer_data();
 
         $export = answers::execute_export(new target_user($data['user1']), context_course::instance($data['course3']->id));
@@ -301,17 +262,10 @@ class mod_choice_userstatus_archived_answers_testcase extends advanced_testcase 
             $this->assertNotEquals($data['choice1']->id, $answer->choiceid);
             $this->assertNotEquals($data['choice2']->id, $answer->choiceid);
         }
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @return array of data to be used by dependent test.
-     * @depends test_export_in_course_context
-     */
-    public function test_count_in_course_context($data) {
-        $this->resetAfterTest(false);
+    public function test_count_in_course_context() {
+        $data = $this->create_answer_data();
 
         $count = answers::execute_count(new target_user($data['user1']), context_course::instance($data['course3']->id));
 
@@ -320,12 +274,8 @@ class mod_choice_userstatus_archived_answers_testcase extends advanced_testcase 
         return $data;
     }
 
-    /**
-     * @param $data
-     * @depends test_count_in_course_context
-     */
-    public function test_purge_in_course_context($data) {
-        $this->resetAfterTest(true);
+    public function test_purge_in_course_context() {
+        $data = $this->create_answer_data();
 
         $eventsink = $this->redirectEvents();
 
@@ -353,12 +303,7 @@ class mod_choice_userstatus_archived_answers_testcase extends advanced_testcase 
         $this->assertEquals(0, $count);
     }
 
-    /**
-     * @return array of data to be used by dependent test.
-     */
     public function test_export_in_module_context() {
-        $this->resetAfterTest(false);
-
         $data = $this->create_answer_data();
 
         $export = answers::execute_export(new target_user($data['user1']), context_module::instance($data['choice4']->cmid));
@@ -366,31 +311,18 @@ class mod_choice_userstatus_archived_answers_testcase extends advanced_testcase 
         $this->assertEmpty($export->files);
         $this->assertCount(1, $export->data);
         $this->assertEquals($data['choice4']->id, reset($export->data)->choiceid);
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @return array of data to be used by dependent test.
-     * @depends test_export_in_module_context
-     */
-    public function test_count_in_module_context($data) {
-        $this->resetAfterTest(false);
+    public function test_count_in_module_context() {
+        $data = $this->create_answer_data();
 
         $count = answers::execute_count(new target_user($data['user1']), context_module::instance($data['choice4']->cmid));
 
         $this->assertEquals(1, $count);
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @depends test_count_in_module_context
-     */
-    public function test_purge_in_module_context($data) {
-        $this->resetAfterTest(true);
+    public function test_purge_in_module_context() {
+        $data = $this->create_answer_data();
 
         $eventsink = $this->redirectEvents();
 
@@ -422,7 +354,6 @@ class mod_choice_userstatus_archived_answers_testcase extends advanced_testcase 
      * unexpected outcomes.
      */
     public function test_purge_with_deleted_user() {
-        $this->resetAfterTest(true);
         global $DB;
 
         $data = $this->create_answer_data();

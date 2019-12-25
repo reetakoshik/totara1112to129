@@ -34,38 +34,11 @@ $categoryid = optional_param('category', 0, PARAM_INT); // Course category - can
 $returnto = optional_param('returnto', 0, PARAM_ALPHANUM); // Generic navigation return page switch.
 $returnurl = optional_param('returnurl', '', PARAM_LOCALURL); // A return URL. returnto must also be set to 'url'.
 
-if ($returnto === 'url' && confirm_sesskey() && $returnurl) {
-    // If returnto is 'url' then $returnurl may be used as the destination to return to after saving or cancelling.
-    // Sesskey must be specified, and would be set by the form anyway.
-    $returnurl = new moodle_url($returnurl);
-} else {
-    if (!empty($id)) {
-        $returnurl = new moodle_url($CFG->wwwroot . '/course/view.php', array('id' => $id));
-    } else {
-        $returnurl = new moodle_url($CFG->wwwroot . '/course/');
-    }
-    if ($returnto !== 0) {
-        switch ($returnto) {
-            case 'category':
-                $returnurl = new moodle_url($CFG->wwwroot . '/course/index.php', array('categoryid' => $categoryid));
-                break;
-            case 'catmanage':
-                $returnurl = new moodle_url($CFG->wwwroot . '/course/management.php', array('categoryid' => $categoryid));
-                break;
-            case 'topcatmanage':
-                $returnurl = new moodle_url($CFG->wwwroot . '/course/management.php');
-                break;
-            case 'topcat':
-                $returnurl = new moodle_url($CFG->wwwroot . '/course/');
-                break;
-            case 'pending':
-                $returnurl = new moodle_url($CFG->wwwroot . '/course/pending.php');
-                break;
-        }
-    }
-}
+// TOTARA: Abstracted to function for reuse by course create workflow.
+$returnurl = course_get_return_url($id, $categoryid, $returnto, $returnurl);
 
-$PAGE->set_pagelayout('admin');
+//$PAGE->set_pagelayout('admin');
+$PAGE->set_pagelayout('noblocks');
 if ($id) {
     $pageparams = array('id' => $id);
 } else {
@@ -130,7 +103,8 @@ if (!empty($course)) {
     }
 
     // Populate course tags.
-    $course->tags = core_tag_tag::get_item_tags_array('core', 'course', $course->id);
+    $course->tags = core_tag_tag::get_item_tags_array('core', 'course', $course->id,
+        core_tag_tag::BOTH_STANDARD_AND_NOT, 0, false); // Totara: Do not encode the special characters.
 
 } else {
     // Editor should respect category context if course context is not set.

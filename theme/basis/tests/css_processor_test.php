@@ -92,6 +92,7 @@ body {
     color: [[setting:linkvisitedcolor]];
     border-top-color: [[setting:headerbgc]];
     border-bottom-color: [[setting:buttoncolor]];
+    border-left-color: [[setting:primarybuttoncolor]];
 }
 EOF;
         $substitutions = array(
@@ -99,6 +100,7 @@ EOF;
             'linkvisitedcolor' => '#777777',
             'headerbgc' => '#FFFFFF',
             'buttoncolor' => '#000000',
+            'primarybuttoncolor' => '#646464',
         );
 
         $expected = <<<EOF
@@ -107,6 +109,7 @@ body {
     color: #777777;
     border-top-color: #FFFFFF;
     border-bottom-color: #000000;
+    border-left-color: #646464;
 }
 EOF;
         $actual = (new css_processor())->replace_colours($substitutions, $css);
@@ -127,6 +130,7 @@ EOF;
             'linkvisitedcolor' => '#999999',
             'headerbgc' => '#333333',
             'buttoncolor' => '#555555',
+            'primarybuttoncolor' => '#424242',
         );
 
         $css =<<<EOF
@@ -135,6 +139,7 @@ body {
     color: [[setting:linkvisitedcolor]];
     border-top-color: [[setting:headerbgc]];
     border-bottom-color: [[setting:buttoncolor]];
+    border-left-color: [[setting:primarybuttoncolor]];
 }
 EOF;
         $substitutions = array(
@@ -142,6 +147,7 @@ EOF;
             'linkvisitedcolor' => '#777777',
             'headerbgc' => '#FFFFFF',
             'buttoncolor' => '#000000',
+            'primarybuttoncolor' => '#646464',
         );
 
         $expected = <<<EOF
@@ -150,6 +156,7 @@ body {
     color: {$theme->settings->linkvisitedcolor};
     border-top-color: {$theme->settings->headerbgc};
     border-bottom-color: {$theme->settings->buttoncolor};
+    border-left-color: {$theme->settings->primarybuttoncolor};
 }
 EOF;
         $actual = (new css_processor($theme))->replace_colours($substitutions, $css);

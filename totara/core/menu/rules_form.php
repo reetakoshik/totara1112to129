@@ -17,36 +17,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Totara navigation edit form page
+ * Totara navigation rules edit form.
  *
  * @author Chris Wharton <chris.wharton@catalyst-eu.net>
- * @package totara
+ * @package totara_core
  * @subpackage navigation
  */
 
-use \totara_core\totara\menu\menu as menu;
+use \totara_core\totara\menu\item;
 
 class rules_form extends moodleform {
 
     public function definition() {
 
         $mform = & $this->_form;
-        /* @var \totara_core\totara\menu\menu $item */
+        /* @var item $item */
         $item = $this->_customdata['item'];
 
-        $mform->addElement('hidden', 'id', $item->id);
+        $mform->addElement('hidden', 'id', $item->get_id());
         $mform->setType('id', PARAM_INT);
 
         $mform->addElement('html', html_writer::empty_tag('hr'));
 
         $mform->addElement('header', "accesscontrols", get_string('menuitem:accesscontrols', 'totara_core'));
+        $mform->setExpanded("accesscontrols", true, true);
 
         // The menu for the visibility between rulesets.
         $radiogroup = array();
         $radiogroup[] =& $mform->createElement('radio', 'item_visibility', '',
-            get_string('menuitem:withrestrictionany', 'totara_core'), menu::AGGREGATION_ANY);
+            get_string('menuitem:withrestrictionany', 'totara_core'), item::AGGREGATION_ANY);
         $radiogroup[] =& $mform->createElement('radio', 'item_visibility', '',
-            get_string('menuitem:withrestrictionall', 'totara_core'), menu::AGGREGATION_ALL);
+            get_string('menuitem:withrestrictionall', 'totara_core'), item::AGGREGATION_ALL);
         $mform->addGroup($radiogroup, 'item_visibility',
             get_string('menuitem:restrictaccess', 'totara_core'), html_writer::empty_tag('br'), false);
         $mform->setDefault('item_visibility', $item->get_setting('visibility_restriction', 'item_visibility'));
@@ -70,8 +71,8 @@ class rules_form extends moodleform {
         $mform->setDefault('role_enable', $enable);
 
         $aggregationoptions = array(
-            menu::AGGREGATION_ANY => get_string('any'),
-            menu::AGGREGATION_ALL => get_string('all'),
+            item::AGGREGATION_ANY => get_string('any'),
+            item::AGGREGATION_ALL => get_string('all'),
         );
 
         // Role aggregation.
@@ -144,7 +145,7 @@ class rules_form extends moodleform {
 
         $audienceclass = new totara_cohort_visible_learning_cohorts();
         $instancetype = COHORT_ASSN_ITEMTYPE_MENU;
-        $audienceclass->build_visible_learning_table($item->id, $instancetype);
+        $audienceclass->build_visible_learning_table($item->get_id(), $instancetype);
         $mform->addElement('html', $audienceclass->display(true, 'visible'));
 
         $mform->addElement('button', 'cohortsaddvisible', get_string('menuitem:addcohorts', 'totara_core'));
@@ -158,7 +159,8 @@ class rules_form extends moodleform {
         $mform->addElement('header', "accessbypreset", get_string('menuitem:accessbypreset', 'totara_core'));
         $enable = $item->get_setting('preset_access', 'enable');
         $activepresets = explode(',', $item->get_setting('preset_access', 'active_presets'));
-        $availablepresets = menu::get_preset_rule_choices();
+        $availablepresets = item::get_visibility_preset_rule_choices();
+        $incompatiblepresets = $item->get_incompatible_preset_rules();
 
         if ($enable) {
             $mform->setExpanded('accessbypreset');
@@ -178,6 +180,9 @@ class rules_form extends moodleform {
 
         $presetgroup = array();
         foreach ($availablepresets as $name => $description) {
+            if (in_array($name, $incompatiblepresets)) {
+                continue;
+            }
             $presetgroup[] =& $mform->createElement('advcheckbox', "preset_active_presets[{$name}]", '',
                 $description, null, array(0, 1));
             if (in_array($name, $activepresets)) {
@@ -210,21 +215,21 @@ class rules_form extends moodleform {
 
         // Check if any of the restriction types are enabled.
         if (!isset($data['role_enable']) && !isset($data['audience_enable']) && !isset($data['preset_enable'])) {
-            $errors[] = totara_set_notification(get_string('error:menuitemrulerequired', 'totara_core'));
+            $errors['item_visibility'] = get_string('error:menuitemrulerequired', 'totara_core');
         }
 
         // Check if a role is selected.
-        if (isset($data['role_enable']) && $data['role_enable'] === 1 && !in_array('1', $data['role_activeroles'], TRUE)) {
+        if (isset($data['role_enable']) && $data['role_enable'] == 1 && !in_array('1', $data['role_activeroles'], TRUE)) {
             $errors['role_enable'] = get_string('error:menuitemrulerolerequired', 'totara_core');
         }
 
         // Check if an audience is selected.
-        if (isset($data['audience_enable']) && $data['audience_enable'] === 1 && empty($data['cohortsvisible'])) {
+        if (isset($data['audience_enable']) && $data['audience_enable'] == 1 && empty($data['cohortsvisible'])) {
             $errors['audience_enable'] = get_string('error:menuitemruleaudiencerequired', 'totara_core');
         }
 
         // Check if a preset is selected.
-        if (isset($data['preset_enable']) && $data['preset_enable'] === 1 && !in_array('1', $data['preset_active_presets'], TRUE)) {
+        if (isset($data['preset_enable']) && $data['preset_enable'] == 1 && !in_array('1', $data['preset_active_presets'], TRUE)) {
             $errors['preset_enable'] = get_string('error:menuitemrulepresetrequired', 'totara_core');
         }
 

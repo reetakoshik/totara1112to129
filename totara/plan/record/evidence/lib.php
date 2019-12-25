@@ -23,8 +23,12 @@
  * @subpackage plan
  */
 
+use totara_job\job_assignment;
+
 /**
  * Display attachments to an evidence
+ *
+ * @deprecated since Totara 12
  *
  * @global object $CFG
  * @global type $OUTPUT
@@ -171,13 +175,7 @@ function display_evidence_detail($evidenceid, $delete = false) {
 
     $out .= $OUTPUT->heading($img . $item->name, 4);
 
-    $caneditown = has_capability('totara/plan:editownsiteevidence', $usercontext);
-    $canedit = has_capability('totara/plan:editsiteevidence', $usercontext);
-
-    if (($USER->id == $item->userid && $caneditown && (!$item->readonly || $canedit) ||
-            $USER->id != $item->userid && $canedit) && !$delete) {
-
-        // Can edit
+    if (!$delete && can_create_or_edit_evidence($item->userid, !empty($evidenceid), $item->readonly)) {
         $buttonlabel = get_string('editdetails', 'totara_plan');
         $editurl = new moodle_url('/totara/plan/record/evidence/edit.php',
                 array('id' => $evidenceid, 'userid' => $item->userid));
@@ -288,4 +286,37 @@ function list_evidence_in_use($evidenceid) {
     }
     return $out;
 
+}
+
+/**
+ * Check whether the current user has permission to create, edit or delete evidence
+ *
+ * @param int $userid The ID of the user the evidence is for
+ * @param bool $is_editing Are we wanting to edit/delete the evidence? Defaults to creating (false)
+ * @param bool $read_only Is the evidence read-only? Defaults to false
+ * @return bool
+ */
+function can_create_or_edit_evidence(int $userid, bool $is_editing = false, bool $read_only = false): bool {
+    global $USER;
+    $user_context = context_user::instance($userid);
+
+    if (has_capability('totara/plan:editsiteevidence', $user_context) ||
+        has_capability('totara/plan:accessanyplan', context_system::instance())) {
+        return true;
+    }
+
+    if ($read_only) {
+        return false;
+    }
+
+    if ($USER->id != $userid) {
+        return job_assignment::is_managing($USER->id, $userid);
+    }
+
+    if ($is_editing) {
+        return has_capability('totara/plan:editownsiteevidence', $user_context);
+    }
+
+    // A user can always create evidence for themselves no matter what
+    return true;
 }

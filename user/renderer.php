@@ -106,8 +106,12 @@ class core_user_renderer extends plugin_renderer_base {
     public function user_search($url, $firstinitial, $lastinitial, $usercount, $totalcount, $heading = null) {
         global $OUTPUT;
 
-        $strall = get_string('all');
-        $alpha  = explode(',', get_string('alphabet', 'langconfig'));
+        if ($firstinitial !== 'all') {
+            set_user_preference('ifirst', $firstinitial);
+        }
+        if ($lastinitial !== 'all') {
+            set_user_preference('ilast', $lastinitial);
+        }
 
         if (!isset($heading)) {
             $heading = get_string('allparticipants');
@@ -119,43 +123,11 @@ class core_user_renderer extends plugin_renderer_base {
         // Search utility heading.
         $content .= $OUTPUT->heading($heading.get_string('labelsep', 'langconfig').$usercount.'/'.$totalcount, 3);
 
-        // Bar of first initials.
-        $content .= html_writer::start_tag('div', array('class' => 'initialbar firstinitial'));
-        $content .= html_writer::tag('span', get_string('firstname').' : ', array('id' => 'grader-report--firstname-label'));
-
-        if (!empty($firstinitial)) {
-            $content .= html_writer::link($url.'&sifirst=', $strall, array('aria-labelledby' => 'grader-report--firstname-label'));
-        } else {
-            $content .= html_writer::tag('strong', $strall, array('aria-labelledby' => 'grader-report--firstname-label'));
-        }
-
-        foreach ($alpha as $letter) {
-            if ($letter == $firstinitial) {
-                $content .= html_writer::tag('strong', $letter, array('aria-labelledby' => 'grader-report--firstname-label'));
-            } else {
-                $content .= html_writer::link($url.'&sifirst='.$letter, $letter, array('aria-labelledby' => 'grader-report--firstname-label'));
-            }
-        }
-        $content .= html_writer::end_tag('div');
-
-         // Bar of last initials.
-        $content .= html_writer::start_tag('div', array('class' => 'initialbar lastinitial'));
-        $content .= html_writer::tag('span', get_string('lastname').' : ', array('id' => 'grader-report--surname-label'));
-
-        if (!empty($lastinitial)) {
-            $content .= html_writer::link($url.'&silast=', $strall, array('aria-labelledby' => 'grader-report--surname-label'));
-        } else {
-            $content .= html_writer::tag('strong', $strall, array('aria-labelledby' => 'grader-report--surname-label'));
-        }
-
-        foreach ($alpha as $letter) {
-            if ($letter == $lastinitial) {
-                $content .= html_writer::tag('strong', $letter, array('aria-labelledby' => 'grader-report--surname-label'));
-            } else {
-                $content .= html_writer::link($url.'&silast='.$letter, $letter, array('aria-labelledby' => 'grader-report--surname-label'));
-            }
-        }
-        $content .= html_writer::end_tag('div');
+        // Initials bar.
+        $prefixfirst = 'sifirst';
+        $prefixlast = 'silast';
+        $content .= $OUTPUT->initials_bar($firstinitial, 'firstinitial', get_string('firstname'), $prefixfirst, $url);
+        $content .= $OUTPUT->initials_bar($lastinitial, 'lastinitial', get_string('lastname'), $prefixlast, $url);
 
         $content .= html_writer::end_tag('div');
         $content .= html_writer::tag('div', '&nbsp;');

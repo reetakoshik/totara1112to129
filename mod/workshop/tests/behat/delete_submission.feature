@@ -25,7 +25,7 @@ Feature: Workshop submission removal
       | workshop | TestWorkshop | Test workshop description | c1     | workshop1 |
     # Teacher sets up assessment form and changes the phase to submission.
     And I log in as "teacher1"
-    And I follow "Course1"
+    And I am on "Course1" course homepage
     And I edit assessment form in workshop "TestWorkshop" as:"
       | id_description__idx_0_editor | Aspect1 |
       | id_description__idx_1_editor | Aspect2 |

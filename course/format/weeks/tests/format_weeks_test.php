@@ -229,6 +229,7 @@ class format_weeks_testcase extends advanced_testcase {
         global $CFG, $DB;
 
         $this->resetAfterTest(true);
+        $this->setAdminUser();
 
         require_once($CFG->dirroot . '/course/tests/fixtures/testable_course_edit_form.php');
 

@@ -20,8 +20,6 @@ Feature: Test duplicating a quiz containing a drag and drop onto image question
     And quiz "Test quiz" contains the following questions:
       | Drag onto image | 1 |
     And I log in as "admin"
-    And I am on site homepage
-    And I follow "Course 1"
 
   @javascript
   Scenario: Backup and restore a course containing a drag and drop onto image question

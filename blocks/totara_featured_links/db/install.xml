@@ -23,11 +23,13 @@
         <FIELD NAME="audienceshowing" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="This field holds whether the audience rules are to be applied"/>
         <FIELD NAME="presetshowing" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="This field holds whether the preset rules are to be applied"/>
         <FIELD NAME="tilerulesshowing" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="This field holds whether the tile defined rules are to be applied"/>
+        <FIELD NAME="parentid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The tile that is the parent of this tile"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="id" TYPE="primary" FIELDS="id" COMMENT="The tile id"/>
         <KEY NAME="blockid" TYPE="foreign" FIELDS="blockid" REFTABLE="block_instances" REFFIELDS="id" COMMENT="Id for the block that the tile is in"/>
         <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id" COMMENT="The user who created the tile"/>
+        <KEY NAME="parentid" TYPE="foreign" FIELDS="parentid" REFTABLE="block_totara_featured_links" REFFIELDS="id" COMMENT="The id of the parent tiles"/>
       </KEYS>
     </TABLE>
   </TABLES>

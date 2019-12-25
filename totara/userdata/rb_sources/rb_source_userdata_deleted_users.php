@@ -27,13 +27,6 @@ defined('MOODLE_INTERNAL') || die();
  * Reportbuildersource for deleted users.
  */
 final class rb_source_userdata_deleted_users extends rb_base_source {
-
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
-    public $sourcewhere, $sourceparams;
-    public $cacheable;
-
     public function __construct() {
         $this->usedcomponents[] = 'totara_userdata';
         $this->base = "{user}";
@@ -117,7 +110,7 @@ final class rb_source_userdata_deleted_users extends rb_base_source {
 
         $columnoptions = array();
 
-        $this->add_user_fields_to_columns($columnoptions, 'base');
+        $this->add_core_user_columns($columnoptions, 'base');
 
         $columnoptions[] = new rb_column_option(
             'suspended_purge_type',
@@ -138,7 +131,8 @@ final class rb_source_userdata_deleted_users extends rb_base_source {
             'suspended_purge_type.id',
             array(
                 'addtypetoheading' => true,
-                'joins' => array('suspended_purge_type')
+                'joins' => array('suspended_purge_type'),
+                'displayfunc' => 'integer'
             )
         );
 
@@ -161,7 +155,8 @@ final class rb_source_userdata_deleted_users extends rb_base_source {
             'deleted_purge_type.id',
             array(
                 'addtypetoheading' => true,
-                'joins' => array('deleted_purge_type')
+                'joins' => array('deleted_purge_type'),
+                'displayfunc' => 'integer'
             )
         );
 
@@ -207,7 +202,7 @@ final class rb_source_userdata_deleted_users extends rb_base_source {
     protected function define_filteroptions() {
         $filteroptions = array();
 
-        $this->add_user_fields_to_filters($filteroptions);
+        $this->add_core_user_filters($filteroptions);
 
         $filteroptions[] = new rb_filter_option(
             'suspended_purge_type',

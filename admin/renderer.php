@@ -266,7 +266,6 @@ class core_admin_renderer extends plugin_renderer_base {
             $cronoverdue, $dbproblems, $maintenancemode, $availableupdates, $availableupdatesfetch,
             $buggyiconvnomb, $registered, array $cachewarnings = array(), $eventshandlers = 0,
             $themedesignermode = false, $devlibdir = false, $unused_latesterror = null, $activeusers, $totara_release, $activeusers3mth = 0) {
-
         global $CFG, $PAGE ,$DB;
         $lzversion= $DB->get_record_sql("SELECT * FROM {config_plugins}  WHERE plugin = ? AND name= ?", array('local_lz_extension','version'));
         $t=explode(' ', $totara_release);
@@ -291,7 +290,7 @@ class core_admin_renderer extends plugin_renderer_base {
 
         // list count of active users
         $output .= $totara_renderer->active_users($activeusers, $activeusers3mth);
-         $output .= '<div class="box copyright"><a href="http://moodle.org/">LZ</a> <a href="http://docs.moodle.org/dev/Releases" title="'.$lzversion->value.'">'.$t[0].' (Build: '.$lzversion->value.')</a></div>';
+        $output .= '<div class="box copyright"><a href="http://moodle.org/">LZ</a> <a href="http://docs.moodle.org/dev/Releases" title="'.$lzversion->value.'">'.$t[0].' (Build: '.$lzversion->value.')</a></div>';
         /// Display Totara version information
         $output .= $totara_renderer->totara_print_copyright($totara_release);
 

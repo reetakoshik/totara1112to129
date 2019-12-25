@@ -15,7 +15,7 @@ Feature: The generators create the expected position framework
 
   Scenario: A position item can be updated
     When I log in as "admin"
-    And I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    And I navigate to "Manage positions" node in "Site administration > Positions"
     And I follow "Test position framework"
     And I click on "Edit" "link" in the "First position" "table_row"
     Then the following fields match these values:
@@ -31,7 +31,7 @@ Feature: The generators create the expected position framework
   @javascript
   Scenario: A position item custom fields can be updated and displayed
     When I log in as "admin"
-    And I navigate to "Manage types" node in "Site administration > Hierarchies > Positions"
+    And I navigate to "Manage types" node in "Site administration > Positions"
     Then I follow "Position type 1"
 
     # Add Text input field.
@@ -70,7 +70,7 @@ Feature: The generators create the expected position framework
     Then I press "Save changes"
 
     # Add data to the custom fields for the position.
-    And I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    And I navigate to "Manage positions" node in "Site administration > Positions"
     And I click on "Test position framework" "link"
     And I click on "First position" "link"
     And I click on "Edit" "link"

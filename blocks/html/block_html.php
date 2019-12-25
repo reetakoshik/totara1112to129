@@ -37,11 +37,7 @@ class block_html extends block_base {
     }
 
     function specialization() {
-        if (isset($this->config->title)) {
-            $this->title = format_string($this->config->title, true, ['context' => $this->context]);
-        } else {
-            $this->title = get_string('newhtmlblock', 'block_html');
-        }
+        $this->title = get_string('newhtmlblock', 'block_html');
     }
 
     function instance_allow_multiple() {
@@ -144,7 +140,8 @@ class block_html extends block_base {
      * @return bool
      */
     public function instance_can_be_docked() {
-        return (!empty($this->config->title) && parent::instance_can_be_docked());
+        // Totara: Title override is done via get_title();
+        return (!empty($this->get_title()) && parent::instance_can_be_docked());
     }
 
     /*

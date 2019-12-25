@@ -104,7 +104,8 @@ class csv_import {
         // End the transaction.
         $transaction->allow_commit();
 
-        // Purge the progress caches to ensure course is re-calcuated
+        // Purge the progress caches to ensure course and program progress is re-calcuated
+        \totara_program\progress\program_progress_cache::purge_progressinfo_caches();
         \completion_info::purge_progress_caches();
 
         return $errors;

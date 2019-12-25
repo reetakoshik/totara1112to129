@@ -38,16 +38,18 @@ list($context, $course, $cm) = get_context_info_array($contextid);
 navigation_node::override_active_url(new moodle_url('/backup/restorefile.php', array('contextid' => $contextid)));
 $PAGE->set_url('/backup/restore.php', array('contextid' => $contextid));
 $PAGE->set_context($context);
-if (!$stage or $stage == restore_ui::STAGE_CONFIRM) {
+
+require_login($course, null, $cm);
+require_capability('moodle/restore:restorefile', $context);
+require_sesskey();
+
+// Totara: This has to come after require_login(), which sets page layout to course.
+if (!$stage) {
     $PAGE->set_pagelayout('admin');
 } else {
     // Better not show block with navigation, they should use buttons at the bottom!
     $PAGE->set_pagelayout('noblocks');
 }
-
-require_login($course, null, $cm);
-require_capability('moodle/restore:restorefile', $context);
-require_sesskey();
 
 if ($restoreid) {
     $rc = restore_ui::load_controller($restoreid);

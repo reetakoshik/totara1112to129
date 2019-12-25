@@ -25,9 +25,9 @@ namespace block_totara_featured_links\tile;
 
 defined('MOODLE_INTERNAL') || die();
 
-use \totara_form\form;
-use \totara_form\group;
-use \totara_form\item;
+use totara_form\form;
+use totara_form\item;
+use totara_form\group;
 
 /**
  * Class base_form
@@ -42,22 +42,44 @@ abstract class base_form extends form {
      * makes tile type and position appear on every form
      */
     protected function definition() {
+        $this->add_action_buttons();
+    }
+
+    /**
+     * Adds the action buttons to the form.
+     * ie save and cancel by default.
+     */
+    protected function add_action_buttons(): void {
         $this->model->add_action_buttons();
     }
 
     /**
      * contains the tile defined form
      * @param group $group
-     * @return null
+     * @return void
      */
     protected abstract function specific_definition(group $group);
 
     /**
      * gets the requirements for the form eg css and javascript
-     * @return null
+     * @return void
      */
     public function requirements() {
         return;
+    }
+
+    /**
+     * Gets the url that the form should go to after being submitted successfully.
+     *
+     * @param base $tile_instance the instance of the tile that the form is for
+     * @return string
+     */
+    public function get_next_url(base $tile_instance): string {
+        assert(
+            isset($this->get_parameters()['return_url']),
+            'The parameter \'return_url\' needs to be set on a form'
+        );
+        return $this->get_parameters()['return_url'];
     }
 
     /**

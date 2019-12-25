@@ -131,35 +131,42 @@ class enrol_totara_program_plugin extends enrol_plugin {
         if (!is_array($userids) || empty($userids)) {
             return;
         }
-        // Get all the active enrolments with this plugin for these users.
-        list($insql, $inparams) = $DB->get_in_or_equal($userids);
-        array_push($inparams, $instance->id);
-        $active_enrolments = $DB->get_fieldset_select('user_enrolments', 'userid', "userid $insql AND enrolid = ?", $inparams);
+
+        // Divide the users into batches to prevent sql problems.
+        $batches = array_chunk($userids, $DB->get_max_in_params());
+        unset($userids);
 
         $unenrolaction = $this->get_config('unenrolaction', ENROL_EXT_REMOVED_SUSPEND);
 
-        // Depending on the plugin settings, unenrol or suspend the unassigned users from this course.
-        switch ($unenrolaction) {
-            case ENROL_EXT_REMOVED_UNENROL:
-                $useridbatches = array_chunk($active_enrolments, BATCH_INSERT_MAX_ROW_COUNT);
-                foreach ($useridbatches as $key => $batch) {
-                    $this->unenrol_user_bulk($instance, $batch);
-                }
-                break;
-            case ENROL_EXT_REMOVED_SUSPEND:
-            case ENROL_EXT_REMOVED_SUSPENDNOROLES:
-                foreach ($active_enrolments as $userid) {
-                    // Suspend the enrolment.
-                    $this->update_user_enrol($instance, $userid, ENROL_USER_SUSPENDED);
-                    $context = context_course::instance($instance->courseid);
-                    // If ENROL_EXT_REMOVED_SUSPENDNOROLES remove them from all roles.
-                    if ($unenrolaction == ENROL_EXT_REMOVED_SUSPENDNOROLES) {
-                        role_unassign_all(array('userid' => $userid, 'contextid' => $context->id, 'component' => 'enrol_totara_program', 'itemid' => $instance->id));
+        foreach ($batches as $userids) {
+            // Get all the active enrolments with this plugin for these users.
+            list($insql, $inparams) = $DB->get_in_or_equal($userids);
+            array_push($inparams, $instance->id);
+            $active_enrolments = $DB->get_fieldset_select('user_enrolments', 'userid', "userid $insql AND enrolid = ?", $inparams);
+
+            // Depending on the plugin settings, unenrol or suspend the unassigned users from this course.
+            switch ($unenrolaction) {
+                case ENROL_EXT_REMOVED_UNENROL:
+                    $useridbatches = array_chunk($active_enrolments, BATCH_INSERT_MAX_ROW_COUNT);
+                    foreach ($useridbatches as $key => $batch) {
+                        $this->unenrol_user_bulk($instance, $batch);
                     }
-                }
-                break;
-            default:
-                break;
+                    break;
+                case ENROL_EXT_REMOVED_SUSPEND:
+                case ENROL_EXT_REMOVED_SUSPENDNOROLES:
+                    foreach ($active_enrolments as $userid) {
+                        // Suspend the enrolment.
+                        $this->update_user_enrol($instance, $userid, ENROL_USER_SUSPENDED);
+                        $context = context_course::instance($instance->courseid);
+                        // If ENROL_EXT_REMOVED_SUSPENDNOROLES remove them from all roles.
+                        if ($unenrolaction == ENROL_EXT_REMOVED_SUSPENDNOROLES) {
+                            role_unassign_all(array('userid' => $userid, 'contextid' => $context->id, 'component' => 'enrol_totara_program', 'itemid' => $instance->id));
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -181,8 +188,9 @@ class enrol_totara_program_plugin extends enrol_plugin {
             return;
         }
 
-        // Get all the suspended enrolments for these users in batches.
+        // Divide the users into batches to prevent sql problems.
         $batches = array_chunk($userids, $DB->get_max_in_params());
+        unset($userids);
         foreach ($batches as $batch) {
             list($insql, $params) = $DB->get_in_or_equal($batch, SQL_PARAMS_NAMED);
             $params['enrolid'] = $instance->id;

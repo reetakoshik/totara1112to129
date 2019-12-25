@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="40px" height="40px" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 52.6 (67491) - http://www.bohemiancoding.com/sketch -->
+    <title>D809C58F-F06B-488B-A3CB-ACC8BCFEC2A1</title>
+    <desc>Created with sketchtool.</desc>
+    <defs>
+        <circle id="path-1" cx="25" cy="25" r="25"></circle>
+    </defs>
+    <g id="website" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="icons-" transform="translate(-595.000000, -65.000000)">
+            <g id="user" transform="translate(595.000000, 65.000000)">
+                <g id="Shape">
+                    <mask id="mask-2" fill="white">
+                        <use xlink:href="#path-1"></use>
+                    </mask>
+                    <use id="Mask" fill="#D8D8D8" xlink:href="#path-1"></use>
+                    <path d="M25,30.2631579 C31.5137747,30.2631579 36.8421053,24.9340872 36.8421053,18.4210526 C36.8421053,11.9080181 31.5137747,6.57894737 25,6.57894737 C18.4862253,6.57894737 13.1578947,11.9080181 13.1578947,18.4210526 C13.1578947,24.9340872 18.4862253,30.2631579 25,30.2631579 Z M25,30.2631579 C17.154852,30.2631579 1.31578947,34.1120797 1.31578947,41.6666667 L1.31578947,60.5263158 L48.6842105,60.5263158 L48.6842105,41.6666667 C48.6842105,34.1120797 32.845148,30.2631579 25,30.2631579 Z" fill="#858585" fill-rule="nonzero" mask="url(#mask-2)"></path>
+                </g>
+                <g id="_ionicons_svg_md-person-copy" transform="translate(1.315789, 1.315789)"></g>
+            </g>
+        </g>
+    </g>
+</svg>

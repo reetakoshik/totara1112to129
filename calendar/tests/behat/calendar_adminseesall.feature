@@ -30,31 +30,15 @@ Feature: Config setting calendar_adminseesall allows admin to view all events on
     And I log in as "admin"
     And I set the following administration settings values:
       | enableavailability | 0 |
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name                                    | Test Seminar One         |
       | Description                             | Test seminar description |
       | Show entry on user's calendar           | 1                        |
     And I follow "View all events"
     And I follow "Add a new event"
-    And I click on "Edit session" "link"
-    And I fill seminar session with relative date in form data:
-      | sessiontimezone    | Pacific/Auckland |
-      | timestart[month]   | 0                |
-      | timestart[day]     | +1               |
-      | timestart[year]    | 0                |
-      | timestart[hour]    | 0                |
-      | timestart[minute]  | 0                |
-      | timefinish[month]  | 0                |
-      | timefinish[day]    | +1               |
-      | timefinish[year]   | 0                |
-      | timefinish[hour]   | +1               |
-      | timefinish[minute] | 0                |
-    And I press "OK"
     And I press "Save changes"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I follow "Course 2"
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name                                    | Test Seminar Two         |
@@ -62,22 +46,8 @@ Feature: Config setting calendar_adminseesall allows admin to view all events on
       | Show entry on user's calendar           | 1                        |
     And I follow "View all events"
     And I follow "Add a new event"
-    And I click on "Edit session" "link"
-    And I fill seminar session with relative date in form data:
-      | sessiontimezone    | Pacific/Auckland |
-      | timestart[month]   | 0                |
-      | timestart[day]     | +1               |
-      | timestart[year]    | 0                |
-      | timestart[hour]    | 0                |
-      | timestart[minute]  | 0                |
-      | timefinish[month]  | 0                |
-      | timefinish[day]    | +1               |
-      | timefinish[year]   | 0                |
-      | timefinish[hour]   | +1               |
-      | timefinish[minute] | 0                |
-    And I press "OK"
     And I press "Save changes"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I follow "Course 3"
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name                                    | Test Seminar Three       |
@@ -85,20 +55,6 @@ Feature: Config setting calendar_adminseesall allows admin to view all events on
       | Show entry on user's calendar           | 1                        |
     And I follow "View all events"
     And I follow "Add a new event"
-    And I click on "Edit session" "link"
-    And I fill seminar session with relative date in form data:
-      | sessiontimezone    | Pacific/Auckland |
-      | timestart[month]   | 0                |
-      | timestart[day]     | +1               |
-      | timestart[year]    | 0                |
-      | timestart[hour]    | 0                |
-      | timestart[minute]  | 0                |
-      | timefinish[month]  | 0                |
-      | timefinish[day]    | +1               |
-      | timefinish[year]   | 0                |
-      | timefinish[hour]   | +1               |
-      | timefinish[minute] | 0                |
-    And I press "OK"
     And I press "Save changes"
     And I log out
 
@@ -109,11 +65,11 @@ Feature: Config setting calendar_adminseesall allows admin to view all events on
     And I should see "Test Seminar Two"
     And I should not see "Test Seminar Three"
     # Confirm that signed-up event edit cog links correctly.
-    When I click on "Sign-up for this seminar event" "link"
+    When I click on "Seminar event" "link"
     And I press "Sign-up"
     And I click on "Go to calendar" "link"
     And I click on "Edit event" "link"
-    Then I should see "Sign-up for Test Seminar Two"
+    Then I should see "Test Seminar Two"
     And I should see "Cancel booking"
 
   Scenario: Combination of moodle/calendar:manageentries capability and calendar_adminseesall setting allows a user to see all events

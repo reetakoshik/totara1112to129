@@ -1,0 +1,84 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Kevin Hottinger <kevin.hottinger@totaralearning.com>
+   @package totara_core
+}}
+{{!
+
+    @template totara_core/select_tree
+
+    This template generates a tree select
+
+    Classes required for JS:
+    * tw-selectTree__active: Display active item
+    * tw-selectTree__hidden: Toggle visibility of nodes
+    * tw-selectTree__current_label: label for current item
+
+    Data attributes required for JS:
+    * data-core-autoinitialise: State of this JS auto initilise
+    * data-core-autoinitialise-amd: AMD to be linked to template
+    * data-tw-selectorGroup: Target for selector types
+    * data-tw-selectTree-current: Target for current item
+    * data-tw-selectTree-default: Target for default item
+    * data-tw-selectTree-label: label for default item
+    * data-tw-selectTree-tree: Target for the tree items
+    * data-tw-selectTree-trigger: Triggers visibility of tree
+    * data-tw-selectTree-urlKey: String, key for the tree
+    * data-tw-selectTree-urlVal: String, key of default item
+
+    Context variables required for this template:
+    * active_name: string, the name of the currently selected option
+    * flat_tree: bool, true if the tree should be styled as only one level
+    * key: string, unique ID for this select
+    * title: string, Title for this select
+    * title_hidden: bool, true to hide the title
+    * options: array containing select_tree_option data
+    * parents_are_selectable: bool, true if clicking a parent name selects the option, false if it behaves like a chevron
+
+}}
+<div class="tw-selectTree"
+    data-tw-selectorGroup=""
+    data-tw-selectTree-urlKey="{{{key}}}"
+    data-core-autoinitialise="true"
+    data-core-autoinitialise-amd="totara_core/select_tree">
+
+    {{^title_hidden}}
+    <div class="tw-selectTree__label" id="title_{{{key}}}">
+        {{{title}}}
+    </div>
+    {{/title_hidden}}
+
+    <div class="tw-selectTree__expandable">
+        <a href="#" class="tw-selectTree__current" data-tw-selectTree-trigger="">
+            <span class="tw-selectTree__current_label" data-tw-selectTree-current=""
+                {{#call_to_action}}data-tw-selectTree-callToActionLabel="{{call_to_action}}"{{/call_to_action}}>
+                {{#active_name}}{{{active_name}}}{{/active_name}}
+                {{^active_name}}{{{call_to_action}}}{{/active_name}}
+            </span>
+            {{#flex_icon}}expandable, expand, core, tw-selectTree__current_icon{{/flex_icon}}
+        </a>
+
+        <div aria-hidden="true" class="tw-selectTree__option tw-selectTree__hidden" data-tw-selectTree-tree="">
+            <ul role="tree" aria-labelledby="title_{{{key}}}"
+            class="tw-selectTree__list {{#flat_tree}}tw-selectTree__list_flat{{/flat_tree}}">
+                {{#options}}{{> totara_core/select_tree_option }}{{/options}}
+            </ul>
+        </div>
+    </div>
+</div>

@@ -34,5 +34,41 @@ function xmldb_contentmarketplace_goone_upgrade($oldversion) {
 
     $dbman = $DB->get_manager();
 
+    if ($oldversion < 2018090800) {
+        // This upgrade is only required for upgrades from backported versions (10 and 11).
+        // Fresh installs receive these settings via install.php.
+
+        // Enable GO1 course create workflow on upgrade.
+        $workflow = contentmarketplace_goone\workflow\core_course\coursecreate\contentmarketplace::instance();
+        $workflow->enable();
+        // Enable goone Explore marketplace workflow on upgrade.
+        $workflow = contentmarketplace_goone\workflow\totara_contentmarketplace\exploremarketplace\goone::instance();
+        $workflow->enable();
+
+        // Content Marketplace savepoint reached.
+        upgrade_plugin_savepoint(true, 2018090800, 'contentmarketplace', 'goone');
+    }
+
+    if ($oldversion < 2018101900) {
+        // Clean up old config settings if they exist.
+        $settingchanges = [
+            'contentmarketplace_goone\\workflow\\coursecreate\\contentmarketplace' => 'contentmarketplace_goone\\workflow\\core_course\\coursecreate\\contentmarketplace',
+            'contentmarketplace_goone\\workflow\\exploremarketplace\\goone' => 'contentmarketplace_goone\\workflow\\totara_contentmarketplace\\exploremarketplace\\goone',
+        ];
+        foreach ($settingchanges as $oldclass => $newclass) {
+            $oldsetting = get_config('totara_workflow', $oldclass);
+            if (!is_null($oldsetting)) {
+                if (!empty($oldsetting)) {
+                    // If old setting was enabled, turn it on.
+                    $workflow = $newclass::instance();
+                    $workflow->enable();
+                }
+                // Remove old setting.
+                unset_config($oldclass, 'totara_workflow');
+            }
+        }
+        upgrade_plugin_savepoint(true, 2018101900, 'contentmarketplace', 'goone');
+    }
+
     return true;
 }

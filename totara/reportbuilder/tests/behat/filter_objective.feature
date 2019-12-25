@@ -14,7 +14,8 @@ Feature: Verify the blank date filter works for reports that use it.
       | learner1 | Learning Plan 1 | Objective 1 |
 
     When I log in as "admin"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | RoL Objectives                 |
       | Source      | Record of Learning: Objectives |

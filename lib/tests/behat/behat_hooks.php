@@ -787,6 +787,19 @@ class behat_hooks extends behat_base {
     protected static function is_first_scenario() {
         return !(self::$initprocessesfinished);
     }
+
+    /**
+     * Totara:
+     * Refresh "last step action" time.
+     *
+     * This is usually refreshed in after_step() hook to record the last non-readonly action.
+     * However, when other non-readonly steps are called *within* a step definition method,
+     * it may be necessary to refresh the time directly in order to ensure correct
+     * calculation of waiting timeouts.
+     */
+    public static function refresh_last_step_action() {
+        self::$laststepaction = microtime(true);
+    }
 }
 
 /**

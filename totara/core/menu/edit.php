@@ -19,70 +19,121 @@
  *
  * Totara navigation edit page.
  *
- * @package    totara
+ * @package    totara_core
  * @subpackage navigation
  * @author     Oleg Demeshev <oleg.demeshev@totaralms.com>
  */
 
+use \totara_core\totara\menu\item;
+use \totara_core\totara\menu\helper;
+
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/lib/adminlib.php');
-require_once($CFG->dirroot . '/lib/formslib.php');
-require_once($CFG->dirroot . '/totara/core/menu/edit_form.php');
 
 // Item id.
-$id    = optional_param('id', 0, PARAM_INT);
+$id = optional_param('id', 0, PARAM_INT);
 
-admin_externalpage_setup('totaranavigation');
+admin_externalpage_setup('totaranavigation', '', null, new moodle_url('/totara/core/menu/edit.php', array('id' => $id)));
+// Double check capability, the settings file is too far away.
+require_capability('totara/core:editmainmenu', context_system::instance());
 
-$PAGE->set_context(\context_system::instance());
-$renderer = $PAGE->get_renderer('totara_core');
+$returnurl = \totara_core\totara\menu\helper::get_admin_edit_return_url($id);
 
-$item = \totara_core\totara\menu\menu::get($id);
-$property = $item->get_property();
-$node = \totara_core\totara\menu\menu::node_instance($property);
+if ($id) {
+    $record = $DB->get_record('totara_navigation', array('id' => $id));
+    if (!$record) {
+        // Most likely result of concurrent editing, just go back.
+        redirect($returnurl, get_string('error:findingmenuitem', 'totara_core'), 0, \core\output\notification::NOTIFY_ERROR);
+    }
+    $node = item::create_instance($record);
+    if (!$node) {
+        // This should not happen.
+        throw new coding_exception('Error instantiating menu item class');
+    }
 
-$cancelurl = new moodle_url('/totara/core/menu/index.php');
+    $parentidoptions = helper::create_parentid_form_options(0);
+    if (!isset($parentidoptions[$record->parentid])) {
+        $record->parentid = helper::get_unused_container_id();
+    }
 
-$mform = new edit_form(null, array('item' => $item));
-if ($mform->is_cancelled()) {
-    redirect($cancelurl);
-}
-if ($data = $mform->get_data()) {
-    try {
-        $redirect = new moodle_url('/totara/core/menu/index.php', array());
-
-        if ((int)$id > 0) {
-            // Get the old visiblity before updating.
-            $oldvisibility = $item->__get('visibility');
-
-            $item->update($data);
-
-            // Only redirect if a user turned on custom access rules.
-            if ($oldvisibility != $data->visibility &&
-                $data->visibility == \totara_core\totara\menu\menu::SHOW_CUSTOM) {
-                    $redirect = new moodle_url('/totara/core/menu/rules.php', array('id' => $item->id));
-            }
+    if ($record->custom) {
+        if (get_class($node) === 'totara_core\totara\menu\container') {
+            $form = new \totara_core\form\menu\update_custom_container($record, array('item' => $node, 'parentidoptions' => $parentidoptions));
+            $record->classname = '\totara_core\totara\menu\container';
         } else {
-            $item = $item->create($data);
-            // Redirect to the visibility settings page so they can set the visibility rules.
-            if ($data->visibility == \totara_core\totara\menu\menu::SHOW_CUSTOM) {
-                $redirect = new moodle_url('/totara/core/menu/rules.php', array('id' => $item->id));
-            }
+            $form = new \totara_core\form\menu\update_custom_item($record, array('item' => $node, 'parentidoptions' => $parentidoptions));
+            $record->classname = '\totara_core\totara\menu\item';
         }
 
-        totara_set_notification(get_string('menuitem:updatesuccess', 'totara_core'),
-            $redirect, array('class' => 'notifysuccess'));
-    } catch (moodle_exception $e) {
-        totara_set_notification($e->getMessage());
+    } else {
+        if (!$record->customtitle and trim($record->title) === '') {
+            // Prefill current value for customisation.
+            $record->title = $node->get_title();
+        }
+        $form = new \totara_core\form\menu\update_default($record, array('item' => $node, 'parentidoptions' => $parentidoptions));
+    }
+
+} else {
+    $record = new stdClass();
+    $record->id = 0;
+    $record->parentid = 0;
+    $record->visibility = item::VISIBILITY_SHOW;
+    $record->type = 'item';
+
+    // NOTE: if we knew we are adding folder only it would be -2
+    $parentidoptions = helper::create_parentid_form_options(0, item::MAX_DEPTH - 1);
+
+    $form = new \totara_core\form\menu\add_custom($record, array('parentidoptions' => $parentidoptions));
+}
+
+if ($form->is_cancelled()) {
+    redirect($returnurl);
+}
+
+if ($data = $form->get_data()) {
+    ignore_user_abort(true);
+    if (!$data->id) {
+        // Must be a new custom item or container.
+        unset($data->id);
+        $record = helper::add_custom_menu_item($data);
+
+        if ($record->visibility == item::VISIBILITY_CUSTOM) {
+            $returnurl = new moodle_url('/totara/core/menu/rules.php', array('id' => $record->id));
+        } else {
+            $returnurl = \totara_core\totara\menu\helper::get_admin_edit_return_url($record->id);
+        }
+
+        redirect($returnurl, get_string('menuitem:updatesuccess', 'totara_core'), 0, \core\output\notification::NOTIFY_SUCCESS);
+
+    } else {
+        $oldrecord = $record;
+        $data->classname = $oldrecord->classname;
+        $data->custom = $oldrecord->custom;
+        $record = helper::update_menu_item($data);
+
+        if ($oldrecord->visibility != item::VISIBILITY_CUSTOM && $record->visibility == item::VISIBILITY_CUSTOM) {
+            $returnurl = new moodle_url('/totara/core/menu/rules.php', array('id' => $record->id));
+        }
+
+        redirect($returnurl, get_string('menuitem:updatesuccess', 'totara_core'), 0, \core\output\notification::NOTIFY_SUCCESS);
     }
 }
 
-$url = new moodle_url('/totara/core/menu/edit.php', array('id' => $id));
-$PAGE->set_url($url);
-$title = ($id ? get_string('menuitem:editingx', 'totara_core', $node->get_title()) : get_string('menuitem:addnew', 'totara_core'));
+if ($id) {
+    if ($node) {
+        $title = get_string('menuitem:editingx', 'totara_core', $node->get_title());
+    } else {
+        $title = $record->classname;
+    }
+} else {
+    $title = get_string('menuitem:addnew', 'totara_core');
+}
 $PAGE->set_title($title);
-$PAGE->navbar->add($title, $url);
+$PAGE->navbar->add($title);
 $PAGE->set_heading($title);
+
+/** @var totara_core_renderer|core_renderer $renderer */
+$renderer = $PAGE->get_renderer('totara_core');
 
 // Display page header.
 echo $renderer->header();
@@ -90,9 +141,9 @@ echo $renderer->heading($title);
 
 // Set up tabs for access controls and detail editing.
 // Don't show them when creating a new item.
-if (!empty($id)) {
-    echo $renderer->totara_menu_tabs('edit', $item);
+if ($record->id) {
+    echo $renderer->totara_menu_tabs('edit', $record);
 }
 
-echo $mform->display();
+echo $form->render();
 echo $renderer->footer();

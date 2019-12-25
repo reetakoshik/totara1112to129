@@ -305,6 +305,7 @@ class block_html_userdata_html_testcase extends advanced_testcase {
     /**
      * Create a block instance
      *
+     * @param target_user $user
      * @param string $title
      * @param string $content
      * @return block_base
@@ -312,7 +313,7 @@ class block_html_userdata_html_testcase extends advanced_testcase {
     protected function create_block_instance(target_user $user, string $title, string $content): block_base {
         global $DB;
 
-        $config = (object)[
+        $config = (object) [
             'title' => $title,
             'text' => $content,
             'format' => FORMAT_HTML
@@ -328,8 +329,20 @@ class block_html_userdata_html_testcase extends advanced_testcase {
         $block = $DB->get_record_sql($sql, [], IGNORE_MULTIPLE);
         // Store config data.
         $configdata = base64_encode(serialize($config));
-        $DB->set_field('block_instances', 'configdata', $configdata, ['id' => $block->id]);
+
+        $common_config = json_encode([
+            'title' => $config->title,
+            'override_title' => true,
+        ]);
+
+        $DB->update_record('block_instances', (object) [
+            'id' => $block->id,
+            'configdata' => $configdata,
+            'common_config' => $common_config,
+        ]);
+
         $block->configdata = $configdata;
+        $block->common_config = $common_config;
 
         return block_instance('html', $block, $page);
     }
@@ -351,5 +364,4 @@ class block_html_userdata_html_testcase extends advanced_testcase {
         $file = $fs->create_file_from_string($filerecord, random_string(20));
         return $fs->get_file_by_id($file->get_id());
     }
-
 }

@@ -215,6 +215,9 @@ class prog_content {
 
         foreach ($coursesets as $courseset) {
             $DB->delete_records('prog_courseset_course', array('coursesetid' => $courseset->id));
+
+            // Delete courseset completion records
+            $DB->delete_records('prog_completion', ['coursesetid' => $courseset->id]);
         }
 
         $DB->delete_records('prog_courseset', array('programid' => $this->programid));
@@ -491,6 +494,11 @@ class prog_content {
 
                 // delete the course set
                 if (!$DB->delete_records('prog_courseset', array('id' => $coursesetid))) {
+                    return false;
+                }
+
+                // Delete courseset completion record
+                if (!$DB->delete_records('prog_completion', ['coursesetid' => $coursesetid])) {
                     return false;
                 }
             }

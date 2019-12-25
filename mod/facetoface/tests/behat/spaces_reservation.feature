@@ -43,13 +43,11 @@ Feature: Reserve spaces for team in seminar
       | student3 | POS001   | sitemanager2 |
       | student4 | POS001   | sitemanager2 |
     And I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name                                    | Test seminar name        |
       | Description                             | Test seminar description |
-      | Users can sign-up to multiple events    | 1                        |
+      | How many times the user can sign-up?    | Unlimited                |
       | Allow manager reservations              | Yes                      |
       | Maximum reservations                    | 10                       |
     And I follow "View all events"
@@ -75,8 +73,7 @@ Feature: Reserve spaces for team in seminar
 
   Scenario: Wait listed users should be added to attendees list when reservations are deleted
     Given I log in as "sitemanager1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I follow "Reserve spaces for team"
     And I set the following fields to these values:
@@ -88,32 +85,28 @@ Feature: Reserve spaces for team in seminar
     And I log out
 
     And I log in as "student3"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I click on the link "Sign-up" in row 1
     And I press "Sign-up"
     And I log out
 
     And I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I click on the link "Sign-up" in row 1
     And I press "Sign-up"
     And I log out
 
     And I log in as "student2"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I click on the link "Join waitlist" in row 1
-    And I press "Sign-up"
+    And I press "Join waitlist"
     And I log out
 
     Given I log in as "sitemanager1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     When I click on "Attendees" "link"
     Then I should see "Sam1 Student1"

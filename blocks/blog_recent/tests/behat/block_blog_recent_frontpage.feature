@@ -1,5 +1,5 @@
-@block @block_blog_recent
-Feature: Feature: Students can use the recent blog entries block to view recent entries on the frontpage
+@block @block_blog_recent @javascript
+Feature: Students can use the recent blog entries block to view recent entries on the frontpage
   In order to enable the recent blog entries block on the frontpage
   As an admin
   I can add the recent blog entries block to the frontpage

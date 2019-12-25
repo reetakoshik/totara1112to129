@@ -18,6 +18,8 @@ Feature: Learner creates learning plan with programs
     And the following "plans" exist in "totara_plan" plugin:
       | user     | name                   |
       | learner1 | learner1 Learning Plan |
+    And the following config values are set as admin:
+        | enableprogramlargeassignments | 1 |
 
   @javascript
   Scenario: Test the learner can add and remove programs from their learning plan prior to approval.
@@ -98,13 +100,10 @@ Feature: Learner creates learning plan with programs
 
     When I log out
     And I log in as "admin"
-    And I click on "Programs" in the totara menu
-    And I follow "Program 1"
+    And I am on "Program 1" program homepage
     And I click on "Edit program details" "button"
     And I click on "Assignments" "link" in the ".tabtree" "css_element"
-    And I select "Individuals" from the "Add a new" singleselect
-    And I click on "Add" "button"
-    And I click on "Add individuals to program" "button"
+    And I set the field "Add a new" to "Individuals"
     And I click on "firstname1 lastname1" "link" in the "Add individuals to program" "totaradialogue"
     And I click on "Ok" "button" in the "Add individuals to program" "totaradialogue"
     And I wait "1" seconds
@@ -115,8 +114,6 @@ Feature: Learner creates learning plan with programs
       | completiontimeminute | 45         |
     And I click on "Set fixed completion date" "button" in the "Completion criteria" "totaradialogue"
     And I wait "1" seconds
-    And I press "Save changes"
-    And I click on "Save all changes" "button" in the "Confirm assignment changes" "totaradialogue"
     And I log out
     And I log in as "learner1"
     And I click on "Dashboard" in the totara menu

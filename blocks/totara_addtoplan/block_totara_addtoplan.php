@@ -35,6 +35,10 @@ class block_totara_addtoplan extends block_base {
     function get_content() {
         global $CFG, $USER, $COURSE;
 
+        if ($this->content !== null) {
+            return $this->content;
+        }
+
         require_once($CFG->dirroot . '/blocks/totara_addtoplan/lib.php');
 
         $args = array('args' => '{"courseid":' . $COURSE->id . '}');
@@ -43,10 +47,6 @@ class block_totara_addtoplan extends block_base {
             'fullpath' => '/blocks/totara_addtoplan/block.js',
             'requires' => array('json'));
         $this->page->requires->js_init_call('M.block_totara_addtoplan.init', $args, false, $jsmodule);
-
-        if ($this->content !== NULL) {
-            return $this->content;
-        }
 
         $this->content = new stdClass;
         $this->content->footer = '';

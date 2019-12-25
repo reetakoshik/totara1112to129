@@ -1,0 +1,226 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tool_policy/page_viewdoc
+
+    Template for viewing a policy version document.
+
+    Classes required for JS:
+    -
+
+    Data attributes required for JS:
+    -
+
+    Context variables required for this template:
+    * policy - version document object.
+
+    Example context (json):
+    {
+        "numpolicy": 1,
+        "totalpolicies": 2,
+        "policy": {
+            "name": "Terms &amp; conditions",
+            "summary": "Policy <u>summary</u>",
+            "content": "Policy <em>content</em>"
+        },
+        "returnurl": "#",
+        "editurl": "#",
+        "accepturl": "#"
+    }
+}}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.js"></script> 
+<a id="top"></a>
+<div class="clearfix">
+    <div class="pull-left">
+    </div>
+    {{# numpolicy }}
+        <div class="pull-right">
+            {{# str }} steppolicies, tool_policy,
+                { "numpolicy": {{# quote }}{{numpolicy}}{{/quote }}, "totalpolicies": {{# quote }}{{totalpolicies}}{{/ quote }} }
+            {{/ str }}
+        </div>
+    {{/ numpolicy }}
+</div>
+<style>
+iframe html body{
+	border:solid 4px red !important;
+	margin:20px;
+	padding:20px;
+	}
+</style>
+
+<div class="policy_document m-t-1">
+<div class="newInsideTradPolcy">
+	<div class="headingTopHeader">
+	<h2>{{{policy.name}}}</h2>
+	<div class="rhtprint"><a href="#">{{# str }} cstatus, tool_policy {{/ str }}</a> <a href="#">{{# str }} released, tool_policy {{/ str }}</a> <a href="#"><i class="fa fa-print onclickmyFunction"></i> </a></div>
+	<div class=" clearfix"></div>
+	</div>
+	
+	<div class="tdvPanel">
+	<p><strong>{{# str }} policydoctype, tool_policy {{/ str }}</strong> {{{type}}}</p>
+	<p><strong>{{# str }} documentnumber, tool_policy {{/ str }}</strong> {{{documentno}}}</p>
+	<p><strong>{{# str }} version, tool_policy {{/ str }}</strong> {{{versionrevision}}}</p>
+	</div>
+	
+	<script>
+	  $(document).ready(function() {
+	    
+	  $(".accordion_head").click(function() {
+		if ($('.accordion_body').is(':visible')) {
+		  $(".accordion_body").slideUp(300);
+		  $(".plusminus").text('+');
+		}
+		if ($(this).next(".accordion_body").is(':visible')) {
+		  $(this).next(".accordion_body").slideUp(300);
+		  $(this).children(".plusminus").text('+');
+		} else {
+		  $(this).next(".accordion_body").slideDown(300);
+		  $(this).children(".plusminus").text('-');
+		}
+	  });
+	});
+
+	</script>
+	 <div class="accordion_container">
+     {{#managepolicy}}
+		  <div class="accordion_head"><span class="plusminus">+</span> {{# str }} revisionhistory, tool_policy {{/ str }}</div>
+		  <div class="accordion_body" style="display: none;">
+			<div class="responsive-table">
+	  <table class="table table-striped">
+	  <tr>
+            <th>{{# str }} sno, tool_policy {{/ str }}</th>
+            <th>{{# str }} policydate, tool_policy {{/ str }}</th>
+            <th>{{# str }} version, tool_policy {{/ str }}</th>
+            <th>{{# str }} author, tool_policy {{/ str }}</th>
+            
+      </tr>
+      {{#commentdata}}
+        <tr>
+            <td>{{{sno}}}</td>
+            <td>{{{timemodified}}}</td>
+            <td>{{{commentversion}}}</td>
+            <td>{{{assignto}}}</td>
+            
+        </tr>
+    
+      
+      {{/commentdata}}
+	  </table>
+	</div>
+		  </div>
+          {{/managepolicy}}
+		  <div class="accordion_head"><span class="plusminus">+</span> {{# str }} approvals, tool_policy {{/ str }}</div>
+		  <div class="accordion_body" style="display: none;">
+			<div class="responsive-table">
+      <table class="table table-striped">
+      <tr>
+            <th>{{# str }} sno, tool_policy {{/ str }}</th>
+            <th>{{# str }} policydocname, tool_policy {{/ str }}</th>
+            <th>{{# str }} title, tool_policy {{/ str }}</th>
+            <th>{{# str }} role, tool_policy {{/ str }}</th>
+            <th>{{# str }} electronicsignature, tool_policy {{/ str }}</th>
+            <th>{{# str }} policydate, tool_policy {{/ str }}</th>
+      </tr>
+      {{#approveldata}}
+        <tr>
+            <td>{{{sno}}}</td>
+            <td>{{{assignto}}}</td>
+            <td> - </td>
+            <td>{{{role}}}</td>
+            <td> - </td>
+            <td>{{{timemodified}}}</td>
+        </tr>
+      
+      {{/approveldata}}
+      </table>
+    </div>
+
+
+		  </div>
+		  <div class="accordion_head"><span class="plusminus">+</span> {{# str }} relatedpolicy, tool_policy {{/ str }}</div>
+		  <div class="accordion_body" style="display: none;">
+			<p>{{#relatepolicy}}
+             <span class="relatedPolicy"> <a href="{{pluginbaseurl}}/view.php?policyid={{policyid}}&versionid={{versionid}}&retuenurl={{pluginbaseurl}}/managedocs.php">{{policyname}}</a> </span>
+
+            {{/relatepolicy}}</p>
+		  </div>
+
+          <div class="accordion_head"><span class="plusminus">+</span> {{# str }} relatedcourse, tool_policy {{/ str }}</div>
+          <div class="accordion_body" style="display: none;">
+            <p>{{#relatecourse}}
+             <span class="relatedCourse"> <a href="{{siteurl}}/course/view.php?id={{courseid}}">{{fullname}}</a> </span>
+
+            {{/relatecourse}}</p>
+          </div>
+		</div>
+	<div
+	
+
+
+    <div class="policy_document_summary clearfix m-b-1 iphoneheight" >
+        {{{policy.summary}}}
+		<div style="clear:both;"></div>
+    </div>
+    <div class="policy_document_content m-t-2 iphoneheight">
+        {{{policy.content}}}
+		<div style="clear:both;"></div>
+    </div>
+</div>
+</div>
+
+<hr>
+
+<div class="policy_buttons">
+    {{#returnurl}}
+        {{# numpolicy }}
+            <a role="button" href="{{returnurl}}" class="btn btn-primary">{{#str}} next {{/str}}</a>
+        {{/ numpolicy }}
+        
+        <a role="button" href="{{returnurl}}" class="btn btn-primary">{{#str}} back {{/str}}</a>
+     
+    {{/returnurl}}
+    {{^returnurl}}
+     <a role="button" href="{{viewreturn}}" class="btn btn-primary">{{#str}} back {{/str}}</a>
+    {{/returnurl}}
+    {{#editurl}}
+        <a role="button" href="{{editurl}}" class="btn">{{#str}} edit {{/str}}</a>
+    {{/editurl}}
+    {{#accepturl}}
+        <a role="button" href="{{accepturl}}" class="btn btn-primary">{{#str}} iagree, tool_policy, {{{policy.name}}} {{/str}}</a>
+    {{/accepturl}}
+    {{#declineurl}}
+        <a role="button" href="{{declineurl}}" class="btn btn-link">{{#str}} idontagree, tool_policy, {{{policy.name}}} {{/str}}</a>
+    {{/declineurl}}
+
+    <div class="pull-right">
+        <a href="#top">
+            {{# str }} backtotop, tool_policy {{/ str }}
+            <i class="icon text-primary fa fa-caret-up" title="{{# str }} backtotop, tool_policy {{/ str }}" ></i>
+        </a>
+    </div>
+</div>
+<script>
+$(".onclickmyFunction").click(function(){
+$(".accordion_body").show();
+ $(".accordion_head").children(".plusminus").text('-'); 
+     window.print();
+
+});
+window.addEventListener("load", function () { window.setInterval(function(){ var iframes = jQuery('body.mobiletheme:not(.h5p-no-frame) iframe[src*="hvp"]'); jQuery(iframes).each(function(i,obj){ jQuery(obj).contents().find('body').css('overflow','hidden'); var frameHeight = jQuery(obj).contents().find('iframe.h5p-iframe').css('height'); jQuery(obj).css('height',frameHeight); jQuery(obj).css('min-height',frameHeight); }); }, 5); }); 
+</script>

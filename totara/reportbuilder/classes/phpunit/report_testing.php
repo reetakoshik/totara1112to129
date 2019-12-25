@@ -118,7 +118,7 @@ trait report_testing {
 
     /**
      * Add a new filter to report
-     * This will not update report instance, so use it before new reportbuiler.
+     * This will not update report instance, so use it before new reportbuilder.
      *
      * @param int $reportid
      * @param string $type
@@ -155,7 +155,7 @@ trait report_testing {
 
     /**
      * Set report settings
-     * This will not update report instance, so use it before new reportbuiler.
+     * This will not update report instance, so use it before new reportbuilder.
      *
      * @param int $reportid
      * @param string $type
@@ -185,7 +185,7 @@ trait report_testing {
 
     /**
      * Add report graph settings
-     * This will not update report instance, so use it before new reportbuiler.
+     * This will not update report instance, so use it before new reportbuilder.
      *
      * @param int $reportid
      * @param string $type

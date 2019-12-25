@@ -32,24 +32,24 @@ if ($ADMIN->fulltree) {
 
     // Favicon file setting.
     $name = "{$component}/favicon";
-    $title = new lang_string('favicon', $component);
-    $description = new lang_string('favicondesc', $component);
+    $title = new lang_string('favicon', 'totara_core');
+    $description = new lang_string('favicondesc', 'totara_core');
     $setting = new admin_setting_configstoredfile($name, $title, $description, 'favicon', 0, array('accepted_types' => '.ico'));
     $setting->set_updatedcallback('theme_reset_all_caches');
     $settings->add($setting);
 
     // Logo file setting.
     $name = "{$component}/logo";
-    $title = new lang_string('logo', $component);
-    $description = new lang_string('logodesc', $component);
+    $title = new lang_string('logo', 'totara_core');
+    $description = new lang_string('logodesc', 'totara_core');
     $setting = new admin_setting_configstoredfile($name, $title, $description, 'logo',0 ,['accepted_types' => 'web_image']);
     $setting->set_updatedcallback('theme_reset_all_caches');
     $settings->add($setting);
 
     // Logo alt text.
     $name = "{$component}/alttext";
-    $title = new lang_string('alttext', $component);
-    $description = new lang_string('alttextdesc', $component);
+    $title = new lang_string('alttext', 'totara_core');
+    $description = new lang_string('alttextdesc', 'totara_core');
     $setting = new admin_setting_configtext($name, $title, $description, '');
     $setting->set_updatedcallback('theme_reset_all_caches');
     $settings->add($setting);
@@ -80,8 +80,7 @@ if ($ADMIN->fulltree) {
     $title = new lang_string('linkcolor', $component);
     $description = new lang_string('linkcolordesc', $component);
     $default = css_processor::$DEFAULT_LINKCOLOR;
-    $previewconfig = array('selector' => 'a', 'style' => 'color');
-    $setting = new admin_setting_configcolourpicker($name, $title, $description, $default, $previewconfig);
+    $setting = new admin_setting_configcolourpicker($name, $title, $description, $default, null);
     $setting->set_updatedcallback('theme_reset_all_caches');
     $settings->add($setting);
 
@@ -90,8 +89,7 @@ if ($ADMIN->fulltree) {
     $title = new lang_string('linkvisitedcolor', $component);
     $description = new lang_string('linkvisitedcolordesc', $component);
     $default = css_processor::$DEFAULT_LINKVISITEDCOLOR;
-    $previewconfig = array('selector' => 'a:visited', 'style' => 'color');
-    $setting = new admin_setting_configcolourpicker($name, $title, $description, $default, $previewconfig);
+    $setting = new admin_setting_configcolourpicker($name, $title, $description, $default, null);
     $setting->set_updatedcallback('theme_reset_all_caches');
     $settings->add($setting);
 
@@ -100,8 +98,23 @@ if ($ADMIN->fulltree) {
     $title = new lang_string('buttoncolor',$component);
     $description = new lang_string('buttoncolordesc', $component);
     $default = css_processor::$DEFAULT_BUTTONCOLOR;
-    $previewconfig = array('selector'=>'input[\'type=submit\']]', 'style'=>'background-color');
-    $setting = new admin_setting_configcolourpicker($name, $title, $description, $default, $previewconfig);
+    $setting = new admin_setting_configcolourpicker($name, $title, $description, $default, null);
+    $setting->set_updatedcallback('theme_reset_all_caches');
+    $settings->add($setting);
+    // Remember button colour setting.
+    $button_setting = $setting;
+
+    // Primary button colour setting.
+    $name = "{$component}/primarybuttoncolor";
+    $title = new lang_string('primarybuttoncolor',$component);
+    $description = new lang_string('primarybuttoncolordesc', $component);
+    // If button colour has been customised, use that as the default.
+    if ($button_setting->get_setting() != css_processor::$DEFAULT_BUTTONCOLOR) {
+        $default = $button_setting->get_setting();
+    } else {
+        $default = css_processor::$DEFAULT_PRIMARYBUTTONCOLOR;
+    }
+    $setting = new admin_setting_configcolourpicker($name, $title, $description, $default, null);
     $setting->set_updatedcallback('theme_reset_all_caches');
     $settings->add($setting);
 
@@ -128,8 +141,16 @@ if ($ADMIN->fulltree) {
     $title = new lang_string('headerbgc', $component);
     $description = new lang_string('headerbgcdesc', $component);
     $default = css_processor::$DEFAULT_HEADERBGC;
-    $previewconfig = array('selector' => '#page-header', 'style' => 'backgroundColor');
-    $setting = new admin_setting_configcolourpicker($name, $title, $description, $default, $previewconfig);
+    $setting = new admin_setting_configcolourpicker($name, $title, $description, $default, null);
+    $setting->set_updatedcallback('theme_reset_all_caches');
+    $settings->add($setting);
+
+    // Navigation text color.
+    $name = "{$component}/navtextcolor";
+    $title = get_string('navtextcolor', $component);
+    $description = get_string('navtextcolor_desc', $component);
+    $default = css_processor::$DEFAULT_NAVTEXTCOLOR;
+    $setting = new admin_setting_configcolourpicker($name, $title, $description, $default, null, false);
     $setting->set_updatedcallback('theme_reset_all_caches');
     $settings->add($setting);
 

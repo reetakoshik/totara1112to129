@@ -23,31 +23,47 @@
 /*
  * This switches the images on the tiles with multiple images.
  */
-define(['jquery'], function($) {
+define(['jquery', 'core/templates', 'block_totara_featured_links/slick'], function($, templates) {
+
     return {
-        init: function(interval, id) {
-            var currentImg = 1;
-            var maxImg = 0;
-            maxImg = $('#' + id).children('div').length;
-            currentImg = Math.floor(Math.random() * (maxImg)) + 1;
-            $('#' + id + ' div:nth-of-type(' + currentImg + ')').show();
-            if (maxImg <= 1) {
-                return;
-            }
-            if (interval === 0) {
-                return;
-            }
-            window.setInterval(function() {
-                $('#' + id + ' div:nth-of-type(' + currentImg + ')').css({'z-index': '2'}).fadeOut('slow');
+        init: function(interval, id, transition, order, controls, autoplay, repeat, pauseonhover) {
+            var leftArrow = templates.renderIcon('caret-left', 'Previous', 'slick-prev');
+            var rightArrow = templates.renderIcon('caret-right', 'Next', 'slick-next');
 
-                var newcurrentImg = -1;
-                do {
-                    newcurrentImg = Math.floor(Math.random() * (maxImg)) + 1;
-                } while (currentImg === newcurrentImg);
-                currentImg = newcurrentImg;
+            var fade = transition === 'fade';
+            var dots = controls.indexOf('position_indicator') !== -1;
+            var arrows = controls.indexOf('arrows') !== -1;
 
-                $('#' + id + ' div:nth-of-type(' + currentImg + ')').css({'z-index': '1'}).show();
-            }, interval);
+            $.when(leftArrow, rightArrow).then(function(leftArrowMarkup, rightArrowMarkup) {
+                var element = $('#' + id);
+                element.slick({
+                    autoplay: autoplay === '1',
+                    autoplaySpeed: interval,
+                    prevArrow: leftArrowMarkup,
+                    nextArrow: rightArrowMarkup,
+                    fade: fade,
+                    dots: dots,
+                    rtl: document.dir === "rtl",
+                    arrows: arrows,
+                    infinite: repeat === '1',
+                    pauseOnHover: pauseonhover === '1'
+                });
+
+                // Randomise the order.
+                if (order === 'random' && autoplay === '1') {
+                    var numSlides = element.slick('getSlick').slideCount;
+                    var currentItem = 0;
+                    element.slick('pause');
+                    window.setInterval(function(){
+                        var nextSlideIndex = Math.floor(Math.random() * (numSlides - 1));
+                        if (nextSlideIndex >= currentItem) {
+                            nextSlideIndex += 1;
+                        }
+                        element.slick('slickGoTo', nextSlideIndex, false);
+                        currentItem = nextSlideIndex;
+                    }, interval);
+                }
+            });
         }
     };
 });

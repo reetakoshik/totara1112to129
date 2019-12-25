@@ -187,8 +187,6 @@ class core_files_file_storage_testcase extends advanced_testcase {
     public function test_get_file() {
         global $CFG;
 
-        $this->resetAfterTest(false);
-
         $filepath = $CFG->dirroot.'/lib/filestorage/tests/fixtures/testimage.jpg';
         $syscontext = context_system::instance();
         $filerecord = array(
@@ -213,20 +211,27 @@ class core_files_file_storage_testcase extends advanced_testcase {
         $this->assertEquals('testimage.jpg', $file->get_filename());
         $this->assertEquals(filesize($filepath), $file->get_filesize());
         $this->assertEquals($pathhash, $file->get_pathnamehash());
-
-        return $file;
     }
 
     /**
      * Local images can be added to the filepool and their preview can be obtained
-     *
-     * @depends test_get_file
      */
-    public function test_get_file_preview(stored_file $file) {
+    public function test_get_file_preview() {
         global $CFG;
 
-        $this->resetAfterTest();
+        $filepath = $CFG->dirroot.'/lib/filestorage/tests/fixtures/testimage.jpg';
+        $syscontext = context_system::instance();
+        $filerecord = array(
+            'contextid' => $syscontext->id,
+            'component' => 'core',
+            'filearea'  => 'unittest',
+            'itemid'    => 0,
+            'filepath'  => '/images/',
+            'filename'  => 'testimage.jpg',
+        );
+
         $fs = get_file_storage();
+        $file = $fs->create_file_from_pathname($filerecord, $filepath);
 
         $previewtinyicon = $fs->get_file_preview($file, 'tinyicon');
         $this->assertInstanceOf('stored_file', $previewtinyicon);
@@ -971,8 +976,6 @@ class core_files_file_storage_testcase extends advanced_testcase {
     public function test_convert_image() {
         global $CFG;
 
-        $this->resetAfterTest(false);
-
         $filepath = $CFG->dirroot.'/lib/filestorage/tests/fixtures/testimage.jpg';
         $syscontext = context_system::instance();
         $filerecord = array(
@@ -998,8 +1001,6 @@ class core_files_file_storage_testcase extends advanced_testcase {
 
     public function test_convert_image_png() {
         global $CFG;
-
-        $this->resetAfterTest(false);
 
         $filepath = $CFG->dirroot.'/lib/filestorage/tests/fixtures/testimage.png';
         $syscontext = context_system::instance();

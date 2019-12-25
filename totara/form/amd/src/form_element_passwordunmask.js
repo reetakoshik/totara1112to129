@@ -121,14 +121,13 @@ define(['jquery', 'totara_form/form'], function($, Form) {
     PasswordUnmaskElement.prototype.init = function(done) {
         var id = this.id,
             input = $('#' + id),
-            defereds = [],
             mask;
 
         this.input = input;
         this.unmaskinput = $('#' + id + 'unmask');
         this.wrap = this.input.parent('.wrap');
 
-        var mask = $('<input type="text" value="" class="inputmask" />');
+        mask = $('<input type="text" value="" class="inputmask" />');
         if (this.input.attr('readonly')) {
             mask.attr('readonly', 'readonly');
         }
@@ -154,38 +153,7 @@ define(['jquery', 'totara_form/form'], function($, Form) {
         // Call the changed method when this element is changed.
         this.input.change($.proxy(this.changed, this));
 
-        if (this.input.attr('required')) {
-            var requiredDefer = $.Deferred();
-            defereds.push(requiredDefer);
-
-            require(['totara_form/modernizr'], function(mod) {
-                if (!mod.input.required) {
-                    require(['totara_form/polyfill_required-lazy'], function (poly) {
-                        poly.init(id);
-                        requiredDefer.resolve();
-                    });
-                } else {
-                    requiredDefer.resolve();
-                }
-            });
-        }
-        if (this.input.attr('placeholder')) {
-            var placeholderDefer = $.Deferred();
-            defereds.push(placeholderDefer);
-
-            require(['totara_form/modernizr'], function(mod) {
-                if (!mod.input.placeholder ) {
-                    require(['totara_form/polyfill_placeholder-lazy'], function (poly) {
-                        poly.init(id);
-                        placeholderDefer.resolve();
-                    });
-                } else {
-                    placeholderDefer.resolve();
-                }
-            });
-        }
-
-        $.when.apply($, defereds).done(done);
+        done();
     };
 
     /**

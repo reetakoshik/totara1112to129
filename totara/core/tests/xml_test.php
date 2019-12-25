@@ -253,6 +253,7 @@ class totara_core_xml_testcase extends advanced_testcase {
         // We can't use a relative path in this case.
         $extxmlstring = file_get_contents($CFG->dirroot . "/totara/core/tests/fixtures/extentities.xml");
         $pathtotextfile = $CFG->dirroot . "/totara/core/tests/fixtures/test.txt";
+        $pathtotextfile = str_replace('\\', '/', $pathtotextfile);
         $extxmlstring = str_replace("test.txt", $pathtotextfile, $extxmlstring);
 
         $dom = new DOMDocument();
@@ -307,6 +308,7 @@ class totara_core_xml_testcase extends advanced_testcase {
 
         $htmlstring = file_get_contents($CFG->dirroot . "/totara/core/tests/fixtures/extentities.html");
         $pathtotextfile = $CFG->dirroot . "/totara/core/tests/fixtures/test.txt";
+        $pathtotextfile = str_replace('\\', '/', $pathtotextfile);
         $htmlstring = str_replace("test.txt", $pathtotextfile, $htmlstring);
 
         $dom = new DOMDocument();
@@ -542,6 +544,7 @@ class totara_core_xml_testcase extends advanced_testcase {
         $dom = new DOMDocument();
         $dom->substituteEntities = true;
         $doctype = '<!DOCTYPE html [ <!ENTITY file SYSTEM "' . $CFG->dirroot . '/totara/core/tests/fixtures/test.txt"> ]>';
+        $doctype = str_replace('\\', '/', $doctype);
         $newhtml = str_replace('Text', '&file;', $html);
         $dom->loadXML($doctype.$newhtml);
         $this->assertFalse($this->searchDOMDocument($dom, '&gt;'));
@@ -620,6 +623,7 @@ class totara_core_xml_testcase extends advanced_testcase {
 
         $xmlstring = file_get_contents($CFG->dirroot . "/totara/core/tests/fixtures/withextentitydtd.xml");
         $pathtodtdfile = $CFG->dirroot . "/totara/core/tests/fixtures/withexternal.dtd";
+        $pathtodtdfile = str_replace('\\', '/', $pathtodtdfile);
         $xmlstring = str_replace("withexternal.dtd", $pathtodtdfile, $xmlstring);
 
         $dom = new DOMDocument();
@@ -644,6 +648,7 @@ class totara_core_xml_testcase extends advanced_testcase {
 
         $falsedtdxmlstring = file_get_contents($CFG->dirroot . "/totara/core/tests/fixtures/falsedtd.xml");
         $pathtodtdfile = $CFG->dirroot . "/totara/core/tests/fixtures/test.txt";
+        $pathtodtdfile = str_replace('\\', '/', $pathtodtdfile);
         $falsedtdxmlstring = str_replace("test.txt", $pathtodtdfile, $falsedtdxmlstring);
 
         $dom = new DOMDocument();
@@ -755,6 +760,7 @@ class totara_core_xml_testcase extends advanced_testcase {
         $noentities = file_get_contents($CFG->dirroot . "/totara/core/tests/fixtures/noentities.xml");
         $extentities = file_get_contents($CFG->dirroot . "/totara/core/tests/fixtures/extentities.xml");
         $pathtotextfile = $CFG->dirroot . "/totara/core/tests/fixtures/test.txt";
+        $pathtotextfile = str_replace('\\', '/', $pathtotextfile);
         $extentities = str_replace("test.txt", $pathtotextfile, $extentities);
 
         $xml = simplexml_load_string($extentities);
@@ -792,10 +798,12 @@ class totara_core_xml_testcase extends advanced_testcase {
 
         $xmlstring = file_get_contents($CFG->dirroot . "/totara/core/tests/fixtures/withextentitydtd.xml");
         $pathtodtdfile = $CFG->dirroot . "/totara/core/tests/fixtures/withexternal.dtd";
+        $pathtodtdfile = str_replace('\\', '/', $pathtodtdfile);
         $xmlstring = str_replace("withexternal.dtd", $pathtodtdfile, $xmlstring);
 
         $falsedtd = file_get_contents($CFG->dirroot . "/totara/core/tests/fixtures/falsedtd.xml");
         $pathtotextfile = $CFG->dirroot . "/totara/core/tests/fixtures/test.txt";
+        $pathtotextfile = str_replace('\\', '/', $pathtotextfile);
         $falsedtd = str_replace("withexternal.dtd", $pathtotextfile, $falsedtd);
 
         // Will throw an error saying that &entitytext; is not defined (that is defined in the dtd file, but it can't
@@ -913,6 +921,7 @@ class totara_core_xml_testcase extends advanced_testcase {
 
         $extentities = file_get_contents($CFG->dirroot . "/totara/core/tests/fixtures/extentities.xml");
         $pathtotextfile = $CFG->dirroot . "/totara/core/tests/fixtures/test.txt";
+        $pathtotextfile = str_replace('\\', '/', $pathtotextfile);
         $extentities = str_replace("test.txt", $pathtotextfile, $extentities);
 
         $xml = new XMLReader();
@@ -958,10 +967,12 @@ class totara_core_xml_testcase extends advanced_testcase {
 
         $xmlstring = file_get_contents($CFG->dirroot . "/totara/core/tests/fixtures/withextentitydtd.xml");
         $pathtodtdfile = $CFG->dirroot . "/totara/core/tests/fixtures/withexternal.dtd";
+        $pathtodtdfile = str_replace('\\', '/', $pathtodtdfile);
         $xmlstring = str_replace("withexternal.dtd", $pathtodtdfile, $xmlstring);
 
         $falsedtd = file_get_contents($CFG->dirroot . "/totara/core/tests/fixtures/falsedtd.xml");
         $pathtotextfile = $CFG->dirroot . "/totara/core/tests/fixtures/test.txt";
+        $pathtotextfile = str_replace('\\', '/', $pathtotextfile);
         $falsedtd = str_replace("withexternal.dtd", $pathtotextfile, $falsedtd);
 
         // This will throw errors about entitytext not being defined both when its loaded and when we try to read it.
@@ -1037,6 +1048,7 @@ class totara_core_xml_testcase extends advanced_testcase {
 
         $extentities = file_get_contents($CFG->dirroot . "/totara/core/tests/fixtures/extentities.xml");
         $pathtotextfile = $CFG->dirroot . "/totara/core/tests/fixtures/test.txt";
+        $pathtotextfile = str_replace('\\', '/', $pathtotextfile);
         $extentities = str_replace("test.txt", $pathtotextfile, $extentities);
 
         $this->assertNotEquals(LIBXML_NOENT, XMLReader::SUBST_ENTITIES);
@@ -1129,6 +1141,7 @@ class totara_core_xml_testcase extends advanced_testcase {
 
         $extentities = file_get_contents($CFG->dirroot . "/totara/core/tests/fixtures/extentities.xml");
         $pathtotextfile = $CFG->dirroot . "/totara/core/tests/fixtures/test.txt";
+        $pathtotextfile = str_replace('\\', '/', $pathtotextfile);
         $extentities = str_replace("test.txt", $pathtotextfile, $extentities);
 
         $parsed = array();

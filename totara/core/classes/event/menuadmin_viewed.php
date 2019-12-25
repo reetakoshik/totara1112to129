@@ -61,7 +61,7 @@ class menuadmin_viewed extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "The user with id '{$this->userid}' viewed the main menu";
+        return "The user with id '{$this->userid}' viewed the top navigation editor";
     }
 
     /**

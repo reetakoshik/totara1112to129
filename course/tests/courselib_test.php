@@ -29,6 +29,7 @@ global $CFG;
 require_once($CFG->dirroot . '/course/lib.php');
 require_once($CFG->dirroot . '/course/tests/fixtures/course_capability_assignment.php');
 require_once($CFG->dirroot . '/enrol/imsenterprise/tests/imsenterprise_test.php');
+require_once($CFG->dirroot . '/files/externallib.php');
 
 class core_course_courselib_testcase extends advanced_testcase {
 
@@ -561,7 +562,6 @@ class core_course_courselib_testcase extends advanced_testcase {
         $course->summaryformat = FORMAT_PLAIN;
         $course->format = 'topics';
         $course->newsitems = 0;
-        $course->numsections = 5;
         $course->category = $defaultcategory;
         $original = (array) $course;
 
@@ -613,25 +613,26 @@ class core_course_courselib_testcase extends advanced_testcase {
         global $DB;
         $this->resetAfterTest(true);
 
+        $numsections = 5;
         $course = $this->getDataGenerator()->create_course(
                 array('shortname' => 'GrowingCourse',
                     'fullname' => 'Growing Course',
-                    'numsections' => 5),
+                    'numsections' => $numsections),
                 array('createsections' => true));
 
         // Ensure all 6 (0-5) sections were created and course content cache works properly
         $sectionscreated = array_keys(get_fast_modinfo($course)->get_section_info_all());
-        $this->assertEquals(range(0, $course->numsections), $sectionscreated);
+        $this->assertEquals(range(0, $numsections), $sectionscreated);
 
         // this will do nothing, section already exists
-        $this->assertFalse(course_create_sections_if_missing($course, $course->numsections));
+        $this->assertFalse(course_create_sections_if_missing($course, $numsections));
 
         // this will create new section
-        $this->assertTrue(course_create_sections_if_missing($course, $course->numsections + 1));
+        $this->assertTrue(course_create_sections_if_missing($course, $numsections + 1));
 
         // Ensure all 7 (0-6) sections were created and modinfo/sectioninfo cache works properly
         $sectionscreated = array_keys(get_fast_modinfo($course)->get_section_info_all());
-        $this->assertEquals(range(0, $course->numsections + 1), $sectionscreated);
+        $this->assertEquals(range(0, $numsections + 1), $sectionscreated);
     }
 
     public function test_update_course() {
@@ -961,18 +962,18 @@ class core_course_courselib_testcase extends advanced_testcase {
         // Delete last section.
         $this->assertTrue(course_delete_section($course, 6, true));
         $this->assertFalse($DB->record_exists('course_modules', array('id' => $assign6->cmid)));
-        $this->assertEquals(5, course_get_format($course)->get_course()->numsections);
+        $this->assertEquals(5, course_get_format($course)->get_last_section_number());
 
         // Delete empty section.
         $this->assertTrue(course_delete_section($course, 4, false));
-        $this->assertEquals(4, course_get_format($course)->get_course()->numsections);
+        $this->assertEquals(4, course_get_format($course)->get_last_section_number());
 
         // Delete section in the middle (2).
         $this->assertFalse(course_delete_section($course, 2, false));
         $this->assertTrue(course_delete_section($course, 2, true));
         $this->assertFalse($DB->record_exists('course_modules', array('id' => $assign21->cmid)));
         $this->assertFalse($DB->record_exists('course_modules', array('id' => $assign22->cmid)));
-        $this->assertEquals(3, course_get_format($course)->get_course()->numsections);
+        $this->assertEquals(3, course_get_format($course)->get_last_section_number());
         $this->assertEquals(array(0 => array($assign0->cmid),
             1 => array($assign1->cmid),
             2 => array($assign3->cmid),
@@ -2575,7 +2576,7 @@ class core_course_courselib_testcase extends advanced_testcase {
         $caps = course_capability_assignment::allow('moodle/category:manage', $roleid, $context->id);
 
         $courses = $category->get_courses();
-        $this->assertInternalType('array', $courses);
+        $this->assertIsArray($courses);
         $this->assertEquals(array($course1->id, $course2->id, $course3->id), array_keys($courses));
         $dbcourses = $DB->get_records('course', array('category' => $category->id), 'sortorder', 'id');
         $this->assertEquals(array_keys($dbcourses), array_keys($courses));
@@ -2583,7 +2584,7 @@ class core_course_courselib_testcase extends advanced_testcase {
         // Test moving down.
         $this->assertTrue(course_change_sortorder_after_course($course1->id, $course3->id));
         $courses = $category->get_courses();
-        $this->assertInternalType('array', $courses);
+        $this->assertIsArray($courses);
         $this->assertEquals(array($course2->id, $course3->id, $course1->id), array_keys($courses));
         $dbcourses = $DB->get_records('course', array('category' => $category->id), 'sortorder', 'id');
         $this->assertEquals(array_keys($dbcourses), array_keys($courses));
@@ -2591,7 +2592,7 @@ class core_course_courselib_testcase extends advanced_testcase {
         // Test moving up.
         $this->assertTrue(course_change_sortorder_after_course($course1->id, $course2->id));
         $courses = $category->get_courses();
-        $this->assertInternalType('array', $courses);
+        $this->assertIsArray($courses);
         $this->assertEquals(array($course2->id, $course1->id, $course3->id), array_keys($courses));
         $dbcourses = $DB->get_records('course', array('category' => $category->id), 'sortorder', 'id');
         $this->assertEquals(array_keys($dbcourses), array_keys($courses));
@@ -2599,7 +2600,7 @@ class core_course_courselib_testcase extends advanced_testcase {
         // Test moving to the top.
         $this->assertTrue(course_change_sortorder_after_course($course1->id, 0));
         $courses = $category->get_courses();
-        $this->assertInternalType('array', $courses);
+        $this->assertIsArray($courses);
         $this->assertEquals(array($course1->id, $course2->id, $course3->id), array_keys($courses));
         $dbcourses = $DB->get_records('course', array('category' => $category->id), 'sortorder', 'id');
         $this->assertEquals(array_keys($dbcourses), array_keys($courses));
@@ -2646,7 +2647,7 @@ class core_course_courselib_testcase extends advanced_testcase {
         $course1 = $generator->create_course(array('category' => $category->id));
 
         $courses = $category->get_courses();
-        $this->assertInternalType('array', $courses);
+        $this->assertIsArray($courses);
         $this->assertEquals(array($course1->id, $course2->id, $course3->id), array_keys($courses));
         $dbcourses = $DB->get_records('course', array('category' => $category->id), 'sortorder', 'id');
         $this->assertEquals(array_keys($dbcourses), array_keys($courses));
@@ -2655,7 +2656,7 @@ class core_course_courselib_testcase extends advanced_testcase {
         $course1 = get_course($course1->id);
         $this->assertTrue(course_change_sortorder_by_one($course1, false));
         $courses = $category->get_courses();
-        $this->assertInternalType('array', $courses);
+        $this->assertIsArray($courses);
         $this->assertEquals(array($course2->id, $course1->id, $course3->id), array_keys($courses));
         $dbcourses = $DB->get_records('course', array('category' => $category->id), 'sortorder', 'id');
         $this->assertEquals(array_keys($dbcourses), array_keys($courses));
@@ -2664,7 +2665,7 @@ class core_course_courselib_testcase extends advanced_testcase {
         $course1 = get_course($course1->id);
         $this->assertTrue(course_change_sortorder_by_one($course1, true));
         $courses = $category->get_courses();
-        $this->assertInternalType('array', $courses);
+        $this->assertIsArray($courses);
         $this->assertEquals(array($course1->id, $course2->id, $course3->id), array_keys($courses));
         $dbcourses = $DB->get_records('course', array('category' => $category->id), 'sortorder', 'id');
         $this->assertEquals(array_keys($dbcourses), array_keys($courses));
@@ -2674,7 +2675,7 @@ class core_course_courselib_testcase extends advanced_testcase {
         $this->assertFalse(course_change_sortorder_by_one($course1, true));
         // Check nothing changed.
         $courses = $category->get_courses();
-        $this->assertInternalType('array', $courses);
+        $this->assertIsArray($courses);
         $this->assertEquals(array($course1->id, $course2->id, $course3->id), array_keys($courses));
         $dbcourses = $DB->get_records('course', array('category' => $category->id), 'sortorder', 'id');
         $this->assertEquals(array_keys($dbcourses), array_keys($courses));
@@ -2684,7 +2685,7 @@ class core_course_courselib_testcase extends advanced_testcase {
         $this->assertFalse(course_change_sortorder_by_one($course3, false));
         // Check nothing changed.
         $courses = $category->get_courses();
-        $this->assertInternalType('array', $courses);
+        $this->assertIsArray($courses);
         $this->assertEquals(array($course1->id, $course2->id, $course3->id), array_keys($courses));
         $dbcourses = $DB->get_records('course', array('category' => $category->id), 'sortorder', 'id');
         $this->assertEquals(array_keys($dbcourses), array_keys($courses));
@@ -3548,7 +3549,7 @@ class core_course_courselib_testcase extends advanced_testcase {
 
         // Delete empty section. No difference from normal, synchronous behaviour.
         $this->assertTrue(course_delete_section($course, 4, false, true));
-        $this->assertEquals(3, course_get_format($course)->get_course()->numsections);
+        $this->assertEquals(3, course_get_format($course)->get_last_section_number());
 
         // Delete a module in section 2 (using async). Need to verify this doesn't generate two tasks when we delete
         // the section in the next step.
@@ -3576,7 +3577,7 @@ class core_course_courselib_testcase extends advanced_testcase {
         $this->assertEquals(3, $DB->count_records('course_modules', ['section' => $sectionid, 'deletioninprogress' => 1]));
 
         // Confirm the section has been deleted.
-        $this->assertEquals(2, course_get_format($course)->get_course()->numsections);
+        $this->assertEquals(2, course_get_format($course)->get_last_section_number());
 
         // Check event fired.
         $events = $sink->get_events();
@@ -3645,7 +3646,7 @@ class core_course_courselib_testcase extends advanced_testcase {
 
         // Delete empty section. No difference from normal, synchronous behaviour.
         $this->assertTrue(course_delete_section($course, 4, false, true));
-        $this->assertEquals(3, course_get_format($course)->get_course()->numsections);
+        $this->assertEquals(3, course_get_format($course)->get_last_section_number());
 
         // Delete section in the middle (2).
         $section = $DB->get_record('course_sections', ['course' => $course->id, 'section' => '2']); // For event comparison.
@@ -3666,7 +3667,7 @@ class core_course_courselib_testcase extends advanced_testcase {
         $this->assertEmpty($cmcount);
 
         // Confirm the section has been deleted.
-        $this->assertEquals(2, course_get_format($course)->get_course()->numsections);
+        $this->assertEquals(2, course_get_format($course)->get_last_section_number());
 
         // Confirm the course_section_deleted event has been generated.
         $events = $sink->get_events();
@@ -3751,5 +3752,87 @@ class core_course_courselib_testcase extends advanced_testcase {
         $this->assertEquals(COURSE_TIMELINE_FUTURE, course_classify_for_timeline($futurecourse));
         $this->assertEquals(COURSE_TIMELINE_PAST, course_classify_for_timeline($completedcourse));
         $this->assertEquals(COURSE_TIMELINE_INPROGRESS, course_classify_for_timeline($inprogresscourse));
+    }
+
+    public function course_get_return_url_data_provider() {
+        return [
+            // Requests for a specific url should use it.
+            // This will throw exception due to missing sesskey.
+            [
+                'courseid' => 1,
+                'categoryid' => 3,
+                'returnto' => 'url',
+                'returnurl' => '/some/url/path',
+                'expectedurl' => new \moodle_url('/some/url/path'),
+            ],
+            // Requests to return to a specific category should go there.
+            [
+                'courseid' => 1,
+                'categoryid' => 3,
+                'returnto' => 'category',
+                'returnurl' => 'anything',
+                'expectedurl' => new \moodle_url('/course/index.php', ['categoryid' => 3]),
+            ],
+            // Requests to specific category on management page should go there.
+            [
+                'courseid' => 1,
+                'categoryid' => 2,
+                'returnto' => 'catmanage',
+                'returnurl' => 'anything',
+                'expectedurl' => new \moodle_url('/course/management.php', ['categoryid' => 2]),
+            ],
+            // Requests to top of management page should go there.
+            [
+                'courseid' => 1,
+                'categoryid' => 2,
+                'returnto' => 'topcatmanage',
+                'returnurl' => 'anything',
+                'expectedurl' => new \moodle_url('/course/management.php'),
+            ],
+            // Requests to top category should go to course index.
+            [
+                'courseid' => 1,
+                'categoryid' => 2,
+                'returnto' => 'topcat',
+                'returnurl' => 'anything',
+                'expectedurl' => new \moodle_url('/course/'),
+            ],
+            // Requests for pending courses should go to pending page.
+            [
+                'courseid' => 1,
+                'categoryid' => 2,
+                'returnto' => 'pending',
+                'returnurl' => 'anything',
+                'expectedurl' => new \moodle_url('/course/pending.php'),
+            ],
+            // No specific return but valid courseid should go to course.
+            [
+                'courseid' => 1,
+                'categoryid' => 2,
+                'returnto' => '0',
+                'returnurl' => '',
+                'expectedurl' => new \moodle_url('/course/view.php', ['id' => 1]),
+            ],
+            // No specific return and no valid courseid should go to course index.
+            [
+                'courseid' => 0,
+                'categoryid' => 2,
+                'returnto' => '0',
+                'returnurl' => '',
+                'expectedurl' => new \moodle_url('/course/'),
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider course_get_return_url_data_provider
+     */
+    public function test_course_get_return_url(int $courseid, int $categoryid, ?string $returnto, ?string $returnurl, \moodle_url $expectedurl) {
+        if ($returnto == 'url') {
+            // Explicit URL request checks sesskey which we don't have here.
+            $this->expectException('moodle_exception');
+        }
+        $url = course_get_return_url($courseid, $categoryid, $returnto, $returnurl);
+        $this->assertEquals($expectedurl, $url);
     }
 }

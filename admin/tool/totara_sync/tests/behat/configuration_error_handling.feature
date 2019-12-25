@@ -12,11 +12,11 @@ Feature: Verify configuration error handling in HR Import.
     And I click on "Settings" "link" in the "User" "table_row"
     Then I should see "User element settings"
 
-    When I set the field "Source" to "CSV"
+    When I set the field "CSV" to "1"
     And I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
 
-    When I follow "Configure source"
+    When I follow "configured here"
     Then I should see "User - CSV source settings"
 
     When I press "Save changes"
@@ -33,15 +33,15 @@ Feature: Verify configuration error handling in HR Import.
     And I click on "Settings" "link" in the "User" "table_row"
     Then I should see "User element settings"
 
-    When I set the field "Source" to "External Database"
+    When I set the field "External Database" to "1"
     And I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
 
     Given the following "user" HR Import database source exists:
       | idnumber | username | firstname | lastname | email                     | deleted | timemodified |
       | 1        | learner1 | Bob1      | Learner1 | bob1.learner1@example.com | 0       | 0            |
 
-    When I follow "Configure source"
+    When I follow "configured here"
     Then I should see "User - external database source settings"
 
     When I press "Save changes"

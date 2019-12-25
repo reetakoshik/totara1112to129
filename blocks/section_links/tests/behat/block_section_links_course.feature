@@ -1,4 +1,4 @@
-@block @block_section_links
+@block @block_section_links @javascript
 Feature: The section links block allows users to quickly navigate around a moodle course
   In order to navigate a moodle course
   As a teacher
@@ -15,8 +15,7 @@ Feature: The section links block allows users to quickly navigate around a moodl
       | user     | course | role |
       | teacher1 | C1     | editingteacher |
     And I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Assignment" to section "5" and I fill the form with:
       | Assignment name | Test assignment 1 |
       | Description | Offline text |
@@ -26,7 +25,6 @@ Feature: The section links block allows users to quickly navigate around a moodl
       | id_numsections   | 20 |
       | id_coursedisplay | Show one section per page |
     And I press "Save and display"
-
 
   Scenario: Add the section links block to a course.
     Given I add the "Section links" block

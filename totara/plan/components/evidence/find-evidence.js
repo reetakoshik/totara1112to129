@@ -95,7 +95,7 @@ M.totara_plan_find_evidence = M.totara_plan_find_evidence || {
 
         var url = M.cfg.wwwroot + '/totara/plan/components/'+this.config.component_name+'/';
         var evidenceurl = M.cfg.wwwroot + '/totara/plan/components/evidence/';
-        var saveurl = evidenceurl + 'update-evidence.php?planid='+this.config.plan_id+'&component='+this.config.component_name+'&itemid='+this.config.item_id+'&update=';
+        var saveurl = evidenceurl + 'update-evidence.php?sesskey=' + M.cfg.sesskey + '&planid='+this.config.plan_id+'&component='+this.config.component_name+'&itemid='+this.config.item_id+'&update=';
 
         var handler = new this.totaraDialog_handler_preRequisite();
         handler.baseurl = url;

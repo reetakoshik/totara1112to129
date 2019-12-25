@@ -23,14 +23,10 @@ Feature: An admin can update only existing courses using a CSV file without rese
     And I should see "Courses total: 3"
     And I should see "Courses updated: 2"
     And I should see "Courses created: 0"
-    And I am on site homepage
-
-    When I follow "Course 1"
+    When I am on "Course 1" course homepage
     And I navigate to "Edit settings" in current page administration
     Then the field "Course Type" matches value "Blended"
-
-    And I am on site homepage
-    When I follow "Course 2"
+    When I am on "Course 2" course homepage
     And I navigate to "Edit settings" in current page administration
     Then the field "Course Type" matches value "Seminar"
 

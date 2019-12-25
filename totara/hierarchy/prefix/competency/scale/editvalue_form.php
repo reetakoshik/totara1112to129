@@ -63,21 +63,8 @@ class competencyscalevalue_edit_form extends moodleform {
         $mform->addHelpButton('numericscore', 'competencyscalevaluenumericalvalue', 'totara_hierarchy');
         $mform->setType('numericscore', PARAM_RAW);
 
-        if (competency_scale_is_used($scaleid)) {
-           $note = html_writer::tag('span', get_string('proficientvaluefrozen', 'totara_hierarchy'), array('class' => 'notifyproblem'));
-           $freeze = true;
-        } else if ($id != 0 && competency_scale_only_proficient_value($scaleid) == $id) {
-           $note = html_writer::tag('span', get_string('proficientvaluefrozenonlyprof', 'totara_hierarchy'), array('class' => 'notifyproblem'));
-            $freeze = true;
-        } else {
-            $note = '';
-            $freeze = false;
-        }
-        $mform->addElement('advcheckbox', 'proficient', get_string('competencyscaleproficient', 'totara_hierarchy'), $note);
+        $mform->addElement('advcheckbox', 'proficient', get_string('competencyscaleproficient', 'totara_hierarchy'));
         $mform->addHelpButton('proficient', 'competencyscaleproficient', 'totara_hierarchy');
-        if ($freeze) {
-            $mform->hardFreeze('proficient');
-        }
 
         $mform->addElement('editor', 'description_editor', get_string('description'), null, $TEXTAREA_OPTIONS);
         $mform->addHelpButton('description_editor', 'competencyscalevaluedescription', 'totara_hierarchy');

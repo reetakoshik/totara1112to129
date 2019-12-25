@@ -28,15 +28,13 @@ define('DEFAULT_NUMBER_OF_PHOTOS', 6);
 class block_tag_flickr extends block_base {
 
     function init() {
+        // Totara: Title override is done via get_title();
+        // Default title supplied here matches the title in specialization, so leaving it only here.
         $this->title = get_string('pluginname','block_tag_flickr');
     }
 
     function applicable_formats() {
         return array('tag' => true);
-    }
-
-    function specialization() {
-        $this->title = !empty($this->config->title) ? $this->config->title : get_string('pluginname', 'block_tag_flickr');
     }
 
     function instance_allow_multiple() {

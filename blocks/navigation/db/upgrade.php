@@ -65,5 +65,24 @@ function xmldb_block_navigation_upgrade($oldversion, $block) {
     // Automatically generated Moodle v3.2.0 release upgrade line.
     // Put any upgrade step following this.
 
+    // Automatically generated Moodle v3.3.0 release upgrade line.
+    // Put any upgrade step following this.
+
+    // Totara 12 branching line.
+    if ($oldversion < 2017051500.01) {
+        // Remove 'navigation' block instances from the system.
+        $blockids = $DB->get_fieldset_select('block_instances', 'id', 'blockname = ?', ['navigation']);
+        if (!empty($blockids)) {
+            foreach ($blockids as $bid) {
+                context_helper::delete_instance(CONTEXT_BLOCK, $bid);
+                $DB->delete_records('block_positions', ['blockinstanceid' => $bid]);
+                $DB->delete_records('block_instances', ['id' => $bid]);
+                $DB->delete_records_list('user_preferences', 'name', ['block' . $bid . 'hidden', 'docked_block_instance_' . $bid]);
+            }
+        }
+
+        upgrade_plugin_savepoint(true, 2017051500.01, 'block', 'navigation');
+    }
+
     return true;
 }

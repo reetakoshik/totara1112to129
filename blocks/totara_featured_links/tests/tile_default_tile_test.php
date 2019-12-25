@@ -26,7 +26,7 @@ require_once('test_helper.php');
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Tests the methods on the \block_totara_featured_links\tile\default_tile class
+ * Tests the methods on the block_totara_featured_links\tile\default_tile class
  */
 class block_totara_featured_links_tile_default_tile_testcase extends test_helper {
 
@@ -54,6 +54,7 @@ class block_totara_featured_links_tile_default_tile_testcase extends test_helper
      */
     public function test_get_accessibility_text() {
         $this->resetAfterTest();
+        $this->setAdminUser();
         $blockinstance = $this->blockgenerator->create_instance();
         $tile1 = $this->blockgenerator->create_default_tile($blockinstance->id);
         $access_text = $tile1->get_accessibility_text();
@@ -90,7 +91,7 @@ class block_totara_featured_links_tile_default_tile_testcase extends test_helper
         $data->alt_text = 'This is some alternative text';
 
         $tile1->save_content($data);
-        $tile_real = new \block_totara_featured_links\tile\default_tile($DB->get_record('block_totara_featured_links_tiles', ['id' => $tile1->id]));
+        $tile_real = new block_totara_featured_links\tile\default_tile($DB->get_record('block_totara_featured_links_tiles', ['id' => $tile1->id]));
 
         $this->assertSame('some heading', $this->get_protected_property($tile_real, 'data')->heading);
         $this->assertSame('some textbody', $this->get_protected_property($tile_real, 'data')->textbody);

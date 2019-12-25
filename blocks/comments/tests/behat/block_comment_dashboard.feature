@@ -1,4 +1,4 @@
-@block @block_comments
+@block @block_comments @javascript
 Feature: Enable Block comments on the dashboard and view comments
   In order to enable the comments block on a the dashboard
   As a teacher
@@ -12,15 +12,6 @@ Feature: Enable Block comments on the dashboard and view comments
       | username | firstname | lastname | email |
       | teacher1 | Teacher | Frist | teacher1@example.com |
 
-  Scenario: Add the comments block on the dashboard and add comments with Javascript disabled
-    When I log in as "teacher1"
-    And I press "Customise this page"
-    And I add the "Comments" block
-    And I follow "Show comments"
-    And I add "I'm a comment from the teacher" comment to comments block
-    Then I should see "I'm a comment from the teacher"
-
-  @javascript
   Scenario: Add the comments block on the dashboard and add comments with Javascript enabled
     When I log in as "teacher1"
     And I press "Customise this page"

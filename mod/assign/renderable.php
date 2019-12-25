@@ -748,6 +748,8 @@ class assign_grading_summary implements renderable {
     public $teamsubmission = false;
     /** @var boolean warnofungroupedusers - Do we need to warn people that there are users without groups */
     public $warnofungroupedusers = false;
+    /** @var boolean cangrade - Can the current user grade students? */
+    public $cangrade = false;
     /** @var boolean gradingnotrequired - The assignment does not require grading */
     public $gradingnotrequired = false;
 
@@ -764,6 +766,7 @@ class assign_grading_summary implements renderable {
      * @param int $coursemoduleid
      * @param int $submissionsneedgradingcount
      * @param bool $teamsubmission
+     * @param bool $cangrade
      * @param bool $gradingnotrequired
      */
     public function __construct($participantcount,
@@ -777,6 +780,7 @@ class assign_grading_summary implements renderable {
                                 $submissionsneedgradingcount,
                                 $teamsubmission,
                                 $warnofungroupedusers,
+                                $cangrade = false,
                                 $gradingnotrequired = false) {
         $this->participantcount = $participantcount;
         $this->submissiondraftsenabled = $submissiondraftsenabled;
@@ -789,6 +793,7 @@ class assign_grading_summary implements renderable {
         $this->submissionsneedgradingcount = $submissionsneedgradingcount;
         $this->teamsubmission = $teamsubmission;
         $this->warnofungroupedusers = $warnofungroupedusers;
+        $this->cangrade = $cangrade;
         $this->gradingnotrequired = $gradingnotrequired;
     }
 }
@@ -870,7 +875,7 @@ class assign_files implements renderable {
      * @param string $component
      */
     public function __construct(context $context, $sid, $filearea, $component) {
-        global $CFG;
+        global $CFG, $DB, $USER;
         $this->context = $context;
         list($context, $course, $cm) = get_context_info_array($context->id);
         $this->cm = $cm;
@@ -885,7 +890,23 @@ class assign_files implements renderable {
                                      'timemodified',
                                      false);
 
-        if (!empty($CFG->enableportfolios)) {
+        // TOTARA TL-18569: Check for user against submission, only a user should be
+        // able to export their own submission.
+        $submission = $DB->get_record('assign_submission', array('id' => $sid));
+        $canexportportfolio = false;
+
+        if (!empty($submission)) {
+            if ($submission->userid == 0)  {
+                // This must be a group submission.
+                if (groups_is_member($submission->groupid, $USER->id)) {
+                    $canexportportfolio = true;
+                }
+            } else if ($USER->id == $submission->userid) {
+                $canexportportfolio = true;
+            }
+        }
+
+        if (!empty($CFG->enableportfolios) && $canexportportfolio) {
             require_once($CFG->libdir . '/portfoliolib.php');
             if (count($files) >= 1 && !empty($sid) &&
                     has_capability('mod/assign:exportownsubmission', $this->context)) {
@@ -921,7 +942,8 @@ class assign_files implements renderable {
         }
         foreach ($dir['files'] as $file) {
             $file->portfoliobutton = '';
-            if (!empty($CFG->enableportfolios)) {
+            // TOTARA TL-18569: Remove export to portfolio links in grading interface.
+            /*if (!empty($CFG->enableportfolios)) {
                 require_once($CFG->libdir . '/portfoliolib.php');
                 $button = new portfolio_add_button();
                 if (has_capability('mod/assign:exportownsubmission', $this->context)) {
@@ -932,7 +954,7 @@ class assign_files implements renderable {
                     $button->set_format_by_file($file);
                     $file->portfoliobutton = $button->to_html(PORTFOLIO_ADD_ICON_LINK);
                 }
-            }
+            }*/
             $path = '/' .
                     $this->context->id .
                     '/' .

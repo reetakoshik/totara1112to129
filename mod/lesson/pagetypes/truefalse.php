@@ -124,30 +124,30 @@ class lesson_page_type_truefalse extends lesson_page {
             $cells = array();
             if ($this->lesson->custom && $answer->score > 0) {
                 // if the score is > 0, then it is correct
-                $cells[] = '<span class="labelcorrect">'.get_string("answer", "lesson")." $i</span>: \n";
+                $cells[] = '<span class="mod_lesson__labelcorrect">'.get_string("answer", "lesson")." $i</span>:";
             } else if ($this->lesson->custom) {
-                $cells[] = '<span class="label">'.get_string("answer", "lesson")." $i</span>: \n";
+                $cells[] = '<span class="mod_lesson__label">'.get_string("answer", "lesson")." $i</span>:";
             } else if ($this->lesson->jumpto_is_correct($this->properties->id, $answer->jumpto)) {
                 // underline correct answers
-                $cells[] = '<span class="correct">'.get_string("answer", "lesson")." $i</span>: \n";
+                $cells[] = '<span class="correct">'.get_string("answer", "lesson")." $i</span>:";
             } else {
-                $cells[] = '<span class="labelcorrect">'.get_string("answer", "lesson")." $i</span>: \n";
+                $cells[] = '<span class="mod_lesson__labelcorrect">'.get_string("answer", "lesson")." $i</span>:";
             }
             $cells[] = format_text($answer->answer, $answer->answerformat, $options);
             $table->data[] = new html_table_row($cells);
 
             $cells = array();
-            $cells[] = "<span class=\"label\">".get_string("response", "lesson")." $i</span>";
+            $cells[] = "<span class=\"mod_lesson__label\">".get_string("response", "lesson")." $i</span>:";
             $cells[] = format_text($answer->response, $answer->responseformat, $options);
             $table->data[] = new html_table_row($cells);
 
             $cells = array();
-            $cells[] = "<span class=\"label\">".get_string("score", "lesson").'</span>';
+            $cells[] = "<span class=\"mod_lesson__label\">".get_string("score", "lesson").'</span>:';
             $cells[] = $answer->score;
             $table->data[] = new html_table_row($cells);
 
             $cells = array();
-            $cells[] = "<span class=\"label\">".get_string("jump", "lesson").'</span>';
+            $cells[] = "<span class=\"mod_lesson__label\">".get_string("jump", "lesson").'</span>:';
             $cells[] = $this->get_jump_name($answer->jumpto);
             $table->data[] = new html_table_row($cells);
 

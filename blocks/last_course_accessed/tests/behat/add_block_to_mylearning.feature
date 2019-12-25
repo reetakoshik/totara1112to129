@@ -1,4 +1,4 @@
-@totara @block @block_last_course_accessed
+@totara @block @block_last_course_accessed @javascript
 Feature: User can add and remove LCA block to / from default Dashboard.
 
   Background:
@@ -20,7 +20,7 @@ Feature: User can add and remove LCA block to / from default Dashboard.
     And I follow "Delete Last Course Accessed block"
     Then I should see "Are you sure that you want to delete this block titled Last Course Accessed?"
     When I press "Yes"
-    Then I should see "Last Course Accessed" in the "Add a block" "select"
+    Then the add block selector should contain "Last Course Accessed" block
     And I add the "Last Course Accessed" block
     And I should see "Last Course Accessed" in the "Last Course Accessed" "block"
 
@@ -39,7 +39,7 @@ Feature: User can add and remove LCA block to / from default Dashboard.
     And I follow "Delete Last Course Accessed block"
     Then I should see "Are you sure that you want to delete this block titled Last Course Accessed?"
     When I press "Yes"
-    Then I should see "Last Course Accessed" in the "Add a block" "select"
+    Then the add block selector should contain "Last Course Accessed" block
     And I add the "Last Course Accessed" block
     And I should see "Last Course Accessed" in the "Last Course Accessed" "block"
 

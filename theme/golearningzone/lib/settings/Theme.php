@@ -22,19 +22,36 @@ class Theme
     const FAVICON = 'themefavicon';
     const FAVICON_LABLE = 'settings-theme-favicon';
     const FAVICON_DESCRIPTION = 'settings-theme-favicondescription';
-    
+    const RMBTITLE = 'rmbtitle';
+    const RMBTITLE_LABLE = 'settings-header-rmbtitle';
+    const RMBTITLE_DESCRIPTION = 'settings-header-rmbtitledescription';
+
     private $page;
 
     public function __construct($ADMIN)
     {
         $this->createPage($ADMIN);
         if ($ADMIN->fulltree) {
+            $this->rmblocktitle();
             $this->palette();
             $this->customPalette();
             $this->color();
             $this->backgroundImage();
             $this->favicon();
         }
+    }
+
+    private function rmblocktitle()
+    {
+        $name = static::THEME.'/'.static::RMBTITLE;
+        $title = get_string(static::RMBTITLE_LABLE, static::THEME);
+        $description = get_string(static::RMBTITLE_DESCRIPTION, static::THEME);
+        $yes = 1;
+        $no = 0;
+        $default = $no;
+        $setting = new \admin_setting_configcheckbox($name, $title, $description, $default);
+        $setting->set_updatedcallback('theme_reset_all_caches');
+        $this->page->add($setting);
     }
 
     private function createPage($ADMIN)

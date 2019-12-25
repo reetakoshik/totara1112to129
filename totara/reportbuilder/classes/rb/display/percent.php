@@ -28,7 +28,7 @@ namespace totara_reportbuilder\rb\display;
  */
 class percent extends base {
     public static function display($value, $format, \stdClass $row, \rb_column $column, \reportbuilder $report) {
-        return $value === null ? null : sprintf('%.1f%%', $value);
+        return $value === null ? '-' : sprintf('%.1f%%', $value);
     }
 
     public static function is_graphable(\rb_column $column, \rb_column_option $option, \reportbuilder $report) {

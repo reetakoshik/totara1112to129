@@ -366,6 +366,57 @@ class mysql_sql_generator extends sql_generator {
     }
 
     /**
+     * Given one correct xmldb_index, returns the SQL statements
+     * needed to create it (in array).
+     *
+     * @param xmldb_table $xmldb_table The xmldb_table instance to create the index on.
+     * @param xmldb_index $xmldb_index The xmldb_index to create.
+     * @return array An array of SQL statements to create the index.
+     * @throws coding_exception Thrown if the xmldb_index does not validate with the xmldb_table.
+     */
+    public function getCreateIndexSQL($xmldb_table, $xmldb_index) {
+        global $CFG;
+
+        if ($error = $xmldb_index->validateDefinition($xmldb_table)) {
+            throw new coding_exception($error);
+        }
+
+        $enablengram = false;
+        if (isset($CFG->dboptions['ftsngram'])) {
+            $enablengram = (bool) $CFG->dboptions['ftsngram'];
+        }
+
+        $hints = $xmldb_index->getHints();
+        $fields = $xmldb_index->getFields();
+        if (in_array('full_text_search', $hints)) {
+            $tablename = $this->getTableName($xmldb_table);
+            $fieldname = reset($fields);
+            $indexname = $this->getNameForObject($xmldb_table->getName(), $fieldname, 'fts');
+            $language = $this->mdb->get_ftslanguage();
+
+            $sqls = array();
+            $sqlindex = "CREATE FULLTEXT INDEX {$indexname} ON {$tablename} ({$fieldname})";
+
+            if ($enablengram && $this->mdb->get_dbvendor() === 'mysql') {
+                // Exclude mariadb;
+                $ngram = $this->mdb->record_exists_sql(
+                    "SELECT 1 FROM information_schema.PLUGINS WHERE PLUGIN_NAME = 'ngram' AND PLUGIN_STATUS = 'ACTIVE'"
+                );
+
+                if ($ngram) {
+                    $sqlindex .= " WITH PARSER NGRAM";
+                }
+            }
+
+            $sqls[] = $sqlindex;
+            $sqls[] = "ALTER TABLE {$tablename} MODIFY COLUMN {$fieldname} LONGTEXT COLLATE {$language}";
+            return $sqls;
+        }
+
+        return parent::getCreateIndexSQL($xmldb_table, $xmldb_index);
+    }
+
+    /**
      * Given one XMLDB Type, length and decimals, returns the DB proper SQL type.
      *
      * @param int $xmldb_type The xmldb_type defined constant. XMLDB_TYPE_INTEGER and other XMLDB_TYPE_* constants.

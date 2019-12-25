@@ -22,6 +22,7 @@ function addtobackpack(event, args) {
  * Check if website is externally accessible from the backpack.
  */
 function check_site_access() {
+    // TL-18131 Added js_pending checks to better locations
     var callback = {
         method: "GET",
         on: {
@@ -32,13 +33,20 @@ function check_site_access() {
                         var context = {message: data.response};
                         templateLib.render('core/notification_warning', context).done(function(html) {
                             document.getElementById('maincontent').insertAdjacentHTML('afterend', html);
+                            M.util.js_complete('badge/backpack::check_site_access');
                         });
                     });
+                } else {
+                    M.util.js_complete('badge/backpack::check_site_access');
                 }
+            },
+            failure: function() {
+                M.util.js_complete('badge/backpack::check_site_access');
             }
         }
     };
 
+    M.util.js_pending('badge/backpack::check_site_access');
     Y.use('io-base', function(Y) {
         Y.io('ajax.php', callback);
     });

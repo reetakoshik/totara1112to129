@@ -45,11 +45,12 @@ $string['completionposname'] = 'Completion Position Name';
 $string['grade'] = 'Grade';
 $string['passgrade'] = 'Pass Grade';
 $string['requiredgrade'] = 'Grade and required grade';
+$string['rplnote'] = 'RPL note';
 $string['timetocompletesinceenrol'] = 'Time to complete (since enrol date)';
 $string['timetocompletesincestart'] = 'Time to complete (since start date)';
 $string['progress'] = 'Progress';
-$string['progressnumeric'] = 'Progress (numeric)';
-$string['progresspercent'] = 'Progress (% complete)';
+$string['progressnumeric'] = 'Progress';
+$string['progresspercent'] = 'Progress (%)';
 // filters
 $string['datecompleted'] = 'Date Completed';
 $string['completionstatus'] = 'Completion Status';

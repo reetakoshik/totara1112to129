@@ -23,7 +23,7 @@ Feature: See that program visibility affects Required Learning content correctly
       | firstjob     | firstjob    | user001   | user003   |
     # Get back the removed dashboard item for now.
     And I log in as "admin"
-    And I navigate to "Main menu" node in "Site administration > Appearance"
+    And I navigate to "Main menu" node in "Site administration > Navigation"
     And I click on "Edit" "link" in the "Required Learning" "table_row"
     And I set the field "Parent item" to "Top"
     And I press "Save changes"
@@ -47,8 +47,7 @@ Feature: See that program visibility affects Required Learning content correctly
   @javascript
   Scenario: Normal visibility (default), hidden, RL should be shown and link to the program.
     When I log in as "admin"
-    And I click on "Programs" in the totara menu
-    And I click on "RoLProgVisibility Test Program 1" "link"
+    And I am on "RoLProgVisibility Test Program 1" program homepage
     And I click on "Edit program details" "button"
     And I click on "Details" "link"
     And I set the field "Visible" to "0"
@@ -64,7 +63,7 @@ Feature: See that program visibility affects Required Learning content correctly
   @javascript
   Scenario: Audience visibility, all users (default), RL should be shown and link to the program.
     When I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
@@ -78,13 +77,12 @@ Feature: See that program visibility affects Required Learning content correctly
   @javascript
   Scenario: Audience visibility, enrolled users and auds, RL should be shown and link to the program.
     When I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
 
-    When I click on "Programs" in the totara menu
-    And I click on "RoLProgVisibility Test Program 1" "link"
+    When I am on "RoLProgVisibility Test Program 1" program homepage
     And I click on "Edit program details" "button"
     And I click on "Details" "link"
     And I set the field "Visibility" to "Enrolled users and members of the selected audiences"
@@ -100,13 +98,12 @@ Feature: See that program visibility affects Required Learning content correctly
   @javascript
   Scenario: Audience visibility, enrolled users, RL should be shown and link to the program.
     When I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
 
-    When I click on "Programs" in the totara menu
-    And I click on "RoLProgVisibility Test Program 1" "link"
+    When I am on "RoLProgVisibility Test Program 1" program homepage
     And I click on "Edit program details" "button"
     And I click on "Details" "link"
     And I set the field "Visibility" to "Enrolled users only"
@@ -122,13 +119,12 @@ Feature: See that program visibility affects Required Learning content correctly
   @javascript
   Scenario: Audience visibility, enrolled users, 2nd program assigned, RL should be shown.
     When I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
 
-    When I click on "Programs" in the totara menu
-    And I click on "RoLProgVisibility Test Program 1" "link"
+    When I am on "RoLProgVisibility Test Program 1" program homepage
     And I click on "Edit program details" "button"
     And I click on "Details" "link"
     And I set the field "Visibility" to "Enrolled users only"
@@ -145,13 +141,12 @@ Feature: See that program visibility affects Required Learning content correctly
   @javascript
   Scenario: Audience visibility, no users, RL should not be visible.
     When I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
 
-    When I click on "Programs" in the totara menu
-    And I click on "RoLProgVisibility Test Program 1" "link"
+    When I am on "RoLProgVisibility Test Program 1" program homepage
     And I click on "Edit program details" "button"
     And I click on "Details" "link"
     And I set the field "Visibility" to "No users"
@@ -165,13 +160,12 @@ Feature: See that program visibility affects Required Learning content correctly
   @javascript
   Scenario: Audience visibility, no users, 2nd program assigned, RL should be visible and go straight to prog 2.
     When I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
 
-    When I click on "Programs" in the totara menu
-    And I click on "RoLProgVisibility Test Program 1" "link"
+    When I am on "RoLProgVisibility Test Program 1" program homepage
     And I click on "Edit program details" "button"
     And I click on "Details" "link"
     And I set the field "Visibility" to "No users"
@@ -201,7 +195,7 @@ Feature: See that program visibility affects Required Learning content correctly
 
     When I log out
     And I log in as "admin"
-    And I navigate to "Logs" node in "Site administration > Reports"
+    And I navigate to "Logs" node in "Site administration > Server"
     And I press "Get these logs"
     Then I should see "The program 1 was viewed by user 5."
     Then I should not see "The program 1 was viewed by user 3."

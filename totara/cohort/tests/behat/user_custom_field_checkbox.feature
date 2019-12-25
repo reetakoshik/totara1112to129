@@ -43,7 +43,7 @@ Feature: Test dynamic audience with user profile custom checkbox fields.
     Given I log in as "admin"
     # Unfortunately new custom fields are popping up in auth plugin settings.
     And I confirm new default admin settings
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "TestAudience"
     And I switch to "Rule sets" tab
     And I set the field "addrulesetmenu" to "upck"

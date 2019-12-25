@@ -36,18 +36,13 @@ $PAGE->set_context($systemcontext);
 
 $output = $PAGE->get_renderer('totara_appraisal');
 
-$report = new reportbuilder($detailreportid, null, false, null, 'setup');
-
-// Check that the user has permission to view the report. Uses report builder access settings.
-if (!$report->is_capable($detailreportid)) {
-    print_error('nopermission', 'totara_reportbuilder');
-}
+$report = reportbuilder::create($detailreportid, null, true);
 
 $fullname = $report->fullname;
 
 // Start page output.
 $PAGE->set_url('/totara/appraisal/rb_source/appraisaldetailselector.php', array('detailreportid' => $detailreportid));
-$PAGE->set_totara_menu_selected('myreports');
+$PAGE->set_totara_menu_selected('\totara_core\totara\menu\myreports');
 $PAGE->set_pagelayout('noblocks');
 $heading = get_string('myappraisals', 'totara_appraisal');
 $PAGE->set_title($heading);

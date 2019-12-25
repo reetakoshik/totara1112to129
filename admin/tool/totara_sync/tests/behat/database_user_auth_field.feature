@@ -4,17 +4,17 @@ Feature: Test the user database auth field import.
   Background:
     Given I am on a totara site
     When I log in as "admin"
-    And I navigate to "General settings" node in "Site administration > HR Import"
+    And I navigate to "Default settings" node in "Site administration > HR Import"
     And I set the following fields to these values:
-      | File Access | Upload Files |
+      | File access | Upload Files |
     And I press "Save changes"
     And I navigate to "Manage elements" node in "Site administration > HR Import > Elements"
     And I "Enable" the "User" HR Import element
     And I navigate to "User" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source | External Database |
+      | External Database | 1 |
     And I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
 
   Scenario: Test user auth field import has case sensitivity checks using database source
 
@@ -35,7 +35,7 @@ Feature: Test the user database auth field import.
     When I navigate to "HR Import Log" node in "Site administration > HR Import"
     Then I should see "created user 1"
     And I should see "invalid authentication plugin MANUAL for user 2"
-    And I should see "cannot create user 3: invalid authentication plugin"
+    And I should see "Auth cannot be empty. Skipped user 3"
     And I should see "created user 4"
     And I should see "invalid authentication plugin Shibboleth for user 5"
     And I should see "invalid authentication plugin DOES-NOT-EXIST for user 6"
@@ -43,7 +43,7 @@ Feature: Test the user database auth field import.
     And I press "Continue"
 
     # Check there are no errors in user profiles.
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I should see "Upload User 1"
     And I should not see "Upload User 2"
     And I should not see "Upload User 3"
@@ -53,7 +53,7 @@ Feature: Test the user database auth field import.
     And I follow "Edit profile"
     Then I should see "Upload User 1"
     And I should see "Manual accounts"
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Upload User 4"
     And I follow "Edit profile"
     Then I should see "Upload User 4"
@@ -66,13 +66,13 @@ Feature: Test the user database auth field import.
     When I navigate to "HR Import Log" node in "Site administration > HR Import"
     Then I should see "updated user 1"
     And I should see "invalid authentication plugin MANUAL for user 2"
-    And I should see "cannot create user 3: invalid authentication plugin"
+    And I should see "Auth cannot be empty. Skipped user 3"
     And I should see "updated user 4"
     And I should see "invalid authentication plugin Shibboleth for user 5"
     And I should see "invalid authentication plugin DOES-NOT-EXIST for user 6"
 
     # Check there are no errors in user profiles.
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I should see "Upload User 1"
     And I should not see "Upload User 2"
     And I should not see "Upload User 3"
@@ -82,7 +82,7 @@ Feature: Test the user database auth field import.
     And I follow "Edit profile"
     Then I should see "Upload User 1"
     And I should see "Manual accounts"
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Upload User 4"
     And I follow "Edit profile"
     Then I should see "Upload User 4"
@@ -108,11 +108,11 @@ Feature: Test the user database auth field import.
     And I press "Continue"
 
     # Check there are no errors in user profiles.
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Upload User 1"
     And I follow "Edit profile"
     Then I should see "Upload User 1"
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Upload User 2"
     And I follow "Edit profile"
     Then I should see "Upload User 2"
@@ -127,11 +127,11 @@ Feature: Test the user database auth field import.
     And I should see "updated user 2"
 
     # Check there are no errors in user profiles.
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Upload User 1"
     And I follow "Edit profile"
     Then I should see "Upload User 1"
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Upload User 2"
     And I follow "Edit profile"
     Then I should see "Upload User 2"

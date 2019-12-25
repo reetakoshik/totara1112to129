@@ -180,7 +180,7 @@ class totara_cohort_organisation_rules_testcase extends advanced_testcase {
         $orgtype1 = $DB->insert_record('org_type', $newtype);
 
         // Verify the record was created correctly.
-        $this->assertInternalType('int', $orgtype1);
+        $this->assertIsInt($orgtype1);
 
         // Assign the type organisation to org1.
         $this->assertTrue($DB->set_field('org', 'typeid', $orgtype1, array('id' => $this->org1->id)));

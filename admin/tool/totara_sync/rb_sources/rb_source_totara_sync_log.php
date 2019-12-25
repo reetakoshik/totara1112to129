@@ -25,10 +25,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 class rb_source_totara_sync_log extends rb_base_source {
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
-
     function __construct() {
         $this->base = '{totara_sync_log}';
         $this->joinlist = $this->define_joinlist();
@@ -40,6 +36,7 @@ class rb_source_totara_sync_log extends rb_base_source {
         $this->defaultfilters = $this->define_defaultfilters();
         $this->requiredcolumns = $this->define_requiredcolumns();
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_totara_sync_log');
+        $this->usedcomponents[] = 'tool_totara_sync';
         parent::__construct();
     }
 
@@ -68,13 +65,15 @@ class rb_source_totara_sync_log extends rb_base_source {
                 'totara_sync_log',
                 'id',
                 'id',
-                "base.id"
+                "base.id",
+                array('displayfunc' => 'integer')
             ),
             new rb_column_option(
                 'totara_sync_log',
                 'runid',
                 get_string('runid', 'tool_totara_sync'),
-                "base.runid"
+                "base.runid",
+                array('displayfunc' => 'integer')
             ),
             new rb_column_option(
                 'totara_sync_log',
@@ -90,14 +89,15 @@ class rb_source_totara_sync_log extends rb_base_source {
                 get_string('element', 'tool_totara_sync'),
                 "base.element",
                 array('dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'plaintext')
             ),
             new rb_column_option(
                 'totara_sync_log',
                 'logtype',
                 get_string('logtype', 'tool_totara_sync'),
                 "base.logtype",
-                array('displayfunc' => 'logtype')
+                array('displayfunc' => 'totara_sync_log_type')
             ),
             new rb_column_option(
                 'totara_sync_log',
@@ -105,7 +105,8 @@ class rb_source_totara_sync_log extends rb_base_source {
                 get_string('action', 'tool_totara_sync'),
                 "base.action",
                 array('dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'plaintext')
             ),
             new rb_column_option(
                 'totara_sync_log',
@@ -113,7 +114,8 @@ class rb_source_totara_sync_log extends rb_base_source {
                 get_string('info', 'tool_totara_sync'),
                 "base.info",
                 array('dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'plaintext')
             ),
         );
 
@@ -283,7 +285,16 @@ class rb_source_totara_sync_log extends rb_base_source {
     //
     //
 
+    /**
+     * Display log type
+     *
+     * @deprecated Since Totara 12.0
+     * @param $type
+     * @param $row
+     * @return string
+     */
     function rb_display_logtype($type, $row) {
+        debugging('rb_source_totara_sync_log::rb_display_logtype has been deprecated since Totara 12.0. Use tool_totara_sync\rb\display\totara_sync_log_type::display', DEBUG_DEVELOPER);
         switch ($type) {
             case 'error':
                 $class = 'notifyproblem';

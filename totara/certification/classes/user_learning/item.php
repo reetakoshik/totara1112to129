@@ -214,6 +214,7 @@ class item extends item_base implements item_has_progress, item_has_dueinfo {
      * so if it is not null then we already have the data we need.
      */
     public function ensure_completion_loaded() {
+        global $OUTPUT;
 
         if ($this->progress_canbecompleted === null) {
 
@@ -229,23 +230,9 @@ class item extends item_base implements item_has_progress, item_has_dueinfo {
             $this->progress_canbecompleted = true;
             $this->progress_percentage = $certificationprogress;
 
-            if ($certificationprogress > 0) {
-                $this->progress_summary = get_string('xpercentcomplete', 'totara_core', $certificationprogress);
-            } else {
-                $this->progress_summary = get_string('notyetstarted', 'completion');
-
-                // Hack to set item progress as 'In Progress' if any course within it has a progress percentage above zero.
-                // We need this as the certification api is not retrieving the progress correctly.
-                // We are only doing this if $certificationprogress is 0.
-                // TODO: Remove this once the certification api is returning the correct progress.
-                foreach ($this->coursesets as $set) {
-                    foreach ($set->get_courses() as $course) {
-                        if ($course->get_progress_percentage() > 0) {
-                            $this->progress_summary = new \lang_string('inprogress', 'completion');
-                        }
-                    }
-                }
-            }
+            $pbar = new \static_progress_bar('', '0');
+            $pbar->set_progress((int)$this->progress_percentage);
+            $this->progress_pbar = $pbar->export_for_template($OUTPUT);
         }
     }
 
@@ -259,7 +246,7 @@ class item extends item_base implements item_has_progress, item_has_dueinfo {
 
         $record = new \stdClass;
         $record->summary = (string)$this->progress_summary;
-        $record->percentage = $this->progress_percentage;
+        $record->pbar = $this->progress_pbar;
         return $record;
     }
 

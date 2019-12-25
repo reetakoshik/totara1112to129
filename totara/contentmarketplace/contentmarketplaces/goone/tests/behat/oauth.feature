@@ -1,4 +1,4 @@
-@local @totara_contentmarketplace @contentmarketplace_goone
+@totara @totara_contentmarketplace @contentmarketplace_goone
 Feature: Establish API connection with GO1
 
   @javascript @_switch_window
@@ -7,7 +7,6 @@ Feature: Establish API connection with GO1
     And I log in as "admin"
     And I navigate to "Setup Content Marketplaces" node in "Site administration > Content Marketplace"
     And I should see "What is Content Marketplace?"
-    And I click on "Enable content marketplaces" "button"
     And I should see "Enable" in the ".contentmarketplace_goone" "css_element"
     When I click on "Enable" "link" in the ".contentmarketplace_goone" "css_element"
     And I switch to "setup" window
@@ -35,7 +34,6 @@ Feature: Establish API connection with GO1
     And I log in as "admin"
     And I navigate to "Setup Content Marketplaces" node in "Site administration > Content Marketplace"
     And I should see "What is Content Marketplace?"
-    And I click on "Enable content marketplaces" "button"
     And I should see "Enable" in the ".contentmarketplace_goone" "css_element"
     When I click on "Enable" "link" in the ".contentmarketplace_goone" "css_element"
     And I switch to "setup" window
@@ -60,9 +58,8 @@ Feature: Establish API connection with GO1
   Scenario: Set up a previously enabled GO1 marketplace
     Given I am on a totara site
     And the following config values are set as admin:
-      | enablecontentmarketplaces | 1                 |                          |
-      | enabled                   | 1                        | contentmarketplace_goone |
-      | oauth_access_token        | --INVALID-ACCESS-TOKEN-- | contentmarketplace_goone |
+      | enabled            | 1                        | contentmarketplace_goone |
+      | oauth_access_token | --INVALID-ACCESS-TOKEN-- | contentmarketplace_goone |
     And I log in as "admin"
     And I navigate to "Manage Content Marketplaces" node in "Site administration > Content Marketplace"
     And I should not see "What is Content Marketplace?"
@@ -87,8 +84,7 @@ Feature: Establish API connection with GO1
   Scenario: Skip content marketplace introduction after at least one marketplace has been enabled at some point
     Given I am on a totara site
     And the following config values are set as admin:
-      | enablecontentmarketplaces | 1 |                          |
-      | enabled                   | 0 | contentmarketplace_goone |
+      | enabled | 0 | contentmarketplace_goone |
     And I log in as "admin"
     And I navigate to "Manage Content Marketplaces" node in "Site administration > Content Marketplace"
     And I should not see "What is Content Marketplace?"

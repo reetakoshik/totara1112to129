@@ -39,7 +39,7 @@ Feature: Verify course completion data can be successfully uploaded.
     And I should see "1 Records successfully imported as courses"
     And I should see "1 Records in total"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob1 Learner1"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     Then I should see "100%" in the "Course 1" "table_row"
@@ -53,7 +53,7 @@ Feature: Verify course completion data can be successfully uploaded.
     And I should see "1 Records successfully imported as courses"
     And I should see "1 Records in total"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob1 Learner1"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     Then I should see "100%" in the "Course 1" "table_row"
@@ -91,7 +91,7 @@ Feature: Verify course completion data can be successfully uploaded.
     And I should see "1 Records created as evidence"
     And I should see "2 Records in total"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob1 Learner1"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     Then I should see "100%" in the "Course 1" "table_row"
@@ -144,7 +144,7 @@ Feature: Verify course completion data can be successfully uploaded.
     And I should see "1 Records created as evidence"
     And I should see "2 Records in total"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob1 Learner1"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     Then I should see "100%" in the "Course 1" "table_row"
@@ -169,7 +169,7 @@ Feature: Verify course completion data can be successfully uploaded.
     And I should see "1 Records created as evidence"
     And I should see "2 Records in total"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob1 Learner1"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     Then I should see "100%" in the "Course 1" "table_row"
@@ -191,7 +191,7 @@ Feature: Verify course completion data can be successfully uploaded.
     And I should see "1 Records created as evidence"
     And I should see "2 Records in total"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob1 Learner1"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     Then I should see "100%" in the "Course 1" "table_row"

@@ -60,6 +60,11 @@ class css_processor {
     /**
      * @var string
      */
+    public static $DEFAULT_PRIMARYBUTTONCOLOR = '#36A5A6';
+
+    /**
+     * @var string
+     */
     public static $DEFAULT_CONTENTBACKGROUND = '#FFFFFF';
 
     /**
@@ -71,6 +76,11 @@ class css_processor {
      * @var string
      */
     public static $DEFAULT_TEXTCOLOR = '#333366';
+
+    /**
+     * @var string
+     */
+    public static $DEFAULT_NAVTEXTCOLOR = '#FFFFFF';
 
     /**
      * @var string

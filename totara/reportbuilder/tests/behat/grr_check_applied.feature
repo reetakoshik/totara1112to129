@@ -11,7 +11,7 @@ Feature: Check global report restrictions default settings
       | Enable report restrictions | 1 |
 
   Scenario: Check default embeded report status
-    Given I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage embedded reports" node in "Site administration > Reports"
     And I click on "Edit this report" "button"
     And I switch to "Columns" tab
     And I add the "Global report restrictions" column to the report
@@ -30,7 +30,8 @@ Feature: Check global report restrictions default settings
     And I should see "No" in the "Goal Summary (View)" "table_row"
 
   Scenario: Check default created report status
-    Given I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | Audience report  |
       | Source      | Audience Members |

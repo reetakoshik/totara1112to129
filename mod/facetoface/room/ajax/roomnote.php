@@ -23,20 +23,23 @@
  * @subpackage facetoface
  */
 
+define('AJAX_SCRIPT', true);
+
 require_once(__DIR__ . '/../../../../config.php');
 
 $roomid = required_param('id', PARAM_INT);  // room id
 
 // Setup / loading data
-require_login();
+ajax_require_login();
 
 // Legacy Totara HTML ajax, this should be converted to json + AJAX_SCRIPT.
 send_headers('text/html; charset=utf-8', false);
 
-if (!$room = $DB->get_record('facetoface_room', array('id' => $roomid))) {
+if (empty($roomid)) {
     exit;
 }
 
-if ($room->allowconflicts) {
+$room = new \mod_facetoface\room($roomid);
+if ($room->get_allowconflicts()) {
     echo get_string('allowconflictswarning', 'facetoface');
 }

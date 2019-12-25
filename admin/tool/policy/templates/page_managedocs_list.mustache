@@ -1,0 +1,341 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tool_policy/page_managedocs_list
+
+    Template for the policy documents management page.
+
+    Classes required for JS:
+    -
+
+    Data attributes required for JS:
+    * data-policy-name
+    * data-policy-revision
+    * data-action
+
+    Context variables required for this template:
+    * haspolicies
+    * policies
+
+    Example context (json):
+    {
+        "title": "Manage policies",
+        "backurl": "/",
+        "pluginbaseurl": "/admin/tool/policy/",
+        "canviewacceptances": true,
+        "canmanage": true,
+        "versions": [
+            {
+                "id": 1,
+                "name": "Terms &amp; conditions",
+                "typetext": "Site policy",
+                "audiencetext": "All users",
+                "statustext": "Active",
+                "optionaltext": "Optional",
+                "revision": "1.0",
+                "timemodified": 1521531208,
+                "acceptancescounturl": "#",
+                "acceptancescounttext": "10 out of 1000 (1%)"
+            },
+            {
+                "indented": true,
+                "name": "Terms &amp; conditions",
+                "typetext": "Site policy",
+                "audiencetext": "All users",
+                "statustext": "Draft",
+                "optionaltext": "Compulsory",
+                "revision": "2.0",
+                "timemodified": 1521531208,
+                "acceptancescounttext": "N/A"
+            }
+        ]
+    }
+}}
+<script>
+var i = 1;
+</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.js"></script> 
+<div>{{i}} 
+<div class="headingBarPanel">     
+<h2 class="leftHeadBar">{{{title}}}</h2>
+<div class="rhtButtonPanel">
+<div class="btn-group">
+        {{#canownermanage}}
+            <a href="{{pluginbaseurl}}/editpolicydoc.php" class="btn btn-primary">{{#str}} newpolicy, tool_policy {{/str}}</a>
+        {{/canownermanage}} 
+        </div>
+<a href="#" class="btn btn-primary">{{#str}} policytemplatemanager, tool_policy {{/str}}</a> <a href="#" class="btn btn-primary">{{#str}} policycommitteesetup, tool_policy {{/str}}</a></div>
+</div>
+</div>
+{{#backurl}}
+    <div>
+        <div class="btn-group">
+            <a href="{{backurl}}" class="btn btn-secondary">{{#str}} back {{/str}}</a>
+        </div>
+    </div>
+{{/backurl}}
+{{#canaddnew}}
+    <div class="bottomFilterCreateNew">
+     <div class="btn-group">
+        <form method="post" action="{{pluginbaseurl}}/managedocs.php" id="policysrcform" >
+        <input type="text" class="form-control searchpolicy" id="searchpolicy" placeholder="Search the policy" value="{{searchby}}" name="searchpolicy">
+        <input type="submit" name="policysumit" class="btn" value="Search">
+        <a href="{{pluginbaseurl}}/managedocs.php" class="btn"> Clear </a>
+        </form>
+    </div> 
+     <form method="post" action="{{pluginbaseurl}}/managedocs.php" id="policyfilterform" class="policyfilterform" name="policyfilterform" >
+      
+      <h5 class="managedocshtag"> {{#str}} policyfilterby, tool_policy {{/str}} </h5>
+		<select class="custom-select singleselect addtomenu filterMenu" id="filterpolicy" name="group" value ="">
+                 {{#filteroptions}} 
+                 <option value =  > Choose Filter </option>
+                 <option value = {{date}} {{dateselected}}> {{date}} </option>
+                 <option value = {{revision}} {{revisionselected}}> {{revision}} </option>
+                 <option value = {{status}}  {{statusselected}}> {{status}} </option>
+                 <option value = {{type}}  {{typeselected}}> {{type}} </option>
+                 <option value = {{lang}} {{langselected}} > {{lang}} </option>
+                 <option value = {{comp}}  {{compselected}}> {{comp}} </option>
+                 {{/filteroptions}}
+        	</select>
+            </form>
+    </div>
+{{/canaddnew}}
+
+
+<div class="dataTablePolicies">
+<table id="tool-policy-managedocs-wrapper firstpolicy" class="generaltable fullwidth listpolicydocuments">
+    <thead>
+        <tr>
+            <th scope="col" width="3%">&nbsp;</th>
+            <th scope="col" width="18%">{{#str}} policydocname, tool_policy {{/str}}</th>
+            <th scope="col" width="14%;">{{#str}} policyrevision, tool_policy {{/str}}</th>
+            <th scope="col" width="11%;">{{#str}} policylanguage, tool_policy {{/str}}</th>
+            <th scope="col" width="16%;">{{#str}} status, tool_policy {{/str}}</th>
+            <th scope="col" width="14%;">{{#str}} policylastmodify, tool_policy {{/str}} </th>
+            <th scope="col" width="14%;" style="text-align:center;">{{#str}} policycompletion, tool_policy {{/str}}</th>
+            
+            {{#canmanage}}
+              <th scope="col" width="10%;">{{#str}} policyaction, tool_policy {{/str}}</th>
+			<th scope="col" width="4%;"> </th>
+            {{/canmanage}}
+        </tr>
+    </thead>
+    <tbody class="dropDown">
+        {{#versions}}
+        
+        <tr data-policy-name="{{{name}}}" data-policy-revision="{{revision}}" id="{{sortorder}}">
+		<td colspan="9" style="margin:0; padding:0;">
+		 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="policyRowOne">
+
+		 <tr>
+         <td width="4%;" align="center"><span class="flex-icon ft-fw ft ft-fw ft fa-arrows"></span></td>
+            <td width="18%;">
+                {{#indented}}
+                <div style="float:left">
+                    {{#pix}} level, tool_policy {{/pix}}
+                </div>
+                {{/indented}}
+                <div {{#indented}}style="margin-left: 24px" {{/indented}}>
+                    <div><a href="{{{viewmainpolicy}}}" class="decornone">{{{name}}}</a></div>
+                    <div class="text-muted, muted"><small>{{{typetext}}}, {{{audiencetext}}}, {{{optionaltext}}}</small></div>
+                </div>
+            </td>
+            <td width="14%;">
+            {{revision}}
+            </td>
+            <td width="11%" >
+             {{primarylang}}
+            </td>
+            <td width="16%">
+            {{{statustext}}}    
+            </td>
+            <td width="14%">
+                <div class="text-muted, muted">
+                    <small>
+                        <time title="{{#str}} lastmodified, core {{/str}}" datetime="{{#userdate}} {{timemodified}}, %Y-%m-%dT%T%z {{/userdate}}">
+                            {{#userdate}} {{timemodified}}, {{#str}} strftimedatetime, core_langconfig {{/str}} {{/userdate}}
+                        </time>
+                    </small>
+                </div>
+            </td>
+            <td width="14%">
+                <div class="clearfix">
+                    <div class="c100 p{{percentagesVal}} small" style="margin: 0 auto;">
+                        <span>{{percentages}}</span>
+                        <div class="slice">
+                            <div class="bar {{graphcolor}}" ></div>
+                            <div class="fill" ></div>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        
+            
+
+            {{#canmanage}}
+            <td width="10%">
+                {{#actionmenu}}
+               <span class="action-policy actionDropdown onelineClass">
+			    
+			    {{>core/action_menu }} 
+				
+               </span>
+                {{/actionmenu}}
+		  {{#graph}}
+            <a href="{{pluginbaseurl}}/acceptances.php?versionid={{id}}"><span class="flex-icon ft-fw ft fa fa-chart-bar"> </span> </a>
+            {{/graph}}
+            </td>
+			<td width="4%">
+            {{#subpolicychild}}
+			<span class="plusAcc flex-icon ft-fw ft fa accordion plus-active" data-parent-toggle="{{id}}" id="parenttoggle_{{id}}"></span>
+            {{/subpolicychild}}
+            {{^subpolicychild}}
+            <span width="4%;" style="width:20px; display: flex;"></span>
+            {{/subpolicychild}}
+			</td>
+            {{/canmanage}}
+			</tr>
+            <tr id="subparenttoggle_{{id}}"  class="accordianBox" style="display:none;">
+  <td colspan="9"><table celspacing="0" cellpadding="0" border="0">
+      <tbody>
+           {{#subpolicyparent}}
+			<tr >
+		<td colspan="9" style="padding:0;">
+		<div >
+		 <table cellpadding="0" cellspacing="0" border="0">
+		<tr>
+		<td width="4%;" align="center"><span class="flex-icon ft-fw ft ft-fw ft fa-arrows"></span></td>
+		<td width="18%;"><div>
+					<div><a href="{{{viewsubpolicy}}}" class="decornone">{{name}} </a></div>
+                            <div class="text-muted, muted"><small>{{type}},{{audience}},{{optional}}</small></div>
+                        </div></td>
+        <td  width="14%;">
+                    {{revision}}
+                    </td>
+        <td  width="11%;">
+                    {{primarylang1}}
+                    </td>
+        <td width="16%;">{{{statustext1}}} </td>
+		<td width="14%;"><div class="text-muted, muted">
+							<small>
+								<time title="Last modified" datetime="2019-06-10T08:11:02+0100">
+									10 June 2019, 8:11 AM
+								</time>
+							</small>
+						</div></td>
+		<td width="14%;"> <div class="clearfix">
+                    <div class="c100 p{{subpercentageVal}} small" style="margin: 0 auto;">
+                        <span>{{subpercentages}}</span>
+                        <div class="slice">
+                            <div class="bar"style="border:.08em solid {{graphcolor1}};"></div>
+                            <div class="fill"></div>
+                        </div>
+                    </div>
+                </div>  </td>
+		 <td width="10%;">  {{#action2}}
+               <span class="action-policy actionDropdown onelineClass">
+                
+                {{>core/action_menu }} 
+                
+               </span>
+                {{/action2}}
+        {{#graph1}}        
+        <a href="{{pluginbaseurl}}/acceptances.php?versionid={{id}}"><span class="flex-icon ft-fw ft fa fa-chart-bar"> </span> </a>
+        {{/graph1}}
+         </td> 
+		 <td width="4%;" style="width:20px; display: flex;">
+			&nbsp;
+			</td>
+		  
+		</tr>
+		</table>
+		</div>
+		</td>
+		</tr>
+		{{/subpolicyparent}}
+        </table></td>
+  
+</tr>
+		  </table>
+		  </td>	
+        </tr>
+		{{/versions}}
+    </tbody>
+</table>
+</div>
+{{#js}}
+require(['tool_policy/managedocsactions'], function(ManageDocsActions) {
+    //ManageDocsActions.init('tool-policy-managedocs-wrapper');
+});
+$('.action-policy a img').hide();
+$('.action-policy .textmenu').html('<span class="flex-icon ft-fw ft fa fa-cog fa-cogBlack"></span>');
+
+
+$('.dropDown').sortable({
+ delay: 150,
+         stop: function() {
+            var selectedData = new Array();
+            $('.dropDown>tr').each(function() {
+                selectedData.push($(this).attr("id"));
+            });
+            
+          updateOrder(selectedData);
+        }  
+
+});
+function updateOrder(data) {
+        $.ajax({
+            url:'{{pluginbaseurl}}/shortdata.php',
+            type:'post',
+            data:{position:data},
+            success:function(){
+                return true;
+            }
+        })
+    }
+
+ 
+ 
+ $(".plusAcc").click(function(){
+    var parenttoggleid = $(this).attr('data-parent-toggle');
+    $("#subparenttoggle_" + parenttoggleid).toggle();
+    $("#parenttoggle_" + parenttoggleid).toggleClass("plus-active");
+	$("#subparenttoggle_" + parenttoggleid).css('dispaly', '');
+ });
+ $('#searchpolicy').keypress(function(event){
+    
+    var keycode = (event.keyCode ? event.keyCode : event.which);
+    var policysearchtext = $("#searchpolicy").val();
+    if(keycode == '13'){
+         
+        }
+    
+});
+
+$('#filterpolicy').on('change', function() {
+ var filterpolicy = $(this).children("option:selected").val();
+
+$('#policyfilterform').submit();
+
+});
+
+{{/js}}
+
+
+
+ 

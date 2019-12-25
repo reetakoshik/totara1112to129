@@ -27,7 +27,7 @@ Feature: Global report restrictions multiple interactions
       | user1 | CH0    |
       | user2 | CH0    |
       | user3 | CH0    |
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Dynamic audience"
     And I switch to "Rule sets" tab
     And I set the field "id_addrulesetmenu" to "Last name"
@@ -60,7 +60,7 @@ Feature: Global report restrictions multiple interactions
       | dynamic static | Restriction 4 | 1      | 0          | 0        |
       | org dynamic    | Restriction 5 | 1      | 0          | 0        |
       | org static     | Restriction 6 | 1      | 0          | 0        |
-    And I navigate to "Global report restrictions" node in "Site administration > Reports > Report builder"
+    And I navigate to "Global report restrictions" node in "Site administration > Reports"
     And I click on "Edit" "link" in the "limited uses" "table_row"
     And I switch to "Users allowed to select restriction" tab
     And I set the field "menugroupselector" to "Audience"
@@ -146,7 +146,8 @@ Feature: Global report restrictions multiple interactions
     And I wait "1" seconds
     And I follow "All Restrictions"
 
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | User report |
       | Source      | User        |

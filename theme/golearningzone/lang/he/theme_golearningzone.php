@@ -32,6 +32,11 @@ $string['settings-header-notifications'] = 'הפעל הודעות';
 $string['settings-header-notificationsdescription'] = 'הפעל הודעות';
 $string['settings-header-messages'] = 'הפעל הודעות';
 $string['settings-header-messagesdescription'] = 'הפעל סמליל הודעות בראש העמוד';
+$string['settings-header-search'] = 'הפעל חיפוש';
+$string['settings-header-searchdescription'] = 'הפעל חיפוש';
+$string['settings-block-headerborder'] = 'השבת גבול כותרת';
+$string['settings-block-headerborderdescription'] = 'השבת גבול כותרת';
+
 
 $string['settings-theme-name'] = 'אפשרויות ערכת העיצוב';
 $string['settings-theme-palette'] = 'צבע עיקרי';

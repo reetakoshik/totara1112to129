@@ -36,6 +36,18 @@ define(['jquery', 'core/ajax', 'core/config', 'block_navigation/ajax_response_re
             return element.closest('[data-block]').attr('data-instanceid');
         }
 
+        /**
+         * Get the block instance type.
+         *
+         * @since Totara 12
+         * @function getBlockInstanceType
+         * @param {Element} element
+         * @returns {String} the instance type
+         */
+        function getBlockInstanceType(element) {
+            return element.closest('[data-block]').attr('data-block');
+        }
+
     return {
         load: function(element) {
             element = $(element);
@@ -45,7 +57,8 @@ define(['jquery', 'core/ajax', 'core/config', 'block_navigation/ajax_response_re
                 id: element.attr('data-node-key'),
                 type: element.attr('data-node-type'),
                 sesskey: config.sesskey,
-                instance: getBlockInstanceId(element)
+                instance: getBlockInstanceId(element),
+                blocktype: getBlockInstanceType(element)
             };
             var settings = {
                 type: 'POST',

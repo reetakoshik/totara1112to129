@@ -49,11 +49,11 @@ class totara_reportbuilder_lib_static_testcase extends advanced_testcase {
 
         // Generate the directories.
         $generateddirs = \reportbuilder::find_source_dirs(true);
-        $this->assertInternalType('array', $generateddirs);
+        $this->assertIsArray($generateddirs);
 
         // Get it from the cache.
         $cacheddirs = $cache->get($key);
-        $this->assertInternalType('array', $cacheddirs);
+        $this->assertIsArray($cacheddirs);
 
         // Confirm that it is the exact same list from the method and the cache.
         $this->assertSame($generateddirs, $cacheddirs);

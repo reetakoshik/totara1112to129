@@ -53,6 +53,11 @@ Feature: Test plan teamplate settings
     And I set the field "updatemanager" to "Deny"
     When I click on "Save changes" "button"
     Then I should see "Plan settings successfully updated"
+    And I switch to "Courses" tab
+    And I set the field "updatecourselearner" to "Deny"
+    And I set the field "updatecoursemanager" to "Deny"
+    When I click on "Save changes" "button"
+    Then I should see "Course settings successfully updated"
     And I log out
 
     Then I log in as "learner1"
@@ -88,9 +93,9 @@ Feature: Test plan teamplate settings
     # The admin is a superuser so they can always see
     # add buttons (ignoring permissions)
     When I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "firstname1 lastname1" "link"
-    And I click on "Learning Plans" "link"
+    And I click on "Learning Plans" "link" in the ".userprofile" "css_element"
     And I should see "You are viewing firstname1 lastname1's plans."
     And I click on "template 1" "link"
     And I switch to "Courses" tab

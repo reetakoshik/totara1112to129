@@ -4,6 +4,7 @@ if ($hassiteconfig) { // speedup for non-admins, add all caps used on this page
 
     $optionalsubsystems->add(new admin_setting_configcheckbox('enableoutcomes', new lang_string('enableoutcomes', 'grades'), new lang_string('enableoutcomes_help', 'grades'), 0));
     $optionalsubsystems->add(new admin_setting_configcheckbox('usecomments', new lang_string('enablecomments', 'admin'), new lang_string('configenablecomments', 'admin'), 1));
+    $optionalsubsystems->add(new admin_setting_configtext('commentsperpage', new lang_string('commentsperpage', 'admin'), '', 15, PARAM_INT));
 
     $optionalsubsystems->add(new admin_setting_configcheckbox('usetags', new lang_string('usetags','admin'),new lang_string('configusetags', 'admin'), '1'));
 
@@ -108,24 +109,19 @@ if ($hassiteconfig) { // speedup for non-admins, add all caps used on this page
     $setting->set_updatedcallback('totara_rb_purge_ignored_reports');
     $optionalsubsystems->add($setting);
 
-    // Enchanced catalog.
-    // Was upgrade - old catalog by default, otherwise - new catalog.
-    $defaultenhanced = 1;
-    $setting = new admin_setting_configcheckbox('enhancedcatalog',
-            new lang_string('enhancedcatalog', 'totara_core'),
-            new lang_string('configenhancedcatalog', 'totara_core'), $defaultenhanced);
-    $setting->set_updatedcallback('totara_menu_reset_cache');
-    $optionalsubsystems->add($setting);
-
     // Content Marketplaces.
     $optionalsubsystems->add(new admin_setting_configcheckbox('enablecontentmarketplaces',
             new lang_string('enablecontentmarketplaces', 'totara_contentmarketplace'),
-            new lang_string('enablecontentmarketplacesdesc', 'totara_contentmarketplace'), 0));
+            new lang_string('enablecontentmarketplacesdesc', 'totara_contentmarketplace'), 1));
 
     // Dynamic Appraisals.
     $optionalsubsystems->add(new admin_setting_configcheckbox('dynamicappraisals',
-            new lang_string('dynamicappraisals', 'totara_core'),
-            new lang_string('configdynamicappraisals', 'totara_core'), 1));
+        new lang_string('dynamicappraisals', 'totara_core'),
+        new lang_string('configdynamicappraisals', 'totara_core'), 1));
+
+    $optionalsubsystems->add(new admin_setting_configcheckbox('dynamicappraisalsautoprogress',
+        new lang_string('dynamicappraisalsautoprogress', 'totara_core'),
+        new lang_string('configdynamicappraisalsautoprogress', 'totara_core'), 1));
 
     // Show Hierarchy shortcodes.
     $optionalsubsystems->add(new admin_setting_configcheckbox('showhierarchyshortnames',
@@ -136,6 +132,10 @@ if ($hassiteconfig) { // speedup for non-admins, add all caps used on this page
     $optionalsubsystems->add(new admin_setting_configcheckbox('enableprogramextensionrequests',
         new lang_string('enableprogramextensionrequests', 'totara_core'),
         new lang_string('enableprogramextensionrequests_help', 'totara_core'), 1));
+
+    $optionalsubsystems->add(new admin_setting_configcheckbox('enablelegacyprogramassignments',
+        new lang_string('enablelegacyprogramassignments', 'totara_program'),
+        new lang_string('enablelegacyprogramassignments_help', 'totara_program'), 0));
 
     // If adding or removing the settings below, be sure to update the array in
     // totara_advanced_features_list() in totara/core/totara.php.
@@ -164,14 +164,14 @@ if ($hassiteconfig) { // speedup for non-admins, add all caps used on this page
         new lang_string('enablelearningplans', 'totara_plan'),
         new lang_string('configenablelearningplans', 'totara_plan'),
         TOTARA_SHOWFEATURE,
-        array('totara_menu_reset_cache', 'totara_rb_purge_ignored_reports',
+        array('totara_menu_reset_all_caches', 'totara_rb_purge_ignored_reports',
             array('enrol_totara_learningplan_util', 'feature_setting_updated_callback'))));
 
     $optionalsubsystems->add(new totara_core_admin_setting_feature('enableprograms',
         new lang_string('enableprograms', 'totara_program'),
         new lang_string('configenableprograms', 'totara_program'),
         TOTARA_SHOWFEATURE,
-        array('totara_menu_reset_cache', 'totara_rb_purge_ignored_reports',
+        array('totara_menu_reset_all_caches', 'totara_rb_purge_ignored_reports',
             array('enrol_totara_program_util', 'feature_setting_updated_callback'))));
 
     $optionalsubsystems->add(new totara_core_admin_setting_feature('enablecertifications',
@@ -220,4 +220,21 @@ if ($hassiteconfig) { // speedup for non-admins, add all caps used on this page
     $optionalsubsystems->add(new admin_setting_configcheckbox('enablesitepolicies',
         new lang_string('enablesitepolicies', 'tool_sitepolicy'),
         new lang_string('configenablesitepolicies', 'tool_sitepolicy'), 0));
+
+    // Catalog type.
+    $defaultcatalogtype = 'totara';
+    $options = [
+        'moodle' => get_string('catalog_old', 'totara_catalog'),
+        'enhanced' => get_string('catalog_enhanced', 'totara_catalog'),
+        'totara' => get_string('catalog_totara', 'totara_catalog'),
+    ];
+    $setting = new admin_setting_configselect(
+        'catalogtype',
+        new lang_string('catalogtype', 'totara_catalog'),
+        new lang_string('configcatalogtype', 'totara_catalog'),
+        $defaultcatalogtype,
+        $options
+    );
+    $setting->set_updatedcallback('totara_menu_reset_all_caches');
+    $optionalsubsystems->add($setting);
 }

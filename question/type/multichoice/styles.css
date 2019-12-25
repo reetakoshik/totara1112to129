@@ -6,8 +6,7 @@
 
 .que.multichoice .answer div.r0,
 .que.multichoice .answer div.r1 {
-    padding: 0.3em 0 0.3em 25px;
-    text-indent: -25px;
+    padding: 0.3em 0;
 }
 
 .que.multichoice .answer div.r0 label,

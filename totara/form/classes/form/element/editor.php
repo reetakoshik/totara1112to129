@@ -335,10 +335,11 @@ class editor extends element {
             $format = FORMAT_HTML;
         }
 
+        $newdraftfilearea = false;
         if ($this->get_current_file_area()) {
             if (empty($value['itemid'])) {
+                $newdraftfilearea = true;
                 $draftitemid = (int)file_get_unused_draft_itemid();
-                $text = file_area::rewrite_links_to_draftarea($text, $draftitemid);
             } else {
                 $draftitemid = (int)$value['itemid'];
             }
@@ -413,6 +414,21 @@ class editor extends element {
             $fpoptions['image'] = $image_options;
             $fpoptions['media'] = $media_options;
             $fpoptions['link'] = $link_options;
+        }
+
+        if ($newdraftfilearea) {
+            // Move any images that have been used from file storage into the draft file are, and update links to use those draft files.
+            $text = file_area::rewrite_links_to_draftarea($text, $draftitemid);
+        }
+
+        if (!$model->is_form_submitted() && $text !== '' && strlen($text) > 10) {
+            // Clean the text before we return it as context data.
+            // If we don't clean it then XSS can be performed when editing data.
+            // Notes:
+            //   - We intentionally do not support the noclean or trusttext madness!
+            //   - Only clean it if the data was NOT submit. If it was submit and we're here then the form is being redisplayed.
+            //     in which case we want to maintain exactly what they provided. Remember this is display only.
+            $text = clean_text($text, $format);
         }
 
         $attributes = array();

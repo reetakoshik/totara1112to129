@@ -45,6 +45,10 @@ class backup_totara_featured_links_block_task extends backup_block_task {
         );
     }
 
+    public function get_blockname() {
+        return 'totara_featured_links';
+    }
+
     /**
      * Define one array() of fileareas that each block controls
      */

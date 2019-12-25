@@ -1,4 +1,4 @@
-@block @block_login
+@block @block_login @javascript
 Feature: Login from a block
     In order to make it easier to login
     As an user

@@ -8,9 +8,9 @@ Feature: Verify that parentid is set correctly for position CSV uploads.
       | fullname             | idnumber |
       | Position Framework 1 | PF1      |
 
-    When I navigate to "General settings" node in "Site administration > HR Import"
+    When I navigate to "Default settings" node in "Site administration > HR Import"
     And I set the following fields to these values:
-      | File Access | Upload Files |
+      | File access | Upload Files |
     And I press "Save changes"
     Then I should see "Settings saved"
 
@@ -20,10 +20,10 @@ Feature: Verify that parentid is set correctly for position CSV uploads.
 
     When I navigate to "Position" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source                      | CSV |
+      | CSV                         | 1   |
       | Source contains all records | Yes |
     And I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
 
     When I navigate to "CSV" node in "Site administration > HR Import > Sources > Position"
     And I set the following fields to these values:
@@ -43,7 +43,7 @@ Feature: Verify that parentid is set correctly for position CSV uploads.
     Then I should not see "Error"
     And I should see "Running HR Import cron...Done!"
 
-    When I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    When I navigate to "Manage positions" node in "Site administration > Positions"
     And I follow "Position Framework 1"
     Then I should see these hierarchy items at the following depths:
       | Department Manager  | 1 |
@@ -76,7 +76,7 @@ Feature: Verify that parentid is set correctly for position CSV uploads.
     Then I should not see "Error"
     And I should see "Running HR Import cron...Done!"
 
-    When I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    When I navigate to "Manage positions" node in "Site administration > Positions"
     And I follow "Position Framework 1"
 
     # Position 3 is in the wrong place. It should be under Team Leader 2. See TL-12671.
@@ -95,7 +95,7 @@ Feature: Verify that parentid is set correctly for position CSV uploads.
     And I set the following fields to these values:
       | Empty string behaviour in CSV  | Empty strings erase existing data |
     When I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
 
     When I navigate to "Upload HR Import files" node in "Site administration > HR Import > Sources"
     And I upload "admin/tool/totara_sync/tests/fixtures/positions_parent_zero_1.csv" file to "CSV" filemanager
@@ -117,7 +117,7 @@ Feature: Verify that parentid is set correctly for position CSV uploads.
     Then I should not see "Error"
     And I should see "Running HR Import cron...Done!"
 
-    When I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    When I navigate to "Manage positions" node in "Site administration > Positions"
     And I follow "Position Framework 1"
 
     # The parentid for Position 3 has been deleted so it's at the top level.
@@ -135,7 +135,7 @@ Feature: Verify that parentid is set correctly for position CSV uploads.
     And I set the following fields to these values:
       | Source contains all records | No  |
     And I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
 
     When I navigate to "Upload HR Import files" node in "Site administration > HR Import > Sources"
     And I upload "admin/tool/totara_sync/tests/fixtures/positions_parent_sanity_check_1.csv" file to "CSV" filemanager
@@ -148,7 +148,7 @@ Feature: Verify that parentid is set correctly for position CSV uploads.
     And I should see "Running HR Import cron...Done!"
 
     # All the records should have been added correctly.
-    When I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    When I navigate to "Manage positions" node in "Site administration > Positions"
     And I follow "Position Framework 1"
     Then I should see these hierarchy items at the following depths:
       | pos1  | 1 |
@@ -168,7 +168,7 @@ Feature: Verify that parentid is set correctly for position CSV uploads.
     And I should see "Running HR Import cron...Done!"
 
     # The record should have been added correctly.
-    When I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    When I navigate to "Manage positions" node in "Site administration > Positions"
     And I follow "Position Framework 1"
     Then I should see these hierarchy items at the following depths:
       | pos1  | 1 |
@@ -215,7 +215,7 @@ Feature: Verify that parentid is set correctly for position CSV uploads.
     And I should see "Running HR Import cron...Done!"
 
     # The records should have been added correctly.
-    When I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    When I navigate to "Manage positions" node in "Site administration > Positions"
     And I follow "Position Framework 1"
     Then I should see these hierarchy items at the following depths:
       | pos1  | 1 |

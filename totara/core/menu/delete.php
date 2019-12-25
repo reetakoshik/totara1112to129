@@ -17,95 +17,70 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Totara navigation edit page.
+ * Totara navigation deleting page.
  *
- * @package    totara
+ * @package    totara_core
  * @subpackage navigation
  * @author     Oleg Demeshev <oleg.demeshev@totaralms.com>
  */
 
-use \totara_core\totara\menu\menu as menu;
+use \totara_core\totara\menu\helper;
+use \totara_core\totara\menu\item;
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/lib/adminlib.php');
 
 // Menu item id.
-$id = optional_param('id', 0, PARAM_INT);
+$id = required_param('id', PARAM_INT);
 $confirm = optional_param('confirm', false, PARAM_BOOL);
 
-admin_externalpage_setup('totaranavigation');
+admin_externalpage_setup('totaranavigation', '', null, new moodle_url('/totara/core/menu/delete.php', array('id' => $id)));
+// Double check capability, the settings file is too far away.
+require_capability('totara/core:editmainmenu', context_system::instance());
 
-$context = context_system::instance();
-$PAGE->set_context($context);
+$returnurl = \totara_core\totara\menu\helper::get_admin_edit_return_url($id);
 
-$canremove = true;
-$item = menu::get($id);
-$property = $item->get_property();
-$node = menu::node_instance($property);
-$title = $node->get_title();
-$error = get_string('error:menuitemcannotremove', 'totara_core', $title);
-$returnurl = new moodle_url('/totara/core/menu/index.php');
+$record = $DB->get_record('totara_navigation', array('id' => $id));
+if (!$record) {
+    // Most likely result of concurrent editing, just go back.
+    redirect($returnurl, get_string('error:findingmenuitem', 'totara_core'), 0, \core\output\notification::NOTIFY_ERROR);
+}
 
-if ($confirm) {
-    require_sesskey();
-    try {
-        $item->delete();
-        totara_set_notification(get_string('menuitem:deletesuccess', 'totara_core'), $returnurl, array('class' => 'notifysuccess'));
-    } catch (moodle_exception $e) {
-        $canremove = false;
-        $error = $e->getMessage();
+$node = item::create_instance($record);
+if ($node) {
+    $itemtitle = $node->get_title();
+} else {
+    $itemtitle = $record->classname;
+}
+
+if (!helper::is_item_deletable($record->id)) {
+    redirect($returnurl, get_string('error:menuitemcannotremove', 'totara_core'), 0, core\output\notification::NOTIFY_ERROR);
+}
+
+$parentidoptions = helper::create_parentid_form_options(0);
+if (!isset($parentidoptions[$record->parentid])) {
+    $record->parentid = helper::get_unused_container_id();
+}
+
+$form = new \totara_core\form\menu\delete($record, array('itemtitle' => $itemtitle, 'parentidoptions' => $parentidoptions));
+if ($form->is_cancelled()) {
+    redirect($returnurl);
+}
+if ($form->get_data()) {
+    ignore_user_abort(true);
+    if (helper::delete_item($record->id)) {
+        $returnurl = \totara_core\totara\menu\helper::get_admin_edit_return_url(0);
+        redirect($returnurl, get_string('menuitem:deletesuccess', 'totara_core', $itemtitle), 0, core\output\notification::NOTIFY_SUCCESS);
+    } else {
+        redirect($returnurl, get_string('error:menuitemcannotremove', 'totara_core', $itemtitle), 0, core\output\notification::NOTIFY_ERROR);
     }
 }
 
-$children = $item->get_children();
-$childtoremove = '';
-if ($children) {
-    $childtoremove = html_writer::start_tag('ul');
-    foreach ($children as $child) {
-        $property = $child->get_property();
-        $childnode = menu::node_instance($property);
-        if ($child->custom == menu::DB_ITEM) {
-            $childtoremove .= html_writer::tag('li', $childnode->get_title());
-        } else {
-            $canremove = false;
-            $childtoremove .= html_writer::tag('li', $childnode->get_title() . get_string('error:menuitemcannotremovechild', 'totara_core'));
-        }
-    }
-    $childtoremove .= html_writer::end_tag('ul');
-}
-
-$url = new moodle_url('/totara/core/menu/delete.php', array('id' => $id));
-$PAGE->set_url($url);
-$PAGE->set_pagelayout('admin');
-$PAGE->set_title($title);
-$PAGE->navbar->add($title, $url);
-$PAGE->set_heading($title);
+$PAGE->set_title($itemtitle);
+$PAGE->navbar->add($itemtitle);
+$PAGE->set_heading($itemtitle);
 
 // Display page header.
 echo $OUTPUT->header();
-
-$url = new moodle_url('/totara/core/menu/delete.php', array('id' => $id, 'confirm' => 'true'));
-$continue = new single_button($url, get_string('continue'), 'post');
-$cancel = new single_button($returnurl, get_string('cancel'), 'get');
-
-if ($canremove) {
-    echo $OUTPUT->box_start('notifynotice');
-    echo html_writer::tag('p', get_string('menuitem:delete', 'totara_core', $title));
-    if ($children) {
-        echo html_writer::tag('p', get_string('menuitem:deletechildren', 'totara_core', $title));
-        echo $childtoremove;
-    }
-} else {
-    echo $OUTPUT->box_start('notifyproblem');
-    echo html_writer::tag('p', $error);
-    if ($children && !isset($e)) {
-        echo $childtoremove;
-    }
-}
-echo $OUTPUT->box_end();
-if ($canremove) {
-    echo html_writer::tag('div', $OUTPUT->render($continue) . $OUTPUT->render($cancel), array('class' => 'buttons'));
-} else {
-    echo html_writer::tag('div', $OUTPUT->render($cancel), array('class' => 'buttons'));
-}
+echo $form->render();
 echo $OUTPUT->footer();

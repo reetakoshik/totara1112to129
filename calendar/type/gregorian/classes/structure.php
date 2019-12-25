@@ -136,7 +136,49 @@ class structure extends type_base {
         $dateinfo['month'] = $this->get_months();
         $dateinfo['year'] = $this->get_years($minyear, $maxyear);
 
-        return $dateinfo;
+        // Totara: fix date format to matche current language, such as switched month in 'en_us'.
+        return self::fix_date_order($dateinfo);
+    }
+
+    /**
+     * Totara: fix order of day, month and year to match current language date/time display.
+     *
+     * @param array $dateinfo
+     * @return array
+     */
+    private static function fix_date_order(array $dateinfo) {
+        $dateformat = get_string('strftimedaydatetime', 'langconfig');
+
+        preg_match_all('/%[a-zA-Z]/', $dateformat, $matches);
+
+        // Lang packs are using date format from http://php.net/manual/en/function.strftime.php
+        $map = array(
+            '%d' => 'day',
+            '%e' => 'day',
+            '%b' => 'month',
+            '%B' => 'month',
+            '%h' => 'month',
+            '%m' => 'month',
+            '%G' => 'year',
+            '%y' => 'year',
+            '%Y' => 'year',
+        );
+
+        $result = array();
+
+        foreach ($matches[0] as $match) {
+            if (!isset($map[$match])) {
+                continue;
+            }
+            $field = $map[$match];
+            $result[$field] = $dateinfo[$field];
+        }
+
+        if (count($result) !== 3) {
+            return $dateinfo;
+        }
+
+        return $result;
     }
 
     /**

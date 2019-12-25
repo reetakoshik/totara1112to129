@@ -125,6 +125,9 @@ class info_testcase extends advanced_testcase {
         $DB->set_field('course_sections', 'availability', '{{{',
                 array('course' => $course->id, 'section' => 3));
 
+        // Sections have changed.
+        rebuild_course_cache($course->id);
+
         $modinfo = get_fast_modinfo($course);
         $sections = $modinfo->get_section_info_all();
 

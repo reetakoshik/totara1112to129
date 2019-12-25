@@ -183,12 +183,7 @@ class totara_cohort_userdata_set_membership_testcase extends advanced_testcase {
         $this->assertEquals('coursecreator', reset($roles)->shortname);
     }
 
-    /**
-     * @return array of test data.
-     */
     public function test_export_system_context() {
-        $this->resetAfterTest(false);
-
         $data = $this->create_audience_data();
 
         $export = set_membership::execute_export(
@@ -203,17 +198,10 @@ class totara_cohort_userdata_set_membership_testcase extends advanced_testcase {
             $this->assertNotEquals($data['category2_audience2']->id, $record->cohortid);
             $this->assertNotEquals('cat2 aud2', $record->name);
         }
-
-        return $data;
     }
 
-    /**
-     * @param array $data
-     * @return array of test data
-     * @depends test_export_system_context
-     */
-    public function test_count_system_context($data) {
-        $this->resetAfterTest(false);
+    public function test_count_system_context() {
+        $data = $this->create_audience_data();
 
         $count = set_membership::execute_count(
             new target_user($data['user1']),
@@ -225,13 +213,10 @@ class totara_cohort_userdata_set_membership_testcase extends advanced_testcase {
         return $data;
     }
 
-    /**
-     * @param array $data
-     * @depends test_count_system_context
-     */
-    public function test_purge_system_context($data) {
-        $this->resetAfterTest(true);
+    public function test_purge_system_context() {
         global $DB;
+
+        $data = $this->create_audience_data();
 
         $eventsink = $this->redirectEvents();
 
@@ -287,12 +272,7 @@ class totara_cohort_userdata_set_membership_testcase extends advanced_testcase {
         $this->assert_user2_roles_unaffected($data);
     }
 
-    /**
-     * @return array of test data
-     */
     public function test_export_category_context() {
-        $this->resetAfterTest(false);
-
         $data = $this->create_audience_data();
 
         $export = set_membership::execute_export(
@@ -307,17 +287,10 @@ class totara_cohort_userdata_set_membership_testcase extends advanced_testcase {
         $this->assertEquals($data['user1']->id, $record->userid);
         $this->assertEquals($data['category1_audience']->id, $record->cohortid);
         $this->assertEquals('cat1 aud1', $record->name);
-
-        return $data;
     }
 
-    /**
-     * @param array $data
-     * @return array of test data
-     * @depends test_export_category_context
-     */
-    public function test_count_category_context($data) {
-        $this->resetAfterTest(false);
+    public function test_count_category_context() {
+        $data = $this->create_audience_data();
 
         $count = set_membership::execute_count(
             new target_user($data['user1']),
@@ -325,17 +298,12 @@ class totara_cohort_userdata_set_membership_testcase extends advanced_testcase {
         );
 
         $this->assertEquals(1, $count);
-
-        return $data;
     }
 
-    /**
-     * @param array $data
-     * @depends test_count_category_context
-     */
-    public function test_purge_category_context($data) {
-        $this->resetAfterTest(true);
+    public function test_purge_category_context() {
         global $DB;
+
+        $data = $this->create_audience_data();
 
         $eventsink = $this->redirectEvents();
 
@@ -398,7 +366,6 @@ class totara_cohort_userdata_set_membership_testcase extends advanced_testcase {
      * Confirms that running purge on a deleted user does not raise any errors and that any existing data is still purged.
      */
     public function test_purge_with_deleted_user() {
-        $this->resetAfterTest(true);
         global $DB;
 
         $data = $this->create_audience_data();

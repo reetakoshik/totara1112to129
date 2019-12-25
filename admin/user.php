@@ -42,7 +42,8 @@ admin_externalpage_setup('editusers');
 $reportshortname = 'system_browse_users';
 $reportrecord = $DB->get_record('report_builder', array('shortname' => $reportshortname));
 $globalrestrictionset = rb_global_restriction_set::create_from_page_parameters($reportrecord);
-$report = reportbuilder_get_embedded_report($reportshortname, null, false, 0, $globalrestrictionset);
+$config = (new rb_config())->set_global_restriction_set($globalrestrictionset);
+$report = reportbuilder::create_embedded($reportshortname, $config);
 if (!$report) {
     print_error('error:couldnotgenerateembeddedreport', 'totara_reportbuilder');
 }
@@ -57,7 +58,7 @@ if ($format != '') {
 $report->include_js();
 
 $PAGE->set_title($report->fullname);
-$PAGE->set_button($PAGE->button . $report->edit_button());
+$PAGE->set_button($report->edit_button() . $PAGE->button);
 
 echo $OUTPUT->header();
 

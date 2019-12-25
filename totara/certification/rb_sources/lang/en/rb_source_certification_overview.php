@@ -27,5 +27,3 @@ $string['programnameselect'] = 'Certification name (select box)';
 $string['sourcetitle'] = 'Certification Overview';
 $string['type_certif'] = 'Certification';
 $string['type_certif_completion'] = 'Certification Completion';
-$string['type_prog']  = 'Certification';
-$string['type_program_completion'] = 'Certification Completion';

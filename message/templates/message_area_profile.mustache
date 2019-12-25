@@ -22,9 +22,7 @@
 <div class="profile" data-userid="{{userid}}" data-region="profile">
     <div class="user-container">
         <a data-action="profile-view" href="#">
-            <img class="profile-picture" src="{{profileimageurl}}"
-                 alt="{{str_pictureof}}"
-                 title="{{str_pictureof}}" />
+            <img class="profile-picture" src="{{profileimageurl}}" {{#str_pictureof}}alt="{{.}}" title="{{.}}"{{/str_pictureof}} />
         </a>
         <div class="name-container">
             <div class="name">{{fullname}}</div>

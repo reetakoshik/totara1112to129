@@ -76,12 +76,17 @@ class totara_appraisal_current_stage_editor_testcase extends appraisal_testcase 
         $this->assertEquals($expected, $actual);
     }
 
-    public function test_set_stage_for_role_assignment() {
-        global $DB;
-
+    /**
+     * Set up some data which will be used by the set_stage_for_role_assignment tests.
+     *
+     * @return stdClass
+     */
+    public function setup_data_for_set_stage_for_role_assignment(): stdClass {
         $this->resetAfterTest();
 
         set_config('totara_job_allowmultiplejobs', false);
+
+        $data = new stdClass();
 
         $def = array(
             'name' => 'Appraisal',
@@ -138,31 +143,34 @@ class totara_appraisal_current_stage_editor_testcase extends appraisal_testcase 
             )
         );
 
-        $learner1 = $this->getDataGenerator()->create_user();
-        $learner2 = $this->getDataGenerator()->create_user();
-        $manager = $this->getDataGenerator()->create_user();
-        $managerja = \totara_job\job_assignment::create_default($manager->id);
-        \totara_job\job_assignment::create_default($learner1->id, ['managerjaid' => $managerja->id]);
-        \totara_job\job_assignment::create_default($learner2->id, ['managerjaid' => $managerja->id]);
+        $data->learner1 = $this->getDataGenerator()->create_user();
+        $data->learner2 = $this->getDataGenerator()->create_user();
+        $data->manager = $this->getDataGenerator()->create_user();
+        $managerja = \totara_job\job_assignment::create_default($data->manager->id);
+        \totara_job\job_assignment::create_default($data->learner1->id, ['managerjaid' => $managerja->id]);
+        \totara_job\job_assignment::create_default($data->learner2->id, ['managerjaid' => $managerja->id]);
 
         /** @var appraisal $appraisal1 */
-        list($appraisal1) = $this->prepare_appraisal_with_users($def, array($learner1, $learner2));
+        list($appraisal1) = $this->prepare_appraisal_with_users($def, array($data->learner1, $data->learner2));
         $appraisal1->validate();
         $appraisal1->activate();
+        $data->appraisal1 = $appraisal1;
+
         /** @var appraisal $appraisal2 */
-        list($appraisal2) = $this->prepare_appraisal_with_users($def, array($learner1, $learner2));
+        list($appraisal2) = $this->prepare_appraisal_with_users($def, array($data->learner1, $data->learner2));
         $appraisal2->validate();
         $appraisal2->activate();
+        $data->appraisal2 = $appraisal2;
 
-        $map1 = $this->map($appraisal1);
-        $map2 = $this->map($appraisal2);
+        $data->map1 = $this->map($appraisal1);
+        $data->map2 = $this->map($appraisal2);
 
-        $stagestounlock = array($map1['stages']['Stage2'], $map1['stages']['Stage3']);
+        $data->stagestounlock = array($data->map1['stages']['Stage2'], $data->map1['stages']['Stage3']);
 
         $roles = array(appraisal::ROLE_LEARNER, appraisal::ROLE_MANAGER);
 
         $msg = new appraisal_message();
-        $msg->event_stage($map1['stages']['Stage1'], appraisal_message::EVENT_STAGE_COMPLETE);
+        $msg->event_stage($data->map1['stages']['Stage1'], appraisal_message::EVENT_STAGE_COMPLETE);
         $msg->set_delta(1, appraisal_message::PERIOD_DAY);
         $msg->set_roles($roles, appraisal_message::MESSAGE_SEND_ANY_STATE);
         foreach ($roles as $role) {
@@ -171,17 +179,17 @@ class totara_appraisal_current_stage_editor_testcase extends appraisal_testcase 
         $msg->save();
 
         $msg = new appraisal_message();
-        $msg->event_stage($map1['stages']['Stage2'], appraisal_message::EVENT_STAGE_COMPLETE);
+        $msg->event_stage($data->map1['stages']['Stage2'], appraisal_message::EVENT_STAGE_COMPLETE);
         $msg->set_delta(1, appraisal_message::PERIOD_DAY);
         $msg->set_roles($roles, appraisal_message::MESSAGE_SEND_ANY_STATE);
         foreach ($roles as $role) {
             $msg->set_message($role, 'Title '.$role, 'Body '.$role);
         }
         $msg->save();
-        $eventidappraisal1stage2 = $msg->id;
+        $data->eventidappraisal1stage2 = $msg->id;
 
         $msg = new appraisal_message();
-        $msg->event_stage($map2['stages']['Stage1'], appraisal_message::EVENT_STAGE_COMPLETE);
+        $msg->event_stage($data->map2['stages']['Stage1'], appraisal_message::EVENT_STAGE_COMPLETE);
         $msg->set_delta(1, appraisal_message::PERIOD_DAY);
         $msg->set_roles($roles, appraisal_message::MESSAGE_SEND_ANY_STATE);
         foreach ($roles as $role) {
@@ -190,7 +198,7 @@ class totara_appraisal_current_stage_editor_testcase extends appraisal_testcase 
         $msg->save();
 
         $msg = new appraisal_message();
-        $msg->event_stage($map2['stages']['Stage2'], appraisal_message::EVENT_STAGE_COMPLETE);
+        $msg->event_stage($data->map2['stages']['Stage2'], appraisal_message::EVENT_STAGE_COMPLETE);
         $msg->set_delta(1, appraisal_message::PERIOD_DAY);
         $msg->set_roles($roles, appraisal_message::MESSAGE_SEND_ANY_STATE);
         foreach ($roles as $role) {
@@ -198,53 +206,61 @@ class totara_appraisal_current_stage_editor_testcase extends appraisal_testcase 
         }
         $msg->save();
 
-        $learner1userassignment1 = appraisal_user_assignment::get_user($appraisal1->get()->id, $learner1->id);
-        $managerroleassignmentlearner1appraisal1 = appraisal_role_assignment::get_role(
-            $appraisal1->get()->id,
-            $learner1->id,
-            $manager->id,
+        $data->learner1userassignment1 = appraisal_user_assignment::get_user($appraisal1->get()->id, $data->learner1->id);
+        /** @var appraisal_role_assignment $data->managerroleassignmentlearner1appraisal1 */
+        $data->managerroleassignmentlearner1appraisal1 = appraisal_role_assignment::get_role(
+            $data->appraisal1->get()->id,
+            $data->learner1->id,
+            $data->manager->id,
             appraisal::ROLE_MANAGER
         );
-        $managerroleassignmentlearner1appraisal2 = appraisal_role_assignment::get_role(
-            $appraisal2->get()->id,
-            $learner1->id,
-            $manager->id,
+        /** @var appraisal_role_assignment $data->managerroleassignmentlearner1appraisal2 */
+        $data->managerroleassignmentlearner1appraisal2 = appraisal_role_assignment::get_role(
+            $data->appraisal2->get()->id,
+            $data->learner1->id,
+            $data->manager->id,
             appraisal::ROLE_MANAGER
         );
-        $managerroleassignmentlearner2appraisal1 = appraisal_role_assignment::get_role(
-            $appraisal1->get()->id,
-            $learner2->id,
-            $manager->id,
+        /** @var appraisal_role_assignment $data->managerroleassignmentlearner2appraisal1 */
+        $data->managerroleassignmentlearner2appraisal1 = appraisal_role_assignment::get_role(
+            $data->appraisal1->get()->id,
+            $data->learner2->id,
+            $data->manager->id,
             appraisal::ROLE_MANAGER
         );
-        $managerroleassignmentlearner2appraisal2 = appraisal_role_assignment::get_role(
-            $appraisal2->get()->id,
-            $learner2->id,
-            $manager->id,
+        /** @var appraisal_role_assignment $data->managerroleassignmentlearner2appraisal2 */
+        $data->managerroleassignmentlearner2appraisal2 = appraisal_role_assignment::get_role(
+            $data->appraisal2->get()->id,
+            $data->learner2->id,
+            $data->manager->id,
             appraisal::ROLE_MANAGER
         );
-        $learner1roleassignment1 = appraisal_role_assignment::get_role(
-            $appraisal1->get()->id,
-            $learner1->id,
-            $learner1->id,
+        /** @var appraisal_role_assignment $learner1roleassignment1 */
+        $data->learner1roleassignment1 = appraisal_role_assignment::get_role(
+            $data->appraisal1->get()->id,
+            $data->learner1->id,
+            $data->learner1->id,
             appraisal::ROLE_LEARNER
         );
-        $learner1roleassignment2 = appraisal_role_assignment::get_role(
-            $appraisal2->get()->id,
-            $learner1->id,
-            $learner1->id,
+        /** @var appraisal_role_assignment $learner1roleassignment2 */
+        $data->learner1roleassignment2 = appraisal_role_assignment::get_role(
+            $data->appraisal2->get()->id,
+            $data->learner1->id,
+            $data->learner1->id,
             appraisal::ROLE_LEARNER
         );
-        $learner2roleassignment1 = appraisal_role_assignment::get_role(
-            $appraisal1->get()->id,
-            $learner2->id,
-            $learner2->id,
+        /** @var appraisal_role_assignment $learner2roleassignment1 */
+        $data->learner2roleassignment1 = appraisal_role_assignment::get_role(
+            $data->appraisal1->get()->id,
+            $data->learner2->id,
+            $data->learner2->id,
             appraisal::ROLE_LEARNER
         );
-        $learner2roleassignment2 = appraisal_role_assignment::get_role(
-            $appraisal2->get()->id,
-            $learner2->id,
-            $learner2->id,
+        /** @var appraisal_role_assignment $learner2roleassignment2 */
+        $data->learner2roleassignment2 = appraisal_role_assignment::get_role(
+            $data->appraisal2->get()->id,
+            $data->learner2->id,
+            $data->learner2->id,
             appraisal::ROLE_LEARNER
         );
 
@@ -252,21 +268,29 @@ class totara_appraisal_current_stage_editor_testcase extends appraisal_testcase 
         /** @var appraisal_stage $stage */
         $appraisal1stages = appraisal_stage::get_stages($appraisal1->get()->id);
         foreach ($appraisal1stages as $stage) {
-            $stage->complete_for_role($managerroleassignmentlearner1appraisal1);
-            $stage->complete_for_role($managerroleassignmentlearner2appraisal1);
-            $stage->complete_for_role($learner1roleassignment1);
-            $stage->complete_for_role($learner2roleassignment1);
+            $stage->complete_for_role($data->managerroleassignmentlearner1appraisal1);
+            $stage->complete_for_role($data->managerroleassignmentlearner2appraisal1);
+            $stage->complete_for_role($data->learner1roleassignment1);
+            $stage->complete_for_role($data->learner2roleassignment1);
         }
         $appraisal2stages = appraisal_stage::get_stages($appraisal2->get()->id);
         foreach ($appraisal2stages as $stage) {
-            $stage->complete_for_role($managerroleassignmentlearner1appraisal2);
-            $stage->complete_for_role($managerroleassignmentlearner2appraisal2);
-            $stage->complete_for_role($learner1roleassignment2);
-            $stage->complete_for_role($learner2roleassignment2);
+            $stage->complete_for_role($data->managerroleassignmentlearner1appraisal2);
+            $stage->complete_for_role($data->managerroleassignmentlearner2appraisal2);
+            $stage->complete_for_role($data->learner1roleassignment2);
+            $stage->complete_for_role($data->learner2roleassignment2);
         }
 
+        return $data;
+    }
+
+    public function test_set_stage_for_role_assignment_unlock_single_role() {
+        global $DB;
+
+        $data = $this->setup_data_for_set_stage_for_role_assignment();
+
         /////////////////////////////////////////////////////////////////////////////
-        // Only learner1's user assignment was modified.
+        // Only learner1's user assignment will be modified.
 
         // Mark all records so that we know the control records are not touched.
         $DB->set_field('appraisal_user_assignment', 'activestageid', 123);
@@ -278,9 +302,9 @@ class totara_appraisal_current_stage_editor_testcase extends appraisal_testcase 
         // Modify the records to make them look like what we expect they will be.
         $matches_found = 0;
         foreach ($expecteduserassignments as $expectedrecord) {
-            if ($expectedrecord->userid == $learner1->id && $expectedrecord->appraisalid == $appraisal1->get()->id) {
+            if ($expectedrecord->userid == $data->learner1->id && $expectedrecord->appraisalid == $data->appraisal1->get()->id) {
                 $this->assertEquals(123, $expectedrecord->activestageid);
-                $expectedrecord->activestageid = $map1['stages']['Stage2'];
+                $expectedrecord->activestageid = $data->map1['stages']['Stage2'];
                 $this->assertEquals(234, $expectedrecord->timecompleted);
                 $expectedrecord->timecompleted = null;
                 $this->assertEquals(345, $expectedrecord->status);
@@ -291,35 +315,35 @@ class totara_appraisal_current_stage_editor_testcase extends appraisal_testcase 
         $this->assertEquals(1, $matches_found);
 
         /////////////////////////////////////////////////////////////////////////////
-        // Delete learner1's appraisal_stage_data.
+        // Only the manager's appraisal_stage_data will be deleted.
         $expectedstagedata = $DB->get_records('appraisal_stage_data', [], 'id');
         $this->assertCount(24, $expectedstagedata); // One per appraisal per learner per role * 3 stages.
 
         // Modify the records to make them look like what we expect they will be.
         foreach ($expectedstagedata as $key => $expectedrecord) {
-            if ($expectedrecord->appraisalroleassignmentid == $managerroleassignmentlearner1appraisal1->id &&
-                in_array($expectedrecord->appraisalstageid, $stagestounlock)) {
+            if ($expectedrecord->appraisalroleassignmentid == $data->managerroleassignmentlearner1appraisal1->id &&
+                in_array($expectedrecord->appraisalstageid, $data->stagestounlock)) {
                 unset($expectedstagedata[$key]);
             }
         }
         $this->assertCount(22, $expectedstagedata); // Two deleted.
 
         /////////////////////////////////////////////////////////////////////////////
-        // Delete events (messages that are due to be sent).
+        // The event will be deleted (messages that are due to be sent).
         $expecteduserevents = $DB->get_records('appraisal_user_event', [], 'id');
         $this->assertCount(8, $expecteduserevents); // One per appraisal per learner * 2 stages (stage 3 has no message).
 
         // Modify the records to make them look like what we expect they will be.
         foreach ($expecteduserevents as $key => $expectedrecord) {
-            if ($expectedrecord->userid == $learner1->id &&
-                $expectedrecord->eventid == $eventidappraisal1stage2) {
+            if ($expectedrecord->userid == $data->learner1->id &&
+                $expectedrecord->eventid == $data->eventidappraisal1stage2) {
                 unset($expecteduserevents[$key]);
             }
         }
         $this->assertCount(7, $expecteduserevents); // One deleted.
 
         /////////////////////////////////////////////////////////////////////////////
-        // Update the appraisal_role_assignment activepageid.
+        // The appraisal_role_assignment activepageid will be updated.
         $DB->set_field('appraisal_role_assignment', 'activepageid', 123);
         $expectedroleassignments = $DB->get_records('appraisal_role_assignment', [], 'id');
         $this->assertCount(16, $expectedroleassignments); // One per appraisal per learner * all 4 roles.
@@ -327,7 +351,7 @@ class totara_appraisal_current_stage_editor_testcase extends appraisal_testcase 
         // Modify the records to make them look like what we expect they will be.
         $matches_found = 0;
         foreach ($expectedroleassignments as $expectedrecord) {
-            if ($expectedrecord->appraisaluserassignmentid == $learner1userassignment1->id &&
+            if ($expectedrecord->appraisaluserassignmentid == $data->learner1userassignment1->id &&
                 $expectedrecord->appraisalrole == appraisal::ROLE_MANAGER) {
                 $this->assertEquals(123, $expectedrecord->activepageid);
                 $expectedrecord->activepageid = null;
@@ -339,10 +363,10 @@ class totara_appraisal_current_stage_editor_testcase extends appraisal_testcase 
         /////////////////////////////////////////////////////////////////////////////
         // Run the function - reset manager of learner1 to stage2 in appraisal1.
         current_stage_editor::set_stage_for_role_assignment(
-            $appraisal1->get()->id,
-            $learner1->id,
-            $managerroleassignmentlearner1appraisal1->id,
-            $map1['stages']['Stage2']
+            $data->appraisal1->get()->id,
+            $data->learner1->id,
+            $data->managerroleassignmentlearner1appraisal1->id,
+            $data->map1['stages']['Stage2']
         );
 
         /////////////////////////////////////////////////////////////////////////////
@@ -363,9 +387,119 @@ class totara_appraisal_current_stage_editor_testcase extends appraisal_testcase 
         // Check that an exception is thrown when no stage can be found to unlock (for whatever reason).
         $this->expectExceptionMessage("Cannot find any stage to unlock");
         current_stage_editor::set_stage_for_role_assignment(
-            $appraisal1->get()->id,
-            $learner2->id,
-            $managerroleassignmentlearner1appraisal1->id,
+            $data->appraisal1->get()->id,
+            $data->learner2->id,
+            $data->managerroleassignmentlearner1appraisal1->id,
+            -1
+        );
+    }
+
+    public function test_set_stage_for_role_assignment_unlock_all_roles() {
+        global $DB;
+
+        $data = $this->setup_data_for_set_stage_for_role_assignment();
+
+        /////////////////////////////////////////////////////////////////////////////
+        // Only learner1's user assignment will be modified.
+
+        // Mark all records so that we know the control records are not touched.
+        $DB->set_field('appraisal_user_assignment', 'activestageid', 123);
+        $DB->set_field('appraisal_user_assignment', 'timecompleted', 234);
+        $DB->set_field('appraisal_user_assignment', 'status', 345);
+        $expecteduserassignments = $DB->get_records('appraisal_user_assignment', [], 'id');
+        $this->assertCount(4, $expecteduserassignments); // One per appraisal per learner.
+
+        // Modify the records to make them look like what we expect they will be.
+        $matches_found = 0;
+        foreach ($expecteduserassignments as $expectedrecord) {
+            if ($expectedrecord->userid == $data->learner1->id && $expectedrecord->appraisalid == $data->appraisal1->get()->id) {
+                $this->assertEquals(123, $expectedrecord->activestageid);
+                $expectedrecord->activestageid = $data->map1['stages']['Stage2'];
+                $this->assertEquals(234, $expectedrecord->timecompleted);
+                $expectedrecord->timecompleted = null;
+                $this->assertEquals(345, $expectedrecord->status);
+                $expectedrecord->status = appraisal::STATUS_ACTIVE;
+                $matches_found++;
+            }
+        }
+        $this->assertEquals(1, $matches_found);
+
+        /////////////////////////////////////////////////////////////////////////////
+        // All roles' appraisal_stage_data will be deleted.
+        $expectedstagedata = $DB->get_records('appraisal_stage_data', [], 'id');
+        $this->assertCount(24, $expectedstagedata); // One per appraisal per learner per role * 3 stages.
+
+        // Modify the records to make them look like what we expect they will be.
+        foreach ($expectedstagedata as $key => $expectedrecord) {
+            if (($expectedrecord->appraisalroleassignmentid == $data->learner1roleassignment1->id ||
+                 $expectedrecord->appraisalroleassignmentid == $data->managerroleassignmentlearner1appraisal1->id) &&
+                in_array($expectedrecord->appraisalstageid, $data->stagestounlock)) {
+                unset($expectedstagedata[$key]);
+            }
+        }
+        $this->assertCount(20, $expectedstagedata); // Four deleted.
+
+        /////////////////////////////////////////////////////////////////////////////
+        // The event will be deleted (messages that are due to be sent).
+        $expecteduserevents = $DB->get_records('appraisal_user_event', [], 'id');
+        $this->assertCount(8, $expecteduserevents); // One per appraisal per learner * 2 stages (stage 3 has no message).
+
+        // Modify the records to make them look like what we expect they will be.
+        foreach ($expecteduserevents as $key => $expectedrecord) {
+            if ($expectedrecord->userid == $data->learner1->id &&
+                $expectedrecord->eventid == $data->eventidappraisal1stage2) {
+                unset($expecteduserevents[$key]);
+            }
+        }
+        $this->assertCount(7, $expecteduserevents); // One deleted.
+
+        /////////////////////////////////////////////////////////////////////////////
+        // The appraisal_role_assignment activepageid will be updated.
+        $DB->set_field('appraisal_role_assignment', 'activepageid', 123);
+        $expectedroleassignments = $DB->get_records('appraisal_role_assignment', [], 'id');
+        $this->assertCount(16, $expectedroleassignments); // One per appraisal per learner * all 4 roles.
+
+        // Modify the records to make them look like what we expect they will be.
+        $matches_found = 0;
+        foreach ($expectedroleassignments as $expectedrecord) {
+            if ($expectedrecord->appraisaluserassignmentid == $data->learner1userassignment1->id) {
+                $this->assertEquals(123, $expectedrecord->activepageid);
+                $expectedrecord->activepageid = null;
+                $matches_found++;
+            }
+        }
+        $this->assertEquals(4, $matches_found);
+
+        /////////////////////////////////////////////////////////////////////////////
+        // Run the function - reset all roles of learner1 to stage2 in appraisal1.
+        current_stage_editor::set_stage_for_role_assignment(
+            $data->appraisal1->get()->id,
+            $data->learner1->id,
+            -1,
+            $data->map1['stages']['Stage2']
+        );
+
+        /////////////////////////////////////////////////////////////////////////////
+        // Check the results.
+        $actualuserassignments = $DB->get_records('appraisal_user_assignment', [], 'id');
+        $this->assertEquals($expecteduserassignments, $actualuserassignments);
+
+        $actualstagedata = $DB->get_records('appraisal_stage_data', [], 'id');
+        $this->assertEquals($expectedstagedata, $actualstagedata);
+
+        $actualuserevents = $DB->get_records('appraisal_user_event', [], 'id');
+        $this->assertEquals($expecteduserevents, $actualuserevents);
+
+        $actualroleassignments = $DB->get_records('appraisal_role_assignment', [], 'id');
+        $this->assertEquals($expectedroleassignments, $actualroleassignments);
+
+        /////////////////////////////////////////////////////////////////////////////
+        // Check that an exception is thrown when no stage can be found to unlock (for whatever reason).
+        $this->expectExceptionMessage("Cannot find any stage to unlock");
+        current_stage_editor::set_stage_for_role_assignment(
+            $data->appraisal1->get()->id,
+            $data->learner2->id,
+            $data->learner1roleassignment1->id,
             -1
         );
     }

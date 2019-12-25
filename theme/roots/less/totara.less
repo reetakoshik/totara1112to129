@@ -30,9 +30,12 @@
 // for all plugins imported here.
 @import "admin/tool/customlang/less/roots.less";
 @import "admin/tool/sitepolicy/less/roots.less";
+@import "blocks/admin_subnav/less/roots.less";
 @import "blocks/site_main_menu/less/roots.less";
+@import "blocks/course_navigation/less/roots.less";
 @import "blocks/current_learning/less/roots.less";
 @import "blocks/search_forums/less/roots.less";
+@import "blocks/totara_community/less/roots.less";
 @import "blocks/totara_dashboard/less/roots.less";
 @import "blocks/totara_featured_links/less/roots.less";
 @import "blocks/totara_recent_learning/less/roots.less";
@@ -52,7 +55,11 @@
 @import "totara/program/less/roots.less";
 @import "totara/reportbuilder/less/roots.less";
 @import "totara/customfield/less/roots.less";
+@import "totara/workflow/less/roots.less";
 @import "blocks/last_course_accessed/less/roots.less";
+@import "totara/assign.less";
+@import "totara/contentmarketplace/less/roots.less";
+@import "blocks/frontpage_combolist/less/roots.less";
 
 // Flexible icons.
 @import "base/less/flexible-icons.less";
@@ -70,8 +77,12 @@
 // Roll back nameclashes.
 @import "totara/undo.less";
 
+// Styles derived from design guide for component consistency
+@import "totara/totara_style.less";
+
 // Core styles
 @import "totara/core.less";
+@import "totara/atto.less";
 @import "totara/admin.less";
 @import "totara/calendar.less";
 @import "totara/course.less";
@@ -105,12 +116,25 @@
 @import "totara/progressbar.less";
 @import "totara/popover.less";
 @import "totara/form-notification.less";
+@import "totara/add_block_popover_content.less";
+@import "totara/core/less/select_region_panel.less";
+@import "totara/core/less/select_region_primary.less";
+@import "totara/core/less/select_multi.less";
+@import "totara/core/less/select_search_text.less";
+@import "totara/core/less/select_tree.less";
+@import "totara/core/less/grid.less";
+@import "totara/core/less/accordion.less";
+@import "totara/core/less/quickaccessmenu.less";
+@import "totara/core/less/quickaccesssettings.less";
+@import "totara/core/less/inline-edit.less";
 
 //
 // Modules
 //
 @import "totara/totara-menu.less";
+@import "totara/nav/main.less";
 @import "totara/totara-dialog.less";
+@import "totara/catalog/less/catalog.less";
 
 //
 // JQuery

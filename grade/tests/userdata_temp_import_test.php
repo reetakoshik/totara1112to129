@@ -63,8 +63,8 @@ class core_grades_userdata_temp_import_test extends grade_testcase {
 
         $contexts = temp_import::get_compatible_context_levels();
 
-        $this->assertEquals($expected, $contexts,
-            "Temporary grades import item is expected to work with system context only", .0, 10, true);
+        $this->assertEqualsCanonicalizing($expected, $contexts,
+            "Temporary grades import item is expected to work with system context only");
     }
 
     public function test_it_purges_data_for_system_context() {

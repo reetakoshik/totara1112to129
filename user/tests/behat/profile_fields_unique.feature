@@ -6,7 +6,7 @@ Feature: User profile fields handle the unique values correctly.
     When I log in as "admin"
 
     # Create a user checkbox custom field set as unique.
-    And I navigate to "User profile fields" node in "Site administration > Users > Accounts"
+    And I navigate to "User profile fields" node in "Site administration > Users"
     And I set the following fields to these values:
       | datatype   | checkbox |
     And I set the following fields to these values:
@@ -81,7 +81,7 @@ Feature: User profile fields handle the unique values correctly.
     Then I should see "User profile fields"
     Then I should see "Text 1"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I press "Add a new user"
     And I expand all fieldsets
     And I set the following fields to these values:
@@ -107,7 +107,7 @@ Feature: User profile fields handle the unique values correctly.
 
   Scenario: Verify unique user profile fields when creating a user with non-unique values fail uniqueness check in manual user creation.
 
-    Given I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    Given I navigate to "Browse list of users" node in "Site administration > Users"
     When I press "Add a new user"
     And I expand all fieldsets
     And I set the following fields to these values:
@@ -180,7 +180,7 @@ Feature: User profile fields handle the unique values correctly.
 
   Scenario: Verify unique user profile fields when updating a user with non-unique values fail uniqueness check in manual user creation.
 
-    Given I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    Given I navigate to "Browse list of users" node in "Site administration > Users"
     When I press "Add a new user"
     And I expand all fieldsets
     And I set the following fields to these values:

@@ -34,6 +34,9 @@ class core_environment_testcase extends advanced_testcase {
      * Test fixed normalize_version() in Totara.
      */
     public function test_normalize_version() {
+        global $CFG;
+        require_once($CFG->libdir.'/environmentlib.php');
+
         $this->assertSame('1', normalize_version(1));
         $this->assertSame('1', normalize_version('1'));
         $this->assertSame('1', normalize_version('a1'));

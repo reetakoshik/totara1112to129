@@ -1,0 +1,56 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Brian Barnes <brian.barnes@totaralearning.com>
+   @package totara_catalog
+}}
+{{!
+
+    @template totara_catalog/element_matrix__row
+
+    This template generates a row for the Totara form matrix in the catalog admin screen.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * data-direction - Required so the correct spacer is shown (for CSS)
+    * data-action - Required so that the correction action happens when moving
+    * data-id - Required when inserting a item back into the select list
+
+    Context variables required for this template:
+    * id - The id for the filter name
+    * filtername - The human readable name of the filter
+    * name - Name of the matrix form element (inherited)
+    * heading - The name of the filter as it is to display on the catalog page
+
+    Other context variables for following partials:
+    * none
+
+    Example context (json):
+      There is no example for this template as its just a husk, please refer to totara_catalog/element_matrix.
+}}
+<tr data-id="{{id}}">
+    <th scope="row"><label for="{{id}}__heading">{{{filtername}}}</label></th>
+    <td><input type="text" id="{{id}}__heading" name="{{name}}[{{id}}]" value="{{heading}}"/></td>
+    <td>
+        <a href="#" class="totara_catalog-matrix__action" data-action="move-down">{{#flex_icon}}move-down, move_filter_down, totara_catalog{{/flex_icon}}</a>
+        <a href="#" class="totara_catalog-matrix__action" data-action="move-up">{{#flex_icon}}move-up, move_filter_up, totara_catalog{{/flex_icon}}</a>
+        <a href="#" class="totara_catalog-matrix__action" data-action="delete">{{#flex_icon}}delete, delete_filter, totara_catalog{{/flex_icon}}</a>
+    </td>
+</tr>

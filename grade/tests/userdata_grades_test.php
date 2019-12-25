@@ -67,8 +67,8 @@ class core_grade_userdata_grades_test extends grade_testcase {
 
         $contexts = grades::get_compatible_context_levels();
 
-        $this->assertEquals($expected, $contexts,
-            "Grades user_data item is expected to work with a wide range of contexts", .0, 10, true);
+        $this->assertEqualsCanonicalizing($expected, $contexts,
+            "Grades user_data item is expected to work with a wide range of contexts");
     }
 
     public function test_it_purges_data_for_system_context() {
@@ -360,7 +360,7 @@ class core_grade_userdata_grades_test extends grade_testcase {
 
             if (!empty($historical)) {
                 $this->assertArrayHasKey('history', $export->data[$grade->id], 'Export does not contain expected historical grades.');
-                $this->assertInternalType('array', $export->data[$grade->id]['history']);
+                $this->assertIsArray($export->data[$grade->id]['history']);
                 $this->assertCount(count($historical), $export->data[$grade->id]['history']);
 
                 foreach ($historical as $item) {
