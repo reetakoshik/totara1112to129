@@ -1,0 +1,44 @@
+{{> theme_golearningzone/head}}
+    <body  {{{body_attributes}}}
+            data-color="{{color}}"
+            style="background-image: url({{background}}) !important;" 
+            {{#palette}} data-palette="{{palette}}" {{/palette}} >
+        {{{standard_top_of_body_html}}}
+        <div id="page" class="text-left">
+            <div id="page-content">
+                <section>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12">
+                                {{{main_content}}}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            {{{footer}}}
+        </div>
+        {{{standard_end_of_body_html}}}
+        <style>
+                {{#logo}}
+                .loginbox .loginpanel .loginsub:before {
+                    content: " ";
+                    background-image: url({{{logo}}});
+                    background-size: contain;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    display: block;
+                    margin: auto;
+                    height: 80px;
+                }
+                {{/logo}}
+        </style>
+        <link rel="stylesheet" type="text/css" href="/theme/golearningzone/style/login.css">
+        <script src="/theme/golearningzone/js/login.js"></script>
+        <script>
+            window.onload = function() {
+                new Login().init();
+            };
+        </script>
+    </body>
+</html>

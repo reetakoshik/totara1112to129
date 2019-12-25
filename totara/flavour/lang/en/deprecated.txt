@@ -1,0 +1,3 @@
+mygoals,totara_hierarchy
+setting_core_enableteam,totara_flavour
+setting_core_enableteam_desc,totara_flavour

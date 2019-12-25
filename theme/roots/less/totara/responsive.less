@@ -1,0 +1,195 @@
+// This file is part of Totara LMS
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @package   theme_roots
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @copyright 2015 Bas Brands <www.sonsbeekmedia.nl>
+// @author    Bas Brands
+// @author    David Scotson
+// @author    Joby Harding <joby.harding@totaralearning.com>
+
+/* responsive.less */
+
+@media (max-width: 767px) {
+    .file-picker .fp-repo-area {
+        width: 100%;
+        height: auto;
+        max-height: 220px;
+        overflow-y: auto;
+        float: none;
+        border: 0;
+    }
+
+    .file-picker .fp-repo-items {
+        width: 100%;
+        float: none;
+    }
+
+    .file-picker .fp-login-form .fp-login-input label {
+        text-align: left;
+    }
+
+    .file-picker .fp-content form td {
+        display: block;
+        width: 100%;
+        text-align: left;
+    }
+
+    .fp-content .mdl-right {
+        text-align: left;
+    }
+
+    .fp-repo-items .fp-navbar {
+        border-top: 1px solid rgb(187, 187, 187);
+    }
+}
+
+@media (max-width: @screen-xs) {
+    .fp-content-center {
+        display: block;
+        vertical-align: top;
+    }
+
+    .course-content ul.topics li.section,
+    .course-content ul.topics li.section .content,
+    .course-content ul.weeks li.section .content,
+    .course-content ul.weeks li.section,
+    .course-content ul.section {
+        margin-right: 0;
+        margin-left: 0;
+        padding: 0;
+    }
+
+    .activityinstance {
+        display: block;
+    }
+
+    .editing .course-content .section .activity {
+        margin-bottom: 0.2em;
+        padding-bottom: 0.2em;
+        border-bottom: thin solid @table-border-color;
+    }
+
+    .course-content .section .activity .commands {
+        text-align: right;
+    }
+
+    /** Handles display of the activity chooser on small screens **/
+    .jsenabled .choosercontainer #chooseform .alloptions {
+        max-width: 100%;
+    }
+
+    .jsenabled .choosercontainer #chooseform .instruction,
+    .jsenabled .choosercontainer #chooseform .typesummary {
+        position: static;
+    }
+
+    .que .info {
+        float: none;
+        width: auto;
+    }
+
+    .que .content {
+        margin: 0;
+    }
+
+    .path-mod-choice .horizontal .choices .option {
+        display: block;
+    }
+
+    .path-mod-forum .forumsearch #search {
+        width: 120px;
+    }
+
+    .panel {
+        .courseimage {
+            img {
+                margin-right: 5px;
+                float: none;
+                max-width: 100%;
+            }
+        }
+    }
+}
+
+// Backward compatible grid Bootstrap 2
+.row-fluid {
+    .make-row();
+    .span1 {
+        .make-md-column(1);
+    }
+    .span2 {
+        .make-md-column(2);
+    }
+    .span3 {
+        .make-md-column(3);
+    }
+    .span4 {
+        .make-md-column(4);
+    }
+    .span5 {
+        .make-md-column(5);
+    }
+    .span6 {
+        .make-md-column(6);
+    }
+    .span7 {
+        .make-md-column(7);
+    }
+    .span8 {
+        .make-md-column(8);
+    }
+    .span9 {
+        .make-md-column(9);
+    }
+    .span10 {
+        .make-md-column(10);
+    }
+    .span11 {
+        .make-md-column(11);
+    }
+    .span12 {
+        .make-md-column(12);
+        padding: 0;
+    }
+}
+
+@media (max-width: @screen-sm) {
+    // Resize, reflow file-picker on small devices
+    #filesskin .yui3-panel,
+    #filesskin .file-picker.fp-generallayout {
+        width: 100%;
+        left: 0;
+    }
+
+    .path-mod-forum .forumheaderlist .picture {
+        width: 0;
+        a {
+            display: none;
+        }
+    }
+
+}
+
+// End of original bootstrap theme code.
+
+// Namespaced shim for grading interface.
+#page-mod-assign-grader {
+    .row-fluid {
+        .span4 {
+            .make-sm-column(4);
+        }
+    }
+}

@@ -1,0 +1,211 @@
+/*
+ * NOTE: This file is not processed by Grunt
+ * as the placeholders cause fatal errors. Therefore
+ * do not rely on autoprefixing or rtl flipping.
+ */
+
+[[enablestyleoverrides:start]]
+
+a, a:link {
+    color: [[setting:linkcolor]];
+}
+a:visited {
+    color: [[setting:linkvisitedcolor]];
+}
+a:hover,
+a:focus {
+    color: [[setting:linkcolor-dark]];
+}
+
+a:active {
+    color: [[setting:linkcolor-darker]];
+}
+
+.mform .btn-cancel {
+    color: [[setting:linkcolor]];
+}
+
+button,
+input.submit,
+input[type="submit"],
+input[type="reset"],
+input[type="button"],
+#id_buttonfield,
+a.link-as-button,
+a.btn {
+    color: [[setting:buttoncolor-readable-text]];
+    background-color: [[setting:buttoncolor]];
+    border-color: [[setting:buttoncolor]];
+}
+
+input.submit:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover,
+input[type="button"]:hover,
+#id_buttonfield:hover,
+button:hover,
+a.link-as-button:hover,
+a.btn:hover {
+    color:[[setting:buttoncolor-readable-text]];
+    background-color:[[setting:buttoncolor-darker-perc]];
+}
+
+input.submit:active,
+input[type="submit"]:active,
+input[type="reset"]:active,
+input[type="button"]:active,
+#id_buttonfield:active,
+button:active,
+a.link-as-button:active,
+a.btn:active,
+input.submit:focus,
+input[type="submit"]:focus,
+input[type="reset"]:focus,
+input[type="button"]:focus,
+#id_buttonfield:focus,
+button:focus,
+a.link-as-button:focus,
+a.btn:focus,
+input.submit:active:hover,
+input[type="submit"]:active:hover,
+input[type="reset"]:active:hover,
+input[type="button"]:active:hover,
+#id_buttonfield:active:hover,
+button:active:hover,
+a.link-as-button:active:hover,
+a.btn:active:hover {
+    color:[[setting:buttoncolor-readable-text]];
+    background-color:[[setting:buttoncolor-dark-perc]];
+}
+
+button.disabled,
+input.form-submit.disabled,
+input[type="button"].disabled,
+input[type="submit"].disabled,
+input[type="reset"].disabled,
+button[disabled],
+input.form-submit[disabled],
+input[type="button"][disabled],
+input[type="submit"][disabled],
+input[type="reset"][disabled] {
+    color:#888888;
+    background-color:[[setting:buttoncolor-lighter-perc]];
+}
+
+#page-footer,
+.navbar-inner {
+    background-color: [[setting:headerbgc]];
+}
+
+.ie8 .navbar-inner,
+.ie9 .navbar-inner {
+    filter: none;
+}
+
+.jsenabled .usermenu .moodle-actionmenu.show,
+.moodle-dialogue-base .moodle-dialogue-wrap .moodle-dialogue-hd h1,
+.moodle-dialogue-base .moodle-dialogue-wrap .moodle-dialogue-hd h2,
+.moodle-dialogue-base .moodle-dialogue-wrap .moodle-dialogue-hd h3,
+.moodle-dialogue-base .moodle-dialogue-wrap .moodle-dialogue-hd h4,
+.moodle-dialogue-base .moodle-dialogue-wrap .moodle-dialogue-hd h5,
+.moodle-dialogue-base .moodle-dialogue-wrap .moodle-dialogue-hd h6,
+.moodle-dialogue-base .moodle-dialogue-wrap .moodle-dialogue-hd.yui3-widget-hd h1,
+.moodle-dialogue-base .moodle-dialogue-wrap .moodle-dialogue-hd.yui3-widget-hd h2,
+.moodle-dialogue-base .moodle-dialogue-wrap .moodle-dialogue-hd.yui3-widget-hd h3,
+.moodle-dialogue-base .moodle-dialogue-wrap .moodle-dialogue-hd.yui3-widget-hd h4,
+.moodle-dialogue-base .moodle-dialogue-wrap .moodle-dialogue-hd.yui3-widget-hd h5,
+.moodle-dialogue-base .moodle-dialogue-wrap .moodle-dialogue-hd.yui3-widget-hd h6 {
+    background: [[setting:headerbgc]];
+    color: [[setting:heading-on-headerbgc]];
+}
+
+.totara-dialog .ui-dialog-titlebar,
+.moodle-dialogue-base .moodle-dialogue-wrap .moodle-dialogue-hd,
+.moodle-dialogue-base .moodle-dialogue-wrap .moodle-dialogue-hd.yui3-widget-hd {
+    background: [[setting:headerbgc]];
+}
+
+#page-header-wrapper {
+    color: [[setting:text-on-headerbgc]];
+}
+
+body {
+    background-color: [[setting:bodybackground]];
+}
+
+#region-main {
+    background-color: [[setting:contentbackground]];
+    border-radius: 4px;
+    padding: 20px;
+}
+
+body, h1, h2, h3, h4, h5, h6, p, ul, ol, dl, input, textarea {
+    color: [[setting:textcolor]];
+}
+
+/* Totara menu current item highlight */
+.totara-menu > .totara-menu-nav > .totara-menu-nav-list > .totara-menu-nav-item.selected > .totara-menu-nav-item-link {
+    box-shadow: inset 0 -3px [[setting:linkcolor]];
+}
+
+#page-footer {
+    border-top: 3px solid [[setting:linkcolor]];
+}
+
+#page-footer a:link,
+#page-footer a:visited,
+#page-footer a:hover,
+#page-footer a:active {
+    color: white;
+}
+
+.page-footer-poweredby {
+    background-color: [[setting:linkcolor]];
+}
+
+.totara-navbar-container {
+    background-color: [[setting:headerbgc]];
+}
+
+.totara-menu-nav-item-link, .totara-menu-nav-list .totara-menu-nav-item .totara-menu-nav-item-link {
+    background-color: [[setting:headerbgc]];
+}
+
+.totara-menu > .totara-menu-nav > .totara-menu-nav-list > .totara-menu-nav-item.selected > .totara-menu-nav-item-link {
+    background-color: [[setting:headerbgc-dark]];
+}
+
+.totara-menu-nav-item-link:hover, .totara-menu-nav-item-link:focus, .totara-menu-nav-list .totara-menu-nav-item .totara-menu-nav-item-link:hover, .totara-menu-nav-list .totara-menu-nav-item .totara-menu-nav-item-link:focus, .totara-menu-nav-item.selected .totara-menu-nav-item-link:hover, .totara-menu .totara-menu-nav-list .totara-menu-nav-item .totara-menu-nav-item-link:hover, .totara-menu .totara-menu-nav-list .totara-menu-nav-item .totara-menu-nav-item-link:focus {
+    background-color: [[setting:headerbgc-dark]];
+}
+
+.navbar-site {
+    background-color: [[setting:bodybackground]];
+}
+
+.navbar-site .navbar-collapse, .navbar-default .navbar-form {
+    border-color: [[setting:headerbgc]];
+}
+
+.block.block_calendar_month td.today {
+    background-color: [[setting:linkcolor]];
+}
+
+.moodle-actionmenu[data-enhanced].show .menu a:hover {
+    background-color: [[setting:linkcolor]];
+}
+
+@media (min-width: 768px) {
+    .totara-menu-nav-item .totara-menu-nav-item .totara-menu-nav-item-link {
+        background-color: #F0F2F4;
+    }
+    .totara-menu-nav-item.selected .totara-menu-nav-item.selected .totara-menu-nav-item-link:hover, .totara-menu .totara-menu-nav-item .totara-menu-nav-item .totara-menu-nav-item-link:hover {
+        background-color: #DDE1E5;
+    }
+}
+
+[[enablestyleoverrides:end]]
+
+/** Custom CSS defined via theme settings **/
+[[setting:customcss]]
+/** END Custom CSS **/

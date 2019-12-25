@@ -1,0 +1,111 @@
+[data-palette="blue"] .forgetpass a,
+[data-palette="blue"] .ui-dialog-titlebar,
+[data-palette="blue"] .ui-dialog-titlebar-close,
+[data-palette="blue"] .ui-dialog-titlebar-close:hover,
+[data-palette="blue"] h2,
+[data-palette="blue"] .mform .helptooltip a,
+[data-palette="blue"] .mform .helptooltip a:hover,
+[data-palette="blue"] .ui-dialog-content #column-checkboxes input[type="checkbox"] + label:before,
+[data-palette="blue"] .custom-blocks .block div.content .duration,
+[data-palette="blue"] .theme-color,
+[data-palette="blue"] header .action-totara-alerts .alerts-list .total_link,
+[data-palette="blue"] header .action-totara-alerts .alerts-list .total_link:hover,
+[data-palette="blue"].path-totara-program .display-program h3,
+[data-palette="blue"] ul.topics li .content h3,
+[data-palette="blue"].path-course .block:not(.block-introduction):not(.block-outcomes) div.header h2 {
+	color: rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+}
+
+[data-palette="blue"] .qnbutton.blocked,
+[data-palette="blue"] .qnbutton.notyetanswered,
+[data-palette="blue"] .qnbutton.requiresgrading,
+[data-palette="blue"] .qnbutton.invalidanswer,
+[data-palette="blue"] header #totaramenu-legacy ul li a:hover,
+[data-palette="blue"] header #totaramenu-legacy ul ul li a:hover,
+[data-palette="blue"] header #totaramenu ul li a:hover,
+[data-palette="blue"] header #totaramenu ul ul li a:hover,
+[data-palette="blue"] button:not([data-dismiss="modal"]), 
+[data-palette="blue"] .btn,
+[data-palette="blue"] input.form-submit,
+[data-palette="blue"] input[type="button"],
+[data-palette="blue"] input[type="submit"],
+[data-palette="blue"] input[type="submit"][disabled],
+[data-palette="blue"] input[type="reset"],
+[data-palette="blue"] .link-as-button,
+[data-palette="blue"] .qnbutton,
+[data-palette="blue"] .moodle-actionmenu[data-enhanced].show .menu > li:hover,
+[data-palette="blue"] .moodle-actionmenu[data-enhanced].show .menu > li a:hover,
+[data-palette="blue"] .rememberpass input[type="checkbox"]:not(checked) + label:after,
+[data-palette="blue"] input.form-submit, 
+[data-palette="blue"] input#id_submitbutton, 
+[data-palette="blue"] input#id_submitbutton2, 
+[data-palette="blue"].path-admin .buttons input[type="submit"], 
+[data-palette="blue"] td.submit input,
+[data-palette="blue"] .custom-blocks .block div.header,
+[data-palette="blue"] .course-content ul.topics li.section .section-collapser,
+[data-palette="blue"] header .action-totara-alerts .alerts-list .header-list-top,
+[data-palette="blue"] header .action-totara-alerts span.items-count,
+[data-palette="blue"] header .action-totara-alerts-sm span.items-count,
+[data-palette="blue"] .ui-dialog .ui-dialog-buttonpane button,
+[data-palette="blue"].path-totara-program .notifymessage,
+[data-palette="blue"] header .tooltip .tooltiptext {
+	background-color: rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+}
+
+[data-palette="blue"] .editing_on .region > * { 
+	background-color: rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 0.3);
+}
+
+[data-palette="blue"] button:hover:not([data-dismiss="modal"]),
+[data-palette="blue"] .btn:hover,
+[data-palette="blue"] input.form-submit:hover,
+[data-palette="blue"] input[type="button"]:hover,
+[data-palette="blue"] input[type="submit"]:hover,
+[data-palette="blue"] input[type="reset"]:hover,
+[data-palette="blue"] .link-as-button:hover,
+[data-palette="blue"] .ui-dialog .ui-dialog-buttonpane button:hover,
+[data-palette="blue"] button:focus:not([data-dismiss="modal"]),
+[data-palette="blue"] .btn:focus,
+[data-palette="blue"] input.form-submit:focus,
+[data-palette="blue"] input[type="button"]:focus,
+[data-palette="blue"] input[type="submit"]:focus,
+[data-palette="blue"] input[type="reset"]:focus,
+[data-palette="blue"] .link-as-button:focus,
+[data-palette="blue"] .qnbutton:hover,
+[data-palette="blue"] .qnbutton:focus,
+[data-palette="blue"] input.form-submit:hover,
+[data-palette="blue"] input#id_submitbutton:hover, 
+[data-palette="blue"] input#id_submitbutton2:hover, 
+[data-palette="blue"].path-admin .buttons input[type="submit"]:hover, 
+[data-palette="blue"] td.submit input:hover,
+[data-palette="blue"] input.form-submit:focus, 
+[data-palette="blue"] input#id_submitbutton:focus, 
+[data-palette="blue"] input#id_submitbutton2:focus, 
+[data-palette="blue"].path-admin .buttons input[type="submit"]:focus, 
+[data-palette="blue"] td.submit input:focus {
+	background-color: rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 0.7);
+}
+
+[data-palette="blue"] .nav-tabs > li.active > a,
+[data-palette="blue"] .nav-tabs > li.active > a:hover,
+[data-palette="blue"] #dialog-tabs .tabs li.ui-tabs-active.ui-state-active a,
+[data-palette="blue"] #dialog-tabs .tabs li.ui-tabs-active.ui-state-active a:hover {
+  border-top: 3px solid rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+}
+
+[data-palette="blue"] .yui3-calendar-grid {
+	border: 1px solid rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+}
+
+[data-palette="blue"] .custom-blocks .block div.content {
+	border-top: 1px solid rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+}
+
+[data-palette="blue"] header .action-totara-alerts .alerts-list .header-list-top .triangle-left,
+[data-palette="blue"] header .action-totara-alerts .alerts-list .header-list-top .triangle-right {
+	border-color: rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1);
+}
+
+[data-palette="blue"] header .tooltip-bottom:after {
+	border-bottom-color: rgba([[setting:blue_r]], [[setting:blue_g]], [[setting:blue_b]], 1)
+}

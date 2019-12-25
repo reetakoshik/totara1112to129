@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<libraries>
+  <library>
+    <location>fonts</location>
+    <name>Font Awesome Fonts</name>
+    <license>SIL OFL</license>
+    <version>4.7.0</version>
+    <licenseversion>1.1</licenseversion>
+  </library>
+  <library>
+    <location>less/fa</location>
+    <name>Font Awesome CSS</name>
+    <license>MIT</license>
+    <version>4.7.0</version>
+    <licenseversion></licenseversion>
+  </library>
+  <library>
+    <location>fonts</location>
+    <name>Bootstrap - GLYPHICONS Halflings</name>
+    <license>MIT</license>
+    <version>3.3.7</version>
+    <licenseversion></licenseversion>
+  </library>
+  <library>
+    <location>fonts/totara_font.json.zip</location>
+    <name>Octicons</name>
+    <license>MIT</license>
+    <version>4.3.0</version>
+    <licenseversion></licenseversion>
+  </library>
+  <library>
+    <location>fonts/totara_font.json.zip</location>
+    <name>Material icons</name>
+    <license>CC BY</license>
+    <version></version>
+    <licenseversion>4.0</licenseversion>
+  </library>
+  <library>
+    <location>fonts/totara_font.json.zip</location>
+    <name>Entypo+</name>
+    <license>CC BY-SA</license>
+    <version></version>
+    <licenseversion>4.0</licenseversion>
+  </library>
+  <library>
+    <location>fonts/totara_font.json.zip</location>
+    <name>Ionicons</name>
+    <license>MIT</license>
+    <version></version>
+    <licenseversion></licenseversion>
+  </library>
+  <library>
+    <location>fonts/totara_font.json.zip</location>
+    <name>IcoMoon</name>
+    <license>GPL</license>
+    <version></version>
+    <licenseversion></licenseversion>
+  </library>
+</libraries>

@@ -1,0 +1,99 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tool_sitepolicy/element_consent_statement_block
+
+    Creates the consent statement block for a site policy.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * instance - Instance index
+    * dataid - Id
+    * primarystatement - Consent statement in primary language
+    * statement - Consent statement in user's chosen language
+    * primaryprovided - Text for user consent to in primary language
+    * provided - Text for user consent to in user's chosen language
+    * primarywithheld - Text for user withhold to in primary language
+    * withheld - Text for user withhold to in user's chosen language
+    * mandatory - Option is mandatory?
+    * index - Index number
+    * removedstatement - Has statement been removed?
+
+    Example context (json):
+    {
+        "instance": 1,
+        "dataid": 1,
+        "primarystatement": "The primary consent statement",
+        "statement": "The consent statement",
+        "primaryprovided": "Text user provided consent to in the primary language",
+        "provided": "Text user provided consent to",
+        "primarywithheld": "Text user withheld consent with in the primary language",
+        "withheld": "Text user withheld consent with",
+        "mandatory": 1,
+        "index": 1,
+        "removedstatement": false
+    }
+}}
+<div data-rel="statement-block" class="tf_group totara_form_group_section clearfix{{#removedstatement}} hidden{{/removedstatement}}">
+    <fieldset>
+        <legend class="tf_section_legend">{{#str}}statementblocklegend, tool_sitepolicy{{/str}} {{^nocontrols}}<div class="pull-right"><input type="button" data-index="{{index}}" data-rel="removestatement" name="{{name}}_remove[{{index}}]" value="{{#str}}statementremove, tool_sitepolicy{{/str}}" /></div>{{/nocontrols}}</legend>
+        <input type="hidden" name="{{name}}__instance[{{index}}]" value="{{instance}}" />
+        <input type="hidden" name="{{name}}__dataid[{{index}}]" value="{{dataid}}" />
+        <input type="hidden" name="{{name}}__removedstatement[{{index}}]" value="{{#removedstatement}}1{{/removedstatement}}{{^removedstatement}}0{{/removedstatement}}" />
+        <input type="hidden" name="{{name}}__index[{{index}}]" value="{{index}}" />
+        <div class="tf_section_items">
+            <div class="nostyles">
+                <div class="tf_element totara_form_element_text">
+                    <div class="tf_element_title"><label class="legend" for="{{id}}__statement_{{instance}}">{{#str}}statementlabelstatement, tool_sitepolicy{{/str}}{{#required}}{{> totara_form/required_suffix}}{{/required}}</label></div>
+                    <div class="tf_element_input">{{#primarystatement}}{{primarystatement}}<br/>{{/primarystatement}}<input type="text" autocomplete="off" id="{{id}}__statement_{{instance}}" {{#frozen}}disabled data-{{/frozen}}name="{{name}}__statement[{{index}}]" value="{{statement}}" {{^removedstatement}}{{#required}}required{{/required}}{{/removedstatement}}/></div>
+                </div>
+            </div>
+            <div class="nostyles">
+                <div class="tf_element totara_form_element_text">
+                    <div class="tf_element_title"><label class="legend" for="{{id}}__provided_{{instance}}">{{#str}}statementlabelprovideconsent, tool_sitepolicy{{/str}}{{#required}}{{> totara_form/required_suffix}}{{/required}}</label></div>
+                    <div class="tf_element_input">
+                        {{#primaryprovided}}{{primaryprovided}}<br/>{{/primaryprovided}}
+                        <input type="text" autocomplete="off" id="{{id}}__provided_{{instance}}" {{#frozen}}disabled data-{{/frozen}}name="{{name}}__provided[{{index}}]" value="{{provided}}" {{^removedstatement}}{{#required}}required{{/required}}{{/removedstatement}}/></div>
+                </div>
+            </div>
+            <div class="nostyles">
+                <div class="tf_element totara_form_element_text">
+                    <div class="tf_element_title"><label class="legend" for="{{id}}__withheld_{{instance}}">{{#str}}statementlabelwithholdconsent, tool_sitepolicy{{/str}}{{#required}}{{> totara_form/required_suffix}}{{/required}}</label></div>
+                    <div class="tf_element_input">
+                        {{#primarywithheld}}{{primarywithheld}}<br/>{{/primarywithheld}}
+                        <input type="text" autocomplete="off" id="{{id}}__withheld_{{instance}}" {{#frozen}}disabled data-{{/frozen}}name="{{name}}__withheld[{{index}}]" value="{{withheld}}" {{^removedstatement}}{{#required}}required{{/required}}{{/removedstatement}}/>
+                    </div>
+                </div>
+            </div>
+            <div class="nostyle">
+                <div class="tf_element totara_form_element_text">
+                    <div class="tf_element_title"><label class="legend" for="{{id}}__mandatory_{{instance}}">{{#str}}statementlabelrequired, tool_sitepolicy{{/str}}</label></div>
+                    <div class="tf_element_checkbox">
+                    <input type="checkbox" id="{{id}}__mandatory_{{instance}}" {{#nocontrols}}disabled data-{{/nocontrols}}name="{{name}}__mandatory[{{index}}]" value="1" {{#mandatory}}checked{{/mandatory}}/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</div>

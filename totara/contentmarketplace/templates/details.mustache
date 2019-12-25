@@ -1,0 +1,113 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Sergey Vidusov <sergey.vidusov@androgogic.com>
+   @package totara_contentmarketplace
+}}
+{{!
+    @template totara_contentmarketplace/details
+
+    Content Marketplace learning object details
+
+    Example context (json):
+    {
+        "title": "Search Engines",
+        "description": "Search Engines in detail",
+        "delivery": [
+            {
+                "title": "20 HRS"
+            },
+            {
+                "title": "Self paced",
+                "last": true
+            }
+        ],
+        "delivery_has_items": true,
+        "provider": {
+            "logo": "https:\/\/yt3.ggpht.com\/-xVzemH7wNSk\/AAAAAAAAAAI\/AAAAAAAAAAA\/c9QL4EZyJlc\/s240-c-k-no-mo-rj-c0xffffff\/photo.jpg",
+            "name": "Video Creators"
+        },
+        "price": "AUD 1,234.00"
+    }
+
+}}
+<div class="tcm-details-content">
+    <div class="tcm-details-top clearfix">
+        <span class="tcm-details-close pull-right">&times;</span>
+        <h3 class="pull-left">{{title}}</h3>
+    </div>
+    <div class="tcm-details-header clearfix">
+        <div class="pull-left">
+            <div class="tcm-header-details-cell">
+                {{#delivery_has_items}}
+                    <div class="tcm-details-delivery">
+                        {{#delivery}} {{duration_label}}{{mode}} {{/delivery}}
+                    </div>
+                {{/delivery_has_items}}
+            </div>
+            {{#provider}}
+                <div class="tcm-header-details-cell tcm-details-logo">
+                    <img src="{{logo}}" height="40" alt="">
+                </div>
+            {{/provider}}
+            <div class="tcm-header-details-cell">
+                {{#provider}}
+                    <div>{{name}}</div>
+                    <div><span class="tcm-goone-search-location">{{#flex_icon}}contentmarketplace_goone|online{{/flex_icon}} {{#str}} online, totara_contentmarketplace {{/str}}</span></div>
+                {{/provider}}
+            </div>
+            <div class="tcm-header-details-cell">
+                <div class="tcm-details-price">{{price}}</div>
+                {{#has_reviews}}
+                    <div>{{{stars}}} {{#reviews}} {{strratings}}{{/reviews}}</div>
+                {{/has_reviews}}
+            </div>
+        </div>
+        <div class="pull-right action-buttons">
+            <button type="button" class="btn btn-block btn-primary tcm-create-course-button">{{#str}} createcourse, totara_contentmarketplace{{/str}}</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="tcm-details-main col-md-8">
+            <div class="tcm-details-description">
+                <h4>{{#str}} course_description_label, totara_contentmarketplace{{/str}}</h4>
+                <p>{{{description}}}</p>
+            </div>
+            {{#has_items}}
+            <div class="tcm-details-items">
+                <h4>{{#str}} course_items_label, totara_contentmarketplace{{/str}}</h4>
+                {{#items}}
+                    <div class="tcm-details-item">
+                        <h5>{{title}}</h5>
+                        <div class="text-muted">
+                            <div>{{description}}</div>
+                        </div>
+                    </div>
+                {{/items}}
+            </div>
+            {{/has_items}}
+        </div>
+        {{#has_image}}
+        <div class="col-md-4">
+            <div class="tcm-details-img">
+                <div class="tcm-thumbnail-img" style="background-image: url('{{ image }}');"></div>
+            </div>
+        </div>
+        {{/has_image}}
+    </div>
+</div>

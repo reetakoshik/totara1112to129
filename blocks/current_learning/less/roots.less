@@ -1,0 +1,270 @@
+@bg-default: #fff;
+@color-default: #333;
+
+@bg-light: #f5f5f5;
+@bg: #e8e8e8;
+
+@padding-small-vertical: 5px;
+
+// Program set complete.
+@bg-set-complete: #83CC36;
+@border-color-complete: #5cb85c;
+@color-complete: #3c763d;
+
+@border-color-unavailable: #d9534f;
+@color-unavailable: #a94442;
+
+@padding-vertical: 6px;
+@padding-horizontal: 10px;
+@padding-large: 15px;
+
+@item-border: #ddd;
+
+@border-radius-default: 4px;
+@border-radius-large: 8px;
+
+@font-size-small: 12px;
+@font-size-title: 16px;
+
+.block_current_learning {
+    .panel-heading .btn-group {
+        margin-left: 20px;
+    }
+    .content {
+        // prefix needed to overwrite .block .content which comes from the theme
+        div& {
+            padding: 0;
+            margin: 0;
+        }
+
+        a {
+            color: @color-default;
+        }
+
+        //.block_current_learning-item div:first-child {
+        .block_current_learning-row-item {
+            font-size: @font-size-title;
+            line-height: 28px;
+            margin: 0;
+            padding: 0 0 0 26px;
+            display: inline-block;
+            width: 100%;
+
+            > span {
+                padding: 0 5px;
+            }
+
+            &__status {
+                min-width: 20%;
+                float: right;
+                text-align: right;
+
+                .progressbar_container {
+                    padding-top: 5px;
+                }
+            }
+
+            > .expand-collapse-icon-wrap {
+                padding: 0.3em;
+                border-radius: @border-radius-default;
+                margin: 0 0 0 -1.8em;
+                text-align: center;
+
+                &:hover {
+                    background-color: #ddd;
+                    cursor: pointer;
+                }
+                .collapsed-icon {
+                    display: none;
+                }
+                .expanded-icon {
+                    display: inherit;
+                }
+                &.collapsed {
+                    .collapsed-icon {
+                        display: inherit;
+                    }
+                    .expanded-icon {
+                        display: none;
+                    }
+                }
+            }
+            > .ft-certificate {
+                font-size: 18px;
+            }
+
+            h3 {
+                display: inline-block;
+            }
+
+            .info {
+                .label {
+                    display: inline-block;
+                }
+            }
+        }
+    }
+    .panel-body {
+        padding: 0;
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+
+            li {
+                border-bottom: 1px solid @item-border;
+                padding: @padding-vertical @padding-horizontal;
+            }
+            li:nth-of-type(even) {
+                background-color: @bg-light;
+            }
+        }
+    }
+    .panel-footer {
+        background-color: @bg-default;
+        overflow: hidden;
+
+        .count {
+            margin: 10px 0 0;
+            float: left;
+        }
+
+        .pagination {
+            margin: 0;
+            float: right;
+        }
+    }
+
+    // Message displayed when the user has no current learning.
+    .current_learning-no-content {
+        padding: @padding-large;
+        text-align: center;
+        margin-bottom: 0;
+    }
+
+    ul li:nth-of-type(even) .current_learning-set {
+        background-color: @bg-default;
+    }
+
+    ul li:nth-of-type(even) .current_learning-course {
+        background-color: @bg;
+    }
+}
+
+// Program user learning items.
+.block_current_learning-program {
+    .current_learning-operator {
+        text-align: center;
+        font-size: 30px;
+        line-height: 40px;
+        height: 40px;
+        color: #aaa;
+        margin: 0;
+
+        .fa-caret-down {
+            font-size: 40px;
+        }
+    }
+    .current_learning-bundle {
+        padding: 10px 40px;
+
+        .block_current_learning-row-item__status .progressbar_container {
+            padding-top: 0;
+        }
+    }
+    .current_learning-set {
+        padding: @padding-large-vertical @padding-horizontal;
+        background-color: @bg;
+        border-radius: @border-radius-large;
+        h4 {
+            &:not(:first-child) {
+                padding-top: @padding-small-vertical;
+            }
+            span {
+                color: #888;
+                font-size: @font-size-small;
+            }
+        }
+        .points {
+            color: #777777;
+            display: inline-block;
+            min-width: 10px;
+            padding: 2px 7px;
+            font-size: @font-size-small;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            background-color: @bg-light;
+            border-radius: 10px;
+            border: 1px solid darken(@bg-light, 10%);
+        }
+    }
+    .current_learning-set-stamp {
+        text-align: center;
+
+        &:first-child {
+            margin-bottom: 12px;
+        }
+        &:last-child {
+            margin-top: 12px;
+        }
+
+        p {
+            padding: 4px 10px;
+            background-color: @bg;
+            border-radius: @border-radius-default;
+            margin: 0;
+            display: inline-block;
+            font-size: @font-size-small;
+        }
+
+        .status-complete {
+            background-color: @bg-default;
+            border: 2px solid @border-color-complete;
+            font-weight: bold;
+            color: @color-complete;
+
+            .flex-icon {
+                color: @bg-set-complete;
+            }
+        }
+
+        .status-unavailable {
+            background-color: @bg-default;
+            border: 2px solid @border-color-unavailable;
+            font-weight: bold;
+            color: @color-unavailable;
+        }
+    }
+}
+
+// Course user learning items appearing at the top level and within programs.
+.block_current_learning .current_learning-course {
+    padding: @padding-vertical;
+    background-color: @bg-default;
+    border-radius: @border-radius-large;
+    clear: both;
+    display: inline-block;
+    width: 100%;
+    margin-top: @padding-vertical;
+
+    &:first-child {
+        margin-top: 0;
+    }
+
+    .flex-icon {
+        float: right;
+        margin-top: 3px;
+    }
+
+    .info {
+        margin-top: -1px;
+    }
+
+    .label .flex-icon {
+        float: none;
+    }
+}

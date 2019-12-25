@@ -1,0 +1,118 @@
+.treeview, .treeview ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.treeview ul {
+    background-color: white;
+}
+
+.treeview .hitarea {
+    background-image: url([[pix:totara_core|jquery_treeview/treeview-default]]);
+    background-repeat: no-repeat;
+    height: 16px;
+    width: 16px;
+    margin-left: -16px;
+    float: left;
+    cursor: pointer;
+
+    .dir-rtl & {
+        background-image: url([[pix:totara_core|jquery_treeview/treeview-default-rtl]]);
+    }
+
+    &.collapsable-hitarea {
+        background-position: -64px -23px;
+
+        /*rtl:ignore*/
+        .dir-rtl & {
+            background-position-x: -16px;
+        }
+    }
+
+    &.expandable-hitarea {
+        background-position: -32px -68px;
+
+        /*rtl:ignore*/
+        .dir-rtl & {
+            background-position-x: -48px;
+        }
+    }
+
+    &.lastCollapsable-hitarea {
+        background-position: 0 -112px;
+        /*rtl:ignore*/
+        .dir-rtl & {
+            background-position-x: -80px;
+        }
+    }
+
+    &.lastExpandable-hitarea {
+        background-position: -32px -68px;
+        /*rtl:ignore*/
+        .dir-rtl & {
+            background-position-x: -48px;
+        }
+    }
+}
+
+.treeview li {
+    margin: 0;
+    padding: 0 0 0 16px;
+    font-size: @font-size-small;
+}
+
+.treeview a.selected {
+    background-color: #eee;
+}
+
+#treecontrol { margin: 1em 0; display: none; }
+
+.treeview li {
+    background-image: url([[pix:totara_core|jquery_treeview/treeview-default-line]]);
+    background-repeat: no-repeat;
+    background-position: 0 0;
+
+    .dir-rtl & {
+        background-image: url([[pix:totara_core|jquery_treeview/treeview-default-line-rtl]]);
+    }
+}
+.treeview li.collapsable, .treeview li.expandable { background-position: 0 -176px; }
+
+//.treeview .expandable-hitarea { background-position: -80px -2px; }
+
+.treeview li.last { background-position: 0 -1766px }
+
+.treeview li.lastCollapsable,
+.treeview li.lastExpandable {
+    background-image: none;
+}
+
+.treeview-red li { background-image: url([[pix:totara_core|jquery_treeview/treeview-red-line]]); }
+.treeview-red .hitarea, .treeview-red li.lastCollapsable, .treeview-red li.lastExpandable { background-image: url([[pix:totara_core|jquery_treeview/treeview-red]]); }
+
+.treeview-black li { background-image: url([[pix:totara_core|jquery_treeview/treeview-black-line]]); }
+.treeview-black .hitarea, .treeview-black li.lastCollapsable, .treeview-black li.lastExpandable { background-image: url([[pix:totara_core|jquery_treeview/treeview-black]]); }
+
+.treeview-gray li { background-image: url([[pix:totara_core|jquery_treeview/treeview-gray-line]]); }
+.treeview-gray .hitarea, .treeview-gray li.lastCollapsable, .treeview-gray li.lastExpandable { background-image: url([[pix:totara_core|jquery_treeview/treeview-gray]]); }
+
+.treeview-famfamfam li { background-image: url([[pix:totara_core|jquery_treeview/treeview-famfamfam-line]]); }
+.treeview-famfamfam .hitarea, .treeview-famfamfam li.lastCollapsable, .treeview-famfamfam li.lastExpandable { background-image: url([[pix:totara_core|jquery_treeview/treeview-famfamfam]]); }
+
+.filetree span.folder, .filetree span.file { padding: 0 0 0 16px; display: block; }
+.filetree span.folder {
+    background-image: url([[pix:totara_core|jquery_treeview/folder]]);
+    background-repeat: no-repeat;
+    background-position: 0 0;
+}
+.filetree li.expandable span.folder {
+    background-image: url([[pix:totara_core|jquery_treeview/folder-closed]]);
+    background-repeat: no-repeat;
+    background-position: 0 0;
+}
+.filetree span.file {
+    background: url([[pix:totara_core|jquery_treeview/file]]);
+    background-repeat: no-repeat;
+    background-position: 0 0;
+}

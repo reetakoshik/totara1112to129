@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/contractor_webservice/db" VERSION="2018010101" COMMENT="XMLDB file for Moodle local/contractor_webservice"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+	<TABLES>
+		<TABLE NAME="contractor_service_history" COMMENT="Logging web services response date with status">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="service"/>
+				<FIELD NAME="service" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Web service name" PREVIOUS="id" NEXT="time"/>
+				<FIELD NAME="time" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="service" NEXT="info"/>
+				<FIELD NAME="status" TYPE="int" LENGTH="1" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 if there were data otherwise 0" PREVIOUS="info"/>
+				<FIELD NAME="signupids" TYPE="text" NOTNULL="false" UNSIGNED="true" DEFAULT="NULL" SEQUENCE="false" COMMENT="1 if there were data otherwise 0" PREVIOUS="info"/>
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+			</KEYS>
+		</TABLE>
+	</TABLES>
+</XMLDB>

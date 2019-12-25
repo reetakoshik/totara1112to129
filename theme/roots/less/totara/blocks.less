@@ -1,0 +1,316 @@
+// This file is part of Totara LMS
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @package   theme_roots
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @copyright 2015 Bas Brands <www.sonsbeekmedia.nl>
+// @author    Bas Brands
+// @author    David Scotson
+// @author    Joby Harding <joby.harding@totaralearning.com>
+// @author    Rob Tyler <rob.tyler@totaralearning.com>
+
+.block {
+    &:extend(.panel);
+    &:extend(.panel-default);
+    &.invisible {
+        border-color: lighten(@panel-default-border, 5%);
+        .header {
+            background-color: lighten(@panel-default-heading-bg, 5%);
+            h2 {
+                color: lighten(@panel-default-text, 20%);
+            }
+        }
+    }
+    .block_action {
+        float: right;
+    }
+    .header {
+        &:extend(.panel-default > .panel-heading);
+        .panel-heading;
+        min-height: 50px;
+        h2 {
+            .panel-title;
+            word-wrap: break-word;
+        }
+    }
+    .content {
+        word-wrap: break-word;
+        padding: 4px 14px;
+        hr {
+            margin: 5px 0;
+        }
+        .userpicture {
+            width: 16px;
+            height: 16px;
+            margin-right: 6px;
+        }
+        .list {
+            li.listentry {
+                clear: both;
+            }
+            .c0 {
+                display: inline;
+            }
+            .c1 {
+                margin-left: 5px;
+                display: inline;
+            }
+        }
+    }
+    .footer {
+        margin-bottom: 4px;
+    }
+    .blockannotation {
+        font-size: 0.75em;
+        margin: -1em 0 1em;
+    }
+    .singleselect select {
+        .form-control;
+    }
+    &.chromeless {
+        border: none;
+        padding: 0;
+        &.block {
+            box-shadow: none;
+        }
+        .block-header {
+            padding: 0;
+            .block-control-actions {
+                margin: 0;
+            }
+        }
+        .title.block-title {
+            padding: @panel-body-padding;
+        }
+        .content {
+            padding: 0;
+        }
+    }
+}
+
+.editing {
+    .block {
+        .header {
+            .commands {
+                clear: both;
+                text-align: right;
+
+                > a {
+                    margin: 0 3px;
+                }
+                .icon img {
+                    width: 12px;
+                    height: 12px;
+                }
+                img.actionmenu {
+                    width: auto;
+                }
+            }
+        }
+    }
+}
+
+.block.list_block {
+    .unlist {
+        & > li {
+            & > .column {
+                display: inline-block;
+            }
+        }
+    }
+}
+
+.blockmovetarget,
+.block.beingmoved {
+    border-width: 2px;
+    border-style: dashed;
+}
+
+.blockmovetarget {
+    display: block;
+    height: 1em;
+    margin-bottom: 1em;
+}
+
+.block .block-hider-show,
+.block .block-hider-hide {
+    cursor: pointer;
+}
+
+.block .block-hider-show,
+.block.hidden .block-hider-hide {
+    display: none;
+}
+
+.block.hidden .block-hider-show {
+    display: inline;
+}
+
+.block.hidden .content {
+    display: none;
+}
+
+.block_calendar_upcoming {
+    .footer {
+        margin-top: .5em;
+    }
+    .content {
+        .date {
+            padding-left: 22px;
+        }
+        .footer {
+            padding-top: 10px;
+            padding-left: 0;
+        }
+    }
+}
+
+.blogsearchform,
+.searchform {
+    input[type="text"] {
+        .form-group;
+        .form-control;
+    }
+    fieldset {
+        width: 100%;
+    }
+}
+
+.block_rss_client {
+    .content li {
+        margin-bottom: 10px;
+        padding: 5px;
+        border: 1px solid @blockquote-border-color;
+        border-radius: @border-radius-base;
+        .link {
+            font-weight: inherit;
+        }
+    }
+    .list li:first-child {
+        border-top-width: 1px; // undo the style provided by the block's styles.css
+    }
+}
+
+.block_myprofile {
+    .content {
+        .email {
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+    }
+}
+
+.block_news_items .content {
+    .newlink {
+        padding-bottom: 10px;
+    }
+    ul li {
+        border-top: 1px solid @blockquote-border-color;
+        padding: 2px;
+        display: table;
+        width: 100%;
+        .info {
+            display: table-header-group;
+        }
+        .date {
+            font-size: @font-size-small;
+            display: inline;
+        }
+        .name {
+            font-size: @font-size-small;
+            padding-left: 1ex;
+            display: inline;
+        }
+    }
+    .footer {
+        padding-top: 10px;
+        padding-left: 0;
+    }
+}
+
+// End of original bootstrap theme code.
+
+.block .header {
+    padding: @padding-large-horizontal;
+    margin: 0;
+}
+
+.block .content {
+    padding: @padding-large-horizontal;
+    margin: 0;
+}
+
+.block .footer {
+    margin: 0;
+}
+
+.block.block_settings .footer {
+    margin: @padding-large-horizontal 0 0 0;
+}
+
+.block.block_totara_quicklinks .content ul {
+    margin: 0;
+}
+
+.block.block_calendar_month .content {
+    padding: 0 @padding-large-horizontal @padding-large-horizontal @padding-large-horizontal;
+}
+
+// The headers need to be an appropriate size for
+// use within the block so use the standard font size.
+.block .content h1,
+.block .content h2,
+.block .content h3,
+.block .content h4,
+.block .content h5,
+.block .content h6 {
+    font-size: @font-size-base;
+    margin-top: 0;
+    margin-bottom: (@line-height-computed / 2);
+}
+
+// Ensure the headings in the html block are the correct size
+.block_html .content {
+    h1 {
+        font-size: @font-size-h1;
+    }
+
+    h2 {
+        font-size: @font-size-h2;
+    }
+
+    h3 {
+        font-size: @font-size-h3;
+    }
+
+    h4 {
+        font-size: @font-size-h4;
+    }
+
+    h5 {
+        font-size: @font-size-h5;
+    }
+
+    h6 {
+        font-size: @font-size-h6;
+    }
+}
+
+// Ensure the Administration block search extends to
+// full width when using a mobile device.
+.block_settings #adminsearchquery {
+    width: 100%;
+    max-width: none;
+}

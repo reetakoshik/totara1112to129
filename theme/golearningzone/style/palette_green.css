@@ -1,0 +1,111 @@
+[data-palette="green"] .forgetpass a,
+[data-palette="green"] .ui-dialog-titlebar,
+[data-palette="green"] .ui-dialog-titlebar-close,
+[data-palette="green"] .ui-dialog-titlebar-close:hover,
+[data-palette="green"] h2,
+[data-palette="green"] .mform .helptooltip a,
+[data-palette="green"] .mform .helptooltip a:hover,
+[data-palette="green"] .ui-dialog-content #column-checkboxes input[type="checkbox"] + label:before,
+[data-palette="green"] .custom-blocks .block div.content .duration,
+[data-palette="green"] .theme-color,
+[data-palette="green"] header .action-totara-alerts .alerts-list .total_link,
+[data-palette="green"] header .action-totara-alerts .alerts-list .total_link:hover,
+[data-palette="green"].path-totara-program .display-program h3,
+[data-palette="green"] ul.topics li .content h3,
+[data-palette="green"].path-course .block:not(.block-introduction):not(.block-outcomes) div.header h2 {
+	color: rgba([[setting:green_r]], [[setting:green_g]], [[setting:green_b]], 1);
+}
+
+[data-palette="green"] .qnbutton.blocked,
+[data-palette="green"] .qnbutton.notyetanswered,
+[data-palette="green"] .qnbutton.requiresgrading,
+[data-palette="green"] .qnbutton.invalidanswer,
+[data-palette="green"] header #totaramenu-legacy ul li a:hover,
+[data-palette="green"] header #totaramenu-legacy ul ul li a:hover,
+[data-palette="green"] header #totaramenu ul li a:hover,
+[data-palette="green"] header #totaramenu ul ul li a:hover,
+[data-palette="green"] button:not([data-dismiss="modal"]), 
+[data-palette="green"] .btn,
+[data-palette="green"] input.form-submit,
+[data-palette="green"] input[type="button"],
+[data-palette="green"] input[type="submit"],
+[data-palette="green"] input[type="submit"][disabled],
+[data-palette="green"] input[type="reset"],
+[data-palette="green"] .link-as-button,
+[data-palette="green"] .qnbutton,
+[data-palette="green"] .moodle-actionmenu[data-enhanced].show .menu > li:hover,
+[data-palette="green"] .moodle-actionmenu[data-enhanced].show .menu > li a:hover,
+[data-palette="green"] .rememberpass input[type="checkbox"]:not(checked) + label:after,
+[data-palette="green"] input.form-submit, 
+[data-palette="green"] input#id_submitbutton, 
+[data-palette="green"] input#id_submitbutton2, 
+[data-palette="green"].path-admin .buttons input[type="submit"], 
+[data-palette="green"] td.submit input,
+[data-palette="green"] .custom-blocks .block div.header,
+[data-palette="green"] .course-content ul.topics li.section .section-collapser,
+[data-palette="green"] header .action-totara-alerts .alerts-list .header-list-top,
+[data-palette="green"] header .action-totara-alerts span.items-count,
+[data-palette="green"] header .action-totara-alerts-sm span.items-count,
+[data-palette="green"] .ui-dialog .ui-dialog-buttonpane button,
+[data-palette="green"].path-totara-program .notifymessage,
+[data-palette="green"] header .tooltip .tooltiptext  {
+	background-color: rgba([[setting:green_r]], [[setting:green_g]], [[setting:green_b]], 1);
+}
+
+[data-palette="green"] .editing_on .region > * { 
+	background-color: rgba([[setting:green_r]], [[setting:green_g]], [[setting:green_b]], 0.3);
+}
+
+[data-palette="green"] button:hover:not([data-dismiss="modal"]),
+[data-palette="green"] .btn:hover,
+[data-palette="green"] input.form-submit:hover,
+[data-palette="green"] input[type="button"]:hover,
+[data-palette="green"] input[type="submit"]:hover,
+[data-palette="green"] input[type="reset"]:hover,
+[data-palette="green"] .link-as-button:hover,
+[data-palette="green"] .ui-dialog .ui-dialog-buttonpane button:hover,
+[data-palette="green"] button:focus:not([data-dismiss="modal"]),
+[data-palette="green"] .btn:focus,
+[data-palette="green"] input.form-submit:focus,
+[data-palette="green"] input[type="button"]:focus,
+[data-palette="green"] input[type="submit"]:focus,
+[data-palette="green"] input[type="reset"]:focus,
+[data-palette="green"] .link-as-button:focus,
+[data-palette="green"] .qnbutton:hover,
+[data-palette="green"] .qnbutton:focus,
+[data-palette="green"] input.form-submit:hover, 
+[data-palette="green"] input#id_submitbutton:hover, 
+[data-palette="green"] input#id_submitbutton2:hover, 
+[data-palette="green"].path-admin .buttons input[type="submit"]:hover, 
+[data-palette="green"] td.submit input:hover,
+[data-palette="green"] input.form-submit:focus, 
+[data-palette="green"] input#id_submitbutton:focus, 
+[data-palette="green"] input#id_submitbutton2:focus, 
+[data-palette="green"].path-admin .buttons input[type="submit"]:focus, 
+[data-palette="green"] td.submit input:focus {
+	background-color: rgba([[setting:green_r]], [[setting:green_g]], [[setting:green_b]], 0.7);
+}
+
+[data-palette="green"] .nav-tabs > li.active > a,
+[data-palette="green"] .nav-tabs > li.active > a:hover,
+[data-palette="green"] #dialog-tabs .tabs li.ui-tabs-active.ui-state-active a,
+[data-palette="green"] #dialog-tabs .tabs li.ui-tabs-active.ui-state-active a:hover {
+  border-top: 3px solid rgba([[setting:green_r]], [[setting:green_g]], [[setting:green_b]], 1);
+}
+
+[data-palette="green"] .yui3-calendar-grid {
+	border: 1px solid rgba([[setting:green_r]], [[setting:green_g]], [[setting:green_b]], 1);
+}
+
+[data-palette="green"] .custom-blocks .block div.content {
+	border-top: 1px solid rgba([[setting:green_r]], [[setting:green_g]], [[setting:green_b]], 1);
+}
+
+[data-palette="green"] header .action-totara-alerts .alerts-list .header-list-top .triangle-left,
+[data-palette="green"] header .action-totara-alerts .alerts-list .header-list-top .triangle-right {
+	border-color: rgba([[setting:green_r]], [[setting:green_g]], [[setting:green_b]], 1);
+}
+
+[data-palette="green"]  header .tooltip-bottom:after {
+	border-bottom-color: rgba([[setting:green_r]], [[setting:green_g]], [[setting:green_b]], 1);
+}

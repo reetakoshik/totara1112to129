@@ -1,0 +1,6 @@
+{
+  "moodle-core-jquerybehat": {
+    "requires": [
+    ]
+  }
+}

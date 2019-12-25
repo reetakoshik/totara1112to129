@@ -1,0 +1,66 @@
+{
+  "total": 4,
+  "hits": [],
+  "facets": {
+    "instance": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": 1866847,
+          "doc_count": 4,
+          "name": "GO1 Content"
+        }
+      ]
+    },
+    "language": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": "en",
+          "doc_count": 2
+        },
+        {
+          "key": "ar",
+          "doc_count": 1
+        },
+        {
+          "key": "fr",
+          "doc_count": 1
+        }
+      ]
+    },
+    "tag": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": "Personal Development",
+          "doc_count": 3,
+          "type": "premium"
+        },
+        {
+          "key": "Academics",
+          "doc_count": 4,
+          "type": "marketplace"
+        },
+        {
+          "key": "Arts \u0026 Humanities",
+          "doc_count": 2,
+          "type": "marketplace"
+        },
+        {
+          "key": "Computer Science",
+          "doc_count": 1,
+          "type": "marketplace"
+        },
+        {
+          "key": "Social Science",
+          "doc_count": 3,
+          "type": "marketplace"
+        }
+      ]
+    }
+  }
+}

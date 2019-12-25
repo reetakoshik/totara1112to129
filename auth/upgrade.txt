@@ -1,0 +1,17 @@
+This files describes API changes in /auth/* - plugins,
+information provided here is intended especially for developers.
+
+=== 11.9 ===
+
+* $CFG->alternateloginurl setting is deprecated and will be removed in Totara 13,
+  you need to enable $CFG->allowlogincsrf in config.php if you want to keep using it
+* /login/weblinkauth.php is deprecated and it will be ignored in Totara 13,
+  you need to enable $CFG->allowlogincsrf in config.php if you want to keep using it
+
+=== 10 ===
+
+* New auth hook - pre_user_login_hook() - available, triggered right after the user object is created.
+  This can be used to modify the user object before any authentication errors are raised.
+* The block_login now displays the loginpage_idp_list() links as well as main login page.
+* The authentication plugin auth_radius has been moved to https://github.com/moodlehq/moodle-auth_radius
+* auth_plugin_base::edit_profile_url($userid = null) has a new optional user id parameter

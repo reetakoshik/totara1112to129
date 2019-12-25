@@ -1,0 +1,75 @@
+{{!
+    This file is part of Totara LMS
+
+    Copyright (C) 2010 onwards Totara Learning Solutions LTD
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    @author Brian Barnes <brian.barnes@totaralms.com>
+    @package totara
+    @subpackage cohort/rules
+}}
+{{!
+    @template totara_cohort/editing_ruleset
+
+    Audience rule template
+
+    The purpose of this template is to render an audience rule.
+
+    Classes required for JS:
+    * ruleid
+    * ruledef-edit
+    * ruledef-delete
+    * cohort_rule_type
+
+    Data attributes required for JS:
+    * data-ruletype
+    * data-ruleid
+
+    Context variables required for this template:
+    * rule text the text of the rule to display
+
+    Example context (json):
+    {
+        "hasrules":true,
+        "operator":"AND",
+        "rules":[
+            {"id":"1","first":true,"editurl":"#","ruledescription":"User's username contains \"test\"","ruletype":"user","rulename":"username","broken":false},
+            {"id":"7","first":false,"editurl":"#","ruledescription":"User's last name contains \"test\"","ruletype":"user","rulename":"lastname","broken":false},
+            {"id":"9","first":false,"editurl":"#","ruledescription":"User's first name contains \"test\"","ruletype":"user","rulename":"firstname","broken":false},
+            {"id":"10","first":false,"editurl":"#","ruledescription":"User's email address contains \"localhost&quot;, &quot;testa\"","ruletype":"user","rulename":"email","broken":false}
+        ]
+    }
+}}
+{{#hasrules}}
+<ul class="cohort-editing_ruleset unlist fitem">
+    {{#rules}}
+    <li id="rule{{id}}">
+        <span class="cohort_rule_type">{{^first}}{{operator}}{{/first}}</span>
+        {{^broken}}
+        <span class="cohort_rule_text">{{{ruledescription}}}</span>
+        <a href="{{{editurl}}}" class="ruledef-edit" data-ruletype="{{ruletype}}-{{rulename}}" data-ruleid="{{id}}">
+            {{#pix}} t/edit, core, {{#str}}edit, core{{/str}} {{/pix}}
+        </a>
+        {{/broken}}
+        {{#broken}}
+            <strong class="error">{{brokenruleinfostr}}</strong>
+        {{/broken}}
+        <a href="#" title="{{#str}}delete, core{{/str}}" class="ruledef-delete" data-ruleid="{{id}}">
+            {{#pix}} t/delete, core, {{#str}}delete, core{{/str}}{{/pix}}
+        </a>
+    </li>
+    {{/rules}}
+</ul>
+{{/hasrules}}

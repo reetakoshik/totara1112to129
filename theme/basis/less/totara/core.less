@@ -1,0 +1,255 @@
+//
+// This file is part of Totara LMS
+//
+// Copyright (C) 2016 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <ht    tp://www.gnu.org/licenses/>.
+//
+// @copyright 2016 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Joby Harding <joby.harding@totaralearning.com>
+// @author    Brian Barnes <brian.barnes@totaralearning.com>
+// @package   theme_basis
+
+.breadcrumb-nav {
+    margin-bottom: 0;
+}
+
+#page-content {
+    padding-top: @line-height-computed;
+}
+
+.upgradekeyreq {
+    margin-bottom: @line-height-computed;
+}
+
+.usermenu {
+    .userloggedinas & {
+        padding-top: ceil(@navbar-padding-vertical * 0.5);
+    }
+}
+
+// There is a <div> and a <select> with the same class.
+div.langmenu {
+    padding-top: ceil(@navbar-padding-vertical * 1.25);
+}
+
+/* display comment count on top of speech bubble image */
+a.comments-icon-some,
+a.comments-icon-none {
+    display: block;
+    width: 27px;
+    height: 25px;
+    padding: 0;
+    text-align: center;
+    line-height: 21px;
+}
+
+a.comments-icon-some {
+    background-image: url([[pix:totara_core|t/comments]]);
+}
+
+a.comments-icon-none {
+    background-image: url([[pix:totara_core|t/comments-none]]);
+}
+
+.comment-list li {
+    position: relative;
+    max-width: 628px;
+    background: none;
+
+    .comment-content {
+        position: relative;
+        border-radius: 4px 4px 4px 4px;
+        padding: 5px 8px;
+        border: 1px solid @gray-lighter;
+    }
+
+    .comment-userpicture {
+        position: absolute;
+        top: 4px;
+        width: 30px;
+        z-index: 99;
+    }
+
+    .comment-user-name {
+        margin-left: 0;
+    }
+}
+
+.comment-list .comment-others-post .comment-content {
+    background-color: @gray-lighter;
+    margin-right: 26px;
+}
+
+.comment-list .comment-own-post .comment-content {
+    margin-left: 26px;
+}
+
+.comment-list .comment-others-post .comment-userpicture {
+    background: url([[pix:totara_core|comment-point-grey]]) no-repeat scroll left center transparent;
+    right: 0;
+    text-align: right;
+}
+
+.dir-rtl .comment-list .comment-others-post .comment-userpicture {
+    /*rtl:begin:ignore*/
+    background: url([[pix:totara_core|comment-point-grey-rtl]]) no-repeat scroll right center transparent;
+    /*rtl:end:ignore*/
+}
+
+.comment-list .comment-own-post .comment-userpicture {
+    background: url([[pix:totara_core|comment-point-blue]]) no-repeat scroll right center transparent;
+    text-align: left;
+    left: 0;
+}
+
+.dir-rtl .comment-list .comment-own-post .comment-userpicture {
+    /*rtl:begin:ignore*/
+    background: url([[pix:totara_core|my-comment-rtl]]) no-repeat scroll left center transparent;
+    /*rtl:end:ignore*/
+}
+
+.comment-list .comment-delete {
+    float: right;
+    padding: 4px;
+}
+
+.comment-ctrl {
+    font-size: 12px;
+    display: none;
+    margin: 0;
+    padding: 0;
+}
+
+.comment-ctrl h5 {
+    margin: 0;
+    padding: 5px;
+}
+
+.comment-area {
+    max-width: 400px;
+    padding: 5px;
+    margin-left: 27px;
+}
+
+.comment-area textarea {
+    width: 100%;
+    overflow: auto;
+}
+
+.comment-area .fd {
+    text-align: right;
+}
+
+.comment-meta span {
+    color: gray;
+}
+
+.comment-list {
+    font-size: 11px;
+    overflow: auto;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.comment-list .first {
+    display: none;
+}
+
+.comment-list .comment-userpicture img {
+    width: 18px;
+    height: 18px;
+}
+
+.comment-paging {
+    text-align: center;
+}
+
+.comment-paging .pageno {
+    padding: 2px;
+}
+
+.comment-paging .curpage {
+    border: 1px solid #ccc;
+}
+
+.comment-userpicture {
+    width: 20px;
+}
+
+.comment-content div {
+    margin: 0;
+    padding: 0;
+}
+
+.comment-content p {
+    padding: 0;
+    margin: 0 20px 0 0;
+    display: inline;
+}
+
+.comment-content a {
+    font-weight: bold;
+}
+
+.comment-content .comment-datetime {
+    color: gray;
+    padding: 3px 0;
+}
+
+.comment-report-selectall {
+    display: none;
+}
+
+.comment-link {
+    display: none;
+}
+
+.jsenabled .comment-link {
+    display: block;
+}
+
+.jsenabled .showcommentsnonjs {
+    display: none;
+}
+
+.jsenabled .comment-report-selectall {
+    display: inline;
+}
+
+.path-admin-tool-capability .comparisontable {
+
+    .inverse-text () {
+        font-weight: bold;
+        color: white;
+    }
+
+    .inherit {
+        color: @gray-darker;
+    }
+    .allow {
+        background-color: @brand-success;
+        .inverse-text();
+    }
+    .prevent {
+        background-color: @brand-warning;
+        .inverse-text();
+    }
+    .prohibit {
+        background-color: @brand-danger;
+        .inverse-text();
+    }
+}

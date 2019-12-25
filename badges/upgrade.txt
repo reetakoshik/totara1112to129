@@ -1,0 +1,5 @@
+This files describes API changes in /badges/*,
+information provided here is intended especially for developers.
+
+=== 10 ===
+* core_badges_renderer::print_badge_status_box() has changed

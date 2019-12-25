@@ -1,0 +1,9 @@
+idnumber,timemodified,username,deleted,firstname,lastname,email
+User1,0,Admin,0,Charlie,Admin,Charlie.Admin@example.com
+User2,0,lowercase,0,Clive,lowercase,clive.lowercase@example.com
+User3,0,LowerCase,0,Clive,Not-Really-LowerCase,Clive.not-really-lowercase@example.com
+User4,0,MixedCase1,0,Charlie,MixedCase1,Charlie.MixedCase1@example.com
+User5,0,MIXEDCASE2,0,Charlie,MIXEDCASE2,Charlie.MIXEDCASE2@example.com
+User6,0,mIxEdCaSe3,0,Charlie,mIxEdCaSe3,Charlie.mIxEdCaSe3@example.com
+User7,0,žluťák,0,Žlutý,Koníček,zluty.konicek1@example.com
+User8,0,ћluќбk,0,Ћlutэ,Konниek,zluty.konicek2@example.com

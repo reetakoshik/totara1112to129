@@ -1,0 +1,8 @@
+"idnumber","timemodified","username","firstname","lastname","email"
+"imp001","1425497498","import001","Import","User001","imp001@local.host"
+"imp002","1425497497","import002","Import","User002 "" Double Quote","imp002@local.host"
+"imp003","1425497497","import003","Import","User003 ' Single Quote","imp003@local.host"
+"imp004","1425497497","import004","Import","User004 \ Backslash","imp004@local.host"
+"imp005","1425497497","import005","Import","User005 "" Double "" Quote","imp005@local.host"
+"imp006","1425497497","import006","Import","User006 \' Unnessecary escape","imp006@local.host"
+"imp007","1425497497","import007","Import",User007 " Double Quote,"imp007@local.host"

@@ -1,0 +1,52 @@
+{{!
+
+ This file is part of Totara LMS
+
+ Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+}}
+{{!
+    @template core/flex_icon
+
+    Totara flex_icon template.
+
+    The purpose of this template is to render a flex_icon.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * classes
+    * identifier
+
+    Example context (json):
+    {
+        "identifier" : "edit",
+        "customdata": {
+            "classes": "custom-class another-custom-class",
+            "alt": "Settings"
+        },
+        "classes": "fa-edit"
+    }
+
+}}
+<span aria-hidden="true" data-flex-icon="{{identifier}}"
+      class="flex-icon ft-fw ft {{#classes}}{{.}}{{/classes}}{{#customdata.classes}} {{.}}{{/customdata.classes}}"
+      {{#customdata.title}} title="{{.}}"{{/customdata.title}}></span>{{#customdata.alt}}<span class="sr-only">{{.}}</span>{{/customdata.alt}}
+

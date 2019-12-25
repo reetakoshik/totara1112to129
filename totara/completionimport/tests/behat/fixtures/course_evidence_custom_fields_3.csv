@@ -1,0 +1,2 @@
+username,courseshortname,courseidnumber,completiondate,grade,customfield_invalidfield
+learner1,thisisevidence,1,2015-01-01,100,thisshouldnotwork

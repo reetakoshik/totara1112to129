@@ -1,0 +1,38 @@
+/*
+ * jQuery Timepicker Addon - v1.6.1 - 2015-11-14
+ * http://trentrichardson.com/examples/timepicker
+ * Copyright (c) 2015 Trent Richardson; Licensed MIT https://github.com/trentrichardson/jQuery-Timepicker-Addon/blob/v1.6.1/LICENSE-MIT
+ * Available at https://github.com/trentrichardson/jQuery-Timepicker-Addon/blob/v1.6.1/dist/jquery-ui-timepicker-addon.css
+ */
+// Date polyfill - note this adds an overlay outside of the form element.
+
+.totara_form_element_datetime.ui-timepicker-div .ui-widget-header { margin-bottom: 8px; }
+.totara_form_element_datetime.ui-timepicker-div dl { text-align: left; }
+.totara_form_element_datetime.ui-timepicker-div dl dt { float: left; clear:left; padding: 0 0 0 5px; }
+.totara_form_element_datetime.ui-timepicker-div dl dd { margin: 0 10px 10px 40%; }
+.totara_form_element_datetime.ui-timepicker-div td { font-size: 90%; }
+.totara_form_element_datetime.ui-tpicker-grid-label { background: none; border: none; margin: 0; padding: 0; }
+.totara_form_element_datetime.ui-timepicker-div .ui_tpicker_unit_hide{ display: none; }
+
+.totara_form_element_datetime.ui-timepicker-div .ui_tpicker_time .ui_tpicker_time_input { background: none; color: inherit; border: none; outline: none; border-bottom: solid 1px #555; width: 95%; }
+.totara_form_element_datetime.ui-timepicker-div .ui_tpicker_time .ui_tpicker_time_input:focus { border-bottom-color: #aaa; }
+
+.totara_form_element_datetime.ui-timepicker-rtl{ direction: rtl; }
+.totara_form_element_datetime.ui-timepicker-rtl dl { text-align: right; padding: 0 5px 0 0; }
+.totara_form_element_datetime.ui-timepicker-rtl dl dt{ float: right; clear: right; }
+.totara_form_element_datetime.ui-timepicker-rtl dl dd { margin: 0 40% 10px 10px; }
+
+/* Shortened version style */
+.totara_form_element_datetime.ui-timepicker-div.ui-timepicker-oneLine { padding-right: 2px; }
+.totara_form_element_datetime.ui-timepicker-div.ui-timepicker-oneLine .ui_tpicker_time,
+.totara_form_element_datetime.ui-timepicker-div.ui-timepicker-oneLine dt { display: none; }
+.totara_form_element_datetime.ui-timepicker-div.ui-timepicker-oneLine .ui_tpicker_time_label { display: block; padding-top: 2px; }
+.totara_form_element_datetime.ui-timepicker-div.ui-timepicker-oneLine dl { text-align: right; }
+.totara_form_element_datetime.ui-timepicker-div.ui-timepicker-oneLine dl dd,
+.totara_form_element_datetime.ui-timepicker-div.ui-timepicker-oneLine dl dd > div { display:inline-block; margin:0; }
+.totara_form_element_datetime.ui-timepicker-div.ui-timepicker-oneLine dl dd.ui_tpicker_minute:before,
+.totara_form_element_datetime.ui-timepicker-div.ui-timepicker-oneLine dl dd.ui_tpicker_second:before { content:':'; display:inline-block; }
+.totara_form_element_datetime.ui-timepicker-div.ui-timepicker-oneLine dl dd.ui_tpicker_millisec:before,
+.totara_form_element_datetime.ui-timepicker-div.ui-timepicker-oneLine dl dd.ui_tpicker_microsec:before { content:'.'; display:inline-block; }
+.totara_form_element_datetime.ui-timepicker-div.ui-timepicker-oneLine .ui_tpicker_unit_hide,
+.totara_form_element_datetime.ui-timepicker-div.ui-timepicker-oneLine .ui_tpicker_unit_hide:before{ display: none; }

@@ -1,0 +1,7 @@
+This files describes API changes in /calendar/* ,
+information provided here is intended especially for developers.
+
+=== 10 ===
+
+* function calendar_get_default_courses() has been deprecated. Use the new method calendar_information::get_default_courses() instead.
+* calendar_preferences_button() is now depreciated.  Calendar preferences have been moved to the user preferences page.

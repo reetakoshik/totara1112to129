@@ -1,0 +1,49 @@
+This files describes API changes in Totara Program,
+information provided here is intended especially for developers.
+
+=== 10 ===
+
+API Changes:
+
+* prog_update_completion() added a fourth argument to provide the users completion state if already calculated.
+* program::__construct() now accepts either an ID or a record from the database during construction.
+* program::is_program_complete() now returns a boolean, true when successful false otherwise.
+* program::is_program_inprogress() now returns a boolean, true when successful false otherwise.
+* program::is_accessible() now returns a boolean, true when successful false otherwise.
+* program_assignment_category::get_completion() added a third argument $canupdate.
+* program_assignment_category::build_table() allowed first argument to be a program instance as well as an id.
+This is an abstract method. These changes were applied to this method in its child categories (organisations_category,
+positions_category, cohorts_category, managers_category, individuals_category).
+* program_assignment_category::build_row() added a second argument $canupdate.
+This is an abstract method. These changes were applied to this method in its child categories (organisations_category,
+positions_category, cohorts_category, managers_category, individuals_category).
+* totara_program_renderer::display_edit_assignment_form() allowed first argument to be a program instance as well as an id.
+* program::set_timedue added optional parameter $message which overrides the default log message
+* program::display_completion_record_reason now ignores the second parameter
+* program::display_completion_record_reason now only returns the reasons a user might have a completion record, regardless
+of whether or not a completion record exists.
+* totara_program_renderer::get_completion_checker_results has been changed - the $data parameter now requires
+  fulllist, aggregatelist and totalcount.
+
+Deprecations:
+
+* program::is_accessible() has been deprecated, please call prog_is_accessible() instead.
+* prog_assignments::init_assignments() public access has been deprecated, please call prog_assignments::get_assignments() instead.
+* prog_assignments::$assignments public access has been deprecated, please call prog_assignments::get_assignments() instead.
+* prog_content::$coursesets public access has been deprecated, please call prog_content::get_course_sets() instead.
+* user_assignment class has been deprecated, use $program->set_timedue or prog_load_completion() and prog_write_completion() instead.
+* course_set::get_course_warnings() has being deprecated as the only warning it threw was removed
+
+JavaScript:
+* program_assignment.total_count property has been deprecated. Total program assignment count is no longer used.
+* program_assignment.is_setup property has been deprecated. This value is no longer used.
+* program_assignment.update_total_user_count() has been deprecated. The total program assignment count is no longer used.
+* program_assignment.setup() has been deprecated. This called update_total_user_count() which is no longer required.
+* category.user_count_label property has been deprecated. There element this referenced is no longer on the page.
+* category.update_user_count() has been deprecated. User count totals for categories are no longer used.
+* category.check_table_hidden_status() no longer calls category.update_user_count().
+* M.totara_programassignment.init no longer calls program_assignment.setup().
+* item.update_user_count no longer calls category.update_user_count().
+* The elements with classes 'overall_total' and 'user_count' which are used for the total amount of users to potentially be
+assigned, respectively, to a program overall and for a category, have been removed. As a result of the changes to JavaScript
+described in the points above, if elements with those classes are added back, they will not be updated with new user counts.

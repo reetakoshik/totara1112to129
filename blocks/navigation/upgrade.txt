@@ -1,0 +1,6 @@
+This files describes API changes in /blocks/navigation,
+information provided here is intended especially for developers.
+
+=== 10 ===
+* block_navigation_renderer::navigation_tree() has changed
+* block_navigation_renderer::navigation_node() has changed

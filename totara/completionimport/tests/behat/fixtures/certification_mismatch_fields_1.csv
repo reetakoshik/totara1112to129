@@ -1,0 +1,13 @@
+username,certificationshortname,certificationidnumber,completiondate,duedate
+learner01,,c1,2018-05-22,2018-05-30
+learner02,CP101,,2018-05-22,2018-05-30
+learner03,CP101,c1,2018-05-22,2018-05-30
+learner04,cp101,c1,2018-05-22,2018-05-30
+learner05,CP101,C1,2018-05-22,2018-05-30
+learner06,cp101,C1,2018-05-22,2018-05-30
+learner07,cp101,,2018-05-22,2018-05-30
+learner08,,C1,2018-05-22,2018-05-30
+learner01,CP102,c2,2018-05-22,2018-05-30
+learner02,cp102,c2,2018-05-22,2018-05-30
+learner03,,c2,2018-05-22,2018-05-30
+learner04,CP102,C2,2018-05-22,2018-05-30

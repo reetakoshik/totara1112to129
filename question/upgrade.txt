@@ -1,0 +1,14 @@
+This files describes API changes for code that uses the question API,
+information provided here is intended especially for developers.
+
+=== 10 ===
+
+* The argument $requirecourseid was removed from question_edit_setup() and
+   is no longer respected. The behaviour was found to be buggy and now throws
+   debugging notices if passed.
+* The following renderers have been deprecated in favour of the renderable
+  core_question\output\qbank_chooser and associated render_* method.
+   * qbank_chooser
+   * qbank_chooser_types
+   * qbank_chooser_qtype
+   * qbank_chooser_title

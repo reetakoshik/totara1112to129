@@ -1,0 +1,122 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2017 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Brian Barnes <brian.barnes@totaralearning.com
+   @package core_completion
+}}
+{{!
+
+    @template core_completion/activity_completion
+
+    This template generates the self completion form as seen on an activity page
+
+    NOTE: the markup is based on \core_renderer::render_file_picker()
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+     * formid string id of this form
+     * action string action url
+     * idsuffix string suffix used for all form ids
+     * cssclass string extra css class identifying form by its php class name
+     * phpclass string
+     * sesskey string
+     * failedsubmission bool true if any errors present
+     * requiredpresent bool
+     * items array contained form items included via dynamic partial from form_item_template
+
+    Other context variables for following partials:
+     * totara_form/validation_errors
+
+    Example context (json):
+        {
+            "formid":"tf_fid_core_completion_form_activity_completion",
+            "action":"#",
+            "idsuffix":"core_completion_form_activity_completion",
+            "phpclass":"core_completion\form\activity_completion",
+            "sesskey":"Bn59unK78N",
+            "cssclass":"core_completion__form__activity_completion",
+            "items": [
+                {
+                    "form_item_template":"totara_form\/element_checkbox",
+                    "name__checkbox":true,
+                    "name":"checkbox",
+                    "id":"tfiid_checkbox_totara_form_form_testform_element_compilation",
+                    "label":"Checkbox",
+                    "frozen":false,
+                    "amdmodule":"totara_form\/form_element_checkbox",
+                    "required":false,
+                    "checkedvalue":"checked",
+                    "uncheckedvalue":"empty",
+                    "checked":false,
+                    "errors_has_items":false,
+                    "errors":[],
+                    "helphtml":false,
+                    "elementtype":"totara_form\\form\\element\\checkbox",
+                    "elementid":"tfiid_completed_core_completion_form_activity_completion",
+                    "elementclassification":"element"
+                }
+            ],
+            "failedsubmission":false,
+            "requiredpresent":false,
+            "actions":[],
+            "actionjson":[],
+            "actionsjson":"[]",
+            "errors_has_items":false,
+            "errors":[],
+            "helphtml":false
+        }
+}}
+<form data-totara-form
+      data-element-id="{{formid}}"
+      id="{{formid}}"
+      autocomplete="off" action="{{action}}"
+      method="post"
+      accept-charset="utf-8"
+      class="totara_form {{cssclass}} clearfix">
+    <span>{{#str}}manuallymarkwhencomplete, core_completion{{/str}}</span>
+    {{#items}}
+        <div data-item-classification="{{elementclassification}}"
+                data-element-type="{{elementtype}}"
+                data-element-id="{{elementid}}"
+                data-element-template="{{form_item_template}}"
+                data-element-frozen="{{frozen}}"
+            {{#amdmodule}} data-element-amd-module="{{.}}"{{/amdmodule}}
+                class="nostyles">
+            {{> &&form_item_template }}
+        </div>
+    {{/items}}
+    <div style="display: none;">
+        <input type="hidden" name="___tf_formclass" value="{{phpclass}}">
+        <input type="hidden" name="___tf_idsuffix" value="{{idsuffix}}">
+        <input type="hidden" name="___tf_reload" value="">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+    </div>
+</form>
+{{#js}}
+require(['jquery', 'totara_form/form'], function ($, Form) {
+    Form.init({
+        id: '{{formid}}',
+        actionsConfig: {{{actionsjson}}}
+    });
+});
+{{/js}}

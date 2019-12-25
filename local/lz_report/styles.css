@@ -1,0 +1,64 @@
+.lz-report-progressbar-gray {
+	display: inline-block; 
+    width: 92px; 
+    height: 14px; 
+    background-color: #d7d7d7;
+    border: 1px solid white;
+}
+
+.lz-report-progressbar-green {
+	display: inline-block; 
+    width: 92px; 
+    height: 14px; 
+    background-color: #66b128;
+    border: 1px solid white;
+    box-shadow: inset 0px 6px 4px rgba(255,255,255,.3);
+}
+
+.lz-report-progressbar-orange {
+	display: block; 
+    width: 0%; 
+    height: 12px; 
+    background-color: #f3b03d;
+    box-shadow: inset 0px 6px 4px rgba(255,255,255,.3);
+}
+
+td.course_completion_status,
+td.progcompletion_status {
+    cursor: pointer;
+}
+
+
+.path-totara-reportbuilder .status-row-inner {
+    max-width: 1100px;
+}
+
+@media (max-width: 992px) {
+    .path-totara-reportbuilder .status-row-inner {
+        max-width: 950px;
+    }
+}
+
+@media (max-width: 768px) {
+    .path-totara-reportbuilder .status-row-inner {
+        max-width: 730px;
+    }
+}
+
+tr:nth-child(odd) .status-row-inner .course-set {
+    padding: 15px 10px;
+    border: 3px solid rgba(255,255,255,1);
+}
+
+tr:nth-child(even) .status-row-inner .course-set {
+    padding: 15px 10px;
+    border: 3px solid #f5f5f5;
+}
+
+tr:hover .status-row-inner .course-set {
+    border: 3px solid rgba(255,255,255,1);
+}
+
+.status-row-inner .course-set + .course-set {
+    margin-top: 10px;
+}

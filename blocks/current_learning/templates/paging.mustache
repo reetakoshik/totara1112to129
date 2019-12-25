@@ -1,0 +1,83 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+
+    @template block_current_learning/paging
+
+    The block pagnination area.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * totalitems int Count of the total learning items
+    * itemsperpage int Number of items to show per page
+    * pages array Data to contaion page number and active state
+    * text string The paging display text
+    * nextclass string Class applied to the next button
+    * previousclass string Class applied to the previous button
+
+    Example context (json):
+    {
+        "totalitems": 30,
+        "itemsperpage": 10,
+        "currentpage": 1,
+        "pages": [
+            {
+                "page": 1,
+                "link": "",
+                "active": "active"
+            },
+            {
+                "page": 2,
+                "link": ""
+            },
+            {
+                "page": 3,
+                "link": ""
+            }
+        ],
+        "text": "Displaying 1 - 10 of 30 results",
+        "nextclass": "",
+        "previousclass": "disabled"
+    }
+}}
+{{#pagination}}
+    <div class="panel-footer">
+        <p class="count">{{text}}</p>
+        {{^onepage}}<nav>
+            <ul class="pagination">
+                <li class="{{previousclass}}">
+                    <a data-page="prev" href="#" aria-label="{{#str}}previous, block_current_learning{{/str}}">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+                </li>
+                {{#pages}}<li class={{active}}><a data-page="{{page}}" href="{{link}}">{{page}}</a></li>{{/pages}}
+                <li class="{{nextclass}}">
+                    <a data-page="next" href="#" aria-label="{{#str}}next, block_current_learning{{/str}}">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+                </li>
+            </ul>
+        </nav>{{/onepage}}
+    </div>
+{{/pagination}}

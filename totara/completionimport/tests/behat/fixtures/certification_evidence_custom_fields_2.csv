@@ -1,0 +1,2 @@
+username,certificationshortname,certificationidnumber,completiondate,duedate,customfield_evidencedescription,customfield_checkbox1,customfield_datetime1,customfield_menuofchoices1,customfield_textinput1,customfield_textarea1,customfield_url1
+learner1,Cert1,1,2015-01-01,2016-01-01,"Most excellent course of the very highest standard",0,"2016-01-01","Choice 2","A short text input","A looooooooooooooooooooooooooong text area","http://totaralms.com"

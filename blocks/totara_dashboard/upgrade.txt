@@ -1,0 +1,5 @@
+This files describes API changes in /blocks/totara_dashboard,
+information provided here is intended especially for developers.
+
+=== 11.0 ===
+* Outputed HTML uses standard list HTML

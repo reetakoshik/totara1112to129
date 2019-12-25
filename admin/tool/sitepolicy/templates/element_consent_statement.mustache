@@ -1,0 +1,87 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tool_sitepolicy/element_consent_statement
+
+    Creates the site policy version template.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * id Element id
+    * name Element name
+    * consent_statement_count Number of consent statements
+    * consent_statements Consent statement data passed to element_consent_statement_block
+    * nocontrols Show controls?
+
+    Example context (json):
+    {
+        "id": 123,
+        "name": "A sitepolicy",
+        "consent_statement_count": 2,
+        "nocontrols": false,
+        "consent_statements": [
+            {
+                "instance": 1,
+                "dataid": 1,
+                "primarystatement": "First consent statement in primary language",
+                "statement": "First consent statement",
+                "primaryprovided": "First provided consent to in the primary language",
+                "provided": "First provided consent to",
+                "primarywithheld": "First withheld consent with in the primary language",
+                "withheld": "First withheld consent with",
+                "mandatory": 1,
+                "index": 1,
+                "removedstatement": false
+            },
+            {
+                "instance": 2,
+                "dataid": 2,
+                "primarystatement": "Second consent statement in primary language",
+                "statement": "Second consent statement",
+                "primaryprovided": "Second provided consent to in the primary language",
+                "provided": "Second provided consent to",
+                "primarywithheld": "Second withheld consent with in the primary language",
+                "withheld": "Second withheld consent with",
+                "mandatory": 0,
+                "index": 2,
+                "removedstatement": false
+            }
+        ]
+    }
+}}
+<div class="tf_element tool_sitepolicy_element_consent_statement" id="{{id}}" data-element-name="{{name}}">
+    <input type="hidden" name="{{name}}" value="1" />
+    {{> totara_form/validation_errors}}
+    <input type="hidden" name="{{name}}__statement_count" value="{{consent_statement_count}}" />
+    <input type="hidden" name="{{name}}__addstatement" value="0" />
+    <div>
+        {{#consent_statements}}
+        {{> tool_sitepolicy/element_consent_statement_block}}
+        {{/consent_statements}}
+    </div>
+    {{^nocontrols}}
+    <div><input type="button" data-rel="addstatement" value="{{#str}}statementadd, tool_sitepolicy{{/str}}" /></div>
+    {{/nocontrols}}
+</div>
+

@@ -1,0 +1,76 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Andrew McGhie <andrew.mcghie@totaralearning.com>
+   @package block_totara_featured_links
+}}
+{{!
+
+    @template block_totara_featured_links/main
+
+    This template generates a tile for the featured links block.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * tile_data an array of the data content of the tiles as well as if the tile is an adder or filler
+
+    Other context variables for following partials:
+     * none
+
+    Example context (json):
+      {
+            "tile_data": [
+                {"filler": false,
+                    "adder": false,
+                    "content": "render html code of the content_wrapper template"},
+                {"adder: true},
+                {"filler": true}
+            ]
+            "manual_id": 2,
+            "editing": true,
+            "size": small,
+            "instanceid": 2 (the blockid)
+      }
+}}
+<div class="block-totara-featured-links-layout {{shape}}" {{#manual_id}}id="{{manual_id}}"{{/manual_id}}>
+    {{#tile_data}}
+        {{^filler}} <!-- if the tile is not a filler or the add tile tile -->
+            {{^adder}}
+                {{{content}}}
+            {{/adder}}
+        {{/filler}}
+        {{#filler}} <!-- filler tile -->
+            <div class="block-totara-featured-links-flex-filler block-totara-featured-links-tile-{{size}}">
+            </div>
+        {{/filler}}
+        {{#adder}} <!-- adder tile -->
+            {{#editing}}
+                <div class="block-totara-featured-links-tile-adder block-totara-featured-links-tile block-totara-featured-links-tile-{{size}}">
+                    <a href="{{& url}}" target="_self" type="add" class="btn btn-primary" blockid="{{instanceid}}">
+                        <span>{{#str}}addtile, block_totara_featured_links{{/str}}</span>
+                    </a>
+                </div>
+            {{/editing}}
+        {{/adder}}
+    {{/tile_data}}
+</div>

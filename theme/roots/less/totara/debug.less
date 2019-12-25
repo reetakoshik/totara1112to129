@@ -1,0 +1,113 @@
+// This file is part of Totara LMS
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @package   theme_roots
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @copyright 2015 Bas Brands <www.sonsbeekmedia.nl>
+// @author    Bas Brands
+// @author    David Scotson
+// @author    Joby Harding <joby.harding@totaralearning.com>
+
+.phpinfo td {
+    border: 1px solid @table-border-color;
+    vertical-align: baseline;
+}
+
+#page-footer {
+    text-align: center;
+
+    .validators {
+        margin-top: 40px;
+        padding-top: 5px;
+        border-top: 1px dotted gray;
+
+        ul {
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+
+            > li {
+                display: inline;
+                margin-right: 10px;
+                margin-left: 10px;
+            }
+        }
+    }
+
+    .performanceinfo {
+        margin: 1em;
+
+        span {
+            display: block;
+        }
+
+        .cachesused {
+
+            // Variables, as basis at least is going to invert these.
+            @cache-stat-bg: lighten(@gray-base, 97%); // #f7f7f7;
+            @cache-stat-border: lighten(@gray-base, 93.5%); // #eee;
+            @cache-stat-heading-text: @text-color;
+
+            margin-top: 1em;
+
+            > li {
+                display: inline;
+            }
+
+            .cache-stats-heading,
+            .cache-total-stats {
+                font-weight: bold;
+                font-size: 110%;
+                margin-top: 0.3em;
+            }
+            .cache-definition-stats {
+                margin: .3em;
+                display: inline-block;
+                vertical-align: top;
+                background-color: @cache-stat-bg;
+                border: 1px solid @cache-stat-border; // #eee;
+                border-radius: @border-radius-small;
+            }
+            .cache-definition-stats-heading {
+                color: @cache-stat-heading-text;
+                span {
+                    display: inline-block;
+                }
+            }
+            .cache-store-stats {
+                padding: 0 1.3em;
+
+                &.nohits {
+                    color: @state-danger-text;
+                    background-color: @state-danger-bg;
+                }
+                &.lowhits {
+                    color: @state-warning-text;
+                    background-color: @state-warning-bg;
+                }
+                &.hihits {
+                    color: @state-success-text;
+                    background-color: @state-success-bg;
+                }
+            }
+            .cache-store-stats:last-child {
+                border-bottom-left-radius: @border-radius-small;
+                border-bottom-right-radius: @border-radius-small;
+            }
+        }
+    }
+}
+
+// End of original bootstrap theme code.

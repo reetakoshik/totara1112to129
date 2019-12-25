@@ -1,0 +1,198 @@
+//
+// This file is part of Totara LMS
+//
+// Copyright (C) 2016 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <ht    tp://www.gnu.org/licenses/>.
+//
+// @copyright 2016 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Joby Harding <joby.harding@totaralearning.com>
+// @package   theme_roots
+
+.totara-menu {
+    clear: both;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+    border-top: none;
+}
+
+.totara-menu-nav {
+    > .totara-menu-nav-list {
+        > .totara-menu-nav-item {
+            &:first-child {
+                .totara-menu-nav-item-link {
+                    border-top-width: 0;
+                }
+            }
+        }
+    }
+}
+
+.totara-menu-nav-list {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0; // Override default ul/ol (as per BS3 .nav)
+    // Override some BS3 .navbar styles.
+    min-height: initial;
+    border: none;
+    border-radius: 0;
+    .totara-menu-nav-list {
+        // Reset .navbar styles for this nested ul
+        margin-right: 0;
+        margin-left: 0;
+        .totara-menu-nav-item {
+            float: none;
+            margin: 0;
+        }
+        .totara-menu-nav-item-link {
+            display: block;
+            border-right-width: 0;
+            border-left-width: 0;
+            text-indent: @totara-menu-dropdown-text-indent;
+        }
+    }
+}
+
+.totara-menu-nav-item {
+    border: none;
+    font-weight: normal;
+    list-style-type: none;
+    &.selected {
+        > .totara-menu-nav-item-link {
+            background-color: @totara-menu-link-active-bg;
+        }
+    }
+    &:hover {
+        .totara-menu-nav-list {
+            display: block;
+        }
+    }
+    .totara-menu-nav-item {
+        &.selected .totara-menu-nav-item-link {
+            color: @totara-menu-link-active-color;
+            background: @totara-menu-link-active-bg;
+        }
+        .totara-menu-nav-item-link {
+            border-right-width: 0;
+            border-left-width: 0;
+        }
+    }
+}
+
+.totara-menu-nav-item-link {
+    display: block;
+    border-color: @totara-menu-border-color;
+    border-style: solid;
+    border-width: @totara-menu-border-width 0 0 0;
+    background-color: @totara-menu-bg;
+    color: @totara-menu-link-color;
+    text-decoration: none;
+    padding: @totara-menu-padding-vertical @totara-menu-padding-horizontal;
+    &:link,
+    &:visited {
+        color: @totara-menu-link-color;
+        text-decoration: none;
+    }
+    &:hover,
+    &:focus {
+        color: @totara-menu-link-hover-color;
+        background-color: @totara-menu-link-hover-bg;
+        text-decoration: none;
+    }
+    &:active {
+        color: @totara-menu-link-active-color;
+        background-color: @totara-menu-link-active-bg;
+        text-decoration: none;
+    }
+}
+
+.totara-menu-nav-item.selected .totara-menu-nav-item-link:hover {
+    &:extend(.totara-menu-nav-item-link:hover);
+}
+
+// Specificity here required to override navbar styles.
+// Totara Menu should likely become a navbar variant
+// (it currently uses BS3 navbar for responsive layout).
+.totara-menu .totara-menu-nav-list .totara-menu-nav-item .totara-menu-nav-item-link {
+    &:link,
+    &:visited {
+        &:extend(.totara-menu-nav-item-link:link);
+    }
+    &:hover,
+    &:focus {
+        &:extend(.totara-menu-nav-item-link:hover);
+    }
+    &:active {
+        &:extend(.totara-menu-nav-item-link:active);
+    }
+}
+
+// Specificity required to override navbar styles.
+.totara-menu-nav-list .totara-menu-nav-item .totara-menu-nav-item-link {
+    &:extend(.totara-menu-nav-item-link);
+}
+
+@media (min-width: @grid-float-breakpoint) {
+
+    .totara-navbar {
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+    .totara-menu-nav-item {
+        float: left;
+    }
+
+    .totara-menu-nav-item-link {
+        border-left-width: @totara-menu-border-width;
+    }
+
+    .totara-menu-nav-list {
+        .totara-menu-nav-list {
+            position: absolute;
+            display: none;
+            width: auto;
+            min-width: 200px;
+            z-index: 100;
+            border: @totara-menu-border;
+            border-top-width: 0;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+            .totara-menu-nav-item-link {
+                text-indent: 0;
+                border-left-width: 0;
+            }
+        }
+    }
+
+    .totara-menu-nav {
+        > .totara-menu-nav-list {
+            > .totara-menu-nav-item {
+                &:first-child {
+                    .totara-menu-nav-item-link {
+                        border-top-width: 1px;
+                    }
+                }
+                &:last-child {
+                    > .totara-menu-nav-item-link {
+                        border-right-width: @totara-menu-border-width;
+                    }
+                }
+            }
+        }
+    }
+
+}

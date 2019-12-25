@@ -1,0 +1,84 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_current_learning/course_row
+
+    Creates the row in the current learning block for courses.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * component string The component name
+    * type string The learning type
+    * id string The item id
+    * shortname string The course shortname
+    * fullname string The course fullname
+    * description string The course description
+    * url_view string The url of the course
+    * progress array The progress summary and percentage data
+    * dueinfo array The duedate data
+    * duetext string Timestamp of the duedate
+    * template string The mustache template for the learning item
+
+    Example context (json):
+    {
+        "component": "core_course",
+        "type": "course",
+        "id": "24",
+        "shortname": "Outlook basics",
+        "fullname": "Outlook basics",
+        "description": "",
+        "url_view": "/course/view.php?id=1",
+        "progress": {
+            "summary": "",
+            "percentage": null
+        },
+        "dueinfo": {
+            "duetext": "due on 25 Oct",
+            "tooltip": "Course due 12:00am on 25 Oct 2016",
+            "state": "label-info",
+            "alert": false
+        },
+        "duetext": "1477350000",
+        "template": "block_current_learning/course_row"
+    }
+}}
+<li id="block_current_learning-course-{{id}}" class="block_current_learning-item block_current_learning-course">
+<div class="block_current_learning-row-item">
+    <span data-toggle="tooltip" tabindex="0" data-placement="top" data-container="body" title="{{#str}} thisisacourse, block_current_learning {{/str}}">{{#flex_icon}}course{{/flex_icon}}</span>
+    <a href="{{url_view}}"><h3>{{{fullname}}}</h3></a>
+    <div class="block_current_learning-row-item__status">
+        {{#dueinfo}}
+            <span class="label {{state}}" tabindex="0" data-toggle="tooltip" data-placement="top" data-container="body" title="{{tooltip}}">{{#alert}}{{#flex_icon}}warning{{/flex_icon}}{{/alert}} {{duetext}}</span>
+        {{/dueinfo}}
+        {{#progress}}
+            {{#pbar}}
+               {{> core/progress_bar }}
+            {{/pbar}}
+            {{^pbar}}
+                <span class="label label-default">{{summarytext}}</span>
+            {{/pbar}}
+        {{/progress}}
+    </div>
+</div>
+</li>

@@ -1,0 +1,4 @@
+"idnumber","timemodified","username","deleted","firstname","lastname","email","customfield_menutest"
+1,0,upload_user1,0,Upload,User 1,upload1@local.com,Health & Safety
+2,0,upload_user2,0,Upload,User 2,upload2@local.com,> 10
+3,0,upload_user3,0,Upload,User 3,upload3@local.com,< 10

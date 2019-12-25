@@ -1,0 +1,92 @@
+//
+// This file is part of Totara LMS
+//
+// Copyright (C) 2016 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <ht    tp://www.gnu.org/licenses/>.
+//
+// @copyright 2016 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Joby Harding <joby.harding@totaralearning.com>
+// @package   theme_basis
+
+// We prefer not to use IDs for styles but necessary
+// due to existing implementation.
+#page-footer {
+    margin-top: @line-height-computed;
+    padding: 0;
+    border-top: @basis-border-thick solid @brand-primary;
+    background-color: @totara-menu-bg;
+    color: #fff;
+
+    a:link,
+    a:visited,
+    a:hover,
+    a:active {
+        color: #fff;
+        text-decoration: none;
+        border-bottom: none;
+    }
+}
+
+.page-footer {
+    // We can't easily add a .page-footer-purge-caches class currently.
+    .purgecaches {
+        margin-bottom: @line-height-computed;
+    }
+}
+
+.page-footer-main-content small {
+    font-size: @font-size-base;
+}
+
+.page-footer-poweredby {
+    display: block;
+    padding: @padding-base-vertical 0;
+    background-color: @brand-primary;
+}
+
+.page-footer-loggedin-info {
+    margin-bottom: @line-height-computed;
+}
+
+#page-footer .row:nth-child(2) .logininfo {
+    margin-top: @line-height-computed;
+}
+
+#page-footer .logininfo .btn {
+    &:extend(.btn);
+    &:extend(.btn-xs);
+}
+
+.page-footer-nav {
+    text-align: left;
+    margin-top: @line-height-computed;
+}
+
+.page-footer-nav-item {
+    list-style-type: none;
+    white-space: nowrap;
+    margin-bottom: @line-height-computed;
+    .page-footer-nav-item {
+        &:extend(small);
+        margin-bottom: 0;
+    }
+}
+
+.page-footer-nav-list {
+    .page-footer-nav > & {
+        margin: 0;
+    }
+}

@@ -1,0 +1,5 @@
+{
+    "require": {
+        "validator/livr": "dev-master"
+    }
+}

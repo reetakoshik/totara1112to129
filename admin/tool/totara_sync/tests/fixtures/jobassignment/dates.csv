@@ -1,0 +1,4 @@
+idnumber,useridnumber,timemodified,deleted,fullname,startdate,enddate
+newjaid,user1,0,0,good data,1460692800,1463284800
+newjaid,user2,0,0,good data,25/01/17,26/02/18
+newjaid,user3,0,0,bad data,25-01-2017,26-02-2018

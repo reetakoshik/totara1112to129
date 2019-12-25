@@ -1,0 +1,5 @@
+idnumber,fullname,deleted,frameworkidnumber,parentidnumber,timemodified
+P1,pos1,0,PF1,,0
+P2,pos1a,0,PF1,P1,0
+P3,pos1b,0,PF1,P1,0
+P4,pos2,0,PF1,,0

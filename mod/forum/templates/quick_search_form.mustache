@@ -1,0 +1,11 @@
+<div class="forumsearch">
+    <form action="{{actionurl}}">
+        {{#helpicon}}
+            {{>core/help_icon}}
+        {{/helpicon}}
+        <input type="hidden" name="id" value="{{courseid}}">
+        <label class="accesshide" for="search">{{#str}}search, forum{{/str}}</label>
+        <input id="search" name="search" type="text" size="18" value="{{query}}">
+        <input id="searchforums" type="submit" value={{#quote}}{{#str}}searchforums, forum{{/str}}{{/quote}}>
+    </form>
+</div>

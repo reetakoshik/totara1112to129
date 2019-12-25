@@ -1,0 +1,63 @@
+{{!
+    This file is part of Totara LMS
+
+   Copyright (C) 2015 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template totara_core/totara_search
+
+    Create a search input and button.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * id The form id
+    * action The form action
+    * hiddenfields Array of name and value
+    * inputid The form input id
+    * value The form input value
+    * alt The form input alt
+    * placeholder The form input placeholder
+
+
+    Example context (json):
+    {
+        "id": "hierarchy-search-form",
+        "action": "",
+        "hiddenfields": [
+            {
+                "prefix": "position",
+                "frameworkid": "1"
+            }
+        ],
+        "inputid": "hierarchy-search-text-field",
+        "value": "pos1",
+        "placeholder": "Search Framework one"
+
+    }
+}}
+<form id="{{id}}" method="get" action="{{action}}">
+    {{#hiddenfields}}
+    <input type="hidden" value="{{value}}" name="{{name}}">
+    {{/hiddenfields}}
+    <label for="{{inputid}}" class="sr-only">{{placeholder}}</label>
+    <input id="{{inputid}}" class="search-box" type="text" {{#value}}value="{{value}}"{{/value}}placeholder="{{placeholder}}" name="search">
+    <input type="submit" value="{{#str}} go {{/str}}">
+</form>

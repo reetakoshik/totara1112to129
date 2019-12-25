@@ -1,0 +1,23 @@
+.auth_approved-instructions {
+    max-width: 940px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.auth_approved-request-details dl {
+    clear: both;
+}
+.auth_approved-request-details dt:after {
+    content: ":";
+}
+.auth_approved-request-details dt {
+    clear: left;
+    float: left;
+    width: 320px;
+    text-align: right;
+    font-weight: bold;
+}
+.auth_approved-request-details dd {
+    margin: 0 0 0 340px;
+    padding: 0 0 0.1em 0;
+}

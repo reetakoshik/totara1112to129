@@ -1,0 +1,5 @@
+This files describes API changes in /blocks/rss_client,
+information provided here is intended especially for developers.
+
+=== 10 ===
+* Major changes were made improving the themeablity of this block including adding mustache templates

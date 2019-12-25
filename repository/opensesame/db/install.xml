@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="repository/opensesame/db" VERSION="20150122" COMMENT="XMLDB file for OpenSesame repository"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="repository_opensesame_bdls" COMMENT="Totara OpenSesame course bundles">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="1333" NOTNULL="true" SEQUENCE="false" COMMENT="Bundle name, cannot have enforced unique index because it is too long"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Date when bundle added"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="repository_opensesame_pkgs" COMMENT="Totara OpenSesame course packages">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Is this course package visible?"/>
+        <FIELD NAME="zipfilename" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="title" TYPE="char" LENGTH="1333" NOTNULL="true" SEQUENCE="false" COMMENT="OpenSesame course title"/>
+        <FIELD NAME="expirationdate" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="Date the license is valid until as text"/>
+        <FIELD NAME="mobilecompatibility" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Options are allDevices, ios, android and empty"/>
+        <FIELD NAME="externalid" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="OpenSesame course identifier - unique id"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="OpenSesame course description"/>
+        <FIELD NAME="duration" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="Duration of course"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Date when package added"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Date when package last modified"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="externalid" UNIQUE="true" FIELDS="externalid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="repository_opensesame_bps" COMMENT="Link an OpenSesame course to a bundle">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="bundleid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="packageid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="bundleid" TYPE="foreign" FIELDS="bundleid" REFTABLE="repository_opensesame_bdls" REFFIELDS="id"/>
+        <KEY NAME="packageid" TYPE="foreign" FIELDS="packageid" REFTABLE="repository_opensesame_pkgs" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="bundleid-packageid" UNIQUE="true" FIELDS="bundleid, packageid" COMMENT="enforce unique index"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

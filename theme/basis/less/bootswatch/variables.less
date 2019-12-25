@@ -1,0 +1,162 @@
+//
+// This file is part of Totara LMS
+//
+// Copyright (C) 2016 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <ht    tp://www.gnu.org/licenses/>.
+//
+// @copyright 2016 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Joby Harding <joby.harding@totaralearning.com>
+// @package   theme_basis
+//
+// This file is part of the theme_basis Bootswatch and contains variable
+// overrides to Bootstrap 3 for the Totara Basis theme. Architectural
+// overrides should go in the accompanying bootswatch.less file.
+//
+// Note that the theme_basis Bootswatch extends the theme_roots Bootswatch.
+//
+// For more on Bootswatches see https://bootswatch.com
+//
+
+//
+// Bootstrap.
+//
+// Use Bootstrap 4 platform fonts
+@font-family-sans-serif:  -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+@font-family-serif:       Georgia, "Times New Roman", Times, serif;
+@font-family-monospace:   Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+@font-family-base:        @font-family-sans-serif;
+
+@gray-darker: #1d2125;
+@gray-dark: #3d444b;
+@gray-light: #6e6e6e;
+@gray-lighter: #dde1e5;
+
+//
+// Colors.
+//
+@brand-primary: #36a5a6;
+@brand-info: #337ab7;
+@brand-success: #677b2d;
+@brand-warning: #8e660d;
+@brand-danger: #953539;
+
+// Basis-specific darker variant for WCAG AA min text contrast.
+/**
+ * @deprecated since 10.0
+ */
+@brand-primary-dark: #008287;
+
+// Reset to Bootstrap 3 default.
+@text-color: @gray-dark;
+
+// Ensure WCAG AA minimum text contrast against #fff and #f5f5f5.
+@link-color: darken(@brand-primary, 11%);
+
+@state-success-text: #6a7e26;
+@state-success-bg: #f7faee;
+@state-success-border: #b2cb6c;
+
+@state-info-text: @gray-dark;
+@state-info-bg: #eff7fb;
+@state-info-border: #88b8d5;
+
+@state-warning-text: #bf8400;
+@state-warning-bg: #fff9ed;
+@state-warning-border: #ecc876;
+
+@state-danger-text: #bb4247;
+@state-danger-bg: #fef6f6;
+@state-danger-border: #e7898d;
+
+@navbar-default-bg: #fff;
+@navbar-border-radius: 0;
+
+//
+// Theme.
+//
+@basis-border-thick: 3px;
+
+//
+// Common (Used on multiple components)
+//
+@common-border-colour: #c8cfd6;
+@common-hover-bg: #e5e9ed;
+
+//
+// Nav.
+//
+@nav-link-hover-bg: @common-hover-bg;
+
+//
+// Nav-tabs.
+//
+@nav-link-padding: 15px 30px;
+@nav-tabs-border-color: @common-border-colour;
+
+// Custom vars for Basis.
+@nav-tabs-link-color: @gray-light;
+@nav-tabs-link-bg: lighten(@gray-lighter, 4%);
+
+//
+// Alerts.
+//
+@alert-border-radius: 8px;
+
+@alert-info-border: @brand-info;
+@alert-info-bg: #fff;
+@alert-info-text: @text-color;
+
+@alert-success-border: @brand-success;
+@alert-success-bg: #fff;
+@alert-success-text: @text-color;
+
+@alert-warning-border: @brand-warning;
+@alert-warning-bg: #fff;
+@alert-warning-text: @text-color;
+
+@alert-danger-border: @brand-danger;
+@alert-danger-bg: #fff;
+@alert-danger-text: @text-color;
+
+//
+// Buttons.
+//
+@btn-primary-border: transparent;
+@btn-success-border: transparent;
+@btn-info-border: transparent;
+@btn-warning-border: transparent;
+@btn-danger-border: transparent;
+
+@btn-primary-bg: darken(@brand-primary, 10%);
+
+@btn-border-radius-base: 3px;
+@btn-border-radius-small: @btn-border-radius-base;
+@btn-border-radius-large: @btn-border-radius-base;
+
+//
+// Labels.
+//
+@label-primary-bg: darken(@brand-primary, 10%);
+
+//
+// Type.
+//
+@blockquote-font-size: @font-size-base;
+
+//
+// Code.
+//
+@pre-bg: #fff;

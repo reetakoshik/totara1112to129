@@ -1,0 +1,16 @@
+.block-prog-completions-list .more {
+    display: none;
+}
+
+.block-prog-completions-list .row {
+    margin: 1px 0;
+}
+
+.block-prog-completions-list div.name {
+    display: inline-block;
+}
+
+.block-prog-completions-list div.value {
+    display: inline-block;
+    float: right;
+}

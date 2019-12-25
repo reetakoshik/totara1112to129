@@ -1,0 +1,156 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Michael Dunstan <michael.dunstan@androgogic.com>
+   @package totara_contentmarketplace
+}}
+{{!
+    @template totara_contentmarketplace/explorer
+
+    Content Marketplace explorer template
+
+    Example context (json):
+    {
+        "marketplace": "demo",
+        "mode": "create-course",
+        "category": 0,
+        "heading": "Explore Content Marketplace: Demo content marketplace"
+        "filters": [
+            {
+                "name": "avaliablity",
+                "label": "Avaliablity",
+                "showcounts": true,
+                "template": "totara_contentmarketplace/filter_radios",
+                "options": [
+                    {
+                        "htmlid": "tcm-filter-avaliablity-0",
+                        "label": "All",
+                        "value": "all",
+                        "checked": true
+                    },
+                    {
+                        "htmlid": "tcm-filter-avaliablity-1",
+                        "label": "Subscription",
+                        "value": "subscribed",
+                        "checked": false
+                    },
+                    {
+                        "htmlid": "tcm-filter-avaliablity-2",
+                        "label": "Collection",
+                        "value": "collection",
+                        "checked": false
+                    }
+                ]
+            }
+        ]
+        "sortby": [
+            {
+                "value": "most-popular",
+                "title": "Most Popular",
+                "selected": false
+            },
+            {
+                "value": "latest",
+                "title": "Latest",
+                "selected": true
+            }
+        ],
+        "sortby_has_items": true,
+        "searchplaceholder": "Search course title, provider, or keyword"
+    }
+
+}}
+
+<div id="{{ uniqid }}-tcm-explorer" class="tcm-explorer tcm-explorer-mode-{{mode}} row" data-marketplace="{{marketplace}}" data-mode="{{mode}}" data-category="{{category}}" data-createpagepath="{{createpagepath}}">
+    <div class="col-md-9 col-md-push-3 col-sm-8 col-sm-push-4 col-xs-12">
+        <h2 class="tcm-explorer-heading">{{ heading }}</h2>
+            {{#intro}}<p class="tcm-explorer-intro">{{ . }}</p>{{/intro}}
+        <div class="tcm-search_query tcm-search_toolbar row">
+            <div class="col-xs-12">
+                <form>
+                    <input type="text" class="form-control tcm-query" aria-label="{{ searchplaceholder }}" placeholder="{{ searchplaceholder }}">
+                </form>
+            </div>
+        </div>
+        <div class="row tcm-search_toolbar tcm-vertical-align">
+            <div class="col-md-8 col-xs-12">
+                <div class="tcm-search_result_summary"></div>
+                <div class="tcm-status-searching">
+                    <span class="tcm-loading-icon">{{#pix}} y/loading, core, loading, core {{/pix}}</span>
+                    {{#str}} loading_search_results, totara_contentmarketplace {{/str}}
+                </div>
+            </div>
+            <div class="col-md-4 tcm-sorting form-inline col-xs-12">
+                {{#sortby_has_items}}
+                    <div class="form-group pull-right">
+                        <label for="{{ uniqid }}-sortby">{{# str }} sortby, totara_contentmarketplace {{/ str }}</label>
+                        <select id="{{ uniqid }}-sortby" class="form-control">
+                            {{#sortby}}
+                                <option value="{{value}}" {{#selected}}selected{{/selected}}>{{title}}</option>
+                            {{/sortby}}
+                        </select>
+                    </div>
+                {{/sortby_has_items}}
+            </div>
+        </div>
+        <div class="row tcm-vertical-align">
+            <div class="col-xs-12">
+                <div class="tcm-search_selection_tools">
+                    <span class="tcm-search_selection_status"></span>
+                    <a class="tcm-collection-tool tcm-add-to-collection">{{#flex_icon}}file-ebook{{/flex_icon}}{{#str}} add_to_collection, totara_contentmarketplace {{/str}}</a>
+                    <a class="tcm-collection-tool tcm-remove-from-collection">{{#flex_icon}}file-ebook{{/flex_icon}}{{#str}} remove_from_collection, totara_contentmarketplace {{/str}}</a>
+                    <a href="#" class="tcm-create-course tcm-tool-enabled">{{#flex_icon}}plus{{/flex_icon}}{{#str}}createcourse, totara_contentmarketplace{{/str}}</a>
+                    <span class="pull-right">
+                        <a class="tcm-select-all">{{#str}} selectall {{/str}}</a><span class="tcm-loading" style="visibility: hidden;">{{#pix}} i/loading, core, loading, totara_core{{/pix}}</span>
+                        <a class="tcm-deselect-all">{{#str}} deselectall {{/str}}</a>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="row tcm-results">
+        </div>
+        <div class="row tcm-load-more">
+            <div class="col-xs-12">
+                <button>
+                    <span class="tcm-load-more-action">{{# str }} load_more, totara_contentmarketplace {{/ str }}</span>
+                    <span class="tcm-loading-icon">{{#pix}} y/loading, core, loading, core {{/pix}}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-md-pull-9 col-sm-4 col-sm-pull-8 col-xs-12">
+
+        <div>
+            <div class="tcm-search-filters-header">
+                <h2>{{#str}} filters, totara_contentmarketplace {{/str}}</h2>
+            </div>
+            {{> totara_contentmarketplace/filters }}
+        </div>
+    </div>
+    <div class="tcm-details-wrapper clearfix">
+        <div class="tcm-details-pointer"><div class="tcm-empty"></div></div>
+        <div class="tcm-details">
+            <div class="tcm-preloader">{{#flex_icon}}loading{{/flex_icon}} {{#str}} loading_details, totara_contentmarketplace{{/str}}</div>
+        </div>
+    </div>
+</div>
+{{#js}}
+    require(['totara_contentmarketplace/explorer'], function(explorer) {
+        explorer.init("#{{ uniqid }}-tcm-explorer");
+    });
+{{/js}}

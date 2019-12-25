@@ -1,0 +1,537 @@
+body {
+	background-size: cover;
+}
+
+
+.path-login #page,
+#page-login-forgot_password #page {
+	margin-top: 0;
+}
+
+.path-login #page #page-content,
+#page-login-forgot_password #page #page-content {
+	min-height: calc(100vh - 90px);
+	display: -ms-flexbox;
+	display: -webkit-flex;
+	display: flex;
+	-ms-flex-align: center;
+	-webkit-align-items: center;
+	-webkit-box-align: center;
+	align-items: center;
+	justify-content: center;
+}
+
+#page-login-forgot_password div[role="main"] {
+	max-width: 530px;
+	margin: 0 auto;
+}
+
+.path-login.dir-rtl .forgetpass a {
+	margin-left: 22px;
+	max-width: 100%;
+}
+
+.path-login a,
+#page-login-forgot_password a {
+	color: white;
+}
+
+.path-login input[type="text"],
+#page-login-forgot_password input[type="text"] {
+	border: none;
+}
+#page-login-forgot_password .generalbox {
+	background-color: #f8f8f8;
+	padding: 15px;
+	width: 100%;
+	margin: 0;
+}
+#page-login-forgot_password #notice + .continuebutton {
+	background-color: #f8f8f8;
+	padding-bottom: 15px;
+}
+
+.loginbox .loginform .form-label {
+    /*float:left;*/
+    text-align:right;
+    width:150px; 
+    padding: 10px;
+    text-align: center;
+}
+
+.loginbox.twocolumns .loginpanel,
+.loginbox.twocolumns .signuppanel {
+	margin-top: 10px;
+	margin-bottom: 20px;
+	margin-left: 2%;
+    margin-right: 2%;
+    left: auto;
+    right: auto;
+    float: left;
+    border: none;
+    width: 46%;
+    padding: 0;
+}
+
+.dir-rtl .loginbox.twocolumns .loginpanel,
+.dir-rtl .loginbox.twocolumns .signuppanel {
+	float: right;
+}
+
+@media (max-width: 900px) {
+	.loginbox.twocolumns .loginpanel, 
+	.loginbox.twocolumns .signuppanel {
+		width: 100%;
+		margin: 0;
+		margin-bottom: 20px;
+	}
+	#id_submitbuttonusername,
+	#id_submitbuttonemail {
+		margin-left: 0;
+		margin-right: 0;
+	}
+}
+
+.loginbox .loginform .form-label label {
+	font-size: 18px;
+}
+
+.loginbox .loginform .form-label {
+/*	float: left;*/
+  width: 130px;
+  text-align: center;
+  height: 30px;
+}
+
+.dir-rtl .loginbox .loginform .form-label {
+    /*float:right;*/
+    text-align:left;
+}
+
+.loginbox .loginform .form-input {
+	float: none;
+	width: auto;
+}
+
+.loginform {
+	overflow: hidden;
+}
+
+.form-label label {
+	line-height: 30px;
+	display: block;
+}
+
+.rememberpass {
+	float: left;
+	margin-top: 15px;
+}
+
+.dir-rtl .rememberpass {
+	float: right;
+}
+
+.loginpanel {
+	float: left;
+}
+.dir-rtl .loginpamel {
+	float: right;
+}
+
+
+
+
+
+
+.rememberpass input[type="checkbox"] {
+  vertical-align: top;
+  width: 17px;
+  height: 17px;
+  margin: 0 3px 0 0;
+}
+.rememberpass input[type="checkbox"] + label {
+  cursor: pointer;
+}
+.rememberpass input[type="checkbox"]:not(checked) {
+  position: absolute;
+  opacity: 0;
+}
+.rememberpass input[type="checkbox"]:not(checked) + label {
+  position: relative;
+  padding: 0 0 0 23px;
+}
+.dir-rtl .rememberpass input[type="checkbox"]:not(checked) + label {
+  padding: 0 23px 0 0;
+}
+.rememberpass input[type="checkbox"]:not(checked) + label:before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 0;
+  width: 15px;
+  height: 15px;
+  border: 1px solid #CDD1DA;
+  border-radius: 50%;
+  background: #FFF;
+}
+.rememberpass input[type="checkbox"]:not(checked) + label:after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 2px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.5);
+  opacity: 0;
+  transition: all .2s;
+}
+
+.dir-rtl .rememberpass input[type="checkbox"]:not(checked) + label:before {
+  left: auto;
+  right: 0;
+}
+.dir-rtl .rememberpass input[type="checkbox"]:not(checked) + label:after {
+  top: 5px;
+  right: 2px;
+  left: auto;
+}
+
+.rememberpass input[type="checkbox"]:checked + label:after {
+  opacity: 1;
+}
+.rememberpass input[type="checkbox"]:focus + label:before {
+  box-shadow: 0 0 0 3px rgba(14,143,209,.5);
+}
+
+.logo img {
+	max-width: 300px;
+	margin-top: 80px;
+	margin-bottom: 40px;
+	margin-left: 80px;
+}
+
+@media (max-width: 450px) {
+	.logo img {
+		display: block;
+		margin: 90px auto 50px auto;
+	}
+}
+
+.loginpanel .loginerrors {
+	margin-top: 40px;
+}
+
+
+/* new styles */
+
+.loginbox, 
+.loginbox label {
+	font-size: 12px;
+}
+
+.loginbox.onecolumn {
+	padding: 0;
+}
+
+.loginbox.twocolumns,
+.loginbox.onecolumn {
+	margin-bottom: 0;
+}
+
+.loginbox.onecolumn .loginpanel {
+	float: none;
+	margin: auto;
+	max-width: 500px;
+}
+
+@media (min-width: 992px) {
+	.loginbox.onecolumn {
+	    left: 30%;
+	    width: 40%;
+	}
+}
+
+
+.loginbox .loginpanel h2,
+.loginbox .signuppanel h2 {
+	margin: 0;
+    padding: 15px;
+    text-align: center;
+    font-weight: lighter;
+}
+
+.loginbox .loginpanel .subcontent,
+.loginbox .signuppanel .subcontent {
+	background-color: #2d2d37;
+	overflow: hidden;
+	position: relative;
+	padding: 30px;
+	overflow: hidden;
+}
+
+.loginbox .signuppanel .subcontent {
+	min-height: 300px;
+}
+
+.loginbox .loginpanel .subcontent form,
+.loginbox .signuppanel .subcontent form {
+	margin: auto;
+	display: block;
+	max-width: 400px;
+	position: relative;
+}
+
+.dir-ltr .loginbox .loginpanel .subcontent form .guestform {
+	text-align: right;
+}
+.dir-rtl .loginbox .loginpanel .subcontent form .guestform {
+	text-align: left;
+}
+
+.loginbox .loginpanel .subcontent form .loginform .form-label {
+	position: absolute;
+  	left: 0;
+  	float: none;
+}
+
+.dir-rtl .loginbox .loginpanel .subcontent form .loginform .form-label {
+	right: 0;
+	left: initial;
+}
+
+.loginbox .loginpanel .subcontent form .loginform .form-label,
+.loginbox .loginpanel .subcontent form .loginform .form-input {
+	height: 50px;
+	overflow: hidden;
+	box-sizing: border-box;
+	margin-top: 10px;
+}
+
+.loginbox .loginpanel .subcontent form .loginform .form-label label[for="username"],
+.loginbox .loginpanel .subcontent form .loginform .form-label label[for="password"] {
+  	margin-right: 10px;
+  	color: rgba(0,0,0,0.5);
+  	position: absolute;
+}
+
+.loginbox .loginpanel .subcontent form .loginform .form-label label[for="username"]:before,
+.loginbox .loginpanel .subcontent form .loginform .form-label label[for="password"]:before {
+  	font-family: 'FontAwesome' !important;
+  	margin-right: 15px;
+  	margin-left: 15px;
+  	color: black;
+  	position: absolute;
+  	z-index: 1;
+}
+
+.loginbox .loginpanel .subcontent form .loginform .form-label label[for="username"]:before {
+	content: "\f183";
+}
+
+.loginbox .loginpanel .subcontent form .loginform .form-label label[for="password"]:before {
+	content: "\f084";
+}
+
+.loginbox .loginpanel .subcontent form .loginform .form-input input {
+	margin: 0;
+	width: 100% !important;
+	max-width: none;
+	height: 100%;
+	border-radius: 0;
+	box-shadow: none;
+	opacity: 0.6;
+	box-sizing: border-box;
+	font-size: 14px;
+	padding-left: 50px;
+	padding-right: 70px;
+	border-radius: 10px;
+}
+
+.loginbox .loginpanel .subcontent form #loginbtn {
+	float: right;
+	margin-top: -20px;
+	margin-right: 0;
+}
+.dir-rtl .loginbox .loginpanel .subcontent form #loginbtn {
+	float: left;
+	margin-left: 0;
+}
+
+@media(max-width: 400px) {
+	.rememberpass {
+		width: 120px;
+	}
+	.loginbox .loginpanel .subcontent form #loginbtn {
+		margin-top: -40px;
+	}
+}
+
+.loginbox .loginpanel .subcontent form .forgetpass {
+    text-align: left;
+    margin-top: 0px;
+	text-align: left;
+    margin-left: 23px;
+    width: 100%;
+}
+.dir-rtl .loginbox .loginpanel .subcontent form .forgetpass {
+    text-align: right;
+    margin-right: 23px;
+}
+
+.dir-rtl .loginbox .subcontent {
+	text-align: right;
+}
+
+.loginbox .loginpanel .subcontent form .forgetpass .forgetpass a {
+	display: inline-block;
+}
+
+.loginbox .loginpanel .loginsub .desc {
+	margin: auto;
+    display: block;
+    padding-left: 23px;
+    padding-right: 23px;
+    /*margin-bottom: 20px;*/
+}
+
+.loginbox .loginpanel .loginsub .desc,
+.loginbox .loginpanel .guestsub .desc {
+	max-width: 400px;
+}
+
+.loginbox .loginpanel .guestsub .desc {
+	margin: auto;
+}
+
+.loginpanel .loginerrors {
+	max-width: 400px;
+    margin: auto;
+}
+
+#signup {
+	float: left;
+}
+
+.dir-rtl #signup {
+	float: right;
+}
+
+
+#page-login-change_password #page,
+#page-login-forgot_password #page {
+	color: black;
+}
+
+#page-login-change_password #page form {
+	margin-top: 50px;
+}
+
+#page-login-forgot_password input[type="text"] {
+	box-shadow: 0 0 2px rgba(0,0,0,0.1);
+}
+
+.loginbox .loginpanel .guestsub {
+	/*text-align: center;*/
+	padding-top: 0;
+}
+
+.potentialidps {
+	display: none;
+}
+
+.loginbox input[type="submit"] {
+	margin: 0;
+}
+
+#page-login-index iframe {
+	max-width: 100%;
+}
+
+/*.loginbox .loginform .form-input input {
+	width: 100%;
+	max-width: none;
+	height: 100%;
+	border-radius: 0;
+  box-shadow: none;
+  opacity: 0.6;
+  box-sizing: border-box;
+  font-size: 30px;
+}*/
+
+
+/*.loginbox .loginpanel .subcontent .desc {
+	text-align: left;
+	position: absolute;
+	top: 0;
+}*/
+
+
+body[data-color="dark"] .loginbox .loginpanel .subcontent,
+body[data-color="dark"] .loginbox .signuppanel .subcontent {
+	background-color: #2d2d37;
+}
+
+body[data-color="dark"] .loginbox .loginpanel h2,
+body[data-color="dark"] .loginbox .signuppanel h2 {
+	background-color: #4b4b53;
+    border-bottom: 1px solid #2d2d37;
+}
+
+body[data-color="dark"] .loginbox.twocolumns .loginpanel,
+body[data-color="dark"] .loginbox.twocolumns .signuppanel {
+	background-color: #2d2d37;
+}
+
+body[data-color="dark"] .loginbox .loginpanel .loginsub,
+body[data-color="dark"] .loginbox .signuppanel .subcontent {
+	border-top: 3px solid #4b4b53;
+}
+
+body[data-color="dark"] .loginbox .desc,
+body[data-color="dark"].path-login #page {
+	color: white;
+}
+
+body[data-color="dark"]#page-login-forgot_password #page {
+	color: black;
+}
+
+
+
+body[data-color="bright"] .loginbox .loginpanel .subcontent,
+body[data-color="bright"] .loginbox .signuppanel .subcontent {
+	background-color: rgba(244, 244, 244, 1);
+}
+
+body[data-color="bright"] .loginbox .loginpanel h2,
+body[data-color="bright"] .loginbox .signuppanel h2 {
+	border-bottom: 1px solid rgba(244, 244, 244, 1);
+    background-color: white;
+}
+
+body[data-color="bright"] .loginbox.twocolumns .loginpanel,
+body[data-color="bright"] .loginbox.twocolumns .signuppanel {
+	background-color: rgba(244, 244, 244, 1);
+}
+
+body[data-color="bright"] .loginbox .loginpanel .loginsub,
+body[data-color="bright"] .loginbox .signuppanel .subcontent {
+	border-top: 3px solid white;
+}
+
+body[data-color="bright"] .loginbox .desc,
+body[data-color="bright"].path-login #page {
+	color: black;
+}
+
+body[data-color="bright"]#page-login-forgot_password #page {
+	color: black;
+}
+
+/*IE hacks*/
+.loginbox.twocolumns,
+.loginbox.onecolumn {
+	margin-top: 150px\0;
+	margin-bottom: 20px\0;
+}

@@ -1,0 +1,578 @@
+{
+  "total": 319,
+  "hits": [],
+  "facets": {
+    "instance": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": 1919989,
+          "doc_count": 78,
+          "name": "Interaction Training"
+        },
+        {
+          "key": 1885983,
+          "doc_count": 59,
+          "name": "Catalyst online learning portal"
+        },
+        {
+          "key": 298552,
+          "doc_count": 50,
+          "name": "E3Learning"
+        },
+        {
+          "key": 2117281,
+          "doc_count": 48,
+          "name": "MicroLearn"
+        },
+        {
+          "key": 2247989,
+          "doc_count": 39,
+          "name": "Vado"
+        },
+        {
+          "key": 2690326,
+          "doc_count": 37,
+          "name": "Skillboosters"
+        },
+        {
+          "key": 2525789,
+          "doc_count": 8,
+          "name": "Manager Foundation"
+        }
+      ]
+    },
+    "language": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": "en",
+          "doc_count": 319
+        }
+      ]
+    },
+    "tag": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": "Boss Camp",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "Career",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "career development",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "career management",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "Changing Behaviours",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "coaching",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "Communication",
+          "doc_count": 7,
+          "type": "premium"
+        },
+        {
+          "key": "Communication Skills",
+          "doc_count": 37,
+          "type": "premium"
+        },
+        {
+          "key": "Competition Law",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "complaints",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "Compliance",
+          "doc_count": 54,
+          "type": "premium"
+        },
+        {
+          "key": "conflict",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Corporate Responsibility",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Customer Service",
+          "doc_count": 45,
+          "type": "premium"
+        },
+        {
+          "key": "Data Protection",
+          "doc_count": 10,
+          "type": "premium"
+        },
+        {
+          "key": "decision-making",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "Discrimination",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Diversity",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Emotional Intelligence",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Empathy",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "Employee Development",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "employee engagement",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Equality",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "equality and discrimination",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Feedback",
+          "doc_count": 3,
+          "type": "premium"
+        },
+        {
+          "key": "Finance",
+          "doc_count": 4,
+          "type": "premium"
+        },
+        {
+          "key": "Financial Services",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "G.R.O.W",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "GDPR",
+          "doc_count": 10,
+          "type": "premium"
+        },
+        {
+          "key": "GO1 Premium",
+          "doc_count": 208,
+          "type": "premium"
+        },
+        {
+          "key": "guiding",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Hazard Guides",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "Health",
+          "doc_count": 12,
+          "type": "premium"
+        },
+        {
+          "key": "Health and Safety",
+          "doc_count": 30,
+          "type": "premium"
+        },
+        {
+          "key": "Healthy Living",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Hiring",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Human Resources",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Impact",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Influence",
+          "doc_count": 4,
+          "type": "premium"
+        },
+        {
+          "key": "Interviewee Tips",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "Interviews",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "interview skills",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "Interview Techniques",
+          "doc_count": 3,
+          "type": "premium"
+        },
+        {
+          "key": "IT Skills",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "Leadership",
+          "doc_count": 7,
+          "type": "premium"
+        },
+        {
+          "key": "Leadership and management",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Leadership and management: diversity",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Leadership and management: employee engagement",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "leadership skills",
+          "doc_count": 3,
+          "type": "premium"
+        },
+        {
+          "key": "Life Balance",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Management",
+          "doc_count": 7,
+          "type": "premium"
+        },
+        {
+          "key": "Management and Leadership",
+          "doc_count": 29,
+          "type": "premium"
+        },
+        {
+          "key": "Manager",
+          "doc_count": 5,
+          "type": "premium"
+        },
+        {
+          "key": "Manager Skills",
+          "doc_count": 3,
+          "type": "premium"
+        },
+        {
+          "key": "Manager Training",
+          "doc_count": 3,
+          "type": "premium"
+        },
+        {
+          "key": "Manager Zen",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "Managing Upwards",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "Microlearn",
+          "doc_count": 10,
+          "type": "premium"
+        },
+        {
+          "key": "MicroLearn",
+          "doc_count": 32,
+          "type": "premium"
+        },
+        {
+          "key": "Microsoft Suite",
+          "doc_count": 26,
+          "type": "premium"
+        },
+        {
+          "key": "Monitoring",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Motivation",
+          "doc_count": 3,
+          "type": "premium"
+        },
+        {
+          "key": "One on Ones",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "Performance Management and Development",
+          "doc_count": 30,
+          "type": "premium"
+        },
+        {
+          "key": "Performance Management and Devlopment",
+          "doc_count": 7,
+          "type": "premium"
+        },
+        {
+          "key": "Personal Development",
+          "doc_count": 15,
+          "type": "premium"
+        },
+        {
+          "key": "Personal Development\tMicroLearn",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "Personal effectiveness: communication",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "Personal improvement",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "Planning",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Positive Thinking",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Preformance",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "Preparation",
+          "doc_count": 3,
+          "type": "premium"
+        },
+        {
+          "key": "Presenting Data",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Privacy \u0026 Fraud Awareness",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "Professional development",
+          "doc_count": 6,
+          "type": "premium"
+        },
+        {
+          "key": "Professional Development",
+          "doc_count": 117,
+          "type": "premium"
+        },
+        {
+          "key": "Professional Devlopment",
+          "doc_count": 12,
+          "type": "premium"
+        },
+        {
+          "key": "Project Management",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Purpose",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Recruitment",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Relationship Building",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Relaxation",
+          "doc_count": 3,
+          "type": "premium"
+        },
+        {
+          "key": "Resilience",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Retail",
+          "doc_count": 17,
+          "type": "premium"
+        },
+        {
+          "key": "Sales",
+          "doc_count": 11,
+          "type": "premium"
+        },
+        {
+          "key": "Self Leadership",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Social Responsibility",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Social Skills",
+          "doc_count": 4,
+          "type": "premium"
+        },
+        {
+          "key": "Soft Skills",
+          "doc_count": 26,
+          "type": "premium"
+        },
+        {
+          "key": "Taking Action",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Team Performance",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Technology",
+          "doc_count": 34,
+          "type": "premium"
+        },
+        {
+          "key": "Technology Microsoft Suite",
+          "doc_count": 1,
+          "type": "premium"
+        },
+        {
+          "key": "Unconscious Bias",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "V-SAFE",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Value",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "video",
+          "doc_count": 10,
+          "type": "premium"
+        },
+        {
+          "key": "Wellbeing",
+          "doc_count": 20,
+          "type": "premium"
+        },
+        {
+          "key": "Workplace",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Workplace Health \u0026 Safety",
+          "doc_count": 2,
+          "type": "premium"
+        },
+        {
+          "key": "Workplace Relations",
+          "doc_count": 9,
+          "type": "premium"
+        },
+        {
+          "key": "Workplace Wellbeing",
+          "doc_count": 20,
+          "type": "premium"
+        }
+      ]
+    }
+  }
+}

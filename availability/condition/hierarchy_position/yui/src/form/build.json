@@ -1,0 +1,10 @@
+{
+  "name": "moodle-availability_hierarchy_position-form",
+  "builds": {
+    "moodle-availability_hierarchy_position-form": {
+      "jsfiles": [
+        "form.js"
+      ]
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Petr Skoda <petr.skoda@totaralms.com>
+   @package totara_form
+}}
+{{!
+
+    @template totara_form/group_buttons
+
+    This template generates Totara form button group.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+     * form_item_template string this template, used for dynamic partials
+     * name__xxxx bool true where xxxx is the name of this form item
+     * name string name of this item
+     * id string id of this item
+     * items array contained form items included via dynamic partial from form_item_template
+
+    Example context (json):
+      {"form_item_template":"totara_form\/group_buttons","name__actionbuttonsgroup":true,"name":"actionbuttonsgroup","id":"tfiid_actionbuttonsgrouptotara_form_form_testform_element_compilation","items":[{"form_item_template":"totara_form\/element_action_button","name__submitbutton":true,"name":"submitbutton","id":"tfiid_submitbutton_totara_form_form_testform_element_compilation","frozen":false,"value":"Save changes","formnovalidate":false,"errors_has_items":false,"errors":[],"helphtml":false,"elementtype":"totara_form\\form\\element\\action_button","elementid":"tfiid_submitbutton_totara_form_form_testform_element_compilation","elementclassification":"element"}],"errors_has_items":false,"errors":[],"helphtml":false,"elementtype":"totara_form\\form\\group\\buttons","elementid":"tfiid_actionbuttonsgrouptotara_form_form_testform_element_compilation","elementclassification":"group"}
+}}
+<div class="tf_group totara_form_group_buttons clearfix">
+    {{#items}}
+        <div data-item-classification="{{elementclassification}}"
+             data-element-type="{{elementtype}}"
+             data-element-id="{{elementid}}"
+             data-element-template="{{form_item_template}}"
+             data-element-frozen="{{frozen}}"
+             {{#amdmodule}} data-element-amd-module="{{.}}"{{/amdmodule}}
+             class="nostyles">
+        {{> &&form_item_template}}
+        </div>
+    {{/items}}
+    {{> totara_form/help_button}}
+</div>

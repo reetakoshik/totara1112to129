@@ -1,0 +1,18 @@
+This files describes API changes in /mod/facetoface/*,
+information provided here is intended especially for developers.
+
+=== 11.1 ===
+
+* Deprecated function facetoface_get_ical_attachment. It was not working properly. Instead use facetoface_generate_ical(), note different arguments!
+
+=== 10.0 ===
+
+* Hook is added for Seminar Sing-up link directly to calendar upcoming events block
+# calendar_dynamic_content class in mod/facetoface/classes/hook/calendar_dynamic_content.php
+# seminar_calendar_dynamic_content in mod/facetoface/watcher/seminar_calendar_dynamic_content.php
+* Deprecated behat step 'I select to approve "([^"]*)"'. This should be replaced by 'I set the field "Approve <user> for this event" to "1"'
+* Deprecated function facetoface_eventhandler_role_unassigned_bulk. This function was unused and non-functional.
+* facetoface_get_customfield_data function has been deprecated, please use customfield_get_data function instead.
+* Deprecated method rb_facetoface_base_source::rb_display_link_f2f_session. This method was replaced with event_date_link class.
+* Deprecated method rb_source_facetoface_summary::rb_display_link_f2f_session_in_timezone. This method was replaced with event_date_link class.
+

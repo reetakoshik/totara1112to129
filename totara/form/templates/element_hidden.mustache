@@ -1,0 +1,65 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Petr Skoda <petr.skoda@totaralms.com>
+   @package totara_form
+}}
+{{!
+
+    @template totara_form/element_hidden
+
+    This template generates Totara form hidden field.
+    Hidden inputs are sent even when frozen, this is because they may be needed for the form handling the page.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+     * form_item_template string this template, used for dynamic partials
+     * name__xxxx bool true where xxxx is the name of this form item
+     * name string name of this item
+     * id string id of this item
+     * label string
+     * frozen bool
+     * value string
+
+    Other context variables for following partials:
+     * totara_form/help_button
+     * totara_form/validation_errors
+
+    Example context (json):
+      {
+        "form_item_template":"totara_form\/element_hidden",
+        "name__hidden":true,
+        "name":"hidden",
+        "id":"tfiid_hidden_totara_form_form_testform_element_compilation",
+        "frozen":true,
+        "amdmodule":"totara_form\/form_element_hidden",
+        "value":"Invisible",
+        "errors_has_items":false,
+        "errors":[],
+        "helphtml":false,
+        "elementtype":"totara_form\\form\\element\\hidden",
+        "elementid":"tfiid_hidden_totara_form_form_testform_element_compilation",
+        "elementclassification":"element"
+    }
+}}
+<input type="hidden" id="{{id}}" name="{{name}}" value="{{value}}" />

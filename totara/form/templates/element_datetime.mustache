@@ -1,0 +1,99 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2016 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Petr Skoda <petr.skoda@totaralms.com>
+   @package totara_form
+}}
+{{!
+
+    @template totara_form/element_datetime
+
+    This template generates Totara form date-time with optional timezone.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+     * form_item_template string this template, used for dynamic partials
+     * name__xxxx bool true where xxxx is the name of this form item
+     * name string name of this item
+     * id string id of this item
+     * label string
+     * frozen bool
+     * placeholder string
+     * isodate string
+     * showtz bool
+     * tz string current tz
+     * timezones array of available timezones
+       * value string
+       * text string
+       * selected bool
+
+    Other context variables for following partials:
+     * totara_form/help_button
+     * totara_form/validation_errors
+
+    Example context (json):
+        {
+            "form_item_template":"totara_form\/element_datetime",
+            "name__datetime":true,
+            "name":"datetime",
+            "id":"tfiid_datetime_totara_form_form_testform_element_compilation",
+            "label":"Date and time",
+            "frozen":false,
+            "amdmodule":"totara_form\/form_element_datetime",
+            "required":false,
+            "placeholder":false,
+            "isodate":"",
+            "showtz":false,
+            "tz":"99",
+            "timezones": [
+                {"value":"Africa\/Abidjan","text":"Africa\/Abidjan","selected":false},
+                {"value":"Australia\/Perth","text":"Australia\/Perth","selected":false},
+                {"value":"Australia\/Sydney","text":"Australia\/Sydney","selected":false},
+                {"value":"Pacific\/Auckland","text":"Pacific\/Auckland","selected":false},
+                {"value":"UTC","text":"UTC","selected":false},
+                {"value":99,"text":"Pacific\/Auckland (my timezone)","selected":true}
+            ],
+            "errors_has_items":false,
+            "errors":[],
+            "helphtml":false,
+            "elementtype":"totara_form\\form\\element\\datetime",
+            "elementid":"tfiid_datetime_totara_form_form_testform_element_compilation",
+            "elementclassification":"element"
+        }
+}}
+<div class="tf_element totara_form_element_datetime">
+    <div class="tf_element_title"><label class="legend" for="{{id}}">{{label}}{{#required}}{{> totara_form/required_suffix}}{{/required}}</label>{{> totara_form/help_button}}</div>
+    <div class="tf_element_input">{{> totara_form/validation_errors}}<input type="datetime-local" id="{{id}}" {{#frozen}}disabled data-{{/frozen}}name="{{name}}[isodate]" value="{{isodate}}"
+                                                                            {{#required}}required{{/required}} {{#placeholder}}placeholder="{{.}}"{{/placeholder}} />
+    {{#showtz}}
+        <label for="{{id}}___tz" class="accesshide">{{#str}}timezone{{/str}}</label>
+        <select {{#frozen}}disabled data-{{/frozen}}name="{{name}}[tz]" id="{{id}}___tz" >
+            {{#timezones}}
+            <option value="{{value}}" {{#selected}}selected{{/selected}}>{{text}}</option>
+            {{/timezones}}
+        </select>
+    {{/showtz}}
+    {{^showtz}}
+        {{^frozen}}<input type="hidden" name="{{name}}[tz]" value="{{tz}}"/>{{/frozen}}
+    {{/showtz}}</div>
+</div>

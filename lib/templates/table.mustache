@@ -1,0 +1,241 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2015 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+
+    @template core/table
+
+    Tables.
+
+    This template generates a standards compliant HTML table.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+
+    Table:
+     * body array Data containing details to build the body of the table. See the Body section below.
+     * caption object The content for the table caption. A caption tag is not output no caption is given.
+     * cellpadding string
+     * cellspacing string
+     * columns int A count of the total number of columns identified from the head data. Takes column spans into account.
+     * has_body bool Indicates if body data has beeb found for the table determining if a tbody and data is output.
+     * has_content bool Determines if a thead and tbody have content - determines if the table tage is output.
+     * has_head bool Indicates if head data has been found for the table determining if a thead and headers are output.
+     * head array Data containing details to construct the thead and column headers for the table. See the Head section below.
+     * id string The ID of the table. If present is likely required for JS.
+     * summary string Table summary.
+     * tableattributes string An array of attributes to be added to the table tag.
+     * tableclasses string Any classes that must be added to the table.
+     * width string A forced width for the table.
+
+     Head:
+     The head is an array of cells.
+     See the Cell heading for details.
+
+     Body:
+     The body is an array contain row objects.
+     See the Row heading for details.
+
+     Row:
+     * cells array An array of cells to display in this row. See the Cell heading for details.
+     * divider bool True if this row is just a divider.
+     * lastrow bool True if this is the last row in the table.
+     * rowattributes array A list of attributes to be added to the tr tag.
+     * rowclasses string Any classes that must be added to the row.
+     * rowid string The ID of the row, if provided is likely required for JS
+     * rowstyle string Contents for a style attribute required for the row.
+
+     Cells:
+     * abbr string The abbreviation for this cell
+     * cellid string The Id attribute value for this cell, if presently likely used for JS.
+     * cellscope string The scope of this cell.
+     * colspan int The colspan value for this cell.
+     * column string The column number of this cell.
+     * content string The content for in the cell.
+     * cellattributes array A list of attributes to be added to the tr/th tag.
+     * cellclasses string Any classes that must be added to the cell.
+     * cellstyle string Contents for a style attribute required for the cell.
+     * header bool True if this cell should be a header.
+     * lastcol bool True if this is the last cell in the row.
+
+    Example context (json):
+    {
+        "table":{
+            "body":[{
+                    "cells":[
+                        {
+                            "abbr":null,
+                            "cellid":null,
+                            "cellscope":null,
+                            "colspan":null,
+                            "column":"0",
+                            "content":"Cell A1",
+                            "cellattributes":null,
+                            "cellclasses":"alpha",
+                            "cellstyle":"text-align:left;",
+                            "header":false,
+                            "lastcol":false
+                        },{
+                            "abbr":null,
+                            "cellid":null,
+                            "cellscope":null,
+                            "colspan":null,
+                            "column":"1",
+                            "content":"Cell B1",
+                            "cellattributes":null,
+                            "cellclasses":"beta",
+                            "cellstyle":"text-align:right;",
+                            "header":false,
+                            "lastcol":false
+                        },{
+                            "abbr":null,
+                            "cellid":null,
+                            "cellscope":null,
+                            "colspan":null,
+                            "column":"2",
+                            "content":"Cell C1",
+                            "cellattributes":null,
+                            "cellclasses":"gamma",
+                            "cellstyle":"text-align:center;",
+                            "header":false,
+                            "lastcol":true
+                        }
+                    ],
+                    "divider":false,
+                    "lastrow":false,
+                    "rowattributes":[],
+                    "rowclasses":"example-row-class",
+                    "rowid":null,
+                    "rowstyle":null
+                },{
+                    "cells":[
+                        {
+                            "abbr":null,"cellid":null,"cellscope":null,"colspan":null,"column":"0","content":"Cell A2","cellattributes":null,"cellclasses":"alpha","cellstyle":"text-align:left;","header":false,"lastcol":false
+                        },{
+                            "abbr":"Whats a cell to do","cellid":"cell-alpha","cellscope":"row","colspan":null,"column":"1","content":"Cell B2","cellattributes":[{"name":"data-enhance","value":"row-test"}],"cellclasses":"beta","cellstyle":"background-color:blue;text-align:right;","header":true,"lastcol":false
+                        },{
+                            "abbr":null,"cellid":null,"cellscope":null,"colspan":null,"column":"2","content":"Cell C2","cellattributes":null,"cellclasses":"gamma","cellstyle":"text-align:center;","header":false,"lastcol":true
+                        }
+                    ],
+                    "divider":false,
+                    "lastrow":false,
+                    "rowattributes":[{"name":"data-enhance","value":"row-test"}],
+                    "rowclasses":"another-row-class",
+                    "rowid":"row-beta",
+                    "rowstyle":"font-style: italic"
+                },{
+                    "cells":[],
+                    "divider":true,
+                    "lastrow":false,
+                    "rowattributes":[],
+                    "rowclasses":null,
+                    "rowid":null,
+                    "rowstyle":null
+                },{
+                    "cells":[
+                        {
+                            "abbr":null,"cellid":null,"cellscope":null,"colspan":null,"column":"0","content":"Cell A3","cellattributes":null,"cellclasses":"alpha","cellstyle":"text-align:left;","header":false,"lastcol":false
+                        },{
+                            "abbr":null,"cellid":null,"cellscope":null,"colspan":null,"column":"1","content":"Cell B3","cellattributes":null,"cellclasses":"beta","cellstyle":"text-align:right;","header":false,"lastcol":false
+                        },{
+                            "abbr":null,"cellid":null,"cellscope":null,"colspan":null,"column":"2","content":"Cell C3","cellattributes":null,"cellclasses":"gamma","cellstyle":"text-align:center;","header":false,"lastcol":true
+                        }
+                    ],
+                    "divider":false,
+                    "lastrow":true,
+                    "rowattributes":[],
+                    "rowclasses":"carl",
+                    "rowid":null,
+                    "rowstyle":null
+                }
+            ],
+            "caption":{
+                "text":"Caption for an example table"
+            },
+            "cellpadding":null,
+            "cellspacing":null,
+            "columns":3,
+            "has_head":true,
+            "has_body":true,
+            "has_content":true,
+            "head":[
+                {
+                    "abbr":null,"cellid":null,"cellscope":"col","colspan":null,"column":"0","content":"Col One","cellattributes":null,"cellclasses":"alpha","cellstyle":"text-align:left;","header":true,"lastcol":false
+                },{
+                    "abbr":null,"cellid":null,"cellscope":"col","colspan":null,"column":"1","content":"Col Two","cellattributes":null,"cellclasses":"beta","cellstyle":"text-align:right;","header":true,"lastcol":false
+                },{
+                    "abbr":null,"cellid":null,"cellscope":"col","colspan":null,"column":"2","content":"Col Three","cellattributes":null,"cellclasses":"gamma","cellstyle":"text-align:center;","header":true,"lastcol":true
+                }
+            ],
+            "id":"brighton",
+            "summary":"Example summary for a table",
+            "tableattributes":[
+                {
+                    "name":"data-enhance",
+                    "value":"test"
+                }
+            ],
+            "tableclasses":null,
+            "width":null
+        }
+    }
+}}
+{{#table}}
+<table class="{{tableclasses}}{{^tableclasses}}generaltable{{/tableclasses}}"{{#tableattributes}} {{name}}="{{value}}"{{/tableattributes}}{{#id}} id="{{.}}"{{/id}}{{#width}} width="{{.}}"{{/width}}{{#summary}} summary="{{.}}"{{/summary}}{{#cellpadding}} cellpadding="{{.}}"{{/cellpadding}}{{#cellspacing}} cellspacing="{{.}}"{{/cellspacing}} data-origin="html_table">
+    {{#caption}}<caption{{#hidden}} class="accesshide"{{/hidden}}>{{{text}}}</caption>{{/caption}}
+    {{#has_head}}
+    <thead>
+        <tr>
+        {{#head}}
+            {{^header}}
+            <td class="header c{{column}}{{#lastcol}} lastcol{{/lastcol}}{{#cellclasses}} {{.}}{{/cellclasses}}"{{#colspan}} colspan="{{.}}"{{/colspan}}{{#rowspan}} rowspan="{{.}}"{{/rowspan}}{{#cellattributes}} {{name}}="{{value}}"{{/cellattributes}}{{#cellstyle}} style="{{.}}"{{/cellstyle}}{{#cellid}} id="{{.}}"{{/cellid}}{{#abbr}} abbr="{{.}}"{{/abbr}}{{#cellscope}} scope="{{.}}"{{/cellscope}}>{{{content}}}</td>
+            {{/header}}
+            {{#header}}
+            <th class="header c{{column}}{{#lastcol}} lastcol{{/lastcol}}{{#cellclasses}} {{.}}{{/cellclasses}}"{{#colspan}} colspan="{{.}}"{{/colspan}}{{#rowspan}} rowspan="{{.}}"{{/rowspan}}{{#cellattributes}} {{name}}="{{value}}"{{/cellattributes}}{{#cellstyle}} style="{{.}}"{{/cellstyle}}{{#cellid}} id="{{.}}"{{/cellid}}{{#abbr}} abbr="{{.}}"{{/abbr}}{{#cellscope}} scope="{{.}}"{{/cellscope}}>{{{content}}}</th>
+            {{/header}}
+        {{/head}}
+        </tr>
+    </thead>
+    {{/has_head}}
+    <tbody{{^body}} class="empty"{{/body}}>
+    {{#body}}
+        {{#divider}}
+        </tbody><tbody>
+        {{/divider}}
+        <tr class="{{#rowclasses}}{{.}} {{/rowclasses}}{{#lastrow}}lastrow{{/lastrow}}"{{#rowattributes}} {{name}}="{{value}}"{{/rowattributes}}{{#rowid}} id="{{.}}"{{/rowid}}{{#rowstyle}} style="{{.}}"{{/rowstyle}}>
+        {{#cells}}
+            {{^header}}
+            <td class="{{#cellclasses}}{{.}} {{/cellclasses}}cell c{{column}}{{#lastcol}} lastcol{{/lastcol}}"{{#colspan}} colspan="{{.}}"{{/colspan}}{{#rowspan}} rowspan="{{.}}"{{/rowspan}}{{#cellattributes}} {{name}}="{{value}}"{{/cellattributes}}{{#cellstyle}} style="{{.}}"{{/cellstyle}}{{#cellid}} id="{{.}}"{{/cellid}}{{#abbr}} abbr="{{.}}"{{/abbr}}{{#cellscope}} scope="{{.}}"{{/cellscope}}>{{{content}}}</td>
+            {{/header}}
+            {{#header}}
+            <th class="{{#cellclasses}}{{.}} {{/cellclasses}}cell c{{column}}{{#lastcol}} lastcol{{/lastcol}}"{{#colspan}} colspan="{{.}}"{{/colspan}}{{#rowspan}} rowspan="{{.}}"{{/rowspan}}{{#cellattributes}} {{name}}="{{value}}"{{/cellattributes}}{{#cellstyle}} style="{{.}}"{{/cellstyle}}{{#cellid}} id="{{.}}"{{/cellid}}{{#abbr}} abbr="{{.}}"{{/abbr}}{{#cellscope}} scope="{{.}}"{{/cellscope}}>{{{content}}}</th>
+            {{/header}}
+        {{/cells}}
+        </tr>
+    {{/body}}
+    {{^body}}
+        <td colspan="{{columns}}"></td>
+    {{/body}}
+    </tbody>
+</table>
+{{/table}}

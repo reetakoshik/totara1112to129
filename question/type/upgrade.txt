@@ -1,0 +1,11 @@
+This files describes API changes for question type plugins,
+information provided here is intended especially for developers.
+
+=== 10 ===
+
+* The following functions, previously used (exclusively) by upgrade steps are not available
+  anymore because of the upgrade cleanup performed for this version. See MDL-51580 for more info:
+    - qtype_essay_convert_to_html()
+* If you are using check_combined_feedback_file_access in your check_file_access method,
+  then you must now pass $args as the 4th argument, so the correct permission checks
+  can be performed. If you don't, you will get a developer debug notice.

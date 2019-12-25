@@ -1,0 +1,32 @@
+This files describes API changes in HR Import,
+information provided here is intended especially for developers.
+
+=== 11.0 ===
+
+* Notifications and source field informaiion has been moved out Element forms, affecting mark-up in the following methods:
+  * csv_trait::config_form_add_csv_details()
+  * totara_sync_source_org_csv::config_form()
+  * totara_sync_source_pos_csv::config_form()
+  * totara_sync_source_user_csv::config_form()
+  * database_trait::totara_sync_source_org_database()
+  * totara_sync_source_org_database::config_form()
+  * totara_sync_source_pos_database::config_form()
+  * totara_sync_source_user_database::config_form()
+
+
+=== 10.0 ===
+
+* totara_sync_element_user::get_invalid_emails() is now publicly accessible.
+* totara_sync_element_user::get_invalid_lang() is now publicly accessible.
+* Added new classes for importing job assignments:
+   - totara_sync_element_jobassignment
+   - totara_sync_source_jobassignment_csv
+   - totara_sync_source_jobassignment_database
+   Functionality relating to job assignments has been removed from the user element and sources.
+* totara_sync_element_user::get_invalid_org_pos has been deprecated. Please use the new jobassignment element.
+* totara_sync_element_user::get_invalid_start_end_dates has been deprecated. Please use the new jobassignment element.
+* totara_sync_element_user::get_invalid_roles has been deprecated. Please use the new jobassignment element.
+* totara_sync_element_user::check_self_assignment has been deprecated. Please use the new jobassignment element.
+* totara_sync_element_user::sync_user_job_assignments has been deprecated. Please use the new jobassignment element.
+* totara_sync_element_user::sync_user_dependant_job_assignment_fields has been deprecated. Please use the new jobassignment element.
+* totara_sync_element_user::get_duplicated_values no longer take into account whether job assignments are enabled

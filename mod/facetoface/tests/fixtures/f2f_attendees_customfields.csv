@@ -1,0 +1,4 @@
+email,signupnote,checkbox,datetime,menuofchoices,multiselect,textarea,textinput,url
+student1@example.com,Uploaded via csv file,1,2/3/2020,apple,"tui,moa","Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","Lorem ipsum dolor sit amet","http://www.totaralearning.com"
+student2@example.com,Also uploaded via csv file,1,3/4/2021,orange,"tuatara,moa","Consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","Consectetur adipisicing elit","https://google.com"
+student3@example.com,More uploaded via csv file,0,4/5/2022,banana,"tuatara","Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","Sed do eiusmod tempor incididunt","/mod/facetoface/view.php?id=1"

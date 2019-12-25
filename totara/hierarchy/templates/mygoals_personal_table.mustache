@@ -1,0 +1,211 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2015 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template totara_hierarchy/mygoals_personal_table
+
+    Create a toolbars area for a table.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+
+    Example context (json):
+    {
+        "personalgoals": {
+            "table": {
+                "body": [
+                    {
+                        "cells": [
+                            {
+                                "abbr": null,
+                                "cellid": null,
+                                "cellscope": null,
+                                "colspan": null,
+                                "rowspan": null,
+                                "column": "0",
+                                "content": "<a href=\"#\">who knows</a>",
+                                "cellattributes": null,
+                                "cellclasses": null,
+                                "cellstyle": null,
+                                "header": false,
+                                "lastcol": false
+                            },
+                            {
+                                "abbr": null,
+                                "cellid": null,
+                                "cellscope": null,
+                                "colspan": null,
+                                "rowspan": null,
+                                "column": "1",
+                                "content": "",
+                                "cellattributes": null,
+                                "cellclasses": null,
+                                "cellstyle": null,
+                                "header": false,
+                                "lastcol": false
+                            },
+                            {
+                                "abbr": null,
+                                "cellid": null,
+                                "cellscope": null,
+                                "colspan": null,
+                                "rowspan": null,
+                                "column": "2",
+                                "content": "",
+                                "cellattributes": null,
+                                "cellclasses": null,
+                                "cellstyle": null,
+                                "header": false,
+                                "lastcol": false
+                            },
+                            {
+                                "abbr": null,
+                                "cellid": null,
+                                "cellscope": null,
+                                "colspan": null,
+                                "rowspan": null,
+                                "column": "3",
+                                "content": "Self",
+                                "cellattributes": null,
+                                "cellclasses": null,
+                                "cellstyle": null,
+                                "header": false,
+                                "lastcol": false
+                            },
+                            {
+                                "abbr": null,
+                                "cellid": null,
+                                "cellscope": null,
+                                "colspan": null,
+                                "rowspan": null,
+                                "column": "4",
+                                "content": "<a class=\"action-icon\" href=\"#\"><img class=\"smallicon\" alt=\"Edit\" title=\"Edit\" src=\"__WWWROOT__/theme/image.php?theme=__THEME__&amp;amp;component=core&amp;amp;image=t%2Fedit\" /></a> <a class=\"action-icon\" href=\"#\"><img class=\"smallicon\" alt=\"Delete\" title=\"Delete\" src=\"__WWWROOT__/theme/image.php?theme=__THEME__&amp;amp;component=core&amp;amp;image=t%2Fdelete\" /></a>",
+                                "cellattributes": null,
+                                "cellclasses": null,
+                                "cellstyle": null,
+                                "header": false,
+                                "lastcol": true
+                            }
+                        ],
+                        "divider": false,
+                        "lastrow": true,
+                        "rowattributes": [
+
+                        ],
+                        "rowclasses": "company_row",
+                        "rowid": null,
+                        "rowstyle": null
+                    }
+                ],
+                "caption": null,
+                "cellpadding": null,
+                "cellspacing": null,
+                "columns": 5,
+                "has_head": true,
+                "has_body": true,
+                "head": [
+                    {
+                        "abbr": null,
+                        "cellid": null,
+                        "cellscope": "col",
+                        "colspan": null,
+                        "rowspan": null,
+                        "column": "0",
+                        "content": "Name",
+                        "cellattributes": null,
+                        "cellclasses": null,
+                        "cellstyle": null,
+                        "header": true,
+                        "lastcol": false
+                    },
+                    {
+                        "abbr": null,
+                        "cellid": null,
+                        "cellscope": "col",
+                        "colspan": null,
+                        "rowspan": null,
+                        "column": "1",
+                        "content": "Due",
+                        "cellattributes": null,
+                        "cellclasses": null,
+                        "cellstyle": null,
+                        "header": true,
+                        "lastcol": false
+                    },
+                    {
+                        "abbr": null,
+                        "cellid": null,
+                        "cellscope": "col",
+                        "colspan": null,
+                        "rowspan": null,
+                        "column": "2",
+                        "content": "Status",
+                        "cellattributes": null,
+                        "cellclasses": null,
+                        "cellstyle": null,
+                        "header": true,
+                        "lastcol": false
+                    },
+                    {
+                        "abbr": null,
+                        "cellid": null,
+                        "cellscope": "col",
+                        "colspan": null,
+                        "rowspan": null,
+                        "column": "3",
+                        "content": "Assigned via",
+                        "cellattributes": null,
+                        "cellclasses": null,
+                        "cellstyle": null,
+                        "header": true,
+                        "lastcol": false
+                    },
+                    {
+                        "abbr": null,
+                        "cellid": null,
+                        "cellscope": "col",
+                        "colspan": null,
+                        "rowspan": null,
+                        "column": "4",
+                        "content": "Edit",
+                        "cellattributes": null,
+                        "cellclasses": null,
+                        "cellstyle": null,
+                        "header": true,
+                        "lastcol": true
+                    }
+                ],
+                "id": null,
+                "summary": null,
+                "tableattributes": [
+
+                ],
+                "tableclasses": "personal_table fullwidth generaltable",
+                "width": null
+            }
+        }
+    }
+}}
+<div id="personal_goals_table">
+    {{#personalgoals}}{{>core/table}}{{/personalgoals}}
+</div>

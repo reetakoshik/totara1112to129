@@ -1,0 +1,8 @@
+This file describes API changes in core completion,
+information provided here is intended for developers.
+
+=== 10 ===
+
+* completion_completion->_save() now records the status as COMPLETION_STATUS_NOTYETSTARTED (10) when no timeenrolled,
+  timestarted and timecompleted is provided. Previously, it resulted in status 0 which has no corresponding constant
+  and is therefore invalid. Any customisations which rely on status 0 should be redesigned around this change.

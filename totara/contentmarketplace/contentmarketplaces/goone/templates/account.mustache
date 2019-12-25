@@ -1,0 +1,51 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Sergey Vidusov <sergey.vidusov@androgogic.com>
+   @author Brian Barnes <brian.barnes@totaralearning.com>
+   @package contentmarketplace_goone
+}}
+<h3>{{#str}} account, contentmarketplace_goone {{/str}}</h3>
+
+<dl class="tcm-goone_account dl-horizontal">
+    <dt>{{#str}} portalurl, contentmarketplace_goone {{/str}}</dt>
+    <dd><a href="https://{{portal_url}}" target="_blank">{{portal_url}}</a></dd>
+    <dt>{{#str}} enabledby, contentmarketplace_goone {{/str}}</dt>
+    <dd>{{ enabled_by }}</dt>
+    <dt>{{#str}} enableddate, contentmarketplace_goone {{/str}}</dt>
+    <dd>{{ enabled_on }}</dd>
+</dl>
+
+<h3>{{#str}} subscription_details, contentmarketplace_goone {{/str}}</h3>
+
+<dl class="tcm-goone_account dl-horizontal">
+    <dt>{{#str}} currentplan, contentmarketplace_goone {{/str}}</dt>
+    <dd>{{ plan_name }}</dt>
+    <dt>{{#str}} numberlicensedusers, contentmarketplace_goone {{/str}}</dt>
+    <dd>{{ plan_users_licensed }}</dd>
+    <dt>{{#str}} numberactiveusers, contentmarketplace_goone {{/str}}</dt>
+    <dd>{{ plan_users_active }}</dd>
+    <dt>{{#str}} region, contentmarketplace_goone {{/str}}</dt>
+    <dd>{{ plan_region }}</dd>
+    <dt>{{#str}} annualcost, contentmarketplace_goone {{/str}}</dt>
+    <dd>{{ plan_price }}</dd>
+    <dt>{{#str}} renewaldate, contentmarketplace_goone {{/str}}</dt>
+    <dd>{{ plan_renewal_date }}</dd>
+</dl>
+
+<a class="btn btn-default" href="https://{{portal_url}}" target="_blank">{{#str}} managesubscription, contentmarketplace_goone {{/str}}</a>

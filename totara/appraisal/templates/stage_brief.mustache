@@ -1,0 +1,66 @@
+{{!
+    This file is part of Totara LMS
+
+    Copyright (C) 2017 onwards Totara Learning Solutions LTD
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    @author Brian Barnes <brian.barnes@totaralms.com>
+    @package totara_appraisal
+}}
+{{!
+    @template totara_appraisal/stage_brief
+
+    Audience rule template
+
+    The purpose of this template is to render an audience rule.
+
+    Classes required for JS:
+
+    Data attributes required for JS:
+
+    Context variables required for this template:
+    * rule text the text of the rule to display
+    * statusicon flex icon context
+
+    Example context (json):
+    {
+        "hasrules":true,
+        "operator":"AND",
+        "rules":[
+            {"id":"1","first":true,"editurl":"#","ruledescription":"User's username contains \"test\"","ruletype":"user","rulename":"username","broken":false},
+            {"id":"7","first":false,"editurl":"#","ruledescription":"User's last name contains \"test\"","ruletype":"user","rulename":"lastname","broken":false},
+            {"id":"9","first":false,"editurl":"#","ruledescription":"User's first name contains \"test\"","ruletype":"user","rulename":"firstname","broken":false},
+            {"id":"10","first":false,"editurl":"#","ruledescription":"User's email address contains \"localhost&quot;, &quot;testa\"","ruletype":"user","rulename":"email","broken":false}
+        ]
+    }
+}}
+<div class="appraisal-stage {{cssclass}}">
+    <div class="appraisal-stagetitle">
+        <h3>{{name}}</h3>
+        {{#completeby}}<div>{{{completeby_string}}}</div>{{/completeby}}
+    </div>
+    <div class="appraisal-stageinfo">
+        <h4>{{#str}}requirements, totara_appraisal{{/str}}</h4>
+        {{{description}}}
+        <div>
+            {{#lines}}<span class="appraisal-usermessage">{{{.}}}</span>{{/lines}}
+        </div>
+    </div>
+    {{{actions}}}
+    <div class="appraisal-stagestate">
+        {{#statusicon}}{{#context}}{{> &&template }}{{/context}}{{/statusicon}}
+        <span class="appraisal-statetext">{{textstatus}}</span>
+    </div>
+</div>

@@ -1,0 +1,123 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tool_sitepolicy/element_sitepolicy
+
+    Creates the site policy element template.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+     * form_item_template string this template, used for dynamic partials
+     * name string name of this item
+     * id string id of this item
+     * title string Policy title
+     * policytext string Policy title html
+     * whatsnew string What's new html
+     * statements array list of consent option radios
+
+    Other context variables for following partials:
+     * totara_form/element_radios
+
+    Example context (json):
+    {
+      "form_item_template": "tool_sitepolicy/element_sitepolicy",
+      "name": "policypreview",
+      "id": "tfiid_policypreview_tool_sitepolicy_form_versionform",
+      "title": "Another test policy",
+      "policytext": "<p>Some policy statement with&nbsp;</p><p><b>bold <i>italic</i>&nbsp;</b></p><p><span>and other text</span></p>",
+      "whatsnew": "<p>dadsa</p>",
+      "statements": [
+        {
+          "form_item_template": "totara_form/element_radios",
+          "name__option0": true,
+          "name": "option0",
+          "id": "tfiid_option0_tool_sitepolicy_form_versionform",
+          "label": "A statement (Consent is required to access the site)",
+          "frozen": false,
+          "options": [
+            {
+              "value": "1",
+              "oid": "tfiid_option0_tool_sitepolicy_form_versionform___rd_0",
+              "text": "Agree",
+              "checked": false
+            },
+            {
+              "value": "0",
+              "oid": "tfiid_option0_tool_sitepolicy_form_versionform___rd_1",
+              "text": "Disagree",
+              "checked": false
+            }
+          ],
+          "amdmodule": "totara_form/form_element_radios",
+          "required": false,
+          "horizontal": false,
+          "errors_has_items": false,
+          "errors": [],
+          "helphtml": false
+        },
+        {
+          "form_item_template": "totara_form/element_radios",
+          "name__option1": true,
+          "name": "option1",
+          "id": "tfiid_option1_tool_sitepolicy_form_versionform",
+          "label": "Second statement",
+          "frozen": false,
+          "options": [
+            {
+              "value": "1",
+              "oid": "tfiid_option1_tool_sitepolicy_form_versionform___rd_0",
+              "text": "Yes",
+              "checked": false
+            },
+            {
+              "value": "0",
+              "oid": "tfiid_option1_tool_sitepolicy_form_versionform___rd_1",
+              "text": "No",
+              "checked": false
+            }
+          ],
+          "amdmodule": "totara_form/form_element_radios",
+          "required": false,
+          "horizontal": false,
+          "errors_has_items": false,
+          "errors": [],
+          "helphtml": false
+        }
+      ]
+    }
+}}
+
+<h2>{{title}}</h2>
+{{#whatsnew}}
+    <h4><strong>{{#str}}userconsentwhatschanged,tool_sitepolicy{{/str}}</strong></h4>
+    {{{.}}}
+{{/whatsnew}}
+<div class="policybox">{{{policytext}}}</div>
+
+<h2>{{#str}}userconsentprovideconsent,tool_sitepolicy{{/str}}</h2>
+
+{{#statements}}
+    {{> totara_form/element_radios}}
+{{/statements}}
+

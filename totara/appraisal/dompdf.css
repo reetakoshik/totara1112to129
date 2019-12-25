@@ -1,0 +1,116 @@
+/* Simplified CSS stylesheet used for dompdf rendering, it is inlined directly into the html page markup */
+/* TODO TL-14160 remove CSS not used by dompdf and improve the layout nad rendering */
+
+* {
+    font-family: "DejaVu Sans", sans-serif;
+    text-decoration: none;
+}
+
+.addoptionlink,
+.collapsible-actions,
+.visibleto,
+.visibleto-review,
+.skiplinks,
+.userpicture {
+    display: none;
+}
+
+.mform .fitem {
+    clear: both;
+}
+.mform fieldset legend.ftoggler {
+    font-size: 18px;
+    color: #087bb1;
+}
+
+.mform fieldset .fcontainer {
+    padding: 10px 0;
+}
+
+.mform fieldset .fcontainer h3 {
+    font-size: 16px;
+}
+
+.mform .fitem .fitemtitle {
+    float: left;
+    width: 180px;
+}
+
+.mform .fitem .felement {
+    padding: 0 185px;
+}
+
+div.appraisal-content {
+    padding-left: 1em;
+}
+
+.appraisal-content {
+    border: 1px solid #eee;
+    background-color: #fff;
+}
+
+.appraisal-page-list,
+.appraisal-quest-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    margin-bottom: .5em;
+    background-color: white;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
+
+.appraisal-page-list {
+    border-left: 1px solid #eee;
+}
+
+ul.appraisal-quest-list {
+    border: none;
+}
+
+.appraisal-stages .lastcol {
+    text-align: right;
+}
+
+table.appraisal-stages tr,
+ul.appraisal-page-list li,
+ul.appraisal-quest-list li {
+    background-color: #fff;
+}
+
+table.appraisal-stages tr:hover,
+ul.appraisal-page-list li:hover,
+ul.appraisal-quest-list li:hover {
+    background-color: #f5f5f5;
+}
+
+table.appraisal-stages tr.selected,
+ul.appraisal-page-list li.selected,
+ul.appraisal-quest-list li.selected {
+    background-color: #e6e6e6;
+}
+
+.appraisal-stage {
+    width: auto;
+    margin-top: 50px;
+    border: 1px solid #444;
+    padding: 10px;
+    clear: both;
+    min-height: 100px;
+    background: #f5f5f5;
+    page-break-inside: avoid;
+}
+
+.appraisal-statetext {
+    font-size: 20px;
+    display: block;
+    font-weight: bold;
+}
+
+.plan_box .cell {
+    background-color: #fff;
+}
+
+.plan_box .cell img {
+    margin: 10px 0;
+}

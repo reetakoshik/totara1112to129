@@ -1,0 +1,93 @@
+//
+// This file is part of Totara LMS
+//
+// Copyright (C) 2016 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <ht    tp://www.gnu.org/licenses/>.
+//
+// @copyright 2016 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Joby Harding <joby.harding@totaralearning.com>
+// @package   theme_roots
+//
+// This file is part of the theme_roots Bootswatch and contains architectural
+// overrides to Bootstrap 3 for the Totara Roots theme. Variable overrides
+// should go in the accompanying variables.less file.
+//
+// For more on Bootswatches see https://bootswatch.com
+//
+
+//
+// Badges.
+//
+// Extends the Bootstrap 3 badges classes so that state
+// can be applied by class (rather than only inherited).
+.badge-primary {
+    background-color: @brand-primary;
+}
+
+.badge-success {
+    background-color: @brand-success;
+}
+
+.badge-info {
+    background-color: @brand-info;
+}
+
+.badge-warning {
+    background-color: @brand-warning;
+}
+
+.badge-danger {
+    background-color: @brand-danger;
+}
+
+// Custom button types for Basis.
+.btn-secondary {
+    .button-variant(@btn-secondary-color; @btn-secondary-bg; @btn-secondary-border);
+}
+
+// Standard horizontal DL.
+.dl-horizontal dt,
+.dl-horizontal dd {
+    margin-bottom: @padding-small-vertical;
+    white-space: normal;
+}
+
+//
+// Labels.
+//
+// Links inside labels should inherit the label text colour.
+// This is used for action (font) icons.
+.label a {
+    color: inherit;
+
+    &:hover,
+    &:focus {
+        color: inherit;
+    }
+}
+
+// This useful utility class naming borrowed from
+// Bootstrap 4 to ease upgrade path.
+.text-truncate {
+    .text-overflow();
+}
+
+// Nav tabs.
+// There are some odd occasions where a set of nav tabs
+// are displayed directly after another.
+.nav-tabs + .nav-tabs {
+    margin-top: @line-height-computed;
+}

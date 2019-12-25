@@ -1,0 +1,7 @@
+This files describes API changes in the lesson code.
+
+=== 10 ===
+
+* Removed the unused file reformat.php
+* removedoublecr() and importmodifiedaikenstyle() have now been removed.
+

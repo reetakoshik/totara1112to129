@@ -1,0 +1,41 @@
+This files describes API changes for code that uses the appraisal API,
+information provided here is intended especially for developers.
+
+=== 11.11 ===
+
+* The event appraisal_stage_completion has been deprecated. This event wasn't storing the correct data in the correct
+  fields. The event appraisal_stage_completed was added, which contains more, and more accurate, data.
+* Added appraisal_role_page_saved and appraisal_role_stage_completed events.
+
+=== 11.10 ===
+
+* These methods have an added argument "$notifymanager" indicating whether to send a notification to a manager when an appraisee's job assignment changes.
+  * totara_assign_appraisal::store_job_assignments()
+  * appraisal_user_assignment::with_job_assignment()
+  * appraisal_user_assignment::with_auto_job_assignment()
+
+=== 11.4 ===
+
+* The dynamically created appraisal question data table columns have been changed from char to text. Any use of
+  these columns in the where clause of sql queries will need to be changed to use $DB->sql_compare_text.
+
+=== 11.3 ===
+
+* Icon helpers are no longer used in the following templates, icon data is passed via context data:
+** totara/appraisal/templates/stage_brief.mustache
+
+=== 10.0 ===
+
+* get_aggregate_question_answers() function added argument $usedefaults
+* Refactored add_field_form_elements() function to perform aggregate calculations in a separate calculate_aggregate() function
+* Reduced specificy of CSS selectors to improve RTL support
+* Renamed CSS class "previewer" to "appraisal-previewer" so that it did not clash with the same CSS class in feedback360
+* totara_appraisal_renderer::display_appraisal_header() has changed
+* totara_appraisal_renderer::display_job_assignment() has changed
+* store_role_assignments() function returns array of removed appraisal_role_assignments
+* update_role_assignments() function returns array of removed appraisal_role_assignments
+* update_roles() function also return a list of removed role assignments
+* totara_appraisal_renderer::display_stage() has changed to render from a mustache template (totara_appraisal/stage_brief)
+* totara_appraisal_renderer::display_stage_actions_for_stages() has changed
+* totara_appraisal_renderer::display_stage_actions_for_pages() has changed
+* totara_appraisal_renderer::display_pages() has changed

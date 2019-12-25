@@ -1,0 +1,328 @@
+//
+// This file is part of Totara LMS
+//
+// Copyright (C) 2016 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @copyright 2016 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Brian Barnes <brian.barnes@totaralearning.com>
+// @package   totara_reportbuilder
+
+.rb-search .mform {
+    .mform .fitem .felement label {
+        margin-left: @padding-small-horizontal;
+        margin-right: @padding-small-horizontal;
+    }
+
+    .mform .fgroup .felement .fdate_time_selector select {
+        width: auto;
+    }
+
+    // IDs are not desirable in style selectors.
+    // These are based on legacy styles.
+    #fitem_id_toolbarsearchtext label {
+        white-space: nowrap;
+    }
+
+    #fitem_id_toolbarsearchtext,
+    #fitem_id_toolbarsearchbutton,
+    #fitem_id_cleartoolbarsearchtext,
+    #fitem_id_toolbarsearchtext .felement,
+    #fitem_id_toolbarsearchbutton .felement,
+    #fitem_id_cleartoolbarsearchtext .felement {
+        margin: 0;
+        padding: 0;
+    }
+}
+
+.rb-sidebar {
+    margin: 0;
+    vertical-align: top;
+    padding-right: @padding-small-horizontal;
+    width: 25%;
+    float: left;
+
+    .fcontainer .fitem .fitemtitle,
+    .fcontainer .fitem .fgroup legend {
+        width: 100%;
+        margin-bottom: @padding-small-vertical;
+    }
+
+    .fcontainer .fitem .felement select,
+    .fcontainer .fitem .felement input[type="text"] {
+        padding: 0;
+    }
+
+    input[type='text'] {
+        margin-right: @padding-small-horizontal;
+    }
+}
+
+@media (max-width: @screen-md) {
+    .rb-sidebar {
+        width: 33.33333333%;
+    }
+}
+
+@media (max-width: @screen-sm) {
+    .rb-sidebar {
+        width: 100%;
+    }
+}
+
+.rb-has-sidebar {
+    float: left;
+    width: 75%;
+}
+
+@media (max-width: @screen-md) {
+    .rb-has-sidebar {
+        width: 66.66666667%;
+    }
+}
+
+@media (max-width: @screen-sm) {
+    .rb-has-sidebar {
+        width: 100%;
+    }
+}
+
+.totara-table-container {
+    border: none;
+}
+
+#rb_export_form {
+    clear: both;
+}
+
+// Centre the export form.
+#fgroup_id_exportgroup {
+    text-align: center;
+
+    fieldset {
+        width: auto;
+        display: inline-block;
+
+        .felement {
+            width: auto;
+            float: left;
+            margin: 0;
+        }
+
+        legend {
+            float: left;
+            width: auto;
+            line-height: @line-height-computed * 1.5;
+            margin-right: @padding-small-horizontal;
+
+            span {
+                width: auto;
+            }
+        }
+    }
+}
+
+.mform .fgroup .felement .rb-multicheck-control {
+    display: block;
+    margin-bottom: @padding-small-vertical;
+}
+
+.rb-display-table-container {
+    clear: right;
+}
+
+.rb-sidebar .felement > span {
+    clear: both;
+    display: block;
+}
+
+.totara-table-container .totara-toolbar-top {
+    width: 100%;
+}
+
+.totara-table-container .toolbar-left-table {
+    float: left;
+    clear: left;
+}
+
+.totara-table-container .toolbar-right-table {
+    float: right;
+    clear: right;
+}
+
+#fitem_id_toolbarsearchtext,
+#fitem_id_toolbarsearchbutton,
+#fitem_id_cleartoolbarsearchtext {
+    display: inline-block;
+    margin-right: @padding-small-horizontal;
+}
+
+form[id^="toolbarsearch"].mform div,
+form[id^="toolbarsearch"].mform fieldset {
+    margin: 0;
+    padding: 0;
+    width: auto;
+    vertical-align: top;
+}
+
+form[id^="toolbarsearch"].mform .fsubmit {
+    width: auto;
+}
+
+.totara-table-container .toolbar-cell {
+    padding: @padding-small-vertical;
+    display: inline-block;
+}
+
+.totara-table-container .no-results {
+    clear: both;
+    display: block;
+    padding: @padding-small-vertical 0;
+    margin: 0;
+    text-align: center;
+}
+
+.jsenabled #fgroup_id_submitgroupsidebar {
+    display: none;
+}
+
+.reportbuilder-table .user_namewithlinks a {
+    padding-left: 5px;
+    float: left;
+}
+
+#team_members .user_namewithlinks .name {
+    font-size: @font-size-large;
+    font-weight: bold;
+    padding-top: 8px;
+}
+
+.reportbuilder-table .user_namewithlinks ul {
+    clear: both;
+    margin: 0;
+    padding-top: 2px;
+}
+
+.reportbuilder-table .user_namewithlinks ul li {
+    float: left;
+    list-style-type: none;
+}
+
+.reportbuilder-table .user_namewithlinks li a {
+    border-left: 1px solid @table-border-color;
+    font-size: @font-size-small;
+    line-height: 10px;
+    margin: 2px;
+}
+
+.reportbuilder-table .user_namewithlinks li:first-child a {
+    border-left: none;
+    margin-left: 0;
+}
+
+.reportbuilder-table .user_actions {
+    white-space: nowrap;
+}
+
+/* IE does not work properly with 100% height, so let'd use http://alistapart.com/article/creating-intrinsic-ratios-for-video */
+.ie .rb-report-svggraph {
+    position: relative;
+    padding-bottom: 40%; /* This is the ration of original svg size 1000x400 */
+    height: 0;
+    clear: both;
+}
+.ie .rb-report-svggraph:empty {
+    padding-bottom: 0;
+    clear:none;
+}
+
+.ie .rb-report-svggraph svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.rb-display-expand {
+    padding: @padding-small-vertical;
+    background-repeat: no-repeat;
+    background-position: 0 @padding-small-vertical;
+    cursor: pointer;
+}
+
+.multicheck-items label > div {
+    display: inline;
+}
+
+.rb-search-menu {
+    /* stylelint-disable */
+    vertical-align: middle !important;
+    /* stylelint-enable */
+}
+
+.rb-genbutton {
+    float: right;
+}
+
+.rb-genicon {
+    cursor: pointer;
+}
+
+.rb-hidden {
+    display: none;
+}
+
+.rb-inline {
+    display: inline-block;
+}
+
+.path-admin-totara-reportbuilder-restrictions .header.lastcol {
+    min-width: 120px;
+}
+
+#fitem_id_all_sidebar_filters {
+    /* stylelint-disable */
+    display: none !important; // Use !important as this should be hidden in all circumstances
+    /* stylelint-enable */
+}
+
+// Global report restrictions
+.globalrestrictionscontainer {
+    text-align: center;
+}
+
+#chooserestriction {
+    .error-required {
+        display: none;
+    }
+
+    .selectallnone {
+        margin: @padding-small-horizontal 10%;
+    }
+
+    .chooserestriction.mform {
+        margin-top: @padding-small-vertical;
+
+        .fitemtitle {
+            width: 10%;
+        }
+
+        .chooserestriction.mform .felement {
+            width: 89%;
+        }
+    }
+}
