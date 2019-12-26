@@ -20,13 +20,13 @@ class block_image_link_edit_form extends block_edit_form
         );
         $mform->addHelpButton('config_image', 'image', 'block_image_link');
 
-       $mform->addElement(
+      /* $mform->addElement(
             'text', 
             'config_image_caption', 
             get_string('image-caption', 'block_image_link')
         );
         $mform->setType('config_image_caption', PARAM_RAW);
-        $mform->addHelpButton('config_image_caption', 'image-caption', 'block_image_link');
+        $mform->addHelpButton('config_image_caption', 'image-caption', 'block_image_link');*/
 
         $mform->addElement(
             'text', 

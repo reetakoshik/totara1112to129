@@ -4,14 +4,8 @@ class block_image_link extends block_base
 {
     function init() {
 
-    $caption = isset($this->block->config->image_caption) ? $this->block->config->image_caption : '';
-  
-        if($caption){
-            $this->title = $caption;
-        } 
-        else{
-            $this->title = get_string('pluginname', 'block_image_link');
-        }  
+    $this->title = get_string('pluginname', 'block_image_link');
+        
 
     }
 
@@ -28,7 +22,10 @@ class block_image_link extends block_base
           return $this->content;
         }
         $caption = isset($this->config->image_caption) ? $this->config->image_caption : '';
-        
+        if($caption){
+
+          $this->title = str_replace('Image Link block',$caption,'Image Link block');
+        }
         $link = isset($this->config->image_link) ? $this->config->image_link : '';
         if (strpos($link, 'http://') === false && strpos($link, 'https://') === false) {
             $link = "http://$link";
@@ -55,7 +52,7 @@ class block_image_link extends block_base
         $this->content =  new stdClass;
 
         if ($imageUrl) {
-           /* $this->content->text = "<div class=\"header $headerClass\" $headerStyle>".
+            /*$this->content->text = "<div class=\"header $headerClass\" $headerStyle>".
                     "<h2>
                         <a href=\"$link\" $target>
                             $caption
