@@ -229,6 +229,14 @@ class totara_sync_source_user_database extends totara_sync_source_user {
                 $dbrow['deleted'] = empty($dbrow['deleted']) ? 0 : $dbrow['deleted'];
             }
 
+            if (empty($dbrow['firstname'])) {
+                $dbrow['firstname'] = '';
+            }
+
+            if (empty($dbrow['lastname'])) {
+                $dbrow['lastname'] = '';
+            }
+
             if (empty($dbrow['username'])) {
                 $dbrow['username'] = '';
             }
@@ -251,39 +259,43 @@ class totara_sync_source_user_database extends totara_sync_source_user {
             if (!empty($this->customfields)) {
                 $cfield_data = array();
                 foreach (array_keys($this->customfields) as $cf) {
-                    if (!empty($this->config->{'import_'.$cf})) {
-                        if (!empty($this->config->{'fieldmapping_'.$cf})) {
-                            $dbvalue = trim($extdbrow[$this->config->{'fieldmapping_'.$cf}]);
-                            $value = is_null($dbvalue) ? null : trim($dbvalue);
-                        } else {
-                            $value = is_null($extdbrow[$cf]) ? null : trim($extdbrow[$cf]);
-                        }
-                        if (!empty($value)) {
-                            //get shortname and check if we need to do field type processing
-                            $shortname = str_replace("customfield_", "", $cf);
-                            $datatype = $DB->get_field('user_info_field', 'datatype', array('shortname' => $shortname));
-                            switch ($datatype) {
-                                case 'datetime':
-                                    //try to parse the contents - if parse fails assume a unix timestamp and leave unchanged
-                                    $parsed_date = totara_date_parse_from_format($csvdateformat, $value, true);
-                                    if ($parsed_date) {
-                                        $value = $parsed_date;
-                                    }
-                                    break;
-                                case 'date':
-                                    //try to parse the contents - if parse fails assume a unix timestamp and leave unchanged
-                                    $parsed_date = totara_date_parse_from_format($csvdateformat, $value, true, 'UTC');
-                                    if ($parsed_date) {
-                                        $value = $parsed_date;
-                                    }
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        $cfield_data[$cf] = $value;
-                        unset($dbrow[$cf]);
+
+                    if (empty($this->config->{'import_'.$cf})) { // Not a field to import.
+                        continue;
                     }
+
+                    $value = empty($this->config->{'fieldmapping_'.$cf}) ? $extdbrow[$cf] : $extdbrow[$this->config->{'fieldmapping_'.$cf}];
+
+                    if (is_null($value)) { // Null means skip, don't import.
+                        continue;
+                    }
+
+                    $value = trim($value);
+
+                    // Get shortname and check if we need to do field type processing.
+                    $shortname = str_replace("customfield_", "", $cf);
+                    $datatype = $DB->get_field('user_info_field', 'datatype', array('shortname' => $shortname));
+                    switch ($datatype) {
+                        case 'datetime':
+                            //try to parse the contents - if parse fails assume a unix timestamp and leave unchanged
+                            $parsed_date = totara_date_parse_from_format($csvdateformat, $value, true);
+                            if ($parsed_date) {
+                                $value = $parsed_date;
+                            }
+                            break;
+                        case 'date':
+                            //try to parse the contents - if parse fails assume a unix timestamp and leave unchanged
+                            $parsed_date = totara_date_parse_from_format($csvdateformat, $value, true, 'UTC');
+                            if ($parsed_date) {
+                                $value = $parsed_date;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+
+                    $cfield_data[$cf] = $value;
+                    unset($dbrow[$cf]);
                 }
                 $dbrow['customfields'] = json_encode($cfield_data);
                 unset($cfield_data);
@@ -363,5 +375,12 @@ class totara_sync_source_user_database extends totara_sync_source_user {
         }
 
         return $notifications;
+    }
+
+    /**
+     * @return bool False as database sources do not use files.
+     */
+    function uses_files() {
+        return false;
     }
 }

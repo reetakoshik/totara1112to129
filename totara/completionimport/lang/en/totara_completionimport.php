@@ -226,13 +226,3 @@ $string['usernamenotfound'] = 'User name not found';
 $string['validfilenames'] = 'Please note, these are the only valid file names, anything else will be ignored :';
 $string['viewingwithembeddedfilters'] = 'Currently viewing records with embedded filters';
 $string['viewreports'] = 'View import errors';
-
-// Deprecated since Totara 10
-
-$string['dataimportdone_certification'] = 'Certification data imported successfully';
-$string['dataimportdone_course'] = 'Course data imported successfully';
-$string['error:import_certifications'] = 'Errors while importing the certifications';
-$string['error:import_course'] = 'Errors while importing the courses';
-$string['missingfield'] = 'Missing column \'{$a->columnname}\' in file \'{$a->filename}\'';
-$string['unknownfield'] = 'Unknown column \'{$a->columnname}\' in file \'{$a->filename}\'';
-

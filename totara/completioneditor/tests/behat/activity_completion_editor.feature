@@ -18,9 +18,7 @@ Feature: Activity completion records can be edited
 
   Scenario: Activity completion records based on timemodified and grades (Quiz) can be edited
     # Completion editor list of users.
-    When I click on "Courses" in the totara menu
-    And I click on "Course One" "link"
-    And I turn editing mode on
+    When I am on "Course One" course homepage with editing mode on
     And I add a "Quiz" to section "1" and I fill the form with:
       | Name        | Test quiz 1           |
       | Description | Test quiz description |
@@ -83,9 +81,7 @@ Feature: Activity completion records can be edited
 
   Scenario: Activity completion records based on timecompleted and grades (Seminar) can be edited
     # Completion editor list of users.
-    When I click on "Courses" in the totara menu
-    And I click on "Course One" "link"
-    And I turn editing mode on
+    When I am on "Course One" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test seminar 1           |
       | Description | Test seminar description |
@@ -146,9 +142,7 @@ Feature: Activity completion records can be edited
 
   Scenario: Activity completion records based on activity without grades (Feedback) can be edited
     # Completion editor list of users.
-    When I click on "Courses" in the totara menu
-    And I click on "Course One" "link"
-    And I turn editing mode on
+    When I am on "Course One" course homepage with editing mode on
     And I add a "Feedback" to section "1" and I fill the form with:
       | Name        | Test feedback 1           |
       | Description | Test feedback description |

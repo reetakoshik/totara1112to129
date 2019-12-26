@@ -30,15 +30,13 @@ Feature: Totara cohort generators
       | c2     | AUD2   | user2   |
 
     When I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "Enrolled users" node in "Course administration > Users"
     And I should see "First User"
     And I should see "Audience sync (Audience 1 - Learner) enrolled"
     And I should not see "Second User"
 
-    When I click on "Find Learning" in the totara menu
-    And I follow "Course 2"
+    When I am on "Course 2" course homepage
     And I navigate to "Enrolled users" node in "Course administration > Users"
     And I should see "Second User"
     And I should see "Audience sync (Audience 2 - Trainer) enrolled"

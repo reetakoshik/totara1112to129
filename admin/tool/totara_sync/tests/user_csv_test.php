@@ -895,4 +895,51 @@ class tool_totara_sync_user_csv_testcase extends advanced_testcase {
             $this->assertContains($idnumber, $expected);
         }
     }
+
+    public function test_csv_with_emailstop() {
+        global $DB;
+
+        $this->resetAfterTest();
+
+        $this->assertCount(2, $DB->get_records('user'));
+
+        $csv_settings = array(
+            'import_emailstop' => '1',
+            'import_deleted' => '1'
+        );
+
+        $configcsv = array_merge($this->configcsv, $csv_settings);
+        foreach ($configcsv as $k => $v) {
+            set_config($k, $v, 'totara_sync_source_user_csv');
+        }
+
+        $config = $this->config;
+        foreach ($config as $k => $v) {
+            set_config($k, $v, 'totara_sync_element_user');
+        }
+
+        $elements = totara_sync_get_elements(true);
+        /* @var totara_sync_element_user $element */
+        $element = $elements['user'];
+
+        $data = file_get_contents(__DIR__ . '/fixtures/user_csv_emailstop_1.csv');
+        $filepath = $this->filedir . '/csv/ready/user.csv';
+        file_put_contents($filepath, $data);
+
+        $result = $element->sync();
+        $this->assertTrue($result);
+
+        $user = $DB->get_record('user', array('idnumber' => 'User3'));
+        $this->assertEquals('1', $user->emailstop);
+
+        $data = file_get_contents(__DIR__ . '/fixtures/user_csv_emailstop_2.csv');
+        $filepath = $this->filedir . '/csv/ready/user.csv';
+        file_put_contents($filepath, $data);
+
+        $result = $element->sync();
+        $this->assertTrue($result);
+
+        $user = $DB->get_record('user', array('idnumber' => 'User3'));
+        $this->assertEquals('0', $user->emailstop);
+    }
 }

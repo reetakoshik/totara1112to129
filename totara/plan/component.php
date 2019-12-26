@@ -50,7 +50,7 @@ $PAGE->set_context($systemcontext);
 $PAGE->set_pagelayout('report');
 $plan = new development_plan($id);
 $ownplan = ($USER->id == $plan->userid);
-$menuitem = ($ownplan) ? 'learningplans' : 'myteam';
+$menuitem = ($ownplan) ? '\totara_plan\totara\menu\learningplans' : '\totara_core\totara\menu\myteam';
 $PAGE->set_totara_menu_selected($menuitem);
 
 // Check if the user can view the component content.
@@ -98,7 +98,7 @@ $PAGE->set_url(new moodle_url('/totara/plan/component.php', array('id' => $id, '
 $plan->print_header($componentname);
 $table = $component->display_list();
 
-if ($plan->can_update()) {
+if ($plan->can_update() || $plan->can_request_approval()) {
     echo $component->display_picker();
 
     $form = html_writer::start_tag('form', array('id' => "dp-component-update",  'action' => $component->get_url(),

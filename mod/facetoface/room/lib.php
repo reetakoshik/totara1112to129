@@ -28,9 +28,12 @@ defined('MOODLE_INTERNAL') || die();
  * @param int $facetofaceid
  * @param string $fields fields with prefix fr, name and id are required
  * @return stdClass[] containing facetoface_room table db objects
+ * @deprecated since Totara 12
  */
 function facetoface_get_used_rooms($facetofaceid, $fields = 'fr.id, fr.name') {
     global $DB;
+
+    debugging('This function has been deprecated, please use "\mod_facetoface\room_list::get_seminar_room()" instead', DEBUG_DEVELOPER);
 
     $params = array('facetofaceid' => $facetofaceid);
 
@@ -55,11 +58,13 @@ function facetoface_get_used_rooms($facetofaceid, $fields = 'fr.id, fr.name') {
  *
  * @param int $roomid
  * @return stdClass|false room with loaded custom fields or false if not found
+ * @deprecated since Totara 12
  */
 function facetoface_get_room($roomid) {
     global $DB, $CFG;
     require_once($CFG->dirroot . '/totara/customfield/fieldlib.php');
 
+    debugging('This function has been deprecated, please use "new \mod_facetoface\room($id)" instead', DEBUG_DEVELOPER);
     if (!$roomid) {
         return false;
     }
@@ -78,10 +83,13 @@ function facetoface_get_room($roomid) {
  *
  * @param int $sessionid
  * @return stdClass[] the room record or empty array if no room found
+ * @deprecated since Totara 12
  */
 function facetoface_get_session_rooms($sessionid) {
     global $DB, $CFG;
     require_once($CFG->dirroot . '/totara/customfield/fieldlib.php');
+
+    debugging('Function facetoface_get_session_rooms() has been deprecated, please use "\mod_facetoface\room_list::get_event_rooms()" instead', DEBUG_DEVELOPER);
 
     $sql = "SELECT DISTINCT fr.*
               FROM {facetoface_room} fr
@@ -107,11 +115,14 @@ function facetoface_get_session_rooms($sessionid) {
  * @param callable $successhandler function($id) where $id is roomid
  * @param callable $cancelhandler
  * @return mod_facetoface_room_form
+ * @deprecated since Totara 12
  */
 function facetoface_process_room_form($room, $facetoface, $session, callable $successhandler, callable $cancelhandler = null) {
     global $DB, $TEXTAREA_OPTIONS, $USER, $CFG;
     require_once($CFG->dirroot . '/totara/customfield/fieldlib.php');
-    require_once($CFG->dirroot . '/mod/facetoface/room/room_form.php');
+    require_once($CFG->dirroot . '/mod/facetoface/form/room/room_form.php');
+
+    debugging('This function has been deprecated, this is now handled by the form', DEBUG_DEVELOPER);
 
     $editoroptions = $TEXTAREA_OPTIONS;
     if ($facetoface) {
@@ -188,7 +199,6 @@ function facetoface_process_room_form($room, $facetoface, $session, callable $su
          * $_customlocationfieldname added in @see customfield_location::edit_field_add()
          */
         if (property_exists($form->_form, '_customlocationfieldname')) {
-            // TODO: TL-9425 this hack is absolutely unacceptable!
             customfield_define_location::prepare_form_location_data_for_db($data, $form->_form->_customlocationfieldname);
         }
 
@@ -220,11 +230,13 @@ function facetoface_process_room_form($room, $facetoface, $session, callable $su
  * If any session is still using this room, the room is unassigned.
  *
  * @param int $id
+ * @deprecated since Totara 12
  */
 function facetoface_delete_room($id) {
     global $DB, $CFG;
     require_once("$CFG->dirroot/totara/customfield/fieldlib.php");
 
+    debugging('This function has been deprecated, please use "room::delete()" instead', DEBUG_DEVELOPER);
     $room = $DB->get_record('facetoface_room', array('id' => $id));
     if (!$room) {
         // Nothing to delete.
@@ -264,9 +276,12 @@ function facetoface_delete_room($id) {
  * @param int $sessionid current session id, 0 if session is being created, all current session rooms are always included
  * @param int $facetofaceid facetofaceid custom rooms can be used in all dates of one seminar activity
  * @return stdClass[] rooms
+ * @deprecated since Totara 12
  */
 function facetoface_get_available_rooms($timestart, $timefinish, $fields='fr.*', $sessionid, $facetofaceid) {
     global $DB, $USER;
+
+     debugging('facetoface_get_available_rooms has been deprecated. Use \mod_facetoface\room_list::get_available() instead.', DEBUG_DEVELOPER);
 
     $params = array();
     $params['timestart'] = (int)$timestart;
@@ -361,9 +376,12 @@ function facetoface_get_available_rooms($timestart, $timefinish, $fields='fr.*',
  * @param int $sessionid current session id, 0 if adding new session
  * @param int $facetofaceid current facetoface id
  * @return boolean
+ * @deprecated since Totara 12
  */
 function facetoface_is_room_available($timestart, $timefinish, stdClass $room, $sessionid, $facetofaceid) {
     global $DB, $USER;
+
+    debugging('facetoface_is_room_available has been deprecated. Use \mod_facetoface\room::is_available() instead.', DEBUG_DEVELOPER);
 
     if ($room->hidden) {
         // Hidden rooms can be assigned only if they are already used in the session.
@@ -425,9 +443,12 @@ function facetoface_is_room_available($timestart, $timefinish, stdClass $room, $
  *
  * @param int $roomid
  * @return bool
+ * @deprecated since Totara 12
  */
 function facetoface_room_has_conflicts($roomid) {
     global $DB;
+
+    debugging('facetoface_room_has_conflicts has been deprecated. Use \mod_facetoface\room::has_conflicts() instead.', DEBUG_DEVELOPER);
 
     $sql = "SELECT 'x'
               FROM {facetoface_sessions_dates} fsd
@@ -445,11 +466,12 @@ function facetoface_room_has_conflicts($roomid) {
  * @param stdClass $room
  *
  * @return string
+ * @deprecated since Totara 12
  */
 function facetoface_room_get_address($room) {
     global $CFG;
 
-    // TODO: TL-9425 this hack is not pretty
+    debugging('facetoface_room_get_address has been deprecated. Please use room::get_customfield_array() instead.', DEBUG_DEVELOPER);
 
     require_once($CFG->dirroot . '/totara/customfield/field/location/define.class.php');
 
@@ -468,8 +490,12 @@ function facetoface_room_get_address($room) {
  *
  * @param stdClass $room room details with customfields info
  * @return string
+ * @deprecated since Totara 12
  */
 function facetoface_room_to_string($room) {
+
+    debugging('facetoface_room_to_string has been deprecated. Please use room::__toString() instead.', DEBUG_DEVELOPER);
+
     $stringitems = [];
     $stringitems[] = isset($room->name) ? $room->name : null;
     $stringitems[] = isset($room->{"customfield_building"}) ? $room->{"customfield_building"} : null;
@@ -484,9 +510,13 @@ function facetoface_room_to_string($room) {
  * @param object $room        DB record of a facetoface room.
  *
  * @return string containing room details with relevant html tags.
+ * @deprecated since Totara 12
  */
 function facetoface_room_html($room, $backurl=null) {
     global $OUTPUT;
+
+    debugging('facetoface_room_html has been deprecated. Use the renderer function get_room_details_html() instead.', DEBUG_DEVELOPER);
+
     $roomhtml = [];
 
     if (!empty($room)) {
@@ -496,7 +526,7 @@ function facetoface_room_html($room, $backurl=null) {
             html_writer::span(format_string($room->customfield_building), 'room room_building') :
             '';
 
-        $url = new moodle_url('/mod/facetoface/room.php', array(
+        $url = new moodle_url('/mod/facetoface/reports/rooms.php', array(
             'roomid' => $room->id,
             'b' => $backurl
         ));

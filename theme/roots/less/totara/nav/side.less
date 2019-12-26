@@ -1,0 +1,209 @@
+//
+// This file is part of Totara Learn
+//
+// Copyright (C) 2018 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @copyright 2018 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Kevin Hottinger <kevin.hottinger@totaralearning.com>
+// @package   theme_roots
+
+.totaraNav_prim--side {
+    color: @totaranav_prim-color_font;
+    display: flex;
+    flex-shrink: 0;
+    height: 100%;
+    margin: auto 0 auto auto;
+    padding: 0 0 0 @totaranav-spacing_small;
+
+    &__separator {
+        display: none;
+    }
+
+    .langmenu {
+        padding: 0;
+
+        .select {
+            margin: 0 @totaranav-spacing_small 0 0;
+        }
+    }
+
+    .popover-region {
+        margin: auto @totaranav-spacing_x_small;
+        position: initial;
+
+        .ie11 & {
+            //TL-20522: IE11 doesn't support the initial value, so we have to explicitly set it to the (usual) default
+            position: static;
+        }
+
+        .flex-icon {
+            vertical-align: inherit;
+        }
+
+        .nav-link {
+            line-height: 1.5;
+            padding: @totaranav-spacing_small;
+            position: relative;
+            width: auto;
+
+            &:hover {
+                background: @totaranav_prim-color_background_active;
+            }
+        }
+
+        .popover-region-container {
+            color: @totara_style-color_neutral_7;
+            left: 0;
+            top: auto;
+            width: 100%;
+        }
+
+        .popover-region-toggle::before,
+        .popover-region-toggle::after {
+            display: none;
+        }
+    }
+
+    .usermenu {
+        margin: auto 0;
+        padding: 0;
+
+        .caret {
+            margin: auto 0;
+        }
+
+        .moodle-actionmenu ul {
+            line-height: 1.5;
+            vertical-align: top;
+
+            .toggle-display .userbutton .avatars {
+                margin: auto @totaranav-spacing_x_small;
+                padding: 0 @totaranav-spacing_x_small;
+                position: relative;
+            }
+        }
+
+        .moodle-actionmenu li {
+            vertical-align: top;
+        }
+
+        .toggle-display {
+            color: @totaranav_prim-color_font;
+            padding: @totaranav-spacing_x_small;
+            text-decoration: none;
+
+            &:hover {
+                background: @totaranav_prim-color_background_active;
+            }
+        }
+
+        .userbutton {
+            display: flex;
+        }
+
+        .userloggedinas .usermenu {
+            padding: 0;
+        }
+
+        .userpicture {
+            height: 2rem;
+            width: auto;
+        }
+
+        .usertext {
+            display: none;
+            vertical-align: unset;
+        }
+    }
+}
+
+.userloggedinas {
+    .totaraNav_prim--side {
+        .avatar.current {
+            left: 1.8rem;
+            margin: 0;
+            position: absolute;
+            top: 1rem;
+
+            .userpicture {
+                height: 1.5rem;
+                width: auto;
+            }
+        }
+
+        .usermenu {
+            padding: 0;
+        }
+    }
+}
+
+.jsenabled .totaraNav_prim--side .usermenu {
+    .toggle-display.textmenu {
+        display: flex;
+    }
+}
+
+@media (min-width: @totaranav-screen_sm_min) {
+
+    .totaraNav_prim--side {
+        .popover-region {
+            .popover-region-container {
+                left: auto;
+                width: 380px;
+            }
+
+            .popover-region-toggle::before {
+                bottom: -3px;
+                display: block;
+            }
+
+            .popover-region-toggle::after {
+                bottom: -4px;
+                display: block;
+            }
+        }
+    }
+}
+
+@media (min-width: @totaranav-screen_md_min) {
+    .totaraNav_prim--side {
+        position: relative;
+
+        &__separator {
+            display: block;
+            flex: 0 0 0;
+            position: relative;
+
+            padding: 0 0 0 @totaranav-spacing_small;
+
+            &::before {
+                border-left: 1px solid @totaranav_prim-color_background_expanded;
+                content: '';
+                height: 50%;
+                left: 0;
+                position: absolute;
+                top: 25%;
+            }
+        }
+
+        .usermenu {
+            .usertext {
+                display: inline-block;
+            }
+        }
+    }
+}

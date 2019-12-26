@@ -87,7 +87,7 @@ function xmldb_totara_dashboard_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2017111400, 'totara', 'dashboard');
     }
 
-    if ($oldversion < 2018022701.00) {
+    if ($oldversion < 2018050800) {
         // All dashboard blocks have been added to the wrong pagetype.
         // Previously they were my-totara-dashboard-x, they are now totara-dashboard-x
         // First up, take care of all basic dashboard blocks per dashboard. This will perform the best.
@@ -102,10 +102,10 @@ function xmldb_totara_dashboard_upgrade($oldversion) {
         }
         $rs->close();
 
-        upgrade_plugin_savepoint(true, 2018022701.00, 'totara', 'dashboard');
+        upgrade_plugin_savepoint(true, 2018050800, 'totara', 'dashboard');
     }
 
-    if ($oldversion < 2018022701.01) {
+    if ($oldversion < 2018050801) {
         // All dashboard blocks have been added to the wrong pagetype.
         // Previously they were my-totara-dashboard-x, they are now totara-dashboard-x
         // Now deal with situations where the user has managed to move the block within the space.
@@ -139,7 +139,7 @@ function xmldb_totara_dashboard_upgrade($oldversion) {
         }
         $rs->close();
 
-        upgrade_plugin_savepoint(true, 2018022701.01, 'totara', 'dashboard');
+        upgrade_plugin_savepoint(true, 2018050801, 'totara', 'dashboard');
     }
 
     return true;

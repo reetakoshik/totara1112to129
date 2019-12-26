@@ -17,48 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Totara navigation edit page.
- *
- * @package    totara
+ * @package    totara_program
  * @subpackage navigation
  * @author     Oleg Demeshev <oleg.demeshev@totaralms.com>
  */
 
 namespace totara_program\totara\menu;
 
-use \totara_core\totara\menu\menu as menu;
-
 /**
  * Class to store, render and manage the Required Learning Node
  *
- * @property-read int $userhaslearning;
- *
- * @package    totara
+ * @package    totara_program
  * @subpackage navigation
  */
-
 class requiredlearning extends \totara_core\totara\menu\item {
+    private $progurl;
 
-    /**
-    * @var bool Whether this user actually has current programs or certifications assigned.
-    */
-    protected $userhaslearning = false;
-
-    /**
-     * Constructor.
-     *
-     * @param object $node
-     */
-    public function __construct($node) {
+    private function get_prog_url() {
         global $CFG, $USER;
-        parent::__construct($node);
-        require_once($CFG->dirroot . '/totara/program/lib.php');
-        $this->url = prog_get_tab_link($USER->id);
-        if ($this->url === false) {
-            $this->url = '/totara/program/required.php';
-        } else {
-            $this->userhaslearning = true;
+
+        if (!isset($this->progurl)) {
+            require_once($CFG->dirroot . '/totara/program/lib.php');
+            $this->progurl = prog_get_tab_link($USER->id);
         }
+
+        return $this->progurl;
     }
 
     protected function get_default_title() {
@@ -66,11 +49,13 @@ class requiredlearning extends \totara_core\totara\menu\item {
     }
 
     protected function get_default_url() {
-        return $this->url;
-    }
-
-    public function get_default_visibility() {
-        return menu::SHOW_WHEN_REQUIRED;
+        $progurl = $this->get_prog_url();
+        if ($progurl === false) {
+            // This is just a hint for admin UI.
+            return '/totara/program/required.php';
+        } else {
+            return $progurl;
+        }
     }
 
     public function get_default_sortorder() {
@@ -78,12 +63,15 @@ class requiredlearning extends \totara_core\totara\menu\item {
     }
 
     protected function check_visibility() {
-        // Only show Required Learning if programs/certifications are enabled.
-        // And if the user actually has programs or certifications assigned and active.
-        if ($this->userhaslearning && (totara_feature_visible('programs') || totara_feature_visible('certifications'))) {
-            return menu::SHOW_ALWAYS;
+        if (!isloggedin() or isguestuser()) {
+            return false;
+        }
+
+        $progurl = $this->get_prog_url();
+        if ($progurl === false) {
+            return false;
         } else {
-            return menu::HIDE_ALWAYS;
+            return true;
         }
     }
 
@@ -98,5 +86,9 @@ class requiredlearning extends \totara_core\totara\menu\item {
 
     protected function get_default_parent() {
         return '\totara_core\totara\menu\unused';
+    }
+
+    public function get_incompatible_preset_rules(): array {
+        return ['can_view_required_learning'];
     }
 }

@@ -13,6 +13,7 @@
         stopOnFailure="false"
         stopOnIncomplete="false"
         stopOnSkipped="false"
+        beStrictAboutOutputDuringTests="true"
         printerClass="Hint_ResultPrinter"
         testSuiteLoaderClass="phpunit_autoloader"
         beStrictAboutTestsThatDoNotTestAnything="false"
@@ -20,6 +21,7 @@
 
     <php>
         <!--<const name="PHPUNIT_LONGTEST" value="1"/> uncomment to execute also slow or otherwise expensive tests-->
+        <!--<const name="PHPUNIT_DISABLE_UNRESET_PROPERTIES_CHECK" value="1"/> uncomment to disable check which protects against creating memory leaks-->
         <!--Following constants instruct tests to fetch external test files from alternative location or skip tests if empty, clone https://github.com/totara/exttests to local web server-->
         <!--<const name="TEST_EXTERNAL_FILES_HTTP_URL" value="http://test.totaralms.com/exttests"/> uncomment and alter to fetch external test files from alternative location-->
         <!--<const name="TEST_EXTERNAL_FILES_HTTPS_URL" value="https://test.totaralms.com/exttests"/> uncomment and alter to fetch external test files from alternative location-->
@@ -139,6 +141,9 @@
         </testsuite>
         <testsuite name="core_my_testsuite">
             <directory suffix="_test.php">my/tests</directory>
+        </testsuite>
+        <testsuite name="core_block_testsuite">
+            <directory suffix="_test.php">blocks/tests</directory>
         </testsuite>
 
         <!--Plugin suites: use admin/tool/phpunit/cli/util.php to build phpunit.xml from phpunit.xml.dist with up-to-date list of plugins in current install-->

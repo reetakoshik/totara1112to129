@@ -53,31 +53,17 @@ class certif_completion_progress extends \totara_reportbuilder\rb\display\base {
 
         if ($extrafields->window < $now) {
             // The window is open, use the current record.
-            $completions = array();
-            $tempcompletions = explode(', ', $value);
+            $vals = explode('|', $value);
+            $programid = $vals[0];
+            $userid = $vals[1];
 
-            foreach ($tempcompletions as $completion) {
-                $coursesetstatus = explode("|", $completion);
-                if (isset($coursesetstatus[1])) {
-                    $completions[$coursesetstatus[0]] = $coursesetstatus[1];
-                } else {
-                    $completions[$coursesetstatus[0]] =  STATUS_COURSESET_INCOMPLETE;
-                }
+            $progressinfo = \totara_program\progress\program_progress::get_user_progressinfo_from_id($programid, $userid);
+            $percentage = $progressinfo->get_percentagecomplete();
+
+            if ($percentage === false) {
+                // No tracking, default to 0
+                $percentage = 0;
             }
-
-            $cnt = count($completions);
-            if ($cnt == 0) {
-                return '-';
-            }
-            $complete = 0;
-
-            foreach ($completions as $comp) {
-                if ($comp == STATUS_COURSESET_COMPLETE) {
-                    $complete++;
-                }
-            }
-
-            $percentage = round(($complete / $cnt) * 100, 2);
         } else {
             // The window is not open
             if (!empty($extrafields->histcompletion) || !empty($extrafields->completion)) {
@@ -86,6 +72,14 @@ class certif_completion_progress extends \totara_reportbuilder\rb\display\base {
             } else {
                 // They havent had a chance to do anything yet, or did not previously complete.
                 $percentage = 0;
+            }
+        }
+
+        if ($isexport) {
+            if (isset($extrafields->stringexport) && $extrafields->stringexport)  {
+                return get_string('xpercentcomplete', 'totara_core', $percentage);
+            } else {
+                return $percentage;
             }
         }
 

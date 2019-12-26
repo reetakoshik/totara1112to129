@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 class totara_core_component_testcase extends advanced_testcase {
     public function test_get_namespace_classes() {
         $displayclasses = core_component::get_namespace_classes('rb\display');
-        $this->assertInternalType('array', $displayclasses);
+        $this->assertIsArray($displayclasses);
         foreach ($displayclasses as $displayclass) {
             $this->assertContains('\rb\display\\', $displayclass);
         }
@@ -37,7 +37,7 @@ class totara_core_component_testcase extends advanced_testcase {
         $count = count($displayclasses);
 
         $displayclasses = core_component::get_namespace_classes('rb\display', 'totara_reportbuilder\rb\display\base');
-        $this->assertInternalType('array', $displayclasses);
+        $this->assertIsArray($displayclasses);
         foreach ($displayclasses as $displayclass) {
             $this->assertContains('\rb\display\\', $displayclass);
         }
@@ -45,26 +45,26 @@ class totara_core_component_testcase extends advanced_testcase {
         $this->assertCount($count, $displayclasses, 'All classes in rb\dispaly are expected to be extending base class!');
 
         $displayclasses = core_component::get_namespace_classes('rb\display', 'totara_reportbuilder\rb\display\legacy');
-        $this->assertInternalType('array', $displayclasses);
+        $this->assertIsArray($displayclasses);
         $this->assertContains('totara_reportbuilder\rb\display\legacy', $displayclasses);
         $this->assertCount(1, $displayclasses);
 
         $displayclasses = core_component::get_namespace_classes('rb\aggregate', null, null, true);
-        $this->assertInternalType('array', $displayclasses);
+        $this->assertIsArray($displayclasses);
         foreach ($displayclasses as $displayclass) {
             $this->assertContains('rb\aggregate\\', $displayclass);
         }
         $this->assertNotContains('totara_reportbuilder\rb\aggregate\base', $displayclasses);
 
         $displayclasses = core_component::get_namespace_classes('rb\aggregate', null, null, false);
-        $this->assertInternalType('array', $displayclasses);
+        $this->assertIsArray($displayclasses);
         foreach ($displayclasses as $displayclass) {
             $this->assertContains('rb\aggregate\\', $displayclass);
         }
         $this->assertContains('totara_reportbuilder\rb\aggregate\base', $displayclasses);
 
         $displayclasses = core_component::get_namespace_classes('rb\display', 'totara_reportbuilder\rb\display\base', 'totara_reportbuilder');
-        $this->assertInternalType('array', $displayclasses);
+        $this->assertIsArray($displayclasses);
         $this->assertGreaterThan(15, count($displayclasses));
         foreach ($displayclasses as $displayclass) {
             $this->assertContains('totara_reportbuilder\rb\display\\', $displayclass);

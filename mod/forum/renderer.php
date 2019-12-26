@@ -46,17 +46,25 @@ class mod_forum_renderer extends plugin_renderer_base {
             $html .= html_writer::start_tag('div', array('class' => 'discussion-nav clearfix'));
             $html .= html_writer::start_tag('ul');
             if ($prev) {
+                $prevname = $prev->name;
+                if ($prev->deleted) {
+                    $prevname = get_string('forumdiscussiondeleted', 'mod_forum');
+                }
                 $url = new moodle_url('/mod/forum/discuss.php', array('d' => $prev->id));
                 $html .= html_writer::start_tag('li', array('class' => 'prev-discussion'));
-                $html .= html_writer::link($url, format_string($prev->name),
-                    array('aria-label' => get_string('prevdiscussiona', 'mod_forum', format_string($prev->name))));
+                $html .= html_writer::link($url, format_string($prevname),
+                    array('aria-label' => get_string('prevdiscussiona', 'mod_forum', format_string($prevname))));
                 $html .= html_writer::end_tag('li');
             }
             if ($next) {
+                $nextname = $next->name;
+                if ($next->deleted) {
+                    $nextname = get_string('forumdiscussiondeleted', 'mod_forum');
+                }
                 $url = new moodle_url('/mod/forum/discuss.php', array('d' => $next->id));
                 $html .= html_writer::start_tag('li', array('class' => 'next-discussion'));
-                $html .= html_writer::link($url, format_string($next->name),
-                    array('aria-label' => get_string('nextdiscussiona', 'mod_forum', format_string($next->name))));
+                $html .= html_writer::link($url, format_string($nextname),
+                    array('aria-label' => get_string('nextdiscussiona', 'mod_forum', format_string($nextname))));
                 $html .= html_writer::end_tag('li');
             }
             $html .= html_writer::end_tag('ul');
@@ -238,6 +246,7 @@ class mod_forum_renderer extends plugin_renderer_base {
      * @return string
      */
     public function render_big_search_form(\mod_forum\output\big_search_form $form) {
+        $this->page->requires->js_call_amd('mod_forum/big_search_form', 'init');
         return $this->render_from_template('mod_forum/big_search_form', $form->export_for_template($this));
     }
 

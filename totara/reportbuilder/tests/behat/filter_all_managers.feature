@@ -27,7 +27,8 @@ Feature: Use the multi-item manager filter
       | user4   | manager3 | appraiser2 |
       | user5   |          | appraiser3 |
     And I log in as "admin"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     Given I set the field "Report Name" to "Users Report"
     And I set the field "Source" to "user"
     And I press "Create report"

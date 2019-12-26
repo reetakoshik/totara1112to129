@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of Totara LMS
+ * This file is part of Totara Learn
  *
  * Copyright (C) 2016 onwards Totara Learning Solutions LTD
  *
@@ -34,9 +34,11 @@ class totara_customfield_evidence_delete_testcase extends advanced_testcase {
     protected $files = [];
 
     protected function tearDown() {
-        $this->evidence1 = null;
-        $this->evidence2 = null;
-        $this->evidence3 = null;
+        $this->evidence1 = $this->evidence2 = $this->evidence3 = null;
+        $this->multiselect = [];
+        $this->text = [];
+        $this->files = [];
+
         parent::tearDown();
     }
 

@@ -1,0 +1,5 @@
+idnumber,fullname,shortname,description,frameworkidnumber,parentidnumber,typeidnumber,timemodified,aggregationmethod,customfield_CF1
+C1,"Competency 1","Comp 1","Competency Description 1",ID1,,TYPE1ID,1533261109,1,1
+C2,"Competency 2","Comp 2","Competency Description 2",ID1,C1,TYPE2ID,1533261109,1,1
+C3,"Competency 3","Comp 3","Competency Description 3",ID1,C1,,1533261109,1,
+C4,"Competency 4","Comp 4","Competency Description 4",ID1,,,1533261109,1,

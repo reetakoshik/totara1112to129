@@ -10,13 +10,11 @@ Feature: Confirm end date is adjusted when start date is altered
       | fullname | shortname | category |
       | Course 1 | C1        | 0        |
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name                                    | Test seminar name        |
       | Description                             | Test seminar description |
-      | Users can sign-up to multiple events    | 1                        |
+      | How many times the user can sign-up?    | Unlimited                |
       | Allow manager reservations              | Yes                      |
       | Maximum reservations                    | 10                       |
     And I follow "View all events"
@@ -39,13 +37,13 @@ Feature: Confirm end date is adjusted when start date is altered
       | <field> | <start_value> |
     Then I should see "<end_value>" in the "#<end_field>" "css_element"
 
-  Examples:
-    | field             | start_value | end_value | end_field            |
-    | timestart[day]    | 2           | 2         | id_timefinish_day    |
-    | timestart[month]  | 2           | February  | id_timefinish_month  |
-    | timestart[year]   | 2021        | 2021      | id_timefinish_year   |
-    | timestart[hour]   | 12          | 13        | id_timefinish_hour   |
-    | timestart[minute] | 30          | 30        | id_timefinish_minute |
+    Examples:
+      | field             | start_value | end_value | end_field            |
+      | timestart[day]    | 2           | 2         | id_timefinish_day    |
+      | timestart[month]  | 2           | February  | id_timefinish_month  |
+      | timestart[year]   | 2021        | 2021      | id_timefinish_year   |
+      | timestart[hour]   | 12          | 13        | id_timefinish_hour   |
+      | timestart[minute] | 30          | 30        | id_timefinish_minute |
 
   Scenario: Alter seminar date by calendar
     Given I click on "Calendar" "link" in the "#fitem_id_timestart" "css_element"

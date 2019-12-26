@@ -537,7 +537,7 @@ function prog_get_programs($categoryid="all", $sort="p.sortorder ASC",
  *
  */
 function prog_get_category_breadcrumbs($categoryid, $viewtype = 'program') {
-    global $CFG, $DB;
+    global $DB;
 
     $category = $DB->get_record('course_categories', array('id' => $categoryid));
 
@@ -1090,14 +1090,6 @@ function prog_get_programs_search($searchterms, $sort='fullname ASC', $page=0, $
 }
 
 /**
- * @deprecated since 9.0.
- * @param $assignment
- */
-function prog_store_position_assignment($assignment) {
-    throw new coding_exception('prog_store_position_assignment has been deprecated since 9.0. Use \totara_job\job_assignment::update() instead.');
-}
-
-/**
  * Retrieves any recurring programs and returns them in an array or an empty
  * array
  *
@@ -1373,6 +1365,9 @@ function prog_update_completion($userid, program $program = null, $courseid = nu
     /** @var program[] $programs */
     foreach ($programs as $program) {
 
+        // Clear the progressinfo cache to ensure it is calculated again
+        \totara_program\progress\program_progress_cache::mark_progressinfo_stale($program->id, $userid);
+
         // First check if the program is already marked as complete for this user and do nothing if it is.
         if ($useriscomplete !== null) {
             if ($useriscomplete === true) {
@@ -1643,9 +1638,14 @@ function totara_program_pluginfile($course, $cm, $context, $filearea, $args, $fo
     }
 
     $program = new program($programid);
-
-    // If the file is in summary, overview, user is site admin or user has capability to edit the program don't worry if they are assigned to the program.
-    if (!(is_siteadmin($USER) || has_capability('totara/program:configuredetails', $context)) && $filearea != 'summary' && $filearea != 'overviewfiles') {
+    // If the file is in summary, overview, user is site admin or user has capability to edit the program don't worry
+    // if they are assigned to the program.
+    if (!(is_siteadmin($USER) ||
+        has_capability('totara/program:configuredetails', $context)) &&
+        $filearea != 'summary' &&
+        $filearea != 'overviewfiles' &&
+        $filearea != 'images')
+    {
         if (!$program->user_is_assigned($USER->id)) {
             send_file_not_found();
         }
@@ -1818,12 +1818,11 @@ class program_in_list implements IteratorAggregate {
     public function has_program_overviewfiles() {
         global $CFG;
         if (empty($CFG->courseoverviewfileslimit)) {
-            return 0;
+            return false;
         }
-        require_once($CFG->libdir. '/filestorage/file_storage.php');
         $fs = get_file_storage();
         $context = context_program::instance($this->id);
-        return $fs->is_area_empty($context->id, 'program', 'overviewfiles');
+        return !$fs->is_area_empty($context->id, 'program', 'overviewfiles');
     }
 
     /**
@@ -2186,11 +2185,13 @@ function prog_required_for_user($progid, $userid) {
 /**
  * Generates the HTML to display a program icon that links to a page to view the program
  *
+ * @deprecated Since Totara 12.0
  * @param int $progid               The id of a program
  * @param int $userid   optional    The id of a user, defaults to $USER if not set
  * @return html
  */
 function prog_display_link_icon($progid, $userid = null) {
+    debugging('The function prog_display_link_icon has been deprecated since Totara 12.0', DEBUG_DEVELOPER);
     global $OUTPUT, $USER, $DB;
 
     $prog = new program($progid);
@@ -2309,7 +2310,7 @@ function prog_display_duedate($duedate, $progid, $userid, $certifpath = null, $c
  * @return  string
  */
 function prog_display_progress($programid, $userid, $certifpath = CERTIFPATH_CERT, $export = false) {
-    global $DB, $PAGE;
+    global $DB, $PAGE ,$OUTPUT;
 
     $sql = "SELECT pc.*, cc.id AS ccid, prog.certifid
               FROM {prog_completion} pc
@@ -2322,11 +2323,9 @@ function prog_display_progress($programid, $userid, $certifpath = CERTIFPATH_CER
         !empty($prog_completion->certifid) && $prog_completion->status != STATUS_PROGRAM_COMPLETE && empty($prog_completion->ccid)) {
         $out = get_string('notassigned', 'totara_program');
         return $out;
-    } else if ($prog_completion->status == STATUS_PROGRAM_COMPLETE) {
-        $overall_progress = 100;
     } else {
         $program = new program($programid);
-        $overall_progress = $program->get_progress($userid);
+        $overall_progress = (int)$program->get_progress($userid);
     }
 
     if ($export) {
@@ -2337,6 +2336,7 @@ function prog_display_progress($programid, $userid, $certifpath = CERTIFPATH_CER
 
     // Get relevant progress bar and return for display.
     $renderer = $PAGE->get_renderer('totara_core');
+    $OUTPUT->render_from_template('core/progress_bar', ['progress' => $overall_progress, 'width' => '120','progresstext' => $overall_progress.'%', 'id' => 'prog_required_progress_'.$programid.'_'.$userid]);
     return $renderer->progressbar($overall_progress, 'medium', false, $tooltipstr);
 }
 

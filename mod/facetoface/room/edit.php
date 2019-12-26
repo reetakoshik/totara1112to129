@@ -21,37 +21,36 @@
  * @package mod_facetoface
  */
 
+use mod_facetoface\room;
+
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/mod/facetoface/lib.php');
-
-$id = optional_param('id', 0, PARAM_INT);
+require_once($CFG->dirroot . '/totara/customfield/fieldlib.php');
 
 admin_externalpage_setup('modfacetofacerooms');
 
-if ($id) {
-    $room = $DB->get_record('facetoface_room', array('id' => $id, 'custom' => 0), '*', MUST_EXIST);
-} else {
-    $room = false;
+$id = optional_param('id', 0, PARAM_INT);
+$room = new room($id);
+
+if ($room->get_custom()) {
+    print_error(get_string('error:incorrectroomid', 'facetoface'));
 }
 
 $roomlisturl = new moodle_url('/mod/facetoface/room/manage.php');
 
-$form = facetoface_process_room_form($room, false, false,
-    function() use ($roomlisturl, $id) {
-        if (!$id) {
-            $successstr = 'roomcreatesuccess';
-        } else {
-            $successstr = 'roomupdatesuccess';
-        }
-        totara_set_notification(get_string($successstr, 'facetoface'), $roomlisturl, array('class' => 'notifysuccess'));
-    },
-    function() use ($roomlisturl) {
-        redirect($roomlisturl);
-    }
-);
+$customdata = ['room' => $room, 'editoroptions' => $TEXTAREA_OPTIONS];
+$form = new \mod_facetoface\form\editroom(null, $customdata, 'post', '', array('class' => 'dialog-nobind'), true, null, 'mform_modal');
 
-$url = new moodle_url('/admin/settings.php', array('section' => 'modsettingfacetoface'));
+if ($form->is_cancelled()) {
+    redirect($roomlisturl);
+}
+
+if ($data = $form->get_data()) {
+    $room = \mod_facetoface\room_helper::save($data);
+    $message = $id ? get_string('roomupdatesuccess', 'facetoface') : get_string('roomcreatesuccess', 'facetoface');
+    totara_set_notification($message, $roomlisturl, array('class' => 'notifysuccess'));
+}
 
 if ($id == 0) {
     $pageheading = get_string('addroom', 'facetoface');

@@ -22,7 +22,7 @@
 }
 
 html {
-  display: -dompdf-page;
+  display: -dompdf-page !important;
   counter-reset: page;
 }
 
@@ -505,11 +505,8 @@ br {
   display: -dompdf-br;
 }
 
-/* Totara tweak max-width and height */
 img, img_generated {
-  display: -dompdf-image;
-  max-width: 100%;
-  height: auto;
+  display: -dompdf-image !important;
 }
 
 dompdf_generated {

@@ -686,7 +686,7 @@ class behat_base extends Behat\MinkExtension\Context\RawMinkContext {
                 $height = 480;
                 break;
             case "medium":
-                $width = 1024;
+                $width = 1280; // Totara: use larger size to fit the menu
                 $height = 768;
                 break;
             case "large":

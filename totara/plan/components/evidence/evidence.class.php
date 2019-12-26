@@ -99,7 +99,7 @@ class dp_evidence_relation {
         $out .=  $OUTPUT->container_end();
 
         if ($canupdate && !$plancompleted) {
-            $out .= $OUTPUT->container_start('buttons');
+            $out .= $OUTPUT->container_start('buttons rht-add-link2');
             $out .= $OUTPUT->container_start('singlebutton dp-plan-assign-button');
             $out .= $OUTPUT->container_start();
             $out .= html_writer::script('var item_id = ' . $this->itemid . ';' .

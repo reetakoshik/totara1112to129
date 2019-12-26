@@ -1,0 +1,142 @@
+<ul class="nav nav-tabs">
+  <li class="active"><a data-toggle="tab" href="#home2">{{#str}} browse, tool_policy {{/str}}</a></li>
+  <li><a data-toggle="tab" href="#menu2">{{#str}} search, tool_policy {{/str}}</a></li>
+</ul>
+
+<div class="tab-content">
+  <div id="home2" class="tab-pane fade in active">
+   
+	<div class="itemToAdd">
+    <h4>{{#str}} itemstoadd, tool_policy {{/str}}</h4>
+    <ul id="citemstoadd"></ul>
+    </div>
+      <ul class="folderPanel">
+     {{#categories}}
+           <li> {{{catname}}}</li>
+           <ul class="subFolderPanel">
+           {{#courses}}
+              <li><a href="#" class="clickable" id="citemid_{{{cid}}}" data-coursename="{{{fullname}}}">{{{fullname}}}</a></li>
+           {{/courses}}
+           </ul>
+     {{/categories}}
+      </ul>
+  </div>
+  <div id="menu2" class="tab-pane fade clearfix">
+    <p class="search_label_policy">{{#str}} searchcourses, tool_policy {{/str}}<input type="search" id="inputCourseSearch"></p>
+    
+    <div id="searchedtxt"></div>
+	<div class="itemToAdd">
+    <h4>{{#str}} itemstoadd, tool_policy {{/str}}</h4>
+    <ul id="citemstoadd1"></ul>
+    </div>
+  </div>
+</div>
+
+{{#js}}
+
+$(document).ready(function() {
+var editversionid = $("#editversionid").val();
+var wwwroot = M.cfg.wwwroot;
+$.ajax({
+  url: wwwroot + "/admin/tool/policy/ajaxrelatedpcourses.php",
+  data: {coursetxt : 'course', editversionid : editversionid},
+  dataType: "json",
+  success: function(html){
+
+    var coursedata = JSON.stringify(html);
+     
+    var addedli = '';
+    $.each(JSON.parse(coursedata), function(i, object) {
+    if(object.id != null)
+    {
+      addedli += '<li class="caddeditems caddeditem_'+ object.id +'" id="caddeditem_'+ object.id +'"><a href="#">'+ object.fullname +'</a></li>';
+    }
+    });
+        $("#citemstoadd").append(addedli);
+        $("#citemstoadd1").append(addedli);
+  }
+});
+});
+
+$(document).ready(function() {
+$('#inputCourseSearch').on('input',function(e){
+    var wwwroot = M.cfg.wwwroot;
+    $("#searchedtxt").html("");
+    var searchtxt = this.value;
+    $.ajax({
+      url: wwwroot + "/admin/tool/policy/ajaxrelatedpcourses.php",
+      data: {searchtxt : searchtxt},
+      dataType: "json",
+      success: function(html){
+        var cresult = JSON.stringify(html);
+        var srtxt = '';
+            srtxt += '<ul class="folderPanel">';
+        $.each(JSON.parse(cresult), function(idx, obj) {
+          //console.log(idx);
+              srtxt += '<li><a href="#">'+ idx + '</a>';
+              srtxt += '<ul class="subFolderPanelSearch">';
+              var subsrtxt = '';
+              $.each(obj, function(idx1, obj1) {
+                //console.log(obj1.coursename);
+                subsrtxt += '<li><a href="#" class="clickable" id="citemid1_'+ obj1.courseid +'" data-coursename="'+ obj1.coursename +'">'+ obj1.coursename +'</li>';
+              });
+              srtxt += subsrtxt + '</ul></li>';
+        });
+
+        srtxt += '</ul>';
+        $("#searchedtxt").append(srtxt);
+        }
+    });
+
+});
+});
+
+$(document).ready(function() {
+      $(document).on('click', '.clickable', function() {
+      //$(".clickable").click(function() { 
+      //alert("test4444");
+        var id = this.id;
+        var course = id.split("_");
+        var cids = $("#pcourseids").val();
+        var cidsarr = cids.split(',');
+        if(cidsarr.indexOf(course[1]) == -1) {
+        var coursename = $("#"+ this.id).attr("data-coursename");
+        var addedli = '<li class="caddeditems caddeditem_'+ course[1] +'" id="caddeditem_'+ course[1] +'"><a href="#">'+ coursename +'</a></li>';
+        $("#citemstoadd").append(addedli);
+        $("#citemstoadd1").append(addedli);
+        var pcourseids = $("#pcourseids").val();
+        var courseidarr = [];
+        if(pcourseids == "") {
+            $("#pcourseids").val(course[1]);
+        } else {
+            pcourseids = $("#pcourseids").val();
+            pcourseids = pcourseids.split(",");
+            pcourseids.push(course[1]);
+            $("#pcourseids").val(pcourseids);
+        }
+        }
+     });
+     $(document).on('click', '.caddeditems', function(){
+        pcourseids = $("#pcourseids").val();
+        pcourseids = pcourseids.split(",");
+        var id = this.id;
+        var course = id.split("_");
+        var deletedarr = removeA(pcourseids, course[1]);
+        $(".caddeditem_" + course[1]).remove();
+        //alert(this.id);
+        $("#pcourseids").val(deletedarr);
+     });
+  });
+
+  function removeA(arr) {
+    var what, a = arguments, L = a.length, ax;
+    while (L > 1 && arr.length) {
+        what = a[--L];
+        while ((ax= arr.indexOf(what)) !== -1) {
+            arr.splice(ax, 1);
+        }
+    }
+    return arr;
+}
+
+{{/js}}

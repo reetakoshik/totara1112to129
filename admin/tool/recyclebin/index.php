@@ -195,7 +195,7 @@ foreach ($items as $item) {
         if (isset($modules[$item->module])) {
             $mod = $modules[$item->module];
             $modname = get_string('modulename', $mod->name);
-            $name = '<img src="' . $OUTPUT->pix_url('icon', $mod->name) . '" class="icon" alt="' . $modname . '" /> ' . $name;
+            $name = $OUTPUT->pix_icon('icon', $modname, $mod->name) . $name;
         }
     }
 

@@ -34,7 +34,8 @@ Feature: Use the multi-item hierarchy filter
       | user3 | pos2     | org1         |
       | user4 | pos2     | org2         |
     And I log in as "admin"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
 
   Scenario: Use position filter with User report source
     Given I set the field "Report Name" to "Users"
@@ -183,13 +184,13 @@ Feature: Use the multi-item hierarchy filter
     And I should see "Items to add"
     And I click on "First5 Last5 (user5@example.com)" "link" in the "Choose Managers" "totaradialogue"
     And I click on "Save" "button" in the "Choose Managers" "totaradialogue"
-    And I press "Search"
+    And I click on "Search" "button" in the "#region-main" "css_element"
 
     # check that when filter is applies and then unset - controls are disabled
     # Org
     And I wait until the page is ready
     And I click on "Search by" "link" in the "legend.ftoggler" "css_element"
-        When I click on "Choose Organisations" "text" in the "Search by" "fieldset"
+    When I click on "Choose Organisations" "text" in the "Search by" "fieldset"
     Then I should see "Items to add"
     And I click on "Cancel" "button" in the "Choose Organisations" "totaradialogue"
     When I select "is any value" from the "User's Organisation(s) field limiter" singleselect

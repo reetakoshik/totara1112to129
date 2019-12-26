@@ -24,36 +24,43 @@
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/mod/facetoface/lib.php');
 
+use \mod_facetoface\seminar_event;
+
 $s = required_param('s', PARAM_INT); // facetoface session ID
 $backtoallsessions = optional_param('backtoallsessions', 1, PARAM_BOOL);
 
-list($session, $facetoface, $course, $cm, $context) = facetoface_get_env_session($s);
+$seminarevent = new \mod_facetoface\seminar_event($s);
+$seminar = $seminarevent->get_seminar();
+$course = $DB->get_record('course', ['id' => $seminar->get_course()]);
+$cm = $seminar->get_coursemodule();
+$context =  context_module::instance($cm->id);
 
 require_login($course, false, $cm);
 require_capability('mod/facetoface:editevents', $context);
 
 $PAGE->set_url('/mod/facetoface/events/cancel.php', array('s' => $s, 'backtoallsessions' => $backtoallsessions));
-$PAGE->set_title($facetoface->name);
+$PAGE->set_title($seminar->get_name());
 $PAGE->set_heading($course->fullname);
 
 if ($backtoallsessions) {
-    $returnurl = new moodle_url('/mod/facetoface/view.php', array('f' => $facetoface->id));
+    $returnurl = new moodle_url('/mod/facetoface/view.php', array('f' => $seminarevent->get_facetoface()));
 } else {
     $returnurl = new moodle_url('/course/view.php', array('id' => $course->id));
 }
 
-if (facetoface_has_session_started($session, time())) {
+if ($seminarevent->is_started()) {
     // How did they get here? There should not be any link in UI to this page.
     redirect($returnurl);
 }
-if ($session->cancelledstatus != 0) {
+if ($seminarevent->get_cancelledstatus() != 0) {
     // How did they get here? There should not be any link in UI to this page.
     redirect($returnurl);
 }
 
-// NOTE: $session->allowcancellations has no relation to this script.
-
-$mform = new \mod_facetoface\form\cancelsession(null, compact('backtoallsessions', 'session'));
+$mform = new \mod_facetoface\form\cancelsession(null, [
+    'backtoallsessions' => $backtoallsessions,
+    'seminarevent' => $seminarevent
+]);
 if ($mform->is_cancelled()) {
     redirect($returnurl);
 }
@@ -61,7 +68,15 @@ if ($mform->is_cancelled()) {
 if ($fromform = $mform->get_data()) {
     // This may take a long time...
     ignore_user_abort(true);
-    if (!facetoface_cancel_session($session, $fromform)) {
+
+    $seminarevent = new seminar_event($s);
+    if ($seminarevent->cancel()) {
+        // Save the custom fields.
+        if ($fromform) {
+            $fromform->id = $seminarevent->get_id();
+            customfield_save_data($fromform, 'facetofacesessioncancel', 'facetoface_sessioncancel');
+        }
+    } else {
         print_error('error:couldnotcancelsession', 'facetoface', $returnurl);
     }
 
@@ -71,9 +86,14 @@ if ($fromform = $mform->get_data()) {
 
 echo $OUTPUT->header();
 echo $OUTPUT->box_start();
-echo $OUTPUT->heading(get_string('cancelingsession', 'facetoface', $facetoface->name));
+echo $OUTPUT->heading(get_string('cancelingsession', 'facetoface', $seminar->get_name()));
 
-echo facetoface_print_session($session, true);
+/**
+ * @var mod_facetoface_renderer $seminarrenderer
+ */
+$seminarrenderer = $PAGE->get_renderer('mod_facetoface');
+echo $seminarrenderer->render_seminar_event($seminarevent, true);
+
 
 $mform->display();
 

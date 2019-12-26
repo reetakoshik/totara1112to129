@@ -413,8 +413,14 @@ class totara_cohort_events_testcase extends advanced_testcase {
         $assid = totara_cohort_add_association($cohortid, $program->id, COHORT_ASSN_ITEMTYPE_PROGRAM, COHORT_ASSN_VALUE_VISIBLE);
 
         $events = $sink->get_events();
-        $this->assertCount(1, $events);
-        $event = $events[0];
+        $this->assertCount(2, $events);
+
+        foreach ($events as $event) {
+            if (get_class($event) == 'totara_cohort\event\visible_learning_item_added') {
+                break;
+            }
+        }
+
         $eventdata = $event->get_data();
         $this->assertInstanceOf('totara_cohort\event\visible_learning_item_added', $event);
         $this->assertEventContextNotUsed($event);

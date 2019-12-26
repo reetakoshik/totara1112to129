@@ -39,27 +39,6 @@ class rb_source_facetoface_asset extends rb_facetoface_base_source
      */
     protected $urlparams = array();
 
-    /**
-     * The default condition that appears in sql for the report builder source.
-     * @see reportbuilder::build_query
-     * @var string
-     */
-    public $sourcewhere;
-
-    /**
-     * Attribute for setting the default join table for
-     * the report builder source.
-     *
-     * Use string if it is only one join,
-     * or array if it is multiple joins (preferred array)
-     *
-     * The value is the name of the join for report builder.
-     * @example $rb_join->name
-     * @see rb_join::name
-     * @var string | array
-     */
-    public $sourcejoins;
-
     public function __construct(rb_global_restriction_set $globalrestrictionset = null) {
 
         $this->base = '{facetoface_asset}';
@@ -71,8 +50,6 @@ class rb_source_facetoface_asset extends rb_facetoface_base_source
         $this->requiredcolumns = $this->define_requiredcolumns();
         $this->defaultfilters = $this->define_defaultfilters();
         $this->paramoptions = $this->define_paramoptions();
-        $this->sourcewhere = " ( base.custom = 0 OR assigned.cntdates IS NOT NULL ) ";
-        $this->sourcejoins = array("assigned") ;
         $this->add_customfields();
 
         parent::__construct();
@@ -127,8 +104,8 @@ class rb_source_facetoface_asset extends rb_facetoface_base_source
                     'nosort' => true,
                     'joins' => 'assigned',
                     'capability' => 'totara/core:modconfig',
-                    'extrafields' => array('hidden' => 'base.hidden', 'cntdates' => 'assigned.cntdates', 'custom' => 'base.custom'),
-                    'displayfunc' => 'actions',
+                    'extrafields' => array('hidden' => 'base.hidden', 'cntdates' => 'assigned.cntdates'),
+                    'displayfunc' => 'f2f_asset_actions',
                     'hidden' => false
                 )
         );
@@ -196,7 +173,7 @@ class rb_source_facetoface_asset extends rb_facetoface_base_source
     }
 
     protected function add_customfields() {
-        $this->add_custom_fields_for(
+        $this->add_totara_customfield_component(
             'facetoface_asset',
             'base',
             'facetofaceassetid',
@@ -205,14 +182,35 @@ class rb_source_facetoface_asset extends rb_facetoface_base_source
             $this->filteroptions
         );
     }
+
+    /**
+     * Get the embeddedurl
+     *
+     * @return string
+     */
+    public function get_embeddedurl() {
+        return $this->embeddedurl;
+    }
+
+    /**
+     * Get the url params
+     *
+     * @return mixed
+     */
+    public function get_urlparams() {
+        return $this->urlparams;
+    }
+
     /**
      * Asset actions
      *
+     * @deprecated Since Totara 12.0
      * @param int $assetid
      * @param stdClass $row
      * @param bool $isexport
      */
     public function rb_display_actions($assetid, $row, $isexport = false) {
+        debugging('rb_source_facetoface_asset::rb_display_actions has been deprecated since Totara 12.0. Use mod_facetoface\rb\display\f2f_asset_actions::display', DEBUG_DEVELOPER);
         global $OUTPUT;
 
         if ($isexport) {
@@ -222,7 +220,7 @@ class rb_source_facetoface_asset extends rb_facetoface_base_source
         $output = array();
 
         $output[] = $OUTPUT->action_icon(
-            new moodle_url('/mod/facetoface/asset.php', array('assetid' => $assetid)),
+            new moodle_url('/mod/facetoface/reports/assets.php', array('assetid' => $assetid)),
             new pix_icon('t/calendar', get_string('details', 'mod_facetoface'))
         );
 
@@ -231,24 +229,14 @@ class rb_source_facetoface_asset extends rb_facetoface_base_source
             new pix_icon('t/edit', get_string('edit'))
         );
 
-        if ($row->custom) {
-            $output[] = $OUTPUT->pix_icon('t/edit', get_string('nocustomassetedit', 'mod_facetoface'), 'moodle', array('class' => 'disabled iconsmall'));
-        }
-        else {
-            $output[] = $OUTPUT->action_icon(
-                new moodle_url('/mod/facetoface/asset/edit.php', array('id' => $assetid)),
-                new pix_icon('t/edit', get_string('edit'))
-            );
-        }
-
         if ($row->hidden && $this->embeddedurl) {
-            $params = array_merge($this->urlparams, array('show' => $assetid, 'sesskey' => sesskey()));
+            $params = array_merge($this->urlparams, ['action' => 'show', 'id' => $assetid, 'sesskey' => sesskey()]);
             $output[] = $OUTPUT->action_icon(
                 new moodle_url($this->embeddedurl, $params),
                 new pix_icon('t/show', get_string('assetshow', 'mod_facetoface'))
             );
         } else if ($this->embeddedurl) {
-            $params = array_merge($this->urlparams, array('hide' => $assetid, 'sesskey' => sesskey()));
+            $params = array_merge($this->urlparams, ['action' => 'hide', 'id' => $assetid, 'sesskey' => sesskey()]);
             $output[] = $OUTPUT->action_icon(
                 new moodle_url($this->embeddedurl, $params),
                 new pix_icon('t/hide', get_string('assethide', 'mod_facetoface'))
@@ -259,7 +247,7 @@ class rb_source_facetoface_asset extends rb_facetoface_base_source
             $output[] = $OUTPUT->pix_icon('t/delete_gray', get_string('currentlyassigned', 'mod_facetoface'), 'moodle', array('class' => 'disabled iconsmall'));
         } else {
             $output[] = $OUTPUT->action_icon(
-                new moodle_url('/mod/facetoface/asset/manage.php', array('delete' => $assetid)),
+                new moodle_url('/mod/facetoface/asset/manage.php', ['action' => 'delete', 'id' => $assetid]),
                 new pix_icon('t/delete', get_string('delete'))
             );
         }

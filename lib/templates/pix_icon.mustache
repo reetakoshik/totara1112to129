@@ -28,10 +28,12 @@
     * none
 
     Context variables required for this template:
-    * attributes Array of name / value pairs.
+    * attributes Array of name / value pairs. Includes title, alt, src.
+    * extraclasses List of extra classes to append.
 
     Example context (json):
     {
+        "extraclasses": "iconsmall",
         "attributes": [
             {
                 "name": "class",
@@ -49,4 +51,4 @@
     }
 
 }}
-<img {{#attributes}}{{name}}="{{value}}" {{/attributes}}/>
+<img class="icon {{extraclasses}}" {{#attributes}}{{name}}="{{value}}" {{/attributes}}/>

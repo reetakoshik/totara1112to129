@@ -30,4 +30,50 @@ $PAGE->set_context(context_system::instance());
 
 $programid = required_param('programid', PARAM_INT);
 
-echo $PAGE->get_renderer('totara_program')->display_set_completion($programid);
+$assignmentid = optional_param('assignmentid', 0, PARAM_INT);
+
+$data = new stdClass();
+if ($assignmentid !== 0) {
+    $assignment = $DB->get_record('prog_assignment', ['id' => $assignmentid], '*', MUST_EXIST);
+    // Get data for populating form when reopening
+    if ($assignment->completionevent == 0) {
+        // Set due date
+        $notset = (int)$assignment->completiontime === 0 || (int)$assignment->completiontime === -1;
+        if ($notset) {
+            $hour = 0;
+            $minute = 0;
+            $completiontime = '';
+        } else {
+            $hour = (int)userdate($assignment->completiontime, '%H', 99, false);
+            $minute = (int)userdate($assignment->completiontime, '%M', 99, false);
+            $completiontime = $notset ? '' : trim(userdate($assignment->completiontime,
+                get_string('datepickerlongyearphpuserdate', 'totara_core'), 99, false));
+        }
+
+        $data->hour = $hour;
+        $data->minute = $minute;
+        $data->date = $completiontime;
+    } else {
+        // Relative due date
+        require_once($CFG->dirroot . '/totara/program/program.class.php');
+
+        $relative = program_utilities::duration_explode($assignment->completiontime);
+
+        $data->num = $relative->num;
+        $data->period = $relative->period;
+        $data->event = $assignment->completionevent;
+        $data->instance = $assignment->completioninstance;
+
+        global $COMPLETION_EVENTS_CLASSNAMES;
+
+        $classname = $COMPLETION_EVENTS_CLASSNAMES[$data->event];
+        $event = new $classname;
+        $instancename = $event->get_item_name($data->instance);
+
+        echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'event', 'value' => $data->event));
+        echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'eventinstance', 'value' => $data->instance));
+        echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'eventinstancename', 'value' => $instancename));
+    }
+}
+
+echo $PAGE->get_renderer('totara_program')->display_set_completion($programid, $data);

@@ -1,0 +1,12 @@
+This files describes API changes in Totara Messages,
+information provided here is intended especially for developers.
+
+=== 12.0 ===
+
+Removed deprecated method totara_message_accept_reject_action()
+Deprecated the following report builder display functions and replaced with display classes
+  * rb_source_totaramessages::rb_display_urgency_link(), please call totara_message\rb\display\message_urgency_link::display() instead.
+  * rb_source_totaramessages::rb_display_msgtype_link(), please call totara_message\rb\display\message_type_link::display() instead.
+  * rb_source_totaramessages::rb_display_msgcategory_text(), please call totara_message\rb\display\message_category_text::display() instead.
+  * rb_source_totaramessages::rb_display_dismiss_link(), please call totara_message\rb\display\message_dismiss_link::display() instead.
+  * rb_source_totaramessages::rb_display_message_checkbox(), please call totara_message\rb\display\message_checkbox::display() instead.

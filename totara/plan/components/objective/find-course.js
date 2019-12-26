@@ -95,7 +95,7 @@ M.totara_plan_objective_find_course = M.totara_plan_objective_find_course || {
             $('input#remove-selected-course').show();
         };
         var url = M.cfg.wwwroot + '/totara/plan/components/objective/';
-        var saveurl = url + 'update-course.php?planid='+this.config.plan_id+'&objectiveid='+this.config.objective_id+'&update=';
+        var saveurl = url + 'update-course.php?sesskey='+M.cfg.sesskey+'&planid='+this.config.plan_id+'&objectiveid='+this.config.objective_id+'&update=';
 
         var handler = new totaraDialog_handler_preRequisite();
         handler.baseurl = url;

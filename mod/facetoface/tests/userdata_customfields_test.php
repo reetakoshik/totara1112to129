@@ -73,10 +73,17 @@ class mod_facetoface_userdata_customfields_testcase extends advanced_testcase {
         $student1 = $datagenerator->create_user();
         $student2 = $datagenerator->create_user();
 
+        $this->getDataGenerator()->enrol_user($student1->id ,$course1->id);
+        $this->getDataGenerator()->enrol_user($student1->id ,$course2->id);
+        $this->getDataGenerator()->enrol_user($student1->id ,$course3->id);
+        $this->getDataGenerator()->enrol_user($student2->id ,$course1->id);
+        $this->getDataGenerator()->enrol_user($student2->id ,$course2->id);
+        $this->getDataGenerator()->enrol_user($student2->id ,$course3->id);
+
         $session1 = $f2fgenerator->create_session_for_course($course1);
-        $session2 = $f2fgenerator->create_session_for_course($course1);
-        $session3 = $f2fgenerator->create_session_for_course($course2);
-        $session4 = $f2fgenerator->create_session_for_course($course3);
+        $session2 = $f2fgenerator->create_session_for_course($course1, 2);
+        $session3 = $f2fgenerator->create_session_for_course($course2, 3);
+        $session4 = $f2fgenerator->create_session_for_course($course3, 4);
 
         $signups = [];
         $signups[11] = $f2fgenerator->create_signup($student1, $session1);
@@ -165,10 +172,17 @@ class mod_facetoface_userdata_customfields_testcase extends advanced_testcase {
         $student1 = $datagenerator->create_user();
         $student2 = $datagenerator->create_user();
 
+        $this->getDataGenerator()->enrol_user($student1->id ,$course1->id);
+        $this->getDataGenerator()->enrol_user($student1->id ,$course2->id);
+        $this->getDataGenerator()->enrol_user($student1->id ,$course3->id);
+        $this->getDataGenerator()->enrol_user($student2->id ,$course1->id);
+        $this->getDataGenerator()->enrol_user($student2->id ,$course2->id);
+        $this->getDataGenerator()->enrol_user($student2->id ,$course3->id);
+
         $session1 = $f2fgenerator->create_session_for_course($course1);
-        $session2 = $f2fgenerator->create_session_for_course($course1);
-        $session3 = $f2fgenerator->create_session_for_course($course2);
-        $session4 = $f2fgenerator->create_session_for_course($course3);
+        $session2 = $f2fgenerator->create_session_for_course($course1, 2);
+        $session3 = $f2fgenerator->create_session_for_course($course2, 3);
+        $session4 = $f2fgenerator->create_session_for_course($course3, 4);
 
         // Create signups including customfield data and data params.
 

@@ -32,28 +32,6 @@ defined('MOODLE_INTERNAL') || die();
 
 /* === Start of deprecated Totara stuff === */
 
-/**
- * Given a function name or array syntax (same as first arg of call_user_func)
- * returns true if the function or method exists
- *
- * @deprecated since Totara 9.0
- * @param callback $function Function name or array defining the method
- * @return boolean true if function or method exists
- *
- * // TODO: delete in Totara 11.0
- */
-function function_or_method_exists($function) {
-    debugging('Totara function function_or_method_exists() has been deprecated, use standard is_callable() instead', DEBUG_DEVELOPER);
-    // see if it's a function
-    if (is_string($function) && function_exists($function)) {
-        return true;
-    }
-    if (is_array($function) && method_exists($function[0], $function[1])) {
-        return true;
-    }
-    return false;
-}
-
 /* === End of deprecated Totara specific stuff === */
 
 /* === Functions that needs to be kept longer in deprecated lib than normal time period === */
@@ -527,13 +505,6 @@ function filter_text($text, $courseid = NULL) {
 }
 
 /**
- * @deprecated use $PAGE->https_required() instead
- */
-function httpsrequired() {
-    throw new coding_exception('httpsrequired() can not be used any more use $PAGE->https_required() instead.');
-}
-
-/**
  * Given a physical path to a file, returns the URL through which it can be reached in Moodle.
  *
  * @deprecated since 3.1 - replacement legacy file API methods can be found on the moodle_url class, for example:
@@ -559,9 +530,6 @@ function get_file_url($path, $options=null, $type='coursefile') {
             break;
        case 'rssfile':
             $url = $CFG->wwwroot."/rss/file.php";
-            break;
-        case 'httpscoursefile':
-            $url = $CFG->httpswwwroot."/file.php";
             break;
          case 'coursefile':
         default:
@@ -1103,7 +1071,7 @@ function print_arrow($direction='up', $strsort=null, $return=false) {
         $strsort  = get_string('sort' . $sortdir, 'grades');
     }
 
-    $return = ' <img src="'.$OUTPUT->pix_url('t/' . $direction) . '" alt="'.$strsort.'" /> ';
+    $return = ' ' . $OUTPUT->pix_icon('t/' . $direction, $strsort) . ' ';
 
     if ($return) {
         return $return;
@@ -5072,7 +5040,7 @@ function message_contact_link($userid, $linktype='add', $return=false, $script=n
                 $iconpath = 't/addcontact';
         }
 
-        $img = '<img src="'.$OUTPUT->pix_url($iconpath).'" class="iconsmall" alt="'.$safealttext.'" />';
+        $img = $OUTPUT->pix_icon($iconpath, $safealttext);
     }
 
     $output = '<span class="'.$linktype.'contact">'.
@@ -5145,9 +5113,9 @@ function message_history_link($userid1, $userid2, $return=false, $keywords='', $
     }
 
     if ($linktext == 'icon') {  // Icon only
-        $fulllink = '<img src="'.$OUTPUT->pix_url('t/messages') . '" class="iconsmall" alt="'.$strmessagehistory.'" />';
+        $fulllink = $OUTPUT->pix_icon('t/messages', $strmessagehistory);
     } else if ($linktext == 'both') {  // Icon and standard name
-        $fulllink = '<img src="'.$OUTPUT->pix_url('t/messages') . '" class="iconsmall" alt="" />';
+        $fulllink = $OUTPUT->pix_icon('t/messages', '');
         $fulllink .= '&nbsp;'.$strmessagehistory;
     } else if ($linktext) {    // Custom name
         $fulllink = $linktext;

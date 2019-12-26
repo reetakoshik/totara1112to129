@@ -487,7 +487,8 @@ class backup_course_structure_step extends backup_structure_step {
                                         FROM {course_info_field} f
                                         JOIN {course_info_data} d ON d.fieldid = f.id
                                    LEFT JOIN {course_info_data_param} dp ON dp.dataid = d.id
-                                       WHERE d.courseid = ?', array(backup::VAR_PARENTID));
+                                       WHERE d.courseid = ?
+                                    ORDER BY dp.id ASC', array(backup::VAR_PARENTID));
 
         $customrolename->set_source_sql('SELECT r.shortname AS role_name, rn.name AS custom_name
                                         FROM {role_names} rn
@@ -504,6 +505,7 @@ class backup_course_structure_step extends backup_structure_step {
 
         $course->annotate_ids('grouping', 'defaultgroupingid');
 
+        $course->annotate_files('course', 'images', null); // Totara: background image for grid catalogue
         $course->annotate_files('course', 'summary', null);
         $course->annotate_files('course', 'overviewfiles', null);
         $course->annotate_files('course', 'legacy', null);
@@ -1499,7 +1501,9 @@ class backup_block_instance_structure_step extends backup_structure_step {
 
         $block = new backup_nested_element('block', array('id', 'contextid', 'version'), array(
             'blockname', 'parentcontextid', 'showinsubcontexts', 'pagetypepattern',
-            'subpagepattern', 'defaultregion', 'defaultweight', 'configdata'));
+            'subpagepattern', 'defaultregion', 'defaultweight', 'configdata',
+            // Totara:
+            'common_config'));
 
         $positions = new backup_nested_element('block_positions');
 
@@ -2139,6 +2143,10 @@ class backup_annotate_all_question_files extends backup_execution_step {
                                         JOIN {backup_ids_temp} bi ON bi.itemid = qc.id
                                        WHERE bi.backupid = ?
                                          AND bi.itemname = 'question_categoryfinal'", array($this->get_backupid()));
+        // Totara: Records in set may be changed, which could lock MSSQL unless pre-loaded.
+        if ($DB->get_dbfamily() === 'mssql') {
+            $rs->preload();
+        }
         // To know about qtype specific components/fileareas
         $components = backup_qtype_plugin::get_components_and_fileareas();
         // Let's loop
@@ -2271,6 +2279,10 @@ class backup_annotate_all_user_files extends backup_execution_step {
         // Fetch all annotated (final) users
         $rs = $DB->get_recordset('backup_ids_temp', array(
             'backupid' => $this->get_backupid(), 'itemname' => 'userfinal'));
+        // Totara: Records in set may be changed, which could lock MSSQL unless pre-loaded.
+        if ($DB->get_dbfamily() === 'mssql') {
+            $rs->preload();
+        }
         $progress = $this->task->get_progress();
         $progress->start_progress($this->get_name());
         foreach ($rs as $record) {

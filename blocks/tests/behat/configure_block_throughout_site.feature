@@ -20,23 +20,24 @@ Feature: Add and configure blocks throughout the site
       | manager1 | Acceptance test site | manager |
     # Allow at least one role assignment in the block context:
     And I log in as "admin"
-    And I navigate to "Define roles" node in "Site administration > Users > Permissions"
+    And I navigate to "Define roles" node in "Site administration > Permissions"
     And I follow "Edit Non-editing teacher role"
     And I set the following fields to these values:
       | Block | 1 |
     And I press "Save changes"
     And I log out
 
-  Scenario: Add and configure a block throughtout the site
+  @javascript
+  Scenario: Add and configure a block throughout the site
     Given I log in as "manager1"
     And I am on site homepage
     And I follow "Turn editing on"
-    And I add the "Comments" block
+    And I add the "Comments" block to the "top" region
     And I configure the "Comments" block
     And I set the following fields to these values:
       | Page contexts | Display throughout the entire site |
     And I press "Save changes"
-    When I follow "Course 1"
+    When I am on "Course 1" course homepage
     Then I should see "Comments" in the "Comments" "block"
     And I should see "Save comment" in the "Comments" "block"
     And I am on site homepage
@@ -44,18 +45,17 @@ Feature: Add and configure blocks throughout the site
     And I set the following fields to these values:
       | Default weight | -10 (first) |
     And I press "Save changes"
-    And I follow "Course 1"
-    # The first block matching the pattern should be top-left block
-    And I should see "Comments" in the "//*[@id='region-pre' or @id='block-region-side-pre']/descendant::*[contains(concat(' ', normalize-space(@class), ' '), ' block ')]" "xpath_element"
+    And I am on "Course 1" course homepage
+    And I should see "Comments" in the "//*[@id='region-top' or @id='block-region-top']/descendant::*[contains(concat(' ', normalize-space(@class), ' '), ' block ')]" "xpath_element"
 
   Scenario: Blocks on the dashboard page can have roles assigned to them
     Given I log in as "manager1"
     When I press "Customise this page"
-    Then I should see "Assign roles in Navigation block"
+    Then I should see "Assign roles in Dashboards block"
 
   Scenario: Blocks on courses can have roles assigned to them
     Given I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Turn editing on"
     Then I should see "Assign roles in Search forums block"
 
@@ -67,7 +67,8 @@ Feature: Add and configure blocks throughout the site
     And I add the "HTML" block
     And I configure the "(new HTML block)" block
     And I set the following fields to these values:
-      | Block title | Foo " onload="document.getElementsByTagName('body')[0].remove()" alt=" |
-      | Content     | Example |
+      | Override default block title | Yes   |
+      | Block title                  | Foo " onload="document.getElementsByTagName('body')[0].remove()" alt=" |
+      | Content                      | Example |
     When I press "Save changes"
-    Then I should see "Course overview"
+    Then I should see "Current Learning"

@@ -525,6 +525,29 @@ JS;
     }
 
     /**
+     * A method for validating the form submitted data
+     * @return bool
+     */
+    public function validateResponse() {
+        /** @var core_renderer $OUTPUT */
+        global $OUTPUT;
+        $form = $this->constructForm();
+        if ($data = $form->get_submitted_data()) {
+            // Checking whether the listofvalues being passed is empty or not. If it is empty, error should be returned
+            if (empty($data->listofvalues)) {
+                $form->_form->addElement('html',
+                    $OUTPUT->notification(get_string('rule_selector_failure', 'totara_cohort'), \core\output\notification::NOTIFY_ERROR)
+                );
+                return false;
+            }
+            return true;
+        }
+
+        // If the form is not submitted at all, then there is no point to validate and false should be returned here
+        return false;
+    }
+
+    /**
      * Retrieve menu options by constructing sql string from an sql object
      * and then querying the database
      *
@@ -668,6 +691,29 @@ class cohort_rule_ui_checkbox extends cohort_rule_ui_menu {
             '',
             $this->options
         );
+    }
+
+    /**
+     * A method for validating the form submitted data
+     * @return bool
+     */
+    public function validateResponse() {
+        /** @var core_renderer $OUTPUT */
+        global $OUTPUT;
+        $form = $this->constructForm();
+        if ($data = $form->get_submitted_data()) {
+            // Checking whether the listofvalues being passed is set, and in the acceptable options.
+            if (!isset($data->listofvalues) || !in_array($data->listofvalues, [0,1])) {
+                $form->_form->addElement('html',
+                    $OUTPUT->notification(get_string('rule_selector_failure', 'totara_cohort'), \core\output\notification::NOTIFY_ERROR)
+                );
+                return false;
+            }
+            return true;
+        }
+
+        // If the form is not submitted at all, then there is no point to validate and false should be returned here
+        return false;
     }
 
 
@@ -1399,13 +1445,16 @@ abstract class cohort_rule_ui_picker_course_program extends cohort_rule_ui {
     public function printDialogContent($hidden=array(), $ruleinstanceid=false) {
         global $CFG, $DB;
 
+        if (!in_array($this->pickertype, array(COHORT_PICKER_COURSE_COMPLETION, COHORT_PICKER_PROGRAM_COMPLETION,
+            COHORT_PICKER_CERTIFICATION_COMPLETION))) {
+            echo get_string('error:typecompletion', 'totara_cohort');
+            return;
+        }
+
         if ($this->pickertype == COHORT_PICKER_COURSE_COMPLETION) {
             require_once($CFG->dirroot.'/totara/core/dialogs/dialog_content_courses.class.php');
         } else if ($this->pickertype == COHORT_PICKER_PROGRAM_COMPLETION) {
             require_once($CFG->dirroot.'/totara/core/dialogs/dialog_content_programs.class.php');
-        } else {
-            echo get_string('error:typecompletion', 'totara_cohort');
-            return;
         }
 
         ///
@@ -1425,6 +1474,8 @@ abstract class cohort_rule_ui_picker_course_program extends cohort_rule_ui {
         // Load dialog content generator.
         if ($this->pickertype == COHORT_PICKER_COURSE_COMPLETION) {
             $dialog = new totara_dialog_content_cohort_rules_courses($categoryid);
+        } else if ($this->pickertype == COHORT_PICKER_CERTIFICATION_COMPLETION) {
+            $dialog = new totara_dialog_content_cohort_rules_certifications($categoryid);
         } else {
             $dialog = new totara_dialog_content_cohort_rules_programs($categoryid);
         }
@@ -1438,6 +1489,8 @@ abstract class cohort_rule_ui_picker_course_program extends cohort_rule_ui {
         // Add data.
         if ($this->pickertype == COHORT_PICKER_COURSE_COMPLETION) {
             $dialog->load_courses();
+        } else if ($this->pickertype == COHORT_PICKER_CERTIFICATION_COMPLETION) {
+            $dialog->load_certifications();
         } else {
             $dialog->load_programs();
         }
@@ -1958,6 +2011,488 @@ class cohort_rule_ui_picker_course_program_date extends cohort_rule_ui_picker_co
     }
 }
 
+class cohort_rule_ui_picker_certification_completion_date extends cohort_rule_ui_picker_course_program {
+    public $params = array(
+        'operator' => 0,
+        'date' => 0,
+        'listofids' => 1
+    );
+
+    public function getExtraSelectedItemsPaneWidgets() {
+        global $OUTPUT;
+
+        $html = '';
+        $html .= html_writer::start_div();
+        $html .= html_writer::start_tag('form', array('id' => 'form_course_program_date', 'class' => 'mform cohort-treeview-dialog-extrafields'));
+
+        $opmenufix = array(); // Operator menu for fixed date options.
+        $opmenurel = array(); // Operator menu for relative date options.
+
+        $opmenufix[COHORT_RULE_COMPLETION_OP_DATE_LESSTHAN] = get_string('datemenufixeddatebefore', 'totara_cohort');
+        $opmenufix[COHORT_RULE_COMPLETION_OP_DATE_GREATERTHAN] = get_string('datemenufixeddateafter', 'totara_cohort');
+
+        $opmenurel[COHORT_RULE_COMPLETION_OP_WITHIN_PAST_DURATION] = get_string('datemenudurationwithinpast', 'totara_cohort');
+        $opmenurel[COHORT_RULE_COMPLETION_OP_BEFORE_PAST_DURATION] = get_string('datemenudurationbeforepast', 'totara_cohort');
+
+        // Set default values.
+        $selected = isset($this->operator) ? $this->operator : '';
+        $htmldate = get_string('datepickerlongyearplaceholder', 'totara_core');
+        $class = 'cohorttreeviewsubmitfield';
+        $duration = '';
+        $radio2prop = $radio1prop = array('type' => 'radio', 'name' => 'fixeddynamic', 'checked' => 'checked', 'class' => $class);
+        if (isset($this->operator) && array_key_exists($this->operator, $opmenufix)) {
+            array_splice($radio2prop, 2);
+            $htmldate = userdate($this->date, get_string('datepickerlongyearphpuserdate', 'totara_core'), 99, false);
+        } else if (isset($this->operator) && array_key_exists($this->operator, $opmenurel)) {
+            array_splice($radio1prop, 2);
+            $duration = htmlspecialchars($this->date);
+        } else {
+            array_splice($radio2prop, 2);
+        }
+
+        // Fixed date.
+        $html .= get_string('completionusercertifiedbeforeafter', 'totara_cohort');
+        $html .= $OUTPUT->help_icon('rulehelp-cert-date', 'totara_cohort');
+        $html .= html_writer::start_tag('fieldset');
+
+        $html .= html_writer::start_tag('legend', array('class' => 'sr-only'));
+        $html .= get_string('rulelegend-completedfixeddate', 'totara_cohort');
+        $html .= html_writer::end_tag('legend');
+
+        $html .= html_writer::start_tag('label', array('for' => 'fixedordynamic1', 'class' => 'sr-only'));
+        $html .= get_string('rulelabel-fixeddate', 'totara_cohort');
+        $html .= html_writer::end_tag('label');
+
+        $html .= html_writer::empty_tag('input', array_merge(array('id' => 'fixedordynamic1', 'value' => '1'), $radio1prop));
+
+        $html .= html_writer::start_tag('label', array('for' => 'beforeaftermenu', 'class' => 'sr-only'));
+        $html .= get_string('rulelabel-beforeorafter', 'totara_cohort');
+        $html .= html_writer::end_tag('label');
+
+        $html .= html_writer::select($opmenufix, 'beforeaftermenu', $selected, array(), array('id' => 'beforeaftermenu', 'class' => $class));
+
+        $html .= html_writer::start_tag('label', array('for' => 'completiondate', 'class' => 'sr-only'));
+        $html .= get_string('rulelabel-completiondate', 'totara_cohort');
+        $html .= html_writer::end_tag('label');
+
+        $html .= html_writer::empty_tag('input', array('type' => 'text', 'size' => '10', 'id' => 'completiondate',
+            'name' => 'date', 'value' => htmlspecialchars($htmldate), 'class' => $class));
+        $html .= html_writer::end_tag('fieldset');
+
+        // Relative date.
+        $html .= get_string('or', 'totara_cohort');
+        $html .= html_writer::start_tag('fieldset');
+
+        $html .= html_writer::start_tag('legend', array('class' => 'sr-only'));
+        $html .= get_string('rulelegend-completedrelativedate', 'totara_cohort');
+        $html .= html_writer::end_tag('legend');
+
+        $html .= html_writer::start_tag('label', array('for' => 'fixedordynamic2', 'class' => 'sr-only'));
+        $html .= get_string('rulelabel-relativedate', 'totara_cohort');
+        $html .= html_writer::end_tag('label');
+
+        $html .= html_writer::empty_tag('input', array_merge(array('id' => 'fixedordynamic2', 'value' => '2'), $radio2prop));
+
+        $html .= html_writer::start_tag('label', array('for' => 'menudurationmenu', 'class' => 'sr-only'));
+        $html .= get_string('rulelabel-withinorbeforeprevious', 'totara_cohort');
+        $html .= html_writer::end_tag('label');
+
+        $html .= html_writer::select($opmenurel, 'durationmenu', $selected, array(), array('class' => $class));
+
+        $html .= html_writer::start_tag('label', array('for' => 'completiondurationdate', 'class' => 'sr-only'));
+        $html .= get_string('rulelabel-days', 'totara_cohort');
+        $html .= html_writer::end_tag('label');
+
+        $html .= html_writer::empty_tag('input', array('type' => 'text', 'size' => '3', 'id' => 'completiondurationdate',
+            'name' => 'durationdate', 'value' => $duration, 'class' => $class));
+        $html .= get_string('completiondurationdays', 'totara_cohort');
+        $html .= html_writer::end_tag('fieldset');
+
+        $html .= html_writer::end_tag('form');
+        $html .= html_writer::end_div();
+
+        return $html;
+    }
+
+    public function handleDialogUpdate($sqlhandler){
+        $fixedordynamic = required_param('fixeddynamic', PARAM_INT);
+        switch($fixedordynamic) {
+            case 1:
+                $operator = required_param('beforeaftermenu', PARAM_INT);
+                $date = totara_date_parse_from_format(get_string('datepickerlongyearparseformat', 'totara_core'),
+                    required_param('date', PARAM_TEXT));
+                break;
+            case 2:
+                $operator = required_param('durationmenu', PARAM_INT);
+                $date = required_param('durationdate', PARAM_INT); // Convert number to seconds.
+                break;
+            default:
+                return false;
+        }
+        $this->date = $sqlhandler->date = $date;
+        $this->operator = $sqlhandler->operator = $operator;
+        $this->listofids = $sqlhandler->listofids = explode(',', required_param('selected', PARAM_SEQUENCE));
+        $sqlhandler->write();
+    }
+
+    /**
+     * Get the description of this rule for the list of rules
+     * @param int $ruleid
+     * @param boolean $static only display static description, without action controls
+     * @return string
+     */
+    public function getRuleDescription($ruleid, $static=true) {
+        global $DB, $CFG, $COHORT_RULE_COMPLETION_OP;
+        if (!isset($this->operator) || !isset($this->listofids)) {
+            return get_string('error:rulemissingparams', 'totara_cohort');
+        }
+
+        $strvar = new stdClass();
+        $strvar->desc = $this->description;
+        switch ($this->operator) {
+            case COHORT_RULE_COMPLETION_OP_DATE_LESSTHAN:
+            case COHORT_RULE_COMPLETION_OP_DATE_GREATERTHAN:
+                $a = userdate($this->date, get_string('datepickerlongyearphpuserdate', 'totara_core'), 99, false);
+                break;
+            case COHORT_RULE_COMPLETION_OP_BEFORE_PAST_DURATION:
+            case COHORT_RULE_COMPLETION_OP_WITHIN_PAST_DURATION:
+            case COHORT_RULE_COMPLETION_OP_WITHIN_FUTURE_DURATION:
+            case COHORT_RULE_COMPLETION_OP_AFTER_FUTURE_DURATION:
+                $a = $this->date;
+                break;
+        }
+        $strvar->join = get_string("dateis{$COHORT_RULE_COMPLETION_OP[$this->operator]}", 'totara_cohort', $a);
+
+        list($sqlin, $sqlparams) = $DB->get_in_or_equal($this->listofids);
+        $sqlparams[] = $ruleid;
+        if ($this->pickertype == COHORT_PICKER_COURSE_COMPLETION) {
+            $sql = "SELECT c.id, c.fullname, crp.id AS paramid
+                FROM {course} c
+                INNER JOIN {cohort_rule_params} crp ON c.id = " . $DB->sql_cast_char2int('crp.value') . "
+                WHERE c.id {$sqlin}
+                AND crp.name = 'listofids' AND crp.ruleid = ?
+                ORDER BY sortorder, fullname";
+        } else {
+            $sql = "SELECT p.id, p.fullname, crp.id AS paramid
+                FROM {prog} p
+                INNER JOIN {cohort_rule_params} crp ON p.id = " . $DB->sql_cast_char2int('crp.value') . "
+                WHERE p.id {$sqlin}
+                AND crp.name = 'listofids' AND crp.ruleid = ?
+                ORDER BY sortorder, fullname";
+        }
+
+        $courseprogramlist = $DB->get_records_sql($sql, $sqlparams);
+
+        foreach ($courseprogramlist as $i => $c) {
+            $value = '"' . format_string($c->fullname) . '"';
+            if (!$static) {
+                $value .= $this->param_delete_action_icon($c->paramid);
+            }
+            $courselist[$i] = html_writer::tag('span', $value, array('class' => 'ruleparamcontainer'));
+        };
+
+        $this->add_missing_rule_params($courselist, $ruleid, $static);
+        $paramseparator = html_writer::tag('span', ', ', array('class' => 'ruleparamseparator'));
+        $strvar->vars = implode($paramseparator, $courselist);
+
+        return get_string('ruleformat-descjoinvars', 'totara_cohort', $strvar);
+    }
+
+    /**
+     * @param array $ruledescriptions
+     * @param int $ruleinstanceid
+     * @param bool $static
+     *
+     * @return void
+     */
+    public function add_missing_rule_params(array &$ruledescriptions, $ruleinstanceid, $static = true) {
+        global $DB;
+
+        if (count($ruledescriptions) < count($this->listofids)) {
+            $fullparams = $DB->get_records("cohort_rule_params", array(
+                'ruleid' => $ruleinstanceid,
+                'name' => 'listofids'
+            ), "", "value AS certid, id AS paramid");
+
+            foreach ($this->listofids as $certid) {
+                if (!isset($ruledescriptions[$certid])) {
+                    $item = isset($fullparams[$certid]) ? $fullparams[$certid] : null;
+
+                    if (!$item) {
+                        debugging("Missing certification id: {$certid} in rule params");
+                        continue;
+                    }
+
+                    $a = (object) array('id' => $item->certid);
+                    $value = get_string('deleteditem', 'totara_cohort', $a);
+                    if (!$static) {
+                        $value .= $this->param_delete_action_icon($item->paramid);
+                    }
+
+                    $ruledescriptions[$certid] = html_writer::tag("span", $value, array(
+                        'class' => 'ruleparamcontainer cohortdeletedparam'
+                    ));
+                }
+            }
+        }
+    }
+}
+
+class cohort_rule_ui_picker_certification_status extends cohort_rule_ui_picker_course_program {
+    public $params = array(
+        'listofids' => 1,
+        'status' => 0,
+        'assignmentstatus' => 0
+    );
+
+    public function getExtraSelectedItemsPaneWidgets() {
+
+        $status = isset($this->status) ? explode(',', $this->status) : array(cohort_rule_sqlhandler_certification_status::CERTIFIED);
+        $assignmentstatus = isset($this->assignmentstatus) ? explode(',', $this->assignmentstatus) :
+            array(cohort_rule_sqlhandler_certification_status::ASSIGNED, cohort_rule_sqlhandler_certification_status::UNASSIGNED);
+
+        $checkboxatr = array('type' => 'checkbox', 'value' => '0', 'class' => 'cohorttreeviewsubmitfield');
+
+        $html = '';
+        $html .= html_writer::start_div();
+        $html .= html_writer::start_tag('form', array('id' => 'form_certification_status', 'class' => 'mform cohort-treeview-dialog-extrafields'));
+
+        // Certification status.
+        $html .= html_writer::start_tag('fieldset', array('id' => 'certifstatus', 'name' => 'certifstatus', 'class' => 'cohorttreeviewsubmitfield'));
+        $html .= html_writer::start_tag('legend', array('class' => 'sr-only'));
+        $html .= get_string('rulelegend-certificationstatus', 'totara_cohort');
+        $html .= html_writer::end_tag('legend');
+        $html .= html_writer::tag('p', get_string('rulename-learning-certificationstatus', 'totara_cohort'));
+
+        $atr = array_merge($checkboxatr, array('id' => 'certifstatus_currentlycertified', 'name' => 'certifstatus_currentlycertified'));
+        if (in_array(cohort_rule_sqlhandler_certification_status::CERTIFIED, $status)) {
+            $atr['checked'] = 'checked';
+            $atr['value'] = '1';
+        }
+        $html .= html_writer::start_div();
+        $html .= html_writer::start_tag('label', array('for' => 'certifstatus_currentlycertified', 'class' => 'sr-only'));
+        $html .= get_string('ruledesc-learning-certificationstatus-currentlycertified', 'totara_cohort');
+        $html .= html_writer::end_tag('label');
+        $html .= html_writer::empty_tag('input', $atr);
+        $html .= get_string('ruledesc-learning-certificationstatus-currentlycertified', 'totara_cohort');
+        $html .= html_writer::end_div();
+
+        $atr = array_merge($checkboxatr, array('id' => 'certifstatus_currentlyexpired', 'name' => 'certifstatus_currentlyexpired'));
+        if (in_array(cohort_rule_sqlhandler_certification_status::EXPIRED, $status)) {
+            $atr['checked'] = 'checked';
+            $atr['value'] = '1';
+        }
+        $html .= html_writer::start_div();
+        $html .= html_writer::start_tag('label', array('for' => 'certifstatus_currentlyexpired', 'class' => 'sr-only'));
+        $html .= get_string('ruledesc-learning-certificationstatus-currentlyexpired', 'totara_cohort');
+        $html .= html_writer::end_tag('label');
+        $html .= html_writer::empty_tag('input', $atr);
+        $html .= get_string('ruledesc-learning-certificationstatus-currentlyexpired', 'totara_cohort');
+        $html .= html_writer::end_div();
+
+        $atr = array_merge($checkboxatr, array('id' => 'certifstatus_nevercertified', 'name' => 'certifstatus_nevercertified'));
+        if (in_array(cohort_rule_sqlhandler_certification_status::NEVER_CERTIFIED, $status)) {
+            $atr['checked'] = 'checked';
+            $atr['value'] = '1';
+        }
+        $html .= html_writer::start_div();
+        $html .= html_writer::start_tag('label', array('for' => 'certifstatus_nevercertified', 'class' => 'sr-only'));
+        $html .= get_string('ruledesc-learning-certificationstatus-nevercertified', 'totara_cohort');
+        $html .= html_writer::end_tag('label');
+        $html .= html_writer::empty_tag('input', $atr);
+        $html .= get_string('ruledesc-learning-certificationstatus-nevercertified', 'totara_cohort');
+        $html .= html_writer::end_div();
+        $html .= html_writer::end_tag('fieldset');
+
+        $html .= html_writer::empty_tag('br');
+
+        // Assignment status.
+        $html .= html_writer::start_tag('fieldset', array('id' => 'certifassignmentstatus', 'name' => 'certifassignmentstatus', 'class' => 'cohorttreeviewsubmitfield'));
+
+        $html .= html_writer::start_tag('legend', array('class' => 'sr-only'));
+        $html .= get_string('rulelegend-certificationassignmentstatus', 'totara_cohort');
+        $html .= html_writer::end_tag('legend');
+
+        $html .= html_writer::tag('p', get_string('ruledesc-learning-certificationstatus-assignmentstatus', 'totara_cohort'));
+
+        $atr = array_merge($checkboxatr, array('id' => 'certifassignmentstatus_assigned', 'name' => 'certifassignmentstatus_assigned'));
+        if (in_array(cohort_rule_sqlhandler_certification_status::ASSIGNED, $assignmentstatus)) {
+            $atr['checked'] = 'checked';
+            $atr['value'] = '1';
+        }
+        $html .= html_writer::start_div();
+        $html .= html_writer::start_tag('label', array('for' => 'certifassignmentstatus_assigned', 'class' => 'sr-only'));
+        $html .= get_string('ruledesc-learning-certificationstatus-assigned', 'totara_cohort');
+        $html .= html_writer::end_tag('label');
+        $html .= html_writer::empty_tag('input', $atr);
+        $html .= get_string('ruledesc-learning-certificationstatus-assigned', 'totara_cohort');
+        $html .= html_writer::end_div();
+
+        $atr = array_merge($checkboxatr, array('id' => 'certifassignmentstatus_unassigned', 'name' => 'certifassignmentstatus_unassigned'));
+        if (in_array(cohort_rule_sqlhandler_certification_status::UNASSIGNED, $assignmentstatus)) {
+            $atr['checked'] = 'checked';
+            $atr['value'] = '1';
+        }
+        $html .= html_writer::start_div();
+        $html .= html_writer::start_tag('label', array('for' => 'certifassignmentstatus_unassigned', 'class' => 'sr-only'));
+        $html .= get_string('ruledesc-learning-certificationstatus-unassigned', 'totara_cohort');
+        $html .= html_writer::end_tag('label');
+        $html .= html_writer::empty_tag('input', $atr);
+        $html .= get_string('ruledesc-learning-certificationstatus-unassigned', 'totara_cohort');
+        $html .= html_writer::end_div();
+        $html .= html_writer::end_tag('fieldset');
+
+        $html .= html_writer::empty_tag('br');
+        $html .= html_writer::end_tag('form');
+        $html .= html_writer::end_div();
+
+        return $html;
+    }
+
+    public function handleDialogUpdate($sqlhandler) {
+        $certifstatus_currentlycertified = optional_param('certifstatus_currentlycertified', false, PARAM_TEXT);
+        $certifstatus_currentlyexpired = optional_param('certifstatus_currentlyexpired', false, PARAM_TEXT);
+        $certifstatus_nevercertified = optional_param('certifstatus_nevercertified', false, PARAM_TEXT);
+
+        $certifassignmentstatus_assigned = optional_param('certifassignmentstatus_assigned', false, PARAM_TEXT);
+        $certifassignmentstatus_unassigned = optional_param('certifassignmentstatus_unassigned', false, PARAM_TEXT);
+
+        $status = array();
+
+        if ($certifstatus_currentlycertified) {
+            $status[] = cohort_rule_sqlhandler_certification_status::CERTIFIED;
+        }
+
+        if ($certifstatus_currentlyexpired) {
+            $status[] = cohort_rule_sqlhandler_certification_status::EXPIRED;
+        }
+
+        if ($certifstatus_nevercertified) {
+            $status[] = cohort_rule_sqlhandler_certification_status::NEVER_CERTIFIED;
+        }
+
+        if (empty($status)) {
+            throw new \coding_exception('Dynamic audience certification rule has missing status');
+        }
+
+        $assignmentstatus = array();
+
+        if ($certifassignmentstatus_assigned) {
+            $assignmentstatus[] = cohort_rule_sqlhandler_certification_status::ASSIGNED;
+        }
+
+        if ($certifassignmentstatus_unassigned) {
+            $assignmentstatus[] = cohort_rule_sqlhandler_certification_status::UNASSIGNED;
+        }
+
+        if (empty($assignmentstatus)) {
+            throw new \coding_exception('Dynamic audience certification rule has missing assignment status');;
+        }
+
+        $this->listofids = $sqlhandler->listofids = explode(',', required_param('selected', PARAM_SEQUENCE));
+        $this->status = $sqlhandler->status = implode(',', $status);
+        $this->assignmentstatus = $sqlhandler->assignmentstatus = implode(',', $assignmentstatus);
+
+        $sqlhandler->write();
+    }
+
+    /**
+     * Get the description of this rule for the list of rules
+     * @param int $ruleid
+     * @param boolean $static only display static description, without action controls
+     * @return string
+     */
+    public function getRuleDescription($ruleid, $static=true) {
+        global $DB;
+
+        if (!isset($this->status) || !isset($this->assignmentstatus) || !isset($this->listofids)) {
+            return get_string('error:rulemissingparams', 'totara_cohort');
+        }
+
+        $strvar = new stdClass();
+        $strvar->desc = $this->description;
+
+        // Status.
+        $status = explode(',', $this->status);
+        array_walk($status, function(&$item) {
+            $item = "'" . get_string(cohort_rule_sqlhandler_certification_status::get_status($item), 'totara_cohort') . "'";
+        });
+        $strvar->status = implode(', ', $status);
+
+        // Assignment status.
+        $assignmentstatus = explode(',', $this->assignmentstatus);
+        array_walk($assignmentstatus, function(&$item) {
+            $item = "'" . get_string(cohort_rule_sqlhandler_certification_status::get_assignment_status($item), 'totara_cohort') . "'";
+        });
+        $strvar->assignmentstatus = implode(', ', $assignmentstatus);
+
+        list($sqlin, $sqlparams) = $DB->get_in_or_equal($this->listofids);
+        $sqlparams[] = $ruleid;
+
+        $sql = "SELECT p.id, p.fullname, crp.id AS paramid
+            FROM {prog} p
+            INNER JOIN {cohort_rule_params} crp ON p.id = " . $DB->sql_cast_char2int('crp.value') . "
+            WHERE p.id {$sqlin}
+            AND crp.name = 'listofids' AND crp.ruleid = ?
+            ORDER BY sortorder, fullname";
+
+        $courseprogramlist = $DB->get_records_sql($sql, $sqlparams);
+
+        foreach ($courseprogramlist as $i => $c) {
+            $value = '"' . format_string($c->fullname) . '"';
+            if (!$static) {
+                $value .= $this->param_delete_action_icon($c->paramid);
+            }
+            $courselist[$i] = html_writer::tag('span', $value, array('class' => 'ruleparamcontainer'));
+        };
+
+        $this->add_missing_rule_params($courselist, $ruleid, $static);
+        $paramseparator = html_writer::tag('span', ', ', array('class' => 'ruleparamseparator'));
+        $strvar->vars = implode($paramseparator, $courselist);
+
+        return get_string('ruleformat-certificationstatus', 'totara_cohort', $strvar);
+    }
+
+
+    /**
+     * @param array $ruledescriptions
+     * @param int $ruleinstanceid
+     * @param bool $static
+     * @return void
+     */
+    protected function add_missing_rule_params(array &$ruledescriptions, $ruleinstanceid, $static = true) {
+        global $DB;
+
+        if (count($ruledescriptions) < count($this->listofids)) {
+            // Detected there are missing certifications
+            $fullparams = $DB->get_records("cohort_rule_params", array(
+                'ruleid' => $ruleinstanceid,
+                'name' => 'listofids'
+            ),  "", "value AS certid, id AS paramid");
+
+            foreach ($this->listofids as $certid) {
+                if (!isset($ruledescriptions[$certid])) {
+                    $item = isset($fullparams[$certid]) ? $fullparams[$certid] : null;
+                    if (!$item) {
+                        debugging("Missing certification {$certid} in rule's params");
+                        continue;
+                    }
+
+                    $a = (object) array('id' => $item->certid);
+                    $value = "\"" . get_string('deleteditem', 'totara_cohort', $a) . "\"";
+                    if (!$static) {
+                        $value .= $this->param_delete_action_icon($item->paramid);
+                    }
+
+                    $ruledescriptions[$certid] = html_writer::tag('span', $value, array(
+                        'class' => 'ruleparamcontainer cohortdeletedparam'
+                    ));
+                }
+            }
+        }
+    }
+}
+
 // todo: Refactor to remove the shameful amount of code duplication between courses & programs
 require_once($CFG->dirroot.'/totara/core/dialogs/dialog_content_programs.class.php');
 class totara_dialog_content_cohort_rules_programs extends totara_dialog_content_programs {
@@ -1968,6 +2503,20 @@ class totara_dialog_content_cohort_rules_programs extends totara_dialog_content_
     * @param   $elements    array elements to be created in the pane
     * @return  $html
     */
+    public function populate_selected_items_pane($elements) {
+        $html = $this->cohort_rule_ui->getExtraSelectedItemsPaneWidgets();
+        return $html .= parent::populate_selected_items_pane($elements);
+    }
+}
+
+class totara_dialog_content_cohort_rules_certifications extends totara_dialog_content_certifications {
+
+    /**
+     * Returns markup to be used in the selected pane of a multi-select dialog
+     *
+     * @param   $elements    array elements to be created in the pane
+     * @return  $html
+     */
     public function populate_selected_items_pane($elements) {
         $html = $this->cohort_rule_ui->getExtraSelectedItemsPaneWidgets();
         return $html .= parent::populate_selected_items_pane($elements);
@@ -2380,116 +2929,6 @@ class cohort_rule_ui_reportsto extends cohort_rule_ui {
     }
 }
 
-
-class cohort_rule_ui_managersja extends cohort_rule_ui {
-    public $handlertype = 'treeview';
-    public $params = array(
-        'isdirectreport' => 0,
-        'managerid' => 1
-    );
-
-    public function printDialogContent($hidden=array(), $ruleinstanceid=false) {
-        global $CFG, $DB;
-
-        // Parent id
-        $parentid = optional_param('parentid', 0, PARAM_INT);
-
-        // Only return generated tree html
-        $treeonly = optional_param('treeonly', false, PARAM_BOOL);
-
-        $dialog = new totara_dialog_content_manager_cohortreportsto();
-
-        // Toggle treeview only display
-        $dialog->show_treeview_only = $treeonly;
-
-        // Load items to display
-        $dialog->load_items($parentid);
-
-        // Set selected items
-        $alreadyselected = array();
-        if ($ruleinstanceid) {
-            $sql = "SELECT u.id, " . get_all_user_name_fields(true, 'u') . "
-                FROM {user} u
-                INNER JOIN {cohort_rule_params} crp
-                    ON u.id = " . $DB->sql_cast_char2int('crp.value') . "
-                WHERE crp.ruleid = ? AND crp.name='managerid'
-                ORDER BY u.firstname, u.lastname
-                ";
-            $alreadyselected = $DB->get_records_sql($sql, array($ruleinstanceid));
-            foreach ($alreadyselected as $k => $v) {
-                $alreadyselected[$k]->fullname = fullname($v);
-            }
-        }
-        $dialog->selected_items = $alreadyselected;
-        $dialog->isdirectreport = isset($this->isdirectreport) ? $this->isdirectreport : '';
-
-        $dialog->urlparams = $hidden;
-
-        // Display page
-        // Display
-        $markup = $dialog->generate_markup();
-        // Hack to get around the hack that prevents deleting items via dialogs
-        $markup = str_replace('<td class="selected" ', '<td class="selected selected-shown" ', $markup);
-        echo $markup;
-    }
-
-    public function handleDialogUpdate($sqlhandler) {
-        $isdirectreport = required_param('isdirectreport', PARAM_BOOL);
-        $managerid = required_param('selected', PARAM_SEQUENCE);
-        $managerid = explode(',', $managerid);
-        $this->isdirectreport = $sqlhandler->isdirectreport = (int) $isdirectreport;
-        $this->managerid = $sqlhandler->managerid = $managerid;
-        $sqlhandler->write();
-    }
-
-    /**
-     * Get the description of the rule, to be printed on the cohort's rules list page
-     * @param int $ruleid
-     * @param boolean $static only display static description, without action controls
-     * @return string
-     */
-    public function getRuleDescription($ruleid, $static=true) {
-        global $DB;
-
-        if (!isset($this->isdirectreport) || !isset($this->managerid)) {
-            return get_string('error:rulemissingparams', 'totara_cohort');
-        }
-
-        $strvar = new stdClass();
-        if ($this->isdirectreport) {
-            $strvar->desc = get_string('userreportsdirectlyto', 'totara_cohort');
-        } else {
-            $strvar->desc = get_string('userreportsto', 'totara_cohort');
-        }
-
-        $usernamefields = get_all_user_name_fields(true, 'u');
-        list($sqlin, $sqlparams) = $DB->get_in_or_equal($this->managerid);
-        $sqlparams[] = $ruleid;
-        $sql = "SELECT u.id, {$usernamefields}, crp.id AS paramid
-            FROM {user} u
-            INNER JOIN {cohort_rule_params} crp ON u.id = " . $DB->sql_cast_char2int('crp.value') . "
-            WHERE u.id {$sqlin}
-            AND crp.name = 'managerid' AND crp.ruleid = ?";
-        $userlist = $DB->get_records_sql($sql, $sqlparams);
-
-        foreach ($userlist as $i => $u) {
-            $value = '"' . fullname($u) . '"';
-            if (!$static) {
-                $value .= $this->param_delete_action_icon($u->paramid);
-            }
-            $userlist[$i] = html_writer::tag('span', $value, array('class' => 'ruleparamcontainer'));
-        };
-        // Sort by fullname
-        sort($userlist);
-
-        $paramseparator = html_writer::tag('span', ', ', array('class' => 'ruleparamseparator'));
-        $strvar->vars = implode($paramseparator, $userlist);
-
-        return get_string('ruleformat-descvars', 'totara_cohort', $strvar);
-    }
-}
-
-require_once($CFG->dirroot . '/totara/core/dialogs/dialog_content_manager.class.php');
 class totara_dialog_content_manager_cohortmember extends totara_dialog_content {
     /**
     * Returns markup to be used in the selected pane of a multi-select dialog
@@ -2686,5 +3125,56 @@ class cohort_rule_ui_cohortmember extends cohort_rule_ui {
                 ));
             }
         }
+    }
+}
+
+/**
+ * Class cohort_rule_ui_authentication_type
+ * @property array $options Array<value, label> where 'value' is mixed type and 'label' is a string
+ */
+class cohort_rule_ui_authentication_type extends cohort_rule_ui_menu {
+    /**
+     * cohort_rule_ui_authentication_type constructor.
+     * @param string $description
+     */
+    public function __construct($description) {
+        parent::__construct($description, array());
+        $this->init();
+    }
+
+    /**
+     * @return void
+     */
+    private function init(): void {
+        if (empty($this->options)) {
+            $authavailables = core_component::get_plugin_list('auth');
+            foreach ($authavailables as $auth => $dirpath) {
+                $authplugin = get_auth_plugin($auth);
+                $this->options[$auth] = $authplugin->get_title();
+            }
+        }
+    }
+
+    /**
+     * A method for validating the form submitted data
+     * @return bool
+     */
+    public function validateResponse() {
+        /** @var core_renderer $OUTPUT */
+        global $OUTPUT;
+        $form = $this->constructForm();
+        if  ($data = $form->get_submitted_data()) {
+            $success = !empty($data->listofvalues);
+            // Checking whether the listofvalues being passed is empty or not. If it is empty, error should be returned
+            if (!$success) {
+                $form->_form->addElement('html',
+                    $OUTPUT->notification(get_string('msg:missing_auth_type', 'totara_cohort'), \core\output\notification::NOTIFY_ERROR)
+                );
+            }
+            return $success;
+        }
+
+        // If the form is not submitted at all, then there is no point to validate and false should be returned here
+        return false;
     }
 }

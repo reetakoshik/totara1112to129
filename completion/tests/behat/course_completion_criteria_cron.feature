@@ -23,16 +23,14 @@ Feature: Make sure course completion depending on completion of other course is 
     And I set the following administration settings values:
       | Enable completion tracking | 1 |
     # Configure the dependent course's completion.
-    And I am on site homepage
-    And I follow "Dependent course"
+    And I am on "Dependent course" course homepage
     And completion tracking is "Enabled" in current course
     And I follow "Course completion"
     And I set the following fields to these values:
       | criteria_self_value | 1 |
     And I press "Save changes"
     # Configure the resulting course's completion.
-    And I am on site homepage
-    And I follow "Resulting course"
+    And I am on "Resulting course" course homepage
     And completion tracking is "Enabled" in current course
     And I follow "Course completion"
     And I set the following fields to these values:
@@ -48,14 +46,12 @@ Feature: Make sure course completion depending on completion of other course is 
     Then I should see "CSV import completed"
     And I should see "1 Records successfully imported as courses"
     # Check that the resulting course is NOT marked complete.
-    And I am on site homepage
-    And I follow "Resulting course"
+    And I am on "Resulting course" course homepage
     And I navigate to "Course completion" node in "Course administration > Reports"
     And I should see "Not completed" in the "Student First" "table_row"
     # Run the function we're testing.
     And I run the scheduled task "core\task\completion_regular_task"
     # Check that the resulting course IS marked complete.
-    And I am on site homepage
-    And I follow "Resulting course"
+    And I am on "Resulting course" course homepage
     And I navigate to "Course completion" node in "Course administration > Reports"
     And I should see "Completed" in the "Student First" "table_row"

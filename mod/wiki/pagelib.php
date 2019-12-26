@@ -84,7 +84,7 @@ abstract class page_wiki {
      */
     protected $tabs_options = array();
     /**
-     * @var object wiki renderer
+     * @var mod_wiki_renderer wiki renderer
      */
     protected $wikioutput;
     /**
@@ -573,7 +573,8 @@ class page_wiki_edit extends page_wiki {
             $params['filearea']   = 'attachments';
         }
 
-        $data->tags = core_tag_tag::get_item_tags_array('mod_wiki', 'wiki_pages', $this->page->id);
+        $data->tags = core_tag_tag::get_item_tags_array('mod_wiki', 'wiki_pages', $this->page->id,
+            core_tag_tag::BOTH_STANDARD_AND_NOT, 0, false); // Totara: Do not encode special characters.
 
         $form = new mod_wiki_edit_form($url, $params);
         $form->set_data($data);

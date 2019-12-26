@@ -1,6 +1,0 @@
-# This file lists files/directories that are not included in Totara packages built by git-archive
-.gitattributes export-ignore
-.gitignore export-ignore
-
-**/yui/build/** -diff
-**/amd/build/** -diff

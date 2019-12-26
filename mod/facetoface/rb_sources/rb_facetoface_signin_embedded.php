@@ -28,7 +28,7 @@ class rb_facetoface_signin_embedded extends rb_base_embedded {
     public $hidden, $accessmode, $accesssettings, $shortname;
 
     public function __construct($data) {
-        $this->url = '/mod/facetoface/signinsheet.php';
+        $this->url = '/mod/facetoface/reports/signinsheet.php';
         $this->source = 'facetoface_signin';
         $this->shortname = 'facetoface_signin';
         $this->defaultsortcolumn = 'user_namelink';
@@ -57,7 +57,7 @@ class rb_facetoface_signin_embedded extends rb_base_embedded {
         // No restrictions.
         $this->contentmode = REPORT_BUILDER_CONTENT_MODE_NONE;
 
-        // Add required parameters from the mod/facetoface/signinsheet.php page.
+        // Add required parameters from the mod/facetoface/reports/signinsheet.php page.
         $this->embeddedparams['sessiondateid'] = isset($data['sessiondateid']) ? $data['sessiondateid'] : 0;
         $this->embeddedparams['sessionid'] = isset($data['sessionid']) ? $data['sessionid'] : 0;
         $this->embeddedparams['facetofaceid'] = isset($data['facetofaceid']) ? $data['facetofaceid'] : 0;

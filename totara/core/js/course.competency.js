@@ -199,27 +199,6 @@ M.totara_coursecompetency = M.totara_coursecompetency || {
             // select, the following fix will need to be applied to re-assign
             // Moodle auto-submission. Until then, inline jQuery onChange does the
             // work.
-
-            /*
-            // when the AJAX call to retrieve new HTML for the assigned table
-            // completes we can set up the component action on the new select
-            // element because it has a new, unique ID different from when rendered
-            // on page load.
-            var tableid = 'coursecompetency-table-container';
-            $(totaraDialogs.evidence.dialog).on('ajaxComplete', function(event) {
-                // to be double sure our newly appended DOM elements are ready to
-                // have a listener bound by a component action generated ID, respond
-                // when the attached parent node's 'contentready' event is fired.
-                Y.on('contentready', function(e){
-                    Y.all('#'+tableid+' select').each(function(n, idx, li){
-                        var id = n.get('id');
-                        // call the original component action again so it handles the
-                        // auto submission of a selected option based on the new select
-                        M.core.init_formautosubmit(Y, tableid, id);
-                    });
-                }, '#'+tableid, Y);
-            });
-            */
         }
     }
 };

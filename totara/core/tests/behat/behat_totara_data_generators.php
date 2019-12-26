@@ -66,10 +66,6 @@ class behat_totara_data_generators extends behat_base {
                 'datagenerator' => 'global_asset_for_behat',
                 'required' => array('name')
             ),
-            'custom assets' => array(
-                'datagenerator' => 'custom_asset_for_behat',
-                'required'      => array('name'),
-            ),
         ),
         'totara_core' => array(
             'custom profile fields' => array(
@@ -298,6 +294,11 @@ class behat_totara_data_generators extends behat_base {
         'mod_lesson' => array(
             'timer' => array (
                 'age_data' => 'wind_back_timer'
+            )
+        ),
+        'mod_quiz' => array(
+            'responses' => array(
+                'age_data' => 'age_quiz_responses'
             )
         )
 

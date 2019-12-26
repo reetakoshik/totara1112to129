@@ -31,6 +31,7 @@ use totara_job\job_assignment;
  * Unit test of sending a notification email should not add up the message content and the $eventdata should be reset
  * everytime one message got sent out to a single recipient
  *
+ * Class mod_facetoface_notify_under_capacity_testcase
  */
 class mod_facetoface_notify_under_capacity_testcase extends advanced_testcase {
     /**
@@ -43,6 +44,8 @@ class mod_facetoface_notify_under_capacity_testcase extends advanced_testcase {
      * @return void
      */
     private function create_facetoface_with_session(): void {
+        global $DB;
+
         $generator = $this->getDataGenerator();
         $course = $generator->create_course([], ['createsections' => true]);
 
@@ -65,7 +68,7 @@ class mod_facetoface_notify_under_capacity_testcase extends advanced_testcase {
                 ]
             ],
             'mincapacity' => 3,
-            'cutoff' => 3603,
+            'cutoff' => 3620,
             'sendcapacityemail' => 1
         ];
 
@@ -79,6 +82,15 @@ class mod_facetoface_notify_under_capacity_testcase extends advanced_testcase {
         // Signing up users to the session here
         $this->sign_up_user_to_session($user1, $session, $course, $f2f);
         $this->sign_up_user_to_session($user2, $session, $course, $f2f);
+
+        // Clean messages stack.
+        $sink = $this->redirectMessages();
+        $this->execute_adhoc_tasks();
+        $sink->close();
+
+        // Set the session date back an hour, this is enough for facetoface_notify_under_capacity to find this session.
+        $sql = 'UPDATE {facetoface_sessions_dates} SET timestart = (timestart - 360) WHERE sessionid = :sessionid';
+        $DB->execute($sql, array('sessionid' => $session->id));
     }
 
     /**
@@ -108,10 +120,9 @@ class mod_facetoface_notify_under_capacity_testcase extends advanced_testcase {
             job_assignment::create($data);
         }
 
-        $discountcode = 'disc1';
-        $notificationtype = 1;
-        $statuscode = MDL_F2F_STATUS_APPROVED;
-        facetoface_user_signup($session, $f2f, $course, $discountcode, $notificationtype, $statuscode, $user->id);
+        $seminarevent = new \mod_facetoface\seminar_event($session->id);
+        $signup = \mod_facetoface\signup::create($user->id, $seminarevent);
+        \mod_facetoface\signup_helper::signup($signup);
     }
 
     /**
@@ -140,6 +151,8 @@ class mod_facetoface_notify_under_capacity_testcase extends advanced_testcase {
         ob_start();
         facetoface_notify_under_capacity();
         ob_end_clean();
+
+        $this->execute_adhoc_tasks();
 
         $messages = $sink->get_messages();
         $this->assertCount(2, $messages, "The test suite was expecting only 2 messages sent out in the environment setup");

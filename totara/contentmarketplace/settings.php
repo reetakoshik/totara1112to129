@@ -58,26 +58,25 @@ if ($hassiteconfig or has_any_capability(array('totara/contentmarketplace:config
     ));
 
     $beforesibling = null;
-    if (has_capability('moodle/category:manage', $systemcontext)) {
-        $beforesibling = 'addcategory';
+    if (has_any_capability(['moodle/restore:restorefile', 'moodle/backup:downloadfile'], $systemcontext)) {
+        $beforesibling = 'restorecourse';
     }
-    /** @var totara_contentmarketplace\plugininfo\contentmarketplace $plugin */
-    $plugin = core_plugin_manager::instance()->get_plugin_info('contentmarketplace_goone');
+    $wm = new \totara_contentmarketplace\workflow_manager\exploremarketplace();
     $ADMIN->add(
         'courses',
         new admin_externalpage(
             'exploremarketplaces',
             new lang_string('explore_totara_content', 'totara_contentmarketplace'),
-            new \moodle_url('/totara/contentmarketplace/explorer.php', array('marketplace' => 'goone')),
+            $wm->get_url(),
             array('totara/contentmarketplace:add'),
-            (!$marketplaceenabled || !$plugin->is_enabled())
+            (!$marketplaceenabled || !$wm->workflows_available())
         ),
         $beforesibling
     );
 
     // Clean up after ourselves, the admin tree is big enough without us leaving things around.
+    unset($wm);
     unset($marketplaceenabled);
-    unset($plugin);
     unset($forcedisabled);
     unset($alreadysetup);
     unset($beforesibling);

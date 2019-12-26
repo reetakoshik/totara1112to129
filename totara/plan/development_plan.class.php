@@ -611,10 +611,11 @@ class development_plan {
         }
 
         array_unshift($overall_strings, 'Plan Progress: ' . $overall_progress . "%\n\n");
-        $tooltipstr = implode(' | ', $overall_strings);
 
         // Get totara core renderer
         $totara_renderer = $PAGE->get_renderer('totara_core');
+
+        $tooltipstr = $OUTPUT->render_from_template('totara_plan/plan_status_summary', array('statuses' => $overall_strings));
 
         // Get relevant progress bar and return for display
         return $totara_renderer->progressbar($overall_progress, 'medium', false, $tooltipstr);
@@ -1446,22 +1447,6 @@ class development_plan {
         return $this->learner;
     }
 
-
-    /**
-     * Determine the manager for the user of this Plan
-     *
-     * @deprecated since 9.0
-     * @return string
-     */
-    function get_manager() {
-        global $DB;
-
-        debugging('This function is deprecated since 9.0. Please use development_plan::get_all_managers instead.', DEBUG_DEVELOPER);
-
-        $job_assignment = \totara_job\job_assignment::get_first($this->userid);
-        return $DB->get_record('user', array('id' => $job_assignment->managerid));
-    }
-
     /**
      * Get all managers for the user of this plan.
      *
@@ -1668,61 +1653,6 @@ class development_plan {
             $event->data = $data;
 
             tm_workflow_send($event);
-        }
-    }
-
-
-    /**
-     * Send an alert relating to this plan
-     *
-     * @deprecated since 9.0
-     * @param boolean $tolearner To the learner if true, otherwise to the manager
-     * @param string $icon filename of icon (in theme/totara/pix/msgicons/)
-     * @param string $subjectstring lang string in totara_plan
-     * @param string $fullmessagestring lang string in totara_plan
-     * @return boolean
-     */
-    public function send_alert($tolearner, $icon, $subjectstring, $fullmessagestring) {
-        global $CFG, $DB, $USER;
-
-        debugging('development_plan::send_alert has been deprecated since 9.0. Please use development_plan::send_alert_to_learner or development_plan::send_alert_to_managers instead.',
-            DEBUG_DEVELOPER);
-
-        $job_assignment = \totara_job\job_assignment::get_first($this->userid);
-        $manager = $DB->get_record('user', array('id' => $job_assignment->managerid));
-        $learner = $DB->get_record('user', array('id' => $this->userid));
-        if ($learner && $manager) {
-            require_once($CFG->dirroot . '/totara/message/eventdata.class.php');
-            require_once($CFG->dirroot . '/totara/message/messagelib.php');
-            if ($tolearner) {
-                $userto = $learner;
-                $userfrom = $manager;
-                $roleid = $CFG->learnerroleid;
-            } else {
-                $userto = $manager;
-                $userfrom = $learner;
-                $roleid = $CFG->managerroleid;
-            }
-            $event = new tm_alert_eventdata($userto);
-            // Cast to a stdClass.
-            $event = (object)(array)$event;
-            //ensure the message is actually coming from $userfrom, default to support
-            $event->userfrom = ($USER->id == $userfrom->id) ? $userfrom : core_user::get_support_user();
-            $event->contexturl = $this->get_display_url();
-            $event->contexturlname = $this->name;
-            $event->icon = $icon;
-
-            $a = new stdClass();
-            $a->plan = $this->name;
-            $a->manager = fullname($manager);
-            $a->learner = fullname($learner);
-            $stringmanager = get_string_manager();
-            $event->subject = $stringmanager->get_string($subjectstring,'totara_plan',$a, $userto->lang);
-            $event->fullmessage = $stringmanager->get_string($fullmessagestring,'totara_plan',$a, $userto->lang);
-
-            return tm_alert_send($event);
-        } else {
-            return false;
         }
     }
 
@@ -2108,6 +2038,10 @@ class development_plan {
      * @return bool
      */
     public final function can_view(): bool {
+        if (has_capability('totara/plan:accessanyplan', \context_system::instance())) {
+            return true;
+        }
+
         $can_access = dp_can_view_users_plans($this->userid);
         $can_view = ($this->get_setting('view')  == DP_PERMISSION_ALLOW);
         return ($can_access && $can_view);

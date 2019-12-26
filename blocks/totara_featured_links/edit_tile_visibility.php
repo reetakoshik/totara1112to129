@@ -28,7 +28,7 @@ require_login();
 
 $tileid = required_param('tileid', PARAM_INT);
 $return_url = optional_param('return_url', null, PARAM_LOCALURL);
-$tile_instance = \block_totara_featured_links\tile\base::get_tile_instance($tileid);
+$tile_instance = block_totara_featured_links\tile\base::get_tile_instance($tileid);
 
 $PAGE->set_url(
     new \moodle_url(

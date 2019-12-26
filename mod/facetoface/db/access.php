@@ -145,6 +145,28 @@ $capabilities = array(
         'clonepermissionsfrom' => 'mod/facetoface:editsessions'
     ),
 
+    // Ability to signup people on in progress and past events
+    'mod/facetoface:signuppastevents' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        ),
+        'clonepermissionsfrom' => 'mod/facetoface:editevents'
+    ),
+
+    // Ability add attendees outside sign-up registration period.
+    'mod/facetoface:surpasssignupperiod' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        ),
+        'clonepermissionsfrom' => 'mod/facetoface:editevents'
+    ),
+
     // View session cancellations.
     'mod/facetoface:viewcancellations' => array(
         'captype' => 'read',
@@ -166,8 +188,7 @@ $capabilities = array(
         ),
     ),
 
-    // Ability to overbook a session by signing up for it.
-    // Users with mod/facetoface:addattendees can also overbook.
+    // Ability to overbook a session by signing up for it when wait list is disabled.
     'mod/facetoface:signupwaitlist' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -182,35 +203,30 @@ $capabilities = array(
     // Ability to create a f2f instance.
     'mod/facetoface:addinstance' => array(
         'riskbitmask' => RISK_XSS,
-
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
         'archetypes' => array(
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         ),
-
         'clonepermissionsfrom' => 'moodle/site:manageblocks'
     ),
 
     // Manager can reserve / allocate spaces for their team.
     'mod/facetoface:reservespace' => array(
         'riskbitmask' => RISK_SPAM,
-
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
             'manager' => CAP_ALLOW,
             'staffmanager' => CAP_ALLOW,
         ),
-
         'clonepermissionsfrom' => 'mod/facetoface:addattendees'
     ),
 
     // Can reserve spaces on behalf of a manager.
     'mod/facetoface:reserveother' => array(
         'riskbitmask' => RISK_SPAM,
-
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
@@ -230,7 +246,6 @@ $capabilities = array(
     // Can approve any attendance
     'mod/facetoface:approveanyrequest' => array(
         'riskbitmask' => RISK_SPAM,
-
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(),
@@ -260,7 +275,7 @@ $capabilities = array(
         )
     ),
 
-    // Ability to edit the jbo assignment a learner has used to sign up to a session.
+    // Ability to edit the job assignment a learner has used to sign up to a session.
     'mod/facetoface:changesignedupjobassignment' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,

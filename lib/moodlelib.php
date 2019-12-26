@@ -115,8 +115,8 @@ define('PARAM_CAPABILITY',   'capability');
 
 /**
  * PARAM_CLEANHTML - cleans submitted HTML code. Note that you almost never want
- * to use this. The normal mode of operation is to use PARAM_RAW when recieving
- * the input (required/optional_param or formslib) and then sanitse the HTML
+ * to use this. The normal mode of operation is to use PARAM_RAW when receiving
+ * the input (required/optional_param or formslib) and then sanitise the HTML
  * using format_text on output. This is for the rare cases when you want to
  * sanitise the HTML on input. This cleaning may also fix xhtml strictness.
  */
@@ -446,6 +446,11 @@ define('FEATURE_ARCHIVE_COMPLETION', 'archive_completion');
 
 /** True if module uses the question bank */
 define('FEATURE_USES_QUESTIONS', 'usesquestions');
+
+/**
+ * Maximum filename char size
+ */
+define('MAX_FILENAME_SIZE', 100);
 
 /** Unspecified module archetype */
 define('MOD_ARCHETYPE_OTHER', 0);
@@ -1037,10 +1042,31 @@ function clean_param($param, $type) {
             }
             return $param;
 
-        case PARAM_URL:          // Allow safe ftp, http, mailto urls.
+        case PARAM_URL:          // Allow safe ftp, http and https urls; mailto never worked here.
             $param = fix_utf8($param);
+            if ($param === '') {
+                return '';
+            }
+            if (substr($param, 0, 1) === ':') {
+                // '://wwww.example.com/' urls were never allowed.
+                return '';
+            }
+            $param = preprocess_param_url($param);
+            if (preg_match('/^[a-z]+:/i', $param)) {
+                // Totara: the validateUrlSyntax() does not support extended characters,
+                //         that means we can use native PHP url validation without risk of regressions
+                //         to improve security, but only for full URLs.
+                $param = filter_var($param, FILTER_VALIDATE_URL);
+                if ($param === false) {
+                    return '';
+                }
+            } else {
+                // Totara: Colons are not needed in relative URLs.
+                $param = str_replace(':', '%3A', $param);
+            }
             include_once($CFG->dirroot . '/lib/validateurlsyntax.php');
-            if (!empty($param) && validateUrlSyntax($param, 's?H?S?F?E?u-P-a?I?p?f?q?r?')) {
+            // Totara: mailto never worked here because of 'u-', instead of fixing it was removed.
+            if (!empty($param) && validateUrlSyntax($param, 's?H?S?F?E-u-P-a?I?p?f?q?r?')) {
                 // All is ok, param is respected.
             } else {
                 // Not really ok.
@@ -1053,19 +1079,12 @@ function clean_param($param, $type) {
             $param = clean_param($param, PARAM_URL);
             if (!empty($param)) {
 
-                // Simulate the HTTPS version of the site.
-                $httpswwwroot = str_replace('http://', 'https://', $CFG->wwwroot);
-
                 if ($param === $CFG->wwwroot) {
-                    // Exact match;
-                } else if (!empty($CFG->loginhttps) && $param === $httpswwwroot) {
                     // Exact match;
                 } else if (preg_match(':^/:', $param)) {
                     // Root-relative, ok!
                 } else if (preg_match('/^' . preg_quote($CFG->wwwroot . '/', '/') . '/i', $param)) {
                     // Absolute, and matches our wwwroot.
-                } else if (!empty($CFG->loginhttps) && preg_match('/^' . preg_quote($httpswwwroot . '/', '/') . '/i', $param)) {
-                    // Absolute, and matches our httpswwwroot.
                 } else {
                     // Relative - let's make sure there are no tricks.
                     if (validateUrlSyntax('/' . $param, 's-u-P-a-p-f+q?r?')) {
@@ -1241,6 +1260,53 @@ function clean_param($param, $type) {
             // Doh! throw error, switched parameters in optional_param or another serious problem.
             print_error("unknownparamtype", '', '', $type);
     }
+}
+
+/**
+ * Fix some common issues that make URLs incompatible with PARAM_URL cleaning.
+ *
+ * @since Totara 12.9
+ *
+ * @internal intended to be used from clean_param() and URL form elements only
+ *
+ * @param string $url
+ * @return string
+ */
+function preprocess_param_url($url) {
+    $url = (string)$url;
+    if ($url === '') {
+        return '';
+    }
+    if (substr($url, 0, 1) === ':') {
+        // Invalid, nothing to fix anything, it will not pass URL cleaning.
+        return $url;
+    }
+    if (substr($url, 0, 2) === '//') {
+        // Fix protocol relative URLs, we know what this site is using.
+        if (is_https()) {
+            $url = 'https:' . $url;
+        } else {
+            $url = 'http:' . $url;
+        }
+    }
+
+    // Encode dangerous and incompatible characters.
+    $url = str_replace(
+        ['"',   "'",   '[',   ']',   ' ',   "\n",  "\t",  '{',   '}',   '<',   '>'],
+        ['%22', '%27', '%5B', '%5D', '%20', '%0A', '%09', '%7B', '%7D', '%3C', '%3E'],
+        $url);
+
+    // NOTE: in the future we may add encoding of non-unicode characters in URL right here.
+
+    if (preg_match('/^[a-z]+:/i', $url)) {
+        $filtered = filter_var($url, FILTER_VALIDATE_URL);
+        if ($filtered !== false) {
+            // PHP docs do not specify if the returned value is ever changed, but let's assume it might in the future.
+            $url = $filtered;
+        }
+    }
+
+    return $url;
 }
 
 /**
@@ -1659,9 +1725,12 @@ function purge_all_caches() {
     $DB->reset_caches();
     cache_helper::purge_all();
 
-    // Report Builder
+    // Totara Report Builder cache purge.
     require_once($CFG->dirroot.'/totara/reportbuilder/lib.php');
     reportbuilder_purge_all_cache();
+
+    // Totara menu cache purge.
+    totara_menu_reset_all_caches();
 
     // Purge all other caches: rss, simplepie, etc.
     clearstatcache();
@@ -2125,7 +2194,7 @@ function make_timestamp($year, $month=1, $day=1, $hour=0, $minute=0, $second=0, 
  * Format a date/time (seconds) as weeks, days, hours etc as needed
  *
  * Given an amount of time in seconds, returns string
- * formatted nicely as weeks, days, hours etc as needed
+ * formatted nicely as years, days, hours etc as needed
  *
  * @package core
  * @category time
@@ -2617,13 +2686,7 @@ function dayofweek($day, $month, $year) {
 function get_login_url() {
     global $CFG;
 
-    $url = "$CFG->wwwroot/login/index.php";
-
-    if (!empty($CFG->loginhttps)) {
-        $url = str_replace('http:', 'https:', $url);
-    }
-
-    return $url;
+    return "$CFG->wwwroot/login/index.php";
 }
 
 /**
@@ -2794,12 +2857,7 @@ function require_login($courseorid = null, $autologinguest = true, $cm = null, $
                 redirect($changeurl);
             } else {
                 // Use moodle internal method.
-                if (empty($CFG->loginhttps)) {
-                    redirect($CFG->wwwroot .'/login/change_password.php');
-                } else {
-                    $wwwroot = str_replace('http:', 'https:', $CFG->wwwroot);
-                    redirect($wwwroot .'/login/change_password.php');
-                }
+                redirect($CFG->wwwroot .'/login/change_password.php');
             }
         } else if ($userauth->can_change_password()) {
             throw new moodle_exception('forcepasswordchangenotice');
@@ -3416,15 +3474,15 @@ function user_not_fully_set_up($user, $strict = true) {
         return false;
     }
 
+    // Do not use strict mode for primary admin, they need to be able to fix
+    // problems without being interrupted by forced redirects.
+    if (is_primary_admin($user->id)) {
+        return false;
+    }
+
     if ($user->id == $USER->id) {
         // Most likely some ajax or file serving script, we certainly do not want to block those or do redirects.
         if (!WS_SERVER and NO_DEBUG_DISPLAY) {
-            return false;
-        }
-
-        // Do not use strict mode for primary admin, they need to be able to fix
-        // problems without being interrupted by forced redirects.
-        if (is_primary_admin($user->id)) {
             return false;
         }
 
@@ -3505,8 +3563,10 @@ function over_bounce_threshold($user) {
  * @param stdClass $user object containing an id
  * @param bool $reset will reset the count to 0
  * @return void
+ * @deprecated Since Totara 12
  */
 function set_send_count($user, $reset=false) {
+    debugging("set_send_count() has been deprecated, please use \\core_user\\email_bounce_counter instead", DEBUG_DEVELOPER);
     if (empty($user->id)) {
         // No real (DB) user, nothing to do here.
         return;
@@ -3525,8 +3585,11 @@ function set_send_count($user, $reset=false) {
  *
  * @param stdClass $user object containing an id
  * @param bool $reset will reset the count to 0
+ * @deprecated Since Totara 12
  */
 function set_bounce_count($user, $reset=false) {
+    debugging("set_bounce_count() has been deprecated, please use \\core_user\\email_bounce_counter instead", DEBUG_DEVELOPER);
+
     $emailbouncecounter = new core_user\email_bounce_counter($user);
     if ($reset) {
         $emailbouncecounter->reset_bounce_count();
@@ -4504,9 +4567,10 @@ function guest_user() {
  * @param string $password  User's password
  * @param bool $ignorelockout useful when guessing is prevented by other mechanism such as captcha or SSO
  * @param int $failurereason login failure reason, can be used in renderers (it may disclose if account exists)
+ * @param mixed logintoken If this is set to a string it is validated against the login token for the session.
  * @return stdClass|false A {@link $USER} object or false if error
  */
-function authenticate_user_login($username, $password, $ignorelockout=false, &$failurereason=null) {
+function authenticate_user_login($username, $password, $ignorelockout=false, &$failurereason=null, $logintoken=false) {
     global $CFG, $DB;
     require_once("$CFG->libdir/authlib.php");
 
@@ -4526,6 +4590,18 @@ function authenticate_user_login($username, $password, $ignorelockout=false, &$f
             }
             unset($users);
         }
+    }
+
+    // Make sure this request came from the login form.
+    if (!\core\session\manager::validate_login_token($logintoken)) {
+        $failurereason = AUTH_LOGIN_FAILED;
+
+        // Trigger login failed event.
+        $event = \core\event\user_login_failed::create(array('userid' => $user->id,
+            'other' => array('username' => $username, 'reason' => $failurereason)));
+        $event->trigger();
+        error_log('[client '.getremoteaddr()."]  $CFG->wwwroot  Invalid Login Token:  $username  ".$_SERVER['HTTP_USER_AGENT']);
+        return false;
     }
 
     $authsenabled = get_enabled_auth_plugins();
@@ -4757,7 +4833,7 @@ function complete_user_login($user) {
             } else {
                 require_once($CFG->dirroot . '/login/lib.php');
                 $SESSION->wantsurl = core_login_get_return_url();
-                redirect($CFG->httpswwwroot.'/login/change_password.php');
+                redirect($CFG->wwwroot.'/login/change_password.php');
             }
         } else {
             // Totara: this may happen if change is forced before migration to different auth type, do not block access!
@@ -6291,7 +6367,7 @@ function email_to_user($user, $from, $subject, $messagetext, $messagehtml = '', 
     }
 
     $context['body'] = $messagetext;
-    $mail->Subject = $renderer->render_from_template('core/email_subject', $context);
+    $mail->Subject = core_text::entities_to_utf8($renderer->render_from_template('core/email_subject', $context));
     $mail->FromName = $renderer->render_from_template('core/email_fromname', $context);
     $messagetext = $renderer->render_from_template('core/email_text', $context);
 
@@ -6528,7 +6604,7 @@ function reset_password_and_mail($user) {
     $a->sitename    = format_string($site->fullname);
     $a->username    = $user->username;
     $a->newpassword = $newpassword;
-    $a->link        = $CFG->httpswwwroot .'/login/change_password.php';
+    $a->link        = $CFG->wwwroot .'/login/change_password.php';
     $a->signoff     = generate_email_signoff();
 
     $strmgr = get_string_manager();
@@ -6594,7 +6670,7 @@ function send_password_change_confirmation_email($user, $resetrecord) {
     $data->lastname  = $user->lastname;
     $data->username  = $user->username;
     $data->sitename  = format_string($site->fullname);
-    $data->link      = $CFG->httpswwwroot .'/login/forgot_password.php?token='. $resetrecord->token;
+    $data->link      = $CFG->wwwroot .'/login/forgot_password.php?token='. $resetrecord->token;
     $data->admin     = generate_email_signoff();
     $data->resetminutes = $pwresetmins;
 
@@ -7151,7 +7227,6 @@ function clean_filename($string) {
     return clean_param($string, PARAM_FILE);
 }
 
-
 // STRING TRANSLATION.
 
 /**
@@ -7417,14 +7492,8 @@ function get_string($identifier, $component = '', $a = null, $lazyload = false) 
                 break;
         }
     }
-
-    $result = get_string_manager()->get_string($identifier, $component, $a);
-
-    // Debugging feature lets you display string identifier and component.
-    if (isset($CFG->debugstringids) && $CFG->debugstringids && optional_param('strings', 0, PARAM_INT)) {
-        $result .= ' {' . $identifier . '/' . $component . '}';
-    }
-    return $result;
+    // Totara: Debugging feature to display string identifier and component was moved to string_manager_standard::get_string()
+    return get_string_manager()->get_string($identifier, $component, $a);
 }
 
 /**
@@ -7840,13 +7909,22 @@ function get_plugins_with_function($function, $file = 'lib.php', $include = true
     $key = $function . '_' . clean_param($file, PARAM_ALPHA);
     $pluginfunctions = $cache->get($key);
 
+    // Use the plugin manager to check that plugins are currently installed.
+    $pluginmanager = \core_plugin_manager::instance();
+
     if ($pluginfunctions !== false) {
 
         // Checking that the files are still available.
         foreach ($pluginfunctions as $plugintype => $plugins) {
 
             $allplugins = \core_component::get_plugin_list($plugintype);
-            foreach ($plugins as $plugin => $fullpath) {
+            $installedplugins = $pluginmanager->get_installed_plugins($plugintype);
+            foreach ($plugins as $plugin => $pluginfunction) {
+                if (!isset($installedplugins[$plugin])) {
+                    // Plugin code is still present on disk but it is not installed.
+                    unset($pluginfunctions[$plugintype][$plugin]);
+                    continue;
+                }
 
                 // Cache might be out of sync with the codebase, skip the plugin if it is not available.
                 if (empty($allplugins[$plugin])) {
@@ -7875,7 +7953,12 @@ function get_plugins_with_function($function, $file = 'lib.php', $include = true
 
         // We need to include files here.
         $pluginswithfile = \core_component::get_plugin_list_with_file($plugintype, $file, true);
+        $installedplugins = $pluginmanager->get_installed_plugins($plugintype);
         foreach ($pluginswithfile as $plugin => $notused) {
+
+            if (!isset($installedplugins[$plugin])) {
+                continue;
+            }
 
             $fullfunction = $plugintype . '_' . $plugin . '_' . $function;
 
@@ -8551,6 +8634,32 @@ function shorten_text($text, $ideal=30, $exact = false, $ending='...') {
     return $truncate;
 }
 
+/**
+ * Shortens a given filename by removing characters positioned after the ideal string length.
+ * When the filename is too long, the file cannot be created on the filesystem due to exceeding max byte size.
+ * Limiting the filename to a certain size (considering multibyte characters) will prevent this.
+ *
+ * @param string $filename file name
+ * @param int $length ideal string length
+ * @return string $shortened shortened file name
+ */
+function shorten_filename($filename, $length = MAX_FILENAME_SIZE) {
+    $shortened = $filename;
+    // Extract a part of the filename if it's char size exceeds the ideal string length.
+    if (core_text::strlen($filename) > $length) {
+        // Exclude extension if present in filename.
+        $mimetypes = get_mimetypes_array();
+        $extension = pathinfo($filename, PATHINFO_EXTENSION);
+        if ($extension && !empty($mimetypes[$extension])) {
+            $basename = pathinfo($filename, PATHINFO_FILENAME);
+            $shortened = core_text::substr($basename, 0, $length);
+            $shortened .= '.' . $extension;
+        } else {
+            $shortened = core_text::substr($filename, 0, $length);
+        }
+    }
+    return $shortened;
+}
 
 /**
  * Given dates in seconds, how many weeks is the date from startdate
@@ -10401,10 +10510,7 @@ class lang_string {
 
             // Process the string.
             $this->string = get_string_manager()->get_string($this->identifier, $this->component, $this->a, $this->lang);
-            // Debugging feature lets you display string identifier and component.
-            if (isset($CFG->debugstringids) && $CFG->debugstringids && optional_param('strings', 0, PARAM_INT)) {
-                $this->string .= ' {' . $this->identifier . '/' . $this->component . '}';
-            }
+            // Totara: Debugging feature to display string identifier and component was moved to string_manager_standard::get_string()
         }
         // Return the string.
         return $this->string;

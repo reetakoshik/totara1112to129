@@ -30,10 +30,10 @@ $debug = optional_param('debug', 0, PARAM_INT);
 $PAGE->set_context(context_system::instance());
 $PAGE->set_pagelayout('noblocks');
 
-$enhancedcatalogenabled = get_config('core', 'enhancedcatalog');
+$catalogtype = get_config('core', 'catalogtype');
 
-if ($enhancedcatalogenabled) {
-    $PAGE->set_totara_menu_selected('courses');
+if ($catalogtype === 'enhanced') {
+    $PAGE->set_totara_menu_selected('\totara_coursecatalog\totara\menu\courses');
 }
 
 $PAGE->set_url('/totara/coursecatalog/courses.php');
@@ -47,7 +47,7 @@ $renderer = $PAGE->get_renderer('totara_reportbuilder');
 $strheading = get_string('searchcourses', 'totara_core');
 $shortname = 'catalogcourses';
 
-if (!$report = reportbuilder_get_embedded_report($shortname, null, false, 0)) {
+if (!$report = reportbuilder::create_embedded($shortname)) {
     print_error('error:couldnotgenerateembeddedreport', 'totara_reportbuilder');
 }
 

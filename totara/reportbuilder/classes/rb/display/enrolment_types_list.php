@@ -36,7 +36,7 @@ class enrolment_types_list extends base {
             return;
         }
 
-        $enrolments = explode(", ", $value);
+        $enrolments = explode("|", $value);
         $output = array();
 
         foreach ($enrolments as $name) {

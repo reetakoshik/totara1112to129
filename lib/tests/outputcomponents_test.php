@@ -154,7 +154,6 @@ class core_outputcomponents_testcase extends advanced_testcase {
         $this->assertEquals(1, $CFG->themerev);
         $this->assertEquals(0, $CFG->themedesignermode);
         $this->assertSame('https://www.example.com/moodle', $CFG->wwwroot);
-        $this->assertSame($CFG->wwwroot, $CFG->httpswwwroot);
         $this->assertEquals(0, $CFG->enablegravatar);
         $this->assertSame('mm', $CFG->gravatardefaulturl);
 
@@ -245,18 +244,27 @@ class core_outputcomponents_testcase extends advanced_testcase {
         $up3 = new user_picture($user3);
         $this->assertSame($CFG->wwwroot.'/theme/image.php/' . $CFG->theme . '/core/1/u/f2', $up3->get_url($page, $renderer)->out(false));
 
+        // Http version.
+        $CFG->wwwroot = str_replace('https:', 'http:', $CFG->wwwroot);
+
+        // Http version.
+        $CFG->wwwroot = str_replace('https:', 'http:', $CFG->wwwroot);
+        $CFG->httpswwwroot = str_replace('https:', 'http:', $CFG->wwwroot);
+
         // Verify defaults to misteryman (mm).
         $up2 = new user_picture($user2);
-        $this->assertSame('https://secure.gravatar.com/avatar/ab53a2911ddf9b4817ac01ddcd3d975f?s=35&d=mm', $up2->get_url($page, $renderer)->out(false));
+        $this->assertSame('http://www.gravatar.com/avatar/ab53a2911ddf9b4817ac01ddcd3d975f?s=35&d=mm', $up2->get_url($page, $renderer)->out(false));
 
         // Without gravatardefaulturl, verify we pick own file.
         set_config('gravatardefaulturl', '');
-
         $up2 = new user_picture($user2);
-        $this->assertSame('https://secure.gravatar.com/avatar/ab53a2911ddf9b4817ac01ddcd3d975f?s=35&d=https%3A%2F%2Fwww.example.com%2Fmoodle%2Fpix%2Fu%2Ff2.png', $up2->get_url($page, $renderer)->out(false));
+        $this->assertSame('http://www.gravatar.com/avatar/ab53a2911ddf9b4817ac01ddcd3d975f?s=35&d=http%3A%2F%2Fwww.example.com%2Fmoodle%2Fpix%2Fu%2Ff2.png', $up2->get_url($page, $renderer)->out(false));
         // uploaded image takes precedence before gravatar
         $up1 = new user_picture($user1);
         $this->assertSame($CFG->wwwroot.'/pluginfile.php/'.$context1->id.'/user/icon/' . $CFG->theme . '/f2?rev=11', $up1->get_url($page, $renderer)->out(false));
+
+        // Https version.
+        $CFG->wwwroot = str_replace('http:', 'https:', $CFG->wwwroot);
 
         $up1 = new user_picture($user1);
         $this->assertSame($CFG->wwwroot.'/pluginfile.php/'.$context1->id.'/user/icon/' . $CFG->theme . '/f2?rev=11', $up1->get_url($page, $renderer)->out(false));
@@ -305,6 +313,7 @@ class core_outputcomponents_testcase extends advanced_testcase {
 
         // Test non-slashargument images.
         set_config('theme', 'basis');
+        $CFG->wwwroot = str_replace('https:', 'http:', $CFG->wwwroot);
         $CFG->slasharguments = 0;
         $page = new moodle_page();
         $page->set_url('/user/profile.php');

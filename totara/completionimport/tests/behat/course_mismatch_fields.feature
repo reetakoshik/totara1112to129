@@ -67,14 +67,14 @@ Feature: Verify the case insensitive shortnames for course completion imports wo
     And "11" row "Imported as evidence?" column of "completionimport_course" table should contain "No"
     And "12" row "Imported as evidence?" column of "completionimport_course" table should contain "Yes"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob1 Learner1"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     Then I should see "Record of Learning for Bob1 Learner1 : All Courses"
     And "Course 1" row "Progress" column of "plan_courses" table should contain "100%"
     And "Course 2" row "Progress" column of "plan_courses" table should contain "100%"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob4 Learner4"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     Then I should see "Record of Learning for Bob4 Learner4 : All Courses"
@@ -84,7 +84,7 @@ Feature: Verify the case insensitive shortnames for course completion imports wo
     When I follow "Other Evidence"
     Then I should see "Completed course : CP102"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob8 Learner8"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     Then I should see "Record of Learning for Bob8 Learner8 : All Courses"
@@ -130,7 +130,7 @@ Feature: Verify the case insensitive shortnames for course completion imports wo
     And "10" row "Errors" column of "completionimport_course" table should contain "Duplicate ID Number"
     And "11" row "Errors" column of "completionimport_course" table should contain "Duplicate ID Number"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob1 Learner1"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     Then I should see "Record of Learning for Bob1 Learner1 : All Courses"
@@ -140,7 +140,7 @@ Feature: Verify the case insensitive shortnames for course completion imports wo
     When I follow "Other Evidence"
     Then I should see "0 records shown"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob4 Learner4"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     Then I should see "Record of Learning for Bob4 Learner4 : All Courses"
@@ -150,7 +150,7 @@ Feature: Verify the case insensitive shortnames for course completion imports wo
     When I follow "Other Evidence"
     Then I should see "Completed course : CP102"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob8 Learner8"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     Then I should see "Record of Learning for Bob8 Learner8 : All Courses"

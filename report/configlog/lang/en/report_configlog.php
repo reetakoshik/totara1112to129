@@ -23,7 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['configlog'] = 'Config changes';
+$string['configlog'] = 'Configuration changes';
 $string['oldvalue'] = 'Original value';
 $string['plugin'] = 'Plugin';
 $string['pluginname'] = 'Config changes';

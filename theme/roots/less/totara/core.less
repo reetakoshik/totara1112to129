@@ -21,6 +21,38 @@
 // @author    Joby Harding <joby.harding@totaralearning.com>
 
 /** Page layout CSS starts **/
+html {
+    height: 100%;
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+body {
+    align-items: stretch;
+    display: flex;
+    flex: 1 0 auto;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    min-height: 100%;
+}
+
+.breadcrumb-container {
+    width: 100%;
+}
+
+#page {
+    width: 100%;
+    flex-grow: 1;
+    #page-login-index & {
+        // Centre login panel vertically.
+        display: flex;
+        flex: 1 0 auto;
+        flex-flow: column nowrap;
+        align-items: stretch;
+        justify-content: center;
+    }
+}
+
 .layout-option-noheader #page-header,
 .layout-option-nonavbar #page-navbar,
 .layout-option-nofooter #page-footer,
@@ -49,6 +81,28 @@
         .make-md-column(3);
         .make-md-column-pull(0);
         min-height: 100px;
+    }
+}
+
+#block-region-side-pre,
+#block-region-side-post,
+#block-region-top,
+#block-region-bottom,
+#block-region-main {
+    &.editing-region-border {
+        border: 8px solid transparent;
+        padding: (@grid-gutter-width / 2 - 8);
+        position: relative;
+        &::after {
+            border: 2px dotted @totara_style-color_neutral_5;
+            content: "";
+            height: 100%;
+            left: 0;
+            position: absolute;
+            top: 0;
+            width: 100%;
+            z-index: -1;
+        }
     }
 }
 
@@ -344,6 +398,11 @@ img.icon {
     vertical-align: text-bottom;
     width: 16px;
     margin-right: 6px;
+
+    &.iconsize-big {
+        height: 64px;
+        width: 64px;
+    }
 }
 
 img.iconsmall {
@@ -990,10 +1049,44 @@ audio.mediaplugin_html5audio {
 }
 
 .initialbar {
-    a,
-    strong {
-        padding-left: 3px;
-        padding-right: 3px;
+
+    overflow: auto;
+
+    .initialbarlabel {
+        display: inline-block;
+        min-width: 6em;
+        float: left;
+        white-space: nowrap;
+    }
+
+    .initialbar {
+        float: left;
+        display: inline-block;
+        white-space: nowrap;
+        margin: 0 0 0 -0.3em;
+        padding: 0;
+
+        li {
+            float: left;
+            list-style: none;
+        }
+    }
+
+    .letter {
+        display: inline-block;
+        height: 1.35em;
+        min-width: 1.35em;
+        text-align: center;
+    }
+    .letter.active {
+        font-weight: bold;
+    }
+
+    .initialbarall {
+        text-align: left;
+        min-width: 3.5em;
+        white-space: nowrap;
+        margin-left: 0.3em;
     }
 }
 
@@ -1122,6 +1215,13 @@ audio.mediaplugin_html5audio {
 .moodle-dialogue-base .moodle-dialogue-fullscreen .moodle-dialogue-hd,
 .moodle-dialogue-base .moodle-dialogue-fullscreen .moodle-dialogue-wrap {
     border-radius: 0;
+}
+
+.pagelayout-popup .moodle-dialogue-base .moodle-dialogue-lightbox {
+    background-color: transparent;
+}
+.pagelayout-popup .moodle-dialogue-base .moodle-dialogue {
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 }
 
 .moodle-dialogue-confirm .confirmation-dialogue {
@@ -1310,16 +1410,13 @@ audio.mediaplugin_html5audio {
 }
 
 .choosercontainer #chooseform .option .typename,
-.choosercontainer #chooseform .option span.modicon img.icon,
-.choosercontainer #chooseform .nonoption .typename,
-.choosercontainer #chooseform .nonoption span.modicon img.icon {
+.choosercontainer #chooseform .nonoption .typename {
     padding: 0 0 0 0.5em;
 }
 
-.choosercontainer #chooseform .option span.modicon img.icon,
-.choosercontainer #chooseform .nonoption span.modicon img.icon {
-    height: 24px;
-    width: 24px;
+.choosercontainer #chooseform img {
+    width: 1.3em;
+    margin-right: 0;
 }
 
 .choosercontainer #chooseform .option input[type=radio],
@@ -1827,6 +1924,12 @@ h6 [data-flex-icon='help'] {
 body.behat-site {
     .accesshide {
         display: none;
+    }
+    .totaraNav_prim--list_hideMobile {
+        transition: none;
+    }
+    .totaraNav_prim--list_showMobile {
+        transition: none;
     }
 }
 

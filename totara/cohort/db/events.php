@@ -33,31 +33,6 @@ if (!defined('MOODLE_INTERNAL')) {
 
 $observers = array(
     array(
-        'eventname' => '\totara_customfield\event\profilefield_deleted',
-        'callback' => 'totaracohort_event_handler::profilefield_deleted',
-        'includefile' => '/totara/cohort/lib.php',
-    ),
-    array( // Call the updated function as these need to do the same thing.
-        'eventname' => '\totara_hierarchy\event\position_deleted',
-        'callback' => 'totaracohort_event_handler::position_updated',
-        'includefile' => '/totara/cohort/lib.php',
-    ),
-    array(
-        'eventname' => '\totara_hierarchy\event\position_updated',
-        'callback' => 'totaracohort_event_handler::position_updated',
-        'includefile' => '/totara/cohort/lib.php',
-    ),
-    array( // Call the updated function as these need to do the same thing.
-        'eventname' => '\totara_hierarchy\event\organisation_deleted',
-        'callback' => 'totaracohort_event_handler::organisation_updated',
-        'includefile' => '/totara/cohort/lib.php',
-    ),
-    array(
-        'eventname' => '\totara_hierarchy\event\organisation_updated',
-        'callback' => 'totaracohort_event_handler::organisation_updated',
-        'includefile' => '/totara/cohort/lib.php',
-    ),
-    array(
         'eventname'   => '\totara_cohort\event\members_updated',
         'callback' => 'totaracohort_event_handler::members_updated',
         'includefile' => '/totara/cohort/lib.php',

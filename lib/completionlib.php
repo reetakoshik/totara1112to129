@@ -363,7 +363,7 @@ class completion_info {
     /**
      * Course progress aggregation information
      * @since Totara 10
-     * @var \totara_core\progressinfo
+     * @var \totara_core\progressinfo\progressinfo
      */
     private $progressinfo;
 
@@ -1834,7 +1834,9 @@ class completion_info {
         // Conditions to show pass/fail:
         // a) Grade has pass mark (default is 0.00000 which is boolean true so be careful)
         // b) Grade is visible (neither hidden nor hidden-until)
-        if ($item->gradepass && $item->gradepass > 0.000009 && !$item->hidden) {
+        // Totara: removed "!$item->hidden" condition, because completion pass/fail is not the same as grade,
+        //     and shouldn't be hidden from trainer.
+        if ($item->gradepass && $item->gradepass > 0.000009) {
             // Use final grade if set otherwise raw grade
             $score = !is_null($grade->finalgrade) ? $grade->finalgrade : $grade->rawgrade;
 
@@ -1887,17 +1889,6 @@ class completion_info {
     }
 
     /**
-     * DEPRECATED: For testing only.
-     *
-     * @deprecated since Totara 10, this function should no longer be needed for testing.
-     */
-    public static function wipe_session_cache() {
-        debugging('The method \completion_info::wipe_session_cache has been deprecated and will be removed.', DEBUG_DEVELOPER);
-        $cache = cache::make('core', 'completion');
-        $cache->purge();
-    }
-
-    /**
      * Get all completions a user has across the site
      * @access  public
      * @param   $userid     int     User id
@@ -1922,10 +1913,12 @@ class completion_info {
                 cc.rpl
             FROM
                 {course_completions} cc
-            LEFT JOIN
+            JOIN {user} u
+             ON (u.id  = cc.userid AND u.deleted = 0)
+            JOIN
                 {course} c
              ON cc.course = c.id
-            LEFT JOIN
+            JOIN
                 {context} ctx
              ON ctx.instanceid = c.id AND ctx.contextlevel = " . CONTEXT_COURSE . "
             WHERE
@@ -2002,11 +1995,11 @@ class completion_info {
     private function build_progressinfo() {
         global $CFG, $DB;
 
-        $agg_method = \totara_core\progressinfo::AGGREGATE_ANY;
+        $agg_method = \totara_core\progressinfo\progressinfo::AGGREGATE_ANY;
         if ($this->get_aggregation_method() == COMPLETION_AGGREGATION_ALL) {
-            $agg_method = \totara_core\progressinfo::AGGREGATE_ALL;
+            $agg_method = \totara_core\progressinfo\progressinfo::AGGREGATE_ALL;
         }
-        $progressinfo = \totara_core\progressinfo::from_data($agg_method);
+        $progressinfo = \totara_core\progressinfo\progressinfo::from_data($agg_method);
 
         if (!$this->is_enabled()) {
             $progressinfo->set_customdata(array('enabled' => false));
@@ -2055,9 +2048,9 @@ class completion_info {
             if (!$progressinfo->criteria_exist($key)) {
                 if (array_key_exists($key, $multi_activity_criteria)) {
 
-                    $agg_method = \totara_core\progressinfo::AGGREGATE_ANY;
+                    $agg_method = \totara_core\progressinfo\progressinfo::AGGREGATE_ANY;
                     if ($this->get_aggregation_method($key) == COMPLETION_AGGREGATION_ALL) {
-                        $agg_method = \totara_core\progressinfo::AGGREGATE_ALL;
+                        $agg_method = \totara_core\progressinfo\progressinfo::AGGREGATE_ALL;
                     }
                     $critinfo = $progressinfo->add_criteria($key, $agg_method, 0, 0, $customdata);
 
@@ -2094,7 +2087,7 @@ class completion_info {
                 }
 
                 if (!$critinfo->criteria_exist($type)) {
-                    $agg_method = \totara_core\progressinfo::AGGREGATE_ALL;
+                    $agg_method = \totara_core\progressinfo\progressinfo::AGGREGATE_ALL;
                     $critinfo->add_criteria($type, $agg_method, $criteria->get_weight(), 0, $customdata);
                 }
             }
@@ -2107,7 +2100,7 @@ class completion_info {
      * Return the progress aggregation information structure
      *
      * @since Totara 10
-     * @return \totara_core\progressinfo
+     * @return \totara_core\progressinfo\progressinfo
      */
     public function get_progressinfo() {
         if (empty($this->progressinfo)) {

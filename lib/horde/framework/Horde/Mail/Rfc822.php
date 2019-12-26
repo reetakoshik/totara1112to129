@@ -764,7 +764,7 @@ class Horde_Mail_Rfc822
             switch ($chr) {
             case '(':
                 ++$level;
-                break; // Totara: there used to be 'continue;' which was not intended most likely, just silence the PHP 7.3 warnings for now.
+                break; // TOTARA: converted for PHP 7.3 compatibility.
 
             case ')':
                 if (--$level == 0) {

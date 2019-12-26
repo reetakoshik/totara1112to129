@@ -27,7 +27,7 @@ require_once($CFG->libdir.'/adminlib.php');
 
 $action = optional_param('action', null, PARAM_ALPHANUMEXT);
 
-admin_externalpage_setup('totaradashboard', '', array('action' => $action), new moodle_url('/totara/dashboard/manage.php'));
+admin_externalpage_setup('totaradashboard', '', array('action' => $action));
 
 // Check Totara Dashboard is enable.
 totara_dashboard::check_feature_enabled();

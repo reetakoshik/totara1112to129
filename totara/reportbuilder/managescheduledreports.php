@@ -38,7 +38,8 @@ $pageparams = [
 
 $shortname = 'manage_scheduled_reports';
 
-if (!$report = reportbuilder_get_embedded_report($shortname, $pageparams, false, $sid)) {
+$config = (new rb_config())->set_sid($sid)->set_embeddata($pageparams);
+if (!$report = reportbuilder::create_embedded($shortname, $config)) {
     print_error('error:couldnotgenerateembeddedreport', 'totara_reportbuilder');
 }
 

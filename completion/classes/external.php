@@ -44,7 +44,7 @@ class core_completion_external extends external_api {
     /**
      * Describes the parameters for update_activity_completion_status_manually.
      *
-     * @return external_external_function_parameters
+     * @return external_function_parameters
      * @since Moodle 2.9
      */
     public static function update_activity_completion_status_manually_parameters() {
@@ -170,7 +170,7 @@ class core_completion_external extends external_api {
 
         $completion = new completion_info($course);
         $activities = $completion->get_activities();
-        $progresses = $completion->get_progress_all();
+        $progresses = $completion->get_progress_all('u.id = :uid', ['uid' => $params['userid']]);
         $userprogress = $progresses[$user->id];
 
         $results = array();
@@ -384,7 +384,7 @@ class core_completion_external extends external_api {
     /**
      * Describes the parameters for mark_course_self_completed.
      *
-     * @return external_external_function_parameters
+     * @return external_function_parameters
      * @since Moodle 3.0
      */
     public static function mark_course_self_completed_parameters() {

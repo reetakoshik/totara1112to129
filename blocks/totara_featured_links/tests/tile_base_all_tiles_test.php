@@ -48,6 +48,12 @@ class block_totara_featured_links_tile_base_all_tiles_testcase extends test_help
         $this->tile_types = \core_component::get_namespace_classes('tile', 'block_totara_featured_links\tile\base');
     }
 
+    public function tearDown() {
+        parent::tearDown();
+        $this->blockgenerator = null;
+        $this->tile_types = null;
+    }
+
     /**
      * Tests the add_tile() method on all the children of the base class
      * Just makes sure the tile types don't throw exceptions where they shoudln't
@@ -55,6 +61,7 @@ class block_totara_featured_links_tile_base_all_tiles_testcase extends test_help
      */
     public function test_add() {
         $this->resetAfterTest();
+        $this->setAdminUser();
         $blockinstance = $this->blockgenerator->create_instance();
         foreach ($this->tile_types as $index => $tile_type) {
             $tile_instance = $this->blockgenerator->create_tile($blockinstance->id, $tile_type);
@@ -113,7 +120,7 @@ class block_totara_featured_links_tile_base_all_tiles_testcase extends test_help
     }
 
     /**
-     * Tests the \block_totara_featured_links\tile\default_tile::edit_auth_form() method
+     * Tests the block_totara_featured_links\tile\default_tile::edit_auth_form() method
      * Also makes sure that you can't pass dumb stuff to it
      */
     public function test_get_visibility_form() {
@@ -124,7 +131,7 @@ class block_totara_featured_links_tile_base_all_tiles_testcase extends test_help
             $tile_instance = $this->blockgenerator->create_tile($blockinstance->id, $tile_type);
 
             if ($tile_type == course_tile::class) {
-                $data = new \stdclass();
+                $data = new \stdClass();
                 $course = $this->getDataGenerator()->create_course();
                 $data->course_name_id = $course->id;
                 $tile_instance->save_content($data);
@@ -153,20 +160,25 @@ class block_totara_featured_links_tile_base_all_tiles_testcase extends test_help
      * Also makes sure that the rendered content is wrapped in a div.
      */
     public function test_render_content() {
-        global $PAGE;
+        global $PAGE, $DB;
         $PAGE->set_url('/');
         $this->resetAfterTest();
-        $this->setAdminUser();
         $blockinstance = $this->blockgenerator->create_instance();
         foreach ($this->tile_types as $tile_type) {
             $tile = $this->blockgenerator->create_tile($blockinstance->id, $tile_type);
 
             if ($tile_type == course_tile::class) {
-                $data = new \stdclass();
+                $data = new \stdClass();
                 $course = $this->getDataGenerator()->create_course();
                 $data->course_name_id = $course->id;
                 $tile->save_content($data);
                 $this->refresh_tiles($tile);
+            }
+            if ($tile_type == 'block_totara_featured_links\tile\gallery_tile') {
+                $subtile = $this->blockgenerator->create_default_tile($blockinstance->id, $tile->id);
+                $this->refresh_tiles($tile);
+                $this->assertEquals($tile->id, $subtile->parentid);
+                $this->assertCount(1, $tile->get_subtiles());
             }
 
             $content = $tile->render_content_wrapper($PAGE->get_renderer('core'), []);

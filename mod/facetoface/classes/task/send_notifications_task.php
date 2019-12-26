@@ -99,7 +99,7 @@ class send_notifications_task extends \core\task\scheduled_task {
         facetoface_notify_registration_ended();
 
         // Find any reservations that are too close to the start of the session and delete them.
-        facetoface_remove_reservations_after_deadline($this->testing);
+        \mod_facetoface\reservations::remove_after_deadline($this->testing);
 
         // Notify of sessions that are under capacity.
         if (!$this->testing) {

@@ -7,7 +7,7 @@ abstract class Base
     private $renderer;
 
     public function __construct($renderer)
-    {
+    {   
         global $PAGE;
         $this->renderer = $renderer;
         $PAGE->requires->strings_for_js([

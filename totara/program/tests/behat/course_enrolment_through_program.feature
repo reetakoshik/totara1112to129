@@ -52,31 +52,21 @@ Feature: Course enrolment through programs
 
     # Assign the position Learner program1
     And I log in as "admin"
-    And I click on "Programs" in the totara menu
-    And I follow "Test Program 1"
+    And I am on "Test Program 1" program homepage
     And I press "Edit program details"
     And I switch to "Assignments" tab
-    And I select "Positions" from the "Add a new" singleselect
-    And I click on "Add" "button" in the "#category_select" "css_element"
-    And I press "Add position to program"
-    And I click on "Learner" "link" in the "Add position to program" "totaradialogue"
-    And I click on "Ok" "button" in the "Add position to program" "totaradialogue"
-    And I press "Save changes"
-    And I press "Save all changes"
+    And I set the field "Add a new" to "Positions"
+    And I click on "Learner" "link" in the "Add positions to program" "totaradialogue"
+    And I click on "Ok" "button" in the "Add positions to program" "totaradialogue"
     Then I should see "Learner"
 
     # Assign the organisation to the program2
-    When I click on "Programs" in the totara menu
-    And I follow "Test Program 2"
+    When I am on "Test Program 2" program homepage
     And I press "Edit program details"
     And I switch to "Assignments" tab
-    And I select "Organisations" from the "Add a new" singleselect
-    And I click on "Add" "button" in the "#category_select" "css_element"
-    And I press "Add organisations to program"
+    And I set the field "Add a new" to "Organisations"
     And I click on "Organisation1" "link" in the "Add organisations to program" "totaradialogue"
     And I click on "Ok" "button" in the "Add organisations to program" "totaradialogue"
-    And I press "Save changes"
-    And I press "Save all changes"
     Then I should see "Organisation1"
     And I log out
 
@@ -96,13 +86,11 @@ Feature: Course enrolment through programs
     Given I log in as "admin"
     And I set the following administration settings values:
       | Enable audience-based visibility | 1 |
-    And I follow "Find Learning"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "Edit settings" node in "Course administration"
     And I set the field "Visibility" to "Enrolled users only"
     And I press "Save and display"
-    And I follow "Find Learning"
-    And I follow "Course 2"
+    And I am on "Course 2" course homepage
     And I navigate to "Edit settings" node in "Course administration"
     And I set the field "Visibility" to "Enrolled users only"
     And I press "Save and display"
@@ -128,7 +116,7 @@ Feature: Course enrolment through programs
     And I press "Save changes"
 
     # Remove learner1's position
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner One"
     And I follow "full1"
     And I click on "Delete" "link" in the "#positiontitle" "css_element"
@@ -143,14 +131,14 @@ Feature: Course enrolment through programs
     Then I should not see "Test Program 1" in the "Current Learning" "block"
     And I should see "Test Program 2" in the "Current Learning" "block"
 
-    When I click on "Courses" in the totara menu
+    When I click on "Find Learning" in the totara menu
     Then I should see "Course 1"
     And I should see "Course 2"
 
     When I follow "Course 1"
-    Then I should see "You can not enrol yourself in this course"
-    When I click on "Courses" in the totara menu
-    And I follow "Course 2"
+    Then I should see "You are not enrolled in this course"
+
+    When I am on "Course 2" course homepage
     Then I should see "Topic 1"
     And I log out
 
@@ -175,7 +163,7 @@ Feature: Course enrolment through programs
     And I press "Save changes"
 
     # Remove learner1's position
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner One"
     And I follow "full1"
     And I click on "Delete" "link" in the "#positiontitle" "css_element"
@@ -190,15 +178,14 @@ Feature: Course enrolment through programs
     Then I should not see "Test Program 1" in the "Current Learning" "block"
     And I should see "Test Program 2" in the "Current Learning" "block"
 
-    When I click on "Courses" in the totara menu
+    When I click on "Find Learning" in the totara menu
     Then I should see "Course 1"
     And I should see "Course 2"
 
     When I follow "Course 1"
-    Then I should see "You can not enrol yourself in this course"
+    Then I should see "You are not enrolled in this course"
 
-    When I click on "Courses" in the totara menu
-    And I follow "Course 2"
+    When I am on "Course 2" course homepage
     Then I should see "Topic 1"
     And I log out
 
@@ -223,7 +210,7 @@ Feature: Course enrolment through programs
     And I press "Save changes"
 
     # Remove learner1's position
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner One"
     And I follow "full1"
     And I click on "Delete" "link" in the "#positiontitle" "css_element"
@@ -238,15 +225,14 @@ Feature: Course enrolment through programs
     Then I should not see "Test Program 1" in the "Current Learning" "block"
     And I should see "Test Program 2" in the "Current Learning" "block"
 
-    When I click on "Courses" in the totara menu
+    When I click on "Find Learning" in the totara menu
     Then I should see "Course 1"
     And I should see "Course 2"
 
     When I follow "Course 1"
-    Then I should see "You can not enrol yourself in this course"
+    Then I should see "You are not enrolled in this course"
 
-    When I click on "Courses" in the totara menu
-    And I follow "Course 2"
+    When I am on "Course 2" course homepage
     Then I should see "Topic 1"
     And I log out
 
@@ -269,21 +255,20 @@ Feature: Course enrolment through programs
     Then I should not see "Test Program 1"
     And I should not see "Test Program 2"
 
-    When I click on "Courses" in the totara menu
+    When I click on "Find Learning" in the totara menu
     Then I should see "Course 1"
     And I should see "Course 2"
 
     When I follow "Course 1"
-    Then I should see "You can not enrol yourself in this course"
-    When I click on "Courses" in the totara menu
-    And I follow "Course 2"
-    Then I should see "You can not enrol yourself in this course"
+    Then I should see "You are not enrolled in this course"
+    When I follow "Course 2"
+    Then I should see "You are not enrolled in this course"
     And I log out
 
     # Now add teacher to both programs
     Given I log in as "admin"
 
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Teacher First"
     And I follow "fullt1"
     And I press "Choose position"

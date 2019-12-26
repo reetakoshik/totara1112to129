@@ -59,7 +59,7 @@ Feature: Warnings are shown on quiz with random questions and insufficient quest
   @javascript
   Scenario: Warnings shown for random questions with insufficient category questions on the Editig quiz page
     Given I log in as "admin"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Quiz 1"
     And I press "Edit quiz"
     Then I should not see "This quiz contains one or more random questions drawn from question categories that contain an insufficient number of questions"
@@ -83,7 +83,7 @@ Feature: Warnings are shown on quiz with random questions and insufficient quest
   @javascript
   Scenario: Warnings shown for random questions sub category used in parent and on its own
     Given I log in as "admin"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Quiz 1"
     And I press "Edit quiz"
 

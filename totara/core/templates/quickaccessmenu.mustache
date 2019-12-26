@@ -1,0 +1,158 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Carl Anderson <carl.anderson@totaralearning.com>
+   @package totara_core
+}}
+{{!
+    @template totara_core/quickaccessmenu
+
+    This template generates a user's quick access menu for admin navigation
+
+    Classes required for JS:
+    * popover-region
+    * popover-region-toggle
+    * popover-region-content
+    * collapsed
+
+    Data attributes required for JS:
+    * data-core-autoinitialise: true
+    * data-core-autoinitialise-amd: totara_core/quickaccessmenu
+    * data-quickaccessmenu-close-menu
+
+   Context variables required for this template:
+    * [parent] -> empty_message : (string) The message to display when no items are present
+    * [parent] -> has_groups : (bool) whether this menu has any groups
+    * [parent] -> group_count: (int) the number of groups
+    * [parent] -> groups: (array) the list of groups
+    * groups -> title: (string) display name for this group
+    * groups -> has_items: (bool) whether this group contains any items
+    * groups -> item_count: (int)  how many items this group contains
+    * groups -> items: (array) list of items in this group
+    * items -> label: (string) display name for the item
+    * items -> url: (string) url for this item to link to
+
+    Example context (json):
+      {
+        "empty_message": "there are no items here",
+        "has_groups" : true,
+        "group_count" : 2,
+        "groups" : [
+            {
+                "title" : "Core",
+                "has_items" : true,
+                "item_count" : 2
+                "items" : [
+                    {
+                        "label" : "Item 1",
+                        "url" : "https://www.example.com/item1.php",
+                    },
+                    {
+                        "label" : "Item 2",
+                        "url" : "https://www.example.com/item2.php",
+                    }
+                ]
+            },
+            {
+                "title" : "Learn",
+                "has_items" : true,
+                "item_count" : 1
+                "items" : [
+                    {
+                        "label" : "Item 1",
+                        "url" : "https://www.example.com/item3.php",
+                    }
+                ]
+            }
+        ]
+      }
+ }}
+
+<div id="quickaccess-popover-container" class="totara_core__QuickAccess popover-region collapsed"
+     data-core-autoinitialise="true"
+     data-core-autoinitialise-amd="totara_core/quickaccessmenu">
+    <div class="nav-link totara_core__QuickAccess_icon popover-region-toggle"
+         role="button"
+         aria-controls="quickaccess-popover-content"
+         aria-haspopup="true"
+         aria-label="{{#str}}quickaccessmenu:showmenuwindow,totara_core{{/str}}"
+         tabindex="0">
+        {{#flex_icon}}settings{{/flex_icon}}{{#flex_icon}}nav-down,,,totara_core__QuickAccess_chevron{{/flex_icon}}
+    </div>
+
+    <aside id="quickaccess-popover-content" class="totara_core__QuickAccess_menu popover-region-content">
+        <div class="totara_core__QuickAccess_menu-header">
+            <h2 class="totara_core__QuickAccess_menu-header_title">{{#str}}quickaccessmenu:menuheading,totara_core{{/str}}</h2>
+
+            <a href="#" class="totara_core__QuickAccess_menu-header_control"
+               aria-label="{{#str}}quickaccessmenu:hidemenuwindow,totara_core{{/str}}"
+               data-quickaccessmenu-close-menu>
+                {{#flex_icon}}close{{/flex_icon}}
+            </a>
+        </div>
+
+        {{! Search Form}}
+        {{#can_search}}
+            <form class="totara_core__QuickAccess_menu_search" method="get" action="{{config.wwwroot}}/{{config.admin}}/search.php">
+                <div class="input-group">
+                    <label class="sr-only" for="totara_core__QuickAccess_search">{{#str}}search,admin{{/str}}</label>
+                    <input id="totara_core__QuickAccess_search" type="search" name="query" placeholder="{{#str}}search,admin{{/str}}" class="totara_core__QuickAccess_menu_search-input form-control">
+                    <span class="input-group-btn">
+                    <button type="submit" class="btn btn-default totara_core__QuickAccess_menu_search-button">
+                        {{#flex_icon}}search, quickaccessmenu:search, totara_core{{/flex_icon}}
+                    </button>
+                </span>
+                </div>
+            </form>
+        {{/can_search}}
+
+        {{#has_groups}}
+            {{! This is less than ideal, but having this outside the flex-container and positioning it avoids negative margins
+            and having it mess with the overflow.}}
+            <hr class="totara_core__QuickAccess_hr" aria-hidden="true">
+        {{/has_groups}}
+        <div class="totara_core__QuickAccess_flex-container {{^groups}}totara_core__QuickAccess_flex-container-empty{{/groups}}">
+            {{^groups}}
+                <div class="totara_core__QuickAccess_empty-icon" aria-hidden="true">
+                    {{#flex_icon}}settings{{/flex_icon}}
+                </div>
+                <p class="totara_core__QuickAccess_empty-text">
+                    {{{empty_message}}}
+                </p>
+            {{/groups}}
+
+            {{#groups}}
+                <div class="totara_core__QuickAccess_group">
+                    <h3 class="totara_core__QuickAccess_group-title">{{title}}</h3>
+
+                    <ul class="totara_core__QuickAccess_group-list">
+                        {{#items}}
+                            <li><a href="{{url}}">{{label}}</a></li>
+                        {{/items}}
+                    </ul>
+                </div>
+            {{/groups}}
+        </div>
+
+        <footer class="totara_core__QuickAccess_footer">
+            {{#can_edit}}
+                <a href="{{config.wwwroot}}/user/quickaccessmenu.php">{{#str}}quickaccessmenu:menusettings,totara_core{{/str}}</a>
+            {{/can_edit}}
+        </footer>
+    </aside>
+</div>

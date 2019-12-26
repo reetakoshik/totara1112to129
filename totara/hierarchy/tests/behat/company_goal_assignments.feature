@@ -34,7 +34,7 @@ Feature: Company goal assignments
       | user4 | CH1    |
 
     When I log in as "admin"
-    And I navigate to "Manage goals" node in "Site administration > Hierarchies > Goals"
+    And I navigate to "Manage goals" node in "Site administration > Goals"
     Then I should see "Goal Framework"
 
     When I click on "Goal Framework" "link" in the "#frameworkstable" "css_element"

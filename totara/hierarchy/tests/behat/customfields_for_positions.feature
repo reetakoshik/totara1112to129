@@ -6,7 +6,7 @@ Feature: Test I can manage custom fields for position types
 
   Scenario: Test I can create and sort position type custom fields
     When I log in as "admin"
-    And I navigate to "Manage types" node in "Site administration > Hierarchies > Positions"
+    And I navigate to "Manage types" node in "Site administration > Positions"
     And I press "Add a new type"
     And I set the following fields to these values:
       | Type full name          | Development positions |

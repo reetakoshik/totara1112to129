@@ -35,7 +35,7 @@ class auth_plugin_connect extends auth_plugin_base {
      */
     public function __construct() {
         $this->authtype = 'connect';
-        $this->config = get_config('auth/connect'); // Old style config mess - not used.
+        $this->config = get_config('auth_connect');
     }
 
     /**
@@ -97,7 +97,6 @@ class auth_plugin_connect extends auth_plugin_base {
         global $DB, $SESSION;
 
         unset($SESSION->loginerrormsg);
-        unset($SESSION->authconnectssofailed);
 
         $ssosession = $DB->get_record('auth_connect_sso_sessions', array('sid' => session_id()));
         if (!$ssosession) {
@@ -112,7 +111,7 @@ class auth_plugin_connect extends auth_plugin_base {
      * This method is called from login/index.php page for all enabled auth plugins.
      */
     public function loginpage_hook() {
-        global $SESSION, $DB;
+        global $DB;
 
         if (isloggedin() and !isguestuser()) {
             // Nothing to do.
@@ -125,19 +124,13 @@ class auth_plugin_connect extends auth_plugin_base {
             return;
         }
 
-        if (!empty($SESSION->authconnectssofailed)) {
-            // No automatic SSO.
-            return;
-        }
-
         if (data_submitted()) {
             // Let them post username and password directly.
             return;
         }
 
         $testsession = optional_param('testsession', 0, PARAM_INT);  // Tests session works properly/
-        $cancel      = optional_param('cancel', 0, PARAM_BOOL);      // Redirect to frontpage, needed for loginhttps.
-        if ($testsession or $cancel) {
+        if ($testsession) {
             return;
         }
 

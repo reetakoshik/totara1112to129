@@ -25,10 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 class rb_source_assignsummary extends rb_base_source {
-
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $defaultcolumns, $defaultfilters, $requiredcolumns;
-    public $sourcetitle;
+    use \core_course\rb\source\report_trait;
 
     public function __construct($groupid, rb_global_restriction_set $globalrestrictionset = null) {
         global $DB;
@@ -69,6 +66,8 @@ class rb_source_assignsummary extends rb_base_source {
         $this->requiredcolumns = array();
         $this->defaultcolumns = $this->define_defaultcolumns();
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_assignsummary');
+        $this->usedcomponents[] = 'totara_cohort';
+
         parent::__construct();
     }
 
@@ -88,8 +87,8 @@ class rb_source_assignsummary extends rb_base_source {
         $a = array();
 
         // Join courses and categories.
-        $this->add_course_table_to_joinlist($a, 'base', 'assignment_course');
-        $this->add_course_category_table_to_joinlist($a, 'course', 'category');
+        $this->add_core_course_tables($a, 'base', 'assignment_course');
+        $this->add_core_course_category_tables($a, 'course', 'category');
 
         return $a;
     }
@@ -108,7 +107,8 @@ class rb_source_assignsummary extends rb_base_source {
                 get_string('assignmentname', 'rb_source_assignsummary'),
                 'base.assignment_name',
                 array('dbdatatype' => 'char',
-                'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'format_string')
             ),
 
             // Assignment intro.
@@ -118,7 +118,8 @@ class rb_source_assignsummary extends rb_base_source {
                 get_string('assignmentintro', 'rb_source_assignsummary'),
                 'base.assignment_intro',
                 array('dbdatatype' => 'text',
-                'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'format_text')
             ),
 
             // Assignment maxgrade.
@@ -126,7 +127,8 @@ class rb_source_assignsummary extends rb_base_source {
                 'base',
                 'maxgrade',
                 get_string('assignmentmaxgrade', 'rb_source_assignsummary'),
-                'base.assignment_maxgrade'
+                'base.assignment_maxgrade',
+                array('displayfunc' => 'integer')
             ),
 
             // User count.
@@ -134,7 +136,8 @@ class rb_source_assignsummary extends rb_base_source {
                 'base',
                 'user_count',
                 get_string('usercount', 'rb_source_assignsummary'),
-                'base.user_count'
+                'base.user_count',
+                array('displayfunc' => 'integer')
             )
         );
 
@@ -146,7 +149,7 @@ class rb_source_assignsummary extends rb_base_source {
                 $col,
                 get_string("{$col}grade", 'rb_source_assignsummary'),
                 "base.{$col}_grade",
-                array('displayfunc' => 'roundgrade')
+                array('displayfunc' => 'round')
             );
         }
 
@@ -175,8 +178,8 @@ class rb_source_assignsummary extends rb_base_source {
         }
 
         // Course and category fields.
-        $this->add_course_fields_to_columns($columnoptions);
-        $this->add_course_category_fields_to_columns($columnoptions);
+        $this->add_core_course_columns($columnoptions);
+        $this->add_core_course_category_columns($columnoptions);
 
         return $columnoptions;
     }
@@ -223,8 +226,8 @@ class rb_source_assignsummary extends rb_base_source {
         }
 
         // Course and category filters.
-        $this->add_course_fields_to_filters($filteroptions);
-        $this->add_course_category_fields_to_filters($filteroptions);
+        $this->add_core_course_filters($filteroptions);
+        $this->add_core_course_category_filters($filteroptions);
 
         return $filteroptions;
     }
@@ -254,11 +257,14 @@ class rb_source_assignsummary extends rb_base_source {
 
     /**
      * Display a number rounded to the nearest integer
+     *
+     * @deprecated Since Totara 12.0
      * @param string $field
      * @param object $record
      * @param boolean $isexport
      */
     public function rb_display_roundgrade($field, $record, $isexport) {
+        debugging('rb_source_assignsummary::rb_display_roundgrade has been deprecated since Totara 12.0, Use totara_reportbuilder\rb\display\round::display', DEBUG_DEVELOPER);
         return (integer)round($field);
     }
 }

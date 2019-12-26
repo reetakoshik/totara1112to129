@@ -10,7 +10,7 @@ Feature: Test company goal type changes in hierarchies
       | user      | role      | contextlevel | reference |
       | manager   | manager   | System       |           |
     And I log in as "manager"
-    And I navigate to "Manage company goal types" node in "Site administration > Hierarchies > Goals"
+    And I navigate to "Manage company goal types" node in "Site administration > Goals"
     And I press "Add a new company goal type"
     And I set the following fields to these values:
     | Type full name | Goal type 1 |
@@ -26,7 +26,7 @@ Feature: Test company goal type changes in hierarchies
       | Full name                   | Custom field 1_2 |
       | Short name (must be unique) | CF1_2            |
     And I press "Save changes"
-    And I navigate to "Manage company goal types" node in "Site administration > Hierarchies > Goals"
+    And I navigate to "Manage company goal types" node in "Site administration > Goals"
     And I press "Add a new company goal type"
     And I set the following fields to these values:
       | Type full name | Goal type 2 |
@@ -37,7 +37,7 @@ Feature: Test company goal type changes in hierarchies
       | Full name                   | Custom field 2_1 |
       | Short name (must be unique) | CF2_1            |
     And I press "Save changes"
-    And I navigate to "Manage goals" node in "Site administration > Hierarchies > Goals"
+    And I navigate to "Manage goals" node in "Site administration > Goals"
     And I press "Add new goal framework"
     And I set the following fields to these values:
       | Name | My goal frameworkd 1 |
@@ -99,7 +99,7 @@ Feature: Test company goal type changes in hierarchies
     And I should see "Type: Goal type 1" in the "My goal 3" "table_row"
 
     # Bulk change types
-    When I navigate to "Manage company goal types" node in "Site administration > Hierarchies > Goals"
+    When I navigate to "Manage company goal types" node in "Site administration > Goals"
     And I set the following fields to these values:
       | Reclassify of all items from the type: | Goal type 1 |
     And I click on "Choose" "button" in the "Goal type 2" "table_row"
@@ -107,7 +107,7 @@ Feature: Test company goal type changes in hierarchies
       | Data in Custom field 1_1 (Text input): | Transfer to Custom field 2_1 (Text input) |
       | Data in Custom field 1_2 (Text input): | Delete this data                          |
     When I press "Reclassify items and transfer/delete data"
-    And I navigate to "Manage goals" node in "Site administration > Hierarchies > Goals"
+    And I navigate to "Manage goals" node in "Site administration > Goals"
     And I follow "My goal frameworkd 1"
     And I should see "Type: Goal type 2" in the "My goal 1" "table_row"
     And I should see "Type: Goal type 2" in the "My goal 2" "table_row"

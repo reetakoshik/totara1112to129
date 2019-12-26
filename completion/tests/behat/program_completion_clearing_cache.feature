@@ -21,7 +21,7 @@ Feature: Program completion cache should be cleared after deletion
     And I log in as "admin"
 
   Scenario: User untick the completion mark and it should clear the cache when the action has been completed
-    Given I navigate to "Users>Accounts>Browse list of users" in site administration
+    Given I navigate to "Users > Browse list of users" in site administration
     And I follow "Sa Rang Kim"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     And I follow "prog_completion"

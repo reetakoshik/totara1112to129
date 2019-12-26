@@ -123,7 +123,7 @@ class core_cache_cache_testcase extends advanced_testcase {
         $this->assertCount(3, $stores);
         foreach ($stores as $name => $store) {
             // Check its an array.
-            $this->assertInternalType('array', $store);
+            $this->assertIsArray($store);
             // Check the name is the key.
             $this->assertEquals($name, $store['name']);
             // Check that it has been declared default.
@@ -189,7 +189,9 @@ class core_cache_cache_testcase extends advanced_testcase {
     }
 
     /**
-     * Tests set_identifiers resets identifiers and static cache
+     * Tests set_identifiers fails post cache creation.
+     *
+     * set_identifiers cannot be called after initial cache instantiation, as you need to create a difference cache.
      */
     public function test_set_identifiers() {
         $instance = cache_config_testing::instance();
@@ -205,16 +207,8 @@ class core_cache_cache_testcase extends advanced_testcase {
         $this->assertTrue($cache->set('contest', 'test data 1'));
         $this->assertEquals('test data 1', $cache->get('contest'));
 
+        $this->expectException('coding_exception');
         $cache->set_identifiers(array());
-        $this->assertFalse($cache->get('contest'));
-        $this->assertTrue($cache->set('contest', 'empty ident'));
-        $this->assertEquals('empty ident', $cache->get('contest'));
-
-        $cache->set_identifiers(array('area'));
-        $this->assertEquals('test data 1', $cache->get('contest'));
-
-        $cache->set_identifiers(array());
-        $this->assertEquals('empty ident', $cache->get('contest'));
     }
 
     /**
@@ -377,11 +371,11 @@ class core_cache_cache_testcase extends advanced_testcase {
             'key1' => array(1, 2, 3),
             'key2' => array(3, 2, 1),
         ));
-        $this->assertInternalType('array', $cache->get('key1'));
-        $this->assertInternalType('array', $cache->get('key2'));
+        $this->assertIsArray($cache->get('key1'));
+        $this->assertIsArray($cache->get('key2'));
         $this->assertCount(3, $cache->get('key1'));
         $this->assertCount(3, $cache->get('key2'));
-        $this->assertInternalType('array', $cache->get_many(array('key1', 'key2')));
+        $this->assertIsArray($cache->get_many(array('key1', 'key2')));
         $this->assertCount(2, $cache->get_many(array('key1', 'key2')));
         $this->assertEquals(2, $cache->delete_many(array('key1', 'key2')));
 
@@ -551,7 +545,7 @@ class core_cache_cache_testcase extends advanced_testcase {
         $this->assertTrue($cache->purge());
         $this->assertTrue($cache->set('b', 'B'));
         $result = $cache->get_many(array('a', 'b', 'c'));
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(3, $result);
         $this->assertArrayHasKey('a', $result);
         $this->assertArrayHasKey('b', $result);
@@ -687,7 +681,7 @@ class core_cache_cache_testcase extends advanced_testcase {
         // Test with multiple keys.
         $this->assertEquals(3, $cache->set_many(array('a' => 'A', 'b' => 'B', 'c' => 'C')));
         $result = $cache->get_many(array('a', 'b', 'c'));
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(3, $result);
         $this->assertArrayHasKey('a', $result);
         $this->assertArrayHasKey('b', $result);
@@ -698,7 +692,7 @@ class core_cache_cache_testcase extends advanced_testcase {
 
         // Test with multiple keys including missing ones.
         $result = $cache->get_many(array('a', 'c', 'e'));
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(3, $result);
         $this->assertArrayHasKey('a', $result);
         $this->assertArrayHasKey('c', $result);
@@ -736,7 +730,7 @@ class core_cache_cache_testcase extends advanced_testcase {
         // Test with multiple keys.
         $this->assertEquals(3, $cache->set_many(array('a' => 'A', 'b' => 'B', 'c' => 'C')));
         $result = $cache->get_many(array('a', 'b', 'c'));
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(3, $result);
         $this->assertArrayHasKey('a', $result);
         $this->assertArrayHasKey('b', $result);
@@ -747,7 +741,7 @@ class core_cache_cache_testcase extends advanced_testcase {
 
         // Test with multiple keys including missing ones.
         $result = $cache->get_many(array('a', 'c', 'e'));
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(3, $result);
         $this->assertArrayHasKey('a', $result);
         $this->assertArrayHasKey('c', $result);
@@ -785,7 +779,7 @@ class core_cache_cache_testcase extends advanced_testcase {
         // Test with multiple keys.
         $this->assertEquals(3, $cache->set_many(array('a' => 'A', 'b' => 'B', 'c' => 'C')));
         $result = $cache->get_many(array('a', 'b', 'c'));
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(3, $result);
         $this->assertArrayHasKey('a', $result);
         $this->assertArrayHasKey('b', $result);
@@ -796,7 +790,7 @@ class core_cache_cache_testcase extends advanced_testcase {
 
         // Test with multiple keys including missing ones.
         $result = $cache->get_many(array('a', 'c', 'e'));
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(3, $result);
         $this->assertArrayHasKey('a', $result);
         $this->assertArrayHasKey('c', $result);
@@ -1015,7 +1009,7 @@ class core_cache_cache_testcase extends advanced_testcase {
         $timefile = $CFG->dataroot."/cache/cachestore_file/default_application/phpunit_eventinvalidationtest/las-cache/lastinvalidation-$hash.cache";
         // Make sure the file is correct.
         $this->assertTrue(file_exists($timefile));
-        $timecont = serialize(cache::now() - 60); // Back 60sec in the past to force it to re-invalidate.
+        $timecont = serialize(cache::now(true) - 60); // Back 60sec in the past to force it to re-invalidate.
         make_writable_directory(dirname($timefile));
         file_put_contents($timefile, $timecont);
         $this->assertTrue(file_exists($timefile));
@@ -1041,6 +1035,7 @@ class core_cache_cache_testcase extends advanced_testcase {
 
         // Test 2: Rebuild and test the invalidation of the event via the invalidation cache.
         cache_factory::reset();
+
         $instance = cache_config_testing::instance();
         $instance->phpunit_add_definition('phpunit/eventinvalidationtest', array(
             'mode' => cache_store::MODE_APPLICATION,
@@ -1052,6 +1047,7 @@ class core_cache_cache_testcase extends advanced_testcase {
                 'crazyevent'
             )
         ));
+
         $cache = cache::make('phpunit', 'eventinvalidationtest');
         $this->assertFalse($cache->get('testkey1'));
 
@@ -1059,23 +1055,30 @@ class core_cache_cache_testcase extends advanced_testcase {
 
         // Make a new cache class.  This should should invalidate testkey2.
         $cache = cache::make('phpunit', 'eventinvalidationtest');
-        // Timestamp should have updated to cache::now().
-        $this->assertEquals(cache::now(), $cache->get('lastinvalidation'));
+
+        // Invalidation token should have been reset.
+        $this->assertEquals(cache::get_purge_token(), $cache->get('lastinvalidation'));
 
         // Set testkey2 data.
         $cache->set('testkey2', 'test data 2');
+
         // Backdate the event invalidation time by 30 seconds.
         $invalidationcache = cache::make('core', 'eventinvalidation');
         $invalidationcache->set('crazyevent', array('testkey2' => cache::now() - 30));
+
         // Lastinvalidation should already be cache::now().
-        $this->assertEquals(cache::now(), $cache->get('lastinvalidation'));
+        $this->assertEquals(cache::get_purge_token(), $cache->get('lastinvalidation'));
+
         // Set it to 15 seconds ago so that we know if it changes.
-        $cache->set('lastinvalidation', cache::now() - 15);
+        $pasttime = cache::now(true) - 15;
+        $cache->set('lastinvalidation', $pasttime);
+
         // Make a new cache class.  This should not invalidate anything.
         cache_factory::instance()->reset_cache_instances();
         $cache = cache::make('phpunit', 'eventinvalidationtest');
+
         // Lastinvalidation shouldn't change since it was already newer than invalidation event.
-        $this->assertEquals(cache::now() - 15, $cache->get('lastinvalidation'));
+        $this->assertEquals($pasttime, $cache->get('lastinvalidation'));
 
         // Now set the event invalidation to newer than the lastinvalidation time.
         $invalidationcache->set('crazyevent', array('testkey2' => cache::now() - 5));
@@ -1083,18 +1086,18 @@ class core_cache_cache_testcase extends advanced_testcase {
         cache_factory::instance()->reset_cache_instances();
         $cache = cache::make('phpunit', 'eventinvalidationtest');
         // Lastinvalidation timestamp should have updated to cache::now().
-        $this->assertEquals(cache::now(), $cache->get('lastinvalidation'));
+        $this->assertEquals(cache::get_purge_token(), $cache->get('lastinvalidation'));
 
         // Now simulate a purge_by_event 5 seconds ago.
         $invalidationcache = cache::make('core', 'eventinvalidation');
-        $invalidationcache->set('crazyevent', array('purged' => cache::now() - 5));
+        $invalidationcache->set('crazyevent', array('purged' => cache::now(true) - 5));
         // Set our lastinvalidation timestamp to 15 seconds ago.
-        $cache->set('lastinvalidation', cache::now() - 15);
+        $cache->set('lastinvalidation', cache::now(true) - 15);
         // Make a new cache class.  This should invalidate the cache.
         cache_factory::instance()->reset_cache_instances();
         $cache = cache::make('phpunit', 'eventinvalidationtest');
         // Lastinvalidation timestamp should have updated to cache::now().
-        $this->assertEquals(cache::now(), $cache->get('lastinvalidation'));
+        $this->assertEquals(cache::get_purge_token(), $cache->get('lastinvalidation'));
 
     }
 
@@ -1410,7 +1413,7 @@ class core_cache_cache_testcase extends advanced_testcase {
         // Test the many commands.
         $this->assertEquals(3, $cache->set_many(array('a' => 'A', 'b' => 'B', 'c' => 'C')));
         $result = $cache->get_many(array('a', 'b', 'c'));
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(3, $result);
         $this->assertArrayHasKey('a', $result);
         $this->assertArrayHasKey('b', $result);
@@ -1421,7 +1424,7 @@ class core_cache_cache_testcase extends advanced_testcase {
         $this->assertEquals($result, $cache->get_many(array('a', 'b', 'c')));
         $this->assertEquals(2, $cache->delete_many(array('a', 'c')));
         $result = $cache->get_many(array('a', 'b', 'c'));
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(3, $result);
         $this->assertArrayHasKey('a', $result);
         $this->assertArrayHasKey('b', $result);
@@ -1479,7 +1482,7 @@ class core_cache_cache_testcase extends advanced_testcase {
         // Test the many commands.
         $this->assertEquals(3, $cache->set_many(array('a' => 'A', 'b' => 'B', 'c' => 'C')));
         $result = $cache->get_many(array('a', 'b', 'c'));
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(3, $result);
         $this->assertArrayHasKey('a', $result);
         $this->assertArrayHasKey('b', $result);
@@ -1490,7 +1493,7 @@ class core_cache_cache_testcase extends advanced_testcase {
         $this->assertEquals($result, $cache->get_many(array('a', 'b', 'c')));
         $this->assertEquals(2, $cache->delete_many(array('a', 'c')));
         $result = $cache->get_many(array('a', 'b', 'c'));
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(3, $result);
         $this->assertArrayHasKey('a', $result);
         $this->assertArrayHasKey('b', $result);
@@ -1800,8 +1803,8 @@ class core_cache_cache_testcase extends advanced_testcase {
      */
     public function test_sharing_with_version_on_dbmeta_and_config() {
         global $CFG, $DB;
-        /* @var cache_config_phpunittest $instance */
-        $instance = cache_config_phpunittest::instance();
+        /* @var cache_config_testing $instance */
+        $instance = cache_config_testing::instance();
         $instance->set_definition_sharing('core/databasemeta', cache_definition::SHARING_SITEID + cache_definition::SHARING_VERSION);
         $instance->set_definition_sharing('core/config', cache_definition::SHARING_SITEID + cache_definition::SHARING_VERSION);
         cache_helper::purge_all();
@@ -2050,6 +2053,16 @@ class core_cache_cache_testcase extends advanced_testcase {
         $this->assertEquals('b', $returnedinstance2->name);
     }
 
+    public function test_identifiers_have_separate_caches() {
+        $cachepg = cache::make('core', 'databasemeta', array('dbfamily' => 'pgsql'));
+        $cachepg->set(1, 'here');
+        $cachemy = cache::make('core', 'databasemeta', array('dbfamily' => 'mysql'));
+        $cachemy->set(2, 'there');
+        $this->assertEquals('here', $cachepg->get(1));
+        $this->assertEquals('there', $cachemy->get(2));
+        $this->assertFalse($cachemy->get(1));
+    }
+
     public function test_performance_debug() {
         global $CFG;
         $this->resetAfterTest(true);
@@ -2286,4 +2299,50 @@ class core_cache_cache_testcase extends advanced_testcase {
         $this->assertArrayNotHasKey($sessionid, $endstats);
         $this->assertArrayNotHasKey($requestid, $endstats);
     }
+
+    /**
+     * Tests session cache event purge and subsequent visit in the same request.
+     *
+     * This test simulates a cache being created, a value being set, then the value being purged.
+     * A subsequent use of the same cache is started in the same request which fills the cache.
+     * A new request is started a short time later.
+     * The cache should be filled.
+     */
+    public function test_session_event_purge_same_second() {
+        $instance = cache_config_testing::instance();
+        $instance->phpunit_add_definition('phpunit/eventpurgetest', array(
+            'mode' => cache_store::MODE_SESSION,
+            'component' => 'phpunit',
+            'area' => 'eventpurgetest',
+            'invalidationevents' => array(
+                'crazyevent',
+            )
+        ));
+
+        // Create the cache, set a value, and immediately purge it by event.
+        $cache = cache::make('phpunit', 'eventpurgetest');
+        $cache->set('testkey1', 'test data 1');
+        $this->assertEquals('test data 1', $cache->get('testkey1'));
+        cache_helper::purge_by_event('crazyevent');
+        $this->assertFalse($cache->get('testkey1'));
+
+        // Set up the cache again in the same request and add a new value back in.
+        $factory = \cache_factory::instance();
+        $factory->reset_cache_instances();
+        $cache = cache::make('phpunit', 'eventpurgetest');
+        $cache->set('testkey1', 'test data 2');
+        $this->assertEquals('test data 2', $cache->get('testkey1'));
+
+        // Trick the cache into thinking that this is a new request.
+        cache_phpunit_cache::simulate_new_request();
+        $factory = \cache_factory::instance();
+        $factory->reset_cache_instances();
+
+        // Set up the cache again.
+        // This is a subsequent request at a new time, so we instead the invalidation time will be checked.
+        // The invalidation time should match the last purged time and the cache will not be re-purged.
+        $cache = cache::make('phpunit', 'eventpurgetest');
+        $this->assertEquals('test data 2', $cache->get('testkey1'));
+    }
+
 }

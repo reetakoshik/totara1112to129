@@ -11,9 +11,9 @@ Feature: Verify different delimiters can be handled in Totara Sync
       | fullname             | idnumber |
       | Position Framework 1 | PF1      |
 
-    When I navigate to "General settings" node in "Site administration > HR Import"
+    When I navigate to "Default settings" node in "Site administration > HR Import"
     And I set the following fields to these values:
-      | File Access | Upload Files |
+      | File access | Upload Files |
     And I press "Save changes"
     Then I should see "Settings saved"
 
@@ -25,10 +25,10 @@ Feature: Verify different delimiters can be handled in Totara Sync
 
     When I navigate to "Organisation" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source                      | CSV |
+      | CSV                         | 1   |
       | Source contains all records | Yes |
     And I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
 
     When I navigate to "CSV" node in "Site administration > HR Import > Sources > Organisation"
     And I set the following fields to these values:
@@ -46,7 +46,7 @@ Feature: Verify different delimiters can be handled in Totara Sync
     Then I should not see "Error"
     And I should see "Running HR Import cron...Done!"
 
-    When I navigate to "Manage organisations" node in "Site administration > Hierarchies > Organisations"
+    When I navigate to "Manage organisations" node in "Site administration > Organisations"
     And I follow "Organisation Framework 1"
     Then I should see "Organisation 1"
     And I should see "Organisation 2"
@@ -60,10 +60,10 @@ Feature: Verify different delimiters can be handled in Totara Sync
 
     When I navigate to "Organisation" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source                      | CSV |
+      | CSV                         | 1   |
       | Source contains all records | Yes |
     And I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
 
     When I navigate to "CSV" node in "Site administration > HR Import > Sources > Organisation"
     And I set the following fields to these values:
@@ -81,7 +81,7 @@ Feature: Verify different delimiters can be handled in Totara Sync
     Then I should not see "Error"
     And I should see "Running HR Import cron...Done!"
 
-    When I navigate to "Manage organisations" node in "Site administration > Hierarchies > Organisations"
+    When I navigate to "Manage organisations" node in "Site administration > Organisations"
     And I follow "Organisation Framework 1"
     Then I should see "Organisation 1"
     And I should see "Organisation 2"
@@ -95,10 +95,10 @@ Feature: Verify different delimiters can be handled in Totara Sync
 
     When I navigate to "Position" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source                      | CSV |
+      | CSV                         | 1   |
       | Source contains all records | Yes |
     And I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
 
     When I navigate to "CSV" node in "Site administration > HR Import > Sources > Position"
     And I set the following fields to these values:
@@ -117,7 +117,7 @@ Feature: Verify different delimiters can be handled in Totara Sync
     Then I should not see "Error"
     And I should see "Running HR Import cron...Done!"
 
-    When I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    When I navigate to "Manage positions" node in "Site administration > Positions"
     And I follow "Position Framework 1"
     Then I should see "Position 1"
     And I should see "Position 2"
@@ -131,10 +131,10 @@ Feature: Verify different delimiters can be handled in Totara Sync
 
     When I navigate to "Position" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source                      | CSV |
+      | CSV                         | 1   |
       | Source contains all records | Yes |
     And I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
 
     When I navigate to "CSV" node in "Site administration > HR Import > Sources > Position"
     And I set the following fields to these values:
@@ -152,7 +152,7 @@ Feature: Verify different delimiters can be handled in Totara Sync
     Then I should not see "Error"
     And I should see "Running HR Import cron...Done!"
 
-    When I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    When I navigate to "Manage positions" node in "Site administration > Positions"
     And I follow "Position Framework 1"
     Then I should see "Position 1"
     And I should see "Position 2"
@@ -166,10 +166,10 @@ Feature: Verify different delimiters can be handled in Totara Sync
 
     When I navigate to "User" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source                      | CSV |
+      | CSV                         | 1   |
       | Source contains all records | Yes |
     And I press "Save changes"
-    Then I should see "Settings saved"
+    Then I should see "Settings updated. The source settings for this element can be configured here."
 
     When I navigate to "CSV" node in "Site administration > HR Import > Sources > User"
     And I set the following fields to these values:
@@ -187,7 +187,7 @@ Feature: Verify different delimiters can be handled in Totara Sync
     Then I should not see "Error"
     And I should see "Running HR Import cron...Done!"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     Then I should see "Learner1 User1"
     And I should see "Learner2 User2"
     And I should see "Learner3 User3"

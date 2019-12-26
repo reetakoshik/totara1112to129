@@ -17,7 +17,7 @@ Feature: Test use of images in goals and goal custom fields
     # Add images to the private files block to use later
     And I click on "Dashboard" in the totara menu
     And I press "Customise this page"
-    And I select "Private files" from the "Add a block" singleselect
+    And I add the "Private files" block
     And I follow "Manage private files..."
     And I upload "totara/hierarchy/tests/behat/fixtures/learninglogo1.jpg" file to "Files" filemanager
     And I upload "totara/hierarchy/tests/behat/fixtures/learninglogo2.jpg" file to "Files" filemanager
@@ -35,7 +35,7 @@ Feature: Test use of images in goals and goal custom fields
     And I should see "leaves-green.png"
 
     # Create text area custom field for Company goal type
-    When I navigate to "Manage company goal types" node in "Site administration > Hierarchies > Goals"
+    When I navigate to "Manage company goal types" node in "Site administration > Goals"
     And I press "Add a new company goal type"
     And I set the following fields to these values:
     | Type full name | Comp goal type 1 |
@@ -65,7 +65,7 @@ Feature: Test use of images in goals and goal custom fields
     Then I should see "Custom file 1"
 
     # Create a Personal goal type
-    When I navigate to "Manage personal goal types" node in "Site administration > Hierarchies > Goals"
+    When I navigate to "Manage personal goal types" node in "Site administration > Goals"
     And I press "Add a new personal goal type"
     And I set the following fields to these values:
     | Type full name | Pers goal type 1 |
@@ -97,7 +97,7 @@ Feature: Test use of images in goals and goal custom fields
     Then I should see "Custom file 1"
 
     # Create goal using the company goal type
-    When I navigate to "Manage goals" node in "Site administration > Hierarchies > Goals"
+    When I navigate to "Manage goals" node in "Site administration > Goals"
     And I follow "Goal Framework"
     And I press "Add new goal"
     And I set the following fields to these values:
@@ -142,7 +142,7 @@ Feature: Test use of images in goals and goal custom fields
     # Add images to the private files block to use later
     And I click on "Dashboard" in the totara menu
     And I press "Customise this page"
-    And I select "Private files" from the "Add a block" singleselect
+    And I add the "Private files" block
     And I follow "Manage private files..."
     And I upload "totara/hierarchy/tests/behat/fixtures/learninglogo5.jpg" file to "Files" filemanager
     And I upload "totara/hierarchy/tests/behat/fixtures/learninglogo6.jpg" file to "Files" filemanager
@@ -220,7 +220,8 @@ Feature: Test use of images in goals and goal custom fields
     # Also check reports
     When I log out
     And I log in as "admin"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Name   | Test Goal Custom Fields |
       | Source | Goal Custom Fields      |
@@ -245,7 +246,8 @@ Feature: Test use of images in goals and goal custom fields
     And I should see image with alt text "logo6 on personal goal customfield text area"
 
     When I am on site homepage
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Name   | Test Goal Summary |
       | Source | Goal Summary      |
@@ -267,7 +269,8 @@ Feature: Test use of images in goals and goal custom fields
     And I should see image with alt text "logo4 on custom My goal 1 customfield text area"
 
     When I am on site homepage
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Name   | Test Goal Status |
       | Source | Goal Status      |
@@ -288,7 +291,8 @@ Feature: Test use of images in goals and goal custom fields
     And I should see image with alt text "logo4 on custom My goal 1 customfield text area"
 
     When I am on site homepage
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Name   | Test Goal Status History |
       | Source | Goal Status History      |

@@ -37,7 +37,19 @@ class backup_totara_featured_links_block_structure_step extends backup_block_str
             [
                 'type', 'sortorder', 'timecreated', 'timemodified', 'dataraw', 'visibility', 'audienceaggregation',
                 'presetsraw', 'presetsaggregation', 'overallaggregation', 'tilerules', 'audienceshowing', 'presetshowing',
-                'tilerulesshowing'
+                'tilerulesshowing', 'parentid'
+            ]
+        );
+        $gallery = new backup_nested_element(
+            'gallery'
+        );
+        $subtiles = new backup_nested_element(
+            'subtiles',
+            ['id'],
+            [
+                'type', 'sortorder', 'timecreated', 'timemodified', 'dataraw', 'visibility', 'audienceaggregation',
+                'presetsraw', 'presetsaggregation', 'overallaggregation', 'tilerules', 'audienceshowing', 'presetshowing',
+                'tilerulesshowing', 'parentid'
             ]
         );
         $visibility  = new backup_nested_element(
@@ -48,26 +60,46 @@ class backup_totara_featured_links_block_structure_step extends backup_block_str
             ]
         );
 
+        $gallery->add_child($subtiles);
+        $tiles->add_child($gallery);
         $tiles->add_child($visibility);
 
         $tiles->set_source_sql(
             'SELECT id, type, sortorder, timecreated, timemodified, dataraw, visibility, audienceaggregation, presetsraw,
-                    presetsaggregation, overallaggregation, tilerules, audienceshowing, presetshowing, tilerulesshowing
+                    presetsaggregation, overallaggregation, tilerules, audienceshowing, presetshowing, tilerulesshowing,
+                    parentid
                FROM {block_totara_featured_links_tiles}
-              WHERE blockid = :blockid',
-            ['blockid' => backup_helper::is_sqlparam($this->task->get_blockid())]
+              WHERE blockid  = :blockid
+                AND parentid = 0',
+            [
+                'blockid' => backup_helper::is_sqlparam($this->task->get_blockid())
+            ]
+        );
+        $subtiles->set_source_sql(
+            'SELECT id, type, sortorder, timecreated, timemodified, dataraw, visibility, audienceaggregation, presetsraw,
+                    presetsaggregation, overallaggregation, tilerules, audienceshowing, presetshowing, tilerulesshowing,
+                    parentid
+               FROM {block_totara_featured_links_tiles}
+              WHERE blockid  = :blockid
+                AND parentid = :parentid',
+            [
+                'blockid' => backup_helper::is_sqlparam($this->task->get_blockid()),
+                'parentid'=> backup::VAR_PARENTID
+            ]
         );
         $visibility->set_source_sql(
             'SELECT id, cohortid
                FROM {cohort_visibility}
-              WHERE instanceid = :instanceid
-                AND instancetype = :instancetype
-            ',
+              WHERE instanceid   = :instanceid
+                AND instancetype = :instancetype',
             [
                 'instanceid'  => backup::VAR_PARENTID,
                 'instancetype'=> backup_helper::is_sqlparam(COHORT_ASSN_ITEMTYPE_FEATURED_LINKS)
             ]
         );
+
+        $subtiles->annotate_files('block_totara_featured_links', 'tile_background',  'id');
+        $subtiles->annotate_files('block_totara_featured_links', 'tile_backgrounds', 'id');
 
         $tiles->annotate_files('block_totara_featured_links', 'tile_background',  'id');
         $tiles->annotate_files('block_totara_featured_links', 'tile_backgrounds', 'id');

@@ -21,6 +21,8 @@
  * @package totara_appraisal
  */
 
+use core\event\base;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -443,6 +445,8 @@ class appraisal_event_test extends appraisal_testcase {
         );
         $expectedevent->trigger();
 
+        $expectedevent = $this->sync_timecreated($expectedevent, $event, $now);
+
         $this->assertEquals($expectedevent, $event);
 
         // Last stage.
@@ -471,6 +475,8 @@ class appraisal_event_test extends appraisal_testcase {
             )
         );
         $expectedevent->trigger();
+
+        $expectedevent = $this->sync_timecreated($expectedevent, $event, $now);
 
         $this->assertEquals($expectedevent, $event);
     }
@@ -542,6 +548,8 @@ class appraisal_event_test extends appraisal_testcase {
             )
         );
         $expectedevent->trigger();
+
+        $expectedevent = $this->sync_timecreated($expectedevent, $event, $now);
 
         $this->assertEquals($expectedevent, $event);
     }
@@ -617,6 +625,33 @@ class appraisal_event_test extends appraisal_testcase {
         );
         $expectedevent->trigger();
 
+        $expectedevent = $this->sync_timecreated($expectedevent, $event, $now);
+
         $this->assertEquals($expectedevent, $event);
+    }
+
+    /**
+     * When asserting equality of two events, we have to account for the fact that their timecreated field could differ if the
+     * switch to the next second happens between creating the two events (happened in CI run). Make tests more solid by:
+     *  - expecting timecreated may differ in one direction when asserting it
+     *  - syncing timecreated field in expected data so tests can go on comparing the whole event
+     *
+     * @param base $expectedevent
+     * @param base $event
+     * @param int $min_timecreated
+     * @return base
+     */
+    private function sync_timecreated(base $expectedevent, base $event, int $min_timecreated): base {
+        $this->assertGreaterThanOrEqual($min_timecreated, $event->timecreated);
+        $this->assertGreaterThanOrEqual($event->timecreated, $expectedevent->timecreated);
+
+        // Use reflection to overwrite protected property.
+        $timesynced_event_data = array_merge($expectedevent->get_data(), ['timecreated' => $event->timecreated]);
+        $reflection = new ReflectionClass($expectedevent);
+        $data_prop = $reflection->getProperty('data');
+        $data_prop->setAccessible(true);
+        $data_prop->setValue($expectedevent, $timesynced_event_data);
+
+        return $expectedevent;
     }
 }

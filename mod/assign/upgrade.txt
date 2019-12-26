@@ -1,21 +1,30 @@
 This files describes API changes in the assign code.
 information provided here is intended especially for developers.
 
-=== 11.9 ===
-* assign_grading_summary class has a new 12th property $gradingnotrequired
+=== 12.0 ===
 
-=== 11.3 ===
-
+* Modified mod_assign_renderer::render_assign_submission_status_compact removing incorrect use alert-error CSS class
+* Modified mod_assign_renderer::render_assign_submission_status removing incorrect use alert-error CSS class
+* Deprecated the following report builder display functions and replaced with display classes
+    * rb_source_assign::rb_display_assignmenttype().
+    * rb_source_assign::rb_display_scalevalues(), please call mod_assign\rb\display\assign_scale_values::display() instead.
+    * rb_source_assign::rb_display_submissiongrade(), please call mod_assign\rb\display\assign_submission_grade::display() instead.
+    * rb_source_assign::rb_display_maxgrade(), please call mod_assign\rb\display\assign_max_grade::display() instead.
+    * rb_source_assign::rb_display_mingrade(), please call mod_assign\rb\display\assign_min_grade::display() instead.
+    * rb_source_assignsummary::rb_display_roundgrade(), please call totara_reportbuilder\rb\display\round::display() instead.
 * String helpers are no longer used in the following templates, string data is passed via context data:
-** mod/assign/templates/popout_button.mustache
-** mod/assign/templates/loading.mustache
-** mod/assign/templates/grading_navigation_user_summary.mustache
-** mod/assign/templates/grading_navigation_user_selector.mustache
-** mod/assign/templates/grading_navigation.mustache
-** mod/assign/templates/grading_app.mustache
-** mod/assign/templates/grading_actions.mustache
+    * mod/assign/templates/popout_button.mustache
+    * mod/assign/templates/loading.mustache
+    * mod/assign/templates/grading_navigation_user_summary.mustache
+    * mod/assign/templates/grading_navigation_user_selector.mustache
+    * mod/assign/templates/grading_navigation.mustache
+    * mod/assign/templates/grading_app.mustache
+    * mod/assign/templates/grading_actions.mustache
+* render_editor_content added 6th argument $shortentext
+* assign_grading_summary class has a new 12th property $gradingnotrequired.
 
-=== 10.8 ===
+=== 11.2 ===
+
 * assign::add_attempt requires that set_most_recent_team_submission() be called if attempting to use this function with a team
   submission.
 

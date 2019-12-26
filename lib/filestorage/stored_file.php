@@ -276,7 +276,9 @@ class stored_file {
         $filerecord->filesize = $newfile->get_filesize();
         $filerecord->referencefileid = $newfile->get_referencefileid();
         $filerecord->userid = $newfile->get_userid();
+        $oldcontenthash = $this->get_contenthash();
         $this->update($filerecord);
+        $this->fs->deleted_file_cleanup($oldcontenthash);
     }
 
     /**
@@ -578,6 +580,18 @@ class stored_file {
      * @return bool success
      */
     public function archive_file(file_archive $filearch, $archivepath) {
+        if ($this->repository) {
+            $this->sync_external_file();
+            if ($this->get_contenthash() === sha1('')) {
+                // This file is not stored locally - attempt to retrieve it from the repository.
+                // This may happen if the repository deliberately does not fetch files, or if there is a failure with the sync.
+                $fileinfo = $this->repository->get_file($this->get_reference());
+                if (isset($fileinfo['path'])) {
+                    return $filearch->add_file_from_pathname($archivepath, $fileinfo['path']);
+                }
+            }
+        }
+
         if ($this->is_directory()) {
             return $filearch->add_directory($archivepath);
         } else {
@@ -939,6 +953,22 @@ class stored_file {
             return null;
         }
     }
+
+    /**
+     * Returns repository type.
+     *
+     * @return mixed str|null the repository type or null if is not an external file
+     * @since  Moodle 3.3
+     */
+    public function get_repository_type() {
+
+        if (!empty($this->repository)) {
+            return $this->repository->get_typename();
+        } else {
+            return null;
+        }
+    }
+
 
     /**
      * get reference file id

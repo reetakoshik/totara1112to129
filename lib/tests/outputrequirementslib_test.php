@@ -103,4 +103,42 @@ class core_outputrequirementslib_testcase extends advanced_testcase {
         // Make sure that the generated code does not contain backslashes.
         $this->assertFalse(strpos($requirecode, '\\'), "Output contains backslashes: " . $requirecode);
     }
+
+    /**
+     * Test that function will not produce syntax error if provided values cannot be json encoded
+     */
+    public function test_js_call_amd_json() {
+        $page = new moodle_page();
+        /**
+         * @var page_requirements_manager $requirements
+         */
+        $requirements = $page->requires;
+
+        // Valid case.
+        $requirements->js_call_amd('core/add_block_popover', 'a', ['valid', 'text']);
+        $code = implode(';', $requirements->get_raw_amd_js_code());
+        $this->assertContains('a("valid", "text")', $code);
+        $this->assertContains('"core/add_block_popover"', $code);
+
+        // Valid: Empty array.
+        $requirements->js_call_amd('core/test', 'd', [[], 'text']);
+        $code = implode(';', $requirements->get_raw_amd_js_code());
+        $this->assertContains('d([], "text")', $code);
+
+        // Valid: Null value.
+        $requirements->js_call_amd('core/test', 'e', [null, null]);
+        $code = implode(';', $requirements->get_raw_amd_js_code());
+        $this->assertContains('e(null, null)', $code);
+
+        // Invalid UTF-8.
+        $requirements->js_call_amd('core/test', 'b', ['invalid' . "\xB1\x31", 'text']);
+        $code = implode(';', $requirements->get_raw_amd_js_code());
+        $this->assertContains('b(null, "text")', $code);
+        $this->assertNotContains('invalid', $code);
+
+        // Invalid type.
+        $requirements->js_call_amd('core/test', 'c', [NAN, 'text']);
+        $code = implode(';', $requirements->get_raw_amd_js_code());
+        $this->assertContains('c(null, "text")', $code);
+    }
 }

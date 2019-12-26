@@ -1,6 +1,9 @@
 This files describes API changes in /calendar/* ,
 information provided here is intended especially for developers.
 
+=== 12.9 ===
+* core_calendar_renderer::facetoface_print_calendar_session() has been updated to check a user's booking status. 
+
 === 10 ===
 
 * function calendar_get_default_courses() has been deprecated. Use the new method calendar_information::get_default_courses() instead.

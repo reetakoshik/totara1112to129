@@ -19,102 +19,24 @@
  *
  * Totara navigation edit page.
  *
- * @package    totara
+ * @package    totara_appraisal
  * @subpackage navigation
  * @author     Oleg Demeshev <oleg.demeshev@totaralms.com>
  */
 
 namespace totara_appraisal\totara\menu;
 
-use \totara_core\totara\menu\menu as menu;
-
-class appraisal extends \totara_core\totara\menu\item {
+class appraisal extends \totara_core\totara\menu\container {
 
     protected function get_default_title() {
         return get_string('performance', 'totara_appraisal');
-    }
-
-    protected function get_default_url() {
-        global $CFG, $USER;
-
-        require_once($CFG->dirroot . '/totara/appraisal/lib.php');
-
-        $isappraisalenabled = totara_feature_visible('appraisals');
-        $viewownappraisals = $isappraisalenabled && \appraisal::can_view_own_appraisals($USER->id);
-        $viewappraisals = $isappraisalenabled && ($viewownappraisals || \appraisal::can_view_staff_appraisals($USER->id));
-
-        $feedbackmenu = new \totara_feedback360\totara\menu\feedback360(array());
-        $viewfeedback = $feedbackmenu->get_visibility();
-
-        $goalmenu = new \totara_hierarchy\totara\menu\mygoals(array());
-        $viewgoals = $goalmenu->get_visibility();
-
-        if ($viewownappraisals) {
-            return '/totara/appraisal/myappraisal.php?latest=1';
-        } else if ($viewappraisals) {
-            return '/totara/appraisal/index.php';
-        } else if ($viewfeedback) {
-            return '/totara/feedback360/index.php';
-        } else if ($viewgoals) {
-            return '/totara/hierarchy/prefix/goal/mygoals.php';
-        }
     }
 
     public function get_default_sortorder() {
         return 40000;
     }
 
-    public function get_default_visibility() {
-        return menu::SHOW_WHEN_REQUIRED;
-    }
-
-    protected function check_visibility() {
-        global $CFG, $USER;
-
-        static $cache = null;
-        if (isset($cache)) {
-            return $cache;
-        }
-
-        if (totara_feature_visible('goals')) {
-            // Start checking from least consuming requests.
-            $goalmenu = new \totara_hierarchy\totara\menu\mygoals(array());
-            $show = $goalmenu->get_visibility();
-            if ($show != menu::HIDE_ALWAYS) {
-                $cache = menu::SHOW_ALWAYS;
-                return $cache;
-            }
-        }
-
-        if (totara_feature_visible('feedback360')) {
-            $feedbackmenu = new \totara_feedback360\totara\menu\feedback360(array());
-            $show = $feedbackmenu->get_visibility();
-            if ($show != menu::HIDE_ALWAYS) {
-                $cache = menu::SHOW_ALWAYS;
-                return $cache;
-            }
-        }
-
-        if (totara_feature_visible('appraisals')) {
-            require_once($CFG->dirroot . '/totara/appraisal/lib.php');
-            $show = (\appraisal::can_view_own_appraisals($USER->id) || \appraisal::can_view_staff_appraisals($USER->id));
-            if ($show) {
-                $cache = menu::SHOW_ALWAYS;
-                return $cache;
-            }
-        }
-
-        // Nothing to display here.
-        $cache = menu::HIDE_ALWAYS;
-        return $cache;
-    }
-
-    /**
-     * Is this menu item completely disabled?
-     *
-     * @return bool
-     */
-    public function is_disabled() {
-        return (totara_feature_disabled('appraisals') && totara_feature_disabled('goals') && totara_feature_disabled('feedback360'));
+    public function get_incompatible_preset_rules(): array {
+        return ['can_view_appraisal'];
     }
 }

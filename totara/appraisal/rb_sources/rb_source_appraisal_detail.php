@@ -29,19 +29,17 @@ require_once($CFG->dirroot . '/totara/appraisal/rb_sources/rb_source_appraisal.p
 require_once($CFG->dirroot . '/totara/appraisal/lib.php');
 
 class rb_source_appraisal_detail extends rb_source_appraisal {
-    public $base, $joinlist, $columnoptions, $filteroptions, $paramoptions;
-    public $contentoptions, $defaultcolumns, $defaultfilters, $embeddedparams;
-    public $sourcetitle, $shortname, $cacheable;
+    public $shortname;
 
     /**
      * Stored during post_params() so that it can be used later when generating columns.
      *
      * @var int
      */
-    private $appraisalid;
+    public $appraisalid;
 
     // Cache for multi choice value names. The report gets the ids of the choices and the display functions convert them to names.
-    private static $appraisalmultichoicenamecache = array();
+    public static $appraisalmultichoicenamecache = array();
 
     public function __construct($groupid, rb_global_restriction_set $globalrestrictionset = null) {
         parent::__construct($groupid, $globalrestrictionset);
@@ -530,7 +528,7 @@ class rb_source_appraisal_detail extends rb_source_appraisal {
                         $columnoption,
                         $hidden
                     );
-                $newcolumn->displayfunc = 'longtext';
+                $newcolumn->displayfunc = 'appraisal_longtext';
                 $results[] = $newcolumn;
                 break;
 
@@ -599,7 +597,7 @@ class rb_source_appraisal_detail extends rb_source_appraisal {
                         $columnoption,
                         $hidden
                     );
-                $newcolumn->displayfunc = 'multichoicesingle';
+                $newcolumn->displayfunc = 'appraisal_multichoice_single';
                 $results[] = $newcolumn;
                 break;
 
@@ -630,7 +628,7 @@ class rb_source_appraisal_detail extends rb_source_appraisal {
                         $hidden
                     );
                 $newcolumn->joins = array($joinname);
-                $newcolumn->displayfunc = 'multichoicemulti';
+                $newcolumn->displayfunc = 'appraisal_multichoice_multi';
                 $results[] = $newcolumn;
                 break;
 
@@ -683,7 +681,7 @@ class rb_source_appraisal_detail extends rb_source_appraisal {
                         $hidden
                     );
                 $newcolumn->joins = array($joinname);
-                $newcolumn->displayfunc = 'fileupload';
+                $newcolumn->displayfunc = 'appraisal_fileupload';
                 $results[] = $newcolumn;
                 break;
 
@@ -704,8 +702,17 @@ class rb_source_appraisal_detail extends rb_source_appraisal {
         return $results;
     }
 
-
+    /**
+     * Display response to the longtext question type
+     *
+     * @deprecated Since Totara 12.0
+     * @param $value
+     * @param $unused
+     * @param bool $isexport
+     * @return mixed|string
+     */
     public function rb_display_longtext($value, $unused, $isexport = false) {
+        debugging('rb_source_appraisal_detail::rb_display_longtext has been deprecated since Totara 12.0. Use totara_appraisal\rb\display\appraisal_longtext::display', DEBUG_DEVELOPER);
         $cleanvalue = clean_param($value, PARAM_TEXT);
         if ($isexport) {
             return $cleanvalue;
@@ -716,8 +723,15 @@ class rb_source_appraisal_detail extends rb_source_appraisal {
         }
     }
 
-
+    /**
+     * Display response to the fileupload question type
+     *
+     * @deprecated Since Totara 12.0
+     * @param $value
+     * @return string
+     */
     public function rb_display_fileupload($value) {
+        debugging('rb_source_appraisal_detail::rb_display_fileupload has been deprecated since Totara 12.0. Use totara_appraisal\rb\display\appraisal_fileupload::display', DEBUG_DEVELOPER);
         global $OUTPUT;
 
         if (empty($value)) {
@@ -743,7 +757,7 @@ class rb_source_appraisal_detail extends rb_source_appraisal {
      *
      * Just using a static variable as a cache because it's quick and easy and only costs one query to populate.
      */
-    private function populate_multichoice_name_cache() {
+    public function populate_multichoice_name_cache() {
         global $DB;
 
         $sql = "SELECT DISTINCT asv.id, asv.name
@@ -767,7 +781,15 @@ class rb_source_appraisal_detail extends rb_source_appraisal {
         self::$appraisalmultichoicenamecache = array();
     }
 
+    /**
+     * Display response to the multichoicesingle question type
+     *
+     * @deprecated Since Totara 12.0
+     * @param $id
+     * @return string
+     */
     public function rb_display_multichoicesingle($id) {
+        debugging('rb_source_appraisal_detail::rb_display_multichoicesingle has been deprecated since Totara 12.0. Use totara_appraisal\rb\display\appraisal_multichoice_single::display', DEBUG_DEVELOPER);
         if (empty($id)) {
             return '';
         }
@@ -780,7 +802,15 @@ class rb_source_appraisal_detail extends rb_source_appraisal {
         return self::$appraisalmultichoicenamecache[$this->appraisalid][$id];
     }
 
+    /**
+     * Display response to the multichoicemulti question type
+     *
+     * @deprecated Since Totara 12.0
+     * @param $idscommalist
+     * @return string
+     */
     public function rb_display_multichoicemulti($idscommalist) {
+        debugging('rb_source_appraisal_detail::rb_display_multichoicemulti has been deprecated since Totara 12.0. Use totara_appraisal\rb\display\appraisal_multichoice_multi::display', DEBUG_DEVELOPER);
         if (empty($idscommalist)) {
             return '';
         }

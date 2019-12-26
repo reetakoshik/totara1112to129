@@ -48,7 +48,7 @@ $PAGE->set_title(get_string('coursetags', 'tag'));
 $PAGE->set_heading($course->fullname);
 
 $form = new coursetags_form();
-$data = array('id' => $course->id, 'tags' => core_tag_tag::get_item_tags_array('core', 'course', $course->id));
+$data = array('id' => $course->id, 'tags' => core_tag_tag::get_item_tags_array('core', 'course', $course->id, core_tag_tag::BOTH_STANDARD_AND_NOT, 0, false));// Totara: Do not encode the special characters
 $form->set_data($data);
 
 $redirecturl = $returnurl ? new moodle_url($returnurl) : course_get_url($course);

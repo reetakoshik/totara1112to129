@@ -277,10 +277,57 @@ class behat_completion extends behat_base {
         }
 
         // Purge the completion caches
-        $cache = cache::make('core', 'coursecompletion');
-        $cache->purge();
+        completion_info::purge_progress_caches();
+    }
 
-        $cache = cache::make('totara_core', 'completion_progressinfo');
-        $cache->purge();
+    /**
+     * When viewing the course completion report this marks the given user complete by the given role
+     *
+     * It is expected that the current user holds the given role, otherwise this won't work.
+     *
+     * @see behat_general::i_click_on
+     *
+     * @Given /^I mark "(?P<fullname>(?:[^"]|\\")*)" complete by "(?P<activity_name_string>(?:[^"]|\\")*)" in the course completion report$/
+     * @param string $fullname
+     * @param string $role
+     */
+    public function i_mark_user_complete_by_role_in_the_course_completion_report(string $fullname, string $role) {
+
+        // Confirm that the navbar looks correct, we need to be on the course completion report interface.
+        $this->execute('behat_general::should_exist', ['//div[@id="page-navbar"]//ol[contains(., "ReportsCourse completion")]', 'xpath_element']);
+
+        $xpath_fullname = behat_context_helper::escape($fullname);
+        $xpath_role = behat_context_helper::escape($role);
+        $xpath_title = behat_context_helper::escape(get_string('clicktomarkusercomplete', 'report_completion'));
+
+        $xpath = "//table[@id='completion-progress']//th/a[.={$xpath_fullname}]/ancestor::tr/td[count(//table[@id='completion-progress']/thead/tr/th[.={$xpath_role}]/preceding-sibling::th)+1]/a[@title={$xpath_title}]";
+        $method = 'behat_general::i_click_on';
+        $this->execute($method, [$xpath, 'xpath_element']);
+    }
+
+    /**
+     * When viewing the course completion report this marks the given user complete via RPL with the given note.
+     *
+     * @see behat_forms::i_set_the_field_to
+     * @see behat_general::i_click_on
+     *
+     * @Given /^I mark "(?P<fullname>(?:[^"]|\\")*)" complete by RPL with "(?P<note>(?:[^"]|\\")*)" in the course completion report$/
+     * @param string $fullname
+     * @param string $note
+     */
+    public function i_mark_user_complete_by_rpl_in_the_course_completion_report(string $fullname, string $note) {
+
+        // Confirm that the navbar looks correct, we need to be on the course completion report interface.
+        $this->execute('behat_general::should_exist', ['//div[@id="page-navbar"]//ol[contains(., "ReportsCourse completion")]', 'xpath_element']);
+
+        $xpath_fullname = behat_context_helper::escape($fullname);
+        $xpath_title = behat_context_helper::escape(get_string('recognitionofpriorlearning', 'core_completion'));
+
+        $xpath = "//table[@id='completion-progress']//th/a[.={$xpath_fullname}]/ancestor::tr/td[count(//table[@id='completion-progress']/thead/tr/th[.={$xpath_title}]/preceding-sibling::th)+3]/a[contains(@class, 'rpledit')]";
+        // Click to activate.
+        $this->execute('behat_general::i_click_on', [$xpath, 'xpath_element']);
+        $this->execute('behat_forms::i_set_the_field_to', ['rplinput', $note]);
+        // Click again to save.
+        $this->execute('behat_general::i_click_on', [$xpath, 'xpath_element']);
     }
 }

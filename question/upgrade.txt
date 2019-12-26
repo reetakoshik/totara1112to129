@@ -1,6 +1,11 @@
 This files describes API changes for code that uses the question API,
 information provided here is intended especially for developers.
 
+=== 12 ===
+
+* core_question_renderer::get_flag_html() has changed.
+* qtype_renderer::feedback_image() has changed.
+
 === 10 ===
 
 * The argument $requirecourseid was removed from question_edit_setup() and

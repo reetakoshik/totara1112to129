@@ -32,9 +32,17 @@ $icons = array(
                     'classes' => 'fa-ellipsis-h',
                 ),
         ),
-);
+    'totara_program|too_many_assignments' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-warning ft-state-info'
+                ),
+            ),
+        );
 
 $aliases = array(
     'totara_program|program_warning' => 'exclamation-circle',
     'totara_program|progress_then' => 'arrow-down',
+    'totara_program|no_assignments' => 'exclamation-circle',
 );

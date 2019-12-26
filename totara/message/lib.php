@@ -161,7 +161,7 @@ function totara_message_dismiss_action($id) {
             html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'id', 'value' => $id)) .
             html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey())) .
             html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'returnto', 'value' => $clean_fullme)) .
-            html_writer::empty_tag('input', array('type' => 'image', 'class' => 'iconsmall', 'src' => $OUTPUT->pix_url('t/delete_grey', 'totara_core'), 'title' => $str, 'alt' => $str)),
+            html_writer::empty_tag('input', array('type' => 'image', 'class' => 'iconsmall', 'src' => $OUTPUT->image_url('t/delete_grey', 'totara_core'), 'title' => $str, 'alt' => $str)),
         array('action' => $CFG->wwwroot . '/totara/message/dismiss.php?id=' . $id, 'method' => 'post'))
     );
     return $out;
@@ -251,79 +251,4 @@ function totara_message_action_button($action) {
 
     $args = array('action'=>$action, 'action_str' => $str, 'clean_fullme'=>$clean_fullme, 'sesskey'=>sesskey());
     $PAGE->requires->js_init_call('M.totara_message.create_action_dialog', $args);
-}
-
-
-/**
- * Construct the accept/reject actions
- *
- * @param int $id message Id
- * @return string HTML of accept/reject button
- * @deprecated Since Totara 9.0
- */
-function totara_message_accept_reject_action($id) {
-    global $CFG, $FULLME, $PAGE, $DB, $OUTPUT;
-
-    debugging("totara_message_accept_reject_action() has been deprecated because it is no longer used in the codebase.", DEBUG_DEVELOPER);
-
-    // Button Lang Strings
-    $cancel_string = get_string('cancel');
-
-    $clean_fullme = clean_param($FULLME, PARAM_LOCALURL);
-    $msg = $DB->get_record('message', array('id' => $id), '*', MUST_EXIST);
-    $msgmeta = $DB->get_record('message_metadata', array('messageid' => $id), '*', MUST_EXIST);
-    $msgacceptdata = totara_message_eventdata($id, 'onaccept');
-
-    $returnto = ($msgmeta->msgtype == TOTARA_MSG_TYPE_LINK && isset($msgacceptdata->data['redirect'])) ? $msgacceptdata->data['redirect'] : $clean_fullme;
-
-    // Validate redirect
-    $return_host = parse_url($returnto);
-    $site_host = parse_url($CFG->wwwroot);
-    if ($return_host['host'] != $site_host['host']) {
-        print_error('error:redirecttoexternal', 'totara_message');
-    }
-
-    $subject = format_string($msg->subject);
-    $onaccept_str = format_string(isset($msgacceptdata->acceptbutton) ? $msgacceptdata->acceptbutton : get_string('onaccept', 'block_totara_tasks'));
-    $onreject_str = get_string('onreject', 'block_totara_tasks');
-
-    // only give the accept/reject actions if they actually exist
-    $out = '';
-    if (!empty($msgmeta->onaccept)) {
-        $PAGE->requires->string_for_js('cancel', 'moodle');
-
-        $args = array('id'=>$id, 'type' => 'accept', 'type_str' =>$onaccept_str, 'dialog_title' =>$subject, 'returnto'=>$returnto, 'sesskey'=>sesskey());
-        $PAGE->requires->js_init_call('M.totara_message.create_accept_reject_dialog', $args);
-
-        // Construct HTML for accept button
-        $out .= html_writer::tag('form',
-            html_writer::empty_tag('input', array('id' => "acceptmsg'.$id.'-dialog", 'type' => 'image', 'name' => 'tm_accept_msg', 'class' => 'iconsmall action', 'src' => $OUTPUT->pix_url('i/valid'), 'title' => $onaccept_str, 'alt' => $onaccept_str, 'style' => 'display:none;'))
-        );
-        $out .= html_writer::tag('noscript',
-            html_writer::tag('form',
-                html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'id', 'value' => $id)) .
-                html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'returnto', 'value' => $returnto)) .
-                html_writer::empty_tag('input', array('type' => 'image', 'class' => 'iconsmall action', 'src' => $OUTPUT->pix_url('i/valid'), 'title' => $onaccept_str, 'alt' => $onaccept_str)),
-            array('action' => $CFG->wwwroot . '/totara/message/accept.php?id=' . $id, 'method' => 'post'))
-        );
-    }
-    if (!empty($msgmeta->onreject)) {
-        $PAGE->requires->string_for_js('cancel', 'moodle');
-
-        $args = array('id'=>$id, 'type' => 'reject', 'type_str' =>$onaccept_str, 'dialog_title' =>$onreject_str, 'returnto'=>$clean_fullme, 'sesskey'=>sesskey());
-        $PAGE->requires->js_init_call('M.totara_message.create_accept_reject_dialog', $args);
-
-        // Construct HTML for accept button
-        $out .= html_writer::tag('form',
-            html_writer::empty_tag('input', array('id' => "rejectmsg'.$id.'-dialog", 'type' => 'image', 'name' => 'tm_reject_msg', 'class' => 'iconsmall action', 'src' => $OUTPUT->pix_url('t/delete'), 'title' => $onreject_str, 'alt' => $onreject_str, 'style' => 'display:none;'))
-        );
-        $out .= html_writer::tag('noscript',
-            html_writer::tag('form',
-                html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'id', 'value' => $id)) .
-                html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'returnto', 'value' => $clean_fullme)) .
-                html_writer::empty_tag('input', array('type' => 'image', 'class' => 'iconsmall action', 'src' => $OUTPUT->pix_url('t/delete'), 'title' => $onreject_str, 'alt' => $onreject_str)),
-            array('action' => $CFG->wwwroot . '/totara/message/reject.php?id=' . $id, 'method' => 'post'))
-        );
-    }
-    return $out;
 }

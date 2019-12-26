@@ -49,4 +49,56 @@ $observers = array(
         'eventname' => '\core\event\course_in_progress',
         'callback'  => 'totara_certification_observer::course_in_progress',
     ),
+    array(
+        'eventname' => '\totara_program\event\program_created',
+        'callback'  => 'totara_certification\totara_catalog\certification::object_update_observer',
+    ),
+    array(
+        'eventname' => '\totara_program\event\program_updated',
+        'callback'  => 'totara_certification\totara_catalog\certification::object_update_observer',
+    ),
+    array(
+        'eventname' => '\totara_certification\event\certification_updated',
+        'callback'  => 'totara_certification\totara_catalog\certification::object_update_observer',
+    ),
+    array(
+        'eventname' => '\totara_program\event\program_deleted',
+        'callback'  => 'totara_certification\totara_catalog\certification::object_update_observer',
+    ),
+    array(
+        'eventname' => '\core\event\tag_added',
+        'callback'  => 'totara_certification\totara_catalog\certification::object_update_observer',
+    ),
+    array(
+        'eventname' => '\core\event\tag_updated',
+        'callback'  => 'totara_certification\totara_catalog\certification::object_update_observer',
+    ),
+    array(
+        'eventname' => '\core\event\tag_removed',
+        'callback'  => 'totara_certification\totara_catalog\certification::object_update_observer',
+    ),
+    array(
+        'eventname' => '\totara_customfield\event\customfield_data_deleted',
+        'callback'  => 'totara_certification\totara_catalog\certification::object_update_observer',
+    ),
+    array(
+        'eventname' => '\totara_program\event\program_contentupdated',
+        'callback'  => 'totara_certification\totara_catalog\certification::object_update_observer',
+    ),
+    array(
+        'eventname' => '\core\event\course_category_updated',
+        'callback'  => 'totara_certification\totara_catalog\certification::object_update_observer',
+    ),
+    array(
+        'eventname' => '\core\event\admin_settings_changed',
+        'callback'  => 'totara_certification\totara_catalog\certification\observer\settings_observer::changed',
+    ),
+    array(
+        'eventname' => '\totara_customfield\event\customfield_created',
+        'callback'  => 'totara_certification\totara_catalog\certification\observer\customfield_changed::update_default_data'
+    ),
+    array(
+        'eventname' => '\totara_customfield\event\customfield_updated',
+        'callback'  => 'totara_certification\totara_catalog\certification\observer\customfield_changed::update_default_data'
+    ),
 );

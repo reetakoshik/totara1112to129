@@ -40,12 +40,47 @@ define('CERTIFICATION_PART_4_USERS', 6);
  */
 class totara_certification_certification_testcase extends reportcache_advanced_testcase {
 
+    private $setuptimeminimum, $setuptimemaximum, $certprograms, $userswithassignmentduedate, $users, $assignmentduedate,
+        $certprogram1, $certprogram2, $certprogram3, $certprogram4, $certprogram5, $certprogram6,
+        $courses, $coursesforcompletion, $certsforcompletion;
+
+    private $firstcompletiontimeminimum, $firstcompletiontimemaximum, $firstcompletiontime;
+
+    private $secondcompletiontime, $secondcompletiontimeminimum, $secondcompletiontimemaximum;
+
+    private $secondcrontime, $secondcrontimeminimum, $secondcrontimemaximum;
+
+    private $thirdcompletiontime, $thirdcompletiontimeminimum, $thirdcompletiontimemaximum;
+
     protected function tearDown() {
         $this->setuptimeminimum = null;
+        $this->setuptimemaximum = null;
+        $this->certprograms = null;
+        $this->userswithassignmentduedate = null;
+        $this->users = null;
+        $this->assignmentduedate = null;
+        $this->certprogram1 = null;
+        $this->certprogram2 = null;
+        $this->certprogram3 = null;
+        $this->certprogram4 = null;
+        $this->certprogram5 = null;
+        $this->certprogram6 = null;
+        $this->courses = null;
+        $this->coursesforcompletion = null;
+        $this->certsforcompletion = null;
         $this->firstcompletiontimeminimum = null;
+        $this->firstcompletiontimemaximum = null;
+        $this->firstcompletiontime = null;
         $this->secondcompletiontime = null;
+        $this->secondcompletiontimeminimum = null;
+        $this->secondcompletiontimemaximum = null;
         $this->secondcrontime = null;
+        $this->secondcrontimeminimum = null;
+        $this->secondcrontimemaximum = null;
         $this->thirdcompletiontime = null;
+        $this->thirdcompletiontimeminimum = null;
+        $this->thirdcompletiontimemaximum = null;
+
         parent::tearDown();
     }
 
@@ -85,10 +120,6 @@ class totara_certification_certification_testcase extends reportcache_advanced_t
         $this->actions_stage_6(); // Third completion / recertification.
         $this->check_stage_6();
     }
-
-    private $setuptimeminimum, $setuptimemaximum, $certprograms, $userswithassignmentduedate, $users, $assignmentduedate,
-            $certprogram1, $certprogram2, $certprogram3, $certprogram4, $certprogram5, $certprogram6,
-            $courses, $coursesforcompletion, $certsforcompletion;
 
     /**
      * Testing part 1 - Initial setup.
@@ -209,8 +240,6 @@ class totara_certification_certification_testcase extends reportcache_advanced_t
         $this->setuptimemaximum = time();
     }
 
-    private $firstcompletiontimeminimum, $firstcompletiontimemaximum, $firstcompletiontime;
-
     /**
      * Testing part 2 - First completion / primary certification.
      *
@@ -314,8 +343,6 @@ class totara_certification_certification_testcase extends reportcache_advanced_t
         ob_end_clean();
     }
 
-    private $secondcompletiontime, $secondcompletiontimeminimum, $secondcompletiontimemaximum;
-
     /**
      * Testing part 4 - Second completion / recertification.
      *
@@ -338,8 +365,6 @@ class totara_certification_certification_testcase extends reportcache_advanced_t
         $this->waitForSecond();
         $this->secondcompletiontimemaximum = time();
     }
-
-    private $secondcrontime, $secondcrontimeminimum, $secondcrontimemaximum;
 
     /**
      * Testing part 5 - Recertification window opens again.
@@ -430,8 +455,6 @@ class totara_certification_certification_testcase extends reportcache_advanced_t
         $this->waitForSecond();
         $this->secondcrontimemaximum = time();
     }
-
-    private $thirdcompletiontime, $thirdcompletiontimeminimum, $thirdcompletiontimemaximum;
 
     private function actions_stage_6() {
 

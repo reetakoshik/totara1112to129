@@ -1165,6 +1165,8 @@ M.core_filepicker.init = function(Y, options) {
             // register event on clicking submit button
             getfile.on('click', function(e) {
                 e.preventDefault();
+                // Pause behat.
+                window.M.util.js_pending('filepicker_getfile_on');
                 var client_id = this.options.client_id;
                 var scope = this;
                 var repository_id = this.active_repo.id;
@@ -1212,6 +1214,8 @@ M.core_filepicker.init = function(Y, options) {
                         selectnode.removeClass('loading');
                         if (obj.event == 'fileexists') {
                             scope.process_existing_file(obj);
+                            // Release behat.
+                            window.M.util.js_complete('filepicker_getfile_on');
                             return;
                         }
                         if (scope.options.editor_target && scope.options.env=='editor') {
@@ -1222,6 +1226,8 @@ M.core_filepicker.init = function(Y, options) {
                         obj.client_id = client_id;
                         var formcallback_scope = args.scope.options.magicscope ? args.scope.options.magicscope : args.scope;
                         scope.options.formcallback.apply(formcallback_scope, [obj]);
+                        // Release behat.
+                        window.M.util.js_complete('filepicker_getfile_on');
                     }
                 }, false);
             }, this);
@@ -1373,7 +1379,8 @@ M.core_filepicker.init = function(Y, options) {
             // processing repository listing
             // Resort the repositories by sortorder
             var sorted_repositories = [];
-            for (var i in this.options.repositories) {
+            var i;
+            for (i in this.options.repositories) {
                 sorted_repositories[i] = this.options.repositories[i];
             }
             sorted_repositories.sort(function(a,b){return a.sortorder-b.sortorder});
@@ -1385,6 +1392,10 @@ M.core_filepicker.init = function(Y, options) {
                 list.removeChild(reponode);
                 for (i in sorted_repositories) {
                     var repository = sorted_repositories[i];
+                    var h = (parseInt(i) == 0) ? parseInt(i) : parseInt(i) - 1,
+                        j = (parseInt(i) == Object.keys(sorted_repositories).length - 1) ? parseInt(i) : parseInt(i) + 1;
+                    var previousrepository = sorted_repositories[h];
+                    var nextrepository = sorted_repositories[j];
                     var node = reponode.cloneNode(true);
                     list.appendChild(node);
                     node.
@@ -1395,6 +1406,15 @@ M.core_filepicker.init = function(Y, options) {
                             this.hide_header();
                             this.list({'repo_id':repository_id});
                         }, this /*handler running scope*/, repository.id/*second argument of handler*/);
+                    node.on('key', function(e, previousrepositoryid, nextrepositoryid, clientid, repositoryid) {
+                        this.changeHighlightedRepository(e, clientid, repositoryid, previousrepositoryid, nextrepositoryid);
+                    }, 'down:38,40', this, previousrepository.id, nextrepository.id, client_id, repository.id);
+                    node.on('key', function(e, repositoryid) {
+                        e.preventDefault();
+                        this.set_preference('recentrepository', repositoryid);
+                        this.hide_header();
+                        this.list({'repo_id': repositoryid});
+                    }, 'enter', this, repository.id);
                     node.one('.fp-repo-name').setContent(Y.Escape.html(repository.name));
                     node.one('.fp-repo-icon').set('src', repository.icon);
                     if (i==0) {
@@ -1417,6 +1437,23 @@ M.core_filepicker.init = function(Y, options) {
             // display repository that was used last time
             this.mainui.show();
             this.show_recent_repository();
+        },
+        /**
+         * Change the highlighted repository to a new one.
+         *
+         * @param  {object} event The key event
+         * @param  {integer} clientid The client id to identify the repo class.
+         * @param  {integer} oldrepositoryid The repository id that we are removing the highlight for
+         * @param  {integer} previousrepositoryid The previous repository id.
+         * @param  {integer} nextrepositoryid The next repository id.
+         */
+        changeHighlightedRepository: function(event, clientid, oldrepositoryid, previousrepositoryid, nextrepositoryid) {
+            event.preventDefault();
+            var newrepositoryid = (event.keyCode == '40') ? nextrepositoryid : previousrepositoryid;
+            this.fpnode.one('#fp-repo-' + clientid + '-' + oldrepositoryid).setAttribute('tabindex', '-1');
+            this.fpnode.one('#fp-repo-' + clientid + '-' + newrepositoryid)
+                    .setAttribute('tabindex', '0')
+                    .focus();
         },
         parse_repository_options: function(data, appendtolist) {
             if (appendtolist) {
@@ -1588,8 +1625,19 @@ M.core_filepicker.init = function(Y, options) {
         display_response: function(id, obj, args) {
             var scope = args.scope;
             // highlight the current repository in repositories list
-            scope.fpnode.all('.fp-repo.active').removeClass('active');
-            scope.fpnode.all('#fp-repo-'+scope.options.client_id+'-'+obj.repo_id).addClass('active')
+            scope.fpnode.all('.fp-repo.active')
+                    .removeClass('active')
+                    .setAttribute('aria-selected', 'false')
+                    .setAttribute('tabindex', '-1');
+            scope.fpnode.all('.nav-link')
+                    .removeClass('active')
+                    .setAttribute('aria-selected', 'false')
+                    .setAttribute('tabindex', '-1');
+            var activenode = scope.fpnode.one('#fp-repo-' + scope.options.client_id + '-' + obj.repo_id);
+            activenode.addClass('active')
+                    .setAttribute('aria-selected', 'true')
+                    .setAttribute('tabindex', '0');
+            activenode.all('.nav-link').addClass('active');
             // add class repository_REPTYPE to the filepicker (for repository-specific styles)
             for (var i in scope.options.repositories) {
                 scope.fpnode.removeClass('repository_'+scope.options.repositories[i].type)
@@ -1713,6 +1761,8 @@ M.core_filepicker.init = function(Y, options) {
             var scope = this;
             content.one('.fp-upload-btn').on('click', function(e) {
                 e.preventDefault();
+                // Pause behat.
+                window.M.util.js_pending('filepicker_file_upload_on');
                 var license = content.one('.fp-setlicense select');
 
                 this.set_preference('recentlicense', license.get('value'));
@@ -1735,6 +1785,8 @@ M.core_filepicker.init = function(Y, options) {
                             if (o.event == 'fileexists') {
                                 scope.create_upload_form(data);
                                 scope.process_existing_file(o);
+                                // Release behat.
+                                window.M.util.js_complete('filepicker_file_upload_on');
                                 return;
                             }
                             if (scope.options.editor_target&&scope.options.env=='editor') {
@@ -1745,6 +1797,8 @@ M.core_filepicker.init = function(Y, options) {
                             o.client_id = client_id;
                             var formcallback_scope = args.scope.options.magicscope ? args.scope.options.magicscope : args.scope;
                             scope.options.formcallback.apply(formcallback_scope, [o]);
+                            // Release behat.
+                            window.M.util.js_complete('filepicker_file_upload_on');
                         }
                 }, true);
             }, this);

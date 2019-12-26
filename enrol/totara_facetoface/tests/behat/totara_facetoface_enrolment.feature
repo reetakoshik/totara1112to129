@@ -1,4 +1,4 @@
-@enrol @javascript @totara @enrol_totara_facetoface
+@enrol @javascript @totara @enrol_totara_facetoface @mod_facetoface
 Feature: Users can auto-enrol themself in courses where seminar direct enrolment is allowed
   In order to participate in courses
   As a user
@@ -22,9 +22,7 @@ Feature: Users can auto-enrol themself in courses where seminar direct enrolment
     And I click on "Enable" "link" in the "Seminar direct enrolment" "table_row"
     And I log out
     And I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test seminar name        |
       | Description | Test seminar description |
@@ -49,13 +47,12 @@ Feature: Users can auto-enrol themself in courses where seminar direct enrolment
 
   Scenario: Enrol using seminar direct enrolment
     Given I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     When I add "Seminar direct enrolment" enrolment method with:
       | Custom instance name | Test student enrolment |
     And I log out
     And I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "Sign-up" "link" in the "1 January 2020" "table_row"
     And I set the following fields to these values:
       | Requests for session organiser | Lorem ipsum dolor sit amet |
@@ -64,33 +61,30 @@ Feature: Users can auto-enrol themself in courses where seminar direct enrolment
     And I log out
     # Check signup note
     And I log in as "admin"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     When I click on "Attendees" "link"
     Then I should see "Lorem ipsum dolor sit amet" in the "Student 1" "table_row"
 
   Scenario: Seminar direct enrolment disabled
     Given I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    When I follow "Course 1"
+    When I am on "Course 1" course homepage
     Then I should see "You can not enrol yourself in this course"
 
   Scenario: Enrol through course catalogue
     Given I log in as "admin"
     And I set the following administration settings values:
-      | Enhanced catalog | 1 |
+      | catalogtype | enhanced |
     And I press "Save changes"
     And I log out
     Given I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     When I add "Seminar direct enrolment" enrolment method with:
       | Custom instance name | Test student enrolment |
     And I log out
     And I log in as "student1"
-    And I should see "Courses" in the "Navigation" "block"
-    And I click on "Courses" "link_or_button" in the "Navigation" "block"
-    And I click on "Course 1" "link"
+    And I click on "Courses" in the totara menu
+    And I follow "Course 1"
     And I click on "Sign-up" "link" in the "1 January 2020" "table_row"
     And I press "Sign-up"
     Then I should see "Topic 1"
@@ -115,13 +109,12 @@ Feature: Users can auto-enrol themself in courses where seminar direct enrolment
     And I log out
 
     Given I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     When I add "Seminar direct enrolment" enrolment method with:
       | Custom instance name | Test student enrolment |
     And I log out
     And I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "Sign-up" "link" in the "1 January 2020" "table_row"
     And I set the following fields to these values:
       | Signup text input | Lorem ipsum dolor sit amet |
@@ -131,7 +124,7 @@ Feature: Users can auto-enrol themself in courses where seminar direct enrolment
     And I log out
   # Check signup note
     And I log in as "admin"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     When I click on "Attendees" "link"
     Then I should see "Lorem ipsum dolor sit amet" in the "Student 1" "table_row"

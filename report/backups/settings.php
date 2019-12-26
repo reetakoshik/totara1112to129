@@ -25,7 +25,10 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-$ADMIN->add('reports', new admin_externalpage('reportbackups', get_string('backups', 'admin'), "$CFG->wwwroot/report/backups/index.php",'moodle/backup:backupcourse'));
+// You only see this if you have the cap because the parent only exists if you have the cap.
+if ($hassiteconfig or has_capability('moodle/backup:backupcourse', $systemcontext)) {
+    $ADMIN->add('backups', new admin_externalpage('reportbackups', get_string('backupsexecutionlog', 'report_backups'), "$CFG->wwwroot/report/backups/index.php", 'moodle/backup:backupcourse'));
+}
 
 // no report settings
 $settings = null;

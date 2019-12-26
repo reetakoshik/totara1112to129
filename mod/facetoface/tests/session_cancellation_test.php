@@ -23,6 +23,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+use \mod_facetoface\seminar_event;
+use \mod_facetoface\signup;
+use \mod_facetoface\signup_helper;
+use \mod_facetoface\signup\state\{declined, user_cancelled};
+
 class mod_facetoface_session_cancellation_testcase extends advanced_testcase {
     public function test_facetoface_cancel_session_basic() {
         global $CFG, $DB;
@@ -42,11 +47,11 @@ class mod_facetoface_session_cancellation_testcase extends advanced_testcase {
         $sessiondate->timefinish = $sessiondate->timestart + (DAYSECS * 2);
         $sessiondate->sessiontimezone = 'Pacific/Auckland';
         $sessionid = $generator->add_session(array('facetoface' => $facetoface->id, 'sessiondates' => array($sessiondate)));
-        $session = facetoface_get_session($sessionid);
-        $this->assertEquals(0, $session->cancelledstatus);
+        $seminarevent = new seminar_event($sessionid);
+        $this->assertEquals(0, $seminarevent->get_cancelledstatus());
 
         $eventsink = $this->redirectEvents();
-        $result = facetoface_cancel_session($session, null);
+        $result = $seminarevent->cancel();
         $this->assertTrue($result);
         $events = $eventsink->get_events();
         $eventsink->close();
@@ -58,7 +63,7 @@ class mod_facetoface_session_cancellation_testcase extends advanced_testcase {
 
         // Second call should do nothing.
         $session = facetoface_get_session($sessionid);
-        $result = facetoface_cancel_session($session, null);
+        $result = $seminarevent->cancel();
         $this->assertFalse($result);
         $newsession = $DB->get_record('facetoface_sessions', array('id' => $sessionid));
         $this->assertEquals(1, $newsession->cancelledstatus);
@@ -82,11 +87,11 @@ class mod_facetoface_session_cancellation_testcase extends advanced_testcase {
         $sessiondate->timefinish = $sessiondate->timestart + (DAYSECS * 2);
         $sessiondate->sessiontimezone = 'Pacific/Auckland';
         $sessionid = $generator->add_session(array('facetoface' => $facetoface->id, 'sessiondates' => array($sessiondate)));
-        $session = facetoface_get_session($sessionid);
-        $this->assertEquals(0, $session->cancelledstatus);
+        $seminarevent = new seminar_event($sessionid);
+        $this->assertEquals(0, $seminarevent->get_cancelledstatus());
 
         $eventsink = $this->redirectEvents();
-        $result = facetoface_cancel_session($session, null);
+        $result = $seminarevent->cancel();
         $this->assertFalse($result);
         $events = $eventsink->get_events();
         $eventsink->close();
@@ -108,11 +113,17 @@ class mod_facetoface_session_cancellation_testcase extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
 
         $facetoface = $generator->create_instance(array('course' => $course->id, 'approvaltype' => 0));
+
         $sessiondate = new stdClass();
         $sessiondate->timestart = time() + DAYSECS;
         $sessiondate->timefinish = $sessiondate->timestart + (DAYSECS * 2);
         $sessiondate->sessiontimezone = 'Pacific/Auckland';
         $sessionid = $generator->add_session(array('facetoface' => $facetoface->id, 'sessiondates' => array($sessiondate)));
+        $seminarevent1 = new seminar_event($sessionid);
+
+        $facetoface2 = $generator->create_instance(array('course' => $course->id, 'approvaltype' => \mod_facetoface\seminar::APPROVAL_ADMIN));
+        $session2id = $generator->add_session(array('facetoface' => $facetoface2->id, 'sessiondates' => array($sessiondate)));
+        $seminarevent2 = new seminar_event($session2id);
 
         $user1 = $this->getDataGenerator()->create_user();
         $user2 = $this->getDataGenerator()->create_user();
@@ -120,38 +131,50 @@ class mod_facetoface_session_cancellation_testcase extends advanced_testcase {
         $user4 = $this->getDataGenerator()->create_user();
         $manager = $this->getDataGenerator()->create_user();
 
+        $this->getDataGenerator()->enrol_user($user1->id, $course->id);
+        $this->getDataGenerator()->enrol_user($user2->id, $course->id);
+        $this->getDataGenerator()->enrol_user($user3->id, $course->id);
+        $this->getDataGenerator()->enrol_user($user4->id, $course->id);
+
         $managerja = \totara_job\job_assignment::create_default($manager->id);
         \totara_job\job_assignment::create_default($user4->id, array('managerjaid' => $managerja->id));
+        \totara_job\job_assignment::create_default($user2->id, array('managerjaid' => $managerja->id));
 
-        $session = facetoface_get_session($sessionid);
+        $managerja = \totara_job\job_assignment::create_default($manager->id);
+        \totara_job\job_assignment::create_default($user2->id, array('managerjaid' => $managerja->id));
 
-        facetoface_user_signup($session, $facetoface, $course, '', MDL_F2F_NONE, MDL_F2F_STATUS_APPROVED, $user1->id, false);
-        facetoface_cancel_attendees($sessionid, array($user1->id));
-        facetoface_user_signup($session, $facetoface, $course, '', MDL_F2F_NONE, MDL_F2F_STATUS_APPROVED, $user2->id, false);
-        facetoface_user_signup($session, $facetoface, $course, '', MDL_F2F_NONE, MDL_F2F_STATUS_BOOKED, $user3->id, false);
-        facetoface_user_signup($session, $facetoface, $course, '', MDL_F2F_NONE, MDL_F2F_STATUS_REQUESTED, $user4->id, false);
-        $attendee = facetoface_get_attendee($session->id, $user4->id);
-        facetoface_update_signup_status($attendee->submissionid, MDL_F2F_STATUS_DECLINED,$user4->id);
+        $signup11 = signup_helper::signup(signup::create($user1->id, $seminarevent1));
+        $this->assertTrue($signup11->can_switch(user_cancelled::class));
+        signup_helper::user_cancel($signup11);
+
+        $signup31 = signup_helper::signup(signup::create($user3->id, $seminarevent1));
+        $signup22 = signup_helper::signup(signup::create($user2->id, $seminarevent2));
+        $signup42 = signup_helper::signup(signup::create($user4->id, $seminarevent2));
+
+        $this->assertTrue($signup42->can_switch(declined::class));
+        $signup42->switch_state(declined::class);
 
         $sql = "SELECT ss.statuscode
                   FROM {facetoface_signups} s
                   JOIN {facetoface_signups_status} ss ON ss.signupid = s.id
                  WHERE s.sessionid = :sid AND ss.superceded = 0 AND s.userid = :uid";
 
-        $this->assertEquals(MDL_F2F_STATUS_USER_CANCELLED, $DB->get_field_sql($sql, array('sid' => $session->id, 'uid' => $user1->id)));
-        $this->assertEquals(MDL_F2F_STATUS_APPROVED, $DB->get_field_sql($sql, array('sid' => $session->id, 'uid' => $user2->id)));
-        $this->assertEquals(MDL_F2F_STATUS_BOOKED, $DB->get_field_sql($sql, array('sid' => $session->id, 'uid' => $user3->id)));
-        $this->assertEquals(MDL_F2F_STATUS_DECLINED, $DB->get_field_sql($sql, array('sid' => $session->id, 'uid' => $user4->id)));
+        $this->assertEquals(\mod_facetoface\signup\state\user_cancelled::get_code(), $DB->get_field_sql($sql, array('sid' => $sessionid, 'uid' => $user1->id)));
+        $this->assertEquals(\mod_facetoface\signup\state\requested::get_code(), $DB->get_field_sql($sql, array('sid' => $session2id, 'uid' => $user2->id)));
+        $this->assertEquals(\mod_facetoface\signup\state\booked::get_code(), $DB->get_field_sql($sql, array('sid' => $sessionid, 'uid' => $user3->id)));
+        $this->assertEquals(\mod_facetoface\signup\state\declined::get_code(), $DB->get_field_sql($sql, array('sid' => $session2id, 'uid' => $user4->id)));
 
-        $result = facetoface_cancel_session($session, null);
+        $result = $seminarevent1->cancel();
+        $result2 = $seminarevent2->cancel();
         $this->assertTrue($result);
+        $this->assertTrue($result2);
 
         // Users that have cancelled their session or their request have been declined should not being affected when a
         // session is cancelled.
-        $this->assertEquals(MDL_F2F_STATUS_USER_CANCELLED, $DB->get_field_sql($sql, array('sid' => $session->id, 'uid' => $user1->id)));
-        $this->assertEquals(MDL_F2F_STATUS_SESSION_CANCELLED, $DB->get_field_sql($sql, array('sid' => $session->id, 'uid' => $user2->id)));
-        $this->assertEquals(MDL_F2F_STATUS_SESSION_CANCELLED, $DB->get_field_sql($sql, array('sid' => $session->id, 'uid' => $user3->id)));
-        $this->assertEquals(MDL_F2F_STATUS_DECLINED, $DB->get_field_sql($sql, array('sid' => $session->id, 'uid' => $user4->id)));
+        $this->assertEquals(\mod_facetoface\signup\state\user_cancelled::get_code(), $DB->get_field_sql($sql, array('sid' => $sessionid, 'uid' => $user1->id)));
+        $this->assertEquals(\mod_facetoface\signup\state\event_cancelled::get_code(), $DB->get_field_sql($sql, array('sid' => $session2id, 'uid' => $user2->id)));
+        $this->assertEquals(\mod_facetoface\signup\state\event_cancelled::get_code(), $DB->get_field_sql($sql, array('sid' => $sessionid, 'uid' => $user3->id)));
+        $this->assertEquals(\mod_facetoface\signup\state\declined::get_code(), $DB->get_field_sql($sql, array('sid' => $session2id, 'uid' => $user4->id)));
 
         $newsession = $DB->get_record('facetoface_sessions', array('id' => $sessionid));
         $this->assertEquals(1, $newsession->cancelledstatus);

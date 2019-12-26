@@ -29,7 +29,7 @@ Feature: View cohort list
 
   Scenario: Admin can see System audiences and all audiences
     When I log in as "admin"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     Then I should see "System cohort"
     And I should not see "Cohort in category"
     And I follow "All audiences"
@@ -41,7 +41,7 @@ Feature: View cohort list
 
   Scenario: Manager can see System audiences and all audiences
     When I log in as "user1"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     Then I should see "System cohort"
     And I should not see "Cohort in category"
     And I follow "All audiences"

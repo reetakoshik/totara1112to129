@@ -70,7 +70,9 @@ function js_send_uncached($js, $filename = 'javascript.php') {
     header('Pragma: ');
     header('Accept-Ranges: none');
     header('Content-Type: application/javascript; charset=utf-8');
-    header('Content-Length: '.strlen($js));
+    if (!min_enable_zlib_compression()) {
+        header('Content-Length: '.strlen($js));
+    }
 
     echo $js;
     die;

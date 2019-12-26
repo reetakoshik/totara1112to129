@@ -24,7 +24,7 @@
 
 $string['addgroup'] = 'Add to group';
 $string['coursesort'] = 'Sort course list';
-$string['coursesort_help'] = 'This determines whether the list of courses that can be linked are sorted by sort order (i.e. the order set in *Site administration > Courses > Manage courses and categories*) or alphabetically by course setting.';
+$string['coursesort_help'] = 'This determines whether the list of courses that can be linked are sorted by sort order (i.e. the order set in *Site administration > Courses > Courses and categories*) or alphabetically by course setting.';
 $string['creategroup'] = 'Create new group';
 $string['defaultgroupnametext'] = '{$a->name} course {$a->increment}';
 $string['linkedcourse'] = 'Link course';

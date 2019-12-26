@@ -124,6 +124,31 @@ class core_string_manager_standard_testcase extends advanced_testcase {
         $this->assertTrue($stringman->string_exists($matches[1], $matches[2]),
             "String {$string} appearing in one of the lang/en/deprecated.txt files does not exist");
     }
+
+    /**
+     * Test that debugging of strings works as exepected
+     */
+    public function test_get_string_debug() {
+        global $CFG;
+
+        $this->resetAfterTest();
+
+        $otherroot = dirname(__FILE__).'/fixtures/langtest';
+        $stringman = testable_core_string_manager::instance($otherroot);
+
+        $CFG->debugstringids = true;
+        $this->assertEquals('Admin', $stringman->get_string("admin"));
+        $this->assertEquals('Admin', get_string("admin"));
+        $this->assertEquals('Schedule', $stringman->get_string('schedule', 'totara_core'));
+        $this->assertEquals('Schedule', get_string('schedule', 'totara_core'));
+
+        $_POST['strings'] = 1;
+
+        $this->assertEquals('Admin {admin/moodle}', $stringman->get_string("admin"));
+        $this->assertEquals('Admin {admin/moodle}', get_string("admin"));
+        $this->assertEquals('Schedule {schedule/totara_core}', $stringman->get_string('schedule', 'totara_core'));
+        $this->assertEquals('Schedule {schedule/totara_core}', get_string('schedule', 'totara_core'));
+    }
 }
 
 /**

@@ -38,7 +38,8 @@ $output = $PAGE->get_renderer('totara_reportbuilder');
 
 $returnurl = new moodle_url('/totara/reportbuilder/access.php', array('id' => $id));
 
-$report = new reportbuilder($id);
+$config = (new rb_config())->set_nocache(true);
+$report = reportbuilder::create($id, $config, false); // No access control for managing of reports here.
 
 // form definition
 $mform = new report_builder_edit_access_form(null, compact('id', 'report'));
@@ -54,7 +55,10 @@ if ($fromform = $mform->get_data()) {
     }
     reportbuilder_set_status($id);
     reportbuilder_update_access($id, $fromform);
-    $report = new reportbuilder($id);
+
+    $config = (new rb_config())->set_nocache(true);
+    $report = reportbuilder::create($id, $config, false); // No access control for managing of reports here.
+
     \totara_reportbuilder\event\report_updated::create_from_report($report, 'access')->trigger();
     totara_set_notification(get_string('reportupdated', 'totara_reportbuilder'), $returnurl, array('class' => 'notifysuccess'));
 }

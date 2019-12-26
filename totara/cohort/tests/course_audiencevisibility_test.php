@@ -257,15 +257,14 @@ class totara_cohort_course_audiencevisibility_testcase extends reportcache_advan
         $user = $this->{$user};
 
         // Make the test toggling the new catalog.
-        for ($i = 1; $i <= 2; $i++) {
-            // Toggle enhanced catalog.
-            $newvalue = ($CFG->enhancedcatalog == 1) ? 0 : 1;
-            set_config('enhancedcatalog', $newvalue);
-            $this->assertEquals($CFG->enhancedcatalog, $newvalue);
+        foreach (['moodle', 'enhanced'] as $catalogtype) {
+            set_config('catalogtype', $catalogtype);
+            $this->assertEquals($catalogtype, $CFG->catalogtype);
+            $enhancedcatalog = ($catalogtype === 'enhanced');
 
             // Test #1: Login as $user and see what courses he can see.
             self::setUser($user);
-            if ($CFG->enhancedcatalog) {
+            if ($enhancedcatalog) {
                 $content = $this->get_report_result('catalogcourses', array(), false, array());
             } else {
                 /** @var core_course_renderer $courserenderer */
@@ -280,12 +279,12 @@ class totara_cohort_course_audiencevisibility_testcase extends reportcache_advan
                 // Test #2: Try to access them.
                 $this->assertTrue($access);
                 // Test #3: Try to do a search for courses.
-                if ($CFG->enhancedcatalog) {
+                if ($enhancedcatalog) {
                     $this->assertCount(1, $search);
                     $r = array_shift($search);
                     $this->assertEquals($this->{$course}->fullname, $r->course_courseexpandlink);
                 } else {
-                    $this->assertInternalType('int', strpos($search, $this->{$course}->fullname));
+                    $this->assertIsInt(strpos($search, $this->{$course}->fullname));
                 }
             }
 
@@ -296,10 +295,10 @@ class totara_cohort_course_audiencevisibility_testcase extends reportcache_advan
                 // Test #2: Try to access them.
                 $this->assertFalse($access);
                 // Test #3: Try to do a search for courses.
-                if ($CFG->enhancedcatalog) {
+                if ($enhancedcatalog) {
                     $this->assertCount(0, $search);
                 } else {
-                    $this->assertInternalType('int', strpos($search, 'No courses were found'));
+                    $this->assertIsInt(strpos($search, 'No courses were found'));
                 }
             }
 
@@ -312,12 +311,12 @@ class totara_cohort_course_audiencevisibility_testcase extends reportcache_advan
                 // Test #2: Try to access them.
                 $this->assertTrue($access);
                 // Test #3: Try to do a search for courses.
-                if ($CFG->enhancedcatalog) {
+                if ($enhancedcatalog) {
                     $this->assertCount(1, $search);
                     $r = array_shift($search);
                     $this->assertEquals($this->{$course}->fullname, $r->course_courseexpandlink);
                 } else {
-                    $this->assertInternalType('int', strpos($search, $this->{$course}->fullname));
+                    $this->assertIsInt(strpos($search, $this->{$course}->fullname));
                 }
             }
 
@@ -328,11 +327,56 @@ class totara_cohort_course_audiencevisibility_testcase extends reportcache_advan
                 // Test #2: Try to access them.
                 $this->assertFalse($access);
                 // Test #3: Try to do a search for courses.
-                if ($CFG->enhancedcatalog) {
+                if ($enhancedcatalog) {
                     $this->assertCount(0, $search);
                 } else {
-                    $this->assertInternalType('int', strpos($search, 'No courses were found'));
+                    $this->assertIsInt(strpos($search, 'No courses were found'));
                 }
+            }
+        }
+    }
+
+    public function test_check_access_audience_visibility() {
+        global $CFG;
+
+        // Set audiencevisibility setting.
+        set_config('audiencevisibility', 1);
+        self::assertEquals($CFG->audiencevisibility, 1);
+
+        $testcases = [
+            ['user' => 'user1', 'visible' => ['course1', 'course2'], 'hidden' => ['course3', 'course4']],
+            ['user' => 'user2', 'visible' => ['course1', 'course2', 'course3'], 'hidden' => ['course4']],
+            ['user' => 'user3', 'visible' => ['course1'], 'hidden' => ['course2', 'course3', 'course4']],
+            ['user' => 'user4', 'visible' => ['course1'], 'hidden' => ['course2', 'course3', 'course4']],
+            ['user' => 'user5', 'visible' => ['course1', 'course3'], 'hidden' => ['course2', 'course4']],
+            ['user' => 'user6', 'visible' => ['course1', 'course3'], 'hidden' => ['course2', 'course4']],
+            ['user' => 'user7', 'visible' => ['course1'], 'hidden' => ['course2', 'course3', 'course4']],
+            ['user' => 'user8', 'visible' => ['course1', 'course2', 'course3', 'course4'], 'hidden' => []],
+            ['user' => 'user9', 'visible' => ['course1', 'course2', 'course3', 'course4'], 'hidden' => []],
+            ['user' => 'user10', 'visible' => ['course1', 'course3'], 'hidden' => ['course2', 'course4']],
+        ];
+
+        foreach ($testcases as $test) {
+            // Courses visible to the user.
+            foreach ($test['visible'] as $course) {
+                // Pass course id.
+                $visible = check_access_audience_visibility('course', $this->{$course}->id, $this->{$test['user']}->id);
+                self::assertTrue($visible);
+
+                // Pass course object.
+                $visible = check_access_audience_visibility('course', $this->{$course}, $this->{$test['user']}->id);
+                self::assertTrue($visible);
+            }
+
+            // Courses not visible to the user.
+            foreach ($test['hidden'] as $course) {
+                // Pass course id.
+                $visible = check_access_audience_visibility('course', $this->{$course}->id, $this->{$test['user']}->id);
+                self::assertFalse($visible);
+
+                // Pass course object.
+                $visible = check_access_audience_visibility('course', $this->{$course}, $this->{$test['user']}->id);
+                self::assertFalse($visible);
             }
         }
     }
@@ -356,7 +400,7 @@ class totara_cohort_course_audiencevisibility_testcase extends reportcache_advan
                 has_capability('moodle/course:viewhiddencourses', context_course::instance($course->id), $userid);
         }
 
-        if ($CFG->enhancedcatalog) { // New catalog.
+        if ($CFG->catalogtype === 'enhanced') { // Enhanced catalog.
             $search = array();
             if (is_array($content)) {
                 $search = totara_search_for_value($content, 'course_courseexpandlink', TOTARA_SEARCH_OP_EQUAL, $course->fullname);

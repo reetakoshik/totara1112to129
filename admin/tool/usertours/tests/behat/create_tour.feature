@@ -45,6 +45,24 @@ Feature: Add a new user tour
     And I should see "Welcome to your personal learning space. We'd like to give you a quick tour to show you some of the areas you may find helpful"
 
   @javascript
+#    Test for TL-20139 regression
+  Scenario: Tours should be able to target navigation items
+    Given the following "users" exist:
+      | username | firstname | lastname | email |
+      | student1 | Student | 1 | student1@example.com |
+    And I log in as "admin"
+    And I add a new user tour with:
+      | Name                | First tour |
+      | Description         | My first tour |
+      | Apply to URL match  | /totara/dashboard/% |
+      | Tour is enabled     | 1 |
+    And I add steps to the "First tour" tour:
+      | targettype                  | targetvalue_selector | Title             | Content |
+      | Selector                    | #totaramenuitem8 | Going Home     | This is the home button. It will return you to your homepage. |
+    When I click on "Dashboard" in the totara menu
+    Then I should see "This is the home button. It will return you to your homepage."
+
+  @javascript
   Scenario: A hidden tour should not be visible
     Given the following "users" exist:
       | username | firstname | lastname | email |

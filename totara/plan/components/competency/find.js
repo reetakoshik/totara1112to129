@@ -163,8 +163,8 @@ M.totara_plan_competency_find = M.totara_plan_competency_find || {
             }
 
             var url = M.cfg.wwwroot + '/totara/plan/components/competency/';
-            var continueurl = url + 'confirm.php?id='+M.totara_plan_competency_find.config.plan_id+'&update=';
-            var saveurl = url + 'update.php?id='+M.totara_plan_competency_find.config.plan_id+'&update=';
+            var continueurl = url + 'confirm.php?sesskey='+M.cfg.sesskey+'&id='+M.totara_plan_competency_find.config.plan_id+'&update=';
+            var saveurl = url + 'update.php?sesskey='+M.cfg.sesskey+'&id='+M.totara_plan_competency_find.config.plan_id+'&update=';
             var continueskipurl = saveurl + 'id='+M.totara_plan_competency_find.config.plan_id+'&update=';
             var continuesaveurl = url + 'update.php?';
 

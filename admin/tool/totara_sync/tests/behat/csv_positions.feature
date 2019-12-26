@@ -11,7 +11,7 @@ Feature: Use customfields in HR import position upload
       | Position Framework 2 | posfw2   |
 
     And I log in as "admin"
-    And I navigate to "Manage types" node in "Site administration > Hierarchies > Positions"
+    And I navigate to "Manage types" node in "Site administration > Positions"
     And I press "Add a new type"
     And I set the following fields to these values:
       | Type full name          | Position type |
@@ -47,15 +47,15 @@ Feature: Use customfields in HR import position upload
     And I press "Save changes"
 
     # HR Import configuration
-    And I navigate to "General settings" node in "Site administration > HR Import"
+    And I navigate to "Default settings" node in "Site administration > HR Import"
     And I set the following fields to these values:
-        | File Access | Upload Files |
+        | File access | Upload Files |
     And I press "Save changes"
     And I navigate to "Manage elements" node in "Site administration > HR Import > Elements"
     And I "Enable" the "Position" HR Import element
     And I navigate to "Position" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source                      | CSV |
+      | CSV                         | 1   |
       | Source contains all records | Yes |
     And I press "Save changes"
     And I navigate to "CSV" node in "Site administration > HR Import > Sources > Position"
@@ -78,7 +78,7 @@ Feature: Use customfields in HR import position upload
     And I should not see "Error" in the "#totarasynclog" "css_element"
 
     # Check
-    When I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    When I navigate to "Manage positions" node in "Site administration > Positions"
     Then I should see "5" in the "Position Framework 1" "table_row"
     And I should see "6" in the "Position Framework 2" "table_row"
 
@@ -87,7 +87,7 @@ Feature: Use customfields in HR import position upload
     Then I should see "Her Majesty"
     And I should see "Buckingham Palace, London, England"
     And I should see "http://www.buckinghampalace.co.uk"
-    And I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    And I navigate to "Manage positions" node in "Site administration > Positions"
     When I follow "Position Framework 2"
     And I follow "Position 6"
     Then I should see "Stonehenge"
@@ -95,7 +95,7 @@ Feature: Use customfields in HR import position upload
     And I should see "http://www.stonehenge.co.uk"
 
     # Check URL customfield value is cleaned.
-    When I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    When I navigate to "Manage positions" node in "Site administration > Positions"
     Then I follow "Position Framework 2"
     And I follow "Position 11"
     Then I should see "URL Hacker"

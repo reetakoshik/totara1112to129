@@ -104,6 +104,7 @@ $string['confirmloosetracks'] = 'WARNING: The package seems to be changed or mod
 $string['contents'] = 'Contents';
 $string['coursepacket'] = 'Course package';
 $string['coursestruct'] = 'Course structure';
+$string['crontask'] = 'Background processing for Scorm';
 $string['currentwindow'] = 'Current window';
 $string['datadir'] = 'Filesystem error: Can\'t create course data directory';
 $string['defaultdisplaysettings'] = 'Default display settings';
@@ -438,3 +439,9 @@ $string['whatgradedesc'] = 'Whether the highest, average (mean), first or last c
 $string['width'] = 'Width';
 $string['window'] = 'Window';
 $string['youmustselectastatus'] = 'You must select a status to require';
+
+// Totara additions:
+$string['sessionkeepalive'] = 'Enable the SCORM player to keep the user session alive';
+$string['sessionkeepalive_desc'] = 'When enabled the SCORM player will routinely communicate with the server in order to keep the user\'s session from expiring, providing the user keeps the SCORM player open in their browser and that the browser can communicate with the server.
+
+This may be considered a minor security concern, but it may also be required in order to prevent unwanted session timeouts during SCORM attempts.';

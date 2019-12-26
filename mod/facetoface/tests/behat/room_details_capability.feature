@@ -29,8 +29,7 @@ Feature: Check room details capability view for student and manager
     And I click on "#id_customfield_locationdisplay_map" "css_element"
     And I press "Add a room"
 
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I follow "Add a new event"
     And I click on "Select room" "link"
@@ -51,8 +50,7 @@ Feature: Check room details capability view for student and manager
 
   Scenario: Login as a student and check seminar room details
     When I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "Room details" "link"
     When I switch to "popup" window
     Then I should see "View room"
@@ -63,8 +61,7 @@ Feature: Check room details capability view for student and manager
 
   Scenario: Login as a manager and check seminar room details
     When I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     When I click on "Room details" "link"
     When I switch to "popup" window
     Then I should see "View room"

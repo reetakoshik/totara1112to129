@@ -80,6 +80,11 @@ class tagareaenabled extends \core\output\inplace_editable {
         $newvalue = $newvalue ? 1 : 0;
         $data = array('enabled' => $newvalue);
         \core_tag_area::update($tagarea, $data);
+
+        //trigger tag area update event
+        $event = \core\event\tag_area_updated::create_from_tag_area($tagarea, $newvalue);
+        $event->trigger();
+
         $tagarea->enabled = $newvalue;
         $tmpl = new self($tagarea);
         return $tmpl;

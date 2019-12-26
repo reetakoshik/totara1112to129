@@ -32,9 +32,7 @@ Feature: Seminar Manager approval of waiting list
   @javascript
   Scenario: The second student to sign up to the session should go on waiting list
     Given I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name              | Test seminar name        |
       | Description       | Test seminar description |
@@ -61,53 +59,45 @@ Feature: Seminar Manager approval of waiting list
     And I log out
 
     When I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Sign-up"
     And I press "Sign-up"
     And I should see "Your request was accepted"
     And I log out
 
     When I log in as "student2"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Join waitlist"
-    Then I should see "This event is currently full. By clicking the \"Join waitlist\" button, you will be placed on the event's waitlist."
-    And I press "Sign-up"
-    # TODO: Seems functionality bug (not behat test)
-    #And I should see "You have been placed on the waitlist for this event."
+    Then I should see "This event is currently full. Upon successful sign-up, you will be placed on the event's waitlist."
+    And I press "Join waitlist"
+    And I should see "You have been placed on the waitlist for this event."
     And I log out
 
     When I log in as "student3"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Join waitlist"
-    Then I should see "This event is currently full. By clicking the \"Join waitlist\" button, you will be placed on the event's waitlist."
-    And I press "Sign-up"
-    # TODO: Seems functionality bug (not behat test)
-    #And I should see "You have been placed on the waitlist for this event."
+    Then I should see "This event is currently full. Upon successful sign-up, you will be placed on the event's waitlist."
+    And I press "Join waitlist"
+    And I should see "You have been placed on the waitlist for this event."
     And I log out
 
     When I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I follow "Attendees"
     Then I should see "Sam1 Student1"
     And I follow "Wait-list"
     Then I should see "Sam2 Student2"
     And I click on "input[type=checkbox]" "css_element" in the "Sam2 Student2" "table_row"
-
-    # Behat bug: cannot push buttons in confirmation dialogs. TL-8632
-    #And I set the field "menuf2f-actions" to "Confirm"
-    #And I press "Yes"
-    #And I should see "Successfully updated attendance"
-    #Then I should not see "Sam2 Student2"
-    #And I click on "input[type=checkbox]" "css_element" in the "Sam3 Student3" "table_row"
-    #And I set the field "menuf2f-actions" to "Cancel"
-    #And I should see "Successfully updated attendance"
-    #Then I should not see "Sam3 Student3"
-    #And I follow "Attendees"
-    #Then I should see "Sam2 Student2"
-    #And I follow "Cancellations"
-    #Then I should see "Sam3 Student3"
+    And I set the field "menuf2f-actions" to "Confirm"
+    And I press "Yes"
+    And I should see "Successfully updated attendance"
+    Then I should not see "Sam2 Student2"
+    And I click on "input[type=checkbox]" "css_element" in the "Sam3 Student3" "table_row"
+    And I set the field "menuf2f-actions" to "Remove from waitlist"
+    And I should see "Successfully updated attendance"
+    Then I should not see "Sam3 Student3"
+    And I follow "Attendees"
+    Then I should see "Sam2 Student2"
+    And I follow "Cancellations"
+    Then I should see "Sam3 Student3"

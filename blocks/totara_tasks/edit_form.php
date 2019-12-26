@@ -29,9 +29,7 @@ class block_totara_tasks_edit_form extends block_edit_form {
 
     protected function specific_definition($mform) {
         global $CFG;
-
-        $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
-
+        $mform->addElement('header', 'configheader', get_string('customblocksettings', 'block'));
         $options = array(0 => get_string('no'), 1 => get_string('yes'));
         $attributes = array();
         if (empty($CFG->block_totara_tasks_showempty)) {

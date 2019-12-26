@@ -71,12 +71,12 @@ class logstore_standard_userdata_log_testcase extends advanced_testcase {
         $targetuser = new target_user($user);
 
         // prove that both users have records
-        $this->assertCount(7, $DB->get_records('logstore_standard_log', ['userid' => $controluser->id]));
-        $this->assertCount(7, $DB->get_records('logstore_standard_log', ['userid' => $targetuser->id]));
+        $this->assertCount(13, $DB->get_records('logstore_standard_log', ['userid' => $controluser->id]));
+        $this->assertCount(13, $DB->get_records('logstore_standard_log', ['userid' => $targetuser->id]));
 
         // check count
         $result = log::execute_count($targetuser, context_system::instance());
-        $this->assertEquals(7, $result);
+        $this->assertEquals(13, $result);
     }
 
     /**
@@ -118,7 +118,7 @@ class logstore_standard_userdata_log_testcase extends advanced_testcase {
 
         // check export data for user
         $result = log::execute_export($targetuser, context_system::instance());
-        $this->assertCount(7, $result->data);
+        $this->assertCount(13, $result->data);
         $this->assertEmpty($result->files);
         foreach ($result->data as $exportitem) {
             $this->assertEquals($targetuser->id, $exportitem->userid);
@@ -147,7 +147,7 @@ class logstore_standard_userdata_log_testcase extends advanced_testcase {
 
         // before purge
         $logcount = log::execute_count($targetactiveuser, context_system::instance());
-        $this->assertEquals(7, $logcount);
+        $this->assertEquals(13, $logcount);
 
         // purge log records
         $result = log::execute_purge($targetactiveuser, context_system::instance());
@@ -187,7 +187,7 @@ class logstore_standard_userdata_log_testcase extends advanced_testcase {
 
         // before purge
         $logcount = log::execute_count($targetsuspendeduser, context_system::instance());
-        $this->assertEquals(7, $logcount);
+        $this->assertEquals(13, $logcount);
 
         // purge log records
         $result = log::execute_purge($targetsuspendeduser, context_system::instance());
@@ -229,7 +229,7 @@ class logstore_standard_userdata_log_testcase extends advanced_testcase {
 
         // before purge
         $logcount = log::execute_count($targetdeleteduser, context_system::instance());
-        $this->assertEquals(7, $logcount);
+        $this->assertEquals(13, $logcount);
 
         // purge log records
         $result = log::execute_purge($targetdeleteduser, context_system::instance());

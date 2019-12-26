@@ -31,7 +31,7 @@ Feature: Learning plans can be created for members of an audience.
       | user     | cohort    |
       | learner1 | setaud1   |
       | learner2 | setaud1   |
-    When I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    When I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "setaud1"
     And I switch to "Learning Plan" tab
 
@@ -53,7 +53,7 @@ Feature: Learning plans can be created for members of an audience.
 
     When I trigger cron
     And I am on homepage
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "setaud1"
     And I switch to "Learning Plan" tab
     Then the following should exist in the "cohortplancreatehistory" table:
@@ -78,7 +78,7 @@ Feature: Learning plans can be created for members of an audience.
     And the following "cohorts" exist:
       | name    | idnumber | cohorttype  |
       | setaud1 | setaud1  | 1           |
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "setaud1"
     And I switch to "Learning Plan" tab
 
@@ -93,7 +93,7 @@ Feature: Learning plans can be created for members of an audience.
 
     When I trigger cron
     And I am on homepage
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "setaud1"
     And I switch to "Learning Plan" tab
     Then the following should exist in the "cohortplancreatehistory" table:
@@ -114,7 +114,7 @@ Feature: Learning plans can be created for members of an audience.
     When I switch to "Learning Plan" tab
     Then the following should exist in the "cohortplancreatehistory" table:
       | Template                 | User       | Plan status | Number of affected users |
-      | Learning plan template 1 | Admin User | Draft       | 2                        |
+      | Learning plan template 1 | Admin User | Draft       | 1                        |
     And I log out
     When I log in as "learner1"
     And I click on "Dashboard" in the totara menu
@@ -132,7 +132,7 @@ Feature: Learning plans can be created for members of an audience.
     And the following "cohorts" exist:
       | name    | idnumber | cohorttype  |
       | setaud1 | setaud1  | 2           |
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "setaud1"
     And I switch to "Learning Plan" tab
 
@@ -146,7 +146,7 @@ Feature: Learning plans can be created for members of an audience.
 
     When I trigger cron
     And I am on homepage
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "setaud1"
     And I switch to "Learning Plan" tab
     Then the following should exist in the "cohortplancreatehistory" table:
@@ -178,13 +178,13 @@ Feature: Learning plans can be created for members of an audience.
 
     # Update another user so they are added to the audience
     When I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "Edit" "link" in the "learner2 learner2" "table_row"
     And I set the field "City/town" to "Brighton"
     And I press "Update profile"
 
     # Check the new plan has been created.
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "setaud1"
     And I switch to "Learning Plan" tab
     Then the following should exist in the "cohortplancreatehistory" table:
@@ -203,7 +203,7 @@ Feature: Learning plans can be created for members of an audience.
     And the following "cohorts" exist:
       | name    | idnumber | cohorttype  |
       | setaud1 | setaud1  | 1           |
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "setaud1"
     When I switch to "Learning Plan" tab
     Then the "autocreatenew" "checkbox" should be enabled
@@ -221,7 +221,7 @@ Feature: Learning plans can be created for members of an audience.
       | learner1 | setaud1   |
 
     # Create plans with status as 'Draft'.
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "setaud1"
     When I switch to "Learning Plan" tab
     And I set the field "Plan template" to "Learning plan template 1"
@@ -234,7 +234,7 @@ Feature: Learning plans can be created for members of an audience.
     Then I should see "Any learning plans will be created for audience members by an adhoc task on the next cron run"
 
     # Create plans with status as 'Approved'.
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "setaud1"
     And I switch to "Learning Plan" tab
     And I set the field "Plan template" to "Learning plan template 2"
@@ -249,7 +249,7 @@ Feature: Learning plans can be created for members of an audience.
     # Run teh cron and check the two learning plans are created on different templates.
     When I trigger cron
     And I am on homepage
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "setaud1"
     And I switch to "Learning Plan" tab
     Then the following should exist in the "cohortplancreatehistory" table:
@@ -286,7 +286,7 @@ Feature: Learning plans can be created for members of an audience.
     And the following "cohort members" exist:
       | user     | cohort    |
       | learner1 | setaud1   |
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "setaud1"
     And I switch to "Learning Plan" tab
     And I set the field "excludecreatedmanual" to "1"
@@ -310,7 +310,7 @@ Feature: Learning plans can be created for members of an audience.
 
     When I trigger cron
     And I am on homepage
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "setaud1"
     And I switch to "Learning Plan" tab
     Then the following should exist in the "cohortplancreatehistory" table:
@@ -338,9 +338,9 @@ Feature: Learning plans can be created for members of an audience.
       | learner1 | Learning plan template 1 |
     And I log in as "admin"
     # Complete the plan.
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "learner1 learner1"
-    And I follow "Learning Plans"
+    And I click on "Learning Plans" "link" in the ".userprofile" "css_element"
     And I follow "Learning plan template 1"
     And I press "Approve"
     And I press "Complete plan"
@@ -348,7 +348,7 @@ Feature: Learning plans can be created for members of an audience.
     Then I should see "Successfully completed plan Learning plan template 1"
 
     # Check additional plans are not created for the user.
-    When I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    When I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "setaud1"
     And I switch to "Learning Plan" tab
     And I set the field "excludecreatedmanual" to "1"
@@ -375,7 +375,7 @@ Feature: Learning plans can be created for members of an audience.
 
     When I trigger cron
     And I am on homepage
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "setaud1"
     And I switch to "Learning Plan" tab
     Then the following should exist in the "cohortplancreatehistory" table:

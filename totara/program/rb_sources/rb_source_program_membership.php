@@ -27,9 +27,7 @@ global $CFG;
 require_once($CFG->dirroot . '/totara/program/lib.php');
 
 class rb_source_program_membership extends rb_base_source {
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
+    use \totara_program\rb\source\program_trait;
 
     public function __construct($groupid, rb_global_restriction_set $globalrestrictionset = null) {
         if ($groupid instanceof rb_global_restriction_set) {
@@ -51,6 +49,10 @@ class rb_source_program_membership extends rb_base_source {
         $this->defaultfilters = $this->define_defaultfilters();
         $this->requiredcolumns = $this->define_requiredcolumns();
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_program_membership');
+        $this->usedcomponents[] = 'totara_program';
+        $this->usedcomponents[] = 'totara_cohort';
+
+        $this->cacheable = false;
 
         parent::__construct();
     }
@@ -81,8 +83,8 @@ class rb_source_program_membership extends rb_base_source {
     protected function define_joinlist() {
         $joinlist = array();
 
-        $this->add_user_table_to_joinlist($joinlist, 'base', 'userid');
-        $this->add_program_table_to_joinlist($joinlist, 'base', 'programid');
+        $this->add_core_user_tables($joinlist, 'base', 'userid');
+        $this->add_totara_program_tables($joinlist, 'base', 'programid');
 
         $joinlist[] = new rb_join(
             'prog_completion',
@@ -94,23 +96,14 @@ class rb_source_program_membership extends rb_base_source {
             REPORT_BUILDER_RELATION_ONE_TO_ONE
         );
 
-        // This join is required to keep the joining of program custom fields happy.
-        $joinlist[] =  new rb_join(
-            'prog',
-            'LEFT',
-            '{prog}',
-            'prog.id = base.programid',
-            REPORT_BUILDER_RELATION_ONE_TO_ONE
-        );
-
         return $joinlist;
     }
 
     protected function define_columnoptions() {
         $columnoptions = array();
 
-        $this->add_user_fields_to_columns($columnoptions);
-        $this->add_program_fields_to_columns($columnoptions);
+        $this->add_core_user_columns($columnoptions);
+        $this->add_totara_program_columns($columnoptions, 'program');
 
         $columnoptions[] = new rb_column_option(
             'progmembership',
@@ -119,7 +112,7 @@ class rb_source_program_membership extends rb_base_source {
             'prog_completion.status',
             array(
                 'joins' => 'prog_completion',
-                'displayfunc' => 'prog_status',
+                'displayfunc' => 'program_completion_status',
             )
         );
         $columnoptions[] = new rb_column_option(
@@ -139,7 +132,7 @@ class rb_source_program_membership extends rb_base_source {
             get_string('editcompletion', 'rb_source_program_membership'),
             'base.id',
             array(
-                'displayfunc' => 'edit_completion',
+                'displayfunc' => 'program_edit_completion',
                 'extrafields' => array(
                     'userid' => 'base.userid',
                     'progid' => 'base.programid',
@@ -153,8 +146,8 @@ class rb_source_program_membership extends rb_base_source {
     protected function define_filteroptions() {
         $filteroptions = array();
 
-        $this->add_user_fields_to_filters($filteroptions);
-        $this->add_program_fields_to_filters($filteroptions);
+        $this->add_core_user_filters($filteroptions);
+        $this->add_totara_program_filters($filteroptions);
 
         $filteroptions[] = new rb_filter_option(
             'progmembership',
@@ -219,7 +212,16 @@ class rb_source_program_membership extends rb_base_source {
         return $out;
     }
 
+    /**
+     * Display the program completion status
+     *
+     * @deprecated Since Totara 12.0
+     * @param $status
+     * @param $row
+     * @return string
+     */
     public function rb_display_prog_status($status, $row) {
+        debugging('rb_source_program_membership::rb_display_prog_status has been deprecated since Totara 12.0. Use totara_program\rb\display\program_completion_status::display', DEBUG_DEVELOPER);
         switch ($status) {
             case STATUS_PROGRAM_INCOMPLETE:
                 return get_string('incomplete', 'totara_program');
@@ -231,7 +233,17 @@ class rb_source_program_membership extends rb_base_source {
         }
     }
 
+    /**
+     * Display edit completion records link.
+     *
+     * @deprecated Since Totara 12.0
+     * @param $id
+     * @param $row
+     * @param $isexport
+     * @return string
+     */
     public function rb_display_edit_completion($id, $row, $isexport) {
+        debugging('rb_source_program_membership::rb_display_edit_completion has been deprecated since Totara 12.0. Use totara_program\rb\display\program_edit_completion::display', DEBUG_DEVELOPER);
         // Ignores $id == prog_completion id, because the user might have been unassigned and only history records exist.
         if ($isexport) {
             return get_string('editcompletion', 'rb_source_program_membership');

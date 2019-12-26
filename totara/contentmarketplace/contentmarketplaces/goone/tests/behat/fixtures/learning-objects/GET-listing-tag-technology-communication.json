@@ -1,0 +1,1600 @@
+{
+  "total": 20623,
+  "hits": [
+    {
+      "id": 1007,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1007</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 45,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Design"
+      ],
+      "title": "Learning Object 1007",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 1011,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1011</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 25,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Business",
+        "Development"
+      ],
+      "title": "Learning Object 1011",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:39+00:00"
+    },
+    {
+      "id": 1015,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1015</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 55,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Digital Literary \u0026 IT Skills",
+        "IT \u0026 Software"
+      ],
+      "title": "Learning Object 1015",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:40+00:00"
+    },
+    {
+      "id": 1019,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1019</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 105,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Digital Literary \u0026 IT Skills",
+        "IT \u0026 Software"
+      ],
+      "title": "Learning Object 1019",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:41+00:00"
+    },
+    {
+      "id": 1023,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1023</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 25,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Business",
+        "Development"
+      ],
+      "title": "Learning Object 1023",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:32+00:00"
+    },
+    {
+      "id": 1024,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1024</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "es",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 45,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Design"
+      ],
+      "title": "Learning Object 1024",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:33+00:00"
+    },
+    {
+      "id": 1025,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1025</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 35,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Digital Literary \u0026 IT Skills",
+        "IT \u0026 Software"
+      ],
+      "title": "Learning Object 1025",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:33+00:00"
+    },
+    {
+      "id": 1028,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1028</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 95,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Digital Literary \u0026 IT Skills",
+        "IT \u0026 Software"
+      ],
+      "title": "Learning Object 1028",
+      "type": "course",
+      "updated_time": "2017-10-26T04:11:43+00:00"
+    },
+    {
+      "id": 1036,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1036</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 25,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Digital Literary \u0026 IT Skills",
+        "IT \u0026 Software"
+      ],
+      "title": "Learning Object 1036",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:35+00:00"
+    },
+    {
+      "id": 1040,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1040</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "USD",
+        "price": 0,
+        "tax": 0,
+        "tax_included": false
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology",
+        "Digital Literary \u0026 IT Skills",
+        "IT \u0026 Software"
+      ],
+      "title": "Learning Object 1040",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:37+00:00"
+    },
+    {
+      "id": 1185,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1185</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 1185",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 1289,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1289</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 1289",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 1401,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 1401</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 1401",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 2176,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 2176</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 2176",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 2352,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 2352</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 2352",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 2599,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 2599</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 2599",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 2758,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 2758</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 2758",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 2908,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 2908</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 2908",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 2957,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 2957</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 2957",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 3516,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 3516</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 3516",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 4051,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 4051</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 4051",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 4150,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 4150</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 4150",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 4381,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 4381</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 4381",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 4512,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 4512</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 4512",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 4805,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 4805</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 4805",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 4850,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 4850</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 4850",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 5021,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 5021</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 5021",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 5422,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 5422</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 5422",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 5440,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 5440</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 5440",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 5930,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 5930</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 5930",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 6181,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 6181</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 6181",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 6188,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 6188</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 6188",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 6245,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 6245</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 6245",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 6542,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 6542</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 6542",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 6565,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 6565</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 6565",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 6588,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 6588</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 6588",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 6996,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 6996</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 6996",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 7163,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 7163</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 7163",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 7388,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 7388</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 7388",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 7735,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 7735</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 7735",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 8044,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 8044</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 8044",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 8198,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 8198</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 8198",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 8575,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 8575</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 8575",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 8590,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 8590</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 8590",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 8644,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 8644</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 8644",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 8971,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 8971</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 8971",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 9058,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 9058</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 9058",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    },
+    {
+      "id": 9075,
+      "assessable": false,
+      "collections": [],
+      "created_time": "2018-09-19T10:09:14+00:00",
+      "delivery": {
+        "duration": 0,
+        "mode": "self-paced"
+      },
+      "description": "<p>Description for learning object 9075</p>",
+      "image": "/totara/contentmarketplace/contentmarketplaces/goone/tests/behat/fixtures/image.jpg",
+      "items": [],
+      "items_count": 0,
+      "language": "en",
+      "portal_collection": false,
+      "pricing": {
+        "currency": "AUD",
+        "price": 100,
+        "tax": 0,
+        "tax_included": true
+      },
+      "provider": {
+        "name": "GO1 Content"
+      },
+      "tags": [
+        "Technology"
+      ],
+      "title": "Learning Object 9075",
+      "type": "course",
+      "updated_time": "2017-10-26T04:14:28+00:00"
+    }
+  ],
+  "facets": {
+    "instance": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": 1866847,
+          "doc_count": 59,
+          "name": "GO1 Content"
+        },
+        {
+          "key": 101,
+          "doc_count": 20463,
+          "name": "Content provider 101"
+        },
+        {
+          "key": 102,
+          "doc_count": 101,
+          "name": "Content provider 102"
+        }
+      ]
+    },
+    "language": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": "en",
+          "doc_count": 20623
+        }
+      ]
+    },
+    "tag": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": "Communication",
+          "doc_count": 93,
+          "type": "premium"
+        },
+        {
+          "key": "Compliance",
+          "doc_count": 8846,
+          "type": "premium"
+        },
+        {
+          "key": "Personal Development",
+          "doc_count": 13754,
+          "type": "premium"
+        },
+        {
+          "key": "Project Management",
+          "doc_count": 153,
+          "type": "premium"
+        },
+        {
+          "key": "Technology",
+          "doc_count": 20540,
+          "type": "premium"
+        },
+        {
+          "key": "Business",
+          "doc_count": 123,
+          "type": "marketplace"
+        },
+        {
+          "key": "Design",
+          "doc_count": 4192,
+          "type": "marketplace"
+        },
+        {
+          "key": "Development",
+          "doc_count": 6622,
+          "type": "marketplace"
+        },
+        {
+          "key": "Digital Literary \u0026 IT Skills",
+          "doc_count": 5337,
+          "type": "marketplace"
+        },
+        {
+          "key": "IT \u0026 Software",
+          "doc_count": 3393,
+          "type": "marketplace"
+        }
+      ]
+    }
+  }
+}

@@ -98,6 +98,9 @@ if ($data = $form->get_data()) {
     }
 }
 
+$strheading = get_string('learningplan', 'totara_cohort');
+totara_cohort_navlinks($cohort->id, format_string($cohort->name), $strheading);
+
 echo $OUTPUT->header();
 
 echo $OUTPUT->heading(format_string($cohort->name));

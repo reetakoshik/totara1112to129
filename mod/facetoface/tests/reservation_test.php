@@ -37,6 +37,8 @@ class mod_facetoface_reservation_testcase extends advanced_testcase {
         $user1 = $this->getDataGenerator()->create_user();
         $user2 = $this->getDataGenerator()->create_user();
         $course = $this->getDataGenerator()->create_course();
+        $this->getDataGenerator()->enrol_user($user1->id, $course->id);
+        $this->getDataGenerator()->enrol_user($user2->id, $course->id);
 
         $facetofacegenerator = $this->getDataGenerator()->get_plugin_generator('mod_facetoface');
         $facetoface = $facetofacegenerator->create_instance(array(
@@ -57,18 +59,22 @@ class mod_facetoface_reservation_testcase extends advanced_testcase {
             'allowoverbook' => 1,
             'sessiondates' => array($sessiondate),
             'mincapacity' => '1',
-            'datetimeknown' => 1
         );
         $sessionid = $facetofacegenerator->add_session($sessiondata);
+        $sessiondata['datetimeknown'] = '1';
         $session = facetoface_get_session($sessionid);
+        $seminarevent = new \mod_facetoface\seminar_event($sessionid);
+        $seminar = $seminarevent->get_seminar();
 
         // Allocate to session by manager.
         $this->setUser($manager);
-        facetoface_user_signup($session, $facetoface, $course, '', MDL_F2F_INVITE, MDL_F2F_STATUS_BOOKED, $user1->id);
-        facetoface_user_signup($session, $facetoface, $course, '', MDL_F2F_INVITE, MDL_F2F_STATUS_BOOKED, $user2->id);
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user1->id, new \mod_facetoface\seminar_event($session->id)));
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user2->id, new \mod_facetoface\seminar_event($session->id)));
 
+        $this->execute_adhoc_tasks();
         $sink = $this->redirectMessages();
-        facetoface_remove_allocations($session, $facetoface, $course, array($user1->id), true, $manager->id);
+        \mod_facetoface\reservations::remove_allocations($seminarevent, $seminar, array($user1->id), true, $manager->id);
+        $this->execute_adhoc_tasks();
         $this->assertSame(1, $sink->count());
         $messages = $sink->get_messages();
         $sink->clear();
@@ -77,7 +83,8 @@ class mod_facetoface_reservation_testcase extends advanced_testcase {
         $this->assertEquals($user1->id, $messages[0]->useridto);
 
         $sink = $this->redirectMessages();
-        facetoface_remove_allocations($session, $facetoface, $course, array($user2->id), false, $manager->id);
+        \mod_facetoface\reservations::remove_allocations($seminarevent, $seminar, array($user2->id), false, $manager->id);
+        $this->execute_adhoc_tasks();
         $this->assertSame(1, $sink->count());
         $messages = $sink->get_messages();
         $sink->clear();

@@ -15,7 +15,7 @@ Feature: Delete a position audience requirement
       | 3        | Pos 3    | fw1           |
       | 4        | Pos 4    | fw1           |
     And I log in as "admin"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I switch to "Add new audience" tab
     And I set the following fields to these values:
       | Name | test audience |

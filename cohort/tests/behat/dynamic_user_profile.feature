@@ -9,7 +9,7 @@ Feature: Limit an audience based on user profile fields
   Background:
     Given I am on a totara site
     And I log in as "admin"
-    And I navigate to "User profile fields" node in "Site administration > Users > Accounts"
+    And I navigate to "User profile fields" node in "Site administration > Users"
     And I set the field "datatype" to "Text input"
     #redirect
     And I set the following fields to these values:
@@ -21,7 +21,7 @@ Feature: Limit an audience based on user profile fields
       | user1    | User      | One      | user1@example.com | 1    |
       | user2    | User      | Two      | user2@example.com | 2    |
       | user3    | User      | Three    | user3@example.com | 3    |
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "Edit" "link" in the "User One" "table_row"
     And I expand all fieldsets
     And I set the field "test" to "1"
@@ -34,7 +34,7 @@ Feature: Limit an audience based on user profile fields
     And I expand all fieldsets
     And I set the field "test" to "3"
     And I press "Update profile"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Add new audience"
     And I set the following fields to these values:
       | Name | Test    |

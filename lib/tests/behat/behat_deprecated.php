@@ -284,19 +284,6 @@ class behat_deprecated extends behat_base {
     }
 
     /**
-     * Select to approve the given user.
-     *
-     * @Given /^I select to approve "([^"]*)"$/
-     * @deprecated since Totara 10
-     */
-    public function i_select_to_approve($user) {
-        $this->deprecated_message('Use "I set the field "Approve <user> for this event" to "1"');
-        return array(
-            new Given('I click on "input[value=\'2\']" "css_element" in the "' . $user . '" "table_row"')
-        );
-    }
-
-    /**
      * Sets the specified value to the field.
      *
      * @Given /^I set the field "(?P<field_string>(?:[^"]|\\")*)" to multiline$/
@@ -317,10 +304,24 @@ class behat_deprecated extends behat_base {
      * Click on a given link in the moodle-actionmenu that is currently open.
      * @Given /^I follow "(?P<link_string>(?:[^"]|\\")*)" in the open menu$/
      * @param string $linkstring the text (or id, etc.) of the link to click.
+     * @deprecated since Moodle 3.2 MDL-55839 - please do not use this step any more.
      */
     public function i_follow_in_the_open_menu($linkstring) {
         $alternative = 'I choose "' . $this->escape($linkstring) . '" from the open action menu';
         $this->deprecated_message($alternative, true);
+    }
+
+    /**
+     * Navigates to the course gradebook and selects a specified item from the grade navigation tabs.
+     * @Given /^I go to "(?P<gradepath_string>(?:[^"]|\\")*)" in the course gradebook$/
+     * @param string $gradepath
+     * @deprecated since Moodle 3.3 MDL-57282 - please do not use this step any more.
+     */
+    public function i_go_to_in_the_course_gradebook($gradepath) {
+        $alternative = 'I navigate to "' . $this->escape($gradepath) . '"  in the course gradebook';
+        $this->deprecated_message($alternative);
+
+        $this->execute('behat_grade::i_navigate_to_in_the_course_gradebook', $gradepath);
     }
 
     /**

@@ -33,28 +33,28 @@ if (!defined('MOODLE_INTERNAL')) {
 $observers = array(
     array(
         'eventname' => '\totara_program\event\program_unassigned',
-        'callback' => 'totara_program_observer::unassigned',
+        'callback'  => 'totara_program_observer::unassigned',
     ),
     array(
         'eventname' => '\totara_program\event\program_completed',
-        'callback' => 'totara_program_observer::completed',
+        'callback'  => 'totara_program_observer::completed',
     ),
     array(
         'eventname' => '\totara_program\event\program_courseset_completed',
-        'callback' => 'totara_program_observer::courseset_completed',
+        'callback'  => 'totara_program_observer::courseset_completed',
     ),
     array(
         'eventname' => '\core\event\user_loggedin',
-        'callback' => 'totara_program_observer::assignments_firstlogin',
+        'callback'  => 'totara_program_observer::assignments_firstlogin',
     ),
     array(
         'eventname' => '\core\event\user_deleted',
-        'callback' => 'totara_program_observer::user_deleted',
+        'callback'  => 'totara_program_observer::user_deleted',
     ),
     array(
         'eventname' => '\core\event\user_confirmed',
-        'callback' => 'totara_program_observer::user_confirmed',
-        'priority' => 2400
+        'callback'  => 'totara_program_observer::user_confirmed',
+        'priority'  => 2400,
     ),
     array(
         'eventname' => '\core\event\course_deleted',
@@ -87,5 +87,53 @@ $observers = array(
     array(
         'eventname' => '\totara_program\event\program_deleted',
         'callback'  => '\totara_program\rb_course_sortorder_helper::handle_program_deleted',
+    ),
+    array(
+        'eventname' => '\totara_program\event\program_created',
+        'callback'  => 'totara_program\totara_catalog\program::object_update_observer',
+    ),
+    array(
+        'eventname' => '\totara_program\event\program_updated',
+        'callback'  => 'totara_program\totara_catalog\program::object_update_observer',
+    ),
+    array(
+        'eventname' => '\totara_program\event\program_deleted',
+        'callback'  => 'totara_program\totara_catalog\program::object_update_observer',
+    ),
+    array(
+        'eventname' => '\core\event\tag_added',
+        'callback'  => 'totara_program\totara_catalog\program::object_update_observer',
+    ),
+    array(
+        'eventname' => '\core\event\tag_updated',
+        'callback'  => 'totara_program\totara_catalog\program::object_update_observer',
+    ),
+    array(
+        'eventname' => '\core\event\tag_removed',
+        'callback'  => 'totara_program\totara_catalog\program::object_update_observer',
+    ),
+    array(
+        'eventname' => '\totara_customfield\event\customfield_data_deleted',
+        'callback'  => 'totara_program\totara_catalog\program::object_update_observer',
+    ),
+    array(
+        'eventname' => '\totara_program\event\program_contentupdated',
+        'callback'  => 'totara_program\totara_catalog\program::object_update_observer',
+    ),
+    array(
+        'eventname' => '\core\event\course_category_updated',
+        'callback'  => 'totara_program\totara_catalog\program::object_update_observer',
+    ),
+    array(
+        'eventname' => '\core\event\admin_settings_changed',
+        'callback'  => 'totara_program\totara_catalog\program\observer\settings_observer::changed',
+    ),
+    array(
+        'eventname' => '\totara_customfield\event\customfield_created',
+        'callback'  => 'totara_program\totara_catalog\program\observer\customfield_changed::update_default_data'
+    ),
+    array(
+        'eventname' => '\totara_customfield\event\customfield_updated',
+        'callback'  => 'totara_program\totara_catalog\program\observer\customfield_changed::update_default_data'
     ),
 );

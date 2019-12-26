@@ -32,10 +32,7 @@ require_once($CFG->dirroot . '/totara/reportbuilder/classes/rb_join_nonpruneable
  * A report builder source for DP objectives
  */
 class rb_source_dp_objective extends rb_base_source {
-
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
+    use \totara_job\rb\source\report_trait;
 
     /**
      * Constructor
@@ -60,6 +57,7 @@ class rb_source_dp_objective extends rb_base_source {
         $this->defaultfilters = array();
         $this->requiredcolumns = array();
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_dp_objective');
+        $this->usedcomponents[] = 'totara_plan';
         parent::__construct();
     }
 
@@ -126,8 +124,8 @@ class rb_source_dp_objective extends rb_base_source {
                 array()
         );
 
-        $this->add_user_table_to_joinlist($joinlist, 'dp','userid');
-        $this->add_job_assignment_tables_to_joinlist($joinlist, 'dp', 'userid');
+        $this->add_core_user_tables($joinlist, 'dp','userid');
+        $this->add_totara_job_tables($joinlist, 'dp', 'userid');
 
         return $joinlist;
     }
@@ -150,7 +148,8 @@ class rb_source_dp_objective extends rb_base_source {
                     'defaultheading' => get_string('plan', 'rb_source_dp_objective'),
                     'joins' => 'dp',
                     'dbdatatype' => 'char',
-                    'outputformat' => 'text'
+                    'outputformat' => 'text',
+                    'displayfunc' => 'format_string'
                 )
         );
         $columnoptions[] = new rb_column_option(
@@ -161,7 +160,7 @@ class rb_source_dp_objective extends rb_base_source {
                 array(
                     'defaultheading' => get_string('plan', 'rb_source_dp_objective'),
                     'joins' => 'dp',
-                    'displayfunc' => 'planlink',
+                    'displayfunc' => 'plan_link',
                     'extrafields' => array( 'plan_id' => 'dp.id' )
                 )
         );
@@ -207,7 +206,8 @@ class rb_source_dp_objective extends rb_base_source {
                     'defaultheading' => get_string('plantemplate', 'rb_source_dp_objective'),
                     'joins' => 'template',
                     'dbdatatype' => 'char',
-                    'outputformat' => 'text'
+                    'outputformat' => 'text',
+                    'displayfunc' => 'format_string'
                 )
         );
         $columnoptions[] = new rb_column_option(
@@ -240,7 +240,8 @@ class rb_source_dp_objective extends rb_base_source {
                 'base.fullname',
                 array(
                     'dbdatatype' => 'char',
-                    'outputformat' => 'text')
+                    'outputformat' => 'text',
+                    'displayfunc' => 'format_string')
         );
 
         $columnoptions[] = new rb_column_option(
@@ -250,7 +251,7 @@ class rb_source_dp_objective extends rb_base_source {
                 'base.fullname',
                 array(
                     'defaultheading' => get_string('fullname', 'rb_source_dp_objective'),
-                    'displayfunc' => 'objectivelink',
+                    'displayfunc' => 'plan_objective_name_link',
                     'extrafields' => array(
                         'objective_id' => 'base.id',
                         'plan_id' => 'dp.id',
@@ -266,7 +267,8 @@ class rb_source_dp_objective extends rb_base_source {
                 'base.shortname',
                 array(
                     'dbdatatype' => 'char',
-                    'outputformat' => 'text')
+                    'outputformat' => 'text',
+                    'displayfunc' => 'plaintext')
         );
 
         $columnoptions[] = new rb_column_option(
@@ -305,7 +307,8 @@ class rb_source_dp_objective extends rb_base_source {
                 array(
                     'joins' => 'priority',
                     'dbdatatype' => 'char',
-                    'outputformat' => 'text'
+                    'outputformat' => 'text',
+                    'displayfunc' => 'format_string'
                 )
         );
 
@@ -315,7 +318,7 @@ class rb_source_dp_objective extends rb_base_source {
                 get_string('objapproved', 'rb_source_dp_objective'),
                 'base.approved',
                 array(
-                    'displayfunc' => 'plan_item_status'
+                    'displayfunc' => 'plan_item_status',
                 )
         );
 
@@ -327,7 +330,8 @@ class rb_source_dp_objective extends rb_base_source {
                 array(
                     'joins' => 'objective_scale_value',
                     'dbdatatype' => 'char',
-                    'outputformat' => 'text'
+                    'outputformat' => 'text',
+                    'displayfunc' => 'format_string'
                 )
         );
 
@@ -350,7 +354,7 @@ class rb_source_dp_objective extends rb_base_source {
                 'objective_scale_value.name',
                 array(
                     'joins' => 'objective_scale_value',
-                    'displayfunc' => 'proficiency_and_approval',
+                    'displayfunc' => 'plan_objective_status',
                     'defaultheading' => get_string('objstatus', 'rb_source_dp_objective'),
                     'extrafields' => array('approved' => 'base.approved')
                 )
@@ -378,8 +382,8 @@ class rb_source_dp_objective extends rb_base_source {
             )
         );
 
-        $this->add_user_fields_to_columns($columnoptions);
-        $this->add_job_assignment_fields_to_columns($columnoptions);
+        $this->add_core_user_columns($columnoptions);
+        $this->add_totara_job_columns($columnoptions);
 
         return $columnoptions;
     }
@@ -453,8 +457,8 @@ class rb_source_dp_objective extends rb_base_source {
                 'text'
         );
 
-        $this->add_user_fields_to_filters($filteroptions);
-        $this->add_job_assignment_fields_to_filters($filteroptions, 'dp', 'userid');
+        $this->add_core_user_filters($filteroptions);
+        $this->add_totara_job_filters($filteroptions, 'dp', 'userid');
 
         return $filteroptions;
     }
@@ -529,12 +533,15 @@ class rb_source_dp_objective extends rb_base_source {
 
     /**
      * Generate the objective name with a link to the objective details page
+     *
+     * @deprecated Since Totara 12.0
      * @global object $CFG
      * @param string $objective Objective name
      * @param object $row Object containing other fields
      * @return string
      */
     public function rb_display_objectivelink($objective, $row) {
+        debugging('rb_source_dp_objective::rb_display_objectivelink has been deprecated since Totara 12.0. Use totara_plan\rb\display\plan_objective_name_link::display', DEBUG_DEVELOPER);
         global $OUTPUT;
         if (empty($objective)) {
             return '';
@@ -542,7 +549,16 @@ class rb_source_dp_objective extends rb_base_source {
         return $OUTPUT->action_link(new moodle_url('/totara/plan/components/objective/view.php', array('id' => $row->plan_id, 'itemid' => $row->objective_id)), $objective);
     }
 
+    /**
+     * Display status
+     *
+     * @deprecated Since Totara 12.0
+     * @param $status
+     * @param $row
+     * @return string
+     */
     function rb_display_proficiency_and_approval($status, $row) {
+        debugging('rb_source_dp_objective::rb_display_proficiency_and_approval has been deprecated since Totara 12.0. Use totara_plan\rb\display\plan_objective_status::display', DEBUG_DEVELOPER);
         global $CFG;
         // needed for approval constants
         require_once($CFG->dirroot . '/totara/plan/lib.php');

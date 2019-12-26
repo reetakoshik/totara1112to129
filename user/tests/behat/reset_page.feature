@@ -1,4 +1,4 @@
-@core @core_user
+@core @core_user @javascript
 Feature: Reset my profile page to default
   In order to remove customisations from my profile page
   As a user

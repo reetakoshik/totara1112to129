@@ -25,19 +25,38 @@
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->dirroot . '/totara/program/rb_sources/rb_source_program.php');
 
-class rb_source_certification extends rb_source_program {
-
-    /**
-     * Overwrite instance type value of totara_visibility_where() in rb_source_program->post_config().
-     */
-    protected $instancetype = 'certification';
+class rb_source_certification extends rb_base_source {
+    use \core_course\rb\source\report_trait;
+    use \totara_cohort\rb\source\report_trait;
+    use \totara_certification\rb\source\certification_trait;
 
     public function __construct() {
-        parent::__construct();
+        $this->base = "(SELECT p.*, c.learningcomptype, c.activeperiod, c.minimumactiveperiod, c.windowperiod, c.recertifydatetype
+                          FROM {prog} p
+                          JOIN {certif} c ON c.id = p.certifid)";
+        $this->joinlist = $this->define_joinlist();
+        $this->columnoptions = $this->define_columnoptions();
+        $this->filteroptions = $this->define_filteroptions();
+        $this->contentoptions = $this->define_contentoptions();
+        $this->paramoptions = $this->define_paramoptions();
+        $this->defaultcolumns = $this->define_defaultcolumns();
+        $this->defaultfilters = $this->define_defaultfilters();
+        $this->requiredcolumns = $this->define_requiredcolumns();
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_certification');
-        $this->sourcewhere = $this->define_sourcewhere();
+        $this->usedcomponents[] = 'totara_certification';
+        $this->usedcomponents[] = "totara_program";
+        $this->usedcomponents[] = 'totara_cohort';
+
+        $this->cacheable = false;
+
+        // Add custom fields.
+        $this->add_totara_customfield_component(
+            'prog', 'base', 'programid',
+            $this->joinlist, $this->columnoptions, $this->filteroptions
+        );
+
+        parent::__construct();
     }
 
     /**
@@ -56,41 +75,155 @@ class rb_source_certification extends rb_source_program {
         return false;
     }
 
-    protected function define_columnoptions() {
-
-        // Include some standard columns, override parent so they say certification.
-        $this->add_program_fields_to_columns($columnoptions, 'base', 'totara_certification');
-        $this->add_certification_fields_to_columns($columnoptions, 'certif', 'totara_certification');
-        $this->add_course_category_fields_to_columns($columnoptions, 'course_category', 'base', 'programcount');
-        $this->add_cohort_program_fields_to_columns($columnoptions);
-
-        return $columnoptions;
-    }
-
-    protected function define_sourcewhere() {
-        $sourcewhere = '(base.certifid IS NOT NULL)';
-
-        return $sourcewhere;
-    }
-
     protected function define_joinlist() {
+        global $CFG;
 
-        $joinlist = parent::define_joinlist();
+        $joinlist = array(
+            new rb_join(
+                'ctx',
+                'INNER',
+                '{context}',
+                'ctx.instanceid = base.id AND ctx.contextlevel = ' . CONTEXT_PROGRAM,
+                REPORT_BUILDER_RELATION_ONE_TO_ONE
+            ),
+        );
 
-        $this->add_certification_table_to_joinlist($joinlist, 'base', 'certifid');
+        $this->add_core_course_category_tables($joinlist, 'base', 'category');
+        $this->add_totara_cohort_program_tables($joinlist, 'base', 'id');
 
         return $joinlist;
     }
 
+    protected function define_columnoptions() {
+
+        // Include some standard columns
+        $this->add_totara_certification_columns($columnoptions, 'base');
+        $this->add_core_course_category_columns($columnoptions, 'course_category', 'base', 'programcount');
+        $this->add_totara_cohort_program_columns($columnoptions);
+
+        return $columnoptions;
+    }
+
+
     protected function define_filteroptions() {
         $filteroptions = array();
 
-        // Include some standard filters, override parent so they say certification.
-        $this->add_program_fields_to_filters($filteroptions, 'totara_certification');
-        $this->add_certification_fields_to_filters($filteroptions, 'totara_certification');
-        $this->add_course_category_fields_to_filters($filteroptions, 'base', 'category');
-        $this->add_cohort_program_fields_to_filters($filteroptions, 'totara_certification');
+        // Include some standard filters
+        $this->add_totara_certification_filters($filteroptions);
+        $this->add_core_course_category_filters($filteroptions);
+        $this->add_totara_cohort_program_filters($filteroptions, 'totara_certification');
 
         return $filteroptions;
     }
+
+    protected function define_paramoptions() {
+        $paramoptions = array(
+            new rb_param_option(
+                'programid',
+                'base.id'
+            ),
+            new rb_param_option(
+                'visible',
+                'base.visible'
+            ),
+            new rb_param_option(
+                'category',
+                'base.category'
+            ),
+        );
+        return $paramoptions;
+    }
+
+    protected function define_defaultcolumns() {
+        $defaultcolumns = array(
+            array(
+                'type' => 'certif',
+                'value' => 'proglinkicon',
+            ),
+            array(
+                'type' => 'course_category',
+                'value' => 'namelink',
+            ),
+        );
+        return $defaultcolumns;
+    }
+
+    protected function define_defaultfilters() {
+        $defaultfilters = array(
+            array(
+                'type' => 'certif',
+                'value' => 'fullname',
+                'advanced' => 0,
+            ),
+            array(
+                'type' => 'course_category',
+                'value' => 'path',
+                'advanced' => 0,
+            ),
+        );
+        return $defaultfilters;
+    }
+
+    protected function define_requiredcolumns() {
+        $requiredcolumns = array();
+
+        $requiredcolumns[] = new rb_column(
+            'ctx',
+            'id',
+            '',
+            "ctx.id",
+            array('joins' => 'ctx')
+        );
+
+        // Visibility.
+        $requiredcolumns[] = new rb_column(
+            'visibility',
+            'id',
+            '',
+            "base.id"
+        );
+
+        $requiredcolumns[] = new rb_column(
+            'visibility',
+            'visible',
+            '',
+            "base.visible"
+        );
+
+        $requiredcolumns[] = new rb_column(
+            'visibility',
+            'audiencevisible',
+            '',
+            "base.audiencevisible"
+        );
+
+        $requiredcolumns[] = new rb_column(
+            'base',
+            'available',
+            '',
+            "base.available"
+        );
+
+        $requiredcolumns[] = new rb_column(
+            'base',
+            'availablefrom',
+            '',
+            "base.availablefrom"
+        );
+
+        $requiredcolumns[] = new rb_column(
+            'base',
+            'availableuntil',
+            '',
+            "base.availableuntil"
+        );
+
+        return $requiredcolumns;
+    }
+
+    public function post_config(reportbuilder $report) {
+        $reportfor = $report->reportfor; // ID of the user the report is for.
+        $report->set_post_config_restrictions($report->post_config_visibility_where('certification', 'base', $reportfor));
+    }
+
 }

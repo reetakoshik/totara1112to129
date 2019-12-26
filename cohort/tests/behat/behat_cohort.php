@@ -52,8 +52,7 @@ class behat_cohort extends behat_base {
 
             // With JS enabled we should expand a few tree nodes.
             $parentnodes = get_string('administrationsite') . ' > ' .
-                get_string('users', 'admin') . ' > ' .
-                get_string('accounts', 'admin');
+                get_string('cohorts', 'cohort');
 
             $this->execute("behat_general::i_am_on_homepage");
             $this->execute("behat_navigation::i_navigate_to_node_in",

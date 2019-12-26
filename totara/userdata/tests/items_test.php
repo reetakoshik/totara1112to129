@@ -81,7 +81,7 @@ class totara_userdata_items_testcase extends advanced_testcase {
     public function test_get_sortorder($class) {
         $sortorder = $class::get_sortorder();
 
-        $this->assertInternalType('integer', $sortorder);
+        $this->assertIsInt($sortorder);
     }
 
     /**
@@ -92,17 +92,17 @@ class totara_userdata_items_testcase extends advanced_testcase {
      */
     public function test_is_compatible_context_level($class) {
         $compatible = $class::is_compatible_context_level(CONTEXT_SYSTEM);
-        $this->assertInternalType('boolean', $compatible);
+        $this->assertIsBool($compatible);
         $compatible = $class::is_compatible_context_level(CONTEXT_USER);
-        $this->assertInternalType('boolean', $compatible);
+        $this->assertIsBool($compatible);
         $compatible = $class::is_compatible_context_level(CONTEXT_COURSECAT);
-        $this->assertInternalType('boolean', $compatible);
+        $this->assertIsBool($compatible);
         $compatible = $class::is_compatible_context_level(CONTEXT_COURSE);
-        $this->assertInternalType('boolean', $compatible);
+        $this->assertIsBool($compatible);
         $compatible = $class::is_compatible_context_level(CONTEXT_MODULE);
-        $this->assertInternalType('boolean', $compatible);
+        $this->assertIsBool($compatible);
         $compatible = $class::is_compatible_context_level(CONTEXT_BLOCK);
-        $this->assertInternalType('boolean', $compatible);
+        $this->assertIsBool($compatible);
     }
 
     /**
@@ -173,8 +173,8 @@ class totara_userdata_items_testcase extends advanced_testcase {
             } else {
                 if ($export !== item::RESULT_STATUS_ERROR or $export !== item::RESULT_STATUS_SKIPPED) {
                     $this->assertInstanceOf('totara_userdata\userdata\export', $export);
-                    $this->assertInternalType('array', $export->data);
-                    $this->assertInternalType('array', $export->files);
+                    $this->assertIsArray($export->data);
+                    $this->assertIsArray($export->files);
                     foreach ($export->files as $file) {
                         $this->assertInstanceOf('stored_file', $file);
                     }

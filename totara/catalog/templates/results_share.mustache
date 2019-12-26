@@ -1,0 +1,74 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Kevin Hottinger <kevin.hottinger@totaralearning.com>
+   @package totara_catalog
+}}
+{{!
+
+    @template totara_catalog/results_share
+
+    This template generates Catalog results share button.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * data-core-autoinitialise: State of this JS auto initilise
+    * data-core-autoinitialise-amd: AMD to be linked to template
+    * data-tw-catalogResultsShare_btn: Trigger btn for displaying share
+    * data-tw-catalogResultsShare_expanded: Popup container
+    * data-tw-catalogResultsShare_close: Close share popup
+    * data-tw-catalogResultsShare_url: Hook for URL input box
+    * data-tw-catalogResultsShare_expanded_btn: Trigger to copy content to clipboard
+
+    Context variables required for this template:
+    * none
+}}
+
+<div class="tw-catalogResultsShare"
+    data-core-autoinitialise="true"
+    data-core-autoinitialise-amd="totara_catalog/results_share">
+    <a href="#" class="tw-catalogResultsShare__btn btn" data-tw-catalogResultsShare_btn="">
+        {{#flex_icon}}share-link{{/flex_icon}}
+        {{#str}}share, totara_catalog{{/str}}
+    </a>
+
+    <div class="tw-catalogResultsShare__arrow"></div>
+    <div class="tw-catalogResultsShare__expanded" data-tw-catalogResultsShare_expanded="">
+        <a href="#" class="tw-catalogResultsShare__expanded_close" data-tw-catalogResultsShare_close="">
+            {{#flex_icon}}close, remove, core,{{/flex_icon}}
+        </a>
+        <h4 class="tw-catalogResultsShare__expanded_title">
+            {{#str}}share, totara_catalog{{/str}}
+        </h4>
+        <div class="tw-catalogResultsShare__expanded_desc">
+            {{#str}}share_link_description, totara_catalog{{/str}}
+        </div>
+        <label class="sr-only" for="catalogresultsshare__expanded_input">
+            {{#str}}url, core{{/str}}
+        </label>
+        <input type="text" value="" class="tw-catalogResultsShare__expanded_input"
+        id="catalogresultsshare__expanded_input"
+        data-tw-catalogResultsShare_url=""/>
+
+        <a href="#" class="tw-catalogResultsShare__expanded_btn" data-tw-catalogResultsShare_expanded_btn="">
+            {{#str}}copy_link_to_clipboard, totara_catalog{{/str}}
+        </a>
+    </div>
+</div>

@@ -119,6 +119,7 @@ class format_topics_renderer extends format_section_renderer_base {
         }
         $url->param('sesskey', sesskey());
 
+        // Totara: Keep isstealth here.
         $isstealth = $section->section > $course->numsections;
         $controls = array();
         if (!$isstealth && $section->section && has_capability('moodle/course:setcurrentsection', $coursecontext)) {

@@ -25,6 +25,10 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once("{$CFG->dirroot}/totara/reportbuilder/lib.php");
 
+use mod_facetoface\seminar;
+use mod_facetoface\seminar_event;
+use mod_facetoface\seminar_session;
+
 class mod_facetoface_eventcreated_time_filter_testcase extends advanced_testcase {
     /**
      * Returning the id of the created report
@@ -102,8 +106,6 @@ class mod_facetoface_eventcreated_time_filter_testcase extends advanced_testcase
      * @return void
      */
     private function generate_facetoface(int $timecreated): void {
-        global $DB, $USER;
-
         $gen = $this->getDataGenerator();
         /** @var mod_facetoface_generator $f2fgen */
         $f2fgen = $gen->get_plugin_generator('mod_facetoface');
@@ -111,25 +113,22 @@ class mod_facetoface_eventcreated_time_filter_testcase extends advanced_testcase
         $course = $gen->create_course(null, ['createsections' => 1]);
         $f2f = $f2fgen->create_instance(['course' => $course->id]);
 
-        $sessionid = $DB->insert_record('facetoface_sessions', (object)[
-            'facetoface' => $f2f->id,
-            'capacity' => 10,
-            'allowoverbook' => 50,
-            'waitlisteveryone' => 1,
-            'details' => '',
-            'normalcost' => '',
-            'discountcost' => '',
-            'timecreated' => $timecreated,
-            'timemodified' => $timecreated,
-            'usermodified' => $USER->id,
-        ]);
+        $seminar = new seminar($f2f->id);
+        $event = new seminar_event();
+        $event->set_facetoface($seminar->get_id());
+        $event->save();
+
+        // Updating the time created here for the event
+        $event->set_timecreated($timecreated);
+        $event->save();
 
         $time = time();
-        $DB->insert_record('facetoface_sessions_dates', (object)[
-            'sessionid' => $sessionid,
-            'timestart' => $time,
-            'timefinish' => $time + 7200
-        ]);
+        $session = new seminar_session();
+        $session->set_sessionid($event->get_id());
+        $session->set_timestart($time);
+        $session->set_timefinish($time + 7200);
+        $session->save();
+
     }
 
     public function test_filter_seminar_session_by_eventtimecreated(): void {
@@ -159,7 +158,7 @@ class mod_facetoface_eventcreated_time_filter_testcase extends advanced_testcase
             )
         );
 
-        $reportbuilder = new reportbuilder($reportid);
+        $reportbuilder = reportbuilder::create($reportid);
 
         list($sql, $params, $cache) = $reportbuilder->build_query(false, true);
         $data = $DB->get_records_sql($sql, $params);

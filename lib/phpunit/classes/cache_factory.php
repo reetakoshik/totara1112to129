@@ -107,8 +107,7 @@ class phpunit_cache_factory extends cache_factory {
         $this->primedcaches = array();
         foreach ($this->cachesfromdefinitions as $id => $cache) {
             $cache->phpunitmodified = false;
-            $this->primedcaches[$id][0] = $cache->phpunitcache;
-            $this->primedcaches[$id][1] = $cache->get_definition()->get_identifiers();
+            $this->primedcaches[$id] = $cache->phpunitcache;
         }
     }
 
@@ -125,8 +124,7 @@ class phpunit_cache_factory extends cache_factory {
                 /** @var phpunit_cache $cache */
                 if ($cache->phpunitmodified) {
                     if (isset($this->primedcaches[$id])) {
-                        $cache->set_identifiers($this->primedcaches[$id][1]);
-                        $cache->phpunitcache = $this->primedcaches[$id][0];
+                        $cache->phpunitcache = $this->primedcaches[$id];
                         $cache->phpunitmodified = false;
                     } else {
                         $cache->phpunitcache = array();

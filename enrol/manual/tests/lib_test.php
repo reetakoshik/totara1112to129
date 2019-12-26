@@ -492,4 +492,115 @@ class enrol_manual_lib_testcase extends advanced_testcase {
         $manualplugin->send_expiry_notifications($trace);
         $this->assertEquals(6, $sink->count());
     }
+
+    /**
+     * Provides [ expirynotify ]
+     *
+     * @return array
+     */
+    public function expiry_manual_enrolment_data_provider() {
+        return [ [ 0 ], [ 1 ], [ 2 ] ];
+    }
+
+    /**
+     * Supplemental test for manual enrolment expiry notifications
+     *
+     * @dataProvider expiry_manual_enrolment_data_provider
+     */
+    public function test_send_expiry_notifications_manual_enrolment(int $expirynotify) {
+        global $DB, $CFG;
+        $this->resetAfterTest();
+
+        require_once($CFG->dirroot . '/enrol/editinstance_form.php');
+
+        $coursename = 'Lorem Ipsum';
+        $username = 'Wolfeschlegelsteinhausenbergerdorff';
+
+        $trace = new null_progress_trace();
+
+        /** @var $manualplugin enrol_manual_plugin */
+        $manualplugin = enrol_get_plugin('manual');
+        $now = time();
+        $admin = get_admin();
+
+        // Note: hopefully nobody executes the unit tests the last second before midnight...
+
+        $manualplugin->set_config('expirynotifylast', $now - 60*60*24);
+        $manualplugin->set_config('expirynotifyhour', 0);
+
+        $course = $this->getDataGenerator()->create_course(array('fullname' => $coursename));
+        $context = context_course::instance($course->id);
+        $user = $this->getDataGenerator()->create_user(array('lastname' => $username));
+
+        $instances = array_filter(enrol_get_instances($course->id, true), function ($e) { return $e->enrol === 'manual'; });
+        $this->assertCount(1, $instances);
+
+        $instance = array_shift($instances);
+
+        $enrol = $DB->get_record('enrol', array('courseid' => $course->id, 'enrol' => 'manual'), '*', MUST_EXIST);
+        $this->assertEquals(0, $enrol->expirynotify);
+        $this->assertEquals(0, $enrol->notifyall);
+
+        // Mock submitting form.
+        $formdata = array(
+            'enrolperiod' => MINSECS * 5,
+            'expirynotify' => $expirynotify,
+            'expirythreshold' => DAYSECS
+        );
+        enrol_instance_edit_form::mock_submit($formdata);
+
+        $mform = new enrol_instance_edit_form(null, array($instance, $manualplugin, $context, 'manual', ''));
+        $data = $mform->get_data();
+        $this->assertNotEmpty($data);
+
+        foreach ($data as $key => $value) {
+            $instance->{$key} = $value;
+        }
+        $instance->timemodified = time();
+
+        $manualplugin->update_instance($instance, $data);
+
+        $enrol = $DB->get_record('enrol', array('courseid' => $course->id, 'enrol' => 'manual'), '*', MUST_EXIST);
+        if ($expirynotify === 2) {
+            $this->assertEquals(1, $enrol->expirynotify);
+            $this->assertEquals(1, $enrol->notifyall);
+        } else {
+            $this->assertEquals($expirynotify, $enrol->expirynotify);
+            $this->assertEquals(0, $enrol->notifyall);
+        }
+
+        $now = time();
+        $manualplugin->enrol_user($instance, $user->id, 0, $now, $now + MINSECS * 5);
+
+        $enrols = $DB->get_records('user_enrolments', array('enrolid' => $instance->id));
+        $this->assertCount(1, $enrols);
+
+        $sink = $this->redirectMessages();
+        $sinkresult = $manualplugin->sync($trace, null);
+        $this->assertEquals(0, $sinkresult);
+
+        $manualplugin->send_expiry_notifications($trace);
+        $messages = $sink->get_messages();
+
+        $this->assertCount($expirynotify, $messages);
+
+        // expirynotify | emails
+        // -------------+-------------------------------------
+        //            0 | no emails
+        //            1 | 0: admin -> admin
+        //            2 | 0: admin -> user, 1: admin -> admin
+
+        if ($expirynotify >= 1) {
+            $message = array_pop($messages);
+            $this->assertEquals($admin->id, $message->useridto);
+            $this->assertEquals($admin->id, $message->useridfrom);
+            $this->assertContains($coursename, $message->fullmessagehtml);
+        }
+        if ($expirynotify >= 2) {
+            $message = array_pop($messages);
+            $this->assertEquals($user->id, $message->useridto);
+            $this->assertEquals($admin->id, $message->useridfrom);
+            $this->assertContains($coursename, $message->fullmessagehtml);
+        }
+    }
 }

@@ -86,33 +86,6 @@ class auth_manual_manual_testcase extends advanced_testcase {
         $this->assertEquals(30, $authplugin->password_expire($user1->username));
     }
 
-    /**
-     * Test test_process_config method.
-     */
-    public function test_process_config() {
-        $this->resetAfterTest();
-
-        /** @var auth_plugin_manual $authplugin */
-        $authplugin = get_auth_plugin('manual');
-
-        $config = new stdClass();
-        $this->assertTrue($authplugin->process_config($config));
-        $newconfig = get_config('auth_manual');
-        $this->assertSame('', $newconfig->expiration);
-        $this->assertSame('', $newconfig->expiration_warning);
-        $this->assertSame('', $newconfig->expirationtime);
-
-        $config = new stdClass();
-        $config->expiration = '1';
-        $config->expiration_warning = '2';
-        $config->expirationtime = '30';
-        $this->assertTrue($authplugin->process_config($config));
-        $newconfig = get_config('auth_manual');
-        $this->assertSame($config->expiration, $newconfig->expiration);
-        $this->assertSame($config->expiration_warning, $newconfig->expiration_warning);
-        $this->assertSame($config->expirationtime, $newconfig->expirationtime);
-    }
-
     public function test_edit_profile_url() {
         /** @var auth_plugin_manual $authplugin */
         $authplugin = get_auth_plugin('manual');

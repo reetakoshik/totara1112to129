@@ -42,9 +42,10 @@ class block_current_learning_program_data_testcase extends block_current_learnin
         $this->generator = null;
         $this->program_generator = null;
         $this->completion_generator = null;
-        $this->user1 = null;
-        $this->course1 = null;
-        $this->program1 = null;
+        $this->user1 = $this->user2 = $this->user3 = $this->user4 = null;
+        $this->course1 = $this->course2 = $this->course3 = $this->course4 = null;
+        $this->program1 = $this->program2 = null;
+
         parent::tearDown();
     }
 

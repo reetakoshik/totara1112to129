@@ -25,10 +25,6 @@ defined('MOODLE_INTERNAL') || die();
 
 class rb_source_opensesame extends rb_base_source {
 
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
-
     public function __construct() {
         $this->base = '{repository_opensesame_pkgs}';
         $this->joinlist = $this->define_joinlist();
@@ -40,6 +36,7 @@ class rb_source_opensesame extends rb_base_source {
         $this->defaultfilters = $this->define_defaultfilters();
         $this->requiredcolumns = array();
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_opensesame');
+        $this->usedcomponents[] = 'repository_opensesame';
 
         parent::__construct();
     }
@@ -88,7 +85,7 @@ class rb_source_opensesame extends rb_base_source {
             array(
                 'dbdatatype' => 'char',
                 'outputformat' => 'text',
-                'displayfunc' => 'coursetitle',
+                'displayfunc' => 'opensesame_course_title',
                 'extrafields' => array('itemid' => 'base.id', 'zipfilename' => 'base.zipfilename', 'packageid' => 'base.id'),
             )
         );
@@ -100,7 +97,7 @@ class rb_source_opensesame extends rb_base_source {
             'base.visible',
             array(
                 'dbdatatype' => 'boolean',
-                'displayfunc' => 'visibility',
+                'displayfunc' => 'opensesame_visibility',
                 'extrafields' => array('itemid' => 'base.id'),
             )
         );
@@ -136,7 +133,7 @@ class rb_source_opensesame extends rb_base_source {
             array(
                 'dbdatatype' => 'char',
                 'outputformat' => 'text',
-                'displayfunc' => 'mobilecompatibility',
+                'displayfunc' => 'opensesame_mobile_compatibility',
             )
         );
 
@@ -157,7 +154,7 @@ class rb_source_opensesame extends rb_base_source {
             get_string('metadescription', 'repository_opensesame'),
             'base.description',
             array(
-                'displayfunc' => 'shortdesc',
+                'displayfunc' => 'opensesame_shortdesc',
                 'dbdatatype' => 'text',
             )
         );
@@ -275,7 +272,17 @@ class rb_source_opensesame extends rb_base_source {
         return $defaultfilters;
     }
 
+    /**
+     * Display course title with create course icon
+     *
+     * @deprecated Since Totara 12.0
+     * @param $value
+     * @param $row
+     * @param bool $isexport
+     * @return string
+     */
     public function rb_display_coursetitle($value, $row, $isexport = false) {
+        debugging('rb_source_opensesame::rb_display_coursetitle has been deprecated since Totara 12.0. Use repository_opensesame\rb\display\opensesame_course_title::display', DEBUG_DEVELOPER);
         global $OUTPUT;
 
         if ($isexport) {
@@ -301,7 +308,17 @@ class rb_source_opensesame extends rb_base_source {
         return $return;
     }
 
+    /**
+     * Display visibility
+     *
+     * @deprecated Since Totara 12.0
+     * @param $value
+     * @param $row
+     * @param bool $isexport
+     * @return string
+     */
     public function rb_display_visibility($value, $row, $isexport = false) {
+        debugging('rb_source_opensesame::rb_display_visibility has been deprecated since Totara 12.0. Use repository_opensesame\rb\display\opensesame_visibility::display', DEBUG_DEVELOPER);
         global $OUTPUT;
 
         // This is very nasty, but I know no better way for 2.6!
@@ -332,7 +349,17 @@ class rb_source_opensesame extends rb_base_source {
         }
     }
 
+    /**
+     * Display mobile compatibility
+     *
+     * @deprecated Since Totara 12.0
+     * @param $value
+     * @param $row
+     * @param bool $isexport
+     * @return mixed|string
+     */
     public function rb_display_mobilecompatibility($value, $row, $isexport = false) {
+        debugging('rb_source_opensesame::rb_display_mobilecompatibility has been deprecated since Totara 12.0. Use repository_opensesame\rb\display\opensesame_mobile_compatibility::display', DEBUG_DEVELOPER);
         $mobileoptions = array(
             'allDevices' => get_string('metamobilecompatibilityall', 'repository_opensesame'),
             'ios' => get_string('metamobilecompatibilityios', 'repository_opensesame'),
@@ -345,7 +372,17 @@ class rb_source_opensesame extends rb_base_source {
         return '';
     }
 
+    /**
+     * Display description
+     *
+     * @deprecated Since Totara 12.0
+     * @param $value
+     * @param $row
+     * @param bool $isexport
+     * @return string
+     */
     public function rb_display_shortdesc($value, $row, $isexport = false) {
+        debugging('rb_source_opensesame::rb_display_shortdesc has been deprecated since Totara 12.0. Use repository_opensesame\rb\display\opensesame_shortdesc::display', DEBUG_DEVELOPER);
         if ($isexport) {
             return $value;
         }
@@ -353,7 +390,17 @@ class rb_source_opensesame extends rb_base_source {
         return $value;
     }
 
+    /**
+     * Display duration
+     *
+     * @deprecated Since Totara 12.0
+     * @param int $value
+     * @param stdClass $row
+     * @param bool $isexport
+     * @return int
+     */
     public function rb_display_duration($value, $row, $isexport = false) {
+        debugging('rb_source_opensesame::rb_display_duration has been deprecated since Totara 12.0', DEBUG_DEVELOPER);
         return $value;
     }
 

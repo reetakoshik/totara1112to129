@@ -74,7 +74,7 @@ $args = array('args' => '{"cohortid":' . $id . ',
     "operator_type_cohort":'  . COHORT_OPERATOR_TYPE_COHORT  . ',
     "operator_type_ruleset":' . COHORT_OPERATOR_TYPE_RULESET .'}');
 $PAGE->requires->strings_for_js(array('error:baddate', 'error:badduration', 'error:couldnotupdatemembershipoption', 'addrule',
-        'orcohort', 'andcohort', 'or', 'and', 'rulesupdatesuccess', 'rulesupdatefailure'), 'totara_cohort');
+        'orcohort', 'andcohort', 'or', 'and', 'rulesupdatesuccess', 'rulesupdatefailure', 'certifoptionsselectone'), 'totara_cohort');
 $PAGE->requires->strings_for_js(array('datepickerlongyearregexjs', 'datepickerlongyeardisplayformat'), 'totara_core');
 $jsmodule = array(
         'name' => 'totara_cohortrules',

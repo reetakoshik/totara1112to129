@@ -27,6 +27,9 @@ namespace theme_roots\output;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * @deprecated since 12.0. Use totara\core\classes\output\masthead_logo.php instead.
+ */
 class site_logo implements \renderable, \templatable {
 
     /**
@@ -38,6 +41,8 @@ class site_logo implements \renderable, \templatable {
     public function export_for_template(\renderer_base $output) {
         global $PAGE, $SITE, $OUTPUT, $CFG;
 
+        debugging('The class theme_roots\output\site_logo has been deprecated since 12.0. Use totara\core\classes\output\masthead_logo.php instead.');
+
         $templatecontext = array(
             'siteurl' => $CFG->wwwroot . '/',
             'shortname' => $SITE->shortname,
@@ -48,7 +53,7 @@ class site_logo implements \renderable, \templatable {
         }
 
         if (empty($templatecontext['logourl'])) {
-            $templatecontext['logourl'] = $OUTPUT->pix_url('logo', 'totara_core');
+            $templatecontext['logourl'] = $OUTPUT->image_url('logo', 'totara_core');
         }
 
         if (!empty($PAGE->theme->settings->alttext)) {

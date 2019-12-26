@@ -66,8 +66,9 @@ class course_edit_form extends moodleform {
             $mform->setConstant('fullname', $course->fullname);
         }
 
-        $mform->addElement('text', 'shortname', get_string('shortnamecourse'), 'maxlength="100" size="20"');
+        $mform->addElement('text', 'shortname', get_string('shortnamecourse'), ['size' => '20']);
         $mform->addHelpButton('shortname', 'shortnamecourse');
+        $mform->addRule('shortname', get_string('maximumchars', '', 255), 'maxlength', 255);
         $mform->addRule('shortname', get_string('missingshortname'), 'required', null, 'client');
         $mform->setType('shortname', PARAM_TEXT);
         if (!empty($course->id) and !has_capability('moodle/course:changeshortname', $coursecontext)) {
@@ -89,7 +90,7 @@ class course_edit_form extends moodleform {
             }
         } else {
             if (has_capability('moodle/course:changecategory', $coursecontext)) {
-                $displaylist = coursecat::make_categories_list('moodle/course:create');
+                $displaylist = coursecat::make_categories_list('moodle/course:changecategory');
                 if (!isset($displaylist[$course->category])) {
                     //always keep current
                     $displaylist[$course->category] = coursecat::get($course->category, MUST_EXIST, true)->get_formatted_name();
@@ -107,8 +108,8 @@ class course_edit_form extends moodleform {
         $choices = array();
         $choices['0'] = get_string('hide');
         $choices['1'] = get_string('show');
-        $mform->addElement('select', 'visible', get_string('visible'), $choices);
-        $mform->addHelpButton('visible', 'visible');
+        $mform->addElement('select', 'visible', get_string('coursevisibility'), $choices);
+        $mform->addHelpButton('visible', 'coursevisibility');
         $mform->setDefault('visible', $courseconfig->visible);
         if (!empty($course->id)) {
             if (!has_capability('moodle/course:visibility', $coursecontext)) {

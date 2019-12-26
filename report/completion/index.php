@@ -96,8 +96,8 @@ function show_rpl($type, $user, $rpl, $describe, $fulldescribe, $cmid = null) {
     } else {
         // Show RPL status icon
         $rplicon = strlen($rpl) ?
-            $OUTPUT->flex_icon('completion-rpl-y', ['classes' => 'ft-size-300', 'alt' => $describe]) :
-            $OUTPUT->flex_icon('completion-rpl-n', ['classes' => 'ft-size-300', 'alt' => $describe]);
+            $OUTPUT->flex_icon('completion-rpl-y', ['alt' => $describe]) :
+            $OUTPUT->flex_icon('completion-rpl-n', ['alt' => $describe]);
         print '<a href="index.php?course='.$course->id.'&sort='.$sort.'&page='.$page.'&edituser='.$user->id.'#user-'.$user->id.'" class="rpledit">' . $rplicon .
             '</a>';
 
@@ -121,7 +121,7 @@ function show_rpl_readonly($rpl, $describe) {
     global $OUTPUT;
 
     if (!empty($rpl)) {
-        print $OUTPUT->flex_icon('completion-rpl-y', ['classes' => 'ft-size-300', 'alt' => $describe]);
+        print $OUTPUT->flex_icon('completion-rpl-y', ['alt' => $describe]);
         print '<a href="#" class="rplshow" title="'.get_string('showrpl', 'completion').'">...</a>';
         print '<span class="rplvalue">' . format_string($rpl) . '</span>';
     }
@@ -240,15 +240,14 @@ if ($csv) {
 
     echo $OUTPUT->header();
 
-    $PAGE->requires->js('/report/completion/textrotate.js');
 
     $args = array(
         'args' => json_encode(array(
             'course'      => $course->id,
-            'pix_rply'    => $OUTPUT->flex_icon('completion-rpl-y', ['classes' => 'ft-size-300']),
-            'pix_rpln'    => $OUTPUT->flex_icon('completion-rpl-n', ['classes' => 'ft-size-300']),
-            'pix_cross'   => $OUTPUT->flex_icon('times-danger', ['classes' => 'ft-size-300']),
-            'pix_loading' => $OUTPUT->flex_icon('loading', ['classes' => 'ft-size-300']),
+            'pix_rply'    => $OUTPUT->flex_icon('completion-rpl-y'),
+            'pix_rpln'    => $OUTPUT->flex_icon('completion-rpl-n'),
+            'pix_cross'   => $OUTPUT->flex_icon('times-danger'),
+            'pix_loading' => $OUTPUT->flex_icon('loading'),
         ))
     );
 
@@ -259,10 +258,47 @@ if ($csv) {
 
     $PAGE->requires->js_init_call('M.totara_completionrpl.init',
              $args, false, $jsmodule);
-    $PAGE->requires->js_function_call('textrotate_init', null, true);
 
     // Handle groups (if enabled)
     groups_print_course_menu($course, $CFG->wwwroot.'/report/completion/index.php?course='.$course->id);
+}
+
+if ($sifirst !== 'all') {
+    set_user_preference('ifirst', $sifirst);
+}
+if ($silast !== 'all') {
+    set_user_preference('ilast', $silast);
+}
+
+if (!empty($USER->preference['ifirst'])) {
+    $sifirst = $USER->preference['ifirst'];
+} else {
+    $sifirst = 'all';
+}
+
+if (!empty($USER->preference['ilast'])) {
+    $silast = $USER->preference['ilast'];
+} else {
+    $silast = 'all';
+}
+
+if ($sifirst !== 'all') {
+    set_user_preference('ifirst', $sifirst);
+}
+if ($silast !== 'all') {
+    set_user_preference('ilast', $silast);
+}
+
+if (!empty($USER->preference['ifirst'])) {
+    $sifirst = $USER->preference['ifirst'];
+} else {
+    $sifirst = 'all';
+}
+
+if (!empty($USER->preference['ilast'])) {
+    $silast = $USER->preference['ilast'];
+} else {
+    $silast = 'all';
 }
 
 // Generate where clause
@@ -315,40 +351,15 @@ $link = $CFG->wwwroot.'/report/completion/index.php?course='.$course->id;
 if (strlen($sort)) {
     $link .= '&amp;sort='.$sort;
 }
-$link .= '&amp;page=';
-
-// Build the the page by Initial bar
-$initials = array('first', 'last');
-$alphabet = explode(',', get_string('alphabet', 'langconfig'));
+$link .= '&amp;start=';
 
 $pagingbar = '';
-foreach ($initials as $initial) {
-    $var = 'si'.$initial;
 
-    $othervar = $initial == 'first' ? 'silast' : 'sifirst';
-    $othervar = $$othervar != 'all' ? "&amp;{$othervar}={$$othervar}" : '';
-
-    $pagingbar .= ' <div class="initialbar '.$initial.'initial">';
-    $pagingbar .= get_string($initial.'name').':&nbsp;';
-
-    if ($$var == 'all') {
-        $pagingbar .= '<strong>'.get_string('all').'</strong> ';
-    }
-    else {
-        $pagingbar .= "<a href=\"{$link}{$othervar}\">".get_string('all').'</a> ';
-    }
-
-    foreach ($alphabet as $letter) {
-        if ($$var === $letter) {
-            $pagingbar .= '<strong>'.$letter.'</strong> ';
-        }
-        else {
-            $pagingbar .= "<a href=\"$link&amp;$var={$letter}{$othervar}\">$letter</a> ";
-        }
-    }
-
-    $pagingbar .= '</div>';
-}
+// Initials bar.
+$prefixfirst = 'sifirst';
+$prefixlast = 'silast';
+$pagingbar .= $OUTPUT->initials_bar($sifirst, 'firstinitial', get_string('firstname'), $prefixfirst, $url);
+$pagingbar .= $OUTPUT->initials_bar($silast, 'lastinitial', get_string('lastname'), $prefixlast, $url);
 
 // Do we need a paging bar?
 if ($total > COMPLETION_REPORT_PAGE) {
@@ -510,24 +521,24 @@ if (!$csv) {
         foreach ($criteria as $criterion) {
             // Get criteria details
             $details = $criterion->get_title_detailed();
-            print '<th scope="col" class="colheader criterianame ie-vertical-completion"><div class="ie-vertical-completion">';
-            print '<span class="completion-criterianame ie-block-completion">'.$details.'</span>';
+            print '<th scope="col" class="colheader criterianame ie-vertical-completion">';
+            print '<div class="rotated-text-container"><div class="rotated-text"><span>'.$details.'</span>';
 
             if (in_array($criterion->id, $criteria_with_rpl)) {
-                print '<span class="completion-rplheader completion-criterianame ie-color-completion">'.get_string('recognitionofpriorlearning', 'completion').'</span>';
+                print '<span class="completion-rplheader completion-criterianame">'.get_string('recognitionofpriorlearning', 'completion').'</span>';
             }
 
-            print '</div></th>';
+            print '</div></div></th>';
         }
 
         // Overall course completion status
-        print '<th scope="col" class="colheader criterianame ie-vertical-completion"><div class="ie-vertical-completion">';
-        print '<span class="completion-criterianame ie-block-completion">'.get_string('coursecomplete', 'completion').'</span>';
+        print '<th scope="col" class="colheader criterianame ie-vertical-completion">';
+        print '<div class="rotated-text-container"><div class="rotated-text"><span>'.get_string('coursecomplete', 'completion').'</span>';
         if ($CFG->enablecourserpl) {
-            print '<span class="completion-rplheader completion-criterianame ie-color-completion">'.get_string('recognitionofpriorlearning', 'completion').'</span>';
+            print '<span class="completion-rplheader completion-criterianame">'.get_string('recognitionofpriorlearning', 'completion').'</span>';
         }
 
-        print '</div></th>';
+        print '</div></div></th>';
 
         // Editor column header.
         if ($showeditorlink) {
@@ -613,9 +624,9 @@ if (!$csv) {
         print ($iconlink ? '</a>' : '');
 
         if (in_array($criterion->id, $criteria_with_rpl)) {
-            $courseicon = $OUTPUT->flex_icon('course', ['alt' => get_string('rpl', 'completion'), 'classes' => 'ft-size-300']);
+            $courseicon = $OUTPUT->flex_icon('course', ['alt' => get_string('rpl', 'completion')]);
             print $courseicon;
-            $moreicon = $OUTPUT->flex_icon('plus', ['alt' => get_string('showrpls', 'completion'), 'classes' => 'ft-size-300']);
+            $moreicon = $OUTPUT->flex_icon('plus', ['alt' => get_string('showrpls', 'completion')]);
             print '<a href="#" class="rplexpand rpl-'.$criterion->id.'" title="'.get_string('showrpls', 'completion').'">' . $moreicon . '</a>';
         }
 
@@ -624,12 +635,12 @@ if (!$csv) {
 
     // Overall course completion status
     print '<th class="criteriaicon">';
-    $courseicon = $OUTPUT->flex_icon('course', ['alt' => get_string('course'), 'classes' => 'ft-size-300']);
+    $courseicon = $OUTPUT->flex_icon('course', ['alt' => get_string('course')]);
     print $courseicon;
 
     if ($CFG->enablecourserpl) {
-        $courseicon = $OUTPUT->flex_icon('course', ['alt' => get_string('rpl', 'completion'), 'classes' => 'ft-size-300']);
-        $moreicon = $OUTPUT->flex_icon('plus', ['alt' => get_string('showrpls', 'completion'), 'classes' => 'ft-size-300']);
+        $courseicon = $OUTPUT->flex_icon('course', ['alt' => get_string('rpl', 'completion')]);
+        $moreicon = $OUTPUT->flex_icon('plus', ['alt' => get_string('showrpls', 'completion')]);
         print $courseicon;
         print '<a href="#" class="rplexpand rpl-course" title="'.get_string('showrpls', 'completion').'">' . $moreicon . '</a>';
     }
@@ -756,7 +767,7 @@ foreach ($progress as $user) {
             } else {
                 print '<td class="completion-progresscell rpl-'.$criterion->id.' cmid-'.$criterion->moduleinstance.'">';
 
-                print $OUTPUT->flex_icon($completionicon, ['alt' => s($describe), 'classes' => 'ft-size-300']);
+                print $OUTPUT->flex_icon($completionicon, ['alt' => s($describe)]);
 
                 // Decide if we need to display an RPL
                 if (in_array($criterion->id, $criteria_with_rpl)) {
@@ -812,14 +823,14 @@ foreach ($progress as $user) {
                 );
 
                 if ($is_complete) {
-                    $manualicon = $OUTPUT->flex_icon('completion-manual-y', ['alt' => s($describe), 'classes' => 'ft-size-300']);
+                    $manualicon = $OUTPUT->flex_icon('completion-manual-y', ['alt' => s($describe)]);
                 } else {
-                    $manualicon = $OUTPUT->flex_icon('completion-manual-n', ['alt' => s($describe), 'classes' => 'ft-size-300']);
+                    $manualicon = $OUTPUT->flex_icon('completion-manual-n', ['alt' => s($describe)]);
                 }
                 print '<a href="'.$toggleurl->out().'" title="'.s(get_string('clicktomarkusercomplete', 'report_completion')).'">' .
                     $manualicon . '</a></td>';
             } else {
-                print $OUTPUT->flex_icon($completionicon, ['alt' => s($describe), 'classes' => 'ft-size-300']) . '</td>';
+                print $OUTPUT->flex_icon($completionicon, ['alt' => s($describe)]) . '</td>';
             }
 
             print '</td>';
@@ -860,7 +871,7 @@ foreach ($progress as $user) {
         print '<td class="completion-progresscell rpl-course">';
 
         // Display course completion status icon
-        print $OUTPUT->flex_icon('completion-auto-' . $completiontype, ['alt' => s($describe), 'classes' => 'ft-size-300']);
+        print $OUTPUT->flex_icon('completion-auto-' . $completiontype, ['alt' => s($describe)]);
 
         if ($CFG->enablecourserpl) {
             if ($ccompletion->is_complete()) {

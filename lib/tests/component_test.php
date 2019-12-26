@@ -481,64 +481,64 @@ class core_component_testcase extends advanced_testcase {
         $result = core_component::get_component_classes_in_namespace('wellington', 'stupid');
         // $this->assertDebuggingCalled();
         // $this->resetDebugging();
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(0, $result);
 
         // Test a plugin that does not exist.
         $result = core_component::get_component_classes_in_namespace('blackboard_core', 'stupid');
         // $this->assertDebuggingCalled();
         // $this->resetDebugging();
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(0, $result);
 
         // Test a namespace that does not exist.
         $result = core_component::get_component_classes_in_namespace('totara_core', 'stupid');
         // $this->assertDebuggingCalled();
         // $this->resetDebugging();
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(0, $result);
 
         // Test a complex namespace that does not exist.
         $result = core_component::get_component_classes_in_namespace('totara_core', 'stupid\monkey');
         // $this->assertDebuggingCalled();
         // $this->resetDebugging();
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(0, $result);
         $result = core_component::get_component_classes_in_namespace('totara_core', '\stupid\monkey');
         // $this->assertDebuggingCalled();
         // $this->resetDebugging();
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(0, $result);
         $result = core_component::get_component_classes_in_namespace('totara_core', 'stupid\monkey\\');
         // $this->assertDebuggingCalled();
         // $this->resetDebugging();
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(0, $result);
         $result = core_component::get_component_classes_in_namespace('totara_core', '\stupid\monkey\\');
         // $this->assertDebuggingCalled();
         // $this->resetDebugging();
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(0, $result);
 
         // Test an invalid component.
         $result = core_component::get_component_classes_in_namespace('_', 'stupid');
         // $this->assertDebuggingCalled();
         // $this->resetDebugging();
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(0, $result);
 
         // Test an invalid namespace.
         $result = core_component::get_component_classes_in_namespace('core', '-');
         // $this->assertDebuggingCalled();
         // $this->resetDebugging();
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(0, $result);
 
         // Test it can find rb_display classes within totara_reportbuilder.
         $displayclasses = core_component::get_component_classes_in_namespace('totara_reportbuilder', 'rb\display');
         // $this->assertDebuggingCalled();
         // $this->resetDebugging();
-        $this->assertInternalType('array', $displayclasses);
+        $this->assertIsArray($displayclasses);
         $this->assertGreaterThan(26, $displayclasses);
         foreach ($displayclasses as $displayclass => $classpaths) {
             $this->assertContains('totara_reportbuilder\rb\display\\', $displayclass);

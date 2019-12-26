@@ -11,7 +11,7 @@ Feature: User can change their password
       | username | firstname | lastname | email |
       | learner | learner | 1 | learner@example.com |
     And I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "learner 1" "link"
     And I click on "Edit profile" "link"
     And I set the following fields to these values:
@@ -29,12 +29,10 @@ Feature: User can change their password
     And I press "Log in"
     And I follow "Profile" in the user menu
     Then I should see "learner 1"
-    And I should see the "Navigation" block
 
     When I click on "Preferences" "link" in the ".userprofile" "css_element"
     Then I should see "Preferences"
     And I should see "User account"
-    And I should see the "Navigation" block
 
     When I click on "Change password" "link"
     Then I should see "Change password"
@@ -49,7 +47,7 @@ Feature: User can change their password
     When I press "Continue"
     And I log out
     Then I should see "Log in"
-    And I should not see the "Navigation" block
+    And I should see "You are not logged in"
 
     When I set the following fields to these values:
     | Username | learner |
@@ -65,7 +63,7 @@ Feature: User can change their password
       | learner | learner | 1 | learner@example.com | monkey |
 
     When I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "learner 1" "link"
     And I click on "Edit profile" "link"
     And I set the following fields to these values:
@@ -75,7 +73,7 @@ Feature: User can change their password
 
     When I log out
     Then I should see "Log in"
-    And I should not see the "Navigation" block
+    And I should see "You are not logged in"
 
     When I set the following fields to these values:
       | Username | learner |
@@ -93,7 +91,7 @@ Feature: User can change their password
     When I press "Continue"
     And I log out
     Then I should see "Log in"
-    And I should not see the "Navigation" block
+    And I should see "You are not logged in"
 
     When I set the following fields to these values:
       | Username | learner |

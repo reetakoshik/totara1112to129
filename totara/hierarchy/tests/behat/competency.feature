@@ -11,8 +11,8 @@ Feature: Test competencies achieved is updated
       | bilbo    | Bilbo     | Baggins  | bilbo.baggins@example.com    |              |         |
       | gandalf  | Gandalf   | the Grey | gandalf.the.grey@example.com | staffmanager | system  |
     And the following "courses" exist:
-      | fullname              | shortname | format |enablecompletion | completionstartonenrol |
-      | An Unexpected Journey | C1        | weeks  | 1               | 1                      |
+      | fullname              | shortname | format |enablecompletion |
+      | An Unexpected Journey | C1        | weeks  | 1               |
     And the following "course enrolments" exist:
       | user  | course | role    |
       | bilbo | C1     | student |
@@ -25,10 +25,7 @@ Feature: Test competencies achieved is updated
 
   Scenario: Add a choice activity and complete the activity as a user
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I click on "Courses" in the totara menu
-    And I click on "An Unexpected Journey" "link"
-    And I turn editing mode on
+    And I am on "An Unexpected Journey" course homepage with editing mode on
     And I add a "Choice" to section "1" and I fill the form with:
       | Choice name         | Help to Gandalf the Grey                          |
       | Description         | The wizard, member of the Istari order            |
@@ -42,7 +39,7 @@ Feature: Test competencies achieved is updated
     And I click on "Choice - Help to Gandalf the Grey" "checkbox"
     And I press "Save changes"
     And I click on "Home" in the totara menu
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "Bilbo Baggins" "link"
     And I click on "Add job assignment" "link"
     And I set the following fields to these values:
@@ -53,7 +50,7 @@ Feature: Test competencies achieved is updated
     And I click on "Gandalf the Grey" "link"
     And I click on "OK" "button" in the ".totara-dialog[aria-describedby=manager]" "css_element"
     And I click on "Add job assignment" "button"
-    And I navigate to "Manage competencies" node in "Site administration > Hierarchies > Competencies"
+    And I navigate to "Manage competencies" node in "Site administration > Competencies"
     And I click on "Reclaim the Lonely Mountain" "link"
     And I click on "Kill the Smaug" "link"
     And I press "Assign course completions"

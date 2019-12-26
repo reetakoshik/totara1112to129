@@ -68,7 +68,7 @@ $string['auth_user_create'] = 'Enable user creation';
 $string['auth_user_creation'] = 'New (anonymous) users can create user accounts on the external authentication source and confirmed via email. If you enable this , remember to also configure module-specific options for user creation.';
 $string['auth_usernameexists'] = 'Selected username already exists. Please choose a new one.';
 $string['auto_add_remote_users'] = 'Auto add remote users';
-$string['cannotmapfield'] = 'Field "{$a->fieldname}" can not be mapped because its short name "{$a->shortname}" is too long. To enable mapping reduce the profile field short name down to {$a->charlimit} characters. <a href="{$a->link}">Edit user profile fields</a>';
+$string['cannotmapfield'] = 'The field "{$a->fieldname}" can\'t be mapped because its short name "{$a->shortname}" is too long. To allow it to be mapped, you need to reduce the short name to not exceed {$a->charlimit} characters. <a href="{$a->link}">Edit user profile fields</a>';
 $string['createpassword'] = 'Generate password and notify user';
 $string['createpasswordifneeded'] = 'Create password if needed and send via email';
 $string['emailchangecancel'] = 'Cancel email change';
@@ -94,7 +94,6 @@ $string['errorminpasswordnonalphanum'] = 'Passwords must have at least {$a} non-
 $string['errorpasswordreused'] = 'This password has been used before, and is not permitted to be reused';
 $string['errorminpasswordupper'] = 'Passwords must have at least {$a} upper case letter(s).';
 $string['errorpasswordupdate'] = 'Error updating password, password not changed';
-$string['errorsettingschange'] = 'Errors exist on this page. Please review and fix them.';
 $string['eventuserloggedin'] = 'User has logged in';
 $string['eventuserloggedinas'] = 'User logged in as another user';
 $string['eventuserloginfailed'] = 'User login failed';

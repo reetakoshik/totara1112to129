@@ -18,12 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author Alastair Munro <alastair.munro@totaralms.com>
- * @package facetoface
+ * @package mod_facetoface
  */
+
+use \mod_facetoface\signup_helper;
 
 defined('MOODLE_INTERNAL') || die();
 
-class facetoface_events_testcase extends advanced_testcase {
+class mod_facetoface_events_testcase extends advanced_testcase {
 
     protected $facetofacegenerator = null;
     protected $facetoface = null;
@@ -108,7 +110,11 @@ class facetoface_events_testcase extends advanced_testcase {
         $this->resetAfterTest();
         $this->setAdminUser();
 
-        $event = \mod_facetoface\event\booking_cancelled::create_from_session($this->session, $this->context);
+        // Create user.
+        $user1 = $this->getDataGenerator()->create_user();
+
+        $signup = \mod_facetoface\signup::create($user1->id, new \mod_facetoface\seminar_event($this->session->id))->save();
+        $event = \mod_facetoface\event\booking_cancelled::create_from_signup($signup, $this->context);
         $event->trigger();
 
         $this->assertEquals($this->context, $event->get_context());
@@ -119,8 +125,6 @@ class facetoface_events_testcase extends advanced_testcase {
     }
 
     public function test_signup_status_updated_event() {
-        global $DB;
-
         $this->resetAfterTest();
         $this->setAdminUser();
 
@@ -130,18 +134,21 @@ class facetoface_events_testcase extends advanced_testcase {
         // Update session.
         $this->session->sessiondates = array();
 
-        // Sign user up.
-        facetoface_user_signup($this->session, $this->facetoface, $this->course, '', MDL_F2F_NONE, MDL_F2F_STATUS_BOOKED, $user1->id, true, '');
-        $signup = $DB->get_record('facetoface_signups', array('sessionid' => $this->session->id, 'userid' => $user1->id));
-        $signupstatus = $DB->get_record('facetoface_signups_status', array('signupid' => $signup->id, 'superceded' => 0));
+        // Create some records (it is not correct signup sequence).
+        $seminarevent = new \mod_facetoface\seminar_event($this->session->id);
+        $signup = \mod_facetoface\signup::create($user1->id, $seminarevent)->save();
+        \mod_facetoface\signup_status::create($signup, new \mod_facetoface\signup\state\booked($signup))->save();
+        $state = $signup->get_state();
+        $status = \mod_facetoface\signup_status::create($signup, $state, time());
+        $status->save();
 
-        $event = \mod_facetoface\event\signup_status_updated::create_from_signup($signupstatus, $this->context, $signup);
+        $event = \mod_facetoface\event\signup_status_updated::create_from_items($status, $this->context, $signup);
         $event->trigger();
         $data = $event->get_data();
 
         $this->assertEquals($this->context, $event->get_context());
-        $this->assertSame($signupstatus, $event->get_signupstatus());
-        $this->assertSame($signupstatus->id, $event->objectid);
+        $this->assertSame($status, $event->get_signupstatus());
+        $this->assertSame($status->get_id(), $event->objectid);
         $this->assertSame('u', $data['crud']);
         $this->assertEventContextNotUsed($event);
     }
@@ -156,7 +163,9 @@ class facetoface_events_testcase extends advanced_testcase {
         // Update session.
         $this->session->sessiondates = array();
 
-        facetoface_user_signup($this->session, $this->facetoface, $this->course, '', MDL_F2F_NONE, MDL_F2F_STATUS_BOOKED, $user1->id);
+        // Create some records (it is not correct signup sequence).
+        $signup = \mod_facetoface\signup::create($user1->id, new \mod_facetoface\seminar_event($this->session->id))->save();
+        \mod_facetoface\signup_status::create($signup, new \mod_facetoface\signup\state\booked($signup))->save();
         $attendee_note = facetoface_get_attendee($this->session->id, $user1->id);
         $attendee_note->userid = $attendee_note->id;
         $attendee_note->id = $attendee_note->submissionid;
@@ -172,7 +181,7 @@ class facetoface_events_testcase extends advanced_testcase {
         $this->assertSame('u', $data['crud']);
         $this->assertEventContextNotUsed($event);
         $this->assertEventLegacyLogData(array($this->course->id, 'facetoface', 'update attendee note',
-            "attendee_note.php?id={$user1->id}&s={$this->session->id}", $this->session->id, $this->facetoface->cmid), $event);
+            "signup_notes.php?id={$user1->id}&s={$this->session->id}", $this->session->id, $this->facetoface->cmid), $event);
     }
 
     public function test_booking_requests_approved_event() {
@@ -255,7 +264,7 @@ class facetoface_events_testcase extends advanced_testcase {
         $this->assertSame('u', $data['crud']);
         $this->assertEventContextNotUsed($event);
         $this->assertEventLegacyLogData(array($this->course->id, 'facetoface', 'Add/remove attendees',
-            "attendees.php?s={$this->session->id}", $this->session->id, $this->facetoface->cmid), $event);
+            "attendees/view.php?s={$this->session->id}", $this->session->id, $this->facetoface->cmid), $event);
     }
 
     public function test_attendee_position_updated() {
@@ -294,40 +303,47 @@ class facetoface_events_testcase extends advanced_testcase {
     }
 
     public function test_interest_declared() {
-        global $DB;
+        global $USER;
+
         $this->resetAfterTest();
         $this->setAdminUser();
 
-        $interestid = facetoface_declare_interest($this->facetoface, 'my reason');
-        $interestobj = $DB->get_record('facetoface_interest', array('id' => $interestid));
-
-        $event = \mod_facetoface\event\interest_declared::create_from_instance($interestobj, $this->context);
+        $interest = new \mod_facetoface\interest();
+        $interest->set_facetoface($this->facetoface->id)
+            ->set_userid($USER->id)
+            ->set_reason('my reason')
+            ->declare();
+        $event = \mod_facetoface\event\interest_declared::create_from_instance($interest, $this->context);
         $event->trigger();
         $data = $event->get_data();
 
-        $this->assertSame($interestobj, $event->get_instance());
+        $this->assertSame($interest, $event->get_instance());
         $this->assertEquals('facetoface_interest', $event->objecttable);
         $this->assertSame($event::LEVEL_PARTICIPATING, $event->edulevel);
-        $this->assertSame($interestobj->id, $event->objectid);
+        $this->assertSame($interest->get_id(), $event->objectid);
         $this->assertSame('c', $data['crud']);
     }
 
     public function test_interest_withdrawn() {
-        global $DB;
+        global $USER;
+
         $this->resetAfterTest();
         $this->setAdminUser();
 
-        $interestid = facetoface_declare_interest($this->facetoface, 'my reason');
-        $interestobj = $DB->get_record('facetoface_interest', array('id' => $interestid));
+        $interest = new \mod_facetoface\interest();
+        $interest->set_facetoface($this->facetoface->id)
+            ->set_userid($USER->id)
+            ->set_reason('my reason')
+            ->declare();
 
-        $event = \mod_facetoface\event\interest_withdrawn::create_from_instance($interestobj, $this->context);
+        $event = \mod_facetoface\event\interest_withdrawn::create_from_instance($interest, $this->context);
         $event->trigger();
         $data = $event->get_data();
 
-        $this->assertSame($interestobj, $event->get_instance());
+        $this->assertSame($interest, $event->get_instance());
         $this->assertEquals('facetoface_interest', $event->objecttable);
         $this->assertSame($event::LEVEL_PARTICIPATING, $event->edulevel);
-        $this->assertSame($interestobj->id, $event->objectid);
+        $this->assertSame($interest->get_id(), $event->objectid);
         $this->assertSame('d', $data['crud']);
 
     }
@@ -341,5 +357,63 @@ class facetoface_events_testcase extends advanced_testcase {
         $data = $event->get_data();
 
         $this->assertSame('r', $data['crud']);
+    }
+
+    public function test_job_assignment_deleted() {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        set_config('facetoface_selectjobassignmentonsignupglobal', true);
+
+        $user = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+
+        $studentrole = $DB->get_record('role', array('shortname' => 'student'));
+        $this->getDataGenerator()->enrol_user($user->id, $course->id, $studentrole->id);
+
+        $data = array(
+            'userid' => $user->id,
+            'fullname' => 'ja1',
+            'shortname' => 'ja1',
+            'idnumber' => 'ja1',
+        );
+        $jobassignment = \totara_job\job_assignment::create($data);
+
+        // Set up a face to face session that requires you to get manager approval and select a position.
+        $facetofacedata = array(
+            'course' => $course->id,
+            'selectjobassignmentonsignup' => 1,
+        );
+        $facetofacegenerator = $this->getDataGenerator()->get_plugin_generator('mod_facetoface');
+        $facetoface = $facetofacegenerator->create_instance($facetofacedata);
+
+        // Create session with capacity and date in 2 years.
+        $sessiondate = new stdClass();
+        $sessiondate->timestart = time() + (DAYSECS * 365 * 2);
+        $sessiondate->timefinish = time() + (DAYSECS * 365 * 2 + 60);
+        $sessiondate->sessiontimezone = 'Pacific/Auckland';
+        $sessiondata = array(
+            'facetoface' => $facetoface->id,
+            'sessiondates' => array($sessiondate),
+        );
+        $sessionid = $facetofacegenerator->add_session($sessiondata);
+        $seminarevent = new \mod_facetoface\seminar_event($sessionid);
+
+        $signup = \mod_facetoface\signup::create($user->id, $seminarevent);
+        $signup->set_jobassignmentid((int)$jobassignment->id);
+        signup_helper::signup($signup);
+        // Reload signup.
+        $signup = new \mod_facetoface\signup($signup->get_id());
+        $this->assertNotNull($signup->get_jobassignmentid());
+        $this->assertNotEquals(0, $signup->get_jobassignmentid());
+
+        // Delete JA which must trigger event of deleting.
+        \totara_job\job_assignment::delete($jobassignment);
+
+        // Reload signup.
+        $signup = new \mod_facetoface\signup($signup->get_id());
+        $this->assertEquals(0, $signup->get_jobassignmentid());
     }
 }

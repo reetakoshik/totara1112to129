@@ -17,9 +17,7 @@ Feature: In a lesson activity, teacher can import blackboard fill in the blank q
       | teacher1 | C1 | editingteacher |
       | student1 | C1 | student |
     And I log in as "teacher1"
-    When I am on homepage
-    And I follow "Course 1"
-    And I turn editing mode on
+    When I am on "Course 1" course homepage with editing mode on
     And I add a "Lesson" to section "1" and I fill the form with:
       | Name | Test lesson name |
       | Description | Test lesson description |
@@ -35,7 +33,8 @@ Feature: In a lesson activity, teacher can import blackboard fill in the blank q
     And I should not see "Your answer"
     And I set the field "id_answer" to "frog"
     And I press "Submit"
-    And I should see "Your answer : frog"
+    And I should see "Your answer:"
+    And I should see "frog" in the ".mod_lesson__student-answer" "css_element"
     And I should see "A frog is an amphibian"
     And I press "Continue"
     And I should see "Congratulations - end of lesson reached"

@@ -62,7 +62,7 @@ if ($context->contextlevel == CONTEXT_SYSTEM) {
 } else {
     $PAGE->set_url('/totara/cohort/goals.php', array('id' => $id));
     $PAGE->set_heading($COURSE->fullname);
-    $PAGE->set_title($cohort->name . ' : ' . get_string('goals', 'totara_hierarchy'));
+    $PAGE->set_title($cohort->name . ' : ' . get_string('goals', 'totara_cohort'));
     $PAGE->set_pagelayout('report');
 }
 
@@ -84,6 +84,9 @@ $jsmodule = array(
         'requires' => array('json', 'totara_core'));
 $PAGE->requires->js_init_call('M.totara_cohort.init',
     $args, false, $jsmodule);
+
+$strheading = get_string('goals', 'totara_cohort');
+totara_cohort_navlinks($cohort->id, format_string($cohort->name), $strheading);
 
 echo $OUTPUT->header();
 

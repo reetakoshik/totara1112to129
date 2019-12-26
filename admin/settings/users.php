@@ -2,8 +2,7 @@
 
 // This file defines settingpages and externalpages under the "users" category
 
-$ADMIN->add('users', new admin_category('accounts', new lang_string('accounts', 'admin')));
-$ADMIN->add('users', new admin_category('roles', new lang_string('permissions', 'role')));
+// Totara: Removed 'accounts' and 'roles' categories.
 
 if ($hassiteconfig
  or has_capability('moodle/user:create', $systemcontext)
@@ -15,15 +14,9 @@ if ($hassiteconfig
  or has_capability('moodle/cohort:view', $systemcontext)) { // speedup for non-admins, add all caps used on this page
 
 
-    if (empty($CFG->loginhttps)) {
-        $securewwwroot = $CFG->wwwroot;
-    } else {
-        $securewwwroot = str_replace('http:','https:',$CFG->wwwroot);
-    }
-    // stuff under the "accounts" subcategory
-    $ADMIN->add('accounts', new admin_externalpage('editusers', new lang_string('userlist','admin'), "$CFG->wwwroot/$CFG->admin/user.php", array('moodle/user:update', 'moodle/user:delete')));
-    $ADMIN->add('accounts', new admin_externalpage('userbulk', new lang_string('userbulk','admin'), "$CFG->wwwroot/$CFG->admin/user/user_bulk.php", array('moodle/user:update', 'moodle/user:delete')));
-    $ADMIN->add('accounts', new admin_externalpage('addnewuser', new lang_string('addnewuser'), "$securewwwroot/user/editadvanced.php?id=-1&amp;returnto=profile", 'moodle/user:create'));
+    // Totara: stuff under the "Users" subcategory
+    $ADMIN->add('users', new admin_externalpage('editusers', new lang_string('userlist','admin'), "$CFG->wwwroot/$CFG->admin/user.php", array('moodle/user:update', 'moodle/user:delete')));
+    $ADMIN->add('users', new admin_externalpage('userbulk', new lang_string('userbulk','admin'), "$CFG->wwwroot/$CFG->admin/user/user_bulk.php", array('moodle/user:update', 'moodle/user:delete')));
 
     // "User default preferences" settingpage.
     $temp = new admin_settingpage('userdefaultpreferences', new lang_string('userdefaultpreferences', 'admin'));
@@ -60,13 +53,10 @@ if ($hassiteconfig
         $temp->add(new admin_setting_configselect('defaultpreference_trackforums', new lang_string('trackforums'),
             '', 0, $choices));
     }
-    $ADMIN->add('accounts', $temp);
-
-    $ADMIN->add('accounts', new admin_externalpage('profilefields', new lang_string('profilefields','admin'), "$CFG->wwwroot/user/profile/index.php", array('moodle/site:config', 'totara/core:manageprofilefields')));
-    $ADMIN->add('accounts', new admin_externalpage('cohorts', new lang_string('cohorts', 'cohort'), $CFG->wwwroot . '/cohort/index.php', array('moodle/cohort:manage', 'moodle/cohort:view')));
-
-
-    // stuff under the "roles" subcategory
+    // TOTARA: Admin restructure.
+    $ADMIN->add('users', $temp);
+    $ADMIN->add('users', new admin_externalpage('profilefields', new lang_string('profilefields','admin'), "$CFG->wwwroot/user/profile/index.php", array('moodle/site:config', 'totara/core:manageprofilefields')));
+    $ADMIN->add('users', new admin_externalpage('profilepage', new lang_string('myprofile', 'admin'), $CFG->wwwroot . '/user/profilesys.php', array('totara/core:appearance')));
 
     // "userpolicies" settingpage
     $temp = new admin_settingpage('userpolicies', new lang_string('userpolicies', 'admin'));

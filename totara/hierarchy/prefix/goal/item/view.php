@@ -93,7 +93,7 @@ $PAGE->navbar->add($name);
 $PAGE->set_url(new moodle_url('/totara/hierarchy/prefix/goal/item/view.php'), array('id' => $goalpersonalid));
 $PAGE->set_context($context);
 $PAGE->set_pagelayout('admin');
-$PAGE->set_totara_menu_selected('mygoals');
+$PAGE->set_totara_menu_selected('\totara_hierarchy\totara\menu\mygoals');
 $PAGE->set_title($strmygoals);
 $PAGE->set_heading($strmygoals);
 

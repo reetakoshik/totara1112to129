@@ -705,12 +705,12 @@ class totara_form_form_testcase extends advanced_testcase {
         $FULLME = 'http://www.example.com/myform.php?xx=yy';
         $form = new test_form();
         $result = $form->export_for_template($OUTPUT);
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
 
         $this->assertSame('tf_fid_totara_form_test_test_form', $result['formid']);
         $this->assertSame('http://www.example.com/myform.php', $result['action']);
         $this->assertSame('totara_form__test__test_form', $result['cssclass']);
-        $this->assertInternalType('array', $result['items']);
+        $this->assertIsArray($result['items']);
         $this->assertFalse($result['failedsubmission']);
         $this->assertFalse($result['requiredpresent']);
         $this->assertFalse($result['errors_has_items']);

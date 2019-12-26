@@ -71,6 +71,80 @@ $CFG->dboptions = array(
 
 
 //=========================================================================
+// 1b. FULL TEXT SEARCH
+//=========================================================================
+
+// Totara Full Text Search supports one language only, you need to configure
+// it here before installation or upgrade to Totara 12 otherwise the default
+// value will be used. If you change it later you need to run following CLI script
+// to rebuild all full text search indexes: admin/cli/fts_rebuild_indexes.php
+// It is recommended that the language selected here is compatible with $CFG->lang.
+//
+// PostgreSQL is using 'english' configuration for full text search by default,
+// for list of available options see result of "SELECT cfgname FROM pg_ts_config;". For example:
+//    $CFG->dboptions['ftslanguage'] = 'english';
+//    $CFG->dboptions['ftslanguage'] = 'simple';
+//    $CFG->dboptions['ftslanguage'] = 'german';
+//
+// NOTE: PostgreSQL does not support Japanese and other languages with very short
+//       words without spaces in between, enable the following setting to get
+//       a basic experimental support of these languages.
+//       If the value changes then you need to run: admin/cli/fts_repopulate_tables.php
+//    $CFG->dboptions['fts3bworkaround'] = true;
+//
+// MySQL is using case and accent insensitive collation for full text search by default,
+// you can specify a different collation here, for example:
+//    $CFG->dboptions['ftslanguage'] = 'utf8_unicode_ci';
+//    $CFG->dboptions['ftslanguage'] = 'utf8mb4_0900_as_ci';
+//    $CFG->dboptions['ftslanguage'] = 'utf8mb4_de_pb_0900_ai_ci';
+//
+// MySQL has a plugin NGRAM to support the full-text parser, which make the search easier. Totara full-text index
+// will enable NGRAM parser by default. However, it can be turned on/off via config, and the config will be used if
+// the database MySQL is used for storage.
+//    $CFG->dboptions['ftsngram'] = false;
+//    $CFG->dboptions['ftsngram'] = true;
+//    $CFG->dboptions['ftsngram'] = 0;
+//    $CFG->dboptions['ftsngram'] = 1;
+//
+// NOTE: After changing the availability of NGRAM once Totara had been installed, then you will need to run the
+// following scripts in the listed order:
+//    1. admin/cli/fts_rebuild_indexes.php
+//    2. admin/cli/fts_repopulate_tables.php
+//
+// NOTE: MySQL does not support Japanese and other languages with very short
+//       words without spaces in between, enable the following setting to get
+//       a basic experimental support of these languages.
+//       If the value changes then you need to run: admin/cli/fts_repopulate_tables.php
+//    $CFG->dboptions['fts3bworkaround'] = true;
+//
+// MS SQL Server is using 'English' language by default, list of options is at
+// https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-fulltext-languages-transact-sql?view=sql-server-2017
+//    $CFG->dboptions['ftslanguage'] = 'English';
+//    $CFG->dboptions['ftslanguage'] = 'German';
+//    $CFG->dboptions['ftslanguage'] = 'Japanese';
+//    $CFG->dboptions['ftslanguage'] = 1028; // Traditional Chinese
+//    $CFG->dboptions['ftslanguage'] = 2052; // Simplified Chinese
+//
+// PostgreSQL and MS SQL have built in support for accent sensitive full text searches.
+// PostgreSQL provides this by means of an extension called unaccent which is not created by default.
+// MS SQL accent sensitivity is on by default and to turn it off the fulltext catalog will need to
+// be rebuilt.
+//
+// To change accent sensitive fulltext searches for either PostgreSQL or MS SQL you can set the
+// following setting according to your requirement:
+//    $CFG->dboptions['ftsaccentsensitivity'] = true;
+//    $CFG->dboptions['ftsaccentsensitivity'] = false;
+//    $CFG->dboptions['ftsaccentsensitivity'] = 1;
+//    $CFG->dboptions['ftsaccentsensitivity'] = 0;
+//    $CFG->dboptions['ftsaccentsensitivity'] = 'dbdefault';
+//
+// NOTE: After changing the accent sensitivity setting you need to run the following scripts in the listed order:
+//    1. admin/cli/fts_rebuild_indexes.php
+//    2. admin/cli/fts_repopulate_tables.php
+//
+
+
+//=========================================================================
 // 2. WEB SITE LOCATION
 //=========================================================================
 // Now you need to tell Totara where it is located. Specify the full
@@ -256,9 +330,13 @@ $CFG->directorypermissions = 02777;
 //      $CFG->session_redis_host = '127.0.0.1';
 //      $CFG->session_redis_port = 6379;  // Optional.
 //      $CFG->session_redis_database = 0;  // Optional, default is db 0.
+//      $CFG->session_redis_auth = ''; // Optional, default is don't set one.
 //      $CFG->session_redis_prefix = ''; // Optional, default is don't set one.
 //      $CFG->session_redis_acquire_lock_timeout = 120;
 //      $CFG->session_redis_lock_expire = 7200;
+//      Use the igbinary serializer instead of the php default one. Note that phpredis must be compiled with
+//      igbinary support to make the setting to work. Also, if you change the serializer you have to flush the database!
+//      $CFG->session_redis_serializer_use_igbinary = false; // Optional, default is PHP builtin serializer.
 //
 //   Memcache session handler (requires memcached server and memcache extension):
 //      $CFG->session_handler_class = '\core\session\memcache';
@@ -374,7 +452,15 @@ $CFG->directorypermissions = 02777;
 //     LogFormat "%h %l %{MOODLEUSER}n %t \"%r\" %s %b \"%{Referer}i\" \"%{User-Agent}i\"" moodleformat
 // And in the part specific to your Totara install / virtualhost:
 //     CustomLog "/your/path/to/log" moodleformat
-// CAUTION: Use of this option will expose usernames in the Apache log,
+//
+// Alternatively for other webservers such as nginx, you can instead have the username sent via a http header
+// 'X-MOODLEUSER' which can be saved in the logfile and then stripped out before being sent to the browser:
+//     $CFG->headerloguser = 0; // Turn this feature off. Default value.
+//     $CFG->headerloguser = 1; // Log user id.
+//     $CFG->headerloguser = 2; // Log full name in cleaned format. ie, Darth Vader will be displayed as darth_vader.
+//     $CFG->headerloguser = 3; // Log username.
+//
+// CAUTION: Use of this option will expose usernames in the Apache / nginx log,
 // If you are going to publish your log, or the output of your web stats analyzer
 // this will weaken the security of your website.
 //
@@ -461,6 +547,13 @@ $CFG->directorypermissions = 02777;
 //
 // To ensure they are never used even when available:
 //      $CFG->svgicons = false;
+//
+// As of version 12, Totara introduces a new site administration menu available in the
+// site's top navigation.
+// For those wanting to continue displaying legacy site administration menu in the
+// 'Administration' block the following setting can be defined in your config.php.
+//
+//      $CFG->legacyadminsettingsmenu = true;
 //
 // Some administration options allow setting the path to executable files. This can
 // potentially cause a security risk. Set this option to true to disable editing
@@ -598,6 +691,14 @@ $CFG->directorypermissions = 02777;
 //      $CFG->thirdpartyexeclist = array('/full/path/to/bin' => true, '/another/path/to/script.sh' => false);
 //
 //
+// In Totara 12.0 the data being exported for hierarchy frameworks were changed to export all fields instead of
+// a hierarchical presentation of the elements in the framework.
+// If $CFG->hierarchylegacyexport is set to 1, the old hierarchycal presentation of the elements in the framework
+// will be exported.
+//
+//      $CFG->hierarchylegacyexport = 0;
+//
+//
 //=========================================================================
 // 7. SETTINGS FOR DEVELOPMENT SERVERS - not intended for production use!!!
 //=========================================================================
@@ -711,6 +812,35 @@ $CFG->directorypermissions = 02777;
 //
 // Example:
 //   $CFG->showflavours = 'flavourname,enterprise';
+//
+//=========================================================================
+// 8c. Totara quickaccess menu
+//=========================================================================
+// Totara quick access menu allows admin users customise their administration
+// navigation based on their personal preferences.
+//
+// The $CFG->defaultquickaccessmenu variable defines the DEFAULT state of the
+// quick access administration navigation. Every node defined here still goes
+// through the access check and will be filtered out of the menu if the current
+// user does not have permissions to access it.
+//
+// Key in every item should correspond to the real key (name) of the node in the
+// administration navigation tree. Administration categories cannot be used as
+// item keys and will be ignored.
+//
+// Example:
+// $CFG->defaultquickaccessmenu = [
+//    [
+//        'key'    => 'key1',
+//        'group'  => 'platform', // optional, defaults to 'learn'
+//                                // valid options: 'learn', 'platform', 'configuration'
+//        'label'  => 'sometext', // optional
+//        'weight' => 1000        // optional
+//    ],
+//    ['key' => 'key2', 'group' => 'platform', 'label' => 'sometext', 'weight' => 2000],
+//    ['key' => 'key3', 'group' => 'learn', 'label' => 'sometext', 'weight' => 3000],
+//    ...
+//    ];
 //
 //=========================================================================
 // 9. PHPUNIT SUPPORT
@@ -894,7 +1024,100 @@ $CFG->directorypermissions = 02777;
 // $CFG->sitetype = 'production'; // Options are 'production', 'qa', 'demo' or 'development'.
 // $CFG->registrationcode = 'xxxxxxxxxxxxxxxx'; // Unique alphanumeric code, 16 characters.
 //
-
+//=========================================================================
+// 15. COURSE CATALOG SETTINGS
+//=========================================================================
+// Catalog full text search relevance weight.
+//
+//      $CFG->catalogrelevanceweight = ['high'=>20, 'medium'=> 4 , 'low'=>1];
+//
+// Catalog full text search indexing method.
+//
+// Enable this setting to use an alternate full text search indexing system. This is applicable
+// to sites which use a DB which uses implicit AND between search terms, such as pgsql and
+// mssql. Using the default method, with the AND behaviour, if a user searches for multiple
+// words which occur in a learning item spread over more than one Catalog FTS "bucket", then
+// the records will not match (score zero). The alternate method ensures these records will be
+// included (score non-zero), but has some side-effects: Relevance ordering may not be accurate
+// in some situations, and more DB storage space is used to index the data.
+//
+// After changing this setting, run
+//     /totara/catalog/cli/populate_catalog_data.php --purge_catalog_first
+// to repopulate the Catalog FTS data.
+//
+//      $CFG->catalog_use_and_compatible_buckets = true;
+//
+// Catalog multi-language alphabetical sorting override
+//
+// When a site has multiple languages installed, catalog automatically disables user sorting
+// options, and instead determines sorting based on the current context, such as sorting by
+// featured learning when it has been configured, by relevance when a user enters a text
+// search term, otherwise by "time".
+//
+// This change happens because sorting with multi-language data is unreliable. Sorting data
+// in real-time isn't feasible due to performance considerations, so the only possibility is
+// to pre-calculate the sorting data. It is likewise infeasible to pre-calculate sorting for
+// each individual user. Thus sorting can only be done for one language. The result would be
+// that users in a language different from the site language would not see items ordered in
+// their language when using "Alphabetical" sorting.
+//
+// This setting allows you to force the sorting options to be available again. This might be
+// useful for sites that have more than one language pack installed, but predominantly use
+// just one language, or sites that use multiple languages but define separate learning items
+// for each language (e.g. one course for German users, another course for French users) and
+// don't use the "Multi-language Content" filter or a similar filter which can modify the
+// data that users see.
+//
+//      $CFG->catalog_enable_alpha_sorting_with_multiple_languages = true;
+//
+//=========================================================================
+// 16. ANALYZE TABLE SETTINGS
+//=========================================================================
+// Totara used to periodically ask the database management system to analyse the context and context_map tables,
+// ensuring that statistics for the tables are up to date.
+// Having accurate statistics can have a significant performance impact on a site,
+// particularly if courses, activities and users are being created, moved or deleted often.
+// Unfortunately, there are known issues with some database systems
+// when analysing tables for a heavily loaded database.
+// Totara tries to ensure that table statistics are up to date in a safe way for your site,
+// based upon the database system you are using.
+//
+// PostgreSQL:
+// Analyze table is called after every change to context as well as updates to the context_map table.
+// There are no known issues with this approach in this database system, and it will result in
+// the best possible outcome as statistics for the tables are always up to date.
+//
+// MySQL, MariaDB and MSSQL:
+// There is a known performance problem within these database systems which can have significant impact
+// when the system is heavily loaded.
+// As such a scheduled task that runs only once per day has been introduced.
+// Sites using these database systems may want to tweak when table analysis happens to best suit
+// how those sites are used.
+// It is possible to control when to analyse tables through the analyze_context_table_after_build setting.
+//
+// Setting it to true will execute analyze table command after changes to the context table as well as
+// updates to the context_map table.
+// Setting it to false will prevent this and it will be done late at night by totara_core\task\analyze_table_task
+// to mitigate performance degradation.
+// It is better to revisit the scheduled tasks setting to let the task run at off-peak times on your site.
+//
+// The default for this setting is true for PostgreSQL, false for MySQL, MariaDB and MSSQL.
+//
+// $CFG->analyze_context_table_after_build = true;                  // this is "analyze", not "analyse"
+//
+//
+// The context_map table is exceptionally large, and changes to a single context record can lead to
+// a significant number of updates for the context_map table.
+// The following setting controls how often table statistics are updated when updating the context_map table.
+//
+// By default it will update context_map table statistics when more than 1000 updates have occured.
+// If set to a positive integer, it will update statistics after the number of updates is more than the value.
+// Setting it to 0 will cause it to update statistics after every update.
+//
+// Note: table statistics will not be updated if $CFG->analyze_context_table_after_build has been set to false.
+//
+// $CFG->analyze_context_table_inserted_count_threshold = 1000;     // this is "analyze", not "analyse"
+//
 //=========================================================================
 // ALL DONE!  To continue installation, visit your main page with a browser
 //=========================================================================

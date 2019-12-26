@@ -46,8 +46,9 @@ class totara_program_observer_testcase extends reportcache_advanced_testcase {
 
     protected function tearDown() {
         $this->data_generator = null;
-        $this->course1 = null;
-        $this->program1 = null;
+        $this->course1 = $this->course2 = $this->course3 = $this->course4 = $this->course5 = null;
+        $this->program1 = $this->program2 = null;
+
         parent::tearDown();
     }
 

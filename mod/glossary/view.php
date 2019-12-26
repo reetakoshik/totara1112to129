@@ -381,7 +381,7 @@ if ($glossary->intro && $showcommonelements) {
 
 /// Search box
 if ($showcommonelements ) {
-    echo '<form method="post" class="form form-inline m-b-1" action="view.php">';
+    echo '<form method="post" class="form form-inline m-b-1" action="' . $CFG->wwwroot . '/mod/glossary/view.php">';
 
     echo html_writer::label(get_string('searchglossaryfor', 'mod_glossary'), 'mod_glossary_search', false, array('class' => 'sr-only'));
     if ($mode == 'search') {
@@ -435,7 +435,10 @@ if ($allentries) {
     }
 
     //Build paging bar
-    $paging = glossary_get_paging_bar($count, $page, $entriesbypage, "view.php?id=$id&amp;mode=$mode&amp;hook=".urlencode($hook)."&amp;sortkey=$sortkey&amp;sortorder=$sortorder&amp;fullsearch=$fullsearch&amp;",9999,10,'&nbsp;&nbsp;', $specialtext, -1);
+    $baseurl = new moodle_url('/mod/glossary/view.php', ['id' => $id, 'mode' => $mode, 'hook' => $hook,
+        'sortkey' => $sortkey, 'sortorder' => $sortorder, 'fullsearch' => $fullsearch]);
+    $paging = glossary_get_paging_bar($count, $page, $entriesbypage, $baseurl->out() . '&amp;',
+        9999, 10, '&nbsp;&nbsp;', $specialtext, -1);
 
     echo '<div class="paging">';
     echo $paging;

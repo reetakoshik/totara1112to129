@@ -27,18 +27,6 @@ require_once($CFG->dirroot.'/totara/hierarchy/prefix/organisation/lib.php');
 
 class totara_sync_element_org extends totara_sync_hierarchy {
 
-    /**
-     * Add Org fields.
-     *
-     * @param MoodleQuickForm $mform
-     */
-    public function config_form(&$mform) {
-        parent::config_form($mform);
-        // Disable the field when nothing is selected, and when database is selected.
-        $mform->disabledIf('csvsaveemptyfields', 'source_org', 'eq', '');
-        $mform->disabledIf('csvsaveemptyfields', 'source_org', 'eq', 'totara_sync_source_org_database');
-    }
-
     function get_hierarchy() {
         return new organisation();
     }

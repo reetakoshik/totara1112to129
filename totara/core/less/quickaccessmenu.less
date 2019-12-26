@@ -1,0 +1,362 @@
+@totara_core__QuickAccessMenu_color-bg: @totara_style-color_neutral_7;
+@totara_core__QuickAccessMenu_color-hr: mix(@totara_style-color_neutral_2, @totara_core__QuickAccessMenu_color-bg, 50%); //fake opacity 50%
+@totara_core__QuickAccessMenu_color-border: @totaranav_prim-color_font;
+
+@totara_core__QuickAccessMenu_search_color-text: @totara_style-color_neutral_1;
+@totara_core__QuickAccessMenu_search_color-bg: @totara_style-color_neutral_8;
+@totara_core__QuickAccessMenu_search_color-border: @totara_style-color_neutral_5;
+@totara_core__QuickAccessMenu_search_color-btn: @totara_style-color_neutral_6;
+@totara_core__QuickAccessMenu_search_font-size: @totara_style-size_12;
+
+@totara_core__QuickAccessMenu_padding-outer: @totara_style-spacing_medium;
+
+@totara_core__QuickAccessMenu_section_title-size: @font-size-h5;
+@totara_core__QuickAccessMenu_spacing: @totara_style-spacing_small;
+@totara_core__QuickAccessMenu_section_title-max-width: 25ch;
+@totara_core__QuickAccessMenu_section_item-indent: @totara_style-spacing_medium;
+@totara_core__QuickAccessMenu_empty_icon-size: @totara_style-size_32;
+@totara_core__QuickAccessMenu_item-color: @totara_style-color_neutral_1;
+
+@totara_core__QuickAccessMenu_empty_link-padding: 0.1em 0.3em;
+@totara_core__QuickAccessMenu_empty_link-border-radius: 0.7em;
+@totara_core__QuickAccessMenu_empty_link-color-bg: @totara_style-color_neutral_6;
+@totara_core__QuickAccessMenu_empty_link-color: @totara_style-color_neutral_1;
+@totara_core__QuickAccessMenu_empty_link-font-size: @totara_style-font_body_small_size;
+@totara_core__QuickAccess__transition-time: 200ms;
+
+@totara_core__QuickAccessMenu__shadow: @totara_style-shadow_1;
+
+@quickaccess_desktop_breakpoint: @totara_style-screen_sm_min;
+@quickaccess_mobile_breakpoint: (@quickaccess_desktop_breakpoint - 1px);
+
+.totara_core__QuickAccess {
+
+  &_hr {
+    @media (max-width: @quickaccess_mobile_breakpoint) {
+      display: none;
+    }
+
+    display: block;
+    position: relative;
+    top: 2em;
+    left: -@totara_core__QuickAccessMenu_padding-outer;
+    clear: both;
+
+    margin: auto 0;
+
+    width: calc(100% ~'+' 2 * @totara_core__QuickAccessMenu_padding-outer);
+    border-top: 1px solid @totara_core__QuickAccessMenu_color-hr;
+  }
+
+  &_chevron {
+    font-size: .7em;
+    position: relative;
+    top: -1px;
+  }
+
+  //Using double & to beat specificity from main navigation
+  & &_menu {
+
+    max-width: 100%;
+    min-width: 300px;
+    opacity: 1;
+    z-index: 1;
+
+    //Desktop sizings
+    @media (min-width: @quickaccess_desktop_breakpoint) {
+      position: absolute;
+      max-width: 95vw;
+
+      //Open/Close animation properties
+      box-shadow: @totara_core__QuickAccessMenu__shadow;
+      border-top: 1px solid @totara_core__QuickAccessMenu_color-border;
+
+      transform-origin: top;
+
+      [dir=rtl] & {
+        transform: scaleY(1) translateX(50%);
+      }
+
+      [dir=ltr] & {
+        transform: scaleY(1) translateX(-50%);
+      }
+
+      &--large {
+        right: 0;
+
+        [dir=rtl] &, [dir=ltr] & {
+          transform: scaleY(1);
+        }
+      }
+    }
+
+    //Mobile sizings
+    @media (max-width: @quickaccess_mobile_breakpoint) {
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100%;
+      width: 85%;
+
+      display: flex;
+      flex-direction: column;
+
+      transform: translateX(0);
+    }
+
+    background-color: @totara_core__QuickAccessMenu_color-bg;
+    padding: @totara_core__QuickAccessMenu_padding-outer @totara_core__QuickAccessMenu_padding-outer 0 @totara_core__QuickAccessMenu_padding-outer;
+
+    //Fade in timings
+    transition: transform @totara_core__QuickAccess__transition-time ease, visibility @totara_core__QuickAccess__transition-time linear;
+
+    .collapsed& {
+      //Fade out timings
+      transition: transform @totara_core__QuickAccess__transition-time ease @totara_core__QuickAccess__transition-time, visibility @totara_core__QuickAccess__transition-time linear @totara_core__QuickAccess__transition-time;
+      visibility: hidden;
+
+      @media (min-width: @quickaccess_desktop_breakpoint) {
+        [dir=rtl] & {
+          transform: scaleY(0) translateX(50%);
+        }
+  
+        [dir=ltr] & {
+          transform: scaleY(0) translateX(-50%);
+        }
+
+        &--large {
+          [dir=rtl] &, [dir=ltr] & {
+            transform: scaleY(0);
+          }
+        }
+      }
+
+      @media (max-width: @quickaccess_mobile_breakpoint) {
+        [dir=ltr] & {
+          transform: translateX(100%);
+        }
+
+        [dir=rtl] & {
+          transform: translateX(-100%);
+        }
+      }
+    }
+
+    //Content fade animation
+    > * {
+      opacity: 1;
+      transition: opacity @totara_core__QuickAccess__transition-time ease @totara_core__QuickAccess__transition-time;
+
+      .collapsed& {
+        opacity: 0;
+        transition: opacity @totara_core__QuickAccess__transition-time ease;
+      }
+    }
+
+    &_search {
+      max-width: 100%;
+
+      @media (max-width: @quickaccess_mobile_breakpoint) {
+        flex: 0 0 auto;
+      }
+
+      @media (min-width: @quickaccess_desktop_breakpoint) {
+        > .input-group {
+          float: right;
+          width: 25ch;
+
+          .ie11 & {
+            // TL-20522: IE11 calculates ch units differently to other browsers (it doesn't account for the space between letters)
+            // so we have to use a higher number for the same effect
+            width: 1.33 * 25ch;
+          }
+        }
+      }
+
+      &-input {
+        color: @totara_core__QuickAccessMenu_search_color-text;
+        background-color: @totara_core__QuickAccessMenu_search_color-bg;
+        border: 1px solid @totara_core__QuickAccessMenu_search_color-border;
+      }
+
+      &-button {
+        .button-variant(@totara_core__QuickAccessMenu_search_color-text, @totara_core__QuickAccessMenu_search_color-btn, @totara_core__QuickAccessMenu_search_color-border);
+        border-radius: 0;
+      }
+    }
+
+    &-header {
+
+      margin-bottom: @totara_core__QuickAccessMenu_spacing;
+      line-height: 2.5em;
+
+      @media (max-width: @quickaccess_mobile_breakpoint) {
+        //Horizontal rule
+        &:after {
+          content: '';
+          display: block;
+          position: relative;
+          left: -@totara_core__QuickAccessMenu_padding-outer;
+
+          width: calc(100%~'+'2 * @totara_core__QuickAccessMenu_padding-outer);
+          border-top: 1px solid @totara_core__QuickAccessMenu_color-hr;
+        }
+      }
+
+      &_title {
+        @media (min-width: @quickaccess_desktop_breakpoint) {
+          .sr-only
+        }
+
+        font-size: @totara_style-font_heading_label_small_size;
+        margin: 0;
+        display: inline-block;
+      }
+
+      &_control {
+        @media (min-width: @quickaccess_desktop_breakpoint) {
+          display: none;
+        }
+
+        float: right;
+        font-size: 1.5rem;
+        color: inherit;
+      }
+    }
+  }
+
+  &_flex-container {
+    width: 100%;
+    display: flex;
+
+    overflow: auto;
+
+    @media (max-width: @quickaccess_mobile_breakpoint) {
+      display: block;
+      flex: 1 1 auto;
+    }
+
+    &-empty {
+      padding-top: 1em;
+
+      @media (max-width: @quickaccess_mobile_breakpoint) {
+        display: flex;
+      }
+    }
+  }
+
+  & &_group {
+    flex: 1 1 auto;
+
+    &-title {
+      font-size: @totara_core__QuickAccessMenu_section_title-size;
+      margin: @totara_core__QuickAccessMenu_spacing 0;
+      min-height: 1em; //Set this to the font-size to make sure that empty titles still have height
+
+      max-width: @totara_core__QuickAccessMenu_section_title-max-width;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: normal;
+
+      .ie11 & {
+        // TL-20522: IE11 calculates ch units differently to other browsers (it doesn't account for the space between letters)
+        // so we have to use a higher number for the same effect
+        max-width: 1.33 * @totara_core__QuickAccessMenu_section_title-max-width;
+      }
+    }
+
+    &-list {
+      margin: 0;
+
+      li {
+        margin: @totara_core__QuickAccessMenu_spacing 0;
+
+        @media (min-width: @quickaccess_desktop_breakpoint) {
+          width: 20ch;
+
+          .ie11 & {
+            // TL-20522: IE11 calculates ch units differently to other browsers (it doesn't account for the space between letters)
+            // so we have to use a higher number for the same effect
+            width: 1.33 * 20ch;
+          }
+        }
+
+        @media (max-width: @quickaccess_mobile_breakpoint) {
+          padding-left: @totara_core__QuickAccessMenu_section_item-indent;
+        }
+
+        a {
+          color: @totara_core__QuickAccessMenu_item-color;
+        }
+      }
+    }
+  }
+
+  & &_footer {
+    @media (max-width: @quickaccess_mobile_breakpoint) {
+      flex: 0 0 auto;
+    }
+
+    margin-top: @totara_core__QuickAccessMenu_spacing;
+    line-height: 2.5em;
+
+    //Horizontal rule
+    &:before {
+      content: '';
+      display: block;
+      position: relative;
+      left: -@totara_core__QuickAccessMenu_padding-outer;
+
+      width: calc(100% ~'+' 2 * @totara_core__QuickAccessMenu_padding-outer);
+      border-top: 1px solid @totara_core__QuickAccessMenu_color-hr;
+    }
+
+    &:after {
+      content: '';
+      display: block;
+      clear: both;
+    }
+
+    > a {
+      color: inherit;
+      font-size: @totara_core__QuickAccessMenu_search_font-size;
+      float: right;
+    }
+  }
+
+  &_empty {
+    &-icon {
+      flex: 0 0 20%;
+      font-size: @totara_core__QuickAccessMenu_empty_icon-size;
+    }
+
+    &-text {
+      font-weight: 100;
+
+      a {
+        display: inline-block;
+        font-size: @totara_core__QuickAccessMenu_empty_link-font-size;
+
+        background-color: @totara_core__QuickAccessMenu_empty_link-color-bg;
+        border-radius: @totara_core__QuickAccessMenu_empty_link-border-radius;
+        padding: @totara_core__QuickAccessMenu_empty_link-padding;
+        color: @totara_core__QuickAccessMenu_empty_link-color;
+      }
+    }
+  }
+
+  //Remove the chevron added by totaraNav--prim styling
+  .popover-region-toggle {
+    &:before,
+    &:after {
+      content: none;
+    }
+  }
+}
+
+#quickaccess-popover-content h3 {
+  //Override for global h3 styling on course/management.php
+  //Remove this when possible
+  padding: 0;
+}

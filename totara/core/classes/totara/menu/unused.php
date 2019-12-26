@@ -1,48 +1,41 @@
 <?php
 /*
-* This file is part of Totara LMS
-*
-* Copyright (C) 2010 onwards Totara Learning Solutions LTD
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*
-* Totara navigation edit page.
-*
-* @package    totara
-* @subpackage navigation
-* @author     Oleg Demeshev <oleg.demeshev@totaralearning.com>
-*/
+ * This file is part of Totara LMS
+ *
+ * Copyright (C) 2010 onwards Totara Learning Solutions LTD
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @package    totara_core
+ * @subpackage navigation
+ * @author     Oleg Demeshev <oleg.demeshev@totaralearning.com>
+ */
 namespace totara_core\totara\menu;
 
-use \totara_core\totara\menu\menu as menu;
-
-class unused extends \totara_core\totara\menu\item {
+class unused extends \totara_core\totara\menu\container {
 
     protected function get_default_title() {
         return get_string('unused', 'totara_core');
     }
 
-    protected function get_default_url() {
-        return ''; //'/index.php';
+    public function is_disabled() {
+        return true;
     }
 
     public function get_default_sortorder() {
-        return 80000;
+        // Always displayed at the end in admin UI, never displayed in Main menu,
+        // sortorder does not matter here, so we use low number so that it does not interfere with other items.
+        return 1;
     }
-
-    public function get_default_visibility() {
-        return menu::HIDE_ALWAYS;
-    }
-
 }

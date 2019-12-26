@@ -17,16 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Totara navigation edit page.
- *
- * @package    totara
+ * @package    totara_plan
  * @subpackage navigation
  * @author     Oleg Demeshev <oleg.demeshev@totaralms.com>
  */
 
 namespace totara_plan\totara\menu;
-
-use \totara_core\totara\menu\menu as menu;
 
 class recordoflearning extends \totara_core\totara\menu\item {
 
@@ -44,16 +40,9 @@ class recordoflearning extends \totara_core\totara\menu\item {
 
     protected function check_visibility() {
         if (!isloggedin() or isguestuser()) {
-            return menu::HIDE_ALWAYS;
+            return false;
         }
-        if (!totara_feature_visible('recordoflearning')) {
-            return menu::HIDE_ALWAYS;
-        }
-        return menu::SHOW_ALWAYS;
-    }
-
-    public function get_default_visibility() {
-        return menu::SHOW_WHEN_REQUIRED;
+        return true;
     }
 
     /**

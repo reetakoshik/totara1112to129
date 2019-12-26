@@ -63,6 +63,9 @@ $help =
 It is strongly recommended to stop the web server before the conversion.
 This script should be executed before upgrade.
 
+Full text search columns are not being updated correctly by this script,
+use admin/cli/fts_rebuild_indexes.php afterwards.
+
 Options:
 --collation=COLLATION Convert MySQL tables to different collation
 -l, --list            Show table and column information
@@ -205,6 +208,9 @@ if (!empty($options['collation'])) {
     $prefix = str_replace('_', '\\_', $prefix);
     $sql = "SHOW TABLE STATUS WHERE Name LIKE BINARY '$prefix%'";
     $rs = $DB->get_recordset_sql($sql);
+    $ftsfields = mysql_get_fts_fields();
+    $ftscount = 0;
+    $ftscollations = array();
     $counts = array();
     foreach ($rs as $table) {
         if (isset($counts[$table->collation])) {
@@ -216,14 +222,22 @@ if (!empty($options['collation'])) {
         echo $table->collation.  "\n";
         $collations = mysql_get_column_collations($table->name);
         foreach ($collations as $columname=>$collation) {
-            if (isset($counts[$collation])) {
+            if (isset($ftsfields[$table->name . '.' . $columname])) {
+                $ftscount++;
+                $ftscollations[$collation] = $collation;
+            } else if (isset($counts[$collation])) {
                 $counts[$collation]++;
             } else {
                 $counts[$collation] = 1;
             }
             echo '    ';
             echo str_pad($columname, 46);
-            echo $collation.  "\n";
+            echo $collation;
+            // Totara: indicate full text search columns.
+            if (isset($ftsfields[$table->name . '.' . $columname])) {
+                echo ' (full text search)';
+            }
+            echo "\n";
         }
     }
     $rs->close();
@@ -231,7 +245,11 @@ if (!empty($options['collation'])) {
     echo "\n";
     echo "Table collations summary for $CFG->wwwroot:\n";
     foreach ($counts as $collation => $count) {
-        echo "$collation: $count\n";
+        echo "  $collation: $count\n";
+    }
+    if ($ftscount) {
+        echo "Full text search indexes ({$ftscount}):\n";
+        echo '  ' . implode(', ', $ftscollations) . "\n";
     }
     exit(0); // success
 
@@ -253,6 +271,7 @@ if (!empty($options['collation'])) {
 // ========== Some functions ==============
 
 function mysql_get_collations() {
+    /** @var mysqli_native_moodle_database $DB */
     global $DB;
 
     $collations = array();
@@ -268,6 +287,11 @@ function mysql_get_collations() {
     $collation = $DB->get_dbcollation();
     if (isset($collations[$collation])) {
         $collations[$collation] .= ' (default)';
+    }
+
+    $ftscollation = $DB->get_ftslanguage();
+    if (isset($collations[$ftscollation])) {
+        $collations[$ftscollation] .= ' (full text search)';
     }
 
     return $collations;
@@ -286,4 +310,28 @@ function mysql_get_column_collations($tablename) {
     }
     $rs->close();
     return $collations;
+}
+
+function mysql_get_fts_fields() {
+    global $DB;
+
+    $ftsfields = array();
+
+    $schema = $DB->get_manager()->get_install_xml_schema();
+    $prefix = $DB->get_prefix();
+
+    /** @var xmldb_table[] $tables */
+    $tables = $schema->getTables();
+    foreach ($tables as $table) {
+        /** @var xmldb_index[] $indexes */
+        $indexes = $table->getIndexes();
+        foreach ($indexes as $index) {
+            if ($index->getHints() === array('full_text_search')) {
+                $field = $table->getName() . '.' . implode($index->getFields());
+                $ftsfields[$prefix . $field] = $field;
+            }
+        }
+    }
+
+    return $ftsfields;
 }

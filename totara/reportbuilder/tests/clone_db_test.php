@@ -32,6 +32,7 @@ class totara_reportbuilder_clone_db_testcase extends advanced_testcase {
     public function test_useclonedb_off() {
         global $CFG, $DB;
         $this->resetAfterTest();
+        $this->setAdminUser();
 
         $this->getDataGenerator()->create_user();
 
@@ -41,29 +42,30 @@ class totara_reportbuilder_clone_db_testcase extends advanced_testcase {
         $rid = $this->create_report('user', 'Test user report 1', true);
         $DB->set_field('report_builder', 'defaultsortcolumn', 'user_id', array('id' => $rid));
         $DB->set_field('report_builder', 'defaultsortorder', SORT_ASC, array('id' => $rid));
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
         $this->add_column($report, 'user', 'id', null, null, null, 0);
         $this->add_column($report, 'user', 'username', null, '', '', 0);
 
         $CFG->clone_dbname = $CFG->dbname;
         $reportdb = totara_get_clone_db(true);
 
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $report = reportbuilder::create($rid, $config);
         $reads = $reportdb->perf_get_reads();
         $writes = $reportdb->perf_get_writes();
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $report = reportbuilder::create($rid, $config);
         $report->get_filtered_count();
         $this->assertSame($reads, $reportdb->perf_get_reads());
         $this->assertSame($writes, $reportdb->perf_get_writes());
 
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $report = reportbuilder::create($rid, $config);
         $reads = $reportdb->perf_get_reads();
         $writes = $reportdb->perf_get_writes();
         $report->get_full_count();
         $this->assertSame($reads, $reportdb->perf_get_reads());
         $this->assertSame($writes, $reportdb->perf_get_writes());
 
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $report = reportbuilder::create($rid, $config);
         $reads = $reportdb->perf_get_reads();
         $writes = $reportdb->perf_get_writes();
         $report->display_table(true);
@@ -77,12 +79,12 @@ class totara_reportbuilder_clone_db_testcase extends advanced_testcase {
         $source = null;
         $this->assertSame($reads, $reportdb->perf_get_reads());
         $this->assertSame($writes, $reportdb->perf_get_writes());
-
     }
 
     public function test_useclonedb_on() {
         global $CFG, $DB;
         $this->resetAfterTest();
+        $this->setAdminUser();
 
         $this->getDataGenerator()->create_user();
 
@@ -93,7 +95,8 @@ class totara_reportbuilder_clone_db_testcase extends advanced_testcase {
         $DB->set_field('report_builder', 'defaultsortcolumn', 'user_id', array('id' => $rid));
         $DB->set_field('report_builder', 'defaultsortorder', SORT_ASC, array('id' => $rid));
         $DB->set_field('report_builder', 'useclonedb', '1', array('id' => $rid));
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
         $this->add_column($report, 'user', 'id', null, null, null, 0);
         $this->add_column($report, 'user', 'username', null, '', '', 0);
 
@@ -102,26 +105,26 @@ class totara_reportbuilder_clone_db_testcase extends advanced_testcase {
         $reads = $reportdb->perf_get_reads();
         $writes = $reportdb->perf_get_writes();
 
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $report = reportbuilder::create($rid, $config);
         $report->get_filtered_count();
         $this->assertSame($reads + 1, $reportdb->perf_get_reads());
         $this->assertSame($writes, $reportdb->perf_get_writes());
 
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $report = reportbuilder::create($rid, $config);
         $reads = $reportdb->perf_get_reads();
         $writes = $reportdb->perf_get_writes();
         $report->get_full_count();
         $this->assertSame($reads + 1, $reportdb->perf_get_reads());
         $this->assertSame($writes, $reportdb->perf_get_writes());
 
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $report = reportbuilder::create($rid, $config);
         $reads = $reportdb->perf_get_reads();
         $writes = $reportdb->perf_get_writes();
         $report->display_table(true);
         $this->assertGreaterThanOrEqual($reads + 1, $reportdb->perf_get_reads());
         $this->assertSame($writes, $reportdb->perf_get_writes());
 
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $report = reportbuilder::create($rid, $config);
         $reads = $reportdb->perf_get_reads();
         $writes = $reportdb->perf_get_writes();
         $source = new \totara_reportbuilder\tabexport_source($report);
@@ -136,6 +139,7 @@ class totara_reportbuilder_clone_db_testcase extends advanced_testcase {
     public function test_useclonedb_on_cached() {
         global $CFG, $DB;
         $this->resetAfterTest();
+        $this->setAdminUser();
 
         $this->getDataGenerator()->create_user();
 
@@ -146,7 +150,8 @@ class totara_reportbuilder_clone_db_testcase extends advanced_testcase {
         $DB->set_field('report_builder', 'defaultsortcolumn', 'user_id', array('id' => $rid));
         $DB->set_field('report_builder', 'defaultsortorder', SORT_ASC, array('id' => $rid));
         $DB->set_field('report_builder', 'useclonedb', '1', array('id' => $rid));
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
         $this->add_column($report, 'user', 'id', null, null, null, 0);
         $this->add_column($report, 'user', 'username', null, '', '', 0);
         $this->enable_caching($rid);
@@ -154,28 +159,29 @@ class totara_reportbuilder_clone_db_testcase extends advanced_testcase {
         $CFG->clone_dbname = $CFG->dbname;
         $reportdb = totara_get_clone_db(true);
 
-        $report = new reportbuilder($rid, null, false, null, null, false);
+        $config = (new rb_config())->set_nocache(false);
+        $report = reportbuilder::create($rid, $config);
         $reads = $reportdb->perf_get_reads();
         $writes = $reportdb->perf_get_writes();
         $report->get_filtered_count();
         $this->assertSame($reads, $reportdb->perf_get_reads());
         $this->assertSame($writes, $reportdb->perf_get_writes());
 
-        $report = new reportbuilder($rid, null, false, null, null, false);
+        $report = reportbuilder::create($rid, $config);
         $reads = $reportdb->perf_get_reads();
         $writes = $reportdb->perf_get_writes();
         $report->get_full_count();
         $this->assertSame($reads, $reportdb->perf_get_reads());
         $this->assertSame($writes, $reportdb->perf_get_writes());
 
-        $report = new reportbuilder($rid, null, false, null, null, false);
+        $report = reportbuilder::create($rid, $config);
         $reads = $reportdb->perf_get_reads();
         $writes = $reportdb->perf_get_writes();
         $report->display_table(true);
         $this->assertSame($reads, $reportdb->perf_get_reads());
         $this->assertSame($writes, $reportdb->perf_get_writes());
 
-        $report = new reportbuilder($rid, null, false, null, null, false);
+        $report = reportbuilder::create($rid, $config);
         $reads = $reportdb->perf_get_reads();
         $writes = $reportdb->perf_get_writes();
         $source = new \totara_reportbuilder\tabexport_source($report);

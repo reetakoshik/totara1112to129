@@ -429,7 +429,7 @@ class dp_competency_component extends dp_base_component {
                 if ($USER->id == $this->plan->userid) {
                     echo html_writer::tag('p', get_string('deletelinkedcoursesinstructionslearner', 'totara_plan'));
                 } else {
-                    if ($planowner = $DB->get_record('user', array('id' => $this->plan->userid), 'firstname, lastname')) {
+                    if ($planowner = $DB->get_record('user', array('id' => $this->plan->userid), get_all_user_name_fields(true))) {
                         $planowner_name = fullname($planowner);
                     }
 
@@ -624,9 +624,10 @@ class dp_competency_component extends dp_base_component {
         $params[] = $priorityscaleid;
         list($insql, $inparams) = $DB->get_in_or_equal($list);
         $where = "WHERE ca.id $insql
-                    AND ca.approved = ? ";
+                    AND ca.approved >= ? ";
         $params = array_merge($params, $inparams);
-        $params[] = DP_APPROVAL_APPROVED;
+        // We are looking for competencies that were added to an approved plan by a user with "Request" permission.
+        $params[] = DP_APPROVAL_UNAPPROVED;
         $sort = "ORDER BY c.fullname";
 
         $tableheaders = array(

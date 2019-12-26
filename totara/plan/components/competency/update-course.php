@@ -26,6 +26,7 @@ require_once($CFG->dirroot.'/totara/plan/lib.php');
 require_once($CFG->dirroot.'/totara/hierarchy/prefix/competency/lib.php');
 
 require_login();
+require_sesskey();
 
 // Check if Learning plans are enabled.
 check_learningplan_enabled();

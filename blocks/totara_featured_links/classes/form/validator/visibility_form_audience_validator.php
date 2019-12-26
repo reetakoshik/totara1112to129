@@ -25,7 +25,7 @@ namespace block_totara_featured_links\form\validator;
 
 defined('MOODLE_INTERNAL') || die();
 
-use \totara_form\element_validator;
+use totara_form\element_validator;
 
 /**
  * Class visibility_form_audience_validator

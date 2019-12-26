@@ -127,7 +127,6 @@ if ($hassiteconfig) { // speedup for non-admins, add all caps used on this page
     $temp->add(new admin_setting_configcheckbox('allowframembedding', new lang_string('allowframembedding', 'admin'), new lang_string('allowframembedding_help', 'admin'), 0));
     $options = array('' => new lang_string('default'), 'none' => 'none', 'master-only' => 'master-only');
     $temp->add(new admin_setting_configselect('permittedcrossdomainpolicies', new lang_string('permittedcrossdomainpolicies', 'totara_core'), new lang_string('permittedcrossdomainpolicies_desc', 'totara_core'), '', $options));
-    $temp->add(new admin_setting_configcheckbox('loginpasswordautocomplete', new lang_string('loginpasswordautocomplete', 'admin'), new lang_string('loginpasswordautocomplete_help', 'admin'), 0));
 
     // Settings elements used by the \core\files\curl_security_helper class.
     $temp->add(new admin_setting_configmixedhostiplist('curlsecurityblockedhosts',

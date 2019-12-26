@@ -8,14 +8,14 @@ Feature: Navigation button works in low resolutions
     Given I am on a totara site
     And I change viewport size to "small"
     And I log in as "admin"
-    Then "#totaramenu" "css_element" should not be visible
+    Then ".totaraNav_prim--list_showMobile" "css_element" should not be visible
 
     # Expand
     When I click on "Toggle navigation" "link_or_button"
     And I wait "1" seconds
-    Then "#totaramenu" "css_element" should be visible
+    Then ".totaraNav_prim--list_showMobile" "css_element" should be visible
 
     # Collapse
-    When I click on "Toggle navigation" "link_or_button"
+    When I click on "Close" "link_or_button"
     And I wait "1" seconds
-    Then "#totaramenu" "css_element" should not be visible
+    Then ".totaraNav_prim--list_showMobile" "css_element" should not be visible

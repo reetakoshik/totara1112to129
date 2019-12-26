@@ -24,7 +24,7 @@ Feature: Verify competency course count within learning plan
 
     # Login as admin, create a competency and assign courses to it
     Given I log in as "admin"
-    And I navigate to "Manage competencies" node in "Site administration > Hierarchies > Competencies"
+    And I navigate to "Manage competencies" node in "Site administration > Competencies"
     And I follow "Competency Framework 1"
     And I follow "Competency 1"
     And I click on "Assign course completions" "button"
@@ -69,8 +69,7 @@ Feature: Verify competency course count within learning plan
 
     # admin hiding a course
     Then I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 2"
+    And I am on "Course 2" course homepage
     And I follow "Edit settings"
     And I set the field "visible" to "Hide"
     And I click on "Save and display" "button"

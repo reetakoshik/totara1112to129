@@ -24,9 +24,352 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Detect common problems in all db/access.php files
+ * Tests covering totara_core\access class and common access related problems in Totara.
  */
 class totara_core_access_testcase extends advanced_testcase {
+
+    /**
+     * Test that context map is being filled properly.
+     */
+    public function test_context_map() {
+        global $DB, $CFG;
+        require_once("{$CFG->dirroot}/user/lib.php");
+        require_once("{$CFG->dirroot}/course/lib.php");
+
+        $this->resetAfterTest(true);
+        $generator = $this->getDataGenerator();
+
+        // Make sure the man is installed properly in tests.
+        $prevmap = $DB->get_records('context_map', array(), 'id ASC');
+        totara_core\access::build_context_map();
+        $newmap = $DB->get_records('context_map', array(), 'id ASC');;
+        $this->assertEquals($prevmap, $newmap);
+
+        // Make sure full purge of map is rebuild with the same number of items.
+        $DB->delete_records('context_map', array());
+        totara_core\access::build_context_map();
+        $newmap = $DB->get_records('context_map', array(), 'id ASC');;
+        $this->assertCount(count($prevmap), $newmap);
+
+        // Make sure context creation adds entries.
+        $prevmap = $DB->get_records('context_map', array(), 'id ASC');
+        $user = $this->getDataGenerator()->create_user();
+        $usercontext = context_user::instance($user->id);
+        $syscontext = context_system::instance();
+        $newmap = $DB->get_records('context_map', array(), 'id ASC');;
+        $this->assertCount(count($prevmap) + 2, $newmap); // System and user entry.
+        $userentry = array_pop($newmap);
+        $systementry = array_pop($newmap);
+        $this->assertEquals($usercontext->id, $userentry->parentid);
+        $this->assertEquals($usercontext->id, $userentry->childid);
+        $this->assertEquals($syscontext->id, $systementry->parentid);
+        $this->assertEquals($usercontext->id, $systementry->childid);
+        delete_user($user);
+        $newmap = $DB->get_records('context_map', array(), 'id ASC');;
+        $this->assertEquals($prevmap, $newmap);
+
+        // And finally the context moving.
+        $category = $this->getDataGenerator()->create_category();
+        $catcontext = context_coursecat::instance($category->id);
+        $course = $this->getDataGenerator()->create_course(array('category'=>$category->id));
+        $coursecontext = context_course::instance($course->id);
+        $page = $generator->create_module('page', array('course'=>$course->id));
+        $modcontext = context_module::instance($page->cmid);
+        $newcategory = $this->getDataGenerator()->create_category();
+        $newcatcontext = context_coursecat::instance($newcategory->id);
+
+        $prevmap = $DB->get_records('context_map', array(), 'id ASC');
+        totara_core\access::build_context_map();
+        $newmap = $DB->get_records('context_map', array(), 'id ASC');;
+        $this->assertEquals($prevmap, $newmap);
+
+        $this->setAdminUser();
+        $course->category = $newcategory->id;
+        update_course($course);
+
+        $movedcourse = $DB->get_record('course', array('id' => $course->id));
+        $movedcoursecontext = context_course::instance($movedcourse->id);
+        $this->assertEquals($newcategory->id, $movedcourse->category);
+        $this->assertSame("/{$syscontext->id}/{$newcatcontext->id}/{$movedcoursecontext->id}", $movedcoursecontext->path);
+
+        $this->assertCount(4, $DB->get_records('context_map', array('childid' => $modcontext->id)));
+        $this->assertTrue($DB->record_exists('context_map', array('childid' => $modcontext->id, 'parentid' => $syscontext->id)));
+        $this->assertTrue($DB->record_exists('context_map', array('childid' => $modcontext->id, 'parentid' => $newcatcontext->id)));
+        $this->assertTrue($DB->record_exists('context_map', array('childid' => $modcontext->id, 'parentid' => $movedcoursecontext->id)));
+        $this->assertTrue($DB->record_exists('context_map', array('childid' => $modcontext->id, 'parentid' => $modcontext->id)));
+
+        $this->assertCount(3, $DB->get_records('context_map', array('childid' => $movedcoursecontext->id)));
+        $this->assertTrue($DB->record_exists('context_map', array('childid' => $movedcoursecontext->id, 'parentid' => $syscontext->id)));
+        $this->assertTrue($DB->record_exists('context_map', array('childid' => $movedcoursecontext->id, 'parentid' => $newcatcontext->id)));
+        $this->assertTrue($DB->record_exists('context_map', array('childid' => $movedcoursecontext->id, 'parentid' => $movedcoursecontext->id)));
+
+        $prevmap = $DB->get_records('context_map', array(), 'id ASC');
+        totara_core\access::build_context_map();
+        $newmap = $DB->get_records('context_map', array(), 'id ASC');;
+        $this->assertEquals($prevmap, $newmap);
+
+        // Test that unexpected context tree changes are detected as hacks.
+        $this->assertDebuggingNotCalled();
+        $prehack = new stdClass();
+        $prehack->parentid = $catcontext->id;
+        $prehack->childid = $modcontext->id;
+        $DB->insert_record('context_map', $prehack);
+        totara_core\access::build_context_map();
+        $this->assertDebuggingCalled('Incorrect entries detected in context_map table, this is likely a result of unsupported changes in context table.');
+        $newmap = $DB->get_records('context_map', array(), 'id ASC');;
+        $this->assertEquals($prevmap, $newmap);
+
+        // Make sure the building can be run inside db transaction.
+        $this->assertFalse($DB->is_transaction_started());
+        $trans = $DB->start_delegated_transaction();
+        totara_core\access::build_context_map();
+        $this->assertTrue($DB->is_transaction_started());
+        $newmap = $DB->get_records('context_map', array(), 'id ASC');;
+        $this->assertEquals($prevmap, $newmap);
+        $trans->allow_commit();
+        $newmap = $DB->get_records('context_map', array(), 'id ASC');;
+        $this->assertEquals($prevmap, $newmap);
+    }
+
+    public function test_get_has_capability_sql() {
+        global $DB;
+        $this->resetAfterTest(true);
+        $generator = $this->getDataGenerator();
+
+        // Create a context hierarchy.
+        $category = $this->getDataGenerator()->create_category();
+        $catcontext = context_coursecat::instance($category->id);
+        $course = $this->getDataGenerator()->create_course(array('category'=>$category->id));
+        $coursecontext = context_course::instance($course->id);
+        $page = $generator->create_module('page', array('course'=>$course->id));
+        $modcontext = context_module::instance($page->cmid);
+
+        // Create a user context.
+        $user = $this->getDataGenerator()->create_user();
+        $usercontext = context_user::instance($user->id);
+
+        // An unrelated user.
+        $user2 = $this->getDataGenerator()->create_user();
+
+        // Create the system context.
+        $systemcontext = context_system::instance();
+
+        // Test with 'moodle/site:config' as it isn't set in any role by default.
+        $capability = 'moodle/site:config';
+
+        // Define some roles to test with.
+        $emptyrole = create_role('Empty role', 'emptyrole', 'This role has no permissions set');
+        $prohibitrole = create_role('Prohibit Role', 'prohibitrole', 'This role has prohibit set on moodle/site:config capability');
+        assign_capability($capability, CAP_PROHIBIT, $prohibitrole, $systemcontext);
+        $allowrole = create_role('Allow Role', 'allowrole', 'This role has allow set on moodle/site:config capability');
+        assign_capability($capability, CAP_ALLOW, $allowrole, $systemcontext);
+        $preventrole = create_role('Prevent Role', 'preventrole', 'This role has prevent set on moodle/site:config capability');
+        assign_capability($capability, CAP_PREVENT, $preventrole, $systemcontext);
+
+        $allowpreventrole = create_role('Allow-Prevent Role', 'allowpreventrole', 'This role has allow set on moodle/site:config capability in the system context, but then the same capability is overridden with prevent in the course context');
+        assign_capability($capability, CAP_ALLOW, $allowpreventrole, $systemcontext);
+        assign_capability($capability, CAP_PREVENT, $allowpreventrole, $coursecontext);
+
+        $preventallowrole = create_role('Prevent-Allow Role', 'preventallowrole', 'This role has prevent set on moodle/site:config capability in the system context, but then the same capability is overridden with allow in the course context');
+        assign_capability($capability, CAP_PREVENT, $preventallowrole, $systemcontext);
+        assign_capability($capability, CAP_ALLOW, $preventallowrole, $coursecontext);
+
+        $allowinheritrole = create_role('Allow-Inherit Role', 'allowinheritrole', 'This role has allow set on moodle/site:config capability in the system context, then the same capability is overridden with inherit in the course context. This should make no difference!');
+        assign_capability($capability, CAP_ALLOW, $allowinheritrole, $systemcontext);
+        assign_capability($capability, CAP_INHERIT, $allowinheritrole, $coursecontext);
+
+        $inheritallowrole = create_role('Inherit-Allow Role', 'inheritallowrole', 'This role has inherit explicitly set on moodle/site:config capability in the system context, then the same capability is overridden with allow in the course context.');
+        assign_capability($capability, CAP_INHERIT, $inheritallowrole, $systemcontext);
+        assign_capability($capability, CAP_ALLOW, $inheritallowrole, $coursecontext);
+
+        // Test each role separately by assigning it in the system context and
+        // checking in the module context.
+        $roles = array($emptyrole, $prohibitrole, $allowrole, $preventrole, $allowpreventrole,
+            $preventallowrole, $allowinheritrole, $inheritallowrole);
+        $expectedallowmatches = array($allowrole, $preventallowrole, $allowinheritrole, $inheritallowrole);
+        $expectedprohibitmatches = array($prohibitrole);
+        foreach ($roles as $roleid) {
+            // Assign this role in the system context.
+            $this->getDataGenerator()->role_assign(
+                $roleid,
+                $user->id,
+                $systemcontext->id);
+
+            // Test for an allow in the module context.
+            $method = new \ReflectionMethod('totara_core\access', 'get_allow_prevent_check_sql');
+            $method->setAccessible(true);
+            list($allowpreventsql, $allowpreventparams) = $method->invoke(null, $capability, $user->id, 'cx.id');
+            $sql = "SELECT * FROM {context} cx WHERE id = :id AND EXISTS ({$allowpreventsql})";
+            $params = array_merge(array('id' => $modcontext->id), $allowpreventparams);
+            $out = $DB->get_records_sql($sql, $params);
+            if (in_array($roleid, $expectedallowmatches)) {
+                $this->assertNotEmpty($out);
+            } else {
+                $this->assertEmpty($out);
+            }
+
+            // Test for a prohibit in the module context.
+            $method = new \ReflectionMethod('totara_core\access', 'get_prohibit_check_sql');
+            $method->setAccessible(true);
+            list($prohibitsql, $prohibitparams) = $method->invoke(null, $capability, $user->id, 'cx.id');
+            $sql = "SELECT * FROM {context} cx WHERE id = :id AND NOT EXISTS ({$prohibitsql})";
+            $params = array_merge(array('id' => $modcontext->id), $prohibitparams);
+            $out = $DB->get_records_sql($sql, $params);
+            if (in_array($roleid, $expectedprohibitmatches)) {
+                $this->assertEmpty($out, "Role id {$roleid} expected to be prohibited but records found");
+            } else {
+                $this->assertNotEmpty($out, "Role id {$roleid} expected to not be prohibited but no records found");
+            }
+
+            // Unassign the role again.
+            role_unassign($roleid, $user->id, $systemcontext->id);
+        }
+
+        // Now we need to test combinations:
+        $grantedcombinations = array(
+            array($emptyrole, $allowrole), // One allow.
+            array($allowrole, $preventallowrole, $preventrole), // Prevent, but also allow.
+        );
+        $deniedcombinations = array(
+            array($emptyrole), // No allows.
+            array($emptyrole, $preventrole), // Prevent only.
+            array($allowpreventrole), // Overridden prevent only.
+            array($emptyrole, $allowrole, $prohibitrole), // Allow with prohibit.
+            array($prohibitrole), // Prohibit alone.
+            array(), // No roles.
+        );
+
+        foreach ($grantedcombinations as $rolestoassign) {
+            foreach ($rolestoassign as $roleid) {
+                $this->getDataGenerator()->role_assign(
+                    $roleid,
+                    $user->id,
+                    $systemcontext->id);
+            }
+
+            // Test user is granted capability.
+            list($hascapsql, $hascapparams) = totara_core\access::get_has_capability_sql($capability, 'c.id', $user->id);
+            $sql = "SELECT 1 FROM {context} c WHERE c.id = :id AND ({$hascapsql})";
+            $params = array_merge(array('id' => $modcontext->id), $hascapparams);
+            $out = $DB->get_records_sql($sql, $params);
+            $this->assertNotEmpty($out);
+
+            // Unassign roles again.
+            foreach ($rolestoassign as $roleid) {
+                role_unassign($roleid, $user->id, $systemcontext->id);
+            }
+
+        }
+
+        foreach ($deniedcombinations as $rolestoassign) {
+            foreach ($rolestoassign as $roleid) {
+                $this->getDataGenerator()->role_assign(
+                    $roleid,
+                    $user->id,
+                    $systemcontext->id);
+            }
+
+            // Test user is NOT granted capability.
+            list($hascapsql, $hascapparams) = totara_core\access::get_has_capability_sql($capability, 'c.id', $user->id);
+            $sql = "SELECT 1 FROM {context} c WHERE c.id = :id AND ({$hascapsql})";
+            $params = array_merge(array('id' => $modcontext->id), $hascapparams);
+            $out = $DB->get_records_sql($sql, $params);
+            $this->assertEmpty($out);
+
+            // Unassign roles again.
+            foreach ($rolestoassign as $roleid) {
+                role_unassign($roleid, $user->id, $systemcontext->id);
+            }
+
+        }
+
+        // Make sure that outside table aliases do not collide with internals.
+        $this->getDataGenerator()->role_assign($allowrole, $user->id, $coursecontext->id);
+        list($hascapsql, $params) = totara_core\access::get_has_capability_sql('moodle/site:config', 'c.id', $user->id);
+        $sql = "SELECT c.id
+                  FROM {context} c
+                 WHERE {$hascapsql}
+              ORDER BY c.id ASC";
+        $result = $DB->get_records_sql($sql, $params);
+        $this->assertGreaterThanOrEqual(2, $result); // Course, page and some blocks most likely.
+
+        list($hascapsql, $params) = totara_core\access::get_has_capability_sql('moodle/site:config', 'ctx.id', $user->id);
+        $sql = "SELECT ctx.id
+                  FROM {context} ctx
+             LEFT JOIN {context} maincontext ON maincontext.id = -1
+             LEFT JOIN {context_map} lineage ON lineage.id = -1
+             LEFT JOIN {role_capabilities} rc ON rc.id = -1
+                 WHERE {$hascapsql}
+              ORDER BY ctx.id ASC";
+        $newresult = $DB->get_records_sql($sql, $params);
+        $this->assertEquals($result, $newresult);
+    }
+
+    /**
+     * Verify the contextidfield parameter is validated properly.
+     */
+    public function test_validate_contextidfield() {
+        $this->resetAfterTest(true);
+
+        $method = new \ReflectionMethod('totara_core\access', 'validate_contextidfield');
+        $method->setAccessible(true);
+
+        try {
+            $method->invoke(null, '10');
+            $this->fail('Exception expected when integer given');
+        } catch (moodle_exception $ex) {
+            $this->assertInstanceOf('coding_exception', $ex);
+        }
+
+        try {
+            $method->invoke(null, ':param');
+            $this->fail('Exception expected when parameter given');
+        } catch (moodle_exception $ex) {
+            $this->assertInstanceOf('coding_exception', $ex);
+        }
+
+        try {
+            $method->invoke(null, '?');
+            $this->fail('Exception expected when parameter given');
+        } catch (moodle_exception $ex) {
+            $this->assertInstanceOf('coding_exception', $ex);
+        }
+
+        try {
+            $method->invoke(null, '{context}.id');
+            $this->fail('Exception expected when {context} table given');
+        } catch (moodle_exception $ex) {
+            $this->assertInstanceOf('coding_exception', $ex);
+        }
+
+        try {
+            $method->invoke(null, 'hascapabilitycontext.id');
+            $this->fail('Exception expected when hascapabilitycontext table alias given');
+        } catch (moodle_exception $ex) {
+            $this->assertInstanceOf('coding_exception', $ex);
+        }
+
+        try {
+            $method->invoke(null, 'pa ram');
+            $this->fail('Exception expected when non-sql given');
+        } catch (moodle_exception $ex) {
+            $this->assertInstanceOf('coding_exception', $ex);
+        }
+
+        $user = $this->getDataGenerator()->create_user();
+        list($hascapsql, $params) = totara_core\access::get_has_capability_sql('moodle/site:config', '{something}.contextid', $user->id);
+        $this->assertContains('{something}.contextid', $hascapsql);
+
+        list($hascapsql, $params) = totara_core\access::get_has_capability_sql('moodle/site:config', 'some_thing3.xyz_3ed', $user->id);
+        $this->assertContains('some_thing3.xyz_3ed', $hascapsql);
+
+        list($hascapsql, $params) = totara_core\access::get_has_capability_sql('moodle/site:config', 'xyz_3ed', $user->id);
+        $this->assertContains('xyz_3ed', $hascapsql);
+    }
+
+    /**
+     * Detect common problems in all db/access.php files
+     */
     public function test_access_files() {
         global $CFG;
 
@@ -67,7 +410,7 @@ class totara_core_access_testcase extends advanced_testcase {
 
             include($file);
 
-            $this->assertInternalType('array', $capabilities);
+            $this->assertIsArray($capabilities);
             $this->assertNull(${$plugin.'_capabilities'});
 
             foreach ($capabilities as $capname => $data) {

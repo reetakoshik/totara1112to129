@@ -32,7 +32,7 @@ class countdistinct extends base {
     }
 
     public static function get_displayfunc(\rb_column $column) {
-        return 'count';
+        return 'integer';
     }
 
     public static function is_column_option_compatible(\rb_column_option $option) {

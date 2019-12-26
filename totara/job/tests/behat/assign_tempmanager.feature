@@ -19,7 +19,7 @@ Feature: Assign a temporary manager to a user via the job assignment page
       | manager2 | Design Manager      | 1        |
       | manager2 | Brand Manager       | 2        |
     And I log in as "admin"
-    And I navigate to "Define roles" node in "Site administration > Users > Permissions"
+    And I navigate to "Define roles" node in "Site administration > Permissions"
     And I press "Add a new role"
     And I press "Continue"
     And I set the following fields to these values:
@@ -41,7 +41,7 @@ Feature: Assign a temporary manager to a user via the job assignment page
   Scenario: Assign temporary manager - form validation ensures temp manager expiry date is set and in future
     Given I log out
     And I log in as "jobadmin"
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "User Two" "link" in the "User Two" "table_row"
     And I click on "Add job assignment" "link"
     And I set the following fields to these values:
@@ -76,7 +76,7 @@ Feature: Assign a temporary manager to a user via the job assignment page
   Scenario: Assign temporary manager - no existing manager - user has full capabilities - restricttempmanagers not set
     Given I log out
     And I log in as "jobadmin"
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "User Two" "link" in the "User Two" "table_row"
     And I click on "Add job assignment" "link"
     And I set the following fields to these values:
@@ -126,7 +126,7 @@ Feature: Assign a temporary manager to a user via the job assignment page
   Scenario: Assign temporary manager - has existing manager - user has full capabilities - restricttempmanagers not set
     Given I log out
     And I log in as "jobadmin"
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "User Two" "link" in the "User Two" "table_row"
     And I click on "Add job assignment" "link"
     And I set the following fields to these values:
@@ -169,7 +169,7 @@ Feature: Assign a temporary manager to a user via the job assignment page
   Scenario: Assign temporary manager - has existing manager - can delegate own manager only - restricttempmanagers not set
     Given I set the following system permissions of "Authenticated user" role:
       | totara/core:delegateownmanager      | Allow      |
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "User Two" "link" in the "User Two" "table_row"
     And I click on "Add job assignment" "link"
     And I set the following fields to these values:
@@ -220,7 +220,7 @@ Feature: Assign a temporary manager to a user via the job assignment page
   Scenario: Assign temporary manager - no existing manager - user has full capabilities - restricttempmanagers is set
     Given I set the following administration settings values:
       | tempmanagerrestrictselection | Only staff managers |
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "User One" "link" in the "User One" "table_row"
     And I click on "Add job assignment" "link"
     And I set the following fields to these values:
@@ -233,7 +233,7 @@ Feature: Assign a temporary manager to a user via the job assignment page
     And I wait "1" seconds
     Then I should see "Manager One (manager1@example.com) - Development Manager"
     And I press "Add job assignment"
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "User Two" "link" in the "User Two" "table_row"
     And I click on "Add job assignment" "link"
     And I set the following fields to these values:
@@ -248,7 +248,7 @@ Feature: Assign a temporary manager to a user via the job assignment page
     And I press "Add job assignment"
     And I log out
     And I log in as "jobadmin"
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "User Two" "link" in the "User Two" "table_row"
     And I click on "Add job assignment" "link"
     And I set the following fields to these values:
@@ -292,7 +292,7 @@ Feature: Assign a temporary manager to a user via the job assignment page
   Scenario: Assign temporary manager and then remove temporary manager to ensure that expiry checkbox is unselected
     Given I log out
     And I log in as "jobadmin"
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "User Two" "link" in the "User Two" "table_row"
     And I click on "Add job assignment" "link"
     And I set the following fields to these values:

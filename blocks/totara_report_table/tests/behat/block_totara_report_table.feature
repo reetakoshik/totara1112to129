@@ -20,7 +20,8 @@ Feature: Report builder table block
       | learner8    | Learner   | 8        |
       | learner9    | Learner   | 9        |
     And I log in as "admin"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | User report |
       | Source      | User        |
@@ -36,8 +37,9 @@ Feature: Report builder table block
     And I add the "Report table" block
     And I configure the "Report table" block
     And I set the following fields to these values:
-      | Block title | Report wo sid |
-      | Report | User report |
+      | Override default block title | Yes           |
+      | Block title                  | Report wo sid |
+      | Report                       | User report   |
     And I press "Save changes"
     And I press "Stop customising this page"
 
@@ -80,8 +82,9 @@ Feature: Report builder table block
     And I add the "Report table" block
     And I configure the "Report table" block
     And I set the following fields to these values:
-      | Block title | Report sid |
-      | Report | User report |
+      | Override default block title | Yes         |
+      | Block title                  | Report sid  |
+      | Report                       | User report |
     And I press "Save changes"
     And I configure the "Report sid" block
     And I set the following fields to these values:
@@ -144,8 +147,9 @@ Feature: Report builder table block
     And I add the "Report table" block
     And I configure the "Report table" block
     And I set the following fields to these values:
-      | Block title | Report sid |
-      | Report | User report |
+      | Override default block title | Yes         |
+      | Block title                  | Report sid  |
+      | Report                       | User report |
     And I press "Save changes"
     And I configure the "Report sid" block
     And I set the following fields to these values:
@@ -185,15 +189,16 @@ Feature: Report builder table block
     And I add the "Report table" block
     And I configure the "Report table" block
     And I set the following fields to these values:
-      | Block title | Report access test |
-      | Report | User report |
+      | Override default block title | Yes                |
+      | Block title                  | Report access test |
+      | Report                       | User report        |
     And I press "Save changes"
     And I press "Stop customising this page"
     And I should see "Admin" in the "Report access test" "block"
     And I log out
     # Remove access to report
     And I log in as "admin"
-    And I navigate to "Manage user reports" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
     And I click on "Settings" "link" in the "User report" "table_row"
     When I switch to "Access" tab
     And I click on "Only certain users can view this report (see below)" "radio"
@@ -203,8 +208,9 @@ Feature: Report builder table block
     When I log in as "learner1"
     And I click on "Dashboard" in the totara menu
     And I press "Customise this page"
-    Then I should not see "Admin" in the "Report table" "block"
-    And I configure the "Report table" block
+    Then I should not see "Admin" in the "Report access test" "block"
+    And I configure the "Report access test" block
+    And I expand all fieldsets
     And I should see "Current report (inaccessible)"
 
   Scenario: Test block settings when report saved search became not public
@@ -225,9 +231,10 @@ Feature: Report builder table block
     And I add the "Report table" block
     And I configure the "Report table" block
     And I set the following fields to these values:
-      | Block title | Report sid access test |
-      | Report | User report |
-      | Saved search | LearnerSearch |
+      | Override default block title | Yes                    |
+      | Block title                  | Report sid access test |
+      | Report                       | User report            |
+      | Saved search                 | LearnerSearch          |
     And I press "Save changes"
     And I should see "learner2" in the "Report sid access test" "block"
     # Make this saved search non-public
@@ -241,9 +248,10 @@ Feature: Report builder table block
     And I press "Close"
     # Confirm that block report is not shown
     When I click on "Dashboard" in the totara menu
-    Then I should not see "learner2" in the "Report table" "block"
+    Then I should not see "learner2" in the "Report sid access test" "block"
     # Confirm that name of saved search is not shown
-    And I configure the "Report table" block
+    And I configure the "Report sid access test" block
+    And I expand all fieldsets
     And I should see "Current saved search (inaccessible)"
     And I should not see "LearnerSearch"
 
@@ -254,11 +262,12 @@ Feature: Report builder table block
     And I add the "Report table" block
     And I configure the "Report table" block
     And I set the following fields to these values:
-      | Block title | Report not exists test |
-      | Report | User report |
+      | Override default block title | Yes                    |
+      | Block title                  | Report not exists test |
+      | Report                       | User report            |
     And I press "Save changes"
     # Remove report
-    And I navigate to "Manage user reports" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
     And I click on "Delete" "link" in the "User report" "table_row"
     And I press "Delete"
     # Confirm that report is not shown, but page still works fine
@@ -271,15 +280,18 @@ Feature: Report builder table block
     And I add the "Report table" block
     And I configure the "Report table" block
     And I set the following fields to these values:
-      | Block title | Report wo sid |
-      | Report | User report |
+      | Override default block title | Yes           |
+      | Block title                  | Report wo sid |
+      | Report                       | User report   |
     And I press "Save changes"
     And I press "Stop customising this page"
     And I click on "View full report" "link" in the "Report wo sid" "block"
     And I should see "User report: 13 records shown"
 
   Scenario: Test view full report link for embedded report block navigation
-    Given I am on a totara site
+    # Enable report-based catalogue to be able to select it.
+    And I set the following administration settings values:
+      | catalogtype | enhanced |
     And the following "courses" exist:
       | fullname | shortname | category |
       | Course 1 | C1        | 0        |
@@ -290,8 +302,9 @@ Feature: Report builder table block
     And I add the "Report table" block
     And I configure the "Report table" block
     And I set the following fields to these values:
-      | Block title | Course Catalog            |
-      | Report      | Enhanced catalog: courses |
+      | Override default block title | Yes                             |
+      | Block title                  | Course Catalog                  |
+      | Report                       | Report-based catalogue: courses |
     And I press "Save changes"
     And I press "Stop customising this page"
     And I click on "View full report" "link" in the "Course Catalog" "block"

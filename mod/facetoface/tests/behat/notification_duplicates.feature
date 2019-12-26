@@ -10,9 +10,7 @@ Feature: Check seminar notification duplicates recovery functionality
       | fullname | shortname | category |
       | Course 1 | C1        | 0        |
     When I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test seminar name        |
       | Description | Test seminar description |

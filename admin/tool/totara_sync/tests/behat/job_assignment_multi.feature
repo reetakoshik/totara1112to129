@@ -1,5 +1,5 @@
 @_file_upload @javascript @tool @tool_totara_sync @totara @totara_job
-Feature: Use user source to import job assignments data in HR sync
+Feature: Use user source to import multiple job assignments data in HR sync
   In order to test HR import of users with multiple job assignments
   I must log in as an admin and import from a CSV file
 
@@ -72,15 +72,15 @@ Feature: Use user source to import job assignments data in HR sync
       | username14 | jaidy         | fullx    |           |            |            | orgz         | posz     |          |                   |            | 1          |
 
     # User source setup.
-    When I navigate to "General settings" node in "Site administration > HR Import"
+    When I navigate to "Default settings" node in "Site administration > HR Import"
     And I set the following fields to these values:
-        | File Access | Upload Files |
+        | File access | Upload Files |
     And I press "Save changes"
     And I navigate to "Manage elements" node in "Site administration > HR Import > Elements"
     And I "Enable" the "Job assignment" HR Import element
     And I navigate to "Job assignment" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source | CSV |
+      | CSV | 1 |
     And I press "Save changes"
 
     # Enable all job assignment fields.
@@ -812,3 +812,4 @@ Feature: Use user source to import job assignments data in HR sync
       | ID Number          | newjaid            |
       | startdate[enabled] | 0                  |
       | enddate[enabled]   | 0                  |
+

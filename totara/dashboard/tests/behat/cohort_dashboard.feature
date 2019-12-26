@@ -1,7 +1,7 @@
 @totara @totara_dashboard
 Feature: Test Dashboard for cohort users
 
-@javascript
+  @javascript
   Scenario: Test Dashboard is assigned to users
     Given I am on a totara site
     And the following "users" exist:
@@ -15,12 +15,13 @@ Feature: Test Dashboard for cohort users
       | student1 | CH1    |
 
     And I log in as "admin"
-    And I navigate to "Front page settings" node in "Site administration > Front page"
+    And I am on site homepage
+    And I navigate to "Edit settings" node in "Front page settings"
       # Behat does not recognize field name in this case "Front page summary"
     And I set the following fields to these values:
       | summary | I'm a label on the frontpage |
     And I press "Save changes"
-    And I navigate to "Dashboards" node in "Site administration > Appearance"
+    And I navigate to "Dashboards" node in "Site administration > Navigation"
       # Add a dashboard.
     And I press "Create dashboard"
     And I set the following fields to these values:
@@ -45,16 +46,19 @@ Feature: Test Dashboard for cohort users
     And I click on "My first dashboard" "link"
     And I add the "HTML" block
     And I configure the "(new HTML block)" block
-    And I set the field "Block title" to "First dashboard block header"
-    And I set the field "Content" to "First dashboard block content"
+    And I set the following fields to these values:
+      | Override default block title | Yes                           |
+      | Block title                  | First dashboard block header  |
+      | Content                      | First dashboard block content |
     And I press "Save changes"
       # Add content to the second dashboard.
-    And I navigate to "Dashboards" node in "Site administration > Appearance"
+    And I navigate to "Dashboards" node in "Site administration > Navigation"
     And I click on "My second dashboard" "link"
     And I add the "HTML" block
     And I configure the "(new HTML block)" block
-    And I set the field "Block title" to "Second dashboard block header"
-    And I set the field "Content" to "Second dashboard block content"
+      | Override default block title | Yes                            |
+      | Block title                  | Second dashboard block header  |
+      | Content                      | Second dashboard block content |
     And I press "Save changes"
 
       # Dasboard shows in the Totara menu

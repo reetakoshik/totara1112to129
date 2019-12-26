@@ -7,15 +7,15 @@ Feature: An admin can import different CSV enconding through HR import
     And I set the following fields to these values:
       | User deletion | Keep username, email and ID number (legacy) |
     And I press "Save changes"
-    And I navigate to "General settings" node in "Site administration > HR Import"
+    And I navigate to "Default settings" node in "Site administration > HR Import"
     And I set the following fields to these values:
-        | File Access | Upload Files |
+        | File access | Upload Files |
     And I press "Save changes"
     And I navigate to "Manage elements" node in "Site administration > HR Import > Elements"
     And I "Enable" the "User" HR Import element
     And I navigate to "User" node in "Site administration > HR Import > Elements"
     And I set the following fields to these values:
-      | Source | CSV |
+      | CSV | 1 |
     And I press "Save changes"
 
   Scenario: add an user from user utf8 bom enconding file
@@ -33,7 +33,7 @@ Feature: An admin can import different CSV enconding through HR import
     And I should see "Running HR Import cron...Done!"
     And I navigate to "HR Import Log" node in "Site administration > HR Import"
     And I should not see "Error" in the "#totarasynclog" "css_element"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     Then I should see "bob marley"
     Then I should see "Žlutý Koníček"
 
@@ -48,6 +48,6 @@ Feature: An admin can import different CSV enconding through HR import
     And I navigate to "Run HR Import" node in "Site administration > HR Import"
     And I press "Run HR Import"
     And I should see "Running HR Import cron...Done!"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     Then I should see "alice smith"
     Then I should see "Žlutý Koníček"

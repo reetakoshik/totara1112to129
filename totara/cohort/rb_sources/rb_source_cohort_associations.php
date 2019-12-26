@@ -34,11 +34,6 @@ require_once($CFG->dirroot.'/cohort/lib.php');
  * the cohort's members should be enrolled in
  */
 class rb_source_cohort_associations extends rb_base_source {
-
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
-
     /**
      * Constructor
      * @global object $CFG
@@ -136,14 +131,15 @@ class rb_source_cohort_associations extends rb_base_source {
             get_string('associationname', 'totara_cohort'),
             'base.name',
             array('dbdatatype' => 'char',
-                  'outputformat' => 'text')
+                  'outputformat' => 'text',
+                  'displayfunc' => 'format_string')
         );
         $columnoptions[] = new rb_column_option(
             'associations',
             'type',
             get_string('associationtype', 'totara_cohort'),
             'base.instancetype',
-            array('displayfunc'=>'associationtype')
+            array('displayfunc'=>'cohort_association_type')
         );
         $columnoptions[] = new rb_column_option(
             'associations',
@@ -151,7 +147,7 @@ class rb_source_cohort_associations extends rb_base_source {
             get_string('associationnameiconlink', 'totara_cohort'),
             'base.name',
             array(
-                'displayfunc'=>'associationnameiconlink',
+                'displayfunc'=>'cohort_association_name_icon_link',
                 'extrafields'=>array(
                     'insid'=> 'base.instanceid',
                     'icon' => 'base.icon',
@@ -165,7 +161,7 @@ class rb_source_cohort_associations extends rb_base_source {
             get_string('associationactionsenrolled', 'totara_cohort'),
             'base.id',
             array(
-                'displayfunc' => 'associationactionsenrolled',
+                'displayfunc' => 'cohort_association_actions_enrolled',
                 'extrafields' => array('cohortid' => 'base.cohortid', 'type' => 'base.instancetype'),
                 'nosort' => true
             )
@@ -177,7 +173,8 @@ class rb_source_cohort_associations extends rb_base_source {
             'cohort.name',
             array('joins' => 'cohort',
                   'dbdatatype' => 'char',
-                  'outputformat' => 'text')
+                  'outputformat' => 'text',
+                  'displayfunc' => 'format_string')
         );
         $columnoptions[] = new rb_column_option(
             'cohort',
@@ -211,7 +208,7 @@ class rb_source_cohort_associations extends rb_base_source {
             get_string('actualduedate', 'totara_program'),
             'base.id',
             array(
-                'displayfunc' => 'programviewduedatelink',
+                'displayfunc' => 'cohort_program_view_duedate_link',
                 'extrafields' => array(
                     'type' => 'base.instancetype',
                     'programid' => 'base.instanceid'
@@ -319,11 +316,14 @@ class rb_source_cohort_associations extends rb_base_source {
 
     /**
      * Helper function to display a string describing the learning item's type
+     *
+     * @deprecated Since Totara 12.0
      * @param int $instancetype
      * @param object $row
      * @return str
      */
     public function rb_display_associationtype($instancetype, $row) {
+        debugging('rb_source_cohort_associations::rb_display_associationtype has been deprecated since Totara 12.0. Use totara_cohort\rb\display\cohort_association_type::display', DEBUG_DEVELOPER);
         switch ($instancetype) {
             case COHORT_ASSN_ITEMTYPE_COURSE:
                 $ret = get_string('course');
@@ -342,11 +342,14 @@ class rb_source_cohort_associations extends rb_base_source {
 
     /**
      * Helper function to display the learning item's name, with its icon and a link to it
+     *
+     * @deprecated Since Totara 12.0
      * @param str $instancename
      * @param object $row
      * @return str
      */
     public function rb_display_associationnameiconlink($instancename, $row) {
+        debugging('rb_source_cohort_associations::rb_display_associationnameiconlink has been deprecated since Totara 12.0. Use totara_cohort\rb\display\cohort_association_name_icon_link::display', DEBUG_DEVELOPER);
         if (empty($instancename)) {
             return '';
         }
@@ -358,7 +361,16 @@ class rb_source_cohort_associations extends rb_base_source {
         return html_writer::link($url, format_string($instancename));
     }
 
+    /**
+     * Create the association delete link
+     *
+     * @deprecated Since Totara 12.0
+     * @param $associationid
+     * @param $row
+     * @return string
+     */
     private function cohort_association_delete_link($associationid, $row) {
+        debugging('rb_source_cohort_associations::cohort_association_delete_link has been deprecated since Totara 12.0', DEBUG_DEVELOPER);
         global $OUTPUT;
 
         static $strdelete = false;
@@ -375,11 +387,14 @@ class rb_source_cohort_associations extends rb_base_source {
 
     /**
      * Helper function to display the action links for the "enrolled learning" page
+     *
+     * @deprecated Since Totara 12.0
      * @param int $associationid
      * @param object $row
      * @return str
      */
     public function rb_display_associationactionsenrolled($associationid, $row) {
+        debugging('rb_source_cohort_associations::rb_display_associationactionsenrolled has been deprecated since Totara 12.0. Use totara_cohort\rb\display\cohort_association_actions_enrolled::display', DEBUG_DEVELOPER);
         static $canedit = null;
         if ($canedit === null) {
             $canedit = has_capability('moodle/cohort:manage', context_system::instance());
@@ -395,9 +410,8 @@ class rb_source_cohort_associations extends rb_base_source {
                 'requires' => array('json'));
             $PAGE->requires->js_init_call('M.totara_cohortlearning.init', array(), false, $jsmodule);
             $PAGE->requires->strings_for_js(array('assignenrolledlearningcourse', 'assignenrolledlearningprogram',
-                'assignenrolledlearningcertification', 'deletelearningconfirm', 'savinglearning', 'savingrule', 'error:badresponsefromajax'),
+                'assignenrolledlearningcertification', 'deletelearningconfirm', 'savinglearning'),
                 'totara_cohort');
-
             return $this->cohort_association_delete_link($associationid, $row);
         }
         return '';
@@ -405,6 +419,7 @@ class rb_source_cohort_associations extends rb_base_source {
 
     /**
      * Helper function to display the "Set due date" link for a program (should only be used with enrolled items)
+     *
      * @param $instanceid
      * @param $row
      * @return string
@@ -428,11 +443,14 @@ class rb_source_cohort_associations extends rb_base_source {
 
     /**
      * Helper function to display the "View date" link for a program (should only be used with enrolled items)
+     *
+     * @deprecated Since Totara 12.0
      * @param $assignmentid
      * @param $row
      * @return string
      */
     public function rb_display_programviewduedatelink($assignmentid, $row) {
+        debugging('rb_source_cohort_associations::rb_display_programviewduedatelink has been deprecated since Totara 12.0. Use totara_cohort\rb\display\cohort_program_view_duedate_link::display', DEBUG_DEVELOPER);
         static $canedit = null;
         if ($canedit === null) {
             $canedit = has_capability('moodle/cohort:manage', context_system::instance());

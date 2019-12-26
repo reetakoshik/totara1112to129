@@ -175,6 +175,22 @@ if ($certcompletion && $progcompletion && empty($exceptions) && !$dismissedexcep
                 if ($currentformdata->state == CERTIFCOMPLETIONSTATE_CERTIFIED && $newstate != CERTIFCOMPLETIONSTATE_CERTIFIED) {
                     prog_reset_course_set_completions($id, $userid);
                 }
+
+                // Trigger an event to notify any listeners that the user state has been edited.
+                $event = \totara_certification\event\certification_completionstateedited::create(
+                    array(
+                        'objectid' => $id,
+                        'context' => context_program::instance($id),
+                        'userid' => $userid,
+                        'other' => array(
+                            'oldstate' => $currentformdata->state,
+                            'newstate' => $newstate,
+                            'changedby' => $USER->id
+                        ),
+                    )
+                );
+                $event->trigger();
+
                 totara_set_notification(get_string('completionchangessaved', 'totara_program'),
                     $url,
                     array('class' => 'notifysuccess'));

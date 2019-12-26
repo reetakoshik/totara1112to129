@@ -1,4 +1,4 @@
-@block @block_myprofile
+@block @block_myprofile @javascript
 Feature: The logged in user block allows users to view their profile information in on the dashboard
   In order to enable the logged in user block on the dashboard
   As a user

@@ -17,6 +17,15 @@ trait program_completion_joins
         );
 
         $joinlist[] = new rb_join(
+            'course_completion',
+            'INNER',
+            'INNER JOIN {course_completions} course_completion',
+            "base.id=course_completion.course",
+            REPORT_BUILDER_RELATION_ONE_TO_MANY,
+            $usertable
+        );
+
+        $joinlist[] = new rb_join(
             'prog',
             'LEFT',
             '{prog}',

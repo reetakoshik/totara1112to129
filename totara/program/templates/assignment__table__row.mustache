@@ -1,0 +1,58 @@
+{{!
+  This file is part of Totara Learn
+
+  Copyright (C) 2019 onwards Totara Learning Solutions LTD
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  @author Brian Barnes <brian.barnes@totaralearning.com>
+  @package totara_program
+}}
+{{!
+
+    @template totara_program/assignment__table__row
+
+    This template is for an individual assignment
+
+    Classes required for JS:
+    * totara_program__assignments__row-name: Name for the user - used for update notification
+
+    Data attributes required for JS:
+    * data-totara_program__assignment-id: the individual assignment id
+    * data-totara_program__assignment: states that this is an assignment
+    * data-totara_program__assignments--action: both the "update-below" and "delete" as they act on the individuals
+
+}}
+<tr data-totara_program__assignment-id="{{id}}" data-totara_program__assignment>
+    <td><span class="totara_program__assignments__row-name">{{name}}</span><span class="totara_program__assignments__results__table__row-type">{{type}}</span></td>
+    <td>
+      {{#checkbox}}
+        <input type="checkbox" id="totara_program__assignments__include-children-{{id}}" value="1" data-totara_program__assignments--action="update-below"{{#includechildren}} checked="checked"{{/includechildren}}{{^canupdate}} disabled="disabled"{{/canupdate}}/>
+        <label for="totara_program__assignments__include-children-{{id}}">{{#str}}includeallbelow, totara_program{{/str}}</label>
+      {{/checkbox}}
+      {{#dropdown}}
+        <label for="totara_program__assignments__include-children-{{id}}" class="sr-only">{{#str}}includeallbelow, totara_program {{/str}}</label>
+        <select id="totara_program__assignments__include-children-{{id}}" data-totara_program__assignments--action="update-below"{{^canupdate}} disabled="disabled"{{/canupdate}}>
+          <option value="0"{{^includechildren}} selected="selected"{{/includechildren}}>{{#str}}includedirect, totara_program {{/str}}</option>
+          <option value="1"{{#includechildren}} selected="selected"{{/includechildren}}>{{#str}}includeallbelow, totara_program {{/str}}</option>
+        {{includechildren}}
+      {{/dropdown}}
+    </td>
+    <td class="totara_program__assignments__row-duedate">{{> totara_program/assignment__due_date}}</td>
+    <td class="totara_program__assignments__row-actual-duedate" >{{> totara_program/assignment__actual_date}}</td>
+    {{#canupdate}}
+      <td data-totara_program__assignments--learnercount>{{learnercount}}</td>
+      <td><a href="#" data-totara_program__assignments--action="delete">{{#flex_icon}}delete, removeassignment, totara_program{{/flex_icon}}</a></td>
+    {{/canupdate}}
+</tr>

@@ -1,4 +1,4 @@
-@block @block_completionstatus @totara_courseprogressbar
+@block @block_completionstatus @totara_courseprogressbar @javascript
 Feature: Enable Block Completion in a course using activity completion
   In order to view the completion block in a course
   As a teacher
@@ -22,8 +22,7 @@ Feature: Enable Block Completion in a course using activity completion
 
   Scenario: Add the block to a course and check the block correctly shows the user not yet started
     Given I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I follow "Test page name"
     And I navigate to "Edit settings" in current page administration
     And I set the following fields to these values:
@@ -38,14 +37,13 @@ Feature: Enable Block Completion in a course using activity completion
     And I press "Save changes"
     And I log out
     When I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "Status: Not yet started" in the "Course completion status" "block"
     And I should see "0 of 1" in the "Activity completion" "table_row"
 
   Scenario: Add the block to a the course and check the block correctly shows the user complete
     Given I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I follow "Test page name"
     And I navigate to "Edit settings" in current page administration
     And I set the following fields to these values:
@@ -60,7 +58,7 @@ Feature: Enable Block Completion in a course using activity completion
     And I press "Save changes"
     And I log out
     When I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test page name"
     And I follow "C1"
     # Totara has instant completion.

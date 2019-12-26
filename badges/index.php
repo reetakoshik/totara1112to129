@@ -25,6 +25,7 @@
  */
 
 require_once(__DIR__ . '/../config.php');
+require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->libdir . '/badgeslib.php');
 
 $type       = required_param('type', PARAM_INT);
@@ -75,6 +76,9 @@ $returnurl = new moodle_url('/badges/index.php', $urlparams);
 $PAGE->set_url($returnurl);
 
 if ($type == BADGE_TYPE_SITE) {
+    // Totara: Add page as external admin page
+    admin_externalpage_setup('managebadges');
+
     $title = get_string('sitebadges', 'badges');
     $PAGE->set_context(context_system::instance());
     $PAGE->set_pagelayout('admin');

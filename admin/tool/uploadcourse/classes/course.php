@@ -97,7 +97,7 @@ class tool_uploadcourse_course {
     /** @var array fields allowed as course data. */
     static protected $validfields = array('fullname', 'shortname', 'idnumber', 'category', 'visible', 'startdate', 'enddate',
         'summary', 'format', 'theme', 'lang', 'newsitems', 'showgrades', 'showreports', 'legacyfiles', 'maxbytes',
-        'groupmode', 'groupmodeforce', 'groupmodeforce', 'enablecompletion', 'completionstartonenrol', 'audiencevisible', 'coursetype'); // TOTARA OVERRIDE - needed the completionstartonenrol, audiencevisible and coursetype fields.
+        'groupmode', 'groupmodeforce', 'enablecompletion', 'completionstartonenrol', 'audiencevisible', 'coursetype'); // TOTARA OVERRIDE - needed the completionstartonenrol, audiencevisible and coursetype fields.
 
     /** @var array fields required on course creation. */
     static protected $mandatoryfields = array('fullname', 'category');
@@ -486,7 +486,7 @@ class tool_uploadcourse_course {
         // therefore the array $coursedata might end up
         // with empty string for key `coursetype` or the key is not there at all
         if (!empty($coursedata['coursetype'])) {
-            $coursetypeid  = $coursedata['coursetype'];
+            $coursetypeid = $coursedata['coursetype'];
             if (!is_numeric($coursedata['coursetype']) && is_string($coursedata['coursetype'])) {
                 $coursetypeid = tool_uploadcourse_helper::get_coursetypeid_from_string($coursedata['coursetype']);
 
@@ -702,6 +702,15 @@ class tool_uploadcourse_course {
         if (!empty($coursedata['format']) && !in_array($coursedata['format'], tool_uploadcourse_helper::get_course_formats())) {
             $this->error('invalidcourseformat', new lang_string('invalidcourseformat', 'tool_uploadcourse'));
             return false;
+        }
+
+        // Special case, 'numsections' is not a course format option any more but still should apply from defaults.
+        if (!$exists || !array_key_exists('numsections', $coursedata)) {
+            if (isset($this->rawdata['numsections']) && is_numeric($this->rawdata['numsections'])) {
+                $coursedata['numsections'] = (int)$this->rawdata['numsections'];
+            } else {
+                $coursedata['numsections'] = get_config('moodlecourse', 'numsections');
+            }
         }
 
         // Saving data.

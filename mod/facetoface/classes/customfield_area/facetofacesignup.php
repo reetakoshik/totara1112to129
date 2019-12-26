@@ -144,7 +144,7 @@ class facetofacesignup implements \totara_customfield\area {
         }
 
         // 5. The current user is a facetoface trainer.
-        if ($record->approvaltype == APPROVAL_ROLE) {
+        if ($record->approvaltype == \mod_facetoface\seminar::APPROVAL_ROLE) {
             $sessionroles = facetoface_get_trainers($record->sessionid, $record->approvalrole);
             if (!empty($sessionroles)) {
                 foreach ($sessionroles as $user) {
@@ -156,7 +156,7 @@ class facetofacesignup implements \totara_customfield\area {
         }
 
         // 6. The current user is an admin approver.
-        if ($record->approvaltype == APPROVAL_ADMIN) {
+        if ($record->approvaltype == \mod_facetoface\seminar::APPROVAL_ADMIN) {
             if (facetoface_is_adminapprover($USER->id, $record)) {
                 return true;
             }
@@ -188,7 +188,7 @@ class facetofacesignup implements \totara_customfield\area {
 
         // Require login without course and cm.
         // Managers who are not enrolled need to be able to see these images without enrolling during approval.
-        // See the hacks in mod/facetoface/attendees.php
+        // See the hacks in mod/facetoface/attendees/view.php
         require_login();
 
         // OK first up we need to verify if the user can access this.

@@ -28,15 +28,6 @@ defined('MOODLE_INTERNAL') || die();
 
 $tasks = array(
     array(
-        'classname' => 'totara_reportbuilder\task\preprocess_group_task',
-        'blocking' => 0,
-        'minute' => '0',
-        'hour' => '0',
-        'day' => '*',
-        'dayofweek' => '*',
-        'month' => '*'
-    ),
-    array(
         'classname' => 'totara_reportbuilder\task\process_scheduled_task',
         'blocking' => 0,
         'minute' => '*',

@@ -23,7 +23,8 @@ Feature: Users can be forced to fill new required custom profile fields
 
   Scenario: Admin is not redirected to edit profile when new required custom profile field present
     Given I log in as "admin"
-    Then I should see "Available courses"
+    Then I should not see "Edit profile"
+    And I should see "Acceptance test site"
 
   Scenario: Users are redirectred to profile if new required custom profile field present
     When I log in as "user1"
@@ -41,7 +42,7 @@ Feature: Users can be forced to fill new required custom profile fields
   @javascript
   Scenario: Loginas user is not redirected to edit profile when new required custom profile field present
     Given I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Jan Kovar"
     When I follow "Log in as"
     And I should see "You are logged in as Jan Kovar"

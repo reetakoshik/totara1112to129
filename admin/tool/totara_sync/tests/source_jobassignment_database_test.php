@@ -43,8 +43,14 @@ class tool_totara_sync_source_jobassignment_database_testcase extends advanced_t
     private $dbpass = '';
     private $dbtable = '';
 
-    public function setUp()
-    {
+    protected function tearDown() {
+        $this->ext_dbconnection = null;
+        $this->dbtype = $this->dbhost = $this->dbport = $this->dbname = $this->dbuser = $this->dbpass = $this->dbtable = '';
+
+        parent::tearDown();
+    }
+
+    protected function setUp() {
         global $CFG;
 
         if (defined('TEST_SYNC_DB_TYPE') ||
@@ -68,7 +74,7 @@ class tool_totara_sync_source_jobassignment_database_testcase extends advanced_t
             $this->dbname = $CFG->dbname;
             $this->dbuser = $CFG->dbuser;
             $this->dbpass = !empty($CFG->dbpass) ? $CFG->dbpass : '';
-            $this->dbtable = $CFG->phpunit_prefix . 'totara_sync_jobassignment_source';
+            $this->dbtable = $CFG->prefix . 'totara_sync_jobassignment_source';
         }
 
         if (!empty($this->dbtype) &&

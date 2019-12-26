@@ -1,0 +1,6 @@
+This file describes API changes for code that uses the completioneditor API,
+information provided here is intended especially for developers.
+
+=== 12.0 ===
+
+* rb_source_course_membership::rb_display_edit_completion has been deprecated, please call totara_completioneditor\rb\display\completioneditor_edit_completion::display() instead.

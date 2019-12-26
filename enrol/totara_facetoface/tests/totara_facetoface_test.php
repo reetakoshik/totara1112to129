@@ -758,6 +758,11 @@ class enrol_totara_facetoface_testcase extends advanced_testcase {
         $user4 = $this->getDataGenerator()->create_user(); // Used to fill up a session.
 
         $course1 = $this->getDataGenerator()->create_course();
+
+        $this->getDataGenerator()->enrol_user($user2->id, $course1->id);
+        $this->getDataGenerator()->enrol_user($user3->id, $course1->id);
+        $this->getDataGenerator()->enrol_user($user4->id, $course1->id);
+
         $facetofacegenerator = $this->getDataGenerator()->get_plugin_generator('mod_facetoface');
 
         $facetoface = $facetofacegenerator->create_instance(array('course' => $course1->id, 'multiplesessions' => 1));
@@ -778,7 +783,7 @@ class enrol_totara_facetoface_testcase extends advanced_testcase {
         $sessionid = $facetofacegenerator->add_session($sessiondata);
         $session = facetoface_get_session($sessionid);
 
-        facetoface_user_import($course1, $facetoface, $session, $user2->id);
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user2->id, new \mod_facetoface\seminar_event($session->id)));
         $totara_facetoface = enrol_get_plugin('totara_facetoface');
 
         $this->setUser(null); // Sloppy test code!
@@ -794,9 +799,9 @@ class enrol_totara_facetoface_testcase extends advanced_testcase {
         );
         $sessionid = $facetofacegenerator->add_session($sessiondata);
         $session = facetoface_get_session($sessionid);
-        facetoface_user_import($course1, $facetoface, $session, $user2->id);
-        facetoface_user_import($course1, $facetoface, $session, $user3->id);
-        facetoface_user_import($course1, $facetoface, $session, $user4->id);
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user2->id, new \mod_facetoface\seminar_event($session->id)));
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user3->id, new \mod_facetoface\seminar_event($session->id)));
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user4->id, new \mod_facetoface\seminar_event($session->id)));
         $totara_facetoface = enrol_get_plugin('totara_facetoface');
 
         $this->setUser(null); // Sloppy test code!
@@ -813,8 +818,8 @@ class enrol_totara_facetoface_testcase extends advanced_testcase {
         );
         $sessionid = $facetofacegenerator->add_session($sessiondata);
         $session = facetoface_get_session($sessionid);
-        facetoface_user_import($course1, $facetoface, $session, $user2->id);
-        facetoface_user_import($course1, $facetoface, $session, $user3->id);
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user2->id, new \mod_facetoface\seminar_event($session->id)));
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user3->id, new \mod_facetoface\seminar_event($session->id)));
         $totara_facetoface = enrol_get_plugin('totara_facetoface');
 
         $this->setUser(null); // Sloppy test code!
@@ -831,7 +836,7 @@ class enrol_totara_facetoface_testcase extends advanced_testcase {
         );
         $sessionid = $facetofacegenerator->add_session($sessiondata);
         $session = facetoface_get_session($sessionid);
-        facetoface_user_import($course1, $facetoface, $session, $user2->id);
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user2->id, new \mod_facetoface\seminar_event($session->id)));
         $totara_facetoface = enrol_get_plugin('totara_facetoface');
 
         $this->setUser(null); // Sloppy test code!
@@ -848,7 +853,7 @@ class enrol_totara_facetoface_testcase extends advanced_testcase {
         );
         $sessionid = $facetofacegenerator->add_session($sessiondata);
         $session = facetoface_get_session($sessionid);
-        facetoface_user_import($course1, $facetoface, $session, $user2->id);
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user2->id, new \mod_facetoface\seminar_event($session->id)));
         $totara_facetoface = enrol_get_plugin('totara_facetoface');
 
         $this->setUser(null); // Sloppy test code!
@@ -869,7 +874,7 @@ class enrol_totara_facetoface_testcase extends advanced_testcase {
         );
         $sessionid = $facetofacegenerator->add_session($sessiondata);
         $session = facetoface_get_session($sessionid);
-        facetoface_user_import($course1, $facetoface, $session, $user2->id);
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user2->id, new \mod_facetoface\seminar_event($session->id)));
         $totara_facetoface = enrol_get_plugin('totara_facetoface');
 
         $this->setUser(null); // Sloppy test code!
@@ -879,8 +884,8 @@ class enrol_totara_facetoface_testcase extends advanced_testcase {
 
         // Create session with capacity and date in 1 years.
         $sessiondate = new stdClass();
-        $sessiondate->timestart = time() + (YEARSECS);
-        $sessiondate->timefinish = time() + (YEARSECS + MINSECS);
+        $sessiondate->timestart = time() + (YEARSECS + DAYSECS);
+        $sessiondate->timefinish = time() + (YEARSECS + DAYSECS + MINSECS);
         $sessiondate->sessiontimezone = 'Pacific/Auckland';
         $sessiondata = array(
             'facetoface' => $facetoface->id,
@@ -890,7 +895,7 @@ class enrol_totara_facetoface_testcase extends advanced_testcase {
         );
         $sessionid = $facetofacegenerator->add_session($sessiondata);
         $session = facetoface_get_session($sessionid);
-        facetoface_user_import($course1, $facetoface, $session, $user2->id);
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user2->id, new \mod_facetoface\seminar_event($session->id)));
         $totara_facetoface = enrol_get_plugin('totara_facetoface');
 
         $this->setUser(null); // Sloppy test code!
@@ -913,6 +918,9 @@ class enrol_totara_facetoface_testcase extends advanced_testcase {
         $user2 = $this->getDataGenerator()->create_user(); // Used to fill up a session.
 
         $course1 = $this->getDataGenerator()->create_course();
+
+        $this->getDataGenerator()->enrol_user($user2->id, $course1->id);
+
         $facetofacegenerator = $this->getDataGenerator()->get_plugin_generator('mod_facetoface');
 
         // We're going to add two sessions to this face to face, only the best (second) should get picked.
@@ -1000,7 +1008,7 @@ class enrol_totara_facetoface_testcase extends advanced_testcase {
         );
         $sessionid = $facetofacegenerator->add_session($sessiondata);
         $session = facetoface_get_session($sessionid);
-        facetoface_user_import($course1, $facetoface, $session, $user2->id, array('ignoreconflicts' => true));
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user2->id, new \mod_facetoface\seminar_event($session->id))->set_ignoreconflicts());
         $sessionsnottoautoenrol[] = $session;
 
         // We're going to add two sessions to this face to face, disable multiple enrolments, and enrol user2 on one.
@@ -1036,7 +1044,7 @@ class enrol_totara_facetoface_testcase extends advanced_testcase {
         );
         $sessionid = $facetofacegenerator->add_session($sessiondata);
         $session = facetoface_get_session($sessionid);
-        facetoface_user_import($course1, $facetoface, $session, $user2->id, array('ignoreconflicts' => true));
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user2->id, new \mod_facetoface\seminar_event($session->id))->set_ignoreconflicts());
         $sessionsnottoautoenrol[] = $session;
 
         $totara_facetoface = enrol_get_plugin('totara_facetoface');

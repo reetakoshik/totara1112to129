@@ -71,6 +71,7 @@ final class helper {
         $directory = new \RecursiveDirectoryIterator($CFG->dirroot);
         $iterator = new \RecursiveIteratorIterator($directory);
         $incorrectperms = [];
+        $windows = DIRECTORY_SEPARATOR !== '/';
         foreach ($iterator as $info) {
             /** @var \SplFileInfo $info */
             if ($info->isLink()) {
@@ -80,6 +81,9 @@ final class helper {
             }
             $name = $info->getFilename();
             $fullpath = $info->getPathname();
+            if ($windows) {
+                $fullpath = str_replace(DIRECTORY_SEPARATOR, '/', $fullpath);
+            }
             $relpath = substr($fullpath, strlen($CFG->dirroot) + 1);
             if ($name === '.' || $name === '..') {
                 continue;

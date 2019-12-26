@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="totara/core/db" VERSION="20180304" COMMENT="XMLDB file for Moodle totara/catalog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="catalog" COMMENT="Catalog table">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="contextid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="objectid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="objecttype" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="ftshigh" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="High search content data"/>
+        <FIELD NAME="ftsmedium" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Medium search content data"/>
+        <FIELD NAME="ftslow" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Low search content data"/>
+        <FIELD NAME="sorttext" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Field used for alphabetical sorting"/>
+        <FIELD NAME="sorttime" TYPE="int" LENGTH="20" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Field used for 'Latest' sorting"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="high" UNIQUE="false" FIELDS="ftshigh" HINTS="full_text_search"/>
+        <INDEX NAME="medium" UNIQUE="false" FIELDS="ftsmedium" HINTS="full_text_search"/>
+        <INDEX NAME="low" UNIQUE="false" FIELDS="ftslow" HINTS="full_text_search"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="catalog_search_metadata" COMMENT="Search metadata table where the search metadata are being stored">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="value" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The list of keywords"/>
+        <FIELD NAME="instanceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="pluginname" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="plugintype" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="18" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="18" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="18" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="unique_component_instance" UNIQUE="true" FIELDS="instanceid, pluginname, plugintype"/>
+        <INDEX NAME="component_instance" UNIQUE="false" FIELDS="instanceid"/>
+        <INDEX NAME="plugin_name" UNIQUE="false" FIELDS="pluginname"/>
+        <INDEX NAME="plugin_type" UNIQUE="false" FIELDS="plugintype"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

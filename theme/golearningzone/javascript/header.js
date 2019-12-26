@@ -1,3 +1,31 @@
+$(document).ready(function() {
+	$(".dropdown-menu.dropdown-menu-left.alerts-list").click(function(e) {
+		//e.preventDefault();
+   		e.stopPropagation();
+		//e.preventDefault();
+	})
+});
+$(document).ready(function() {
+	$(".search-open").click(function() {
+		$(".search-close span").addClass('animated');
+		$(".search-close span").addClass('rotateIn');
+		
+	});
+	$(".search-close").click(function() {
+		$(".search-close span").removeClass('animated');
+		$(".search-close span").removeClass('rotateIn');
+	});
+	$(".search-close").click(function() {
+		$(".search-open").addClass('animated');
+		$(".search-open").addClass('zoomIn');
+	});
+	$(".search-open").click(function() {
+		$(".search-open").removeClass('animated');
+		$(".search-open").removeClass('zoomIn'); 
+	
+	});
+});
+
 function Header() {
 
 }

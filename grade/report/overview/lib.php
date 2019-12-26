@@ -84,7 +84,7 @@ class grade_report_overview extends grade_report {
         parent::__construct($COURSE->id, $gpr, $context);
 
         // Get the user (for full name).
-        $this->user = $DB->get_record('user', array('id' => $userid));
+        $this->user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
 
         // Load the user's courses.
         $this->courses = enrol_get_users_courses($this->user->id, false, 'id, shortname, showgrades');
@@ -188,14 +188,13 @@ class grade_report_overview extends grade_report {
 
             $coursecontext = context_course::instance($course->id);
 
-            if (!$course->visible && !has_capability('moodle/course:viewhiddencourses', $coursecontext)) {
+            if (!totara_course_is_viewable($course->id, $USER->id)) {
                 // The course is hidden and the user isn't allowed to see it.
                 continue;
             }
-
             if (!has_capability('moodle/user:viewuseractivitiesreport', context_user::instance($this->user->id)) &&
-                    ((!has_capability('moodle/grade:view', $coursecontext) || $this->user->id != $USER->id) &&
-                    !has_capability('moodle/grade:viewall', $coursecontext))) {
+                !has_capability('moodle/grade:viewall', $coursecontext) &&
+               (!has_capability('moodle/grade:view', $coursecontext) || $this->user->id != $USER->id)) {
                 continue;
             }
 

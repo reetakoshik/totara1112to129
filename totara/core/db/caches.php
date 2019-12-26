@@ -47,5 +47,15 @@ $definitions = array(
         'simpledata' => true,
         'staticacceleration' => true,
         'staticaccelerationsize' => 10
-    )
+    ),
+
+    // Cache for quickaccess menu items
+    // Keys are user id's and values are from the quickaccess_preferences table value field.
+    'quickaccessmenu' => array(
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'simpledata' => true,
+        'staticacceleration' => true,
+        'staticaccelerationsize' => 10
+    ),
 );

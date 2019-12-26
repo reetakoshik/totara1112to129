@@ -107,11 +107,13 @@ class block_totara_report_graph_util_testcase extends advanced_testcase {
      */
     public function test_get_svg_data() {
         $this->resetAfterTest();
+        $this->setAdminUser();
+
         $rid = $this->create_user_report_with_graph();
         $block = $this->create_report_graph_block_instance($rid);
 
         $svgdata = \block_totara_report_graph\util::get_svg_data($block->instance->id, $block->config);
-        $this->assertInternalType('string', $svgdata);
+        $this->assertIsString($svgdata);
         $this->assertNotEmpty($svgdata);
         $this->assertNotContains('789px', $svgdata); // This is the max-width, we don't expect to see it!
         $this->assertNotContains('327px', $svgdata); // This is the max-height, we don't expect to see it!

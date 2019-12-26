@@ -53,7 +53,7 @@ M.totara_plan_program_find = M.totara_plan_program_find || {
         }
 
         var url = M.cfg.wwwroot + '/totara/plan/components/program/';
-        var saveurl = url + 'update.php?id='+this.config.plan_id+'&update=';
+        var saveurl = url + 'update.php?sesskey='+M.cfg.sesskey+'&id='+this.config.plan_id+'&update=';
 
         require(['totara_plan/component'], function (component) {
             component.init(M.totara_plan_program_find.config);

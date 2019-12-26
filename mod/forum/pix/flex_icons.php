@@ -63,4 +63,12 @@ $icons = array(
                     'classes' => 'fa-check',
                 ),
         ),
+    'mod_forum|i/pinned' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-map-pin',
+                ),
+        ),
+
 );

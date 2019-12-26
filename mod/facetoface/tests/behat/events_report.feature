@@ -15,9 +15,7 @@ Feature: Check the seminar events and sessions reports display correctly
       | teacher1 | C1     | editingteacher |
       | student1 | C1     | student        |
     When I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test seminar name        |
       | Description | Test seminar description |
@@ -53,8 +51,7 @@ Feature: Check the seminar events and sessions reports display correctly
     # Lets add another session.
     # There should only be one row per event in the events report.
     #
-    When I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    When I am on "Course 1" course homepage
     And I follow "View all events"
     And I click on "Edit event" "link"
     And I click on "Add a new session" "button"

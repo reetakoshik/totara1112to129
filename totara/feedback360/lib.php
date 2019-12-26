@@ -883,41 +883,6 @@ class feedback360 {
     }
 
     /**
-     * Return feedback360s that are assigned to the user, but not assigned for response
-     *
-     * @deprecated since 10
-     *
-     * @param int $userid
-     * @return array
-     */
-    public static function get_available_forms($userid) {
-        throw new coding_exception('get_available_forms has been deprecated since 10.');
-
-        global $DB, $TEXTAREA_OPTIONS;
-
-        $sql = "SELECT f.*, fa.id AS assigid
-                FROM {feedback360_user_assignment} fa
-                JOIN {feedback360} f
-                ON fa.feedback360id = f.id
-                WHERE fa.userid = ?
-                AND f.status = ?";
-        $forms = $DB->get_records_sql($sql, array($userid, self::STATUS_ACTIVE));
-        $available_forms = array();
-        foreach ($forms as $form) {
-            $existingrequests = $DB->count_records('feedback360_resp_assignment',
-                    array('feedback360userassignmentid' => $form->assigid));
-            if ($existingrequests > 0) {
-                continue;
-            }
-            $form->description = file_rewrite_pluginfile_urls($form->description, 'pluginfile.php',
-                $TEXTAREA_OPTIONS['context']->id, 'totara_feedback360', 'feedback360', $form->id);
-            $available_forms[$form->id] = $form;
-        }
-
-        return $available_forms;
-    }
-
-    /**
      * Given an id from the table feedback360_user_assignment, ensure that a given user's id
      * matches the userid on that assignment and that it is active.
      *

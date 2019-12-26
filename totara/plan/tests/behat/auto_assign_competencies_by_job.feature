@@ -55,7 +55,7 @@ Feature: Verify competencies are automatically added to plan according to job as
       | learner5 | Job 1    | manager2 |          | O3           |
 
     When I log in as "admin"
-    And I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    And I navigate to "Manage positions" node in "Site administration > Positions"
     And I follow "Position Framework 1"
     And I follow "Position 1"
     Then I should see "Position Framework 1 - Position 1"
@@ -92,7 +92,7 @@ Feature: Verify competencies are automatically added to plan according to job as
     And I click on "Save" "button" in the "Assign competencies" "totaradialogue"
     Then I should see "Remove" in the "Competency 3" "table_row"
 
-    When I navigate to "Manage organisations" node in "Site administration > Hierarchies > Organisations"
+    When I navigate to "Manage organisations" node in "Site administration > Organisations"
     # Add Competency 2 to Organisation 2.
     And I follow "Organisation Framework 1"
     And I follow "Organisation 2"
@@ -123,7 +123,7 @@ Feature: Verify competencies are automatically added to plan according to job as
     And I follow "Workflow"
     And I click on "Custom workflow" "radio"
     And I press "Advanced workflow settings"
-    And I follow "Competencies"
+    And I switch to "Competencies" tab
     And I click on "Automatically assign by position" "checkbox"
     And I click on "Automatically assign by organisation" "checkbox"
     And I press "Save changes"
@@ -142,7 +142,7 @@ Feature: Verify competencies are automatically added to plan according to job as
     Then I should see "Plan creation successful"
 
     # Check that the competencies have been added from each of the job assignments.
-    When I follow "Competencies"
+    When I switch to "Competencies" tab
     Then I should see "Competency 1"
     And I should see "Competency 2"
     And I should see "Competency 3"
@@ -177,7 +177,7 @@ Feature: Verify competencies are automatically added to plan according to job as
       | user     | cohort |
       | learner3 | A1     |
     When I log in as "admin"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I click on "Edit" "link" in the "Audience 1" "table_row"
     And I switch to "Learning Plan" tab
     And I press "Save and create plans"
@@ -190,7 +190,7 @@ Feature: Verify competencies are automatically added to plan according to job as
 
     When I trigger cron
     And I am on homepage
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Audience 1"
     And I switch to "Learning Plan" tab
     Then the following should exist in the "cohortplancreatehistory" table:
@@ -198,9 +198,9 @@ Feature: Verify competencies are automatically added to plan according to job as
       | Learning Plan |	Admin User | Draft       | 1                        |
 
     # Check that learner3 has a single competency assigned in their learning plan.
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob3 Learner3"
-    And I follow "Learning Plans"
+    And I click on "Learning Plans" "link" in the ".userprofile" "css_element"
     And I follow "Competencies (1)"
     Then I should see "Competency 1"
     And I should not see "Competency 2"
@@ -253,7 +253,7 @@ Feature: Verify competencies are automatically added to plan according to job as
       | user     | cohort |
       | learner3 | A1     |
     When I log in as "admin"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I click on "Edit" "link" in the "Audience 1" "table_row"
     And I switch to "Learning Plan" tab
     And I press "Save and create plans"
@@ -266,7 +266,7 @@ Feature: Verify competencies are automatically added to plan according to job as
 
     When I trigger cron
     And I am on homepage
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Audience 1"
     And I switch to "Learning Plan" tab
     Then the following should exist in the "cohortplancreatehistory" table:
@@ -274,9 +274,9 @@ Feature: Verify competencies are automatically added to plan according to job as
       | Learning Plan |	Admin User | Draft       | 1                        |
 
     # Check that learner3 has a single competency assigned in their learning plan.
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob3 Learner3"
-    And I follow "Learning Plans"
+    And I click on "Learning Plans" "link" in the ".userprofile" "css_element"
     And I follow "Competencies (1)"
     Then I should see "Competency 3"
     And I should not see "Competency 1"

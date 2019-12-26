@@ -34,12 +34,15 @@ $string['totara_sync:manageuser'] = 'Manage HR Import users';
 $string['totara_sync:manageorg'] = 'Manage HR Import organisations';
 $string['totara_sync:managepos'] = 'Manage HR Import positions';
 $string['totara_sync:managejobassignment'] = 'Manage HR Import job assignments';
+$string['totara_sync:managecomp'] = 'Manage HR Import competencies';
 $string['totara_sync:uploaduser'] = 'Upload HR Import users';
 $string['totara_sync:uploadorg'] = 'Upload HR Import organisations';
 $string['totara_sync:uploadpos'] = 'Upload HR Import positions';
+$string['totara_sync:uploadcomp'] = 'Upload HR Import competencies';
 $string['totara_sync:uploadjobassignment'] = 'Upload HR Import job assignments';
 $string['totara_sync:deletesynclog'] = 'Clear the HR Import Logs';
 $string['settingssaved'] = 'Settings saved';
+$string['settingssavedlinktosource'] = 'Settings updated. The source settings for this element can be <a href=\'{$a}\'>configured here</a>.';
 $string['elementenabled'] = 'Element enabled';
 $string['elementdisabled'] = 'Element disabled';
 $string['uploadsuccess'] = 'HR Import files uploaded successfully';
@@ -61,12 +64,21 @@ $string['elementxnotfound'] = 'Element {$a} not found';
 $string['notadirerror'] = 'Directory \'{$a}\' does not exist or not accessible';
 $string['readonlyerror'] = 'Directory \'{$a}\' is read-only';
 $string['pathformerror'] = 'Path not found';
+$string['elementsusingdefault'] = 'Elements using default settings';
+$string['noneusedefault'] = 'None';
+$string['compsynctask'] = 'Competency HR Import';
+$string['jobassignmentsynctask'] = 'Job assignment HR Import';
+$string['orgsynctask'] = 'Organisation HR Import';
+$string['possynctask'] = 'Position HR Import';
+$string['usersynctask'] = 'User HR Import';
 
 // Hierarchy items
 $string['displayname:org'] = 'Organisation';
 $string['settings:org'] = 'Organisation element settings';
 $string['displayname:pos'] = 'Position';
 $string['settings:pos'] = 'Position element settings';
+$string['displayname:comp'] = 'Competency';
+$string['settings:comp'] = 'Competency element settings';
 $string['removeitems'] = 'Remove items';
 $string['removeitemsdesc'] = 'Specify what to do with internal items during HR Import when item was removed from source.';
 
@@ -110,6 +122,7 @@ $string['source'] = 'Source';
 $string['sources'] = 'Sources';
 $string['sourcenotfound'] = 'Source for \'{$a}\' not found';
 $string['sourcesettings'] = 'Source settings';
+$string['configurefileaccess'] = 'File access settings must be configured before you can import data.';
 $string['configuresource'] = 'Configure source';
 $string['nosources'] = 'No sources';
 $string['filedetails'] = 'File details';
@@ -119,17 +132,25 @@ $string['uploadsyncfiles'] = 'Upload HR Import files';
 $string['sourcedoesnotusefiles'] = 'Source does not use files';
 $string['nosourceconfig'] = 'No source configuration for \'{$a}\'';
 $string['sourceconfigured'] = 'Source has configuration';
+$string['sourcetypenotloaded'] = 'Source could not be loaded for {$a}';
 $string['uploadfilelink'] = 'Files can be uploaded <a href=\'{$a}\'>here</a>';
 
 // Hierarchy items
+$string['customfieldfullnamewithtype'] = '{$a->customfield_fullname} ({$a->type_fullname})';
+$string['customfieldshortnamewithtype'] = '{$a->customfield_shortname} ({$a->type_idnumber})';
 $string['displayname:totara_sync_source_org_csv'] = 'CSV';
 $string['displayname:totara_sync_source_org_database'] = 'External Database';
 $string['displayname:totara_sync_source_pos_csv'] = 'CSV';
 $string['displayname:totara_sync_source_pos_database'] = 'External Database';
+$string['displayname:totara_sync_source_comp_csv'] = 'CSV';
+$string['displayname:totara_sync_source_comp_database'] = 'External Database';
+$string['hierarchycustomfieldneedstypeid'] = 'Type must be imported when importing custom fields';
 $string['settings:totara_sync_source_org_csv'] = 'Organisation - CSV source settings';
 $string['settings:totara_sync_source_org_database'] = 'Organisation - external database source settings';
 $string['settings:totara_sync_source_pos_csv'] = 'Position - CSV source settings';
 $string['settings:totara_sync_source_pos_database'] = 'Position - external database source settings';
+$string['settings:totara_sync_source_comp_csv'] = 'Competency - CSV source settings';
+$string['settings:totara_sync_source_comp_database'] = 'Competency - external database source settings';
 
 // User
 $string['displayname:totara_sync_source_user_csv'] = 'CSV';
@@ -174,6 +195,11 @@ $string['csvimportfilestructinfo'] = 'The current config requires a CSV file wit
 $string['shortname'] = 'Shortname';
 $string['parentidnumber'] = 'Parent';
 $string['typeidnumber'] = 'Type';
+
+// Competency
+$string['aggregationmethod'] = 'Aggregation method';
+$string['unrecognisedaggregrationmethod'] = 'Unrecognised aggregation method value: {$a}';
+$string['aggregrationmethodmusthavevalue'] = 'The aggregation method must be given a value for item with idnumber: {$a}';
 
 // Job assignment
 $string['appraiserxnotexistjobassignment'] = 'User \'{$a->appraiseridnumber}\' does not exist and was set to be assigned as appraiser. Skipped job assignment \'{$a->idnumber}\' for user \'{$a->useridnumber}\'.';
@@ -237,7 +263,6 @@ $string['syncnotconfiguredsummary'] = 'HR Import is not configured properly. Ple
 $string['syncnotconfigured'] = 'HR Import is not configured properly. Please, fix the issues before running.';
 $string['temptableprepfail'] = 'temp table preparation failed';
 $string['temptablecreatefail'] = 'error creating temp table';
-$string['nocsvfilepath'] = 'no CSV filepath specified';
 $string['nofilesdir'] = 'No HR Import files directory configured';
 $string['nofiletosync'] = 'No file to import (file path: {$a})';
 $string['nofileuploaded'] = 'No file was uploaded for {$a} import';
@@ -258,6 +283,7 @@ $string['cannotdeletex'] = 'cannot delete {$a} (might already be deleted)';
 $string['deletedx'] = 'deleted {$a}';
 $string['deletefieldmissingnotallrecords'] = 'The delete field is missing, this is a required field if the file does not contain all records';
 $string['suspendeduserx'] = 'suspended {$a}';
+$string['existingitemxframeworkidnotfound'] = 'item {$a} does not have a framework id number, this is required when framework id of the existing item is empty';
 $string['frameworkxnotfound'] = 'framework {$a} not found...';
 $string['parentxnotfound'] = 'parent {$a} not found...';
 $string['cannotsyncitemparent'] = 'cannot import item\'s parent {$a}';
@@ -274,6 +300,7 @@ $string['circularreferror'] = 'circular reference error between items {$a->naugh
 $string['customfieldsnotype'] = 'custom fields specified, but no type {$a}';
 $string['typexnotfound'] = 'type {$a} not found...';
 $string['customfieldnotexist'] = 'custom field {$a->shortname} does not exist (type:{$a->typeidnumber})';
+$string['customfieldinvalidmaptype'] = 'While processing item {$a->idnumber}: the custom field column, {$a->columnname}, is not valid for type: {$a->typeidnumber}';
 $string['cannotdeleteuseradmin'] = 'Local administrator accounts can not be deleted: {$a}';
 $string['cannotdeleteuserguest'] = 'Guest user account can not be deleted: {$a}';
 $string['cannotdeleteuserx'] = 'cannot delete user {$a}';
@@ -302,6 +329,7 @@ $string['duplicateuserswithemailx'] = 'Duplicate users with email {$a->duplicate
 $string['duplicateusernamexdb'] = 'Username {$a->username} is already registered. Skipped user {$a->idnumber}';
 $string['duplicateusersemailxdb'] = 'Email {$a->email} is already registered. Skipped user {$a->idnumber}';
 $string['duplicateidnumberx'] = 'Duplicate idnumber {$a}';
+$string['emptyvalueauthx'] = 'Auth cannot be empty. Skipped user {$a->idnumber}';
 $string['emptyvalueemailx'] = 'Email cannot be empty (duplicates not allowed). Skipped user {$a->idnumber}';
 $string['emptyvaluefirstnamex'] = 'First name cannot be empty. Skipped user {$a->idnumber}';
 $string['emptyvalueidnumberx'] = 'Idnumber cannot be empty. Skipped user {$a->idnumber}';
@@ -370,7 +398,7 @@ $string['pipe'] = 'Pipe (|)';
 
 $string['errorplural'] = 'Errors';
 $string['notifymessage'] = 'Server time: {$a->time}, Element: {$a->element}, Action: {$a->action}, {$a->logtype}: {$a->info}';
-$string['notifymessagestart'] = '{$a->count} new HR Import log messages ({$a->logtypes}) since {$a->since}. See below for most recent messages:';
+$string['notifymessagestartrunid'] = '{$a->count} new HR Import log messages ({$a->logtypes}) For run id {$a->runid}. See below for most recent messages:';
 $string['notifysubject'] = '{$a} :: HR Import notification';
 $string['syncnotifications'] = 'HR Import notifications';
 $string['viewsyncloghere'] = 'For more information, view the HR Import Log at {$a}';
@@ -387,22 +415,48 @@ $string['emptyfieldsbehaviouruser_help'] = 'When set to **Empty strings are igno
 When set to **Empty strings erase existing data** empty strings within your CSV file will lead to the current value being deleted.
 
 Please note that some fields are required, and some fields utilise a default value.
-If **Empty strings erase existing data** is selected and you attempt to delete the current value for a required field, the user in the CSV file will be skipped as a value must be provided.
-If **Empty strings erase existing data** is selected and you delete the current value of a field that utilises a default value, the default value will be used as the current value.';
-$string['enablescheduledsync'] = 'Enable scheduled HR Importing';
+
+* If **Empty strings erase existing data** is selected and you attempt to delete the current value for a required field, the user in the CSV file will be skipped as a value must be provided.
+* If **Empty strings erase existing data** is selected and you delete the current value of a field that utilises a default value, the default value will be used as the current value.
+
+Fields that cannot be empty are:
+
+* idnumber
+* username
+* firstname
+* lastname
+* password
+* deleted (depending on the source contains all records setting)
+* auth
+';
 $string['files'] = 'Files';
 $string['filesdir'] = 'Files directory';
-$string['fileaccess'] = 'File Access';
+$string['fileaccess'] = 'File access';
+$string['fileaccess_default'] = 'Default ({$a})';
 $string['fileaccess_directory'] = 'Directory Check';
 $string['fileaccess_upload'] = 'Upload Files';
-$string['generalsettings'] = 'General settings';
+$string['fileaccess_unknowndefault'] = 'Default (Unknown)';
+$string['fileaccessnotset'] = 'No valid file access configuration found';
+$string['filesdirnotset'] = 'No valid file directory configuration found';
+$string['defaultsettings'] = 'Default settings';
 $string['invalidemailaddress'] = 'Invalid email address \'{$a}\'';
+$string['noneselected'] = 'None selected';
 $string['notifications'] = 'Notifications';
 $string['notifymailto'] = 'Email notifications to';
+$string['notifymailtodefault'] = 'Email notifications to: {$a->recipients}';
 $string['notifymailto_help'] = 'A comma-separated list of email addresses so which notifications should be sent.';
 $string['notifytypes'] = 'Send notifications for';
+$string['notifytypesdefault'] = 'Send notifications for: {$a->logmessagetypes}';
 $string['schedule'] = 'Schedule';
+$string['scheduledefault_complex'] = 'Complex schedule in use';
+$string['scheduledefault_currentsetting'] = 'Schedule (Server time): {$a}';
+$string['scheduledhrimporting'] = 'Scheduled HR importing';
+$string['scheduledisabled'] = 'Disable';
+$string['scheduleenabled'] = 'Enable';
 $string['scheduleserver'] = 'Schedule (server time)';
+$string['schedulingdisabled'] = 'Scheduling disabled';
+$string['usedefaultsettings'] = 'Use default settings';
+$string['usedefaultsettings_help'] = 'When selected, settings configured on the \'Default settings\' page will be applied to this element. When deselected, it is possible to override the default with settings specific to this element only.';
 $string['csvencoding'] = 'CSV file encoding';
 
 // Event.
@@ -447,3 +501,9 @@ $string['orgxnotexist'] = 'Organisation {$a->orgidnumber} does not exist. Skippe
 $string['posxnotexist'] = 'Position {$a->posidnumber} does not exist. Skipped user {$a->idnumber}';
 $string['selfassignedmanagerx'] = 'User {$a->idnumber} cannot be their own manager. Skipped user {$a->idnumber}';
 $string['selfassignedappraiserx'] = 'User {$a->idnumber} cannot be their own appraiser. Skipped user {$a->idnumber}';
+
+// Deprecated since 12.0
+$string['nocsvfilepath'] = 'no CSV filepath specified';
+$string['notifymessagestart'] = '{$a->count} new HR Import log messages ({$a->logtypes}) since {$a->since}. See below for most recent messages:';
+$string['enablescheduledsync'] = 'Enable scheduled HR Importing';
+$string['generalsettings'] = 'General settings';

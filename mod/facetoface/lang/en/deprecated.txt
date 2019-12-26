@@ -2,6 +2,7 @@ addmanageremailaddress,mod_facetoface
 addmanageremailinstruction,mod_facetoface
 addnewnotice,mod_facetoface
 addnewnoticelink,mod_facetoface
+approvaloptionsheader,mod_facetoface
 bulkaddattendeesfromfile,mod_facetoface
 bulkaddattendeesfrominput,mod_facetoface
 bulkaddheading,mod_facetoface
@@ -74,6 +75,7 @@ setting:manageraddressformatreadable_caption,mod_facetoface
 setting:manageraddressformatreadabledefault,mod_facetoface
 setting:selectpositiononsignupglobal,mod_facetoface
 setting:selectpositiononsignupglobal_caption,mod_facetoface
+setting:signupapproval_header,mod_facetoface
 setting:sitenotices,mod_facetoface
 setting:sitenoticeshere,mod_facetoface
 sitenoticesheading,mod_facetoface
@@ -86,6 +88,19 @@ availablesignupnote,mod_facetoface
 availablesignupnote_help,mod_facetoface
 missingdefaultnotifications,mod_facetoface
 missingdefaultsfix,mod_facetoface
+error:couldnotaddsession,mod_facetoface
+error:couldnotupdatesession,mod_facetoface
+status_session_cancelled,mod_facetoface
+setting:multiplesessions,mod_facetoface
+setting:multiplesessions_caption,mod_facetoface
+multiplesessions,mod_facetoface
+multiplesessions_help,mod_facetoface
+setting:fromaddress_caption,mod_facetoface
+setting:fromaddress,mod_facetoface
+setting:fromaddressdefault,mod_facetoface
 schedule_unit_3,mod_facetoface
 schedule_unit_3_singular,mod_facetoface
 scvtextfile_help,mod_facetoface
+noupcoming,mod_facetoface
+sessionundercapacity,mod_facetoface
+sessionundercapacity_body,mod_facetoface

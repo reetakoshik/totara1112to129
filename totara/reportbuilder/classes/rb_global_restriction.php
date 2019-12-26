@@ -361,7 +361,7 @@ class rb_global_restriction {
         $sources = reportbuilder::get_source_list();
         $unsupported = array();
         foreach ($sources as $key => $name) {
-            $source = reportbuilder::get_source_object($key);
+            $source = reportbuilder::get_source_object($key, true);
             if (!is_null($source->global_restrictions_supported())) {
                 continue;
             }

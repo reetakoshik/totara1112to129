@@ -20,8 +20,6 @@ Feature: Test duplicating a quiz containing a True/False question
     And quiz "Test quiz" contains the following questions:
       | true-false-001 | 1 |
     And I log in as "admin"
-    And I am on site homepage
-    And I follow "Course 1"
 
   @javascript
   Scenario: Backup and restore a course containing a True/False question

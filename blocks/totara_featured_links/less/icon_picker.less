@@ -1,0 +1,70 @@
+//This file is part of Totara LMS
+//
+//Copyright (C) 2017 onwards Totara Learning Solutions LTD
+//
+//This program is free software; you can redistribute it and/or modify
+//it under the terms of the GNU General Public License as published by
+//the Free Software Foundation; either version 3 of the License, or
+//(at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//                          MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+//@author Andrew McGhie <andrew.mcghie@totaralearning.com>
+//@package block_totara_featured_links
+
+@padding-icon-item: 8px;
+@width-icon-item: 55px;
+@icon-size: 25px;
+@margin-icon-item: 3px;
+
+.modal-body {
+    .icon-picker-icons {
+        font-size: @icon-size;
+        line-height: @icon-size * 1.5;
+        height: calc(~"100vh - 300px");
+        overflow-y: auto;
+
+        .icon-picker-item {
+            display: inline-block;
+
+            border: 2px solid @gray-light;
+            border-radius: @border-radius-small;
+
+            cursor: pointer;
+
+            width: @width-icon-item;
+
+            padding: @padding-icon-item;
+            margin: @margin-icon-item;
+
+            &.selected {
+                border-color: @brand-primary;
+            }
+        }
+    }
+}
+
+.tf_element {
+    .icon-picker-delete-icon {
+        color: @state-danger-text;
+        text-decoration: underline;
+        cursor: pointer;
+        margin-right: 16px;
+    }
+    .icon-picker-icon-display {
+        font-size: @icon-size;
+        img {
+            height: @icon-size;
+            width: @icon-size;
+        }
+        .icon-picker-invalid {
+            font-size: @font-size-base;
+        }
+    }
+}

@@ -1,11 +1,34 @@
 This files describes API changes for code that uses the appraisal API,
 information provided here is intended especially for developers.
 
-=== 11.11 ===
+=== 12.9 ===
+
+* appraisal_stage::get_mandatory_completion will now return roles that are unpopulated (empty userid) when
+  dynamic appraisals is on and automatic progression is off.
+
+=== 12.2 ===
 
 * The event appraisal_stage_completion has been deprecated. This event wasn't storing the correct data in the correct
   fields. The event appraisal_stage_completed was added, which contains more, and more accurate, data.
 * Added appraisal_role_page_saved and appraisal_role_stage_completed events.
+
+=== 12.0 ===
+
+* Icon helpers are no longer used in the following templates, icon data is passed via context data:
+** totara/appraisal/templates/stage_brief.mustache
+Removed deprecated methods:
+  * appraisal::get_missingrole_users()
+  * appraisal::get_changedrole_users()
+  * appraisal::get_live_role_assignments()
+* The dynamically created appraisal question data table columns have been changed from char to text. Any use of
+these columns in the where clause of sql queries will need to be changed to use $DB->sql_compare_text.
+* Deprecated the following report builder display functions and replaced with display classes
+  * rb_source_appraisal::rb_display_status(), please call totara_appraisal\rb\display\appraisal_user_status::display() instead.
+  * rb_source_appraisal::rb_display_appraisalstatus(), please call totara_appraisal\rb\display\appraisal_status::display() instead.
+  * rb_source_appraisal_detail::rb_display_longtext(), please call totara_appraisal\rb\display\appraisal_longtext::display() instead.
+  * rb_source_appraisal_detail::rb_display_fileupload(), please call totara_appraisal\rb\display\appraisal_longtext::display() instead.
+  * rb_source_appraisal_detail::rb_display_multichoicesingle(), please call totara_appraisal\rb\display\appraisal_multichoice_single::display() instead.
+  * rb_source_appraisal_detail::rb_display_multichoicemulti(), please call totara_appraisal\rb\display\appraisal_multichoice_multi::display() instead.
 
 === 11.10 ===
 
@@ -13,16 +36,6 @@ information provided here is intended especially for developers.
   * totara_assign_appraisal::store_job_assignments()
   * appraisal_user_assignment::with_job_assignment()
   * appraisal_user_assignment::with_auto_job_assignment()
-
-=== 11.4 ===
-
-* The dynamically created appraisal question data table columns have been changed from char to text. Any use of
-  these columns in the where clause of sql queries will need to be changed to use $DB->sql_compare_text.
-
-=== 11.3 ===
-
-* Icon helpers are no longer used in the following templates, icon data is passed via context data:
-** totara/appraisal/templates/stage_brief.mustache
 
 === 10.0 ===
 

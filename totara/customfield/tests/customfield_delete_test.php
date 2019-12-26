@@ -77,6 +77,8 @@ class totara_customfield_delete_testcase extends advanced_testcase {
         $this->assertCount(4, $records);
 
         foreach ($cif as $customfield) {
+            // Catalog caches were set up when the course was created, containing the custom field dataholders.
+            \totara_catalog\cache_handler::reset_all_caches();
 
             $prefix = 'course';
             $extra = array('prefix' => $prefix, 'id' => $customfield->id, 'action' => 'deletefield');

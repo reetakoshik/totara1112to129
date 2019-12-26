@@ -44,7 +44,7 @@ class totara_core_dialog_load_courses_testcase extends advanced_testcase {
         $course1 = $generator->create_course(array(
             'category' => $category->id,
             'enablecompletion' => COMPLETION_DISABLED,
-            'completionstartonenrol' => 0,
+            'completionstartonenrol' => 1,
             'completionprogressonview' => 0
         ));
 

@@ -24,5 +24,5 @@
 defined('MOODLE_INTERNAL') || die;
 
 if ($hassiteconfig && has_capability('moodle/user:update', context_system::instance())) {
-    $ADMIN->add('location', new admin_externalpage('tooltimezonefix', get_string('pluginname', 'tool_totara_timezonefix'), "$CFG->wwwroot/$CFG->admin/tool/totara_timezonefix/index.php"));
+    $ADMIN->add('localisation', new admin_externalpage('tooltimezonefix', get_string('pluginname', 'tool_totara_timezonefix'), "$CFG->wwwroot/$CFG->admin/tool/totara_timezonefix/index.php"));
 }

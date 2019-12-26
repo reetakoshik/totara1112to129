@@ -31,4 +31,8 @@ $observers = array(
         'eventname' => '\core\event\user_deleted',
         'callback' => 'totara_reportbuilder_observer::user_deleted',
     ),
+    array(
+        'eventname' => '\totara_reportbuilder\event\report_created',
+        'callback' => 'totara_reportbuilder_observer::add_default_restriction',
+    ),
 );

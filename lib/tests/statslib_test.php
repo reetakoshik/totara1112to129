@@ -537,8 +537,6 @@ class core_statslib_testcase extends advanced_testcase {
 
     /**
      * Test the temporary table creation and deletion.
-     *
-     * @depends test_statslib_temp_table_create_and_drop
      */
     public function test_statslib_temp_table_fill() {
         global $CFG, $DB, $USER;
@@ -640,8 +638,6 @@ class core_statslib_testcase extends advanced_testcase {
 
     /**
      * Test the temporary table creation and deletion.
-     *
-     * @depends test_statslib_temp_table_create_and_drop
      */
     public function test_statslib_temp_table_setup() {
         global $DB;
@@ -659,8 +655,6 @@ class core_statslib_testcase extends advanced_testcase {
 
     /**
      * Test the function that clean out the temporary tables.
-     *
-     * @depends test_statslib_temp_table_create_and_drop
      */
     public function test_statslib_temp_table_clean() {
         global $DB;
@@ -693,13 +687,6 @@ class core_statslib_testcase extends advanced_testcase {
 
     /**
      * Test the daily stats function.
-     *
-     * @depends test_statslib_get_base_daily
-     * @depends test_statslib_get_next_day_start
-     * @depends test_statslib_get_start_from
-     * @depends test_statslib_temp_table_create_and_drop
-     * @depends test_statslib_temp_table_setup
-     * @depends test_statslib_temp_table_fill
      * @dataProvider daily_log_provider
      */
     public function test_statslib_cron_daily($xmlfile) {
@@ -721,9 +708,6 @@ class core_statslib_testcase extends advanced_testcase {
 
     /**
      * Test the daily stats function.
-     *
-     * @depends test_statslib_get_base_daily
-     * @depends test_statslib_get_next_day_start
      */
     public function test_statslib_cron_daily_no_default_profile_id() {
         global $CFG, $DB;
@@ -749,10 +733,6 @@ class core_statslib_testcase extends advanced_testcase {
         $this->verify_stats($dataset[1], $output);
     }
 
-    /**
-     * @depends test_statslib_get_base_daily
-     * @depends test_statslib_get_next_day_start
-     */
     public function test_stats_get_report_options() {
         global $CFG, $DB;
 

@@ -166,7 +166,9 @@ abstract class rb_filter_f2f_available extends rb_filter_type {
     public function get_sql_filter($data) {
         if ($data['start'] > $data['end']) {
             return array(" 1=0 ", array());
-        } else if (isset($data['enable']) && $data['enable'] == self::ANY_TIME) {
+        }
+        else if (isset($data['enable']) && $data['enable'] == self::ANY_TIME)
+        {
             return array(" 1=1 ", array());
         }
 

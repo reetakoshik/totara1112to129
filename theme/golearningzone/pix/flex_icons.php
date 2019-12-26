@@ -45,6 +45,13 @@ $icons = array(
                     'classes' => 'fa-file-word-o',
                 ),
         ),
+    'mod_page|icon' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-suitcase',
+                ),
+        ),
 );
 
 /*

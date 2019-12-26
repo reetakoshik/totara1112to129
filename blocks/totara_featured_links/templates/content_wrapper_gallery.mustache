@@ -37,11 +37,8 @@
     Context variables required for this template:
      * content string the html content of the tile
      * disabled boolean whether the tile is disabled or not
-     * background_imgs array an array containing the urls to the background images
-     * alt_text array and array that contains the text used for accessibility and is not shown
-     * background_color string the color of the background
-     * url string the url that the tile should link to
      * controls string html code for an action menu
+     * subtiles string html for all the subtiles that are in the gallery tile
 
     Other context variables for following partials:
      * none
@@ -50,35 +47,20 @@
       {
         "content": "html displayed in the tile",
         "disabled": true,
-        "background_imgs": [
-            {"url": "http://172.17.0.1/totara-moodle/pluginfile.php/5/block_totara_featured_links/tile_background/427332454/download%20%282%29.jpg",
-            "itemid": "427332454"},
-            {"url": "http://172.17.0.1/totara-moodle/pluginfile.php/5/block_totara_featured_links/tile_background/427332454/download%20%282%29.jpg",
-            "itemid": "427332454"}
-        ],
-        "alt_text": {
-            "tile_title": "alt_text",
-            "sr-only": "sr only text"
-        },
-        "background_color": "#11FFaa",
-        "url": "http://www.google.com",
-        "controls": "rendered html for an action menu"
+        "controls": "rendered html for an action menu",
+        "subtiles": "<div class="block-totara-featured-links-tile">...</div>"
+
       }
 }}
-<div class="block-totara-featured-links-tile-{{size}} block-totara-featured-links-tile-{{tile_id}}" id="block-totara-featured-links-tile-{{tile_id}}" style="{{#background_color}}background-color: {{background_color}};{{/background_color}}" {{#alt_text.tile_title}}title="{{alt_text.tile_title}}"{{/alt_text.tile_title}}>
-    {{^disabled}}{{^editing}}{{#url}}
-        <a class="block-totara-featured-links-link" href="{{& url}}" rel="noreferrer" {{#target}}target="{{target}}"{{/target}}><span class="sr-only">{{alt_text.sr-only}}</span></a>
-    {{/url}}{{/editing}}{{/disabled}}
+<div class="block-totara-featured-links-tile block-totara-featured-links-tile-{{size}} block-totara-featured-links-tile-{{tile_id}}" id="block-totara-featured-links-tile-{{tile_id}}" style="{{#background_color}}background-color: {{background_color}};{{/background_color}}" {{#alt_text.tile_title}}title="{{alt_text.tile_title}}"{{/alt_text.tile_title}}>
     {{#disabled}}<div class="block-totara-featured-links-disabled"><div>{{hidden_text}}</div></div>{{/disabled}}
-    {{{content}}}
     {{#editing}}
         <div class="block-totara-featured-links-edit">
             {{{controls}}}
         </div>
     {{/editing}}
-    <div id="block-totara-featured-links-gallery-tile-{{tile_id}}" class="block-totara-featured-links-gallery-images">
-    {{#background_imgs}}
-        <div style="{{#background_color}}background-color: {{background_color}};{{/background_color}}display: none;background-image: url('{{& .}}');" alt="{{alt_text.tile_title}}"></div>
-    {{/background_imgs}}
+
+    <div id="block-totara-featured-links-gallery-tile-{{tile_id}}" class="block-totara-featured-links-gallery-subtiles">
+        {{{subtiles}}}
     </div>
 </div>

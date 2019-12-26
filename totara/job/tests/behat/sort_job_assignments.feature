@@ -14,7 +14,7 @@ Feature: Test job assignments can be sorted
   @javascript
   Scenario: Job Assignments can be sorted by the admin
     When I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "User One" "link" in the "User One" "table_row"
     Then I should see "User One"
     And I should see "Job assignments"
@@ -72,7 +72,7 @@ Feature: Test job assignments can be sorted
 
     When I follow "Home"
     And a new page should have loaded since I started watching
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "User One" "link" in the "User One" "table_row"
     Then I should see "User One"
     And I should see "Job assignments"
@@ -82,7 +82,7 @@ Feature: Test job assignments can be sorted
     And job assignment at position "3" should be "Assignment 1"
     And I should see "Add job assignment"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "User Two" "link" in the "User Two" "table_row"
     And I follow "Add job assignment"
     And I set the following fields to these values:
@@ -106,7 +106,7 @@ Feature: Test job assignments can be sorted
     And job assignment at position "1" should be "Assignment 1"
     And job assignment at position "2" should be "Assignment 2"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "User One" "link" in the "User One" "table_row"
     And I follow "Add job assignment"
     And I set the following fields to these values:
@@ -129,7 +129,7 @@ Feature: Test job assignments can be sorted
     And job assignment at position "3" should be "Assignment 4"
     And job assignment at position "4" should be "Assignment 1"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "User Two" "link" in the "User Two" "table_row"
     Then there should be "2" totara job assignments
     And job assignment at position "1" should be "Assignment 1"
@@ -140,7 +140,7 @@ Feature: Test job assignments can be sorted
     And job assignment at position "1" should be "Assignment 2"
     And job assignment at position "2" should be "Assignment 1"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "User One" "link" in the "User One" "table_row"
     Then there should be "4" totara job assignments
     And job assignment at position "1" should be "Assignment 3"

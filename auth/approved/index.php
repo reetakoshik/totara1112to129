@@ -34,7 +34,8 @@ $bulktime = optional_param('bulktime', 0, PARAM_INT);
 $syscontext = context_system::instance();
 admin_externalpage_setup('authapprovedpending', '', null, '', array('pagelayout'=>'report'));
 
-$report = reportbuilder_get_embedded_report('auth_approved_pending_requests', array(), true, $sid);
+$config = (new rb_config())->set_sid($sid)->set_nocache(true);
+$report = reportbuilder::create_embedded('auth_approved_pending_requests', $config);
 
 $bulkactions = \auth_approved\bulk::get_actions_menu();
 if ($bulkaction and isset($bulkactions[$bulkaction])) {

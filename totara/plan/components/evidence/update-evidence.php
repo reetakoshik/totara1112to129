@@ -31,6 +31,7 @@ require_once($CFG->dirroot.'/totara/plan/components/evidence/evidence.class.php'
 check_learningplan_enabled();
 
 require_login();
+require_sesskey();
 
 $planid = required_param('planid', PARAM_INT);
 $componentname = required_param('component', PARAM_ALPHA);

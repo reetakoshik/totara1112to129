@@ -373,16 +373,28 @@ class core_navigationlib_testcase extends advanced_testcase {
         $this->assertSame($course->id, $items[$i++]->key);
         $this->assertSame('test 3', $items[$i++]->text);
         $this->assertSame('test 4', $items[$i++]->text);
-
-        return $page;
     }
 
-    /**
-     * @depends test_navbar_prepend_and_add
-     * @param $node
-     */
-    public function test_navbar_has_items(moodle_page $page) {
+    public function test_navbar_has_items() {
+        global $PAGE;
+        // Unfortunate hack needed because people use global $PAGE around the place.
+        $PAGE->set_url('/');
+
+        // We need to reset after this test because we using the generator.
         $this->resetAfterTest();
+
+        $generator = self::getDataGenerator();
+        $cat1 = $generator->create_category();
+        $cat2 = $generator->create_category(array('parent' => $cat1->id));
+        $course = $generator->create_course(array('category' => $cat2->id));
+
+        $page = new moodle_page();
+        $page->set_course($course);
+        $page->set_url(new moodle_url('/course/view.php', array('id' => $course->id)));
+        $page->navbar->prepend('test 1');
+        $page->navbar->prepend('test 2');
+        $page->navbar->add('test 3');
+        $page->navbar->add('test 4');
 
         $this->assertTrue($page->navbar->has_items());
     }
@@ -431,10 +443,11 @@ class core_navigationlib_testcase extends advanced_testcase {
         $this->assertEquals($cache->software, 'Moodle');
     }
 
-    public function test_setting___construct() {
+    /**
+     * @return exposed_settings_navigation
+     */
+    public function create_node() {
         global $PAGE, $SITE;
-
-        $this->resetAfterTest(false);
 
         $PAGE->set_url('/');
         $PAGE->set_course($SITE);
@@ -444,18 +457,11 @@ class core_navigationlib_testcase extends advanced_testcase {
         return $node;
     }
 
-    /**
-     * @depends test_setting___construct
-     * @param mixed $node
-     * @return mixed
-     */
-    public function test_setting__initialise($node) {
-        $this->resetAfterTest(false);
+    public function test_setting__initialise() {
+        $node = $this->create_node();
 
         $node->initialise();
         $this->assertEquals($node->id, 'settingsnav');
-
-        return $node;
     }
 
     /**
@@ -497,13 +503,9 @@ class core_navigationlib_testcase extends advanced_testcase {
         $this->assertTrue($settingsnav->can_view_user_preferences($persontoview->id));
     }
 
-    /**
-     * @depends test_setting__initialise
-     * @param mixed $node
-     * @return mixed
-     */
-    public function test_setting_in_alternative_role($node) {
-        $this->resetAfterTest();
+    public function test_setting_in_alternative_role() {
+        $node = $this->create_node();
+        $node->initialise();
 
         $this->assertFalse($node->exposed_in_alternative_role());
     }

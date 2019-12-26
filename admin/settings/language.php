@@ -12,4 +12,4 @@ $temp->add(new admin_setting_configcheckbox('langstringcache', new lang_string('
 $temp->add(new admin_setting_configtext('locale', new lang_string('localetext', 'admin'), new lang_string('configlocale', 'admin'), '', PARAM_FILE));
 $temp->add(new admin_setting_configselect('latinexcelexport', new lang_string('latinexcelexport', 'admin'), new lang_string('configlatinexcelexport', 'admin'), '0', array('0'=>'Unicode','1'=>'Latin')));
 
-$ADMIN->add('language', $temp);
+$ADMIN->add('localisation', $temp);

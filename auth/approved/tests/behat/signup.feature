@@ -111,7 +111,7 @@ Feature: auth_approved: signup workflow
     And "jb007" row "Email confirmed" column of "auth_approved_pending_requests" table should contain "No"
 
     # Successful signup outcome #2: audit trail created.
-    When I navigate to "Logs" node in "Site administration > Reports"
+    When I navigate to "Logs" node in "Site administration > Server"
     And I press "Get these logs"
     Then "Self-registration with approval" row "Event name" column of "reportlog" table should contain "User added new account request"
     And "Self-registration with approval" row "Description" column of "reportlog" table should contain "jb007 (bond@example.gov) registered for system access"
@@ -202,7 +202,7 @@ Feature: auth_approved: signup workflow
 
     # Successful signup outcome #2: audit trail created.
     When I press "Cancel"
-    And I navigate to "Logs" node in "Site administration > Reports"
+    And I navigate to "Logs" node in "Site administration > Server"
     And I press "Get these logs"
     Then "Self-registration with approval" row "Event name" column of "reportlog" table should contain "User added new account request"
     And "Self-registration with approval" row "Description" column of "reportlog" table should contain "jb007 (bond@example.gov) registered for system access"
@@ -294,7 +294,7 @@ Feature: auth_approved: signup workflow
 
     # Successful signup outcome #2: audit trail created.
     When I press "Cancel"
-    And I navigate to "Logs" node in "Site administration > Reports"
+    And I navigate to "Logs" node in "Site administration > Server"
     And I press "Get these logs"
     Then "Self-registration with approval" row "Event name" column of "reportlog" table should contain "User added new account request"
     And "Self-registration with approval" row "Description" column of "reportlog" table should contain "jb007 (bond@example.gov) registered for system access"
@@ -389,7 +389,7 @@ Feature: auth_approved: signup workflow
 
     # Successful signup outcome #2: audit trail created.
     When I press "Cancel"
-    And I navigate to "Logs" node in "Site administration > Reports"
+    And I navigate to "Logs" node in "Site administration > Server"
     And I press "Get these logs"
     Then "Self-registration with approval" row "Event name" column of "reportlog" table should contain "User added new account request"
     And "Self-registration with approval" row "Description" column of "reportlog" table should contain "jb007 (bond@example.gov) registered for system access"

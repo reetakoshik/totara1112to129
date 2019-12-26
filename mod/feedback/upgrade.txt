@@ -1,6 +1,10 @@
 This files describes API changes in /mod/feedback/*,
 information provided here is intended especially for developers.
 
+=== 12.0 ===
+
+* Method get_current_completed_tmp in mod_feedback_completion class is now public.
+
 == 10.0 ===
 
 * feedback_get_courses_from_sitecourse_map() now returns course id as 'id' attribute

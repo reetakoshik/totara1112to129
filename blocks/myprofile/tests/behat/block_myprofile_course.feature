@@ -1,4 +1,4 @@
-@block @block_myprofile
+@block @block_myprofile @javascript
 Feature: The logged in user block allows users to view their profile information in a course
   In order to enable the logged in user block in a course
   As a teacher
@@ -15,7 +15,6 @@ Feature: The logged in user block allows users to view their profile information
       | user | course | role |
       | teacher1 | C1 | editingteacher |
     When I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add the "Logged in user" block
     Then I should see "Teacher One" in the "Logged in user" "block"

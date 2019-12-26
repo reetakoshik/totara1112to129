@@ -28,6 +28,12 @@ defined('MOODLE_INTERNAL') || die();
  * full tests now in standard moodlelib test file.
  */
 class totara_core_random_string_testcase extends advanced_testcase {
+    public static function setUpBeforeClass() {
+        global $CFG;
+        parent::setUpBeforeClass();
+        require_once("$CFG->dirroot/totara/core/deprecatedlib.php");
+    }
+
     public function test_totara_random_bytes() {
         global $CFG;
         require_once($CFG->dirroot . '/totara/core/deprecatedlib.php');

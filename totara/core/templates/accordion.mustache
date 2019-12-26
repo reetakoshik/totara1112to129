@@ -1,0 +1,50 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Carl Anderson <carl.anderson@totaralearning.com>
+   @package totara_core
+}}
+{{!
+    @template totara_core/accordion
+
+    This template generates an accordion
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * data-core-autoinitialise: true
+    * data-core-autoinitialise-amd: totara_core/accordion
+
+   Context variables required for this template
+    * none
+
+    Example context (json):
+      {}
+ }}
+
+<ul class="totara_core__Accordion {{$classes}}{{/classes}}"
+    data-allow-multiple="{{$allow_multiple}}false{{/allow_multiple}}"
+    data-always-open="{{$always_open}}true{{/always_open}}"
+    data-core-autoinitialise="true"
+    data-core-autoinitialise-amd="totara_core/accordion"
+    role="presentation">
+
+    {{! Use < totara_core/accordion_item }}
+    {{$accordion_body}}{{/accordion_body}}
+</ul>

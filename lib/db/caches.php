@@ -233,7 +233,7 @@ $definitions = array(
     'coursecompletion' => array(
         'mode' => cache_store::MODE_APPLICATION,
         'simplekeys' => true,
-        'simpledata' => true,
+        'simpledata' => false, // Totara: these are instances of completion_completion class
         'ttl' => 3600,
         'staticacceleration' => true,
         'staticaccelerationsize' => 30, // Will be users list of current courses in nav.
@@ -335,5 +335,13 @@ $definitions = array(
         'simplekeys' => true,
         'simpledata' => true,
         'staticacceleration' => false,
+    ),
+
+    // Caches grouping and group ids of a user.
+    'user_group_groupings' => array(
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'simpledata' => true,
+        'staticacceleration' => true,
     ),
 );

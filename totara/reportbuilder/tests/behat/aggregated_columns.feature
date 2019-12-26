@@ -1,5 +1,5 @@
 @totara @totara_reportbuilder @javascript
-Feature: Test unrestricted user columns can be added and viewed by the admin
+Feature: Test aggregated user columns can be added and viewed by the admin
   As an admin
   I create a report using the program overview report source
   I test that I can add the aggregated columns
@@ -9,12 +9,12 @@ Feature: Test unrestricted user columns can be added and viewed by the admin
     Given I am on a totara site
     # Set up some courses with unlikely characters in the short names.
     And the following "courses" exist:
-      | fullname         | shortname | format | enablecompletion | completionstartonenrol |
-      | CourseFullname-A | C+r+s-A   | topics | 1                | 1                      |
-      | CourseFullname-B | C,r,s-B   | topics | 1                | 1                      |
-      | CourseFullname-C | C.r.s-C   | topics | 1                | 1                      |
-      | CourseFullname-D | C/r\s-D   | topics | 1                | 1                      |
-      | CourseFullname-E | C_r^s-E   | topics | 1                | 1                      |
+      | fullname         | shortname | format | enablecompletion |
+      | CourseFullname-A | C+r+s-A   | topics | 1                |
+      | CourseFullname-B | C,r,s-B   | topics | 1                |
+      | CourseFullname-C | C.r.s-C   | topics | 1                |
+      | CourseFullname-D | C/r\s-D   | topics | 1                |
+      | CourseFullname-E | C_r^s-E   | topics | 1                |
     And the following "users" exist:
       | username | firstname | lastname | email             |
       | user1    | user      | one      | user1@example.com |
@@ -30,11 +30,11 @@ Feature: Test unrestricted user columns can be added and viewed by the admin
     And I set self completion for "CourseFullname-C" in the "Miscellaneous" category
     And I set self completion for "CourseFullname-D" in the "Miscellaneous" category
     And I set self completion for "CourseFullname-E" in the "Miscellaneous" category
-    And I navigate to "Manage programs" node in "Site administration > Courses"
+    And I navigate to "Manage programs" node in "Site administration > Programs"
     And I click on "Miscellaneous" "link"
     And I click on "Program Tests" "link"
     And I click on "Edit program details" "button"
-    And I click on "Content" "link"
+    And I switch to "Content" tab
     And I click on "addcontent_ce" "button" in the "#edit-program-content" "css_element"
     And I click on "Miscellaneous" "link" in the "addmulticourse" "totaradialogue"
     And I click on "CourseFullname-A" "link" in the "addmulticourse" "totaradialogue"
@@ -55,7 +55,8 @@ Feature: Test unrestricted user columns can be added and viewed by the admin
     And I press "Save changes"
     And I click on "Save all changes" "button"
     And I wait "1" seconds
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
 
   Scenario: View aggregated fields in the program overview report
     Given I set the field "Report Name" to "Overview Report"

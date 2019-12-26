@@ -3,9 +3,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 class rb_source_scorm extends rb_base_source {
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
+    use \core_course\rb\source\report_trait;
+    use \core_tag\rb\source\report_trait;
+    use \totara_job\rb\source\report_trait;
+    use \totara_cohort\rb\source\report_trait;
 
     public function __construct($groupid, rb_global_restriction_set $globalrestrictionset = null) {
         if ($groupid instanceof rb_global_restriction_set) {
@@ -30,6 +31,7 @@ class rb_source_scorm extends rb_base_source {
         $this->defaultfilters = $this->define_defaultfilters();
         $this->requiredcolumns = $this->define_requiredcolumns();
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_scorm');
+        $this->usedcomponents[] = 'totara_cohort';
 
         parent::__construct();
     }
@@ -91,14 +93,14 @@ class rb_source_scorm extends rb_base_source {
         }
 
         // include some standard joins
-        $this->add_user_table_to_joinlist($joinlist, 'base', 'userid');
-        $this->add_course_table_to_joinlist($joinlist, 'scorm', 'course');
+        $this->add_core_user_tables($joinlist, 'base', 'userid');
+        $this->add_core_course_tables($joinlist, 'scorm', 'course');
         // requires the course join
-        $this->add_course_category_table_to_joinlist($joinlist,
+        $this->add_core_course_category_tables($joinlist,
             'course', 'category');
-        $this->add_job_assignment_tables_to_joinlist($joinlist, 'base', 'userid');
-        $this->add_core_tag_tables_to_joinlist('core', 'course', $joinlist, 'scorm', 'course');
-        $this->add_cohort_course_tables_to_joinlist($joinlist, 'scorm', 'course');
+        $this->add_totara_job_tables($joinlist, 'base', 'userid');
+        $this->add_core_tag_tables('core', 'course', $joinlist, 'scorm', 'course');
+        $this->add_totara_cohort_course_tables($joinlist, 'scorm', 'course');
 
         return $joinlist;
     }
@@ -124,7 +126,8 @@ class rb_source_scorm extends rb_base_source {
                 'scorm.name',
                 array('joins' => 'scorm',
                       'dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'format_string')
             ),
             new rb_column_option(
                 'sco',
@@ -133,7 +136,8 @@ class rb_source_scorm extends rb_base_source {
                 'sco.title',
                 array('joins' => 'sco',
                       'dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'format_string')
             ),
             new rb_column_option(
                 'sco',
@@ -162,14 +166,16 @@ class rb_source_scorm extends rb_base_source {
                 'totaltime',
                 get_string('totaltime', 'rb_source_scorm'),
                 $DB->sql_compare_text('sco_totaltime.value', 1024),
-                array('joins' => 'sco_totaltime')
+                array('joins' => 'sco_totaltime',
+                      'displayfunc' => 'plaintext')
             ),
             new rb_column_option(
                 'sco',
                 'scoreraw',
                 get_string('score', 'rb_source_scorm'),
                 $DB->sql_compare_text('sco_scoreraw.value', 1024),
-                array('joins' => 'sco_scoreraw')
+                array('joins' => 'sco_scoreraw',
+                      'displayfunc' => 'plaintext')
             ),
             new rb_column_option(
                 'sco',
@@ -186,31 +192,34 @@ class rb_source_scorm extends rb_base_source {
                 'scoremin',
                 get_string('minscore', 'rb_source_scorm'),
                 $DB->sql_compare_text('sco_scoremin.value', 1024),
-                array('joins' => 'sco_scoremin')
+                array('joins' => 'sco_scoremin',
+                      'displayfunc' => 'plaintext')
             ),
             new rb_column_option(
                 'sco',
                 'scoremax',
                 get_string('maxscore', 'rb_source_scorm'),
                 $DB->sql_compare_text('sco_scoremax.value', 1024),
-                array('joins' => 'sco_scoremax')
+                array('joins' => 'sco_scoremax',
+                      'displayfunc' => 'plaintext')
             ),
             new rb_column_option(
                 'sco',
                 'attempt',
                 get_string('attemptnum', 'rb_source_scorm'),
                 'base.attempt',
-                array('dbdatatype' => 'integer')
+                array('dbdatatype' => 'integer',
+                      'displayfunc' => 'integer')
             ),
         );
 
         // include some standard columns
-        $this->add_user_fields_to_columns($columnoptions);
-        $this->add_course_fields_to_columns($columnoptions);
-        $this->add_course_category_fields_to_columns($columnoptions);
-        $this->add_job_assignment_fields_to_columns($columnoptions);
-        $this->add_core_tag_fields_to_columns('core', 'course', $columnoptions);
-        $this->add_cohort_course_fields_to_columns($columnoptions);
+        $this->add_core_user_columns($columnoptions);
+        $this->add_core_course_columns($columnoptions);
+        $this->add_core_course_category_columns($columnoptions);
+        $this->add_totara_job_columns($columnoptions);
+        $this->add_core_tag_columns('core', 'course', $columnoptions);
+        $this->add_totara_cohort_course_columns($columnoptions);
 
         return $columnoptions;
     }
@@ -286,12 +295,12 @@ class rb_source_scorm extends rb_base_source {
         );
 
         // include some standard filters
-        $this->add_user_fields_to_filters($filteroptions);
-        $this->add_course_fields_to_filters($filteroptions);
-        $this->add_course_category_fields_to_filters($filteroptions);
-        $this->add_job_assignment_fields_to_filters($filteroptions, 'base', 'userid');
-        $this->add_core_tag_fields_to_filters('core', 'course', $filteroptions);
-        $this->add_cohort_course_fields_to_filters($filteroptions);
+        $this->add_core_user_filters($filteroptions);
+        $this->add_core_course_filters($filteroptions);
+        $this->add_core_course_category_filters($filteroptions);
+        $this->add_totara_job_filters($filteroptions, 'base', 'userid');
+        $this->add_core_tag_filters('core', 'course', $filteroptions);
+        $this->add_totara_cohort_course_filters($filteroptions);
 
         return $filteroptions;
     }
@@ -425,23 +434,6 @@ class rb_source_scorm extends rb_base_source {
         );
         return $requiredcolumns;
     }
-
-    //
-    //
-    // Source specific column display methods
-    //
-    //
-
-    // add methods here with [name] matching column option displayfunc
-    /*
-    function rb_display_[name]($item, $row) {
-        // variable $item refers to the current item
-        // $row is an object containing the whole row
-        // which will include any extrafields
-        //
-        // should return a string containing what should be displayed
-    }
-    */
 
     //
     //

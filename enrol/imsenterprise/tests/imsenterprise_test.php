@@ -211,7 +211,7 @@ class enrol_imsenterprise_testcase extends advanced_testcase {
         $this->set_xml_file(array($imsuser));
 
         $this->imsplugin->cron();
-        $this->assertEquals(1, $DB->get_field('user', 'deleted', array('id' => $user->id), '*', MUST_EXIST));
+        $this->assertEquals(1, $DB->get_field('user', 'deleted', array('id' => $user->id), MUST_EXIST));
     }
 
     /**
@@ -232,7 +232,7 @@ class enrol_imsenterprise_testcase extends advanced_testcase {
         $this->set_xml_file(array($imsuser));
 
         $this->imsplugin->cron();
-        $this->assertEquals(0, $DB->get_field('user', 'deleted', array('id' => $user->id), '*', MUST_EXIST));
+        $this->assertEquals(0, $DB->get_field('user', 'deleted', array('id' => $user->id), MUST_EXIST));
     }
 
     /**
@@ -1082,7 +1082,8 @@ class enrol_imsenterprise_testcase extends advanced_testcase {
 </enterprise>';
 
         // Creating the XML file.
-        $filename = 'ims_' . rand(1000, 9999) . '.xml';
+        static $i = 1000;
+        $filename = 'ims_' . ($i++) . '.xml'; // Totara: make 100% sure a new file is always created.
         $tmpdir = make_temp_directory('enrol_imsenterprise');
         $xmlfilepath = $tmpdir . '/' . $filename;
         file_put_contents($xmlfilepath, $xmlcontent);

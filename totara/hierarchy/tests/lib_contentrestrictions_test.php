@@ -34,11 +34,11 @@ require_once($CFG->dirroot . '/totara/hierarchy/prefix/position/lib.php');
 require_once($CFG->dirroot . '/totara/hierarchy/prefix/organisation/lib.php');
 
 
-class hierarchylib_contentrestrictions_test extends advanced_testcase {
+class totara_hierarchy_lib_contentrestrictions_testcase extends advanced_testcase {
     use totara_reportbuilder\phpunit\report_testing;
 
     /**
-     * Set up data
+     * Set up data that'll be purged, exported or counted.
      */
     private function setup_data() {
         global $DB;
@@ -117,7 +117,8 @@ class hierarchylib_contentrestrictions_test extends advanced_testcase {
 
         // The Report for content restriction definition
         $data->reportid = $this->create_report('user', 'Test User Report');
-        $data->report = new reportbuilder($data->reportid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $data->report = reportbuilder::create($data->reportid, $config);
 
         $update = $DB->get_record('report_builder', ['id' => $data->reportid]);
         $update->accessmode = REPORT_BUILDER_ACCESS_MODE_NONE;

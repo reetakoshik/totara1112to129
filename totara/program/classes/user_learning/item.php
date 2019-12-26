@@ -51,7 +51,6 @@ class item extends item_base implements item_has_progress, item_has_dueinfo {
 
     protected $progress_canbecompleted = null;
     protected $progress_percentage;
-    protected $progress_summary;
 
     /**
      * Gets all program learning items for the given user.
@@ -197,6 +196,7 @@ class item extends item_base implements item_has_progress, item_has_dueinfo {
      * so if it is not null then we already have the data we need.
      */
     public function ensure_completion_loaded() {
+        global $OUTPUT;
 
         if ($this->progress_canbecompleted == null) {
 
@@ -212,23 +212,9 @@ class item extends item_base implements item_has_progress, item_has_dueinfo {
             $this->progress_canbecompleted = true;
             $this->progress_percentage = $programprogress;
 
-            if ($programprogress > 0) {
-                $this->progress_summary = new \lang_string('xpercentcomplete', 'totara_core', $programprogress);
-            } else {
-                $this->progress_summary = new \lang_string('notyetstarted', 'completion');
-
-                // Hack to set item progress as 'In Progress' if any course within it has a progress percentage above zero.
-                // We need this as the program api is not retrieving the progress correctly.
-                // We are only doing this if $programprogress is 0.
-                // TODO: Remove this once the program api is returning the correct progress.
-                foreach ($this->coursesets as $set) {
-                    foreach ($set->get_courses() as $course) {
-                        if ($course->get_progress_percentage() > 0) {
-                            $this->progress_summary = new \lang_string('inprogress', 'completion');
-                        }
-                    }
-                }
-            }
+            $pbar = new \static_progress_bar('', '0');
+            $pbar->set_progress((int)$this->progress_percentage);
+            $this->progress_pbar = $pbar->export_for_template($OUTPUT);
         }
     }
 
@@ -249,8 +235,7 @@ class item extends item_base implements item_has_progress, item_has_dueinfo {
         $this->ensure_completion_loaded();
 
         $record = new \stdClass;
-        $record->summary = (string)$this->progress_summary;
-        $record->percentage = $this->progress_percentage;
+        $record->pbar = $this->progress_pbar;
         return $record;
     }
 

@@ -1,0 +1,464 @@
+@import '../contentmarketplaces/goone/less/roots.less';
+
+@tcm-border-color: @block-border-color;
+@tcm-spacing: @panel-body-padding;
+@tcm-shadow: 0 2px 11px 0 rgba(0, 0, 0, 0.5);
+@tcm-shadow_2: 0 3px 17px 0 rgba(0, 0, 0, 0.5);
+@tcm-screen-xs-max: @screen-xs-max;
+@tcm-screen-sm: @screen-sm;
+@tcm-screen-md: @screen-md;
+@tcm-screen-lg: @screen-lg;
+@tcm-explorer-tile-heading: @totara_style-size_16;
+@tcm-explorer-details-heading: @totara_style-size_18;
+
+.tcm-explorer .tcm-query {
+    width: 100%;
+    max-width: inherit;
+}
+
+.tcm-explorer .totara_form_element_checkboxes_checkbox input,
+.tcm-explorer .totara_form_element_radios_radio input {
+    display: block;
+    float: left;
+}
+
+.tcm-filter-option-count {
+    float: right;
+    clear: right;
+}
+
+.tcm-explorer .totara_form_element_checkboxes_checkbox label,
+.tcm-explorer .totara_form_element_radios_radio label {
+    display: block;
+    font-weight: normal;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.tcm-search-filter legend {
+    margin-bottom: 0;
+    border: none;
+}
+.tcm-search-filter .legend {
+    font-weight: bold;
+    font-size: 14px;
+}
+.tcm-search-filter {
+    margin-bottom: 2em;
+}
+.tcm-search_toolbar {
+    margin-bottom: 1em;
+}
+.tcm-explorer .tcm-vertical-align {
+    display: flex;
+    align-items: center;
+}
+.tcm-explorer h3 {
+    font-weight: bold;
+    line-height: 1.3;
+    margin: 0 0 0.5em;
+    word-wrap: break-word;
+    max-height: 80px;
+    overflow: hidden;
+    text-overflow: clip;
+    font-size: @tcm-explorer-tile-heading;
+}
+
+.tcm-details h3 {
+    font-size: @tcm-explorer-details-heading;
+}
+
+.tcm-search-thumbnail {
+    border: 1px solid @tcm-border-color;
+}
+
+.tcm-search-thumbnail:hover {
+    -webkit-box-shadow: @tcm-shadow;
+    -moz-box-shadow: @tcm-shadow;
+    box-shadow: @tcm-shadow;
+}
+
+.tcm-search-metadata-icon {
+    font-size: 24px;
+    margin-top: @tcm-spacing;
+    margin-bottom: 0;
+    position: static;
+}
+
+h2.tcm-explorer-heading {
+    margin-top: 0;
+}
+
+.tcm-explorer .tcm-load-more .tcm-loading-icon,
+.tcm-explorer .tcm-load-more {
+    display: none;
+}
+.tcm-explorer .tcm-load-more button {
+    width: 100%;
+}
+.tcm-explorer .tcm-load-more-loading .tcm-loading-icon {
+    display: inline;
+}
+.tcm-explorer .tcm-load-more-loading .tcm-load-more-action {
+    display: none;
+}
+
+.tcm-explorer {
+    min-height: 30em;
+}
+
+.tcm-status-searching {
+    display: none;
+}
+
+.tcm-is-searching .tcm-status-searching {
+    display: inline;
+}
+
+.tcm-search_selection_tools {
+    background: #f0f2f4;
+    padding: 0.6em 1em;
+    margin-bottom: 1em;
+    visibility: hidden;
+}
+.tcm-search_selection_status,
+.tcm-collection-tool {
+    padding-right: 1em;
+}
+.tcm-search_selection_tools .pull-right a {
+    padding-left: 0.25em;
+}
+.tcm-search_selection_tools a {
+    cursor: pointer;
+}
+
+.tcm-thumbnail_selection {
+    width: 30px;
+    margin: 1em;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
+
+.tcm-thumbnail_selection input {
+    position: absolute; /* take it out of document flow */
+    opacity: 0; /* hide it */
+}
+
+
+/**
+ * Create the box for the checkbox
+ */
+.tcm-thumbnail_selection label {
+    cursor: pointer;
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    top: 0;
+    left: 0;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+/**
+ * Display the tick inside the checkbox
+ */
+.tcm-thumbnail_selection label:after {
+    opacity: 0;
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 9px;
+    background: transparent;
+    top: 8px;
+    left: 6px;
+    border: 4px solid #3d444b;
+    border-top: none;
+    border-right: none;
+    transform: rotate(-45deg);
+}
+
+/**
+ * Create the hover event of the tick
+ */
+.tcm-thumbnail_selection input:checked + label:hover,
+.tcm-thumbnail_selection label:hover {
+    border-color: @tcm-border-color;
+    background-color: #f0f2f4;
+}
+
+/**
+ * Create the checkbox state for the tick
+ */
+.tcm-thumbnail_selection input:checked + label:after {
+    opacity: 1;
+}
+
+.tcm-thumbnail_selection input:checked + label {
+    background-color: rgba(255, 255, 255, 1);
+    border-color: @tcm-border-color;
+}
+
+.tcm-search-filters-header {
+    h2 {
+        margin: 0 0 3rem;
+        font-size: (@font-size-base * 0.9);
+        text-transform: uppercase;
+        color: @block-actions-color;
+    }
+}
+
+.tcm-search-filters-wrapper {
+
+    .tcm-search-filters {
+        display: none;
+    }
+
+    .tcm-filter-radios input,
+    .tcm-checkbox-filter input {
+        margin: 0.3em 0.5em 0 0;
+    }
+
+    .tcm-checkbox-filter {
+        margin-bottom: 0.35em;
+        label {
+            display: block;
+            font-weight: normal;
+            white-space: nowrap;
+            overflow:  auto;
+            text-overflow: unset;
+            margin-bottom: 0;
+        }
+    }
+
+    legend {
+        margin-bottom: 0.5rem;
+    }
+
+    .tcm-filter-option-label {
+        display: inline-block;
+        width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        float: left;
+    }
+
+    .tcm-search-filter-with-counts .tcm-filter-option-label {
+        width: ~"calc(100% - 4em)";
+    }
+
+    .tcm-search-filter-results {
+        display: none;
+        padding: 0.5rem;
+        max-height: 21em;
+        overflow-y: scroll;
+        border: 1px solid #c8cfd6;
+    }
+
+    .tcm-search-filter-term {
+        margin: 0;
+        padding: 6px 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+
+        &:focus {
+            border-color: #66afe9;
+            outline: 0;
+            box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6);
+        }
+    }
+
+    .tcm-filter-radios {
+        padding: 0 0.5rem;
+    }
+
+    .tcm-search-filter-selection {
+        margin-bottom: 1rem;
+        padding: 0 0.5rem;
+    }
+
+    .tcm-search-filter-results .tcm-search-filter-selection {
+        margin-bottom: 0;
+    }
+
+    .focused .tcm-search-filter-results {
+        box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6);
+        position: absolute;
+        background: white;
+        left: @tcm-spacing;
+        right: @tcm-spacing;
+        z-index: 100;
+        padding-top: 1rem;
+    }
+
+    .tcm-filter-input .tcm-search-filter-term {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .tcm-search-filter-term-wrapper {
+        position: relative;
+        display: inline;
+    }
+
+    .tcm-search-filter-widget .caret {
+        position: absolute;
+        top: 0.8rem;
+        right: 1rem;
+        pointer-events: none;
+    }
+
+}
+
+.tcm-explorer .tcm-results {
+    width: 100%;
+    margin-left: -@tcm-spacing;
+    margin-right: -@tcm-spacing;
+}
+
+.tcm-explorer .tcm-result {
+    position: relative;
+    display: inline-block;
+    float: left;
+    padding: @tcm-spacing;
+    vertical-align: top;
+    zoom: 1;
+    width: 100%;
+}
+
+.tcm-explorer .tcm-details-wrapper {
+    padding: @tcm-spacing;
+    position: relative;
+    width: 100%;
+    float: left;
+    display: none;
+    clear: both;
+}
+
+.tcm-explorer .tcm-details {
+    padding: 20px;
+    border: 1px solid #c8cfd6;
+    background: white;
+    height: 500px;
+    overflow: auto;
+    -webkit-box-shadow: @tcm-shadow_2;
+    -moz-box-shadow: @tcm-shadow_2;
+    box-shadow: @tcm-shadow_2;
+}
+
+.tcm-explorer .tcm-details-target .tcm-search-thumbnail {
+    -webkit-box-shadow: @tcm-shadow_2;
+    -moz-box-shadow: @tcm-shadow_2;
+    box-shadow: @tcm-shadow_2;
+}
+
+.tcm-explorer .tcm-details-close {
+    font-size: 40px;
+    line-height: 40px;
+    color: #ccc;
+    cursor: pointer;
+}
+
+.tcm-explorer .tcm-details-description,
+.tcm-explorer .tcm-details-img,
+.tcm-explorer .tcm-details-items {
+    padding: (@tcm-spacing * 2);
+}
+
+.tcm-explorer .tcm-details-pointer {
+    position: absolute;
+    margin-top: -20px;
+    width: 0;
+    border-bottom: solid 20px @tcm-border-color;
+    border-right: solid 20px transparent;
+    border-left: solid 20px transparent;
+}
+.tcm-explorer .tcm-details-pointer .tcm-empty {
+    position: absolute;
+    top: 1px;
+    left: -20px;
+    width: 0;
+    border-bottom: solid 20px white;
+    border-right: solid 20px transparent;
+    border-left: solid 20px transparent;
+}
+
+.tcm-explorer .tcm-details-wrapper .tcm-details-items h4 {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: @tcm-spacing;
+}
+
+.tcm-explorer .tcm-details .tcm-details-top {
+    margin-bottom: @tcm-spacing;
+}
+
+.tcm-explorer .tcm-details .tcm-details-header {
+    padding: (@tcm-spacing * 2);
+    background: #eee;
+    position: relative;
+}
+
+.tcm-explorer .tcm-details .tcm-header-details-cell {
+    font-size: 85%;
+    vertical-align: top;
+    line-height: 1.8;
+    display: block;
+    max-width: none;
+}
+.tcm-explorer .tcm-details .tcm-header-details-cell.tcm-details-logo {
+    padding-right: 10px;
+}
+
+.tcm-explorer .tcm-details .tcm-header-details-cell .tcm-details-delivery,
+.tcm-explorer .tcm-details .tcm-header-details-cell .tcm-details-price {
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.tcm-explorer .tcm-thumbnail-img {
+    background-repeat: no-repeat;
+    background-position: 50%;
+    background-size: cover;
+    height: 12em;
+}
+
+/* Responsiveness */
+@media (max-width: @tcm-screen-xs-max) {
+    .tcm-search-filters-header {
+        margin-top: 4rem;
+    }
+}
+
+@media (min-width: @tcm-screen-sm) {
+    .tcm-explorer .tcm-result {
+        width: 50%;
+    }
+
+    .tcm-search-metadata-icon {
+        margin-top: @tcm-spacing;
+        position: absolute;
+        bottom: @tcm-spacing;
+        margin-bottom: @tcm-spacing;
+    }
+}
+
+@media (min-width: @tcm-screen-md) {
+    .tcm-explorer .tcm-result {
+        width: 33.33333333%;
+    }
+
+    .tcm-explorer .tcm-details .tcm-header-details-cell {
+        display: table-cell;
+        max-width: 300px;
+        padding-right: 40px;
+    }
+}
+
+@media (min-width: @tcm-screen-lg) {
+    .tcm-explorer .tcm-result {
+        width: 25%;
+    }
+}

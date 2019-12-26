@@ -34,11 +34,12 @@ class totara_reportbuilder_events_testcase extends advanced_testcase {
         $this->setAdminUser();
 
         $rid = $this->create_report('user', 'Test user report');
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
         $this->add_column($report, 'user', 'id', null, null, null, 0);
         $this->add_column($report, 'user', 'firstname', null, null, null, 0);
 
-        $report = new reportbuilder($rid);
+        $report = reportbuilder::create($rid);
 
         $event = \totara_reportbuilder\event\report_created::create_from_report($report, false);
         $event->trigger();
@@ -54,7 +55,7 @@ class totara_reportbuilder_events_testcase extends advanced_testcase {
         // Let's created embedded report, we should not get any event since 2.75.
 
         $sink = $this->redirectEvents();
-        $emreport = new reportbuilder(null, 'cohort_members');
+        $emreport = reportbuilder::create_embedded('cohort_members');
         $this->assertInstanceOf('reportbuilder', $emreport);
         $events = $sink->get_events();
         $sink->close();
@@ -67,11 +68,12 @@ class totara_reportbuilder_events_testcase extends advanced_testcase {
         $this->setAdminUser();
 
         $rid = $this->create_report('user', 'Test user report');
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
         $this->add_column($report, 'user', 'id', null, null, null, 0);
         $this->add_column($report, 'user', 'firstname', null, null, null, 0);
 
-        $report = new reportbuilder($rid);
+        $report = reportbuilder::create($rid);
 
         $event = \totara_reportbuilder\event\report_updated::create_from_report($report, 'columns');
         $event->trigger();
@@ -92,11 +94,12 @@ class totara_reportbuilder_events_testcase extends advanced_testcase {
         $this->setAdminUser();
 
         $rid = $this->create_report('user', 'Test user report');
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
         $this->add_column($report, 'user', 'id', null, null, null, 0);
         $this->add_column($report, 'user', 'firstname', null, null, null, 0);
 
-        $report = new reportbuilder($rid);
+        $report = reportbuilder::create($rid);
 
         $DB->delete_records('report_builder', array('id' => $report->_id));
 
@@ -112,8 +115,7 @@ class totara_reportbuilder_events_testcase extends advanced_testcase {
         $this->assertEventLegacyLogData(array(SITEID, 'reportbuilder', 'delete report', 'index.php', 'Test user report (ID='.$report->_id.')'), $event);
 
         // Embedded report.
-
-        $report = new reportbuilder(null, 'cohort_members');
+        $report = reportbuilder::create_embedded('cohort_members');
         $this->assertInstanceOf('reportbuilder', $report);
 
         $DB->delete_records('report_builder', array('id' => $report->_id));
@@ -137,11 +139,12 @@ class totara_reportbuilder_events_testcase extends advanced_testcase {
         $this->setAdminUser();
 
         $rid = $this->create_report('user', 'Test user report');
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
         $this->add_column($report, 'user', 'id', null, null, null, 0);
         $this->add_column($report, 'user', 'firstname', null, null, null, 0);
 
-        $report = new reportbuilder($rid);
+        $report = reportbuilder::create($rid);
 
         reportbuilder_clone_report($report, 'New Name');
 
@@ -163,11 +166,12 @@ class totara_reportbuilder_events_testcase extends advanced_testcase {
         $this->setAdminUser();
 
         $rid = $this->create_report('user', 'Test user report');
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
         $this->add_column($report, 'user', 'id', null, null, null, 0);
         $this->add_column($report, 'user', 'firstname', null, null, null, 0);
 
-        $report = new reportbuilder($rid);
+        $report = reportbuilder::create($rid);
 
         $event = \totara_reportbuilder\event\report_viewed::create_from_report($report);
         $event->trigger();
@@ -185,11 +189,12 @@ class totara_reportbuilder_events_testcase extends advanced_testcase {
         $this->setAdminUser();
 
         $rid = $this->create_report('user', 'Test user report');
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
         $this->add_column($report, 'user', 'id', null, null, null, 0);
         $this->add_column($report, 'user', 'firstname', null, null, null, 0);
 
-        $report = new reportbuilder($rid);
+        $report = reportbuilder::create($rid);
 
         $event = \totara_reportbuilder\event\report_exported::create_from_report($report, 'pdflandscape');
         $event->trigger();

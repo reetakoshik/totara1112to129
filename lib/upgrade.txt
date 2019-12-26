@@ -1,38 +1,43 @@
 This files describes API changes in core libraries and APIs,
 information provided here is intended especially for developers.
 
-=== 11.12 ===
+=== 12.8 ===
+
+* System state is now reverted after every PHPUnit test, this was required for compatiblity with parallel test execution,
+  all tests that used $this->resetAfterTest(false) should be updated.
+
+=== 12.6 ===
+
+* The jQuery.extend function has had a security patch applied
+* Changes made for behat to be able to check aria-label attribute of buttons and form fields as label, which might break existing behat tests
+* Added a new resolvefaviconcallback property in which themes can override the URL returned by $OUTPUT->favicon().
+
+=== 12.3 ===
 
 * Updated render_tabobject to correctly support tabobject::linkedwhenselected
 
-=== 11.11 ===
+=== 12.2 ===
 
 * PHPUnit has been upgraded to version 7.5.x.
   All methods removed in PHPUnit version 6 were added to basic_testcase to not hard break any third-party testcases.
   A debugging message is issued to use the new methods provided by PHPUnit 7.5.
   All PHPUnit classes are now namespaced and have been added to the totara\core\db\renamedclasses.php file.
   The dbunit package won't receive any updates anymore and composer issues a warning that the "Package phpunit/dbunit is abandoned".
+* Added a new protected function moodle_database::get_fts_mode() which is used to detect what mode to be used for full-text search query.
+* Added a new public function moodle_database::is_fts_accent_sensitive() to check whether accent sensitive is enabled for the database or not.
+* Modified the implementation of moodle_database::build_fts_subquery() in child level, which it is now accept search text with asterisk at the end of string to mark the search query as wild card search.
 
-=== 11.8 ===
+=== 12.0 ===
 
+* set_send_count() has been deprecated, please use \core_user\email_bounce_counter instead
+* set_bounce_count() has been deprecated, please use \core_user\email_bounce_counter instead
 * The user_not_fully_set_up() function has a new $strict parameter (defaulting to true) in order to decide when
   custom fields (and other checks) should be evaluated to determine if the user has been completely setup.
-
-=== 11.7 ===
-
-* PHPUnit's bootstrap has been changed to use HTTPS wwwroot (https://www.example.com/moodle) from previous HTTP version. Any
-  existing test expecting the old HTTP URLs will need to be switched to the new HTTPS value (reference: MDL-54901).
-
-=== 11.5 ===
-
-* core/login mustache template has changed, fixing an issue with a skip link
-
-=== 11.4 ===
-
-* Strings loaded into the page for Javascript now pass through M.util.add_strings()
-
-=== 11.3 ===
-
+* updated popover_region.mustache correcting role attribute
+* Upgraded jQuery to 3.3.1
+* $CFG->loginhttps setting was removed, do not use it.
+* $PAGE->https_required() and $PAGE->verify_https_required() are now deprecated, do not use them.
+* $CFG->httpswwwroot is now deprecated and will always contain in the same value as wwwroot.
 * String helpers are no longer used in the following templates, string data is passed via context data:
 ** lib/templates/block.mustache
 ** lib/templates/loading.mustache
@@ -54,10 +59,82 @@ information provided here is intended especially for developers.
 ** lib/templates/notification_info.mustache
 ** lib/templates/notification_success.mustache
 ** lib/templates/notification_warning.mustache
-
-=== 11.1 ===
-
-* updated popover_region.mustache correcting role attribute
+* Removed deprecated completion_info::wipe_session_cache()
+* Removed deprecated function_or_method_exists()
+* Removed deprecated methods:
+  * mysqli_native_moodle_database::is_compressed_row_format_supported()
+  * mysqli_native_moodle_database::get_row_format_sql()
+* Removed deprecated behat_deprecated::i_select_to_approve()
+* Strings loaded into the page for Javascript now pass through M.util.add_strings()
+* New mustache template for add block
+** lib/templates/add_new_block.mustache
+* New mustache template for add block popover
+** lib/templates/add_block_popover_content.mustache
+* core/login mustache template has changed, fixing an issue with a skip link
+* core_renderer::render_single_button has been updated to set a primary button
+* Limited subset of ES6 globals is now allowed in all supported browsers,
+  see https://help.totaralearning.com/display/DEV/ES+6+functionality for more details.
+* JavaScript autoinitialisation using data-core-autoinitialise and data-core-autoinitialise-amd HTML data attributes has been
+  added.
+* Added support for AMD modules in subdirectories (eg. core/sub/amdmodule is a valid AMD module)
+* Added support for using sub directories in templates folder.
+* $mform->init_javascript_enhancement() is deprecated and no longer does anything. Existing uses of smartselect enhancement
+  should be switched to the searchableselector form element or other solutions.
+* The method moodleform::after_definition() has been added and can now be used to add some logic
+  to be performed after the form's definition was set. This is useful for intermediate subclasses.
+* The mcore YUI rollup which included various YUI modules such as moodle-core-notification is no longer included on every
+  page. Missing YUI depdencies may be exposed by this change (e.g. missing a requirement on moodle-core-notification when
+  using M.core.dialogue).
+* Return value of the validate_email() is now proper boolean as documented. Previously the function could return 1, 0 or false.
+* Various legacy javascript functions have been removed:
+    * M.util.focus_login_form and M.util.focus_login_error no longer do anything. Please use JavaScript instead. See
+      lib/templates/login.mustache for an example.
+    * Some outdated global JS functions have been removed and should be replaced with calls to jquery
+      or alternative approaches:
+        checkall, checknone, select_all_in_element_with_id, select_all_in, deselect_all_in, confirm_if, findParentNode,
+        filterByParent, stripHTML
+    * M.util.init_toggle_class_on_click has been removed.
+* Following behat steps have been removed from core:
+    - I click on "<element_string>" "<selector_string>" in the "<row_text_string>" table row
+    - I go to notifications page
+    - I add "<filename_string>" file from recent files to "<filepicker_field_string>" filepicker
+    - I upload "<filepath_string>" file to "<filepicker_field_string>" filepicker
+    - I create "<foldername_string>" folder in "<filepicker_field_string>" filepicker
+    - I open "<foldername_string>" folder from "<filepicker_field_string>" filepicker
+    - I unzip "<filename_string>" file from "<filepicker_field_string>" filepicker
+    - I zip "<filename_string>" folder from "<filepicker_field_string>" filepicker
+    - I delete "<file_or_folder_name_string>" from "<filepicker_field_string>" filepicker
+    - I send "<message_contents_string>" message to "<username_string>"
+    - I add "<user_username_string>" user to "<cohort_idnumber_string>" cohort
+    - I add "<username_string>" user to "<group_name_string>" group
+    - I fill in "<field_string>" with "<value_string>"
+    - I select "<option_string>" from "<select_string>"
+    - I select "<radio_button_string>" radio button
+    - I check "<option_string>"
+    - I uncheck "<option_string>"
+    - the "<field_string>" field should match "<value_string>" value
+    - the "<checkbox_string>" checkbox should be checked
+    - the "<checkbox_string>" checkbox should not be checked
+    - I fill the moodle form with:
+    - "<element_string>" "<selector_string>" should exists
+    - "<element_string>" "<selector_string>" should not exists
+    - the following "<element_string>" exists:
+* Deprecated moodle-core-form-autosubmit YUI3 module
+* Added Session storage JavaScript library
+* Added userdate Mustache helper - please don't use this as it has a potential XSS issue.
+* Added shortentext Mustache helper
+* Deprecated the following functions:
+    - flexible_table::get_initial_first() - use flexible_table::print_initials_bar() instead
+    - flexible_table::get_initial_last() - use flexible_table::print_initials_bar() instead
+    - flexible_table::print_one_initials_bar() - use flexible_table::print_initials_bar() instead
+* $OUTPUT->pix_url has been deprecated - use $OUTPUT->pix_icon() for icons or $OUTPUT->image_url() for images. In
+  mustache templates, the pix helper is available (although we don't recommend using context variables inside it).
+* Added renderPix method to templates JavaScript library
+* Update pix_icon template, adding an "icon" class
+* The cron runner now sets up a fresh PAGE and OUTPUT between each task.
+* Added a lock to prevent 'coursemodinfo' cache to be built multiple times in parallel
+* PHPUnit's bootstrap has been changed to use HTTPS wwwroot (https://www.example.com/moodle) from previous HTTP version. Any
+  existing test expecting the old HTTP URLs will need to be switched to the new HTTPS value (reference: MDL-54901).
 
 === 11.0 ===
 

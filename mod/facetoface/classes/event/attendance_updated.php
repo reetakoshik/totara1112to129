@@ -96,8 +96,8 @@ class attendance_updated extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        $params = array('s' => $this->other['sessionid'], 'action' => 'takeattendance');
-        return new \moodle_url('/mod/facetoface/attendees.php', $params);
+        $params = array('s' => $this->other['sessionid']);
+        return new \moodle_url('/mod/facetoface/attendees/takeattendance.php', $params);
     }
 
     /**

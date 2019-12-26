@@ -40,6 +40,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class frontend {
+    // Totara: Limit maximum depth to reasonably deep; see report_validation_errors() for more info
+    const AVAILABILITY_JSON_MAX_DEPTH = 300;
+
     /**
      * Decides whether this plugin should be available in a given course. The
      * plugin can do this depending on course or system settings.
@@ -169,9 +172,10 @@ abstract class frontend {
         }
 
         // Decode value.
-        $decoded = json_decode($data['availabilityconditionsjson']);
+        // Totara: Throw coding_exception if availabilityconditionsjson is not JSON or it is deeper than acceptable depth
+        // In practice, the acceptable maximum depth of restriction sets is the half of AVAILABILITY_JSON_MAX_DEPTH.
+        $decoded = json_decode($data['availabilityconditionsjson'], false, self::AVAILABILITY_JSON_MAX_DEPTH);
         if (!$decoded) {
-            // This shouldn't be possible.
             throw new \coding_exception('Invalid JSON from availabilityconditionsjson field');
         }
         if (!empty($decoded->errors)) {
@@ -184,6 +188,9 @@ abstract class frontend {
                 $error .= get_string($stringname, $component);
             }
             $errors['availabilityconditionsjson'] = $error;
+        } else {
+            // Totara: Ensure that JSON can be loaded into a tree object before saving it.
+            new \core_availability\tree($decoded);
         }
     }
 
@@ -205,5 +212,37 @@ abstract class frontend {
             $result[] = (object)array($keyname => $key, $valuename => $value);
         }
         return $result;
+    }
+
+    /**
+     * Parse JSON and recursively iterate conditions in its array
+     *
+     * @param string $availability_json JSON string of {course_modules}.availability
+     * @param callable $callback A callback function that takes $condition parameter
+     * @return void
+     */
+    protected static function for_each_condition_in_availability_json($availability_json, $callback) {
+        $availability = json_decode($availability_json, false, self::AVAILABILITY_JSON_MAX_DEPTH * 3 / 2);
+        if (is_object($availability)) {
+            self::for_each_condition_in_availability($availability, $callback);
+        }
+    }
+
+    /**
+     * Recursively iterate conditions in its array
+     *
+     * @param \stdClass $availability part of {course_modules}.availability
+     * @param callable $callback A callback function that takes $condition parameter
+     * @return void
+     */
+    private static function for_each_condition_in_availability($availability, $callback) {
+        foreach ($availability->c as $single_or_set) {
+            if (isset($single_or_set->c)) {
+                self::for_each_condition_in_availability($single_or_set, $callback);
+            } else {
+                $condition = $single_or_set;
+                call_user_func($callback, $condition);
+            }
+        }
     }
 }

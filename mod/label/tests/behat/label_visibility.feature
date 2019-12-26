@@ -13,8 +13,7 @@ Feature: Check label visibility works
       | user | course | role |
       | admin | C1 | editingteacher |
     Given I log in as "admin"
-    And I follow "Test"
-    And I turn editing mode on
+    And I am on "Test" course homepage with editing mode on
     When I add a "label" to section "1" and I fill the form with:
       | Label text | Swanky label |
       | Visible | Hide |
@@ -29,8 +28,7 @@ Feature: Check label visibility works
       | user | course | role |
       | admin | C1 | editingteacher |
     Given I log in as "admin"
-    And I follow "Test"
-    And I turn editing mode on
+    And I am on "Test" course homepage with editing mode on
     When I add a "label" to section "1" and I fill the form with:
       | Label text | Swanky label |
       | Visible | Show |

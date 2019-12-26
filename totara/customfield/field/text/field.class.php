@@ -42,9 +42,27 @@ class customfield_text extends customfield_base {
             $mform->addRule($this->inputname, get_string('regexvalidationfailed', 'totara_customfield', $fullname), 'regex', $regex);
             // Param5 is regex pattern validation help message.
             if (!empty($this->field->param5)) {
-                $mform->addElement('static', null, null, $this->field->param5);
+                // Giving element an unique name, so that the form will not complain about element without name.
+                $mform->addElement('static', uniqid("{$this->inputname}_"), null, $this->field->param5);
             }
         }
     }
 
+    /**
+     * Does some extra pre-processing for totara sync uploads.
+     *
+     * @param  object $itemnew The item being saved
+     * @return object          The same item after processing
+     */
+    public function sync_data_preprocess($syncitem) {
+        $fieldname = $this->inputname;
+
+        if (!isset($syncitem->$fieldname)) {
+            return $syncitem;
+        }
+
+        $syncitem->{$fieldname} = clean_param($syncitem->{$fieldname}, PARAM_TEXT);
+
+        return $syncitem;
+    }
 }

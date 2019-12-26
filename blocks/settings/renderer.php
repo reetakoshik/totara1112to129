@@ -25,8 +25,28 @@
 class block_settings_renderer extends plugin_renderer_base {
 
     public function settings_tree(settings_navigation $navigation) {
+        global $CFG;
+
         $count = 0;
-        foreach ($navigation->children as &$child) {
+
+        // Totara: check if admin navigation needs to be included.
+        if (empty($CFG->legacyadminsettingsmenu)) {
+            // We're going to create a new node, we can't use clone (it's not deep) and we can't remove children
+            // as they are all handled by objects presently, so modifying one is modifying them all.
+            $blocknav = navigation_node::create('Unexpected coding error', null, navigation_node::TYPE_ROOTNODE);
+            // Copy the children that we want across to the new node.
+            foreach ($navigation->children as $child) {
+                if ($child->key === 'siteadministration' || $child->key === 'root') {
+                    continue; // Bye now!
+                }
+                $blocknav->add_node($child);
+            }
+        } else {
+            // Easy as, nothing to change here, just map navigation to blocknav.
+            $blocknav = $navigation;
+        }
+
+        foreach ($blocknav->children as &$child) {
             $child->preceedwithhr = ($count!==0);
             if ($child->display) {
                 $count++;
@@ -36,9 +56,9 @@ class block_settings_renderer extends plugin_renderer_base {
             'class' => 'block_tree list',
             'role' => 'tree',
             'data-ajax-loader' => 'block_navigation/site_admin_loader');
-        $content = $this->navigation_node($navigation, $navigationattrs);
-        if (isset($navigation->id) && !is_numeric($navigation->id) && !empty($content)) {
-            $content = $this->output->box($content, 'block_tree_box', $navigation->id);
+        $content = $this->navigation_node($blocknav, $navigationattrs);
+        if (isset($blocknav->id) && !is_numeric($blocknav->id) && !empty($content)) {
+            $content = $this->output->box($content, 'block_tree_box', $blocknav->id);
         }
         return $content;
     }

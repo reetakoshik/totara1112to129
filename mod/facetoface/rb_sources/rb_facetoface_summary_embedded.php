@@ -28,7 +28,7 @@ class rb_facetoface_summary_embedded extends rb_base_embedded {
     public $hidden, $accessmode, $accesssettings, $shortname;
 
     public function __construct($data) {
-        $this->url = '/mod/facetoface/sessionreport.php';
+        $this->url = '/mod/facetoface/reports/sessions.php';
         $this->source = 'facetoface_summary';
         $this->shortname = 'facetoface_summary';
         $this->fullname = get_string('embedded:seminarsessions', 'mod_facetoface');

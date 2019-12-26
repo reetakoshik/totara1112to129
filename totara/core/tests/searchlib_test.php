@@ -54,7 +54,7 @@ class totara_core_searchlib_testcase extends advanced_testcase {
         $this->assertCount(2, $result);
         $this->assertStringStartsWith('(', $result[0]);
         $this->assertStringEndsWith(')', $result[0]);
-        $this->assertInternalType('array', $result[1]);
+        $this->assertIsArray($result[1]);
         $users = $DB->get_records_sql("SELECT * FROM {user} WHERE {$result[0]}", $result[1]);
         $this->assertCount(1, $users);
         $this->assertArrayHasKey($user2->id, $users);
@@ -63,7 +63,7 @@ class totara_core_searchlib_testcase extends advanced_testcase {
         $this->assertCount(2, $result);
         $this->assertStringStartsWith('(', $result[0]);
         $this->assertStringEndsWith(')', $result[0]);
-        $this->assertInternalType('array', $result[1]);
+        $this->assertIsArray($result[1]);
         $users = $DB->get_records_sql("SELECT * FROM {user} WHERE {$result[0]}", $result[1]);
         $this->assertCount(2, $users);
         $this->assertArrayHasKey($user1->id, $users);
@@ -73,7 +73,7 @@ class totara_core_searchlib_testcase extends advanced_testcase {
         $this->assertCount(2, $result);
         $this->assertStringStartsWith('(', $result[0]);
         $this->assertStringEndsWith(')', $result[0]);
-        $this->assertInternalType('array', $result[1]);
+        $this->assertIsArray($result[1]);
         $users = $DB->get_records_sql("SELECT * FROM {user} WHERE {$result[0]}", $result[1]);
         $this->assertCount(1, $users);
         $this->assertArrayHasKey($user3->id, $users);
@@ -82,7 +82,7 @@ class totara_core_searchlib_testcase extends advanced_testcase {
         $this->assertCount(2, $result);
         $this->assertStringStartsWith('(', $result[0]);
         $this->assertStringEndsWith(')', $result[0]);
-        $this->assertInternalType('array', $result[1]);
+        $this->assertIsArray($result[1]);
         $users = $DB->get_records_sql("SELECT * FROM {user} WHERE {$result[0]}", $result[1]);
         $this->assertCount(3, $users);
         $this->assertArrayHasKey($user1->id, $users);
@@ -94,7 +94,7 @@ class totara_core_searchlib_testcase extends advanced_testcase {
         $result = totara_search_get_keyword_where_clause(array(), array('username'));
         $this->assertCount(2, $result);
         $this->assertSame('', $result[0]);
-        $this->assertInternalType('array', $result[1]);
+        $this->assertIsArray($result[1]);
     }
 
     public function test_search_get_keyword_where_clause_options() {
@@ -113,7 +113,7 @@ class totara_core_searchlib_testcase extends advanced_testcase {
         $this->assertCount(2, $result);
         $this->assertStringStartsWith('(', $result[0]);
         $this->assertStringEndsWith(')', $result[0]);
-        $this->assertInternalType('array', $result[1]);
+        $this->assertIsArray($result[1]);
         $users = $DB->get_records_sql("SELECT * FROM {user} WHERE {$result[0]}", $result[1]);
         $this->assertCount(2, $users);
         $this->assertArrayHasKey($user1->id, $users);
@@ -123,7 +123,7 @@ class totara_core_searchlib_testcase extends advanced_testcase {
         $this->assertCount(2, $result);
         $this->assertStringStartsWith('(', $result[0]);
         $this->assertStringEndsWith(')', $result[0]);
-        $this->assertInternalType('array', $result[1]);
+        $this->assertIsArray($result[1]);
         $users = $DB->get_records_sql("SELECT * FROM {user} WHERE {$result[0]}", $result[1]);
         $this->assertCount(3, $users);
         $this->assertArrayHasKey($user2->id, $users);
@@ -134,7 +134,7 @@ class totara_core_searchlib_testcase extends advanced_testcase {
         $this->assertCount(2, $result);
         $this->assertStringStartsWith('(', $result[0]);
         $this->assertStringEndsWith(')', $result[0]);
-        $this->assertInternalType('array', $result[1]);
+        $this->assertIsArray($result[1]);
         $users = $DB->get_records_sql("SELECT * FROM {user} WHERE {$result[0]}", $result[1]);
         $this->assertCount(3, $users);
         $this->assertArrayHasKey($user1->id, $users);
@@ -145,7 +145,7 @@ class totara_core_searchlib_testcase extends advanced_testcase {
         $this->assertCount(2, $result);
         $this->assertStringStartsWith('(', $result[0]);
         $this->assertStringEndsWith(')', $result[0]);
-        $this->assertInternalType('array', $result[1]);
+        $this->assertIsArray($result[1]);
         $users = $DB->get_records_sql("SELECT * FROM {user} WHERE {$result[0]}", $result[1]);
         $this->assertCount(2, $users);
         $this->assertArrayHasKey($guest->id, $users);
@@ -155,7 +155,7 @@ class totara_core_searchlib_testcase extends advanced_testcase {
         $this->assertCount(2, $result);
         $this->assertStringStartsWith('(', $result[0]);
         $this->assertStringEndsWith(')', $result[0]);
-        $this->assertInternalType('array', $result[1]);
+        $this->assertIsArray($result[1]);
         $users = $DB->get_records_sql("SELECT * FROM {user} WHERE {$result[0]}", $result[1]);
         $this->assertCount(2, $users);
         $this->assertArrayHasKey($user1->id, $users);
@@ -165,7 +165,7 @@ class totara_core_searchlib_testcase extends advanced_testcase {
         $this->assertCount(2, $result);
         $this->assertStringStartsWith('(', $result[0]);
         $this->assertStringEndsWith(')', $result[0]);
-        $this->assertInternalType('array', $result[1]);
+        $this->assertIsArray($result[1]);
         $users = $DB->get_records_sql("SELECT * FROM {user} WHERE {$result[0]}", $result[1]);
         $this->assertCount(3, $users);
         $this->assertArrayHasKey($user2->id, $users);
@@ -176,7 +176,7 @@ class totara_core_searchlib_testcase extends advanced_testcase {
         $this->assertCount(2, $result);
         $this->assertStringStartsWith('(', $result[0]);
         $this->assertStringEndsWith(')', $result[0]);
-        $this->assertInternalType('array', $result[1]);
+        $this->assertIsArray($result[1]);
         $users = $DB->get_records_sql("SELECT * FROM {user} WHERE {$result[0]}", $result[1]);
         $this->assertCount(1, $users);
         $this->assertArrayHasKey($user2->id, $users);
@@ -185,7 +185,7 @@ class totara_core_searchlib_testcase extends advanced_testcase {
         $this->assertCount(2, $result);
         $this->assertStringStartsWith('(', $result[0]);
         $this->assertStringEndsWith(')', $result[0]);
-        $this->assertInternalType('array', $result[1]);
+        $this->assertIsArray($result[1]);
         $users = $DB->get_records_sql("SELECT * FROM {user} WHERE {$result[0]}", $result[1]);
         $this->assertCount(4, $users);
         $this->assertArrayHasKey($user1->id, $users);
@@ -198,6 +198,6 @@ class totara_core_searchlib_testcase extends advanced_testcase {
         $result = search_get_keyword_where_clause_options('username', array(), true, 'contains', false);
         $this->assertCount(2, $result);
         $this->assertSame('', $result[0]);
-        $this->assertInternalType('array', $result[1]);
+        $this->assertIsArray($result[1]);
     }
 }

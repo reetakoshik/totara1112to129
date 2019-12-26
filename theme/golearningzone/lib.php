@@ -21,7 +21,10 @@ function theme_golearningzone_pluginfile(
  * @return string
  */
 function theme_golearningzone_process_css($css, $theme) 
-{
+{	
+	global $CFG;
+	$css = str_replace('[[setting:wwwroot]]', $CFG->wwwroot,$css);
+
 	$css = str_replace('[[setting:red_r]]', 212, $css);
 	$css = str_replace('[[setting:red_g]]', 20, $css);
 	$css = str_replace('[[setting:red_b]]', 90, $css);

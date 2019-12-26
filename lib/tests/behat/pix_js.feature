@@ -18,21 +18,21 @@ Feature: Javascript template rendering
 
   Scenario: Javascript pix/flex rendering works
     Given I set the field "Component" to "Subsystem (core)"
-    Given I set the field "Search" to "test"
+    And I set the field with xpath "//*[@data-region='list-templates']//*[@id='search']" to "test"
     And I follow "core/test"
 
     # Old style pix
-    And "#template_pix_alt img[alt='argh']" "css_element" should exist
-    And "#template_pix_alt img[title='argh']" "css_element" should exist
-    And "#template_pix_alt img.smallicon" "css_element" should exist
+    And "#template_pix_alt img[alt='test case']" "css_element" should exist
+    And "#template_pix_alt img[title='test case']" "css_element" should exist
+    And "#template_pix_alt img.icon" "css_element" should exist
 
     # Old style pix with string
-    And "#template_pix_alt_variable img[alt='Skip hello']" "css_element" should exist
-    And "#template_pix_alt_variable img[title='Skip hello']" "css_element" should exist
-    And "#template_pix_alt_variable img.smallicon" "css_element" should exist
+    And "#template_pix_alt_variable img[alt='']" "css_element" should exist
+    And "#template_pix_alt_variable img[title='']" "css_element" should exist
+    And "#template_pix_alt_variable img.icon" "css_element" should exist
 
     # Old style pix with data
-    And "#template_pix_alt_json img[alt='Skip hello']" "css_element" should exist
+    And "#template_pix_alt_json img[alt='']" "css_element" should exist
     And "#template_pix_alt_json img.muppet" "css_element" should exist
 
     # Pix replacement with no data
@@ -42,7 +42,7 @@ Feature: Javascript template rendering
     # Pix replacement with text alt
     And "#template_flex_pix_alt .flex-icon.fa-asterisk" "css_element" should exist
     And "#template_flex_pix_alt .flex-icon[data-flex-icon='core|req']" "css_element" should exist
-    And I should see "argh" in the "#template_flex_pix_alt" "css_element"
+    And I should see "test case" in the "#template_flex_pix_alt" "css_element"
 
     # Pix replacement with string alt
     And "#template_flex_pix_alt_variable .flex-icon.fa-asterisk" "css_element" should exist
@@ -52,7 +52,6 @@ Feature: Javascript template rendering
     And "#template_flex_pix_alt_variable .flex-icon.fa-asterisk" "css_element" should exist
     And "#template_flex_pix_alt_variable .flex-icon[data-flex-icon='core|req']" "css_element" should exist
     And "#template_flex_pix_alt_json .flex-icon.muppet" "css_element" should exist
-    And I should see "Skip hello" in the "#template_flex_pix_alt_variable" "css_element"
 
     # Flex without alt
     And "#template_flex .flex-icon.fa-caret-right" "css_element" should exist
@@ -60,12 +59,18 @@ Feature: Javascript template rendering
 
     # Flex with alt
     And "#template_flex_alt .flex-icon.fa-cog" "css_element" should exist
-    And I should see "argh" in the "#template_flex_alt .sr-only" "css_element"
+    And I should see "test case" in the "#template_flex_alt .sr-only" "css_element"
 
     # Flex with alt string
     And "#template_flex_alt .flex-icon.fa-cog" "css_element" should exist
-    And I should see "Per page: hello" in the "#template_flex_string_alt .sr-only" "css_element"
+    And "#template_flex_string_alt .sr-only" "css_element" should not exist
 
     # Flex with alt data
-    And I should see "Skip hello" in the "#template_flex_string_data .sr-only" "css_element"
+    And "#template_flex_string_data .sr-only" "css_element" should not exist
     And "#template_flex_string_data .flex-icon.muppet" "css_element" should exist
+
+    # Userdate helper - should never be used as it is an XSS risk
+    And I should see "1 January 2011" in the "#template_userdata_helper" "css_element"
+
+    # shorten helper
+    And I should see "Lorem ipsum dolor sit amet, ..." in the "#template_shorten_helper" "css_element"

@@ -297,7 +297,7 @@ Feature: Access rights to user goal questions in dynamic appraisals
     # Change learner reporting hierarchy for 2 learners.
     When I log out
     And I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner One"
     And I follow "Learner1 JA"
     And I press "Choose manager"
@@ -307,7 +307,7 @@ Feature: Access rights to user goal questions in dynamic appraisals
     Then I should see "New Manager"
 
     When I press "Update job assignment"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner Two"
     And I follow "Learner2 JA"
     And I press "Choose manager"
@@ -486,7 +486,7 @@ Feature: Access rights to user goal questions in dynamic appraisals
     # Change learner reporting hierarchy for 2 learners.
     When I log out
     And I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner One"
     And I follow "Learner1 JA"
     And I press "Choose appraiser"
@@ -495,7 +495,7 @@ Feature: Access rights to user goal questions in dynamic appraisals
     Then I should see "New Appraiser"
 
     When I press "Update job assignment"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner Two"
     And I follow "Learner2 JA"
     And I press "Choose appraiser"

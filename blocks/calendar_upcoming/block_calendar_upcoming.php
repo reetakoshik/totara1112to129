@@ -88,7 +88,6 @@ class block_calendar_upcoming extends block_base {
         }
         $maxevents = get_user_preferences('calendar_maxevents', $defaultmaxevents);
         $events = calendar_get_upcoming($courses, $group, $user, $lookahead, $maxevents);
-
         if (!empty($this->instance)) {
             $link = 'view.php?view=day&amp;course='.$courseshown.'&amp;';
             $showcourselink = ($this->page->course->id == SITEID);

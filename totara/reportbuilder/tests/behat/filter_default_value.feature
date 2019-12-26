@@ -15,7 +15,7 @@ Feature: Filter default value works as expected
     And the following config values are set as admin:
       | authdeleteusers | partial |
     And I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I should see "User One"
     And I should see "User Two"
     And I should see "User Three"
@@ -25,7 +25,7 @@ Feature: Filter default value works as expected
     And I follow "Suspend User Two"
 
   Scenario: Test default value to active only is correctly set and I see the right information
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     Then I should see "User Three"
     And I should see "User Four"
     And I should not see "User One"
@@ -33,7 +33,7 @@ Feature: Filter default value works as expected
     And the field "user-deleted" matches value "Active"
 
   Scenario: Changing default value for filter is possible
-    Given I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    Given I navigate to "Browse list of users" node in "Site administration > Users"
     And the field "user-deleted" matches value "Active"
 
     # Changing to suspended users only
@@ -56,7 +56,7 @@ Feature: Filter default value works as expected
     And I should see "User Four"
 
   Scenario: Clear filter is working
-    Given I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    Given I navigate to "Browse list of users" node in "Site administration > Users"
     And the field "user-deleted" matches value "Active"
     When I click on "Clear" "button" in the ".fitem_actionbuttons" "css_element"
     Then the field "user-deleted" matches value "any value"

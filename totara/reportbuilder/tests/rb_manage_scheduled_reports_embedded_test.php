@@ -89,9 +89,7 @@ extends advanced_testcase {
         $user_with_capability = $generator->create_user()->id;
         \role_assign($this->role_id, $user_with_capability, $this->context);
 
-        $report = reportbuilder_get_embedded_report(
-            $this->report_name, array(), false, 0
-        );
+        $report = reportbuilder::create_embedded($this->report_name);
         $embedded_report = $report->embedobj;
 
         $this->assertFalse(

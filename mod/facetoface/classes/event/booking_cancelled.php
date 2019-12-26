@@ -37,7 +37,7 @@ defined('MOODLE_INTERNAL') || die();
  * @author Alastair Munro <alastair.munro@totaralms.com>
  * @package mod_facetoface
  */
-class booking_cancelled extends \core\event\base {
+class booking_cancelled extends abstract_signup_event {
 
     /** @var bool Flag for prevention of direct create() call. */
     protected static $preventcreatecall = true;
@@ -96,8 +96,8 @@ class booking_cancelled extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        $params = array('s' => $this->other['sessionid'], 'action' => 'cancellations');
-        return new \moodle_url('/mod/facetoface/attendees.php', $params);
+        $params = array('s' => $this->other['sessionid']);
+        return new \moodle_url('/mod/facetoface/attendees/cancellations.php', $params);
     }
 
     /**

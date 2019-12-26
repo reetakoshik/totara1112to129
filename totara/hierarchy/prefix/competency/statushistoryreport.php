@@ -87,7 +87,8 @@ $data = array(
 if ($rolstatus !== 'all') {
     $data['rolstatus'] = $rolstatus;
 }
-if (!$report = reportbuilder_get_embedded_report($shortname, $data, false, $sid)) {
+$config = (new rb_config())->set_sid($sid)->set_embeddata($data);
+if (!$report = reportbuilder::create_embedded($shortname, $config)) {
     print_error('error:couldnotgenerateembeddedreport', 'totara_reportbuilder');
 }
 
@@ -112,7 +113,7 @@ $PAGE->set_button($report->edit_button());
 $ownplan = $USER->id == $userid;
 
 $usertype = ($ownplan) ? 'learner' : 'manager';
-$menuitem = ($ownplan) ? 'recordoflearning' : 'myteam';
+$menuitem = ($ownplan) ? '\totara_plan\totara\menu\recordoflearning' : '\totara_core\totara\menu\myteam';
 $PAGE->set_totara_menu_selected($menuitem);
 dp_display_plans_menu($userid, 0, $usertype, 'competencies', $rolstatus);
 

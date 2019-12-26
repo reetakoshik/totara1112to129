@@ -31,11 +31,9 @@ require_once($CFG->dirroot . '/totara/program/lib.php');
 require_once($CFG->dirroot . '/totara/cohort/lib.php');
 
 class rb_source_program extends rb_base_source {
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
-
-    protected $instancetype = 'program';
+    use \core_course\rb\source\report_trait;
+    use \totara_cohort\rb\source\report_trait;
+    use \totara_program\rb\source\program_trait;
 
     public function __construct() {
         $this->base = '{prog}';
@@ -49,6 +47,11 @@ class rb_source_program extends rb_base_source {
         $this->requiredcolumns = $this->define_requiredcolumns();
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_program');
         $this->sourcewhere = $this->define_sourcewhere();
+        $this->usedcomponents[] = "totara_program";
+        $this->usedcomponents[] = 'totara_cohort';
+
+        $this->cacheable = false;
+
         parent::__construct();
     }
 
@@ -68,12 +71,6 @@ class rb_source_program extends rb_base_source {
         return false;
     }
 
-    //
-    //
-    // Methods for defining contents of source
-    //
-    //
-
     protected function define_joinlist() {
         global $CFG;
 
@@ -87,8 +84,8 @@ class rb_source_program extends rb_base_source {
             ),
         );
 
-        $this->add_course_category_table_to_joinlist($joinlist, 'base', 'category');
-        $this->add_cohort_program_tables_to_joinlist($joinlist, 'base', 'id');
+        $this->add_core_course_category_tables($joinlist, 'base', 'category');
+        $this->add_totara_cohort_program_tables($joinlist, 'base', 'id');
 
         return $joinlist;
     }
@@ -96,9 +93,9 @@ class rb_source_program extends rb_base_source {
     protected function define_columnoptions() {
 
         // include some standard columns
-        $this->add_program_fields_to_columns($columnoptions, 'base');
-        $this->add_course_category_fields_to_columns($columnoptions, 'course_category', 'base', 'programcount');
-        $this->add_cohort_program_fields_to_columns($columnoptions);
+        $this->add_totara_program_columns($columnoptions, 'base');
+        $this->add_core_course_category_columns($columnoptions, 'course_category', 'base', 'programcount');
+        $this->add_totara_cohort_program_columns($columnoptions);
 
         return $columnoptions;
     }
@@ -108,26 +105,11 @@ class rb_source_program extends rb_base_source {
         $filteroptions = array();
 
         // include some standard filters
-        $this->add_program_fields_to_filters($filteroptions);
-        $this->add_course_category_fields_to_filters($filteroptions, 'base', 'category');
-        $this->add_cohort_program_fields_to_filters($filteroptions, 'totara_program');
+        $this->add_totara_program_filters($filteroptions);
+        $this->add_core_course_category_filters($filteroptions);
+        $this->add_totara_cohort_program_filters($filteroptions, 'totara_program');
 
         return $filteroptions;
-    }
-
-    protected function define_contentoptions() {
-        $contentoptions = array(
-            new rb_content_option(
-                'prog_availability',
-                get_string('availablecontent', 'rb_source_program'),
-                array(
-                    'available' => 'base.available',
-                    'availfrom' => 'base.availablefrom',
-                    'availuntil' => 'base.availableuntil',
-                )
-            ),
-        );
-        return $contentoptions;
     }
 
     protected function define_paramoptions() {
@@ -154,7 +136,7 @@ class rb_source_program extends rb_base_source {
                 'type' => 'prog',
                 'value' => 'proglinkicon',
             ),
-        array(
+            array(
                 'type' => 'course_category',
                 'value' => 'namelink',
             ),
@@ -169,7 +151,7 @@ class rb_source_program extends rb_base_source {
                 'value' => 'fullname',
                 'advanced' => 0,
             ),
-        array(
+            array(
                 'type' => 'course_category',
                 'value' => 'path',
                 'advanced' => 0,
@@ -243,8 +225,7 @@ class rb_source_program extends rb_base_source {
 
     public function post_config(reportbuilder $report) {
         $reportfor = $report->reportfor; // ID of the user the report is for.
-        $report->set_post_config_restrictions($report->post_config_visibility_where($this->instancetype, 'base', $reportfor));
+        $report->set_post_config_restrictions($report->post_config_visibility_where('program', 'base', $reportfor));
     }
 
-} // End of rb_source_courses class.
-
+}

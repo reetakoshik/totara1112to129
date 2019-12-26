@@ -57,6 +57,7 @@ function(ajax, BootstrapTour, $, templates, str, log, notification) {
          * @param   {Number}    tourId      The ID of the tour to start.
          */
         fetchTour: function(tourId) {
+            M.util.js_pending('admin_usertour_fetchTour' + tourId);
             $.when(
                 ajax.call([
                     {
@@ -70,7 +71,13 @@ function(ajax, BootstrapTour, $, templates, str, log, notification) {
                 ])[0],
                 templates.render('tool_usertours/tourstep', {})
             ).then(function(response, template) {
-                usertours.startBootstrapTour(tourId, template[0], response.tourconfig);
+                if (response.showtour == true) {
+                    return usertours.startBootstrapTour(tourId, template[0], response.tourconfig);
+                }
+            }).always(function() {
+                M.util.js_complete('admin_usertour_fetchTour' + tourId);
+
+                return;
             }).fail(notification.exception);
         },
 
@@ -80,6 +87,7 @@ function(ajax, BootstrapTour, $, templates, str, log, notification) {
          * @method  addResetLink
          */
         addResetLink: function() {
+            M.util.js_pending('admin_usertour_addResetLink');
             str.get_string('resettouronpage', 'tool_usertours')
                 .done(function(s) {
                     // Grab the last item in the page of these.
@@ -92,7 +100,13 @@ function(ajax, BootstrapTour, $, templates, str, log, notification) {
                             '</a>' +
                         '</div>'
                     );
-                });
+                })
+                .always(function() {
+                    M.util.js_complete('admin_usertour_addResetLink');
+
+                    return;
+                })
+                .fail();
         },
 
         /**
@@ -102,6 +116,7 @@ function(ajax, BootstrapTour, $, templates, str, log, notification) {
          * @param   {Number}    tourId      The ID of the tour to start.
          * @param   {String}    template    The template to use.
          * @param   {Object}    tourConfig  The tour configuration.
+         * @return  {Object}
          */
         startBootstrapTour: function(tourId, template, tourConfig) {
             if (usertours.currentTour) {
@@ -145,7 +160,7 @@ function(ajax, BootstrapTour, $, templates, str, log, notification) {
             });
 
             usertours.currentTour = new BootstrapTour(tourConfig);
-            usertours.currentTour.startTour();
+            return usertours.currentTour.startTour();
         },
 
         /**

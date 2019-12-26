@@ -28,7 +28,7 @@ class rb_facetoface_events_embedded extends rb_base_embedded {
     public $hidden, $accessmode, $accesssettings, $shortname;
 
     public function __construct($data) {
-        $this->url = '/mod/facetoface/eventreport.php';
+        $this->url = '/mod/facetoface/reports/events.php';
         $this->source = 'facetoface_events';
         $this->shortname = 'facetoface_events';
         $this->fullname = get_string('embedded:seminarevents', 'mod_facetoface');

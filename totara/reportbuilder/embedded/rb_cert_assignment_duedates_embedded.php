@@ -43,7 +43,7 @@ class rb_cert_assignment_duedates_embedded extends rb_base_embedded {
                 'heading' => get_string('userfullname', 'totara_reportbuilder'),
             ),
             array(
-                'type' => 'progcompletion',
+                'type' => 'certcompletion',
                 'value' => 'duedate',
                 'heading' => get_string('actualduedate', 'totara_program'),
             ),
@@ -57,7 +57,26 @@ class rb_cert_assignment_duedates_embedded extends rb_base_embedded {
         // No restrictions.
         $this->contentmode = REPORT_BUILDER_CONTENT_MODE_NONE;
 
+        $this->embeddedparams = array();
+        if (isset($data['programid'])) {
+            $this->embeddedparams['programid'] = $data['programid'];
+        }
+        if (isset($data['assignmentid'])) {
+            $this->embeddedparams['assignmentid'] = $data['assignmentid'];
+        }
+
         parent::__construct();
+    }
+
+    /**
+     * Hide this report because:
+     * - it doesn't make sense outside of certification context
+     * - it doesn't have a dedicate page where it can be viewed
+     *
+     * @return bool
+     */
+    public static function is_report_ignored() {
+        return true;
     }
 
     /**
@@ -70,13 +89,12 @@ class rb_cert_assignment_duedates_embedded extends rb_base_embedded {
      * @return boolean true if the user can access this report
      */
     public function is_capable($reportfor, $report) {
-        $programid = $report->get_param_value('programid');
-        if (empty($programid)) {
+        if (empty($this->embeddedparams['programid'])) {
             $context = context_system::instance();
         } else {
-            $program = new program($programid);
+            $program = new program($this->embeddedparams['programid']);
             $context = $program->get_context();
         }
-        return (has_capability('totara/program:configureassignments', $context));
+        return has_capability('totara/program:configureassignments', $context, $reportfor);
     }
 }

@@ -1,4 +1,4 @@
-@enrol @javascript @totara @enrol_totara_facetoface
+@enrol @javascript @totara @enrol_totara_facetoface @mod_facetoface
 Feature: Users are forced to get manager approval where required
 
   Background:
@@ -19,8 +19,7 @@ Feature: Users are forced to get manager approval where required
     And I click on "Enable" "link" in the "Seminar direct enrolment" "table_row"
     And I log out
     And I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name             | Test seminar name        |
       | Description      | Test seminar description |
@@ -44,15 +43,14 @@ Feature: Users are forced to get manager approval where required
     And I log out
 
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     When I add "Seminar direct enrolment" enrolment method with:
       | Custom instance name | Test student enrolment |
     And I log out
 
   Scenario: Should be unable to enrol using seminar direct without a manager
     Given I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I should see "You can not enrol yourself in this course."
 
   Scenario: A user with a manager can request access, withdraw request and be granted access
@@ -67,15 +65,14 @@ Feature: Users are forced to get manager approval where required
       | student1 | POS001   | teacher1 |
 
     When I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I click on "Sign-up" "link" in the "1 January 2020" "table_row"
+    And I am on "Course 1" course homepage
+    And I click on "Request approval" "link" in the "1 January 2020" "table_row"
     And I press "Request approval"
     Then I should see "Your request was sent to your manager for approval."
     And I log out
 
     When I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I follow "Attendees"
     And I follow "Approval required"
@@ -83,16 +80,15 @@ Feature: Users are forced to get manager approval where required
     And I log out
 
     When I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "manager request already pending"
     And I follow "Withdraw pending request"
     And I press "Confirm"
-    Then I should see "Sign-up"
+    Then I should see "Request approval"
     And I log out
 
     When I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I follow "Attendees"
     And I follow "Cancellations"
@@ -100,14 +96,13 @@ Feature: Users are forced to get manager approval where required
     And I log out
 
     When I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I click on "Sign-up" "link" in the "1 January 2020" "table_row"
+    And I am on "Course 1" course homepage
+    And I click on "Request approval" "link" in the "1 January 2020" "table_row"
     And I press "Request approval"
     Then I should see "Your request was sent to your manager for approval."
     And I log out
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I follow "Attendees"
     And I follow "Approval required"
@@ -115,6 +110,5 @@ Feature: Users are forced to get manager approval where required
     And I press "Update requests"
     And I log out
     And I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "Topic 1"

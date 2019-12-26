@@ -1,0 +1,226 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Kevin Hottinger <kevin.hottinger@totaralearning.com>
+   @package totara_catalog
+}}
+{{!
+
+    @template totara_catalog/item_narrow
+
+    This template generates a narrow item for catalog.
+
+    Classes required for JS:
+
+    Data attributes required for JS:
+    * data-tw-catalogItem: Target for checking ellipsis requirements
+    * data-tw-catalogDetails: Target for rendered full details & loading overlay
+    * data-tw-grid-item-toggle: Toggle for displaying details view
+
+    Context variables required for this template:
+    * active: Bool, grid item is active
+    * active_item: context for active item
+    * description: HTML, description text
+    * description_enabled: bool, enabled on catalog
+    * featured: bool, is a featured item
+    * hero_data_text_enabled: bool, hero text enabled
+    * hero_data_text: string, text for hero
+    * hero_data_icon_enabled: bool, hero icon enabled
+    * hero_data_icon: context for hero data
+    * hero_data_icon -> url: string, url of icon
+    * hero_data_icon -> alt: string, alt of icon
+    * icon_placeholders_enabled: bool, has icon placeholder
+    * icon_placeholders: context for placeholders
+    * icon_placeholders -> data: context for icon
+    * icon_placeholders -> data -> url: string, url for icon
+    * icon_placeholders -> data -> alt: string, alt for icon
+    * image: context for image
+    * image -> alt: string, URL alt text
+    * image -> url: string, URL of image
+    * image_enabled: bool, image enabled
+    * progress_bar_enabled: bool, has progress bar
+    * text_placeholders: context for text placeholders
+    * text_placeholders -> data_exists: bool, has data
+    * text_placeholders -> data: context for placeholders
+    * text_placeholders -> label: string, label
+    * text_placeholders -> show_label: bool, show label
+    * text_placeholders -> value: string, text
+    * text_placeholders_enabled: bool, has text placeholders
+    * title: text, title for item
+
+    Example context (json):
+    {
+        "itemid": 1,
+        "title": "v12",
+        "featured": 0,
+        "image_enabled": true,
+        "image": {
+            "url": "http:\/\/localhost\/v12\/learn\/pluginfile.php\/1\/course\/defaultimage\/244323205\/Fallout%20Shelter%20app%20logo.png",
+            "alt": "v12"
+        },
+        "hero_data_text_enabled": false,
+        "hero_data_icon_enabled": true,
+        "hero_data_icon": {
+            "icon": "<span aria-hidden=\"true\" data-flex-icon=\"totara_core|msgicons\/elearning-regular\"\n
+            class=\"flex-icon ft-fw ft fa-laptop\"\n
+            title=\"E-Learning\"><\/span><span class=\"sr-only\">E-Learning<\/span>"
+        },
+        "description_enabled": true,
+        "description": "",
+        "progress_bar_enabled": true,
+        "progress_bar": "",
+        "text_placeholders_enabled": true,
+        "text_placeholders": [{
+            "data_exists": true,
+            "data": {
+                "key": "shortname",
+                "value": "v12"
+            }
+        }],
+        "icon_placeholders_enabled": true,
+        "icon_placeholders": [{
+            "url": "http:\/\/localhost\/v12\/learn\/theme\/image.php?theme=basis&amp;component=totara_core&amp;image=courseicons%2Fdefault",
+            "alt": "v12"
+        }, {
+            "icon": "<span aria-hidden=\"true\" data-flex-icon=\"mod_forum|icon\"\n
+            class=\"flex-icon ft-fw ft fa-comments-o\"\n
+            title=\"Forum\"><\/span><span class=\"sr-only\">Forum<\/span>"
+        }]
+    }
+}}
+<a href="#" class="tw-catalogItemNarrow" title="{{{titlealt}}}"
+    data-tw-grid-item-toggle="">
+
+    {{#image_enabled}}
+    <div class="tw-catalogItemNarrow__image">
+        <div class="tw-catalogItemNarrow__image_ratio">
+            {{#image}}{{#url}}
+                <div class="tw-catalogItemNarrow__image_ratio_img" style="background-image: url('{{{url}}}'); background-size:cover;"></div>
+                <span class="sr-only">{{alt}}</span>
+            {{/url}}{{/image}}
+        </div>
+    </div>
+    {{/image_enabled}}
+    {{^image_enabled}}
+    <div class="tw-catalogItemNarrow__noimage"></div>
+    {{/image_enabled}}
+
+    <div class="tw-catalogItemNarrow__content">
+
+        {{#hero_data_text_enabled}}{{#hero_data_text}}
+        <div class="tw-catalogItemNarrow__hero">
+            <div class="tw-catalogItemNarrow__hero_text">
+                {{{hero_data_text}}}
+            </div>
+        </div>
+        {{/hero_data_text}}{{/hero_data_text_enabled}}
+
+        {{#hero_data_icon_enabled}}{{#hero_data_icon}}
+        <!--<div class="tw-catalogItemNarrow__hero">
+            <div class="tw-catalogItemNarrow__hero_icon">
+                {{#icon}}
+                    {{{icon}}}
+                {{/icon}}
+                {{#url}}
+                    <img src="{{{url}}}" alt="{{alt}}" class="tw-catalogItemNarrow__hero_icon_img">
+                {{/url}}
+            </div>
+        </div>-->
+        {{/hero_data_icon}}{{/hero_data_icon_enabled}}
+       <h3 class="tw-catalogItemNarrow__title">                
+            <span class="tw-catalogItemNarrow__ellipsis" data-tw-catalogItem="check">               
+                {{#featured}}               
+                <span class="tw-catalogItemNarrow__title_featured">{{#str}}featured, totara_catalog{{/str}}</span>              
+                {{/featured}}               
+                                
+            </span>             
+        </h3>
+        {{#progress_bar_enabled}}
+            {{#progress_bar}}
+            <div class="progressPanel">             
+            <figure><img src="{{{coursetypeimgurl}}}"> </figure>
+            <div class="tw-catalogItemNarrow__progress">
+                {{> core/progress_bar }}
+            </div>
+            </div>
+            {{/progress_bar}}
+            {{^progress_bar}}
+            <div class="progressPanel">
+            <figure><img src="{{{coursetypeimgurl}}}"> </figure>
+              <div class="tw-catalogItemNarrow__noprogress">{{> core/progress_bar }}</div>      
+            </div>
+            
+            {{/progress_bar}}
+        {{/progress_bar_enabled}}
+        {{^progress_bar_enabled}}
+            <div class="progressPanel">
+            <figure><img src="{{{coursetypeimgurl}}}"> </figure>
+            <div class="tw-catalogItemNarrow__noprogress">{{> core/progress_bar }}</div>
+               </div>
+        {{/progress_bar_enabled}}
+
+       <div class="course_title"> 
+       {{{title}}}             
+        </div>
+
+    </div>
+</a>
+        <!--<h3 class="tw-catalogItemNarrow__title">
+            <span class="tw-catalogItemNarrow__ellipsis" data-tw-catalogItem="check">
+                {{#featured}}
+                <span class="tw-catalogItemNarrow__title_featured">{{#str}}featured, totara_catalog{{/str}}</span>
+                {{/featured}}
+                {{{title}}}
+            </span>
+        </h3>
+
+        {{#description_enabled}}
+        <div class="tw-catalogItemNarrow__description">
+            <div class="tw-catalogItemNarrow__ellipsis" data-tw-catalogItem="check">
+                {{{description}}}
+            </div>
+        </div>
+        {{/description_enabled}}
+
+        {{#text_placeholders_enabled}}
+        <div class="tw-catalogItemNarrow__textarea_group">
+            {{#text_placeholders}}
+            <div class="tw-catalogItemNarrow__textarea_group_item">
+                {{#show_label}}{{{label}}}: {{/show_label}}{{#data_exists}}{{{data}}}{{/data_exists}}
+            </div>
+            {{/text_placeholders}}
+        </div>
+        {{/text_placeholders_enabled}}
+
+        {{#icon_placeholders_enabled}}
+        <div class="tw-catalogItemNarrow__iconRow">
+            {{#icon_placeholders}}{{!
+            }}{{#icon}}{{{icon}}}{{/icon}}{{!
+            }}{{#url}}<img src="{{{url}}}" alt="{{alt}}" class="tw-catalogItemNarrow__iconRow_icon">{{/url}}{{!
+            }}{{/icon_placeholders}}
+        </div>
+        {{/icon_placeholders_enabled}}
+    </div>
+</a>-->
+
+<div class="tw-catalogDetails">
+    <div class="tw-catalogDetails__arrow"></div>
+    <div class="tw-catalogDetails__placement">
+        <div class="tw-catalogDetails__content" data-tw-catalogDetails=""></div>
+    </div>
+</div>

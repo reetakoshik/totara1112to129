@@ -55,8 +55,7 @@ Feature: See that program visibility affects Record of Learning: Programs conten
   @javascript
   Scenario: Normal visibility (default), hidden.
     When I log in as "admin"
-    And I click on "Programs" in the totara menu
-    And I click on "RoLProgVisibility Test Program 1" "link"
+    And I am on "RoLProgVisibility Test Program 1" program homepage
     And I click on "Edit program details" "button"
     And I click on "Details" "link"
     And I set the field "Visible" to "0"
@@ -88,8 +87,7 @@ Feature: See that program visibility affects Record of Learning: Programs conten
   @javascript
   Scenario: Normal visibility (default), hidden, 2nd program assigned.
     When I log in as "admin"
-    And I click on "Programs" in the totara menu
-    And I click on "RoLProgVisibility Test Program 1" "link"
+    And I am on "RoLProgVisibility Test Program 1" program homepage
     And I click on "Edit program details" "button"
     And I click on "Details" "link"
     And I set the field "Visible" to "0"
@@ -121,8 +119,7 @@ Feature: See that program visibility affects Record of Learning: Programs conten
   @javascript
   Scenario: Normal vis hidden, switch to audience vis.
     When I log in as "admin"
-    And I click on "Programs" in the totara menu
-    And I click on "RoLProgVisibility Test Program 1" "link"
+    And I am on "RoLProgVisibility Test Program 1" program homepage
     And I click on "Edit program details" "button"
     And I click on "Details" "link"
     And I set the field "Visible" to "0"
@@ -142,7 +139,7 @@ Feature: See that program visibility affects Record of Learning: Programs conten
     # Switch the site setting, program is now set to all users (default).
     When I log out
     And I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
@@ -171,7 +168,7 @@ Feature: See that program visibility affects Record of Learning: Programs conten
   @javascript
   Scenario: Audience visibility, all users (default).
     When I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
@@ -199,13 +196,12 @@ Feature: See that program visibility affects Record of Learning: Programs conten
   @javascript
   Scenario: Audience visibility, enrolled users and auds.
     When I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
 
-    When I click on "Programs" in the totara menu
-    And I click on "RoLProgVisibility Test Program 1" "link"
+    When I am on "RoLProgVisibility Test Program 1" program homepage
     And I click on "Edit program details" "button"
     And I click on "Details" "link"
     And I set the field "Visibility" to "Enrolled users and members of the selected audiences"
@@ -235,13 +231,12 @@ Feature: See that program visibility affects Record of Learning: Programs conten
   @javascript
   Scenario: Audience visibility, enrolled users.
     When I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
 
-    When I click on "Programs" in the totara menu
-    And I click on "RoLProgVisibility Test Program 1" "link"
+    When I am on "RoLProgVisibility Test Program 1" program homepage
     And I click on "Edit program details" "button"
     And I click on "Details" "link"
     And I set the field "Visibility" to "Enrolled users only"
@@ -271,13 +266,12 @@ Feature: See that program visibility affects Record of Learning: Programs conten
   @javascript
   Scenario: Audience visibility, no users.
     When I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
 
-    When I click on "Programs" in the totara menu
-    And I click on "RoLProgVisibility Test Program 1" "link"
+    When I am on "RoLProgVisibility Test Program 1" program homepage
     And I click on "Edit program details" "button"
     And I click on "Details" "link"
     And I set the field "Visibility" to "No users"
@@ -301,13 +295,12 @@ Feature: See that program visibility affects Record of Learning: Programs conten
   @javascript
   Scenario: Audience visibility, no users, 2nd program assigned.
     When I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
 
-    When I click on "Programs" in the totara menu
-    And I click on "RoLProgVisibility Test Program 1" "link"
+    When I am on "RoLProgVisibility Test Program 1" program homepage
     And I click on "Edit program details" "button"
     And I click on "Details" "link"
     And I set the field "Visibility" to "No users"
@@ -337,14 +330,13 @@ Feature: See that program visibility affects Record of Learning: Programs conten
   @javascript
   Scenario: ROL Program: Audience visibility, no users, 1st program not completed then unassigned.
     When I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I set the field "Enable program completion editor" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
 
-    When I click on "Programs" in the totara menu
-    And I click on "RoLProgVisibility Test Program 1" "link"
+    When I am on "RoLProgVisibility Test Program 1" program homepage
     And I click on "Edit program details" "button"
     And I click on "Details" "link"
     And I set the field "Visibility" to "No users"
@@ -355,10 +347,8 @@ Feature: See that program visibility affects Record of Learning: Programs conten
     Then I should see "Not complete" in the "fn_002 ln_002" "table_row"
 
     When I switch to "Assignments" tab
-    And I click on "Delete" "link" in the "fn_002 ln_002" "table_row"
-    And I press "Save changes"
-    And I press "Save all changes"
-    Then I should see "Program assignments saved successfully"
+    And I click on "Remove program assignment" "link" in the "fn_002 ln_002" "table_row"
+    And I click on "Remove" "button"
 
   # RoL: Progs tab should be visible but not contain the program for learner.
     When I log out
@@ -383,14 +373,13 @@ Feature: See that program visibility affects Record of Learning: Programs conten
   @javascript
   Scenario: ROL Program: Audience visibility, no users, 1st program completed then unassigned.
     When I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I set the field "Enable program completion editor" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
 
-    When I click on "Programs" in the totara menu
-    And I click on "RoLProgVisibility Test Program 1" "link"
+    When I am on "RoLProgVisibility Test Program 1" program homepage
     And I click on "Edit program details" "button"
     And I click on "Details" "link"
     And I set the field "Visibility" to "No users"
@@ -411,10 +400,8 @@ Feature: See that program visibility affects Record of Learning: Programs conten
 
     When I follow "Return to program"
     And I switch to "Assignments" tab
-    And I click on "Delete" "link" in the "fn_002 ln_002" "table_row"
-    And I press "Save changes"
-    And I press "Save all changes"
-    Then I should see "Program assignments saved successfully"
+    And I click on "Remove program assignment" "link" in the "fn_002 ln_002" "table_row"
+    And I click on "Remove" "button"
 
     # RoL: Progs tab should be visible but not contain the program for learner.
     When I log out

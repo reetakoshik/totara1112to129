@@ -43,7 +43,7 @@ if ($register) {
     redirect($PAGE->url);
 }
 
-$report = reportbuilder_get_embedded_report('connect_servers', array(), false, 0);
+$report = reportbuilder::create_embedded('connect_servers');
 
 echo $OUTPUT->header();
 

@@ -88,7 +88,7 @@ class behat_util extends testing_util {
         // NOTE: completion is automatically enabled since Moodle 3.1
         set_config('completionstartonenrol', 0, 'moodlecourse');
         set_config('enrol_plugins_enabled', 'manual,guest,self,cohort');
-        set_config('enhancedcatalog', 0);
+        set_config('catalogtype', 'moodle');
         set_config('preventexecpath', 0);
         set_config('enableblogs', 1);
         $DB->set_field('role', 'name', 'Manager', array('shortname' => 'manager'));
@@ -157,6 +157,9 @@ class behat_util extends testing_util {
         $DB->delete_records('config_log');
         $DB->delete_records('log_display');
         $DB->delete_records('upgrade_log');
+
+        // Totara: Renable site legacy site administration menu
+        set_config('legacyadminsettingsmenu', 1);
 
         // Totara: there is no need to save filedir files, we do not delete them in tests!
 
@@ -444,5 +447,7 @@ class behat_util extends testing_util {
         // Totara: make sure all browser caches are invalidated too.
         js_reset_all_caches();
         theme_reset_all_caches();
+
+        \totara_catalog\cache_handler::reset_all_caches();
     }
 }

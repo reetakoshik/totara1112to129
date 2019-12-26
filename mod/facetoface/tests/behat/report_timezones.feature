@@ -20,9 +20,7 @@ Feature: Seminar timezones in reports
       | user2 | C1     | student |
 
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test seminar name        |
       | Description | Test seminar description |
@@ -104,7 +102,7 @@ Feature: Seminar timezones in reports
     And I click on "Attendees" "link" in the "Room 1" "table_row"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "First User, user1@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I press "Continue"
     And I press "Confirm"
     And I wait until "First User" "text" exists
@@ -112,20 +110,19 @@ Feature: Seminar timezones in reports
     And I click on "Attendees" "link" in the "Room 2" "table_row"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Second User, user2@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I press "Continue"
     And I press "Confirm"
     And I wait until "Second User" "text" exists
 
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "F2F sessions"
     And I set the field "Source" to "Seminar Sign-ups"
     And I press "Create report"
     And I switch to "Columns" tab
-    And I add the "Event Finish Time" column to the report
-    And I add the "Event Start Time" column to the report
-    #And I add the "Event Finish Time" column to the report
-    And I add the "Session Start (linked to activity)" column to the report
+    And I add the "Session Finish Date/Time" column to the report
+    And I add the "Session Start Date/Time (linked to activity)" column to the report
 
     When I navigate to my "F2F sessions" report
     Then I should see "1 January 2020" in the "First User" "table_row"
@@ -143,12 +140,12 @@ Feature: Seminar timezones in reports
     # That's a bit strange that w/o timezone date shown in different format, might need to look at that later.
     Then I should see "2 Jan" in the "First User" "table_row"
     Then I should see "2020" in the "First User" "table_row"
-    And I should see "01:15" in the "First User" "table_row"
-    And I should see "03:45" in the "First User" "table_row"
+    And I should see "1:15" in the "First User" "table_row"
+    And I should see "3:45" in the "First User" "table_row"
     And I should see "4 Feb" in the "Second User" "table_row"
     And I should see "2021" in the "Second User" "table_row"
-    And I should see "01:00" in the "Second User" "table_row"
-    And I should see "02:30" in the "Second User" "table_row"
+    And I should see "1:00" in the "Second User" "table_row"
+    And I should see "2:30" in the "Second User" "table_row"
     And I should not see "Prague"
     And I should not see "Perth"
     And I should not see "1 January 2020"
@@ -161,9 +158,7 @@ Feature: Seminar timezones in reports
       | Course 1 | C1        | 0        |
 
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test seminar 1 name        |
       | Description | Test seminar 1 description |
@@ -186,8 +181,7 @@ Feature: Seminar timezones in reports
       | timefinish[timezone] | Australia/Perth |
     And I press "OK"
     And I press "Save changes"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test seminar 2 name        |
       | Description | Test seminar 2 description |
@@ -211,7 +205,8 @@ Feature: Seminar timezones in reports
     And I press "OK"
     And I press "Save changes"
 
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "F2F summary"
     And I set the field "Source" to "Seminar Sessions"
     And I press "Create report"

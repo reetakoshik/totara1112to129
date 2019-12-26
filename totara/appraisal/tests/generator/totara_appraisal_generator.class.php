@@ -547,10 +547,12 @@ class totara_appraisal_generator extends component_generator_base {
             // For now - learner gets cananswer, other gets cananswer and canviewother
             $roles = explode(',', $data['roles']);
             unset($data['roles']);
-            $data['roles'] = array(appraisal::ROLE_LEARNER => appraisal::ACCESS_CANANSWER);
 
             foreach ($roles as $role) {
                 switch ($role) {
+                    case 'learner':
+                        $data['roles'][appraisal::ROLE_LEARNER] = appraisal::ACCESS_CANANSWER;
+                        break;
                     case 'manager':
                         $data['roles'][appraisal::ROLE_MANAGER] = appraisal::ACCESS_CANANSWER + appraisal::ACCESS_CANVIEWOTHER;
                         break;

@@ -106,7 +106,7 @@ class multiselect extends element {
         }
         $missing = array_diff($setvalues, $allvalues);
         if (!$missing) {
-            if (array_intersect($setvalues, $alllabels)) {
+            if ($allvalues !== $alllabels and array_intersect($setvalues, $alllabels)) {
                 throw new ExpectationException("Totara form {$this->mytype} element '{$this->locator}' selection options are both in values and labels: {$value}", $this->context->getSession());
             }
             $this->set_select_values($select, $setvalues);
@@ -115,7 +115,7 @@ class multiselect extends element {
 
         $missing = array_diff($setvalues, $alllabels);
         if (!$missing) {
-            if (array_intersect($setvalues, $allvalues)) {
+            if ($allvalues !== $alllabels and array_intersect($setvalues, $allvalues)) {
                 throw new ExpectationException("Totara form {$this->mytype} element '{$this->locator}' selection options are both in values and labels: {$value}", $this->context->getSession());
             }
             $values = array();

@@ -27,8 +27,7 @@ Feature: Only Alerts Report table block on dashboard
 
     # Create a Seminar.
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I follow "Add a new event"
     And I click on "Edit session" "link"
@@ -52,7 +51,7 @@ Feature: Only Alerts Report table block on dashboard
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I set the following fields to these values:
       | searchtext | Sam1 Student1 |
-    And I press "Search"
+    And I click on "Search" "button" in the "#region-main" "css_element"
     And I click on "Sam1 Student1, student1@example.com" "option"
     And I press "Add"
     And I wait "1" seconds
@@ -61,7 +60,7 @@ Feature: Only Alerts Report table block on dashboard
     Then I should see "Sam1 Student1"
 
     # Set up the dashboard.
-    And I navigate to "Dashboards" node in "Site administration > Appearance"
+    And I navigate to "Dashboards" node in "Site administration > Navigation"
     And I press "Create dashboard"
     And I set the field "Name" to "My Dashboard"
     And I click on "Available only to the following audiences" "radio"
@@ -73,7 +72,7 @@ Feature: Only Alerts Report table block on dashboard
     And I click on "moveup" "link"
 
     # Create an audience that we can allocate to the dashboard.
-    When I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    When I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Audience 1"
     And I follow "Edit members"
     And I set the field "Potential users" to "Admin User (moodle@example.com)"
@@ -86,6 +85,8 @@ Feature: Only Alerts Report table block on dashboard
     Then I should see "Admin User"
     Then I should see "Sam1 Student1"
     Then I should see "Bob2 Student2"
+
+    And I run all adhoc tasks
     And I log out
 
   Scenario: Add only the Alerts report table block to the dashboard
@@ -95,8 +96,9 @@ Feature: Only Alerts Report table block on dashboard
     And I add the "Report table" block
     And I configure the "Report table" block
     And I set the following fields to these values:
-      | Block title | MyAlerts block |
-      | Report | Alerts |
+      | Override default block title | Yes            |
+      | Block title                  | MyAlerts block |
+      | Report                       | Alerts         |
 
     And I press "Save changes"
     And I press "Stop customising this page"
@@ -112,8 +114,9 @@ Feature: Only Alerts Report table block on dashboard
     And I add the "Report table" block
     And I configure the "Report table" block
     And I set the following fields to these values:
-      | Block title | MyAlerts block |
-      | Report | Alerts |
+      | Override default block title | Yes            |
+      | Block title                  | MyAlerts block |
+      | Report                       | Alerts         |
 
     And I press "Save changes"
     And I press "Stop customising this page"

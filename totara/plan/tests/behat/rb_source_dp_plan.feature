@@ -18,7 +18,8 @@ Feature: Verify the columns and filters of a the Learning plans report source.
       | learner1 | Learning Plan 4 |
 
     When I log in as "admin"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | Learning Plans |
       | Source      | Learning Plans |

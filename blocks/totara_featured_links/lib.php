@@ -29,7 +29,7 @@ require_once($CFG->dirroot.'/totara/cohort/lib.php');
 /**
  * Gets a file so that it can be show to the user
  * @param int $course
- * @param stdClass $birecord_or_cm
+ * @param \stdClass $birecord_or_cm
  * @param context $context
  * @param string $filearea
  * @param array $args
@@ -66,7 +66,7 @@ function block_totara_featured_links_pluginfile($course, $birecord_or_cm, contex
 
     $fileid = $args[0];
     $filename = $args[1];
-    $tile_instance = \block_totara_featured_links\tile\base::get_tile_instance($fileid);
+    $tile_instance = block_totara_featured_links\tile\base::get_tile_instance($fileid);
     if (!$tile_instance->can_edit_tile() && !$tile_instance->is_visible()) {
         send_file_not_found();
     }

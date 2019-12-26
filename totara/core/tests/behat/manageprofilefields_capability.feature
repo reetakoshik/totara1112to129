@@ -5,24 +5,24 @@ Feature: Test manageprofilefields capability
     I need to allow this capability to Site Manager and check that
     they can create new custom field
 
-Background:
+  Background:
     Given I am on a totara site
     And the following "users" exist:
       | username | firstname | lastname | email |
       | manager1 | Manager | 1 | manager1@example.com |
 
-Scenario: Test that user with right capability can manage user profile custom fields
+  Scenario: Test that user with right capability can manage user profile custom fields
     Given I log in as "admin"
     And I set the following system permissions of "Site Manager" role:
       | capability | permission |
       | totara/core:manageprofilefields | Allow |
-    And I navigate to "Assign system roles" node in "Site administration > Users > Permissions"
+    And I navigate to "Assign system roles" node in "Site administration > Permissions"
     And I follow "Site Manager"
     And I set the field "Potential users" to "Manager 1 (manager1@example.com)"
     And I press "Add"
     And I log out
     Then I log in as "manager1"
-    And I navigate to "User profile fields" node in "Site administration > Users > Accounts"
+    And I navigate to "User profile fields" node in "Site administration > Users"
     # Field doesn't have a label
     And I set the field "datatype" to "Text input"
     And I set the following fields to these values:
@@ -34,4 +34,3 @@ Scenario: Test that user with right capability can manage user profile custom fi
     # Remove this field
     When I click on "Delete" "link" in the "mytext" "table_row"
     Then I should see "Deleted"
-

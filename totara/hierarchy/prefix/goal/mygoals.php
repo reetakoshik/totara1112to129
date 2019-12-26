@@ -64,7 +64,8 @@ $PAGE->set_pagelayout('standard');
 
 /* Define the "Custom Goals" embedded report */
 $shortname = 'goal_custom_fields';
-if (!$report = reportbuilder_get_embedded_report($shortname, $data, false, $sid)) {
+$config = (new rb_config())->set_sid($sid)->set_embeddata($data);
+if (!$report = reportbuilder::create_embedded($shortname, $config)) {
     print_error('error:couldnotgenerateembeddedreport', 'totara_reportbuilder');
 }
 
@@ -78,7 +79,7 @@ if (!isset($USER->editing)) {
 }
 if ($PAGE->user_allowed_editing()) {
     $editbutton = $OUTPUT->edit_button($PAGE->url);
-    $PAGE->set_button($editbutton);
+    $PAGE->set_button($editbutton . $PAGE->button);
 
     if ($edit == 1 && confirm_sesskey()) {
         $USER->editing = 1;
@@ -97,12 +98,12 @@ if (\totara_job\job_assignment::is_managing($USER->id, $userid)) {
     $strmygoals = get_string('mygoalsteam', 'totara_hierarchy', $username);
     if (totara_feature_visible('myteam')) {
         $myteamurl = new moodle_url('/my/teammembers.php', array());
-        $PAGE->set_totara_menu_selected('myteam');
+        $PAGE->set_totara_menu_selected('\totara_core\totara\menu\myteam');
         $PAGE->navbar->add(get_string('team', 'totara_core'), $myteamurl);
     }
 } else {
     $strmygoals = get_string('goals', 'totara_hierarchy');
-    $PAGE->set_totara_menu_selected('mygoals');
+    $PAGE->set_totara_menu_selected('\totara_hierarchy\totara\menu\mygoals');
 }
 $PAGE->navbar->add($strmygoals);
 $PAGE->set_title($strmygoals);

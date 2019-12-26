@@ -19,24 +19,23 @@ Feature: Add seminar attendees in bulk and see results
       | activity   | name    | course | idnumber |
       | facetoface | Seminar | C1     | seminar  |
     And I log in as "admin"
+    And I am on "Course 1" course homepage
 
   @_file_upload
   Scenario: Conflict result when choosing Add users via file upload option
-    Given I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I follow "View all events"
+    Given I follow "View all events"
     And I follow "Add a new event"
     And I press "Save changes"
 
     And I click on "Attendees" "link"
     And I click on "Add users via file upload" "option" in the "#menuf2f-actions" "css_element"
-    And I upload "mod/facetoface/tests/fixtures/f2f_attendees.csv" file to "CSV text file" filemanager
+    And I upload "mod/facetoface/tests/fixtures/f2f_attendees.csv" file to "CSV file" filemanager
     And I press "Continue"
     When I press "Confirm"
     Then I should see "Uploaded via csv file" in the "John1 Smith1" "table_row"
     And I should see "Also uploaded via csv file" in the "John2 Smith2" "table_row"
     And I click on "Add users via file upload" "option" in the "#menuf2f-actions" "css_element"
-    And I upload "mod/facetoface/tests/fixtures/f2f_attendees.csv" file to "CSV text file" filemanager
+    And I upload "mod/facetoface/tests/fixtures/f2f_attendees.csv" file to "CSV file" filemanager
     And I press "Continue"
     Then I should see "2 problem(s) encountered during import."
     When I click on "View results" "link"
@@ -46,9 +45,7 @@ Feature: Add seminar attendees in bulk and see results
       | I2        | John2 Smith2  | This user is already signed-up for this seminar activity |
 
   Scenario: Conflict result when choosing Add users via list of IDs option
-    Given I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I follow "View all events"
+    Given I follow "View all events"
     And I follow "Add a new event"
     And I press "Save changes"
 
@@ -70,15 +67,13 @@ Feature: Add seminar attendees in bulk and see results
 
   @_file_upload
   Scenario: Success result when choosing Add users via file upload option
-    Given I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I follow "View all events"
+    Given I follow "View all events"
     And I follow "Add a new event"
     And I press "Save changes"
 
     And I click on "Attendees" "link"
     And I click on "Add users via file upload" "option" in the "#menuf2f-actions" "css_element"
-    And I upload "mod/facetoface/tests/fixtures/f2f_attendees.csv" file to "CSV text file" filemanager
+    And I upload "mod/facetoface/tests/fixtures/f2f_attendees.csv" file to "CSV file" filemanager
     And I press "Continue"
     When I press "Confirm"
     Then I should see "Uploaded via csv file" in the "John1 Smith1" "table_row"
@@ -90,9 +85,7 @@ Feature: Add seminar attendees in bulk and see results
       | I2        | John2 Smith2  | Added successfully |
 
   Scenario: Success result when choosing Add users via list of IDs option
-    Given I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I follow "View all events"
+    Given I follow "View all events"
     And I follow "Add a new event"
     And I press "Save changes"
 
@@ -108,9 +101,7 @@ Feature: Add seminar attendees in bulk and see results
       | I3        | John3 Smith3  | Added successfully |
 
   Scenario: Success result when choosing Add users and Remove users options
-    Given I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I follow "View all events"
+    Given I follow "View all events"
     And I follow "Add a new event"
     And I press "Save changes"
 

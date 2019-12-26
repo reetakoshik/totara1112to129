@@ -44,8 +44,8 @@ $string['completionstatus'] = 'Completion status';
 $string['progressandapproval'] = 'Progress (and approval status)';
 $string['coursetypeicon'] = 'Type';
 $string['progress'] = 'Progress';
-$string['progressnumeric'] = 'Progress (numeric)';
-$string['progresspercentage'] = 'Progress (% complete)';
+$string['progressnumeric'] = 'Progress';
+$string['progresspercentage'] = 'Progress (%)';
 // filters
 $string['userid'] = 'User ID';
 $string['coursetitle'] = 'Course Title';

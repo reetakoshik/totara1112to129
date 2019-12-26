@@ -28,6 +28,7 @@ require_once($CFG->dirroot . '/admin/tool/totara_sync/lib.php');
 
 abstract class totara_sync_csv_testcase extends advanced_testcase {
 
+    /* @var \tool_totara_sync\internal\source\csv_trait|totara_sync_source */
     protected $source;
     protected $elementname;
 

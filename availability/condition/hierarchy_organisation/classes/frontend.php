@@ -82,13 +82,14 @@ class frontend extends \core_availability\frontend {
         $org_names = array();
 
         if (!empty($cm->availability)) {
-            $availability = json_decode($cm->availability);
             $ids = array();
-            foreach ($availability->c as $condition) {
-                if ($condition->type == 'hierarchy_organisation') {
-                    $ids[$condition->organisation] = $condition->organisation;
+            self::for_each_condition_in_availability_json(
+                $cm->availability, function ($condition) use (&$ids) {
+                    if ($condition->type == 'hierarchy_organisation') {
+                        $ids[$condition->organisation] = $condition->organisation;
+                    }
                 }
-            }
+            );
 
             if (!empty($ids)) {
                 list($insql, $params) = $DB->get_in_or_equal($ids);
@@ -123,6 +124,12 @@ class frontend extends \core_availability\frontend {
                     $single->fullname = format_string($record->fullname);
                     $org_names[$record->id] = $single;
                 }
+            }
+        } else {
+            $org_names = $DB->get_records_sql('SELECT id, fullname FROM {org}');
+            foreach ($org_names as $id => $value) {
+                $value->fullname = format_string($value->fullname);
+                $org_names[$id] = $value;
             }
         }
 

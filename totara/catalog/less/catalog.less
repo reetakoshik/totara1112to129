@@ -1,0 +1,186 @@
+//
+// This file is part of Totara Learn
+//
+// Copyright (C) 2018 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @copyright 2018 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Kevin Hottinger <kevin.hottinger@totaralearning.com>
+// @package   theme_roots
+
+// Variables
+// Colours
+@catalog-color_neutral_2: @totara_style-color_neutral_2;
+@catalog-color_neutral_4: @totara_style-color_neutral_4;
+@catalog-color_neutral_8: @totara_style-color_neutral_8;
+// Size
+@catalog-spacing_large: @totara_style-spacing_large;
+@catalog-spacing_medium: @totara_style-spacing_medium;
+@catalog-spacing_small: @totara_style-spacing_small;
+@catalog-spacing_x_small: @totara_style-spacing_x_small;
+// Font Size
+@catalog-primaryFilter-size: @totara_style-size_18;
+// Breakpoint
+@catalog-screen_xsm_min: 500px;
+@catalog-screen_sm_min: @totara_style-screen_sm_min;
+@catalog-screen_xl_min: @totara_style-screen_xl_min;
+
+
+#region-main div[role="main"] h2.tw-catalog__title {
+    float: left;
+    margin-top: .4rem;
+}
+
+.tw-catalog {
+    clear: both;
+    position: relative;
+    z-index: 1;
+
+    &__aside {
+        .make-xs-column(12, 0);
+        .make-sm-column(4, 0);
+        .make-md-column(3, 0);
+    }
+
+    &__primaryFilter {
+        border-bottom: 1px solid @catalog-color_neutral_4;
+        border-top: 1px solid @catalog-color_neutral_4;
+        font-size: @catalog-primaryFilter-size;
+        margin: @catalog-spacing_medium 0;
+        padding: @catalog-spacing_medium 0;
+    }
+
+    &__results {
+        .tw-catalog__content--has_side_filter & {
+            .make-xs-column(12, 0);
+            .make-sm-column(8, 0);
+            .make-md-column(9, 0);
+        }
+
+        &_overview {
+            display: flex;
+            flex-wrap: wrap;
+            padding: @catalog-spacing_medium 0;
+
+            &_row {
+                display: flex;
+                height: 100%;
+                margin-bottom: @catalog-spacing_large;
+                width: 100%;
+            }
+        }
+    }
+
+    &__hidden {
+        display: none;
+    }
+
+    .tw-catalogResultsCount {
+        height: 100%;
+        margin: auto @catalog-spacing_medium auto @catalog-spacing_x_small;
+        vertical-align: top;
+    }
+
+    &__debug {
+        clear: both;
+        margin-top: 5rem;
+
+        pre {
+            background: @catalog-color_neutral_2;
+            border: 1px solid @catalog-color_neutral_8;
+            font-size: @totara_style-size_12;
+            padding: @catalog-spacing_medium;
+        }
+
+        span {
+            display: block;
+            white-space: pre-line;
+        }
+    }
+}
+
+@media (min-width: @catalog-screen_xsm_min) {
+    .tw-catalog {
+        &__results {
+            &_overview {
+                flex-wrap: nowrap;
+
+                &_row {
+                    flex-grow: 1;
+                    margin: auto 0;
+                    width: auto;
+
+                    &:last-of-type {
+                        margin: auto 0 auto auto;
+                        max-width: 325px;
+                        padding-left: @catalog-spacing_x_small;
+                    }
+
+                    &_narrow {
+                        flex-grow: 0;
+                        width: auto;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media (min-width: @catalog-screen_sm_min) {
+    .tw-catalog {
+        &__primaryFilter {
+            padding: @catalog-spacing_medium @catalog-spacing_small;
+        }
+
+        &__results {
+            &_overview {
+                padding: 1px @catalog-spacing_medium @catalog-spacing_small 0;
+            }
+        }
+
+        .tw-catalogResultsCount {
+            margin-left: @catalog-spacing_medium;
+        }
+    }
+}
+
+@media (min-width: @catalog-screen_xl_min) {
+    .tw-catalog {
+        &__aside {
+            width: percentage((2 / 12));
+        }
+
+        .tw-catalog__content--has_side_filter &__results {
+            width: percentage((10 / 12));
+        }
+    }
+}
+
+@import "config_form.less";
+@import "details.less";
+@import "details_link.less";
+@import "element_matrix.less";
+@import "element_multiple_select.less";
+@import "item_narrow.less";
+@import "item_style_toggle.less";
+@import "item_wide.less";
+@import "loading_overlay.less";
+@import "manage_btns.less";
+@import "pagination.less";
+@import "results_empty.less";
+@import "results_share.less";
+@import "results_sort.less";
+@import "toggle_filter_panel.less";

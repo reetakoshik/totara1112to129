@@ -10,7 +10,7 @@ class Footer extends Base
     use ThemeTrait;
 
     public function render()
-    {
+    {   
         $renderer = $this->renderer;
 
         return $renderer->render_from_template(

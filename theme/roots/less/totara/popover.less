@@ -23,8 +23,24 @@
 
 .popover__wrapper {
     display: none;
+}
 
-    .popover {
-        box-shadow: 0 6px 6px 0 rgba(0, 0, 0, 0.2), 0 10px 20px 0 rgba(0, 0, 0, 0.2);
+.popover {
+    box-shadow: 0 6px 6px 0 rgba(0, 0, 0, 0.2), 0 10px 20px 0 rgba(0, 0, 0, 0.2);
+    color: @text-color;
+}
+
+/*!rtl:begin:ignore*/
+.popover {
+    right: auto;
+    left: 0;
+
+    &.top > .arrow,
+    &.bottom > .arrow {
+        right: auto;
+        left: 50%;
+        margin-left: -@popover-arrow-outer-width;
+        margin-right: auto;
     }
 }
+/*rtl:end:ignore*/

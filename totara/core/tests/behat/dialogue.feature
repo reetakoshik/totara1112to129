@@ -16,8 +16,7 @@ Feature: Test Totara dialogue operation
       | Cohort 1 | CH1 |
       | Cohort 2 | CH2 |
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "Edit settings" "link" in the "Administration" "block"
     When I press "Add enrolled audiences"
     Then I should see "Cohort 1" in the "Course audiences (enrolled)" "totaradialogue"
@@ -36,8 +35,7 @@ Feature: Test Totara dialogue operation
       | Cohort 1 | CH1 |
       | Cohort 2 | CH2 |
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "Edit settings" "link" in the "Administration" "block"
     When I press "Add enrolled audiences"
     Then I should see "Cohort 1" in the "course-cohorts-enrolled-dialog" "totaradialogue"
@@ -55,8 +53,7 @@ Feature: Test Totara dialogue operation
       | Cohort 1 | CH1 |
       | Cohort 2 | CH2 |
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "Edit settings" "link" in the "Administration" "block"
     When I press "Add enrolled audiences"
     Then I should see "Cohort 1" in the "Course audiences (enrolled)" "totaradialogue"

@@ -29,7 +29,7 @@ $debug = optional_param('debug', 0, PARAM_INT);
 
 admin_externalpage_setup('userdatapurgetypes');
 
-$report = reportbuilder_get_embedded_report('userdata_purge_types', array(), false, 0);
+$report = reportbuilder::create_embedded('userdata_purge_types');
 
 $buttons = array();
 if (has_capability('totara/userdata:config', context_system::instance())) {
@@ -40,7 +40,7 @@ if ($button = $report->edit_button()) {
     $buttons[] = $button;
 }
 if ($buttons) {
-    $PAGE->set_button(implode(' ', $buttons));
+    $PAGE->set_button(implode(' ', $buttons) . $PAGE->button);
 }
 
 /** @var totara_reportbuilder_renderer|core_renderer $output */

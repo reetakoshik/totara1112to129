@@ -26,6 +26,7 @@ require_once("$CFG->dirroot/$CFG->admin/registerlib.php");
 require_once("$CFG->dirroot/$CFG->admin/register_form.php");
 
 $return = optional_param('return', '', PARAM_ALPHA);
+$download = optional_param('download', 0, PARAM_INT);
 
 // This page is hidden if registration is disabled via config.php.
 admin_externalpage_setup('totararegistration', '', array('return' => $return));
@@ -36,6 +37,13 @@ if (!isset($CFG->registrationenabled)) {
     set_config('registrationenabled', 1);
 }
 
+if (!empty($CFG->sitetype) && $download) {
+    $data = get_registration_data();
+    $data['manualupdate'] = 1;
+    $encrypted = encrypt_data(json_encode($data));
+    send_file($encrypted, 'site_registration.ttr', null, 0, true, true);
+}
+
 // Init the form.
 $data = get_registration_data();
 $data['return'] = $return;
@@ -44,6 +52,15 @@ if (!isset($CFG->config_php_settings['registrationcode'])) {
     if (isset($CFG->registrationcodewwwhash) and $CFG->registrationcodewwwhash !== sha1($CFG->wwwroot)) {
         $data['registrationcode'] = '';
     }
+}
+
+if (!empty($CFG->sitetype)) {
+    $PAGE->set_button($PAGE->button .
+        $OUTPUT->single_button(
+            new \moodle_url('/admin/register.php', ['download' => 1]),
+            get_string('downloadregistrationdata', 'totara_core')
+        )
+    );
 }
 
 $mform = new register_form();

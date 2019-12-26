@@ -69,7 +69,7 @@ class block_current_learning extends block_base {
      * Initialises a new block instance.
      */
     public function init() {
-        $this->title = new lang_string('pluginname', 'block_current_learning');
+        $this->title = get_string('pluginname', 'block_current_learning');
 
         if (empty($this->config)) {
             $this->config = new stdClass();
@@ -116,6 +116,8 @@ class block_current_learning extends block_base {
             $this->userid = $USER->id;
         }
 
+        $core_renderer = $this->page->get_renderer('core');
+
         // Create the learning data.
         $items = $this->get_user_learning_items();
 
@@ -124,6 +126,9 @@ class block_current_learning extends block_base {
             'instanceid' => $this->instance->id,
             'learningitems' => []
         ];
+
+        $icon_program = new \core\output\flex_icon('program');
+        $icon_certification = new \core\output\flex_icon('certification');
 
         // Create the template data.
         foreach ($items as $item) {
@@ -173,7 +178,10 @@ class block_current_learning extends block_base {
                     } else {
                         $itemdata->title = get_string('thisisaprogram', 'block_current_learning');
                     }
-                    $itemdata->icon = 'program';
+                    $itemdata->icondata = [
+                        'context' => $icon_program->export_for_template($core_renderer),
+                        'template' => $icon_program->get_template()
+                    ];
                 }
 
                 if ($item instanceof \totara_certification\user_learning\item) {
@@ -183,7 +191,10 @@ class block_current_learning extends block_base {
                     } else {
                         $itemdata->title = get_string('thisisacertification', 'block_current_learning');
                     }
-                    $itemdata->icon = 'certification';
+                    $itemdata->icondata = [
+                        'context' => $icon_certification->export_for_template($core_renderer),
+                        'template' => $icon_certification->get_template()
+                    ];
                 }
 
                 $itemdata->template = $template;
@@ -211,7 +222,6 @@ class block_current_learning extends block_base {
             $contextdata['nocurrentlearning_rol_link'] = get_string('nocurrentlearning', 'block_current_learning', $contextdata['rollink']);
         }
 
-        $core_renderer = $this->page->get_renderer('core');
         $this->content->text = $core_renderer->render_from_template('block_current_learning/block', $contextdata);
 
         return $this->content;

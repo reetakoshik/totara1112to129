@@ -29,7 +29,7 @@ Feature: Test dynamic audience with job assignment fullnames.
       | TestAudience | D1       | 2          |
 
     Given I log in as "admin"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "TestAudience"
     And I switch to "Rule sets" tab
     And I set the field "addrulesetmenu" to "Titles"

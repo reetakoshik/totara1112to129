@@ -10,7 +10,7 @@ Feature: Hierarchy index page sql splitter and joiner
       | orgframework1 | FW001    | Framework description |
 
     Then I log in as "admin"
-    And I navigate to "Manage types" node in "Site administration > Hierarchies > Organisations"
+    And I navigate to "Manage types" node in "Site administration > Organisations"
     And I press "Add a new type"
     And I set the following fields to these values:
       | fullname | orgtype1 |
@@ -392,7 +392,7 @@ Feature: Hierarchy index page sql splitter and joiner
     And I press "Save changes"
 
 
-    Then I navigate to "Manage organisations" node in "Site administration > Hierarchies > Organisations"
+    Then I navigate to "Manage organisations" node in "Site administration > Organisations"
     And I click on "orgframework1" "link"
     And I press "Add new organisation"
     And I set the following fields to these values:
@@ -464,7 +464,7 @@ Feature: Hierarchy index page sql splitter and joiner
       | textinput61fullname | value61 |
     And I press "Save changes"
 
-    Then I navigate to "Manage organisations" node in "Site administration > Hierarchies > Organisations"
+    Then I navigate to "Manage organisations" node in "Site administration > Organisations"
     And I click on "orgframework1" "link"
     And I should see "org1"
     And I should see "Type: orgtype1"

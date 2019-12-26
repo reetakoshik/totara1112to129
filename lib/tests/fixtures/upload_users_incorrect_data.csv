@@ -1,0 +1,4 @@
+username,password,firstname,lastname,email,course1,group1
+jonest,verysecret,Tom,Jones,jonest<img src="xss" onerror="alert('missed one');">@example.com,math102,Section 1
+reznor,somesecret,Trent,Reznor,reznor<img src="xss" onerror="alert('missed one');">@example.com,math102,Section 3
+doe,somesecret,Jane,Doe,doe@example.com,math102,Section 3

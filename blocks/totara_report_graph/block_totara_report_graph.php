@@ -57,18 +57,13 @@ class block_totara_report_graph extends block_base {
     }
 
     public function specialization() {
-        if (!empty($this->config->title)) {
-            $this->title = format_string($this->config->title);
-
-        } else {
-            if ($this->is_configured()) {
-                // Do not waste resources on fetching report name if user cannot see the graph.
-                if (!isset($this->rawreport)) {
-                    $this->rawreport = \block_totara_report_graph\util::get_report($this->config->reportorsavedid);
-                }
-                if ($this->rawreport) {
-                    $this->title = format_string($this->rawreport->fullname);
-                }
+        if ($this->is_configured()) {
+            // Do not waste resources on fetching report name if user cannot see the graph.
+            if (!isset($this->rawreport)) {
+                $this->rawreport = \block_totara_report_graph\util::get_report($this->config->reportorsavedid);
+            }
+            if ($this->rawreport) {
+                $this->title = format_string($this->rawreport->fullname);
             }
         }
         if (!empty($this->config->graphimage_maxwidth)) {

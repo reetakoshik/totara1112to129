@@ -50,7 +50,7 @@ class orderedlist_to_newline extends base {
             }
         }
 
-        $output = implode($newitems, " \n");
+        $output = implode($newitems, "\n");
 
         if ($format !== 'html') {
             $output = static::to_plaintext($output);

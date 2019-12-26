@@ -29,8 +29,12 @@ require_once($CFG->libdir. '/coursecatlib.php');
 
 $categoryid = optional_param('categoryid', 0, PARAM_INT); // Category id
 
-if (!empty($CFG->enhancedcatalog) && !$categoryid) {
-    redirect(new moodle_url('/totara/coursecatalog/courses.php'));
+if (!$categoryid) {
+    if ($CFG->catalogtype === 'enhanced') {
+        redirect(new moodle_url('/totara/coursecatalog/courses.php'));
+    } else if ($CFG->catalogtype === 'totara') {
+        redirect(new moodle_url('/totara/catalog/index.php'));
+    }
 }
 
 $site = get_site();
@@ -66,7 +70,7 @@ if ($CFG->forcelogin) {
 if ($categoryid && !$category->visible && !has_capability('moodle/category:viewhiddencategories', $PAGE->context)) {
     throw new moodle_exception('unknowncategory');
 }
-$PAGE->set_totara_menu_selected('courses');
+$PAGE->set_totara_menu_selected('\totara_coursecatalog\totara\menu\courses');
 $PAGE->set_heading($site->fullname);
 $content = $courserenderer->course_category($categoryid);
 

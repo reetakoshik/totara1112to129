@@ -158,6 +158,9 @@ class enrol_manual_plugin extends enrol_plugin {
             return NULL;
         }
 
+        // Totara: convert a form field to database fields
+        self::fixup_expirynotify_to_database($fields);
+
         return parent::add_instance($course, $fields);
     }
 
@@ -178,6 +181,10 @@ class enrol_manual_plugin extends enrol_plugin {
                 }
             }
         }
+
+        // Totara: convert a form field to database fields
+        self::fixup_expirynotify_to_database($data);
+
         return parent::update_instance($instance, $data);
     }
 
@@ -682,6 +689,9 @@ class enrol_manual_plugin extends enrol_plugin {
      * @return bool
      */
     public function edit_instance_form($instance, MoodleQuickForm $mform, $context) {
+
+        // Totara: convert database fields to a form field
+        self::fixup_expirynotify_from_database($instance);
 
         $options = $this->get_status_options();
         $mform->addElement('select', 'status', get_string('status', 'enrol_manual'), $options);

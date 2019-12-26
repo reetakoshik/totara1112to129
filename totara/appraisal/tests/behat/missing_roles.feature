@@ -108,12 +108,14 @@ Feature: Admin page that lists missing roles for one appraisal
 
     And I log in as "learner1"
     And I follow "Performance"
-    And I set the field with xpath "//div[@class='singleselect']//select" to "2"
+    And I follow "Latest Appraisal"
+    And I set the field with xpath "//div[contains(concat(' ', @class, ' '), ' singleselect ')]//select" to "2"
     And I click on "View" "button"
 
     And I log out
     And I log in as "manager1"
     And I follow "Performance"
+    And I follow "All Appraisals"
     And I follow "Appraisal1"
     And I click on "Start" "button"
     And I set the field with xpath "//fieldset[.//legend//a[text()='App1-Q1']]//input" to "Manager answer1"
@@ -123,13 +125,14 @@ Feature: Admin page that lists missing roles for one appraisal
 
     And I log out
     And I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "Delete" "link" in the "manager1" "table_row"
     And I click on "Delete" "button"
 
     And I log out
     When I log in as "learner1"
     And I follow "Performance"
+    And I follow "Latest Appraisal"
     And I follow "Appraisal1"
     And I click on "View" "button"
 
@@ -137,4 +140,4 @@ Feature: Admin page that lists missing roles for one appraisal
     And I should see "Manager answer2"
     And I should see "Manager answer4"
     And I should see "Manager's answer"
-    And I should see "Not yet answered"
+    And I should see "No response"

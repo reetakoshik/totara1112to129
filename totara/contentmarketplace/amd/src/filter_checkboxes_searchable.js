@@ -70,16 +70,16 @@ define(['jquery', 'core/templates'], function($, templates) {
     };
 
     FilterCheckboxesSearchable.prototype.showMenu = function() {
-        $(document).on('keydown.tcm-filter-' + this.name, this, this.hideIfEscape);
-        $(document).on('click.tcm-filter-' + this.name, this, this.hideIfOutside);
-        $(document).on('focus.tcm-filter-' + this.name, '*', this, this.hideIfOutside);
+        $('body').on('keydown.tcm-filter-' + this.name, this, this.hideIfEscape);
+        $('body').on('click.tcm-filter-' + this.name, this, this.hideIfOutside);
+        $('body').on('focus.tcm-filter-' + this.name, '*', this, this.hideIfOutside);
         this.context.addClass('focused');
     };
 
     FilterCheckboxesSearchable.prototype.hideMenu = function() {
-        $(document).off('keydown.tcm-filter-' + this.name);
-        $(document).off('click.tcm-filter-' + this.name);
-        $(document).off('focus.tcm-filter-' + this.name);
+        $('body').off('keydown.tcm-filter-' + this.name);
+        $('body').off('click.tcm-filter-' + this.name);
+        $('body').off('focus.tcm-filter-' + this.name);
 
         this.context.removeClass('focused');
         $('.tcm-search-filter-term', this.context).val('');

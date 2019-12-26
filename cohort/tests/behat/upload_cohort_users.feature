@@ -17,21 +17,18 @@ Feature: Upload users to a cohort
       | Course 1 | C1 | 0 |
       | Course 2 | C2 | 0 |
     And I log in as "admin"
-    And I click on "Courses" "link" in the "Navigation" "block"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I add "Audience sync" enrolment method with:
       | Audience | Cohort 1 |
-    And I am on homepage
-    And I click on "Courses" "link" in the "Navigation" "block"
-    And I follow "Course 2"
+    And I am on "Course 2" course homepage
     And I add "Audience sync" enrolment method with:
       | Audience | Cohort 2 |
-    When I navigate to "Upload users" node in "Site administration > Users > Accounts"
+    When I navigate to "Upload users" node in "Site administration > Users"
     And I upload "lib/tests/fixtures/upload_users_cohorts.csv" file to "File" filemanager
     And I press "Upload users"
     And I press "Upload users"
     And I press "Continue"
-    And I navigate to "Users > Accounts > Audiences" in site administration
+    And I navigate to "Audiences > Audiences" in site administration
     And I click on "Edit" "link" in the "Cohort 1" "table_row"
     And I follow "Edit members"
     Then the "Current users" select box should contain "Tom Jones (tomjones@example.com)"
@@ -41,16 +38,12 @@ Feature: Upload users to a cohort
     And I follow "Edit members"
     And the "Current users" select box should contain "Mary Smith (marysmith@example.com)"
     And the "Current users" select box should contain "Alice Smith (alicesmith@example.com)"
-    And I am on site homepage
-    And I click on "Courses" "link" in the "Navigation" "block"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "Users > Enrolled users" in current page administration
     And I should see "Tom Jones"
     And I should see "Bob Jones"
     And I should not see "Mary Smith"
-    And I am on site homepage
-    And I click on "Courses" "link" in the "Navigation" "block"
-    And I follow "Course 2"
+    And I am on "Course 2" course homepage
     And I navigate to "Users > Enrolled users" in current page administration
     And I should see "Mary Smith"
     And I should see "Alice Smith"

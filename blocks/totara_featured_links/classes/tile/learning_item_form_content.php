@@ -153,7 +153,8 @@ abstract class learning_item_form_content extends base_form_content {
             $this->get_learning_item_type()
         );
 
-        $PAGE->requires->js_call_amd('block_totara_featured_links/learning_item_dialog',
+        $PAGE->requires->js_call_amd(
+            'block_totara_featured_links/learning_item_dialog',
             'init',
             [$markup, $this->get_learning_item_type()]
         );

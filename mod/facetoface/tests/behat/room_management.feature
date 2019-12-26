@@ -61,9 +61,7 @@ Feature: Manage pre-defined rooms
     And I should see "123 near street" in the "Room 2" "table_row"
     And I should see "6" in the "Room 2" "table_row"
 
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test seminar name        |
       | Description | Test seminar description |
@@ -74,9 +72,7 @@ Feature: Manage pre-defined rooms
     And I should see "Room 2, Your house, 123 near street (Capacity: 6)" in the "Choose a room" "totaradialogue"
 
   Scenario: Fill a room
-    Given I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    Given I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test seminar name        |
       | Description | Test seminar description |
@@ -114,7 +110,7 @@ Feature: Manage pre-defined rooms
     And I click on "User Three, user3@example.invalid" "option"
     And I click on "User Four, user4@example.invalid" "option"
     And I click on "User Five, user5@example.invalid" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     And I press "Confirm"
@@ -129,7 +125,7 @@ Feature: Manage pre-defined rooms
     And I set the field "menuf2f-actions" to "Add users"
     And I wait "1" seconds
     And I click on "User Six, user6@example.invalid" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     And I press "Confirm"
@@ -137,9 +133,7 @@ Feature: Manage pre-defined rooms
     And I should see "This event is overbooked"
 
   Scenario: Try and clash a room
-    Given I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    Given I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test seminar name        |
       | Description | Test seminar description |
@@ -222,9 +216,7 @@ Feature: Manage pre-defined rooms
     Then I should see "Room 1" in the "1 January 2020" "table_row"
 
   Scenario: Clash a room with different timezones
-    Given I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    Given I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test seminar name        |
       | Description | Test seminar description |

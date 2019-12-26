@@ -23,6 +23,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+global $CFG;
+require_once("{$CFG->dirroot}/lib/badgeslib.php");
+
 /**
  * Tests the badges generator
  */

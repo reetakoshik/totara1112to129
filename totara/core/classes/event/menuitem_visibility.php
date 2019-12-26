@@ -47,8 +47,8 @@ class menuitem_visibility extends \core\event\base {
     /**
      * Create instance of event.
      *
-     * @param $itemid
-     * @param $hide visibility status
+     * @param int $itemid
+     * @param bool $hide visibility status
      * @return menuitem_visibility
      */
     public static function create_from_item($itemid, $hide) {

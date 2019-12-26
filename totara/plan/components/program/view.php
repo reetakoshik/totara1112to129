@@ -58,7 +58,7 @@ $systemcontext = context_system::instance();
 $PAGE->set_context($systemcontext);
 $PAGE->set_url('/totara/plan/components/program/view.php', array('id' => $id, 'itemid' => $progassid));
 $PAGE->set_pagelayout('report');
-$PAGE->set_totara_menu_selected('learningplans');
+$PAGE->set_totara_menu_selected('\totara_plan\totara\menu\learningplans');
 
 //Javascript include
 local_js(array(

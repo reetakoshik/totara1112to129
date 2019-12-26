@@ -181,43 +181,45 @@ function totara_plan_pluginfile($course, $cm, $context, $filearea, $args, $force
     send_stored_file($file, 86400, 0, true, $options); // Download MUST be forced - security!
 }
 
-
 /**
  * Can logged in user view specified user's plans.
  * This only checks capabilities, it does not check plan permissions.
  *
  * @access  public
- * @param   int     $ownerid   Plan user
+ *
+ * @param   int $ownerid Plan user
+ * @param   int $viewerid ID of a user trying to view the plan
+ *
  * @return  boolean
  */
-function dp_can_view_users_plans($ownerid) {
+function dp_can_view_users_plans($ownerid, int $viewerid = null) {
     global $USER;
 
-    if (!isloggedin()) {
-        return false;
+    if (empty($viewerid)) {
+        $viewerid = $USER->id;
     }
 
     $systemcontext = context_system::instance();
 
     // If the user can access all plans on the site. Implicitly includes site admins.
-    if (has_capability('totara/plan:accessanyplan', $systemcontext) ||
-        has_capability('totara/plan:manageanyplan', $systemcontext)) {
+    if (has_capability('totara/plan:accessanyplan', $systemcontext, $viewerid) ||
+        has_capability('totara/plan:manageanyplan', $systemcontext, $viewerid)) {
         // The current user has manager's capability (whether or not they are the actual manager, includes site admin).
         return true;
     }
 
     // If the user can access their own plans or the plans of their staff.
-    if (!has_capability('totara/plan:accessplan', $systemcontext)) {
+    if (!has_capability('totara/plan:accessplan', $systemcontext, $viewerid)) {
         // The user has no capability to access either their own plans or those of their staff.
         return false;
     }
 
-    if ($ownerid == $USER->id) {
+    if ($ownerid == $viewerid) {
         // This is the current user's own plan.
         return true;
     }
 
-    if (\totara_job\job_assignment::is_managing($USER->id, $ownerid)) {
+    if (\totara_job\job_assignment::is_managing($viewerid, $ownerid)) {
         // The current user is the actual manager.
         return true;
     }
@@ -325,17 +327,30 @@ function dp_role_is_allowed_action($role, $action, $permission = 'allow') {
  * Return plans for a user with a specific status
  *
  * @access  public
- * @param   int     $userid     Owner of plans
- * @param   array   $statuses   Plan statuses
+ * @param   int     $userid         Owner of plans
+ * @param   array   $statuses       Plan statuses
+ * @param   bool    $checkcanview   Check if user can view the plan. Since Totara 12.9
  * @return  array
  */
-function dp_get_plans($userid, $statuses=array(DP_PLAN_STATUS_APPROVED)) {
+function dp_get_plans($userid, $statuses = array(DP_PLAN_STATUS_APPROVED), $checkcanview = false) {
     global $DB;
     list($insql, $inparams) = $DB->get_in_or_equal($statuses);
     $sql = "userid = ? AND status $insql";
     $params = array($userid);
     $params = array_merge($params, $inparams);
-    return $DB->get_records_select('dp_plan', $sql, $params, 'name');
+    $plans = $DB->get_records_select('dp_plan', $sql, $params, 'name');
+
+    // Remove any plans that can not be viewed.
+    if ($checkcanview) {
+        foreach ($plans as $key => $item) {
+            $plan = new development_plan($item->id);
+            if (!$plan->can_view()) {
+                unset($plans[$key]);
+            }
+        }
+    }
+
+    return $plans;
 }
 
 /**
@@ -811,34 +826,41 @@ function dp_display_plans($userid, $statuses=array(DP_PLAN_STATUSAPPROVED), $col
     $sort = $table->get_sql_sort();
     $sort = empty($sort) ? '' : ' ORDER BY '.$sort;
 
-    // Add table data
-    $plans = $DB->get_records_sql($select.$from.$where.$sort, $params, $table->get_page_start(), $table->get_page_size());
+    // Get the plan records.
+    $plansrecords = $DB->get_records_sql($select.$from.$where.$sort, $params, $table->get_page_start(), $table->get_page_size());
+    $plans = array();
+    foreach ($plansrecords as $plansrecord) {
+        $plan = new development_plan($plansrecord->id);
+        if ($plan->can_view()) {
+            $plans[] = $plan;
+        }
+    }
+
     if (empty($plans)) {
         return '';
     }
+
+    // Add table data.
     $rownumber = 0;
-    foreach ($plans as $p) {
-        $plan = new development_plan($p->id);
-        if ($plan->can_view()) {
-            $row = array();
-            $row[] = $plan->display_summary_widget();
-            if (in_array('enddate', $cols)) {
-                $row[] = $plan->display_enddate();
-            }
-            if (in_array('status', $cols)) {
-                $row[] = $plan->display_progress();
-            }
-            if (in_array('completed', $cols)) {
-                $row[] = $plan->display_completeddate();
-            }
-            if ($can_manage && $can_update) {
-                $row[] = $plan->display_actions();
-            }
-            if (++$rownumber >= $count) {
-                $table->add_data($row, 'last');
-            } else {
-                $table->add_data($row);
-            }
+    foreach ($plans as $plan) {
+        $row = array();
+        $row[] = $plan->display_summary_widget();
+        if (in_array('enddate', $cols)) {
+            $row[] = $plan->display_enddate();
+        }
+        if (in_array('status', $cols)) {
+            $row[] = $plan->display_progress();
+        }
+        if (in_array('completed', $cols)) {
+            $row[] = $plan->display_completeddate();
+        }
+        if ($can_manage && $can_update) {
+            $row[] = $plan->display_actions();
+        }
+        if (++$rownumber >= $count) {
+            $table->add_data($row, 'last');
+        } else {
+            $table->add_data($row);
         }
     }
     unset($plans);
@@ -897,7 +919,7 @@ function dp_display_plans_menu($userid, $selectedid=0, $role='learner', $rolpage
     }
 
     // Display active plans
-    if ($enableplans && $plans = dp_get_plans($userid, array(DP_PLAN_STATUS_APPROVED))) {
+    if ($enableplans && $plans = dp_get_plans($userid, array(DP_PLAN_STATUS_APPROVED), true)) {
         if ($role == 'manager') {
             $out .= $OUTPUT->container_start(null, 'dp-plans-menu-section');
             $out .= $OUTPUT->heading(get_string('activeplans', 'totara_plan'), 5);
@@ -917,7 +939,7 @@ function dp_display_plans_menu($userid, $selectedid=0, $role='learner', $rolpage
     }
 
     // Display unapproved plans
-    if ($enableplans && $plans = dp_get_plans($userid, array(DP_PLAN_STATUS_UNAPPROVED, DP_PLAN_STATUS_PENDING))) {
+    if ($enableplans && $plans = dp_get_plans($userid, array(DP_PLAN_STATUS_UNAPPROVED, DP_PLAN_STATUS_PENDING), true)) {
         if ($role == 'manager') {
             $out .= $OUTPUT->container_start(null, 'dp-plans-menu-section');
             $out .= $OUTPUT->heading(get_string('unapprovedplans', 'totara_plan'), 5);
@@ -938,7 +960,7 @@ function dp_display_plans_menu($userid, $selectedid=0, $role='learner', $rolpage
     }
 
     // Display completed plans
-    if ($enableplans && $plans = dp_get_plans($userid, DP_PLAN_STATUS_COMPLETE)) {
+    if ($enableplans && $plans = dp_get_plans($userid, DP_PLAN_STATUS_COMPLETE, true)) {
         if ($role == 'manager') {
             $out .= $OUTPUT->container_start(null, 'dp-plans-menu-section');
             $out .= $OUTPUT->heading(get_string('completedplans', 'totara_plan'), 5);
@@ -1122,13 +1144,21 @@ function dp_get_template_permission($templateid, $component, $action, $role) {
  * @param  string $action     the action to perform
  * @param  string $role       the user role
  * @param  int $permission    the permission value
- * @return array $templates an array if template ids
+ * @return array $templates an array of template ids
  */
 function dp_template_has_permission($component, $action, $role, $permission) {
     global $DB;
 
-    $sql = 'role = ? AND component = ? AND action = ? AND value = ?';
-    $params = array($role, $component, $action, $permission);
+    $sql = 'role = ? AND component = ? AND action = ?';
+    $params = array($role, $component, $action);
+
+    $canmanageanyplan = has_capability('totara/plan:manageanyplan', context_system::instance());
+
+    if (!$canmanageanyplan) {
+        $sql .= ' AND value = ?';
+        $params[] = $permission;
+    }
+
     $templates = $DB->get_records_select('dp_permissions', $sql, $params, 'id', 'templateid');
 
     return array_keys($templates);
@@ -1593,8 +1623,12 @@ function totara_plan_comment_add($comment) {
     $subscribers = $DB->get_records_select('comments', $sql, $params, '', 'DISTINCT userid');
     $subscribers = !empty($subscribers) ? array_keys($subscribers) : array();
     $subscriberkeys = array();
-    foreach ($subscribers as $s) {
-        $subscriberkeys[$s] = $s;
+    foreach ($subscribers as $subscriber) {
+        // Only users that can see the plan should be in the list of subscribers.
+        if (!dp_can_view_users_plans($plan->userid, $subscriber)) {
+            continue;
+        }
+        $subscriberkeys[$subscriber] = $subscriber;
     }
     $subscribers = $subscriberkeys;
     unset($subscriberkeys);

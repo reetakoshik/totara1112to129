@@ -110,7 +110,6 @@ $string['sites'] = 'Sites';
 $string['showall'] = 'Show all hubs';
 $string['subject'] = 'Subject';
 $string['subject_help'] = 'To narrow your search to courses about a particular subject, choose one from this list.';
-$string['userdataitemcommunity'] = 'Community links';
 $string['userinfo'] = 'Creator: {$a->creatorname} - Publisher: {$a->publishername}';
 $string['visitdemo'] = 'Visit demo';
 $string['visitsite'] = 'Visit site';

@@ -52,8 +52,9 @@ class totara_program_program_courseset_testcase extends advanced_testcase {
     protected function tearDown() {
         $this->generator = null;
         $this->program_generator = null;
-        $this->course1 = null;
+        $this->course1 = $this->course2 = $this->course3 = null;
         $this->program1 = null;
+
         parent::tearDown();
     }
 
@@ -485,7 +486,7 @@ class totara_program_program_courseset_testcase extends advanced_testcase {
         $content = $program->get_content();
         $this->assertInstanceOf('prog_content', $content);
         $coursesets = $content->get_course_sets();
-        $this->assertInternalType('array', $coursesets);
+        $this->assertIsArray($coursesets);
         $this->assertCount(3, $coursesets);
         $content->fix_set_sortorder();
 

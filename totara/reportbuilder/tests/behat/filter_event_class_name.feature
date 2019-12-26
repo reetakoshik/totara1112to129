@@ -5,11 +5,6 @@ Feature: Event Name Site Logs report filter
 
   Background:
     Given I am on a totara site
-    And I log in as "admin"
-    And I set the following administration settings values:
-      | Enhanced catalog | 1 |
-    And I press "Save changes"
-    And I log out
     And the following "users" exist:
       | username | firstname | lastname | email                |
       | teacher1 | Teacher   | 1        | teacher1@example.com |
@@ -22,11 +17,12 @@ Feature: Event Name Site Logs report filter
   @javascript
   Scenario: Test site logs event name filter
     Given I log in as "admin"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     When I add "Self enrolment" enrolment method with:
       | Custom instance name | Self enrolment |
 
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | Site Logs |
       | Source      | Site Logs |
@@ -37,15 +33,17 @@ Feature: Event Name Site Logs report filter
 
     And I log in as "student1"
     And I click on "Find Learning" in the totara menu
-    And I click on ".rb-display-expand" "css_element"
-    And I press "Enrol"
+    And I click on "Course 1" "link"
+    And I click on "Enrol" "link"
+    And I click on "Enrol me" "button"
     Then I should see "Topic 1"
     And I log out
 
     And I log in as "student2"
     And I click on "Find Learning" in the totara menu
-    And I click on ".rb-display-expand" "css_element"
-    And I press "Enrol"
+    And I click on "Course 1" "link"
+    And I click on "Enrol" "link"
+    And I click on "Enrol me" "button"
     Then I should see "Topic 1"
     And I log out
 

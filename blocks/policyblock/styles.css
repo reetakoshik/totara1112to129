@@ -1,0 +1,13 @@
+.viewall{
+	float: right;
+}
+.lastcol a {
+   padding: 2px 16px 1px 16px;
+   font-size: 12px;
+   letter-spacing: 1px;
+}
+.lastcol a:hover {
+   padding: 2px 16px 1px 16px;
+   font-size: 12px;
+   letter-spacing: 1px;
+}

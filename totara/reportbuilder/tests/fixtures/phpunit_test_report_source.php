@@ -29,9 +29,10 @@ defined('MOODLE_INTERNAL') || die();
  */
 class phpunit_test_report_source extends rb_base_source {
 
-    public $base = '{base}';
-    public $joinlist = [];
-    public $columnoptions = [];
-    public $filteroptions = [];
-
+    public function __construct() {
+        $this->base = '{base}';
+        $this->sourcetitle = 'some title';
+        $this->columnoptions[] = new rb_column_option('type', 'value', 'name', 'id');
+        parent::__construct();
+    }
 }

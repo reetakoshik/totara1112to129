@@ -26,7 +26,7 @@
  * @author  Sam Hemelryk <sam.hemelryk@totaralms.com>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'totara_form/form', 'totara_form/modernizr'], function($, Form, Modernizr) {
+define(['jquery', 'totara_form/form'], function($, Form) {
 
     /**
      * Number element
@@ -67,40 +67,11 @@ define(['jquery', 'totara_form/form', 'totara_form/modernizr'], function($, Form
      * @param {Function} done
      */
     NumberInputElement.prototype.init = function(done) {
-        var id = this.id;
-        var deferreds = [];
-        this.input = $('#' + id);
+        this.input = $('#' + this.id);
         // Call the changed method when this element is changed.
         this.input.change($.proxy(this.changed, this));
 
-        if (!Modernizr.inputtypes.number) {
-            var numberdeferred = $.Deferred();
-            deferreds.push(numberdeferred);
-
-            require(['totara_form/polyfill_number-lazy'], function(number) {
-                number.init(id);
-                numberdeferred.resolve();
-            });
-        }
-        if (this.input.attr('required') && !Modernizr.input.required) {
-            var requireddeferred = $.Deferred();
-            deferreds.push(requireddeferred);
-
-            require(['totara_form/polyfill_required-lazy'], function (poly) {
-                poly.init(id);
-                requireddeferred.resolve();
-            });
-        }
-        if (this.input.attr('placeholder') && !Modernizr.input.placeholder) {
-            var placeholderdeferred = $.Deferred();
-            deferreds.push(placeholderdeferred);
-
-            require(['totara_form/polyfill_placeholder-lazy'], function (poly) {
-                poly.init(id);
-                placeholderdeferred.resolve();
-            });
-        }
-        $.when.apply($, deferreds).done(done);
+        done();
     };
 
     NumberInputElement.prototype.getValue = function() {

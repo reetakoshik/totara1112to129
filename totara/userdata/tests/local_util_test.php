@@ -34,7 +34,7 @@ class totara_userdata_local_util_testcase extends advanced_testcase {
     public function test_get_item_classes() {
         $classes = util::get_item_classes();
         foreach ($classes as $i => $classname) {
-            $this->assertInternalType('integer', $i);
+            $this->assertIsInt($i);
             $this->assertRegExp('/^[a-z0-9_]+\\\\userdata\\\\[a-z0-9_]+$/', $classname);
         }
     }
@@ -298,7 +298,7 @@ class totara_userdata_local_util_testcase extends advanced_testcase {
 
         $sortedlabels = util::get_sorted_grouplabels([]);
         $this->assertEmpty($sortedlabels);
-        $this->assertInternalType('array', $sortedlabels);
+        $this->assertIsArray($sortedlabels);
 
         $groupeditems = ['core_user'];
         $sortedlabels = util::get_sorted_grouplabels($groupeditems);

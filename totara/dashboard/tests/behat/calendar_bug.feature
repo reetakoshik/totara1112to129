@@ -15,7 +15,7 @@ Feature: Test that calendar works properly with calendar when dashboard set as h
   Scenario: Calendar navigation when dashboard set as homepage works correctly
     Given I log in as "admin"
     # Add the calendar block to the site front page.
-    And I navigate to "Dashboards" node in "Site administration > Appearance"
+    And I navigate to "Dashboards" node in "Site administration > Navigation"
     # Add a dashboard.
     And I press "Create dashboard"
     And I set the following fields to these values:

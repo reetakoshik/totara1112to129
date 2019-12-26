@@ -1,6 +1,15 @@
 This file describes API changes in Totara Certification,
 information provided here is intended for developers.
 
+=== 12.0 ===
+
+* Removed deprecated methods:
+  * certification_event_handler::unassigned()
+  * assign_certification_stage()
+  * delete_removed_users()
+* rb_source_certification_membership::rb_display_edit_completion() has been deprecated, please call totara_certification\rb\display\certif_edit_completion::display() instead.
+
+
 === 10 ===
 
 * rb_display_certif_status has been moved in to a new style auto-loading class

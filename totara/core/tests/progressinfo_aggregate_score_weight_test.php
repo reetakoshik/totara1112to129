@@ -23,7 +23,7 @@
  * @package    totara_core
  */
 
-namespace totara_core;
+namespace totara_core\progressinfo;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -50,7 +50,6 @@ class progressinfo_aggregate_score_weight_testcase extends \advanced_testcase {
         $this->assertEquals(1, $pinfo->get_score());
     }
 
-
     public function test_single_criteria() {
         $pinfo = progressinfo::from_data(progressinfo::AGGREGATE_ALL, 5, 3);
         $pinfo->add_criteria(0, progressinfo::AGGREGATE_ALL, 1, 0);
@@ -66,7 +65,6 @@ class progressinfo_aggregate_score_weight_testcase extends \advanced_testcase {
         $this->assertEquals(0, $pinfo->get_score());
     }
 
-
     public function test_multi_criteria_single_level() {
         $pinfo = progressinfo::from_data(progressinfo::AGGREGATE_ALL, 0, 0);
         $pinfo->add_criteria(0, progressinfo::AGGREGATE_ALL, 4, 1);
@@ -80,8 +78,12 @@ class progressinfo_aggregate_score_weight_testcase extends \advanced_testcase {
         $pinfo->aggregate_score_weight();
         $this->assertEquals(2, $pinfo->get_weight());
         $this->assertEquals(2, $pinfo->get_score());
-    }
 
+        $pinfo->set_agg_method(progressinfo::AGGREGATE_NONE);
+        $pinfo->aggregate_score_weight();
+        $this->assertEquals(0, $pinfo->get_weight());
+        $this->assertEquals(0, $pinfo->get_score());
+    }
 
     public function test_multi_criteria_single_level_any_highest_weight() {
         $pinfo = progressinfo::from_data(progressinfo::AGGREGATE_ALL, 0, 0);

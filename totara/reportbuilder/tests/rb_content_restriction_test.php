@@ -35,7 +35,14 @@ class totara_rb_content_restrictions_testcase extends advanced_testcase {
     private $users, $positions, $organisations, $hierarchy, $reportid, $report, $wrapper;
 
     protected function tearDown() {
-        $this->rb = null;
+        $this->users = null;
+        $this->positions = null;
+        $this->organisations = null;
+        $this->hierarchy = null;
+        $this->reportid = null;
+        $this->report = null;
+        $this->wrapper = null;
+
         parent::tearDown();
     }
 
@@ -176,7 +183,8 @@ class totara_rb_content_restrictions_testcase extends advanced_testcase {
         }
 
         $this->reportid = $this->create_report('user', 'Test User Report');
-        $this->report = new reportbuilder($this->reportid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $this->report = reportbuilder::create($this->reportid, $config);
 
         $update = $DB->get_record('report_builder', array('id' => $this->reportid));
         $update->accessmode = REPORT_BUILDER_ACCESS_MODE_NONE;

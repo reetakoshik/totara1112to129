@@ -49,10 +49,6 @@ class tool_totara_sync_elements_testcase extends advanced_testcase {
             'c:\\pathmustnotexists' => array('c:\\pathmustnotexists' . $suffix, false)
         );
 
-        if (DIRECTORY_SEPARATOR == '\\') {
-            $paths['c:\\pathmustnotexists'][1] = true;
-        }
-
         $source = new totara_sync_source_org_csv();
         $form = new totara_sync_config_form();
         foreach ($paths as $path => $expected) {

@@ -211,7 +211,8 @@ $entry = file_prepare_standard_filemanager($entry,
                                            $entry->id);
 
 if (!empty($entry->id)) {
-    $entry->tags = core_tag_tag::get_item_tags_array('core', 'post', $entry->id);
+    $entry->tags = core_tag_tag::get_item_tags_array('core', 'post', $entry->id,
+        core_tag_tag::BOTH_STANDARD_AND_NOT, 0, false); // Totara: Do not encode the special characters
 }
 
 $entry->action = $action;

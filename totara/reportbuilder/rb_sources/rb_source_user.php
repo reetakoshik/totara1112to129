@@ -31,24 +31,7 @@ require_once("{$CFG->dirroot}/completion/completion_completion.php");
  * A report builder source for the "user" table.
  */
 class rb_source_user extends rb_base_source {
-
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
-
-    /**
-     * Conditional SQL to filter the data source available to the report.
-     *
-     * @var string
-     */
-    public $sourcewhere;
-
-    /**
-     * Parameters to support the conditional SQL that filters the data source available to the report.
-     *
-     * @var array
-     */
-    public $sourceparams;
+    use \totara_job\rb\source\report_trait;
 
     /**
      * Whether the "staff_facetoface_sessions" report exists or not (used to determine
@@ -96,6 +79,7 @@ class rb_source_user extends rb_base_source {
         $this->requiredcolumns = array();
         $this->staff_f2f = $DB->get_field('report_builder', 'id', array('shortname' => 'staff_facetoface_sessions'));
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_user');
+        $this->usedcomponents[] = 'totara_program';
 
         // Apply global report restrictions.
         $this->add_global_report_restriction_join('base', 'id', 'base');
@@ -109,6 +93,15 @@ class rb_source_user extends rb_base_source {
      */
     public function global_restrictions_supported() {
         return true;
+    }
+
+    /**
+     * Get staff_f2f
+     *
+     * @return bool|mixed
+     */
+    public function get_staff_f2f() {
+        return $this->staff_f2f;
     }
 
     //
@@ -213,9 +206,7 @@ class rb_source_user extends rb_base_source {
             null,
             'user_extra');
 
-
-        $this->add_job_assignment_tables_to_joinlist($joinlist, 'base', 'id', 'INNER');
-        $this->add_cohort_user_tables_to_joinlist($joinlist, 'base', 'id', 'basecohort');
+        $this->add_totara_job_tables($joinlist, 'base', 'id');
 
         return $joinlist;
     }
@@ -230,8 +221,8 @@ class rb_source_user extends rb_base_source {
         global $DB;
 
         $columnoptions = array();
-        $this->add_user_fields_to_columns($columnoptions, 'base');
-        $this->add_job_assignment_fields_to_columns($columnoptions);
+        $this->add_core_user_columns($columnoptions, 'base');
+        $this->add_totara_job_columns($columnoptions);
 
         // A column to display a user's profile picture
         $columnoptions[] = new rb_column_option(
@@ -240,7 +231,7 @@ class rb_source_user extends rb_base_source {
                         get_string('userspicture', 'rb_source_user'),
                         'base.id',
                         array(
-                            'displayfunc' => 'user_picture',
+                            'displayfunc' => 'user_icon',
                             'noexport' => true,
                             'defaultheading' => get_string('picture', 'rb_source_user'),
                             'extrafields' => array(
@@ -264,7 +255,7 @@ class rb_source_user extends rb_base_source {
                         get_string('mylearningicons', 'rb_source_user'),
                         'base.id',
                         array(
-                            'displayfunc' => 'learning_icons',
+                            'displayfunc' => 'user_learning_icons',
                             'noexport' => true,
                             'defaultheading' => get_string('options', 'rb_source_user')
                         )
@@ -288,7 +279,8 @@ class rb_source_user extends rb_base_source {
             'suspended_purge_type.id',
             array(
                 'addtypetoheading' => true,
-                'joins' => array('suspended_purge_type')
+                'joins' => array('suspended_purge_type'),
+                'displayfunc' => 'integer'
             )
         );
 
@@ -310,7 +302,8 @@ class rb_source_user extends rb_base_source {
             'deleted_purge_type.id',
             array(
                 'addtypetoheading' => true,
-                'joins' => array('deleted_purge_type')
+                'joins' => array('deleted_purge_type'),
+                'displayfunc' => 'integer'
             )
         );
 
@@ -322,7 +315,7 @@ class rb_source_user extends rb_base_source {
                         get_string('usersachievedcompcount', 'rb_source_user'),
                         'COALESCE(totara_stats_comp_achieved.number,0)',
                         array(
-                            'displayfunc' => 'count',
+                            'displayfunc' => 'integer',
                             'joins' => 'totara_stats_comp_achieved',
                             'dbdatatype' => 'integer',
                         )
@@ -336,7 +329,7 @@ class rb_source_user extends rb_base_source {
                         get_string('userscoursestartedcount', 'rb_source_user'),
                         'COALESCE(course_completions_courses_started.number,0)',
                         array(
-                            'displayfunc' => 'count',
+                            'displayfunc' => 'integer',
                             'joins' => 'course_completions_courses_started',
                             'dbdatatype' => 'integer',
                         )
@@ -350,7 +343,7 @@ class rb_source_user extends rb_base_source {
                         get_string('userscoursescompletedcount', 'rb_source_user'),
                         'COALESCE(totara_stats_courses_completed.number,0)',
                         array(
-                            'displayfunc' => 'count',
+                            'displayfunc' => 'integer',
                             'joins' => 'totara_stats_courses_completed',
                             'dbdatatype' => 'integer',
                         )
@@ -364,7 +357,7 @@ class rb_source_user extends rb_base_source {
             get_string('coursecompletionsasevidence', 'rb_source_user'),
             'COALESCE(totara_stats_course_completion_imports.number,0)',
             array(
-                'displayfunc' => 'count',
+                'displayfunc' => 'integer',
                 'joins' => 'totara_stats_course_completion_imports',
                 'dbdatatype' => 'integer',
             )
@@ -378,7 +371,7 @@ class rb_source_user extends rb_base_source {
                         get_string('usernamewithlearninglinks', 'rb_source_user'),
                         $DB->sql_concat_join("' '", $usednamefields),
                         array(
-                            'displayfunc' => 'user_with_links',
+                            'displayfunc' => 'user_with_components_links',
                             'defaultheading' => get_string('user', 'rb_source_user'),
                             'extrafields' => array_merge(array('id' => 'base.id',
                                                                'picture' => 'base.picture',
@@ -398,7 +391,7 @@ class rb_source_user extends rb_base_source {
                         'prog_extension_count.extensioncount',
                         array(
                             'joins' => 'prog_extension_count',
-                            'displayfunc' => 'extension_link',
+                            'displayfunc' => 'program_extension_link',
                             'extrafields' => array('user_id' => 'base.id')
                         )
         );
@@ -475,7 +468,7 @@ class rb_source_user extends rb_base_source {
             )
         );
 
-        $this->add_user_fields_to_filters($filteroptions);
+        $this->add_core_user_filters($filteroptions);
 
         $roles = get_roles_used_in_context(context_system::instance());
 
@@ -494,7 +487,7 @@ class rb_source_user extends rb_base_source {
             'base.id'
         );
 
-        $this->add_job_assignment_fields_to_filters($filteroptions, 'base');
+        $this->add_totara_job_filters($filteroptions, 'base');
 
         return $filteroptions;
     }
@@ -552,12 +545,14 @@ class rb_source_user extends rb_base_source {
      * A rb_column_options->displayfunc helper function to display the
      * "My Learning" icons for each user row
      *
+     * @deprecated Since Totara 12.0
      * @global object $CFG
      * @param integer $itemid ID of the user
      * @param object $row The rest of the data for the row
      * @return string
      */
     public function rb_display_learning_icons($itemid, $row) {
+        debugging('rb_source_user::rb_display_learning_icons has been deprecated since Totara 12.0. Use user_learning_icons::display', DEBUG_DEVELOPER);
         global $CFG, $OUTPUT;
 
         static $systemcontext;
@@ -594,8 +589,17 @@ class rb_source_user extends rb_base_source {
         return $disp;
     }
 
-
+    /**
+     * Display program extension link.
+     *
+     * @deprecated Since Totara 12.0
+     * @param $extensioncount
+     * @param $row
+     * @param $isexport
+     * @return string
+     */
     function rb_display_extension_link($extensioncount, $row, $isexport) {
+        debugging('rb_source_user::rb_display_extension_link has been deprecated since Totara 12.0. Use totara_program\rb\display\program_extension_link::display', DEBUG_DEVELOPER);
         global $CFG;
         if (empty($extensioncount)) {
             return '0';
@@ -622,12 +626,14 @@ class rb_source_user extends rb_base_source {
      *                        'email' => $base . '.email'),
      *                  $allnamefields)
      *
+     * @deprecated Since Totara 12.0
      * @param string $user Users name
      * @param object $row All the data required to display a user's name, icon and link
      * @param boolean $isexport If the report is being exported or viewed
      * @return string
      */
     function rb_display_user_with_links($user, $row, $isexport = false) {
+        debugging('rb_source_user::rb_display_user_with_links has been deprecated since Totara 12.0. Use user_with_components_links::display', DEBUG_DEVELOPER);
         global $CFG, $OUTPUT, $USER;
 
         require_once($CFG->dirroot . '/user/lib.php');
@@ -722,7 +728,15 @@ class rb_source_user extends rb_base_source {
         return $return;
     }
 
+    /**
+     * Display for count
+     *
+     * @deprecated Since Totara 12.0
+     * @param $result
+     * @return int
+     */
     function rb_display_count($result) {
+        debugging('rb_source_user::rb_display_count has been deprecated since Totara 12.0', DEBUG_DEVELOPER);
         return $result ? $result : 0;
     }
 

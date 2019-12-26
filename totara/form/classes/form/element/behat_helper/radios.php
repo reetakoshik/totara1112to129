@@ -147,9 +147,24 @@ class radios extends element {
             throw new ExpectationException("Totara form {$this->mytype} element '{$this->locator}' has selected option", $this->context->getSession());
         }
 
+        $checked_radio = null;
         $radios = $this->get_radios_inputs();
         foreach ($radios as $radio) {
-            $idliteral = \behat_context_helper::escape($radio->getAttribute('id'));
+            if ($this->context->running_javascript()) {
+                if ($radio->isChecked()) {
+                    $checked_radio = $radio;
+                    break;
+                }
+            } else {
+                if ($radio->getAttribute('checked') === 'checked') {
+                    $checked_radio = $radio;
+                    break;
+                }
+            }
+        }
+
+        if ($checked_radio) {
+            $idliteral = \behat_context_helper::escape($checked_radio->getAttribute('id'));
             /** @var \Behat\Mink\Element\NodeElement $label */
             $label = $this->node->find('xpath', "//label[@for=$idliteral]");
             if ($expectedvalue === (string)$label->getText()) {

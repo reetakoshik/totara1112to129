@@ -95,7 +95,7 @@ M.totara_plan_course_find_competency = M.totara_plan_course_find_competency || {
 
 
         var url = M.cfg.wwwroot + '/totara/plan/components/course/';
-        var saveurl = url + 'update-competency.php?planid='+this.config.plan_id+'&courseid='+this.config.course_id+'&update=';
+        var saveurl = url + 'update-competency.php?sesskey=' + M.cfg.sesskey + '&planid='+this.config.plan_id+'&courseid='+this.config.course_id+'&update=';
 
         var handler = new this.totaraDialog_handler_preRequisite();
         handler.baseurl = url;

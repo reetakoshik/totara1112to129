@@ -29,11 +29,15 @@ require_once($CFG->libdir. '/coursecatlib.php');
 $categoryid = optional_param('categoryid', 0, PARAM_INT); // Category id
 $viewtype = optional_param('viewtype', 'program', PARAM_TEXT); // Type of a page, program or certification.
 
-if (!empty($CFG->enhancedcatalog) && !$categoryid) {
-    if ($viewtype == 'program') {
-        redirect(new moodle_url('/totara/coursecatalog/programs.php'));
-    } else {
-        redirect(new moodle_url('/totara/coursecatalog/certifications.php'));
+if (!$categoryid) {
+    if ($CFG->catalogtype === 'enhanced') {
+        if ($viewtype == 'program') {
+            redirect(new moodle_url('/totara/coursecatalog/programs.php'));
+        } else {
+            redirect(new moodle_url('/totara/coursecatalog/certifications.php'));
+        }
+    } else if ($CFG->catalogtype === 'totara') {
+        redirect(new moodle_url('/totara/catalog/index.php'));
     }
 }
 
@@ -47,24 +51,30 @@ if ($viewtype == 'program') {
 $site = get_site();
 
 if ($categoryid) {
-    $url = new moodle_url('/totara/program/index.php', array('categoryid' => $categoryid, 'viewtype' => $viewtype));
     $PAGE->set_category_by_id($categoryid);
-    $PAGE->set_url($url);
+    $PAGE->set_url(new moodle_url('/totara/program/index.php', array('categoryid' => $categoryid, 'viewtype' => $viewtype)));
     $PAGE->set_pagetype('course-index-category');
     $category = $PAGE->category;
     // Add program breadcrumbs.
     $navname = $viewtype == 'program' ? get_string('programs', 'totara_program') : get_string('certifications', 'totara_certification');
-    $PAGE->navbar->add($navname, $url);
+    $PAGE->navbar->add($navname, new moodle_url('/totara/program/index.php', ['viewtype' => $viewtype]));
     $category_breadcrumbs = prog_get_category_breadcrumbs($categoryid, $viewtype);
     foreach ($category_breadcrumbs as $crumb) {
         $PAGE->navbar->add($crumb['name'], $crumb['link']);
     }
 } else {
-    $categoryid = 0;
+    // Check if there is only one category, if so use that.
+    if (coursecat::count_all() == 1) {
+        $category = coursecat::get_default();
+        $categoryid = $category->id;
+        $PAGE->set_category_by_id($categoryid);
+        $PAGE->set_pagetype('course-index-category');
+    } else {
+        $PAGE->set_pagetype('course-index');
+        $PAGE->set_context(context_system::instance());
+    }
     $PAGE->set_url('/totara/program/index.php', array('viewtype' => $viewtype));
-    $PAGE->set_context(context_system::instance());
 }
-
 $PAGE->set_pagelayout('coursecategory');
 $programrenderer = $PAGE->get_renderer('totara_program');
 
@@ -77,7 +87,9 @@ if ($categoryid && !$category->visible && !has_capability('moodle/category:viewh
 }
 
 // This 's' is needed so that the correct Totara menu item has the selected css class added.
-$PAGE->set_totara_menu_selected($viewtype . 's');
+$menuitem = $viewtype == 'program' ? '\totara_coursecatalog\totara\menu\programs' : '\totara_coursecatalog\totara\menu\certifications';
+
+$PAGE->set_totara_menu_selected($menuitem);
 $PAGE->set_heading(format_string($site->fullname));
 $content = $programrenderer->program_category($categoryid, $viewtype);
 

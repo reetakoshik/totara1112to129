@@ -23,15 +23,14 @@ Feature: In a report, admin can filter log data
     And I click on "Enable" "link" in the "Legacy log" "table_row"
     And the following config values are set as admin:
       | loglegacy | 1 | logstore_legacy |
-    And I follow "Home"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to course participants
     And I follow "Student 1"
     And I click on "Log in as" "link"
     And I press "Continue"
     And I log out
     And I log in as "admin"
-    When I navigate to "Logs" node in "Site administration > Reports"
+    When I navigate to "Logs" node in "Site administration > Server"
     And I set the field "id" to "Acceptance test site (Site)"
     And I set the field "user" to "All participants"
     And I set the field "logreader" to "Standard log"
@@ -44,14 +43,14 @@ Feature: In a report, admin can filter log data
 
   @javascript
   Scenario: Filter log report for standard log reader
-    Given I follow "Course 1"
+    Given I am on "Course 1" course homepage
     And I navigate to course participants
     And I follow "Student 1"
     And I click on "Log in as" "link"
     And I press "Continue"
     And I log out
     And I log in as "admin"
-    When I navigate to "Logs" node in "Site administration > Reports"
+    When I navigate to "Logs" node in "Site administration > Server"
     And I set the field "id" to "Acceptance test site (Site)"
     And I set the field "user" to "All participants"
     And I press "Get these logs"
@@ -64,17 +63,14 @@ Feature: In a report, admin can filter log data
     And I click on "Disable" "link" in the "Standard log" "table_row"
     And the following config values are set as admin:
       | loglegacy | 1 | logstore_legacy |
-    And I follow "Home"
-    And I follow "Course 1"
-    And I follow "Home"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "Users > Enrolled users" in current page administration
     And I follow "Student 1"
     And I click on "Log in as" "link"
     And I press "Continue"
     And I log out
     And I log in as "admin"
-    When I navigate to "Logs" node in "Site administration > Reports"
+    When I navigate to "Logs" node in "Site administration > Server"
     And I set the field "id" to "Acceptance test site (Site)"
     And I set the field "user" to "All participants"
     And I press "Get these logs"

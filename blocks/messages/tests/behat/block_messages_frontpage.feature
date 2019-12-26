@@ -1,4 +1,4 @@
-@block @block_messages
+@block @block_messages @javascript
 Feature: The messages block allows users to list new messages on the frontpage
   In order to enable the messages block on the frontpage
   As an admin
@@ -35,7 +35,6 @@ Feature: The messages block allows users to list new messages on the frontpage
     When I am on site homepage
     Then I should not see "Messages"
 
-  @javascript
   Scenario: View the block by a user who has messages.
     Given I log in as "student1"
     And I follow "Messages" in the user menu
@@ -46,7 +45,6 @@ Feature: The messages block allows users to list new messages on the frontpage
     And I am on site homepage
     Then I should see "Student 1" in the "Messages" "block"
 
-  @javascript
   Scenario: Use the block to send a message to a user.
     Given I log in as "teacher1"
     And I am on site homepage

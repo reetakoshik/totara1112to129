@@ -32,6 +32,10 @@ if (!defined('MOODLE_INTERNAL')) {
 global $CFG;
 require_once($CFG->dirroot . '/mod/facetoface/lib.php');
 
+use mod_facetoface\asset;
+use mod_facetoface\asset_list;
+use mod_facetoface\seminar_event;
+
 class mod_facetoface_assetlib_testcase extends advanced_testcase {
 
     /** @var mod_facetoface_generator */
@@ -69,11 +73,24 @@ class mod_facetoface_assetlib_testcase extends advanced_testcase {
 
         $this->assertCount(2, $DB->get_records('facetoface_asset', array()));
 
-        $this->assertEquals($sitewideasset, facetoface_get_asset($sitewideasset->id));
-        $this->assertEquals($customasset, facetoface_get_asset($customasset->id));
+        $sitewideassetclass = new asset($sitewideasset->id);
+        $this->assertEquals($sitewideasset->id, $sitewideassetclass->get_id());
+        $this->assertEquals($sitewideasset->name, $sitewideassetclass->get_name());
 
-        $this->assertFalse(facetoface_get_asset(-1));
-        $this->assertFalse(facetoface_get_asset(0));
+        $customassetclass = new asset($customasset->id);
+        $this->assertEquals($customasset->id, $customassetclass->get_id());
+        $this->assertEquals($customasset->name, $customassetclass->get_name());
+
+        $invalidasset = new asset(0);
+        $this->assertEmpty($invalidasset->get_id());
+        $this->assertEmpty($invalidasset->get_name());
+
+        try {
+            $invalidasset = new asset(-1);
+            $this->fail("Incorrect asset id should throw error");
+        } catch (exception $e) {
+            //Do nothing
+        }
     }
 
     /**
@@ -131,7 +148,8 @@ class mod_facetoface_assetlib_testcase extends advanced_testcase {
         $this->assertCount(1, $DB->get_records('facetoface_asset_dates', array('assetid' => $customasset->id)));
         $this->assertCount(2, $DB->get_records('facetoface_asset_dates', array('assetid' => $sitewideasset->id)));
 
-        facetoface_delete_asset($sitewideasset->id);
+        $asset = new asset($sitewideasset->id);
+        $asset->delete();
         $this->assertFalse($DB->record_exists('facetoface_asset', array('id' => $sitewideasset->id)));
         $this->assertTrue($DB->record_exists('facetoface_asset', array('id' => $customasset->id)));
         $sessiondate1 = $DB->get_record('facetoface_sessions_dates', array('sessionid' => $sessionid1), '*', MUST_EXIST);
@@ -142,7 +160,7 @@ class mod_facetoface_assetlib_testcase extends advanced_testcase {
         $this->assertTrue($fs->file_exists_by_hash($customfile->get_pathnamehash()));
 
         // Second delete should do nothing.
-        facetoface_delete_asset($sitewideasset->id);
+        $asset->delete();
     }
 
     /**
@@ -186,395 +204,439 @@ class mod_facetoface_assetlib_testcase extends advanced_testcase {
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 7), $now + (DAYSECS * 8), $customasset4->id);
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 9), $now + (DAYSECS * 10), $sitewideasset4->id);
         $sessionid1_1 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface1->id, 'sessiondates' => $sessiondates));
+        $seminarevent11 = new seminar_event($sessionid1_1);
 
         $sessionid1_2 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface1->id, 'sessiondates' => array()));
+        $seminarevent12 = new seminar_event($sessionid1_2);
 
         $sessiondates = array();
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 30), $now + (DAYSECS * 31), $sitewideasset1->id);
         $sessionid1_3 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface1->id, 'sessiondates' => $sessiondates));
+        $seminarevent13 = new seminar_event($sessionid1_3);
 
         $sessiondates = array();
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 5), $now + (DAYSECS * 6), $customasset3->id);
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 9), $now + (DAYSECS * 10), $sitewideasset4->id);
         $sessionid2_1 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface2->id, 'sessiondates' => $sessiondates));
+        $seminarevent21 = new seminar_event($sessionid2_1);
 
         $this->setUser(null);
+        $tempevent = new seminar_event();
 
         // Get all site assets that are not hidden.
 
-        $assets = facetoface_get_available_assets(0, 0, 'fa.*', 0, 0);
+        $assets = asset_list::get_available(0, 0, new seminar_event());
         $this->assertCount(4, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available(0, 0, $asset, 0, 0));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available(0, 0, new seminar_event()));
             } else {
-                $this->assertFalse(facetoface_is_asset_available(0, 0, $asset, 0, 0));
+                $this->assertFalse($asset->is_available(0, 0, new seminar_event()));
             }
         }
 
         // Get available site assets for given slot.
-
-        $assets = facetoface_get_available_assets($now + (DAYSECS * -1), $now + (DAYSECS * 1), 'fa.*', 0, 0);
+        $assets = asset_list::get_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), new seminar_event());
         $this->assertCount(4, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $asset, 0, 0));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), new seminar_event()));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $asset, 0, 0));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), new seminar_event()));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 2), 'fa.*', 0, 0);
+        $assets = asset_list::get_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), new seminar_event());
         $this->assertCount(3, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, 0, 0));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), new seminar_event()));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, 0, 0));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), new seminar_event()));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 0), $now + (DAYSECS * 3), 'fa.*', 0, 0);
+        $assets = asset_list::get_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), new seminar_event());
         $this->assertCount(2, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $asset, 0, 0));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), new seminar_event()));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $asset, 0, 0));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), new seminar_event()));
             }
         }
 
         // Specify only seminar id such as when adding new session.
-
-        $assets = facetoface_get_available_assets(0, 0, 'fa.*', 0, $facetoface1->id);
+        $tempevent->set_facetoface($facetoface1->id);
+        $assets = asset_list::get_available(0, 0, $tempevent);
         $this->assertCount(7, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset4->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available(0, 0, $asset, 0, $facetoface1->id));
+            $asset = new asset($asset->id);
+            $seminarevent = new seminar_event();
+            $seminarevent->set_facetoface($facetoface1->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available(0, 0, $seminarevent));
             } else {
-                $this->assertFalse(facetoface_is_asset_available(0, 0, $asset, 0, $facetoface1->id));
+                $this->assertFalse($asset->is_available(0, 0, $seminarevent));
             }
         }
 
-        $assets = facetoface_get_available_assets(0, 0, 'fa.*', 0, $facetoface2->id);
+        $tempevent->set_facetoface($facetoface2->id);
+        $assets = asset_list::get_available(0, 0, $tempevent);
         $this->assertCount(5, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset3->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available(0, 0, $asset, 0, $facetoface2->id));
+            $asset = new asset($asset->id);
+            $seminarevent = new seminar_event();
+            $seminarevent->set_facetoface($facetoface2->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available(0, 0, $seminarevent));
             } else {
-                $this->assertFalse(facetoface_is_asset_available(0, 0, $asset, 0, $facetoface2->id));
+                $this->assertFalse($asset->is_available(0, 0, $seminarevent));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * -1), $now + (DAYSECS * 1), 'fa.*', 0, $facetoface1->id);
+        $tempevent->set_facetoface($facetoface1->id);
+        $assets = asset_list::get_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $tempevent);
         $this->assertCount(7, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset4->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $asset, 0, $facetoface1->id));
+            $asset = new asset($asset->id);
+            $seminarevent = new seminar_event();
+            $seminarevent->set_facetoface($facetoface1->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $seminarevent));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $asset, 0, $facetoface1->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $seminarevent));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 2), 'fa.*', 0, $facetoface1->id);
+        $assets = asset_list::get_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $tempevent);
         $this->assertCount(6, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset4->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, 0, $facetoface1->id));
+            $asset = new asset($asset->id);
+            $seminarevent = new seminar_event();
+            $seminarevent->set_facetoface($facetoface1->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, 0, $facetoface1->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 0), $now + (DAYSECS * 3), 'fa.*', 0, $facetoface1->id);
+        $assets = asset_list::get_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $tempevent);
         $this->assertCount(5, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset4->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $asset, 0, $facetoface1->id));
+            $asset = new asset($asset->id);
+            $seminarevent = new seminar_event();
+            $seminarevent->set_facetoface($facetoface1->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $seminarevent));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $asset, 0, $facetoface1->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $seminarevent));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 20), 'fa.*', 0, $facetoface1->id);
+        $assets = asset_list::get_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $tempevent);
         $this->assertCount(3, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset4->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $asset, 0, $facetoface1->id));
+            $asset = new asset($asset->id);
+            $seminarevent = new seminar_event();
+            $seminarevent->set_facetoface($facetoface1->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $asset, 0, $facetoface1->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 20), 'fa.*', 0, $facetoface2->id);
+        $tempevent->set_facetoface($facetoface2->id);
+        $assets = asset_list::get_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $tempevent);
         $this->assertCount(2, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $asset, 0, $facetoface2->id));
+            $asset = new asset($asset->id);
+            $seminarevent = new seminar_event();
+            $seminarevent->set_facetoface($facetoface2->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $asset, 0, $facetoface2->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent));
             }
         }
 
         // Specify seminar id and session id such as when adding updating session.
-
-        $assets = facetoface_get_available_assets(0, 0, 'fa.*', $sessionid1_1, $facetoface1->id);
+        $assets = asset_list::get_available(0, 0, $seminarevent11);
         $this->assertCount(8, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset3->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset3->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset4->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available(0, 0, $asset, $sessionid1_1, $facetoface1->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available(0, 0, $seminarevent11));
             } else {
-                $this->assertFalse(facetoface_is_asset_available(0, 0, $asset, $sessionid1_1, $facetoface1->id));
+                $this->assertFalse($asset->is_available(0, 0, $seminarevent11));
             }
         }
 
-        $assets = facetoface_get_available_assets(0, 0, 'fa.*', $sessionid1_2, $facetoface1->id);
+        $assets = asset_list::get_available(0, 0, $seminarevent12);
         $this->assertCount(7, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset4->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available(0, 0, $asset, $sessionid1_2, $facetoface1->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available(0, 0, $seminarevent12));
             } else {
-                $this->assertFalse(facetoface_is_asset_available(0, 0, $asset, $sessionid1_2, $facetoface1->id));
+                $this->assertFalse($asset->is_available(0, 0, $seminarevent12));
             }
         }
 
-        $assets = facetoface_get_available_assets(0, 0, 'fa.*', $sessionid2_1, $facetoface2->id);
+        $assets = asset_list::get_available(0, 0, $seminarevent21);
         $this->assertCount(5, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset3->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available(0, 0, $asset, $sessionid2_1, $facetoface2->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available(0, 0, $seminarevent21));
             } else {
-                $this->assertFalse(facetoface_is_asset_available(0, 0, $asset, $sessionid2_1, $facetoface2->id));
+                $this->assertFalse($asset->is_available(0, 0, $seminarevent21));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * -1), $now + (DAYSECS * 1), 'fa.*', $sessionid1_1, $facetoface1->id);
+        $assets = asset_list::get_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $seminarevent11);
         $this->assertCount(8, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset3->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset3->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset4->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $asset, $sessionid1_1, $facetoface1->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $seminarevent11));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $asset, $sessionid1_1, $facetoface1->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $seminarevent11));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 2), 'fa.*', $sessionid1_3, $facetoface1->id);
+        $assets = asset_list::get_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent13);
         $this->assertCount(6, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset4->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, $sessionid1_3, $facetoface1->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent13));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, $sessionid1_3, $facetoface1->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent13));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * -1), $now + (DAYSECS * 1), 'fa.*', $sessionid1_2, $facetoface1->id);
+        $assets = asset_list::get_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $seminarevent12);
         $this->assertCount(7, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset4->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $asset, $sessionid1_2, $facetoface1->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $seminarevent12));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $asset, $sessionid1_2, $facetoface1->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $seminarevent12));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 2), 'fa.*', $sessionid1_1, $facetoface1->id);
+        $assets = asset_list::get_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent11);
         $this->assertCount(8, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset3->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset3->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset4->id));
 
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, $sessionid1_1, $facetoface1->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent11));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, $sessionid1_1, $facetoface1->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent11));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 2), 'fa.*', $sessionid1_2, $facetoface1->id);
+        $assets = asset_list::get_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent12);
         $this->assertCount(6, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset4->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, $sessionid1_2, $facetoface1->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent12));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, $sessionid1_2, $facetoface1->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent12));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 0), $now + (DAYSECS * 3), 'fa.*', $sessionid1_1, $facetoface1->id);
+        $assets = asset_list::get_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $seminarevent11);
         $this->assertCount(8, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset3->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset3->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset4->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $asset, $sessionid1_1, $facetoface1->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $seminarevent11));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $asset, $sessionid1_1, $facetoface1->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $seminarevent11));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 0), $now + (DAYSECS * 3), 'fa.*', $sessionid1_2, $facetoface1->id);
+        $assets = asset_list::get_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $seminarevent12);
         $this->assertCount(5, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset4->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $asset, $sessionid1_2, $facetoface1->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $seminarevent12));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $asset, $sessionid1_2, $facetoface1->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $seminarevent12));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 20), 'fa.*', $sessionid1_1, $facetoface1->id);
+        $assets = asset_list::get_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent11);
         $this->assertCount(7, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset3->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset3->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset4->id));
 
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $asset, $sessionid1_1, $facetoface1->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent11));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $asset, $sessionid1_1, $facetoface1->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent11));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 20), 'fa.*', $sessionid1_2, $facetoface1->id);
+        $assets = asset_list::get_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent12);
         $this->assertCount(3, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset4->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $asset, $sessionid1_2, $facetoface1->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent12));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $asset, $sessionid1_2, $facetoface1->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent12));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 20), 'fa.*', $sessionid2_1, $facetoface2->id);
+        $assets = asset_list::get_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent21);
         $this->assertCount(2, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $asset, $sessionid2_1, $facetoface2->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent21));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $asset, $sessionid2_1, $facetoface2->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent21));
             }
         }
 
@@ -582,157 +644,157 @@ class mod_facetoface_assetlib_testcase extends advanced_testcase {
 
         $this->setUser($user1);
 
-        $assets = facetoface_get_available_assets(0, 0, 'fa.*', 0, 0);
+        $assets = asset_list::get_available(0, 0, new seminar_event());
         $this->assertCount(6, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset2->id, $assets);
-        $this->assertArrayHasKey($customasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset2->id));
+        $this->assertTrue($assets->contains($customasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available(0, 0, $asset, 0, 0));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available(0, 0, new seminar_event()));
             } else {
-                $this->assertFalse(facetoface_is_asset_available(0, 0, $asset, 0, 0));
+                $this->assertFalse($asset->is_available(0, 0, new seminar_event()));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * -1), $now + (DAYSECS * 1), 'fa.*', 0, 0);
+        $assets = asset_list::get_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), new seminar_event());
         $this->assertCount(6, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset2->id, $assets);
-        $this->assertArrayHasKey($customasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset2->id));
+        $this->assertTrue($assets->contains($customasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $asset, 0, 0));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), new seminar_event()));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), $asset, 0, 0));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * -1), $now + (DAYSECS * 1), new seminar_event()));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 0), $now + (DAYSECS * 3), 'fa.*', 0, 0);
+        $assets = asset_list::get_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), new seminar_event());
         $this->assertCount(4, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset2->id, $assets);
-        $this->assertArrayHasKey($customasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset2->id));
+        $this->assertTrue($assets->contains($customasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $asset, 0, 0));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), new seminar_event()));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), $asset, 0, 0));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 0), $now + (DAYSECS * 3), new seminar_event()));
             }
         }
 
-        $assets = facetoface_get_available_assets(0, 0, 'fa.*', $sessionid1_1, $facetoface1->id);
+        $assets = asset_list::get_available(0, 0, $seminarevent11);
         $this->assertCount(10, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset3->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
-        $this->assertArrayHasKey($customasset2->id, $assets);
-        $this->assertArrayHasKey($customasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset3->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset4->id));
+        $this->assertTrue($assets->contains($customasset2->id));
+        $this->assertTrue($assets->contains($customasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available(0, 0, $asset, $sessionid1_1, $facetoface1->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available(0, 0, $seminarevent11));
             } else {
-                $this->assertFalse(facetoface_is_asset_available(0, 0, $asset, $sessionid1_1, $facetoface1->id));
+                $this->assertFalse($asset->is_available(0, 0, $seminarevent11));
             }
         }
 
-        $assets = facetoface_get_available_assets(0, 0, 'fa.*', $sessionid1_2, $facetoface1->id);
+        $assets = asset_list::get_available(0, 0, $seminarevent12);
         $this->assertCount(9, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
-        $this->assertArrayHasKey($customasset2->id, $assets);
-        $this->assertArrayHasKey($customasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset4->id));
+        $this->assertTrue($assets->contains($customasset2->id));
+        $this->assertTrue($assets->contains($customasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available(0, 0, $asset, $sessionid1_2, $facetoface1->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available(0, 0, $seminarevent12));
             } else {
-                $this->assertFalse(facetoface_is_asset_available(0, 0, $asset, $sessionid1_2, $facetoface1->id));
+                $this->assertFalse($asset->is_available(0, 0, $seminarevent12));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 20), 'fa.*', $sessionid1_1, $facetoface1->id);
+        $assets = asset_list::get_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent11);
         $this->assertCount(9, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset3->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
-        $this->assertArrayHasKey($customasset2->id, $assets);
-        $this->assertArrayHasKey($customasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset3->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset4->id));
+        $this->assertTrue($assets->contains($customasset2->id));
+        $this->assertTrue($assets->contains($customasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $asset, $sessionid1_1, $facetoface1->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent11));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $asset, $sessionid1_1, $facetoface1->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent11));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 20), 'fa.*', $sessionid1_2, $facetoface1->id);
+        $assets = asset_list::get_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent12);
         $this->assertCount(5, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
-        $this->assertArrayHasKey($customasset2->id, $assets);
-        $this->assertArrayHasKey($customasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset4->id));
+        $this->assertTrue($assets->contains($customasset2->id));
+        $this->assertTrue($assets->contains($customasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $asset, $sessionid1_2, $facetoface1->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent12));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $asset, $sessionid1_2, $facetoface1->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent12));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 20), 'fa.*', $sessionid2_1, $facetoface2->id);
+        $assets = asset_list::get_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent21);
         $this->assertCount(4, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset2->id, $assets);
-        $this->assertArrayHasKey($customasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset2->id));
+        $this->assertTrue($assets->contains($customasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $asset, $sessionid2_1, $facetoface2->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent21));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $asset, $sessionid2_1, $facetoface2->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 20), $seminarevent21));
             }
-        }
-
-        // Test the fields can be specified.
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 20), 'fa.id, fa.custom', $sessionid1_1, $facetoface1->id);
-        $this->assertCount(9, $assets);
-        foreach ($assets as $asset) {
-            $this->assertObjectHasAttribute('custom', $asset);
-            $this->assertObjectNotHasAttribute('name', $asset);
         }
 
         // Test slot must have size.
-        $assets = facetoface_get_available_assets(2, 1, 'fa.*', 0, 0);
+        $assets = asset_list::get_available(2, 1, new seminar_event());
         $this->assertDebuggingCalled();
         $this->assertCount(6, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset2->id, $assets);
-        $this->assertArrayHasKey($customasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset2->id));
+        $this->assertTrue($assets->contains($customasset5->id));
     }
 
     /**
@@ -773,218 +835,245 @@ class mod_facetoface_assetlib_testcase extends advanced_testcase {
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 7), $now + (DAYSECS * 8), $customasset4->id, $customasset3->id);
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 9), $now + (DAYSECS * 10));
         $sessionid1_1 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface1->id, 'sessiondates' => $sessiondates));
+        $seminarevent11 = new seminar_event($sessionid1_1);
 
         $sessionid1_2 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface1->id, 'sessiondates' => array()));
+        $seminarevent12 = new seminar_event($sessionid1_2);
 
         $sessiondates = array();
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 30), $now + (DAYSECS * 31), $sitewideasset1->id, $sitewideasset6->id);
         $sessionid1_3 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface1->id, 'sessiondates' => $sessiondates));
+        $seminarevent13 = new seminar_event($sessionid1_3);
 
         $sessiondates = array();
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 5), $now + (DAYSECS * 6), $customasset3->id);
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 9), $now + (DAYSECS * 10), $sitewideasset4->id);
         $sessionid2_1 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface2->id, 'sessiondates' => $sessiondates));
+        $seminarevent21 = new seminar_event($sessionid2_1);
 
+        $tempevent = new seminar_event();
         $this->setUser(null);
 
-        $assets = facetoface_get_available_assets(0, 0, 'fa.*', 0, 0);
+        $assets = asset_list::get_available(0, 0, new seminar_event());
         $this->assertCount(4, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available(0, 0, $asset, 0, 0));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available(0, 0, new seminar_event()));
             } else {
-                $this->assertFalse(facetoface_is_asset_available(0, 0, $asset, 0, 0));
+                $this->assertFalse($asset->is_available(0, 0, new seminar_event()));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 2), 'fa.*', 0, 0);
+        $assets = asset_list::get_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), new seminar_event());
         $this->assertCount(2, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, 0, 0));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), new seminar_event()));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, 0, 0));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), new seminar_event()));
             }
         }
 
-        $assets = facetoface_get_available_assets(0, 0, 'fa.*', 0, $facetoface1->id);
+        $tempevent->set_facetoface($facetoface1->id);
+        $assets = asset_list::get_available(0, 0, $tempevent);
         $this->assertCount(7, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset4->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available(0, 0, $asset, 0, $facetoface1->id));
+            $asset = new asset($asset->id);
+            $seminarevent = new seminar_event();
+            $seminarevent->set_facetoface($facetoface1->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available(0, 0, $seminarevent));
             } else {
-                $this->assertFalse(facetoface_is_asset_available(0, 0, $asset, 0, $facetoface1->id));
+                $this->assertFalse($asset->is_available(0, 0, $seminarevent));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 2), 'fa.*', 0, $facetoface1->id);
+        $assets = asset_list::get_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $tempevent);
         $this->assertCount(4, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset4->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, 0, $facetoface1->id));
+            $asset = new asset($asset->id);
+            $seminarevent = new seminar_event();
+            $seminarevent->set_facetoface($facetoface1->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, 0, $facetoface1->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent));
             }
         }
 
-        $assets = facetoface_get_available_assets(0, 0, 'fa.*', $sessionid1_1, $facetoface1->id);
+        $assets = asset_list::get_available(0, 0, $seminarevent11);
         $this->assertCount(8, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset3->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset3->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset4->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available(0, 0, $asset, $sessionid1_1, $facetoface1->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available(0, 0, $seminarevent11));
             } else {
-                $this->assertFalse(facetoface_is_asset_available(0, 0, $asset, $sessionid1_1, $facetoface1->id));
+                $this->assertFalse($asset->is_available(0, 0, $seminarevent11));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 2), 'fa.*', $sessionid1_1, $facetoface1->id);
+        $assets = asset_list::get_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent11);
         $this->assertCount(8, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset3->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset3->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset4->id));
 
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, $sessionid1_1, $facetoface1->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent11));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, $sessionid1_1, $facetoface1->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent11));
             }
         }
 
         $this->setUser($user1);
 
-        $assets = facetoface_get_available_assets(0, 0, 'fa.*', 0, 0);
+        $assets = asset_list::get_available(0, 0, new seminar_event());
         $this->assertCount(6, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset2->id, $assets);
-        $this->assertArrayHasKey($customasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset2->id));
+        $this->assertTrue($assets->contains($customasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available(0, 0, $asset, 0, 0));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available(0, 0, new seminar_event));
             } else {
-                $this->assertFalse(facetoface_is_asset_available(0, 0, $asset, 0, 0));
+                $this->assertFalse($asset->is_available(0, 0, new seminar_event()));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 2), 'fa.*', 0, 0);
+        $assets = asset_list::get_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), new seminar_event());
         $this->assertCount(4, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset2->id, $assets);
-        $this->assertArrayHasKey($customasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset2->id));
+        $this->assertTrue($assets->contains($customasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, 0, 0));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), new seminar_event()));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, 0, 0));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), new seminar_event()));
             }
         }
 
-        $assets = facetoface_get_available_assets(0, 0, 'fa.*', 0, $facetoface1->id);
+        $tempevent->set_facetoface($facetoface1->id);
+        $assets = asset_list::get_available(0, 0, $tempevent);
         $this->assertCount(9, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset2->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
-        $this->assertArrayHasKey($customasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset2->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset4->id));
+        $this->assertTrue($assets->contains($customasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available(0, 0, $asset, 0, $facetoface1->id));
+            $asset = new asset($asset->id);
+            $seminarevent = new seminar_event();
+            $seminarevent->set_facetoface($facetoface1->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available(0, 0, $seminarevent));
             } else {
-                $this->assertFalse(facetoface_is_asset_available(0, 0, $asset, 0, $facetoface1->id));
+                $this->assertFalse($asset->is_available(0, 0, $seminarevent));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 2), 'fa.*', 0, $facetoface1->id);
+        $assets = asset_list::get_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $tempevent);
         $this->assertCount(6, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset2->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
-        $this->assertArrayHasKey($customasset5->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset2->id));
+        $this->assertTrue($assets->contains($customasset4->id));
+        $this->assertTrue($assets->contains($customasset5->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, 0, $facetoface1->id));
+            $asset = new asset($asset->id);
+            $seminarevent = new seminar_event();
+            $seminarevent->set_facetoface($facetoface1->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, 0, $facetoface1->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent));
             }
         }
 
-        $assets = facetoface_get_available_assets(0, 0, 'fa.*', $sessionid1_1, $facetoface1->id);
+        $assets = asset_list::get_available(0, 0, $seminarevent11);
         $this->assertCount(10, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset3->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset2->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset5->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset3->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset2->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset5->id));
+        $this->assertTrue($assets->contains($customasset4->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available(0, 0, $asset, $sessionid1_1, $facetoface1->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available(0, 0, $seminarevent11));
             } else {
-                $this->assertFalse(facetoface_is_asset_available(0, 0, $asset, $sessionid1_1, $facetoface1->id));
+                $this->assertFalse($asset->is_available(0, 0, $seminarevent11));
             }
         }
 
-        $assets = facetoface_get_available_assets($now + (DAYSECS * 1), $now + (DAYSECS * 2), 'fa.*', $sessionid1_1, $facetoface1->id);
+        $assets = asset_list::get_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent11);
         $this->assertCount(10, $assets);
-        $this->assertArrayHasKey($sitewideasset1->id, $assets);
-        $this->assertArrayHasKey($sitewideasset2->id, $assets);
-        $this->assertArrayHasKey($sitewideasset3->id, $assets);
-        $this->assertArrayHasKey($sitewideasset4->id, $assets);
-        $this->assertArrayHasKey($sitewideasset5->id, $assets);
-        $this->assertArrayHasKey($customasset1->id, $assets);
-        $this->assertArrayHasKey($customasset2->id, $assets);
-        $this->assertArrayHasKey($customasset3->id, $assets);
-        $this->assertArrayHasKey($customasset5->id, $assets);
-        $this->assertArrayHasKey($customasset4->id, $assets);
+        $this->assertTrue($assets->contains($sitewideasset1->id));
+        $this->assertTrue($assets->contains($sitewideasset2->id));
+        $this->assertTrue($assets->contains($sitewideasset3->id));
+        $this->assertTrue($assets->contains($sitewideasset4->id));
+        $this->assertTrue($assets->contains($sitewideasset5->id));
+        $this->assertTrue($assets->contains($customasset1->id));
+        $this->assertTrue($assets->contains($customasset2->id));
+        $this->assertTrue($assets->contains($customasset3->id));
+        $this->assertTrue($assets->contains($customasset5->id));
+        $this->assertTrue($assets->contains($customasset4->id));
         foreach ($allassets as $asset) {
-            if (isset($assets[$asset->id])) {
-                $this->assertTrue(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, $sessionid1_1, $facetoface1->id));
+            $asset = new asset($asset->id);
+            if ($assets->contains($asset->get_id())) {
+                $this->assertTrue($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent11));
             } else {
-                $this->assertFalse(facetoface_is_asset_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $asset, $sessionid1_1, $facetoface1->id));
+                $this->assertFalse($asset->is_available($now + (DAYSECS * 1), $now + (DAYSECS * 2), $seminarevent11));
             }
         }
     }
@@ -1021,6 +1110,7 @@ class mod_facetoface_assetlib_testcase extends advanced_testcase {
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 5), $now + (DAYSECS * 6), $customasset3->id);
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 7), $now + (DAYSECS * 8), $customasset4->id);
         $sessionid1_1 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface1->id, 'sessiondates' => $sessiondates));
+        $seminarevent11 = new seminar_event($sessionid1_1);
 
         $sessiondates = array();
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 1), $now + (DAYSECS * 3), $sitewideasset1->id);
@@ -1028,25 +1118,27 @@ class mod_facetoface_assetlib_testcase extends advanced_testcase {
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * -3), $now + (DAYSECS * -1.5), $sitewideasset3->id);
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 4), $now + (DAYSECS * 7), $customasset4->id);
         $sessionid1_2 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface1->id, 'sessiondates' => $sessiondates));
+        $seminarevent12 = new seminar_event($sessionid1_2);
 
         $sessiondates = array();
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 9), $now + (DAYSECS * 10), $sitewideasset4->id);
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 5.5), $now + (DAYSECS * 5.6), $customasset3->id);
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 8), $now + (DAYSECS * 9), $customasset4->id);
         $sessionid2_1 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface2->id, 'sessiondates' => $sessiondates));
+        $seminarevent21 = new seminar_event($sessionid2_1);
 
-        $this->assertTrue(facetoface_asset_has_conflicts($sitewideasset1->id));
-        $this->assertTrue(facetoface_asset_has_conflicts($sitewideasset2->id));
-        $this->assertTrue(facetoface_asset_has_conflicts($sitewideasset3->id));
-        $this->assertTrue(facetoface_asset_has_conflicts($sitewideasset4->id));
-        $this->assertFalse(facetoface_asset_has_conflicts($sitewideasset5->id));
-        $this->assertFalse(facetoface_asset_has_conflicts($sitewideasset6->id));
-        $this->assertFalse(facetoface_asset_has_conflicts($customasset1->id));
-        $this->assertFalse(facetoface_asset_has_conflicts($customasset2->id));
-        $this->assertTrue(facetoface_asset_has_conflicts($customasset3->id));
-        $this->assertFalse(facetoface_asset_has_conflicts($customasset4->id));
-        $this->assertFalse(facetoface_asset_has_conflicts($customasset5->id));
-        $this->assertFalse(facetoface_asset_has_conflicts($customasset6->id));
+        $this->assertTrue((new asset($sitewideasset1->id))->has_conflicts());
+        $this->assertTrue((new asset($sitewideasset2->id))->has_conflicts());
+        $this->assertTrue((new asset($sitewideasset3->id))->has_conflicts());
+        $this->assertTrue((new asset($sitewideasset4->id))->has_conflicts());
+        $this->assertFalse((new asset($sitewideasset5->id))->has_conflicts());
+        $this->assertFalse((new asset($sitewideasset6->id))->has_conflicts());
+        $this->assertFalse((new asset($customasset1->id))->has_conflicts());
+        $this->assertFalse((new asset($customasset2->id))->has_conflicts());
+        $this->assertTrue((new asset($customasset3->id))->has_conflicts());
+        $this->assertFalse((new asset($customasset4->id))->has_conflicts());
+        $this->assertFalse((new asset($customasset5->id))->has_conflicts());
+        $this->assertFalse((new asset($customasset6->id))->has_conflicts());
     }
 
     public function test_session_cancellation() {
@@ -1083,6 +1175,7 @@ class mod_facetoface_assetlib_testcase extends advanced_testcase {
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 5), $now + (DAYSECS * 6), $customasset3->id);
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 7), $now + (DAYSECS * 8), $customasset4->id);
         $sessionid1_1 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface1->id, 'sessiondates' => $sessiondates));
+        $seminarevent11 = new seminar_event($sessionid1_1);
 
         $sessiondates = array();
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 1), $now + (DAYSECS * 3), $sitewideasset1->id);
@@ -1090,18 +1183,18 @@ class mod_facetoface_assetlib_testcase extends advanced_testcase {
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * -3), $now + (DAYSECS * -1.5), $sitewideasset3->id);
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 4), $now + (DAYSECS * 7), $customasset4->id);
         $sessionid1_2 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface1->id, 'sessiondates' => $sessiondates));
+        $seminarevent12 = new seminar_event($sessionid1_2);
 
         $sessiondates = array();
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 9), $now + (DAYSECS * 10), $sitewideasset4->id);
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 5.5), $now + (DAYSECS * 5.6), $customasset3->id);
         $sessiondates[] = $this->prepare_date($now + (DAYSECS * 8), $now + (DAYSECS * 9), $customasset4->id);
         $sessionid2_1 = $this->facetoface_generator->add_session(array('facetoface' => $facetoface2->id, 'sessiondates' => $sessiondates));
+        $seminarevent21 = new seminar_event($sessionid2_1);
 
-        $session = $DB->get_record('facetoface_sessions', array('id' => $sessionid2_1));
-        $session->sessiondates = facetoface_get_session_dates($session->id);
-
-        facetoface_cancel_session($session, null);
-        $dateids = $DB->get_fieldset_select('facetoface_sessions_dates', 'id', "sessionid = :sessionid", array('sessionid' => $session->id));
+        $seminarevent = new \mod_facetoface\seminar_event($sessionid2_1);
+        $seminarevent->cancel();
+        $dateids = $DB->get_fieldset_select('facetoface_sessions_dates', 'id', "sessionid = :sessionid", array('sessionid' => $sessionid2_1));
         foreach ($dateids as $did) {
             $this->assertFalse($DB->record_exists('facetoface_asset_dates', array('sessionsdateid' => $did)));
         }

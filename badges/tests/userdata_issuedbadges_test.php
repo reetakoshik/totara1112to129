@@ -21,11 +21,9 @@
  * @package core_badges
  */
 
-namespace core_badges\userdata;
-
-use advanced_testcase;
 use totara_userdata\userdata\item;
 use totara_userdata\userdata\target_user;
+use core_badges\userdata\issuedbadges;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -339,11 +337,8 @@ class core_badges_userdata_issuedbadges_testcase extends advanced_testcase {
 
     /**
      * Test counting badges issues in coursecat contexts.
-     *
-     * @return array
      */
     public function test_count_coursecat_context() {
-        $this->resetAfterTest(false);
 
         $data = $this->prepare_test_data();
 
@@ -353,18 +348,25 @@ class core_badges_userdata_issuedbadges_testcase extends advanced_testcase {
 
         self::assertSame(4, issuedbadges::execute_count($user1, $context));
         self::assertSame(4, issuedbadges::execute_count($user2, $context));
+    }
+
+    /**
+     * context data provide
+     *
+     * @return array
+     */
+    public function provider_coursecat_context() {
+        $data = $this->prepare_test_data();
+
+        $user1 = new target_user($data['users'][0]);
+        $user2 = new target_user($data['users'][1]);
+        $context = \context_coursecat::instance($data['categories'][0]->id);
 
         return $data;
     }
 
-    /**
-     * Test purging badges in the coursecat context
-     *
-     * @depends test_count_coursecat_context
-     * @param array $data
-     */
-    public function test_purge_coursecat_context(array $data) {
-        $this->resetAfterTest(true);
+    public function test_purge_coursecat_context() {
+        $data = $this->prepare_test_data();
 
         $user1 = new target_user($data['users'][0]);
         $user2 = new target_user($data['users'][1]);
@@ -410,34 +412,8 @@ class core_badges_userdata_issuedbadges_testcase extends advanced_testcase {
         self::assertSame(3, issuedbadges::execute_count($user2, \context_system::instance()));
     }
 
-    /**
-     * Test counting badges issued in course contexts.
-     *
-     * @return array
-     */
-    public function test_count_course_context() {
-        $this->resetAfterTest(false);
-
+    public function test_purge_course_context() {
         $data = $this->prepare_test_data();
-
-        $user1 = new target_user($data['users'][0]);
-        $user2 = new target_user($data['users'][1]);
-        $context = \context_course::instance($data['courses'][0]->id);
-
-        self::assertSame(2, issuedbadges::execute_count($user1, $context));
-        self::assertSame(2, issuedbadges::execute_count($user2, $context));
-
-        return $data;
-    }
-
-    /**
-     * Test purging badges issued in course contexts.
-     *
-     * @depends test_count_course_context
-     * @param array $data
-     */
-    public function test_purge_course_context(array $data) {
-        $this->resetAfterTest(true);
 
         $user1 = new target_user($data['users'][0]);
         $user2 = new target_user($data['users'][1]);

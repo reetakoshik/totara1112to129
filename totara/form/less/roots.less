@@ -1,10 +1,10 @@
 @import "date_polyfill.less";
-@import "number_polyfill.less";
 @import "passwordunmask.less";
 @import "wizard/wizard.less";
 
 @totara_form-text-color: rgba(85, 85, 85, 1);
 @totara_form-disabled-bg: #dde1e5;
+@totara_form-placeholder-colour: @totara_style-color_neutral_5;
 
 .totara_form {
 
@@ -96,10 +96,16 @@
     .totara_form_element_checkboxes,
     .totara_form_element_radios,
     .totara_form_element_yesno {
-        .tf_element_input label {
-            padding-right: .6em;
-            padding-left: .6em;
-            color: @totara_form-text-color;
+        .tf_element_input {
+            label {
+                padding-right: 2rem;
+                padding-left: 0;
+                color: @totara_form-text-color;
+            }
+
+            .tf_loading {
+                margin-left: -1.8rem;
+            }
         }
     }
 
@@ -138,17 +144,11 @@
         display: none;
     }
 
-    /* Placeholder Polyfill */
-    .tf_element .placeholder {
-        color: #aaa;
-    }
-
     // Apply input styles from bootstrap to HTML5 elements.
     .totara_form-input-default() {
         padding: 6px 12px;
         font-size: 14px;
         line-height: 1.42857143;
-        -webkit-text-fill-color: @totara_form-text-color;
         color: @totara_form-text-color;
         background-color: #fff;
         background-image: none;
@@ -185,6 +185,10 @@
         .totara_form-input-default;
         width: auto;
         display: inline;
+
+        &::placeholder {
+            color: @totara_form-placeholder-colour;
+        }
     }
     textarea {
         .totara_form-input-default;

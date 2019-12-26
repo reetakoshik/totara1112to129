@@ -18,13 +18,11 @@ Feature: Check previous and upcomings sections are right populated
       | student1 | C1     | student        |
       | teacher1 | C1     | editingteacher |
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name                                 | Test seminar in progress |
       | Description                          | Test seminar in progress |
-      | Users can sign-up to multiple events | 1                        |
+      | How many times the user can sign-up? | Unlimited                |
     And I follow "View all events"
     And I follow "Add a new event"
     And I click on "Edit session" "link"
@@ -110,8 +108,7 @@ Feature: Check previous and upcomings sections are right populated
 
   Scenario: Check upcoming and previous events are displayed accordingly
     Given I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     Then I should see "Event in progress" in the ".upcomingsessionlist" "css_element"
     And I should see "1 January 2020" in the ".upcomingsessionlist" "css_element"
@@ -126,24 +123,27 @@ Feature: Check previous and upcomings sections are right populated
     And I click on "Sign-up" "link" in the "1 January 2020" "table_row"
     And I press "Sign-up"
     When I follow "C1"
-    Then I should see "Event in progress"
-    And I should see "1 January 2020"
-    And I should not see "1 January 1999"
+    Then I should see "Booked"
+    And I should not see "Event in progress"
+    And I should not see "Event over"
+    And I follow "View all events"
+    Then I should see "Booked"
+    And I should see "Event in progress"
+    And I should see "Event over"
     And I log out
 
     # Change sign up for multiple events setting.
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "View all events"
     And I navigate to "Edit settings" in current page administration
-    And I set the field "Users can sign-up to multiple events" to "0"
+    And I expand all fieldsets
+    And I set the field "How many times the user can sign-up?" to "1"
     And I press "Save and return to course"
     And I log out
 
     When I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "1 January 2020"
     And I should not see "1 January 1999"
     And I should not see "Event in progress"

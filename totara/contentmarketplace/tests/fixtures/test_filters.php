@@ -27,8 +27,11 @@
 
 require_once(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/config.php');
 
+$displaydebugging = false;
 if (!defined('BEHAT_SITE_RUNNING') || !BEHAT_SITE_RUNNING) {
-    if (!debugging()) {
+    if (debugging()) {
+        $displaydebugging = true;
+    } else {
         throw new coding_exception('Invalid access.');
     }
 }
@@ -221,6 +224,14 @@ $PAGE->requires->js_amd_inline($js);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading('Content Marketplace filter testing page');
+
+if ($displaydebugging) {
+    // This is intentionally hard coded - this page is not in the navigation and should only ever be used by developers.
+    $msg = 'This page only exists to facilitate acceptance testing, if you are here for any other reason please file an improvement request.';
+    echo $OUTPUT->notification($msg, \core\output\notification::NOTIFY_WARNING);
+    // We display a developer debug message as well to ensure that this doesn't not get shown during behat testing.
+    debugging('This is a developer resource, please contact your system admin if you have arrived here by mistake.', DEBUG_DEVELOPER);
+}
 
 echo html_writer::start_div('row tcm-explorer');
 echo html_writer::start_div('col-md-3 col-sm-4 col-xs-12');

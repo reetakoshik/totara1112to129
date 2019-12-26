@@ -53,8 +53,9 @@ class totara_program_program_content_testcase extends advanced_testcase {
     protected function tearDown() {
         $this->generator = null;
         $this->program_generator = null;
-        $this->course1 = null;
-        $this->program1 = null;
+        $this->course1 = $this->course2 = $this->course3 = null;
+        $this->program1 = $this->program2 = null;
+
         parent::tearDown();
     }
 
@@ -317,6 +318,48 @@ class totara_program_program_content_testcase extends advanced_testcase {
         $this->assertFalse($program2->content->contains_course($this->course1->id));
         $this->assertTrue($program2->content->contains_course($this->course2->id));
         $this->assertFalse($program2->content->contains_course($this->course3->id));
+    }
+
+    public function test_delete_courseset_completion() {
+        global $DB;
+
+        set_config('enablecompletion', '1');
+
+        $completion_generator = $this->generator->get_plugin_generator('core_completion');
+        $completion_generator->enable_completion_tracking($this->course1);
+        $completion_generator->enable_completion_tracking($this->course2);
+
+        $this->program_generator->add_courses_and_courseset_to_program($this->program1, [[$this->course1], [$this->course2]]);
+
+        $user1 = $this->generator->create_user();
+        $user2 = $this->generator->create_user();
+        $user3 = $this->generator->create_user();
+
+        $this->program_generator->assign_program($this->program1->id, [$user1->id, $user2->id, $user3->id]);
+
+        $completion_generator->complete_course($this->course1, $user1);
+        $completion_generator->complete_course($this->course1, $user3);
+
+        $coursesets = $this->program1->get_content()->get_course_sets();
+
+        $this->assertEquals(8, $DB->count_records('prog_completion'));
+        // Check we have two records for courseset 1 and 1 for courseset 2
+        $this->assertEquals(3, $DB->count_records('prog_completion', ['coursesetid' => $coursesets[0]->id]));
+        $this->assertEquals(2, $DB->count_records('prog_completion', ['coursesetid' => $coursesets[1]->id]));
+
+        $this->program1->content->delete_set($coursesets[0]->sortorder);
+        $this->program1->content->save_content();
+
+        // Ensure we only deleted completion for courseset 1
+        $this->assertEquals(0, $DB->count_records('prog_completion', ['coursesetid' => $coursesets[0]->id]));
+        $this->assertEquals(2, $DB->count_records('prog_completion', ['coursesetid' => $coursesets[1]->id]));
+
+        // Delete all program content
+        $this->program1->content->delete();
+
+        // Check that there are only 2 completion records left and they are both prog completion
+        $this->assertEquals(3, $DB->count_records('prog_completion'));
+        $this->assertEquals(3, $DB->count_records('prog_completion', ['coursesetid' => 0]));
     }
 }
 

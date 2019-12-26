@@ -22,6 +22,8 @@
  * @subpackage enrol_totara_facetoface
  */
 
+use \mod_facetoface\seminar;
+
 require_once($CFG->dirroot . '/lib/formslib.php');
 
 class enrol_totara_facetoface_signup_form extends moodleform {
@@ -91,8 +93,6 @@ class enrol_totara_facetoface_signup_form extends moodleform {
         foreach ($sessions as $session) {
             $f2fids[$session->facetoface] = $session->facetoface;
         }
-        list($idin, $params) = $DB->get_in_or_equal($f2fids);
-        $facetofaces = $DB->get_records_select('facetoface', "id $idin", $params);
 
         if (!empty($instance->$settingautosignup)) {
             $sessionsavailable = true;
@@ -118,17 +118,16 @@ class enrol_totara_facetoface_signup_form extends moodleform {
 
             $force = count($sessrows) == 1 ? true : false;
             foreach ($sessrows as $facetofaceid => $sessions) {
-                $facetoface = $facetofaces[$facetofaceid];
+                $seminar = new seminar($facetofaceid);
 
                 $mform->addElement('html', html_writer::start_div('f2factivity', array('id' => 'f2factivity' . $facetofaceid)));
-                $mform->addElement('html', $OUTPUT->heading($facetoface->name, 3));
-                $managerreqd = facetoface_manager_needed($facetoface);
-                $activejobassigns = \totara_job\job_assignment::get_all($USER->id, $managerreqd);
-                if ($facetoface->forceselectjobassignment && empty($activejobassigns)) {
+                $mform->addElement('html', $OUTPUT->heading($seminar->get_name(), 3));
+                $activejobassigns = \totara_job\job_assignment::get_all($USER->id, $seminar->is_manager_required());
+                if ($seminar->get_forceselectjobassignment() && empty($activejobassigns)) {
                     $msg = get_string('error:nojobassignmentselectedactivity', 'facetoface');
                     $mform->addElement('html', html_writer::tag('div', $msg));
                 } else {
-                    $this->enrol_totara_facetoface_addsessrows($mform, $sessions, $facetoface, $force);
+                    $this->enrol_totara_facetoface_addsessrows($mform, $sessions, $seminar, $force);
                     $sessionsavailable = true;
                 }
                 $mform->addElement('html', html_writer::end_div());
@@ -163,7 +162,7 @@ class enrol_totara_facetoface_signup_form extends moodleform {
             $mform->addElement('hidden', 'eventhandlers', $url);
             $mform->setType('eventhandlers', PARAM_URL);
 
-            $url = $CFG->wwwroot . '/mod/facetoface/js/signup_tsandcs_ajax.js';
+            $url = $CFG->wwwroot . '/enrol/totara_facetoface/js/signup_tsandcs.js';
             $mform->addElement('html', '<script src=' . $url . '></script>');
         } else {
             global $PAGE;
@@ -178,10 +177,10 @@ class enrol_totara_facetoface_signup_form extends moodleform {
      * Add session rows to signup form
      * @param moodleform $mform
      * @param array $sessrows
-     * @param array $facetofaces
+     * @param seminar $seminar
      * @param bool $force Option "Do not sign up" will not be displayed if true
      */
-    private function enrol_totara_facetoface_addsessrows($mform, $sessions, $facetoface, $force = false) {
+    private function enrol_totara_facetoface_addsessrows($mform, $sessions, seminar $seminar, $force = false) {
         global $DB, $PAGE;
 
         $mform->addElement('html', html_writer::start_tag('table'));
@@ -198,7 +197,7 @@ class enrol_totara_facetoface_signup_form extends moodleform {
         // "Do not sign up" option.
         if (!$force) {
             $mform->addElement('html', html_writer::start_tag('tr') . html_writer::start_tag('td', array('class' => 'session-select')));
-            $mform->addElement('radio', "sid[{$facetoface->id}]", '', '', 0);
+            $mform->addElement('radio', "sid[{$seminar->get_id()}]", '', '', 0);
             $mform->addElement('html', html_writer::end_tag('td') . html_writer::start_tag('td', array('class' => 'session-dates')));
             $mform->addElement('html', get_string('donotsignup', 'enrol_totara_facetoface'));
             $mform->addElement('html', html_writer::end_tag('td') . html_writer::end_tag('tr'));
@@ -210,7 +209,7 @@ class enrol_totara_facetoface_signup_form extends moodleform {
             $mform->addElement('html', html_writer::start_tag('tr'));
 
             $mform->addElement('html', html_writer::start_tag('td', array('class' => 'session-select')));
-            $mform->addElement('radio', "sid[{$facetoface->id}]", '', '', $sid);
+            $mform->addElement('radio', "sid[{$seminar->get_id()}]", '', '', $sid);
             $mform->addElement('html', html_writer::end_tag('td'));
 
             // Dates/times.
@@ -272,18 +271,18 @@ class enrol_totara_facetoface_signup_form extends moodleform {
             }
 
             // Display T&Cs for self approval.
-            if ($facetoface->approvaltype == APPROVAL_SELF) {
-                $elementname = 'selfapprovaltandc_' . $facetoface->id;
-                $selfapprovaljsparams[$elementname] = $facetoface->selfapprovaltandc;
+            if ($seminar->get_approvaltype() == seminar::APPROVAL_SELF) {
+                $elementname = 'selfapprovaltandc_' . $seminar->get_id();
+                $selfapprovaljsparams[$elementname] = $seminar->get_approvalterms();
 
-                $url = new moodle_url('/mod/facetoface/signup_tsandcs.php', array('s' => $session->id));
+                $url = new moodle_url('/enrol/totara_facetoface/ajax/signup_tsandcs.php', array('s' => $session->id));
                 $attributes = array("class" => "tsandcs ajax-action");
                 $tandcurl = html_writer::link($url, get_string('selfapprovalsoughtbrief', 'mod_facetoface'), $attributes);
                 $elementid = 'selfapprovaltc' . $session->id;
                 $mform->addElement('checkbox', $elementid, $tandcurl);
             }
 
-            mod_facetoface_signup_form::add_jobassignment_selection_formelem($mform, $facetoface->id, $session->id);
+            mod_facetoface_signup_form::add_jobassignment_selector($mform, new seminar($seminar->get_id()));
 
             $mform->addElement('html', html_writer::end_tag('td'));
 

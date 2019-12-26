@@ -135,8 +135,6 @@ class enrol_flatfile_userdata_pending_enrolments_testcase extends advanced_testc
     }
 
     public function test_export_system_context() {
-        $this->resetAfterTest(false);
-
         $data = $this->create_test_data();
 
         $export = pending_enrolments::execute_export(
@@ -149,17 +147,10 @@ class enrol_flatfile_userdata_pending_enrolments_testcase extends advanced_testc
         foreach($export->data as $record) {
             $this->assertEquals($data['user1']->id, $record->userid);
         }
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @return array
-     * @depends test_export_system_context
-     */
-    public function test_count_system_context($data) {
-        $this->resetAfterTest(false);
+    public function test_count_system_context() {
+        $data = $this->create_test_data();
 
         $count = pending_enrolments::execute_count(
             new target_user($data['user1']),
@@ -171,13 +162,10 @@ class enrol_flatfile_userdata_pending_enrolments_testcase extends advanced_testc
         return $data;
     }
 
-    /**
-     * @param $data
-     * @depends test_count_system_context
-     */
-    public function test_purge_system_context($data) {
+    public function test_purge_system_context() {
         global $DB;
-        $this->resetAfterTest(true);
+
+        $data = $this->create_test_data();
 
         $result = pending_enrolments::execute_purge(
             new target_user($data['user1']),
@@ -191,8 +179,6 @@ class enrol_flatfile_userdata_pending_enrolments_testcase extends advanced_testc
     }
 
     public function test_export_category_context() {
-        $this->resetAfterTest(false);
-
         $data = $this->create_test_data();
 
         $export = pending_enrolments::execute_export(
@@ -206,17 +192,10 @@ class enrol_flatfile_userdata_pending_enrolments_testcase extends advanced_testc
             $this->assertEquals($data['user1']->id, $record->userid);
             $this->assertNotEquals($data['course1']->id, $record->courseid);
         }
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @return array
-     * @depends test_export_category_context
-     */
-    public function test_count_category_context($data) {
-        $this->resetAfterTest(false);
+    public function test_count_category_context() {
+        $data = $this->create_test_data();
 
         $count = pending_enrolments::execute_count(
             new target_user($data['user1']),
@@ -224,17 +203,12 @@ class enrol_flatfile_userdata_pending_enrolments_testcase extends advanced_testc
         );
 
         $this->assertEquals(4, $count);
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @depends test_count_category_context
-     */
-    public function test_purge_category_context($data) {
+    public function test_purge_category_context() {
         global $DB;
-        $this->resetAfterTest(true);
+
+        $data = $this->create_test_data();
 
         $result = pending_enrolments::execute_purge(
             new target_user($data['user1']),
@@ -253,8 +227,6 @@ class enrol_flatfile_userdata_pending_enrolments_testcase extends advanced_testc
     }
 
     public function test_export_course_context() {
-        $this->resetAfterTest(false);
-
         $data = $this->create_test_data();
 
         $export = pending_enrolments::execute_export(
@@ -268,17 +240,10 @@ class enrol_flatfile_userdata_pending_enrolments_testcase extends advanced_testc
             $this->assertEquals($data['user1']->id, $record->userid);
             $this->assertEquals($data['course3']->id, $record->courseid);
         }
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @return array
-     * @depends test_export_course_context
-     */
-    public function test_count_course_context($data) {
-        $this->resetAfterTest(false);
+    public function test_count_course_context() {
+        $data = $this->create_test_data();
 
         $count = pending_enrolments::execute_count(
             new target_user($data['user1']),
@@ -286,17 +251,11 @@ class enrol_flatfile_userdata_pending_enrolments_testcase extends advanced_testc
         );
 
         $this->assertEquals(2, $count);
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @depends test_count_course_context
-     */
-    public function test_purge_course_context($data) {
+    public function test_purge_course_context() {
         global $DB;
-        $this->resetAfterTest(true);
+        $data = $this->create_test_data();
 
         $result = pending_enrolments::execute_purge(
             new target_user($data['user1']),

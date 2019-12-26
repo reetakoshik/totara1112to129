@@ -163,7 +163,7 @@ if ($data = $form->get_data()) {
     if (isset($data->savechanges)) {
 
         $availablefrom = ($data->availablefrom) ? $data->availablefrom : 0;
-        $availableuntil = ($data->availableuntil) ? $data->availableuntil : 0;
+        $availableuntil = ($data->availableuntil) ? $data->availableuntil + (DAYSECS - 1) : 0;
 
         $program_todb = new stdClass;
         $program_todb->category = $data->category;
@@ -189,6 +189,8 @@ if ($data = $form->get_data()) {
 
         $data->id = $newid;
         customfield_save_data($data, 'program', 'prog');
+
+        $program->save_image($data->image);
 
         $editoroptions = $TEXTAREA_OPTIONS;
         $editoroptions['context'] = context_program::instance($newid);
@@ -263,6 +265,13 @@ if ($data = $form->get_data()) {
         if (isset($data->tags)) {
             core_tag_tag::set_item_tags('totara_program', 'prog', $newid, $programcontext, $data->tags);
         }
+
+        $hook = new totara_program\hook\program_edit_form_save_changes($data, $program->id);
+        if ($newcertid) {
+            $hook->set_certification();
+        }
+
+        $hook->execute();
 
         $event = \totara_program\event\program_created::create(
             array(

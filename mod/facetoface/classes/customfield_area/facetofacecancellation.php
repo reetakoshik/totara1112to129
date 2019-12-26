@@ -78,7 +78,7 @@ class facetofacecancellation implements \totara_customfield\area {
     /**
      * Returns true if the user can view the the Seminar cancellation custom field area.
      *
-     * Access to this is copied from mod/facetoface/cancellation_note.php which is used to display the
+     * Access to this is copied from mod/facetoface/attendees/ajax/usercancellation_notes.php which is used to display the
      * cancellation custom field data to users who are able to access to the "Cancellations" tab on the attendees page.
      *
      * @param \stdClass|int $signuporid An instance record OR the id of the instance. If a record is given it must be complete.
@@ -153,7 +153,7 @@ class facetofacecancellation implements \totara_customfield\area {
 
         // Require login without course and cm.
         // Managers who are not enrolled need to be able to see these images without enrolling during approval.
-        // See the hacks in mod/facetoface/attendees.php
+        // See the hacks in mod/facetoface/attendees/cancellations.php
         require_login();
 
         // OK first up we need to verify if the user can access this.

@@ -112,6 +112,10 @@ $string['check_persistentlogin_details'] = '<p>If enabled persistent logins igno
 $string['check_persistentlogin_name'] = 'Persistent login';
 $string['check_persistentlogin_ok'] = 'Persistent login is disabled.';
 $string['check_persistentlogin_warning'] = 'Persistent logins may be considered to be a security risk.';
+$string['check_preventexecpath_name'] = 'Executable paths';
+$string['check_preventexecpath_ok'] = 'Executable paths only settable in config.php.';
+$string['check_preventexecpath_warning'] = 'Executable paths can be set in the Admin GUI.';
+$string['check_preventexecpath_details'] = '<p>Allowing executable paths to be set via the Admin GUI is a vector for privilege escalation.</p>';
 $string['check_repositoryurl_details'] = '<p>Enabling the URL downloader can allow external users to access URLs within your internal network. You should not enable this feature if you have users who are allowed to access your LMS but not allowed to access other resources within your internal network that are accessible from the LMS server.</p>';
 $string['check_repositoryurl_warning'] = 'URL downloader repository is enabled.';
 $string['check_repositoryurl_name'] = 'URL downloader repository';
@@ -137,6 +141,10 @@ $string['check_riskxss_details'] = '<p>RISK_XSS denotes all dangerous capabiliti
 <p>Please verify the following list of users and make sure that you trust them completely on this server:</p><p>{$a}</p>';
 $string['check_riskxss_name'] = 'XSS trusted users';
 $string['check_riskxss_warning'] = 'RISK_XSS - found {$a} users that have to be trusted.';
+$string['check_scormsessionkeepalive_details'] = '<p>If enabled user session is kept alive in SCORM player.</p>';
+$string['check_scormsessionkeepalive_name'] = 'SCROM session keep alive';
+$string['check_scormsessionkeepalive_ok'] = 'Standard session timeout is enforced in SCORM player.';
+$string['check_scormsessionkeepalive_warning'] = 'Keeping user session alive in SCORM player may be considered to be a small security issue.';
 $string['check_unsecuredataroot_details'] = '<p>The dataroot directory must not be accessible via web. The best way to make sure the directory is not accessible is to use a directory outside the public web directory.</p>
 <p>If you move the directory, you need to update the <code>$CFG->dataroot</code> setting in <code>config.php</code> accordingly.</p>';
 $string['check_unsecuredataroot_error'] = 'Your dataroot directory <code>{$a}</code> is in the wrong location and is exposed to the web!';
@@ -170,7 +178,3 @@ $string['statusok'] = 'OK';
 $string['statusserious'] = 'Serious';
 $string['statuswarning'] = 'Warning';
 $string['timewarning'] = 'Data processing may take a long time, please be patient...';
-
-// Deprecated since Totara 10.
-$string['check_mediafilterswf_details'] = '<p>Automatic swf embedding is very dangerous - any registered user may launch an XSS attack against other server users. Please disable it on production servers.</p>';
-$string['check_mediafilterswf_error'] = 'Flash media filter is enabled - this is very dangerous for the majority of servers.';

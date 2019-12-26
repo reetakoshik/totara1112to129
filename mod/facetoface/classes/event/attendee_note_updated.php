@@ -124,7 +124,7 @@ class attendee_note_updated extends \core\event\base {
      */
     public function get_url() {
         $params = array('id' => $this->other['attendeeid'], 's' => $this->other['sessionid']);
-        return new \moodle_url('/mod/facetoface/attendees.php', $params);
+        return new \moodle_url('/mod/facetoface/attendees/view.php', $params);
     }
 
     /**
@@ -134,7 +134,7 @@ class attendee_note_updated extends \core\event\base {
      */
     public function get_legacy_logdata() {
         return array($this->courseid, 'facetoface', 'update attendee note',
-            "attendee_note.php?id={$this->other['attendeeid']}&s={$this->other['sessionid']}",
+            "signup_notes.php?id={$this->other['attendeeid']}&s={$this->other['sessionid']}",
             $this->other['sessionid'], $this->contextinstanceid);
     }
 

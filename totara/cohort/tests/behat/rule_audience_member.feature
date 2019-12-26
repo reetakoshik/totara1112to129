@@ -14,7 +14,7 @@ Feature: Test the audience member rule in dynamic audiences
 
     # Create a dynamic audience.
     When I log in as "admin"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I switch to "Add new audience" tab
     And I set the following fields to these values:
       | Name | test audience |

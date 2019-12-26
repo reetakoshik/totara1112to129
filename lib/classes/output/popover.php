@@ -47,9 +47,39 @@ class popover implements \templatable {
     private $templatecontext = null;
 
     /**
-     * @var string
+     * @var string Title for the popover
      */
     private $title = '';
+
+    /**
+     * @var string placement for the popover. This can be one of the following values
+     *     * 'bottom' - Default location for the popover, displayed below the tirgger element
+     *     * 'top' - displayed above the trigger element
+     *     * 'left' - displayed to the left the trigger element
+     *     * 'right' - displayed to the right the trigger element
+     *     * 'smartPosition' - displayed where there is room on the page
+     */
+    public $arrow_placement = null;
+
+    /**
+     * @var int Expected max height of the popover - only used when arrow_placement is smartPosition.
+     */
+    public $max_height = null;
+
+    /**
+     * @var int Expected max width of the popover - only used when arrow_placement is smartPosition.
+     */
+    public $max_width = null;
+
+    /**
+     * @var string the trigger for the popover
+     */
+    public $trigger = '';
+
+    /**
+     * @var bool Whether to close the popover when a user clicks outside the popover
+     */
+    public $focus_out = true;
 
     /**
      * @var string Sanitised content for the popover.
@@ -115,7 +145,14 @@ class popover implements \templatable {
             'contenttemplate' => isset($this->template) ? $this->template : false,
             'contenttemplatecontext' => isset($this->templatecontext) ? $this->templatecontext : false,
             'title' => $this->title,
-            'contentraw' => isset($this->text) ? $this->text : ''
+            'contentraw' => isset($this->text) ? $this->text : '',
+            'arrow_placement' => $this->arrow_placement,
+            'close_on_focus_out' => $this->focus_out,
+            'placement_max_height' => $this->max_height,
+            'max_height' => $this->max_height,
+            'placement_max_width' => $this->max_width,
+            'max_width' => $this->max_width,
+            'trigger' => $this->trigger
         );
 
         return $returnval;

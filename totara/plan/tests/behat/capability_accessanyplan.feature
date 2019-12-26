@@ -1,4 +1,4 @@
-@totara @totara_plan
+@totara @totara_plan @javascript
 Feature: Verify capability accessanyplan.
 
   Background:
@@ -81,7 +81,6 @@ Feature: Verify capability accessanyplan.
     Then I should see "Program 1" in the ".dp-plan-component-items" "css_element"
     And I log out
 
-  @javascript
   Scenario: Check a user can access but not approve the plan with accessanyplan capability.
 
     # Login as the learner and navigate to the learning plan.
@@ -97,7 +96,7 @@ Feature: Verify capability accessanyplan.
 
     # As the manager, access the learners plans.
     When I log in as "manager2"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "firstname1 lastname1"
     And I click on "Learning Plans" "link" in the ".userprofile" "css_element"
     # Access the learners plans and verify it hasn't been approved.
@@ -107,12 +106,11 @@ Feature: Verify capability accessanyplan.
     And I should not see "Edit details"
     And I should not see "Delete plan"
 
-  @javascript
   Scenario: Check a user can view but not amend plan courses with accessanyplan capability.
 
     # As the manager, access the learners plans.
     Given I log in as "manager2"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "firstname1 lastname1"
     And I click on "Learning Plans" "link" in the ".userprofile" "css_element"
     # Access the learners plan.
@@ -133,12 +131,11 @@ Feature: Verify capability accessanyplan.
     And I should not see "Add linked evidence"
     And I should not see "Remove selected links"
 
-  @javascript
   Scenario: Check a user can view but not amend plan competencies with accessanyplan capability.
 
     # As the manager, access the learners plans.
     Given I log in as "manager2"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "firstname1 lastname1"
     And I click on "Learning Plans" "link" in the ".userprofile" "css_element"
     # Access the learners plan.
@@ -160,12 +157,11 @@ Feature: Verify capability accessanyplan.
     And "Add linked evidence" "button" should not exist
     And "Remove selected links" "button" should not exist
 
-  @javascript
   Scenario: Check a user can view but not amend plan objectives with accessanyplan capability.
 
     # As the manager, access the learners plans.
     Given I log in as "manager2"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "firstname1 lastname1"
     And I click on "Learning Plans" "link" in the ".userprofile" "css_element"
     # Access the learners plan.
@@ -186,12 +182,11 @@ Feature: Verify capability accessanyplan.
     And "Add linked evidence" "button" should not exist
     And "Remove selected links" "button" should not exist
 
-  @javascript
   Scenario: Check a user can view but not amend plan programs with accessanyplan capability.
 
     # As the manager, access the learners plans.
     Given I log in as "manager2"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "firstname1 lastname1"
     And I click on "Learning Plans" "link" in the ".userprofile" "css_element"
     # Access the learners plan.
@@ -209,3 +204,88 @@ Feature: Verify capability accessanyplan.
     Then I should see "Program 1"
     And "Add linked evidence" "button" should not exist
     And "Remove selected links" "button" should not exist
+
+  Scenario: accessanyplan has precedence over plan template permissions
+    Given I log in as "admin"
+    When I navigate to "Manage templates" node in "Site administration > Learning Plans"
+    And I click on "Edit" "link" in the "Learning Plan (Default)" "table_row"
+    And I follow "Workflow"
+    And I click on "Custom workflow" "radio"
+    And I press "Advanced workflow settings"
+    And I set the field "viewmanager" to "Deny"
+    And I set the field "createmanager" to "Deny"
+    And I set the field "updatemanager" to "Deny"
+    And I press "Save changes"
+    Then I should see "Plan settings successfully updated"
+
+    # Admin can view and create plans.
+    When I navigate to "Browse list of users" node in "Site administration > Users"
+    And I follow "firstname1 lastname1"
+    And I click on "Learning Plans" "link" in the ".profile_tree" "css_element"
+    Then I should see "You are viewing firstname1 lastname1's plans."
+    And I should see "firstname1 lastname1's current and completed learning plans are shown below."
+    When I press "Create new learning plan"
+    And I set the field "Plan name" to "Learning Plan admin created"
+    And I press "Create plan"
+    Then I should see "Plan creation successful"
+    And I log out
+
+    # Manager 2 is not the learners manager but does have the totara/plan:accessanyplan capability so can view plans,
+    # even though the plan template has deny for manager.
+    When I log in as "manager2"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
+    And I follow "firstname1 lastname1"
+    And I click on "Learning Plans" "link" in the ".profile_tree" "css_element"
+    Then I should see "You are viewing firstname1 lastname1's plans."
+    And I should see "firstname1 lastname1's current and completed learning plans are shown below."
+    And I should not see "Nothing to display"
+    And I should see "learner1 Learning Plan"
+    And I should see "Learning Plan admin created"
+    And I log out
+
+    # Now remove the totara/plan:accessanyplan capability.
+    # The plans should not be visible as the plan template is set as deny for manager.
+    When the following "permission overrides" exist:
+      | capability                 | permission | role        | contextlevel | reference |
+      | totara/plan:accessanyplan  | Prohibit   | manager     | System       |           |
+    When I log in as "manager2"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
+    And I follow "firstname1 lastname1"
+    Then I should not see "Learning Plans"
+    And I log out
+
+    # Manager 3 is the learners manager but does not have totara/plan:accessanyplan capability.
+    # They should not be able to view plans.
+    # The plan template is set as deny for manager.
+    When I log in as "manager3"
+    And I click on "Team" in the totara menu
+    And I follow "firstname1 lastname1"
+    And I click on "Learning Plans" "link" in the ".profile_tree" "css_element"
+    Then I should see "You are viewing firstname1 lastname1's plans."
+    And I should see "firstname1 lastname1's current and completed learning plans are shown below."
+    And I should not see "Active Plans"
+    And I should not see "Unapproved Plans"
+    And I should not see "learner1 Learning Plan"
+    And I should not see "Learning Plan admin created"
+    And I log out
+
+    # Now add the totara/plan:accessanyplan capability.
+    # The plans should now be visible.
+    When the following "roles" exist:
+      | shortname   |
+      | planmanager |
+    And the following "role assigns" exist:
+      | user     | role        | contextlevel | reference |
+      | manager3 | planmanager | System       |           |
+    And the following "permission overrides" exist:
+      | capability                 | permission | role             | contextlevel | reference |
+      | totara/plan:accessanyplan  | Allow      | planmanager      | System       |           |
+    And I log in as "manager3"
+    And I click on "Team" in the totara menu
+    And I follow "firstname1 lastname1"
+    And I click on "Learning Plans" "link" in the ".profile_tree" "css_element"
+    Then I should see "You are viewing firstname1 lastname1's plans."
+    And I should see "firstname1 lastname1's current and completed learning plans are shown below."
+    And I should see "learner1 Learning Plan"
+    And I should see "Learning Plan admin created"
+    And I should not see "Nothing to display"

@@ -18,8 +18,7 @@ Feature: The course completion history records can be edited
 
   Scenario: The course completion history records can be created and edited
     # Completion editor list of users.
-    When I click on "Courses" in the totara menu
-    And I click on "Course One" "link"
+    When I am on "Course One" course homepage
     And I navigate to "Completion editor" node in "Course administration"
     Then I should see "FirstName1 LastName1"
 

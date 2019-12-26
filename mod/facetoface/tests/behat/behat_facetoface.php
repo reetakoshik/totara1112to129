@@ -215,7 +215,8 @@ class behat_facetoface extends behat_base {
     public function i_make_duplicates_of_seminar_notification($title) {
         \behat_hooks::set_step_readonly(false);
         global $DB;
-        $notifications = $DB->get_records('facetoface_notification', array('title' => $title));
+        $notifications = $DB->get_records_select('facetoface_notification',
+            $DB->sql_compare_text('title') . ' = :title', array('title' => $title));
         foreach ($notifications as $note) {
             $note->id = null;
             $DB->insert_record('facetoface_notification', $note);
@@ -328,7 +329,8 @@ class behat_facetoface extends behat_base {
      */
     public function i_visit_the_attendees_page_for_session_with_action($sessionid, $action){
         \behat_hooks::set_step_readonly(false);
-        $path = "/mod/facetoface/attendees.php?s={$sessionid}&action={$action}";
+        $page = $action . '.php';
+        $path = "/mod/facetoface/attendees/{$page}?s={$sessionid}";
         $this->getSession()->visit($this->locate_path($path));
         $this->wait_for_pending_js();
     }

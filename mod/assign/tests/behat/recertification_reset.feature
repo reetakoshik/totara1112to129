@@ -7,14 +7,14 @@ Feature: Learners can submit assignments again when certification is expired
   Background:
     Given I am on a totara site
     And the following "courses" exist:
-      | fullname | shortname | enablecompletion | completionstartonenrol |
-      | Course 1 | C1        | 1                | 1                      |
+      | fullname | shortname | enablecompletion |
+      | Course 1 | C1        | 1                |
     And the following "users" exist:
       | username | firstname | lastname | email |
       | student1 | Student | 1 | student1@example.com |
 
     And I log in as "admin"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I set self completion for "Course 1" in the "Miscellaneous" category
     And I turn editing mode on
     And I add a "Assignment" to section "1" and I fill the form with:
@@ -23,14 +23,14 @@ Feature: Learners can submit assignments again when certification is expired
       | assignsubmission_onlinetext_enabled | 1 |
       | assignsubmission_file_enabled | 0 |
 
-    And I click on "Certifications" in the totara menu
-    And I press "Create Certification"
+    And I navigate to "Manage certifications" node in "Site administration > Certifications"
+    And I press "Add new certification"
     And I set the following fields to these values:
         | Full name  | Test Certification |
         | Short name | tstcert            |
     And I press "Save changes"
 
-    And I click on "Content" "link"
+    And I switch to "Content" tab
     And I click on "addcontent_ce" "button" in the "#programcontent_ce" "css_element"
     And I click on "Miscellaneous" "link" in the "addmulticourse" "totaradialogue"
     And I click on "Course 1" "link" in the "addmulticourse" "totaradialogue"
@@ -57,8 +57,7 @@ Feature: Learners can submit assignments again when certification is expired
 
   Scenario: Add submission then lock it then reset certification and confirm that assignment submission is unlocked
     Given I log in as "student1"
-    And I click on "Courses" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test assignment name"
     And I press "Add submission"
     And I set the following fields to these values:
@@ -70,8 +69,7 @@ Feature: Learners can submit assignments again when certification is expired
     And I log out
 
     And I log in as "admin"
-    And I click on "Courses" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test assignment name"
     And I follow "View all submissions"
     And I click on "Edit" "link" in the "Student 1" "table_row"
@@ -84,8 +82,7 @@ Feature: Learners can submit assignments again when certification is expired
     And I log out
 
     And I log in as "student1"
-    And I click on "Courses" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test assignment name"
     And I press "Add submission"
     And I set the following fields to these values:

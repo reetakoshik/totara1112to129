@@ -84,6 +84,18 @@ if ($mform->is_cancelled()) {
     $scormdata->hidetoc = 3;
     $scormdata->reference = $package->zipfilename;
 
+    // The course fullname supports 255 characters, the scorm name only supports 255.
+    // We don't want to fail at this point as the course already exists.
+    // Trim the name if required to ensure it fits; it can always be changed later.
+    if (core_text::strlen($scormdata->name) > 255) {
+        // First up strip tags, any HTML will be removed. We intend to substr if required.
+        $scormdata->name = strip_tags($scormdata->name);
+        // Check if we need to reduce it further, if so then we just cut it off.
+        if (core_text::strlen($scormdata->name) > 255) {
+            $scormdata->name = core_text::substr($course->fullname, 0, 255);
+        }
+    }
+
     $scormconfig = get_config('scorm');
     foreach ($scormconfig as $k => $v) {
         if (!isset($scormdata->$k)) {

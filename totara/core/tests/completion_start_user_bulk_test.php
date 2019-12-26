@@ -63,7 +63,7 @@ class totara_core_completion_start_user_bulk_testcase extends advanced_testcase 
 
         $record2 = new stdClass();
         $record2->enablecompletion = 1;
-        $record2->completionstartonenrol = 0;
+        $record2->completionstartonenrol = 1;
         $this->course2 = $this->getDataGenerator()->create_course($record2);
 
         $record3 = new stdClass();

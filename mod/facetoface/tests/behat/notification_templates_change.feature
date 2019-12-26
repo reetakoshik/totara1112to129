@@ -40,12 +40,11 @@ Feature: Test notification templates update all activities
     And I should not see "Seminar booking confirmation: [facetofacename], [starttime]-[finishtime], [sessiondate]"
 
     # Check F2F activity notification now.
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Seminar TL-9052"
     When I navigate to "Notifications" node in "Seminar administration"
     Then I should see "TL-9052 booking cancellation"
-    And I should see "Inactive" in the "TL-9052 booking cancellation" "table_row"
+    And I should not see "Inactive" in the "TL-9052 booking cancellation" "table_row"
     And I should not see "Seminar booking cancellation"
 
     And I should see "TL-9052 booking confirmation: [facetofacename], [starttime]-[finishtime], [sessiondate]"
@@ -73,8 +72,7 @@ Feature: Test notification templates update all activities
     And I should not see "Seminar booking confirmation: [facetofacename], [starttime]-[finishtime], [sessiondate]"
 
     # Check F2F activity notification now.
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Seminar TL-9052"
     When I navigate to "Notifications" node in "Seminar administration"
     Then I should see "Seminar booking cancellation"
@@ -111,9 +109,7 @@ Feature: Test notification templates update all activities
     And I click on "Save changes" "button"
 
     # Check F2F activity notification now.
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name | Seminar TL-9052A |
     And I follow "Seminar TL-9052A"

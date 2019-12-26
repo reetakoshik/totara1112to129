@@ -1,12 +1,39 @@
 This files describes API changes for code that uses the audience API,
 information provided here is intended especially for developers.
 
-=== 11.3 ===
+=== 12.0 ===
 
 * Icon helpers are no longer used in the following templates, icon data is passed via context data:
 ** totara/cohort/templates/editing_ruleset.mustache
+* Removed deprecated function cohort_rule_form_html()
+* Removed deprecated classes:
+  * cohort_rule_sqlhandler_reportsto
+  * cohort_rule_sqlhandler_in_posorgfield
+  * cohort_rule_sqlhandler_in_posorgcustomfield
+  * cohort_rule_sqlhandler_date_posstarted
+  * cohort_rule_sqlhandler_date_postimevalidto
+  * cohort_rule_sqlhandler_completion_duration_program
+* Deprecated the following report builder display functions and replaced with display classes
+  * rb_source_cohort::rb_display_link_cohort_category(), please call totara_cohort\rb\display\cohort_category_link::display() instead.
+  * rb_source_cohort::rb_display_cohort_name_link(), please call totara_cohort\rb\display\cohort_name_link::display() instead.
+  * rb_source_cohort::rb_display_cohort_type(), please call totara_cohort\rb\display\cohort_type::display() instead.
+  * rb_source_cohort::rb_display_cohort_actions(), please call totara_cohort\rb\display\cohort_actions::display() instead.
+  * rb_source_cohort::rb_display_cohort_status(), please call totara_cohort\rb\display\cohort_status::display() instead.
+  * rb_source_cohort_associations::rb_display_associationtype(), please call totara_cohort\rb\display\cohort_association_type::display() instead.
+  * rb_source_cohort_associations::rb_display_associationnameiconlink(), please call totara_cohort\rb\display\cohort_association_name_icon_link::display() instead.
+  * rb_source_cohort_associations::cohort_association_delete_link().
+  * rb_source_cohort_associations::rb_display_associationactionsenrolled(), please call totara_cohort\rb\display\cohort_association_actions_enrolled::display() instead.
+  * rb_source_cohort_associations::rb_display_programviewduedatelink(), please call totara_cohort\rb\display\cohort_program_view_duedate_link::display() instead.
+  * rb_source_cohort_associations_visible::rb_display_associationtype(), please call totara_cohort\rb\display\cohort_association_type::display() instead.
+  * rb_source_cohort_associations_visible::rb_display_visibility_status(), please call totara_cohort\rb\display\cohort_visibility_status::display() instead.
+  * rb_source_cohort_associations_visible::rb_display_associationnameiconlink(), please call totara_cohort\rb\display\cohort_association_name_icon_link::display() instead.
+  * rb_source_cohort_associations_visible::rb_display_associationactionsvisible(), please call totara_cohort\rb\display\cohort_association_actions_visible::display() instead.
+  * rb_source_cohort_members::rb_display_cohort_name_link(), please call totara_cohort\rb\display\cohort_name_link::display() instead.
+  * rb_source_cohort_members::rb_display_cohort_type(), please call totara_cohort\rb\display\cohort_type::display() instead.
+  * rb_source_cohort_members::rb_display_cohort_actions(), please call totara_cohort\rb\display\cohort_actions::display() instead.
+  * rb_source_cohort_members::rb_display_cohort_status(), please call totara_cohort\rb\display\cohort_status::display() instead.
 
-=== 11.0 ===
+=== 11 ===
 
 * Converted CSS to LESS
 

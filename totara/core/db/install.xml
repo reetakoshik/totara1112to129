@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="totara/core/db" VERSION="20180304" COMMENT="XMLDB file for Moodle totara/core"
+<XMLDB PATH="totara/core/db" VERSION="20181101" COMMENT="XMLDB file for Moodle totara/core"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -191,12 +191,12 @@
         <FIELD NAME="url" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="classname" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="depth" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
-        <FIELD NAME="path" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="custom" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="depth" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Deprecated since Totara 12.0"/>
+        <FIELD NAME="path" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="Deprecated sicec Totara 12.0"/>
+        <FIELD NAME="custom" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Set to 1 for custom items and custom containers only"/>
         <FIELD NAME="customtitle" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="visibility" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="visibilityold" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Stores the last visibility state"/>
+        <FIELD NAME="visibilityold" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Intended for show/hide admin UI buttons"/>
         <FIELD NAME="targetattr" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
@@ -258,6 +258,21 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="contenthash" UNIQUE="true" FIELDS="contenthash"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="quickaccess_preferences" COMMENT="Stores user preferences for the quick access menu">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="value" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="quickaccesspref_user_uix" UNIQUE="false" FIELDS="userid"/>
+        <INDEX NAME="quickaccesspref_usenam_uix" UNIQUE="true" FIELDS="userid, name"/>
       </INDEXES>
     </TABLE>
   </TABLES>

@@ -340,7 +340,8 @@ Feature: Test category management actions
       | name | category | idnumber |
       | Cat 1 | 0 | CAT1 |
     And I log in as "admin"
-    And I navigate to "Courses > Add a category" in site administration
+    And I navigate to "Courses > Courses and categories" in site administration
+    And I click on "Create new category" "link"
     And I set the following fields to these values:
       | Category name | Test duplicate |
       | Category ID number | CAT1 |

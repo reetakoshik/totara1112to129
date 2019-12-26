@@ -21,51 +21,57 @@
  * @subpackage facetoface
  */
 
-require_once '../../config.php';
-require_once 'lib.php';
+require(__DIR__ . '/../../config.php');
+require_once($CFG->dirroot . '/mod/facetoface/lib.php');
+
+use \mod_facetoface\signup as signup;
+use \mod_facetoface\signup_helper as signup_helper;
+use \mod_facetoface\signup\state\booked;
+use \mod_facetoface\signup\state\waitlisted;
+use \mod_facetoface\signup\state\user_cancelled;
 
 $s  = required_param('s', PARAM_INT); // facetoface session ID
 $confirm           = optional_param('confirm', false, PARAM_BOOL);
 $backtoallsessions = optional_param('backtoallsessions', 0, PARAM_BOOL);
 
-list($session, $facetoface, $course, $cm, $context) = facetoface_get_env_session($s);
-if (!$session->allowcancellations) {
+$seminarevent = new \mod_facetoface\seminar_event($s);
+$seminar = $seminarevent->get_seminar();
+if (!$course = $DB->get_record('course', ['id' => $seminar->get_course()])) {
+    print_error('error:incorrectcourseid', 'facetoface');
+}
+$cm = $seminar->get_coursemodule();
+$context = context_module::instance($cm->id);
+
+if (!$signup = signup::create($USER->id, $seminarevent)) {
+    throw new coding_exception("No user with ID: {$USER->id} has signed-up for the Seminar event ID: {$seminarevent->get_id()}.");
+}
+
+// Check user's eligibility to cancel.
+$currentstate = $signup->get_state();
+if (!$currentstate->can_switch(signup\state\user_cancelled::class)) {
     print_error('error:cancellationsnotallowed', 'facetoface');
 }
+
+// User might have an ability to render the settings_navigation, and with settings_navigation, it
+// requires the url of a page, therefore. PAGE should set url here first.
+$PAGE->set_url('/mod/facetoface/cancelsignup.php', array('s' => $s, 'backtoallsessions' => $backtoallsessions, 'confirm' => $confirm));
 
 require_login($course, false, $cm);
 require_capability('mod/facetoface:view', $context);
 
-$userisinwaitlist = facetoface_is_user_on_waitlist($session, $USER->id);
-$pagetitle = format_string($facetoface->name);
+$currentstate = $signup->get_state();
+$userisinwaitlist = $currentstate instanceof waitlisted;
+$pagetitle = format_string($seminar->get_name());
 
-$PAGE->set_url('/mod/facetoface/cancelsignup.php', array('s' => $s, 'backtoallsessions' => $backtoallsessions, 'confirm' => $confirm));
+$seminarrenderer = $PAGE->get_renderer('mod_facetoface');
+
 $PAGE->set_title($pagetitle);
 $PAGE->set_heading($course->fullname);
 
 if ($backtoallsessions) {
-    $returnurl = new moodle_url('/mod/facetoface/view.php', array('f' => $facetoface->id));
+    $returnurl = new moodle_url('/mod/facetoface/view.php', array('f' => $seminar->get_id()));
 } else {
     $returnurl = new moodle_url('/course/view.php', array('id' => $course->id));
-}
-
-// Add booking information.
-$session->bookedsession = null;
-if ($booked = facetoface_get_user_submissions($facetoface->id,
-    $USER->id, MDL_F2F_STATUS_REQUESTED, MDL_F2F_STATUS_BOOKED, $session->id)) {
-    $session->bookedsession = reset($booked);
-}
-
-$viewattendees = has_capability('mod/facetoface:viewattendees', $context);
-$multisessionid = ($facetoface->multiplesessions ? $session->id : null);
-$signedup = facetoface_check_signup($facetoface->id, $multisessionid);
-
-if (!$signedup) {
-    print_error('notsignedup', 'facetoface', $returnurl);
-}
-
-if (!facetoface_allow_user_cancellation($session)) {
-    print_error('notallowedtocancel', 'facetoface', $returnurl);
 }
 
 $cancellation_note = facetoface_get_attendee($s, $USER->id);
@@ -83,56 +89,48 @@ if ($fromform = $mform->get_data()) { // Form submitted.
         print_error('error:unknownbuttonclicked', 'facetoface', $returnurl);
     }
 
-    $forcecancel = false;
-    $timenow = time();
-    $bookedsession = facetoface_get_user_submissions($facetoface->id, $USER->id, MDL_F2F_STATUS_WAITLISTED, MDL_F2F_STATUS_WAITLISTED, $session->id);
-    if (!empty($bookedsession) && facetoface_has_session_started($session, $timenow)) {
-        $forcecancel = true;
-    }
-
-    $errorstr = '';
-    if (facetoface_user_cancel($session, false, $forcecancel, $errorstr, '')) {
-        $signup = facetoface_get_attendee($session->id, $USER->id);
-        $fromform->id = $signup->submissionid;
+    // Attempt to switch the signup state.
+    if (signup_helper::can_user_cancel($signup)) {
+        signup_helper::user_cancel($signup);
+        // Update cancellation custom fields.
+        $fromform->id = $signup->get_id();
         customfield_save_data($fromform, 'facetofacecancellation', 'facetoface_cancellation');
 
-        $strmessage = $userisinwaitlist ? 'waitlistcancelled' : 'bookingcancelled';
-        $message = get_string($strmessage, 'facetoface');
-
-        if ($session->mintimestart) {
-            // Users in waitlist should not receive a cancellation email.
-            if ($userisinwaitlist === false) {
-                $error = facetoface_send_cancellation_notice($facetoface, $session, $USER->id);
-                if (empty($error)) {
-                    if ($session->mintimestart && isset($facetoface->cancellationinstrmngr) && !empty($facetoface->cancellationstrmngr)) {
-                        $message .= html_writer::empty_tag('br') . html_writer::empty_tag('br') . get_string('cancellationsentmgr', 'facetoface');
-                    } else {
-                        $msg = ($CFG->facetoface_notificationdisable ? 'cancellationnotsent' : 'cancellationsent');
-                        $message .= html_writer::empty_tag('br') . html_writer::empty_tag('br') . get_string($msg, 'facetoface');
-                    }
+        // Page notification box.
+        $message = $userisinwaitlist ? get_string('waitlistcancelled', 'facetoface')
+            : get_string('bookingcancelled', 'facetoface');
+        if ($userisinwaitlist === false) {
+            $error = \mod_facetoface\notice_sender::signup_cancellation($signup);
+            if (empty($error)) {
+                $minstart = $seminarevent->get_mintimestart();
+                if ($minstart) {
+                    $message .= html_writer::empty_tag('br') . html_writer::empty_tag('br') . get_string('cancellationsentmgr', 'facetoface');
                 } else {
-                    print_error($error, 'facetoface');
+                    $msg = ($CFG->facetoface_notificationdisable ? 'cancellationnotsent' : 'cancellationsent');
+                    $message .= html_writer::empty_tag('br') . html_writer::empty_tag('br') . get_string($msg, 'facetoface');
                 }
+            } else {
+                print_error($error, 'facetoface');
             }
         }
 
         totara_set_notification($message, $returnurl, array('class' => 'notifysuccess'));
+    } else {
+        $failures = $signup->get_failures(user_cancelled::class);
+        throw new coding_exception("Could not cancel user signup.", implode("\n", $failures));
     }
-    else {
-        print_error($errorstr);
-    }
-
-    redirect($returnurl);
 }
+
 echo $OUTPUT->header();
 
 $strheading = $userisinwaitlist ? 'cancelwaitlistfor' : 'cancelbookingfor';
-$heading = get_string($strheading, 'facetoface', $facetoface->name);
+$heading = get_string($strheading, 'facetoface', $seminar->get_name());
 
 echo $OUTPUT->box_start();
 echo $OUTPUT->heading($heading);
 
-echo facetoface_print_session($session, $viewattendees);
+$viewattendees = has_capability('mod/facetoface:viewattendees', $context);
+echo $seminarrenderer->render_seminar_event($seminarevent, $viewattendees);
 $mform->display();
 
 echo $OUTPUT->box_end();

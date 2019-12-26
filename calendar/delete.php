@@ -36,7 +36,7 @@ $repeats = optional_param('repeats', false, PARAM_BOOL);
 $courseid = optional_param('course', 0, PARAM_INT);
 
 $PAGE->set_url('/calendar/delete.php', array('id'=>$eventid));
-$PAGE->set_totara_menu_selected('calendar');
+$PAGE->set_totara_menu_selected('\totara_core\totara\menu\calendar');
 
 if(!$site = get_site()) {
     redirect(new moodle_url('/admin/index.php'));

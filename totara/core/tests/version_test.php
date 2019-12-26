@@ -34,7 +34,7 @@ class totara_core_version_testcase extends advanced_testcase {
         require("$CFG->dirroot/version.php");
 
         // The following test may be updated only when merging new release from Moodle!
-        $this->assertSame(2016120509.00, $version, 'Hands off the main version!!!');
+        $this->assertSame(2017051509.00, $version, 'Hands off the main version!!!');
     }
 }
 

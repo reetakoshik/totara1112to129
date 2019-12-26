@@ -25,10 +25,7 @@ namespace tool_sitepolicy\totara\menu;
 
 defined('MOODLE_INTERNAL') || die();
 
-use \totara_core\totara\menu\item as item;
-use \totara_core\totara\menu\menu as menu;
-
-class userpolicy extends item {
+class userpolicy extends \totara_core\totara\menu\item {
 
     protected function get_default_title() {
         return get_string('previewconsents', 'tool_sitepolicy');
@@ -43,10 +40,6 @@ class userpolicy extends item {
         return 70000;
     }
 
-    public function get_default_visibility() {
-        return menu::SHOW_WHEN_REQUIRED;
-    }
-
     public function is_disabled() {
         global $CFG;
         if (!empty($CFG->enablesitepolicies)) {
@@ -58,6 +51,6 @@ class userpolicy extends item {
     }
 
     protected function get_default_parent() {
-        return '\totara_core\totara\menu\home';
+        return '\totara_core\totara\menu\unused';
     }
 }

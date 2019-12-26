@@ -26,9 +26,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 class rb_source_course_completion extends rb_base_source {
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
+    use \core_course\rb\source\report_trait;
+    use \core_tag\rb\source\report_trait;
+    use \totara_job\rb\source\report_trait;
+    use \totara_cohort\rb\source\report_trait;
 
     public function __construct($groupid, rb_global_restriction_set $globalrestrictionset = null) {
         if ($groupid instanceof rb_global_restriction_set) {
@@ -50,6 +51,7 @@ class rb_source_course_completion extends rb_base_source {
         $this->defaultfilters = $this->define_defaultfilters();
         $this->requiredcolumns = $this->define_requiredcolumns();
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_course_completion');
+        $this->usedcomponents[] = 'totara_cohort';
 
         parent::__construct();
     }
@@ -128,14 +130,14 @@ class rb_source_course_completion extends rb_base_source {
         );
 
         // include some standard joins
-        $this->add_user_table_to_joinlist($joinlist, 'base', 'userid');
-        $this->add_course_table_to_joinlist($joinlist, 'base', 'course', 'INNER');
+        $this->add_core_user_tables($joinlist, 'base', 'userid');
+        $this->add_core_course_tables($joinlist, 'base', 'course', 'INNER');
         // requires the course join
-        $this->add_course_category_table_to_joinlist($joinlist,
+        $this->add_core_course_category_tables($joinlist,
             'course', 'category');
-        $this->add_job_assignment_tables_to_joinlist($joinlist, 'base', 'userid');
-        $this->add_core_tag_tables_to_joinlist('core', 'course', $joinlist, 'base', 'course');
-        $this->add_cohort_course_tables_to_joinlist($joinlist, 'base', 'course');
+        $this->add_totara_job_tables($joinlist, 'base', 'userid');
+        $this->add_core_tag_tables('core', 'course', $joinlist, 'base', 'course');
+        $this->add_totara_cohort_course_tables($joinlist, 'base', 'course');
 
         return $joinlist;
     }
@@ -148,7 +150,7 @@ class rb_source_course_completion extends rb_base_source {
                 'status',
                 get_string('completionstatus', 'rb_source_course_completion'),
                 'base.status',
-                array('displayfunc' => 'completion_status')
+                array('displayfunc' => 'course_completion_status')
             ),
             new rb_column_option(
                 'course_completion',
@@ -192,6 +194,17 @@ class rb_source_course_completion extends rb_base_source {
                     'displayfunc' => 'yes_or_no',
                     'dbdatatype' => 'boolean',
                     'defaultheading' => get_string('iscomplete', 'rb_source_course_completion'),
+                )
+            ),
+            // RPL note column, will contain the note provided when manually awarding RPL completion,
+            // or will be empty if not an RPL completion or if no note was provided.
+            new rb_column_option(
+                'course_completion',
+                'rplnote',
+                get_string('rplnote', 'rb_source_course_completion'),
+                'rpl',
+                array(
+                    'displayfunc' => 'plaintext',
                 )
             ),
             new rb_column_option(
@@ -239,9 +252,9 @@ class rb_source_course_completion extends rb_base_source {
             ),
             new rb_column_option(
                 'course_completion',
-                'enrolltype',
+                'enrolmenttype',
                 get_string('courseenroltypes', 'totara_reportbuilder'),
-                "(SELECT " . $DB->sql_group_concat('e.enrol', ', ', 'e.enrol ASC') . "
+                "(SELECT " . $DB->sql_group_concat('e.enrol', '|', 'e.enrol ASC') . "
                     FROM {enrol} e
                     JOIN {user_enrolments} ue ON ue.enrolid = e.id
                    WHERE ue.userid = base.userid AND e.courseid = base.course)",
@@ -277,7 +290,8 @@ class rb_source_course_completion extends rb_base_source {
                 'course_completion',
                 'organisationid',
                 get_string('completionorgid', 'rb_source_course_completion'),
-                'base.organisationid'
+                'base.organisationid',
+                array('displayfunc' => 'integer')
             ),
             new rb_column_option(
                 'course_completion',
@@ -300,13 +314,15 @@ class rb_source_course_completion extends rb_base_source {
                 'completion_organisation.fullname',
                 array('joins' => 'completion_organisation',
                       'dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'format_string')
             ),
             new rb_column_option(
                 'course_completion',
                 'positionid',
                 get_string('completionposid', 'rb_source_course_completion'),
-                'base.positionid'
+                'base.positionid',
+                array('displayfunc' => 'integer')
             ),
             new rb_column_option(
                 'course_completion',
@@ -329,7 +345,8 @@ class rb_source_course_completion extends rb_base_source {
                 'completion_position.fullname',
                 array('joins' => 'completion_position',
                       'dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'format_string')
             ),
             new rb_column_option(
                 'course_completion',
@@ -352,7 +369,8 @@ class rb_source_course_completion extends rb_base_source {
                 'course_completion',
                 'passgrade',
                 get_string('passgrade', 'rb_source_course_completion'),
-                '(((criteria.gradepass - grade_items.grademin) / (grade_items.grademax - grade_items.grademin)) * 100)',
+                'CASE WHEN grade_items.grademax = 0 THEN NULL
+                      ELSE (((criteria.gradepass - grade_items.grademin) / (grade_items.grademax - grade_items.grademin)) * 100) END',
                 array(
                     'joins' => ['criteria', 'grade_items'],
                     'displayfunc' => 'percent',
@@ -366,7 +384,7 @@ class rb_source_course_completion extends rb_base_source {
                       ELSE grade_grades.finalgrade END',
                 array(
                     'joins' => array('criteria', 'grade_grades'),
-                    'displayfunc' => 'grade_string',
+                    'displayfunc' => 'course_grade_string',
                     'extrafields' => array(
                         'gradepass' => 'criteria.gradepass',
                         'grademax' => 'grade_items.grademax',
@@ -400,12 +418,12 @@ class rb_source_course_completion extends rb_base_source {
         );
 
         // include some standard columns
-        $this->add_user_fields_to_columns($columnoptions);
-        $this->add_course_fields_to_columns($columnoptions);
-        $this->add_course_category_fields_to_columns($columnoptions);
-        $this->add_job_assignment_fields_to_columns($columnoptions);
-        $this->add_core_tag_fields_to_columns('core', 'course', $columnoptions);
-        $this->add_cohort_course_fields_to_columns($columnoptions);
+        $this->add_core_user_columns($columnoptions);
+        $this->add_core_course_columns($columnoptions);
+        $this->add_core_course_category_columns($columnoptions);
+        $this->add_totara_job_columns($columnoptions);
+        $this->add_core_tag_columns('core', 'course', $columnoptions);
+        $this->add_totara_cohort_course_columns($columnoptions);
 
         return $columnoptions;
     }
@@ -593,22 +611,27 @@ class rb_source_course_completion extends rb_base_source {
             ),
             new rb_filter_option(
                 'course_completion',
-                'enrolltype',
+                'enrolmenttype',
                 get_string('courseenroltypes', 'totara_reportbuilder'),
-                'text',
+                'multicheck',
                 array(
                     'cachingcompatible' => false, // Current filter code is not compatible with aggregated columns.
+                    'concat' => true,
+                    'selectfunc' => 'enrolment_types_list',
+                    'attributes' => rb_filter_option::select_width_limiter(),
+                    'simplemode' => false,
+                    'showcounts' => false
                 )
             ),
         );
 
         // include some standard filters
-        $this->add_user_fields_to_filters($filteroptions);
-        $this->add_course_fields_to_filters($filteroptions);
-        $this->add_course_category_fields_to_filters($filteroptions);
-        $this->add_job_assignment_fields_to_filters($filteroptions, 'base', 'userid');
-        $this->add_core_tag_fields_to_filters('core', 'course', $filteroptions);
-        $this->add_cohort_course_fields_to_filters($filteroptions);
+        $this->add_core_user_filters($filteroptions);
+        $this->add_core_course_filters($filteroptions);
+        $this->add_core_course_category_filters($filteroptions);
+        $this->add_totara_job_filters($filteroptions, 'base', 'userid');
+        $this->add_core_tag_filters('core', 'course', $filteroptions);
+        $this->add_totara_cohort_course_filters($filteroptions);
 
         return $filteroptions;
     }
@@ -762,7 +785,17 @@ class rb_source_course_completion extends rb_base_source {
     //
     //
 
+    /**
+     * Display for course completion status
+     *
+     * @deprecated Since Totara 12.0
+     * @param $status
+     * @param $row
+     * @param $isexport
+     * @return string
+     */
     function rb_display_completion_status($status, $row, $isexport) {
+        debugging('rb_source_course_completion::rb_display_completion_status has been deprecated since Totara 12.0. Use course_completion_status::display', DEBUG_DEVELOPER);
         global $CFG;
         require_once($CFG->dirroot.'/completion/completion_completion.php');
         global $COMPLETION_STATUS;
@@ -778,7 +811,17 @@ class rb_source_course_completion extends rb_base_source {
         }
     }
 
+    /**
+     * Display for course progress
+     *
+     * @deprecated Since Totara 12.0
+     * @param $status
+     * @param $row
+     * @param $isexport
+     * @return mixed|string
+     */
     function rb_display_course_progress($status, $row, $isexport) {
+        debugging('rb_source_course_completion::rb_display_course_progress has been deprecated since Totara 12.0', DEBUG_DEVELOPER);
         if ($isexport) {
             global $PAGE;
 
@@ -819,5 +862,29 @@ class rb_source_course_completion extends rb_base_source {
         }
         return $statuslist;
     }
+
+    /**
+     * Get all the enabled enrolment types for the filter
+     *
+     * @return array
+     */
+    function rb_filter_enrolment_types_list() : array {
+        global $CFG;
+        require_once($CFG->libdir . '/enrollib.php');
+
+        $types = [];
+        $plugins = enrol_get_plugins(true);
+
+        foreach ($plugins as $key => $plugin) {
+            if ($key == 'guest') {
+                continue;
+            }
+
+            $types[$key] = $plugin->get_instance_name(null);
+        }
+
+        return $types;
+    }
+
 } // end of rb_source_course_completion class
 

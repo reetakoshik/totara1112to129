@@ -8,6 +8,8 @@ redirect_if_major_upgrade_required();
 $section = required_param('section', PARAM_SAFEDIR);
 $return = optional_param('return','', PARAM_ALPHA);
 $adminediting = optional_param('adminedit', -1, PARAM_BOOL);
+$removefrommenu = optional_param('removefrommenu', 0, PARAM_INT);
+$addtomenu = optional_param('addtomenu', '', PARAM_ALPHANUMEXT);
 
 /// no guest autologin
 require_login(0, false);
@@ -41,17 +43,39 @@ if (!($settingspage->check_access())) {
     die;
 }
 
+// Totara: Remove from quick access menu
+if (!empty($removefrommenu) && confirm_sesskey()) {
+    \totara_core\quickaccessmenu\helper::remove_item($USER->id, $settingspage->name);
+    redirect($PAGE->url, get_string('quickaccessmenu:success:itemremoved', 'totara_core'), null, \core\output\notification::NOTIFY_SUCCESS);
+}
+
+// Totara: Add to quick access menu
+if (!empty($addtomenu) && confirm_sesskey()) {
+    if ($addtomenu === '-1') {
+        $newgroup = \totara_core\quickaccessmenu\group::create_group(null, $USER->id);
+        \totara_core\quickaccessmenu\helper::add_item($USER->id, $settingspage->name, $newgroup);
+    } else {
+        $newgroup = \totara_core\quickaccessmenu\group::get($addtomenu, $USER->id);
+        \totara_core\quickaccessmenu\helper::add_item($USER->id, $settingspage->name, $newgroup);
+    }
+    redirect($PAGE->url, get_string('quickaccessmenu:success:itemadded', 'totara_core'), null, \core\output\notification::NOTIFY_SUCCESS);
+}
+
 /// WRITING SUBMITTED DATA (IF ANY) -------------------------------------------------------------------------------
 
 $statusmsg = '';
 $errormsg  = '';
 
 if ($data = data_submitted() and confirm_sesskey()) {
-    if (admin_write_settings($data)) {
-        redirect($PAGE->url, get_string('changessaved'), null, \core\output\notification::NOTIFY_SUCCESS);
-    }
 
+    $count = admin_write_settings($data);
+    // Regardless of whether any setting change was written (a positive count), check validation errors for those that didn't.
     if (empty($adminroot->errors)) {
+        // No errors. Did we change any setting? If so, then redirect with success.
+        if ($count) {
+            redirect($PAGE->url, get_string('changessaved'), null, \core\output\notification::NOTIFY_SUCCESS);
+        }
+        // We didn't change a setting.
         switch ($return) {
             case 'site': redirect("$CFG->wwwroot/");
             case 'admin': redirect("$CFG->wwwroot/$CFG->admin/");
@@ -121,6 +145,7 @@ if (empty($SITE->fullname)) {
     echo $OUTPUT->render_from_template('core_admin/settings', $context);
 
 } else {
+    $buttonhtml = '';
     if ($PAGE->user_allowed_editing()) {
         $url = clone($PAGE->url);
         if ($PAGE->user_is_editing()) {
@@ -130,9 +155,40 @@ if (empty($SITE->fullname)) {
             $caption = get_string('blocksediton');
             $url->param('adminedit', 'on');
         }
-        $buttons = $OUTPUT->single_button($url, $caption, 'get');
-        $PAGE->set_button($buttons);
+        $buttonhtml .= $OUTPUT->single_button($url, $caption, 'get');
     }
+
+    // Totara: add quickaccess menu controls.
+    $systemcontext = context_system::instance();
+    $caneditquickaccess = has_capability('totara/core:editownquickaccessmenu', $systemcontext);
+
+    if ($caneditquickaccess) {
+        // Is this part in the admin menu already?
+        $inmenu = \totara_core\quickaccessmenu\helper::item_exists_in_user_menu($USER->id, $settingspage->name);
+
+        $url = clone($PAGE->url);
+        if ($inmenu) {
+            $url = new moodle_url($PAGE->url, array('removefrommenu' => '1', 'sesskey' => sesskey()));
+            $buttonhtml .= $OUTPUT->single_button($url, get_string('quickaccessmenu:removefrommenu', 'totara_core'), 'post');
+        } else {
+            // Get quickaccess groups
+            $groups = \totara_core\quickaccessmenu\group::get_group_strings($USER->id, 25);
+            if (empty($groups)) {
+                $url = new moodle_url($PAGE->url, array('addtomenu' => '-1', 'sesskey' => sesskey()));
+                $buttonhtml .= $OUTPUT->single_button($url, get_string('quickaccessmenu:addtomenu', 'totara_core'), 'post');
+            } else {
+                // Add 'Unititled' group to the selection.
+                $groups['-1'] = get_string('quickaccessmenu:createnewgroup', 'totara_core');
+
+                $singleselect = new \single_select($url, 'addtomenu', $groups, '', array('' => get_string('quickaccessmenu:addtomenu', 'totara_core')));
+                $singleselect->method = 'post';
+                $singleselect->class = $singleselect->class . ' addtomenu';
+                $buttonhtml .= $OUTPUT->render($singleselect);
+            }
+        }
+    }
+
+    $PAGE->set_button($buttonhtml);
 
     $visiblepathtosection = array_reverse($settingspage->visiblepath);
 

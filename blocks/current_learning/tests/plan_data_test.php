@@ -42,11 +42,9 @@ class block_current_learning_plan_data_testcase extends block_current_learning_t
         $this->generator = null;
         $this->plan_generator = null;
         $this->program_generator = null;
-        $this->user1 = null;
-        $this->course1 = null;
-        $this->course2 = null;
-        $this->program1 = null;
-        $this->program2 = null;
+        $this->user1 = $this->user2 = null;
+        $this->course1 = $this->course2 = null;
+        $this->program1 = $this->program2 = null;
         $this->planrecord1 = null;
         parent::tearDown();
     }

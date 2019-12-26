@@ -5,6 +5,7 @@ namespace GoLearningZone\Pages;
 use GoLearningZone\Traits\Theme as ThemeTrait;
 use GoLearningZone\Settings\LoginPage as LoginPageSettings;
 use GoLearningZone\Settings\Theme as ThemeSettings;
+use GoLearningZone\Settings\Footer as FooterSettings;
 
 class Login extends Base
 {
@@ -17,8 +18,15 @@ class Login extends Base
         $params = $this->getDefaultPageValues() + [
             'logo'       => $this->getSettingFile(LoginPageSettings::LOGO_IMAGE),
             'background' => $this->getBackground(),
-            'color'      => $this->getSettingValue(ThemeSettings::COLOR),
-        ];
+            'themecolor'      => $this->getSettingValue(ThemeSettings::COLOR),
+            'logo-link' => $this->getSettingFile(FooterSettings::LOGO_IMAGE), 
+                'fb-link'   => $this->getSettingValue(FooterSettings::FACEBOOK), 
+                'tw-link'   => $this->getSettingValue(FooterSettings::TWITTER), 
+                'yt-link'   => $this->getSettingValue(FooterSettings::YOUTUBE), 
+                'li-link'   => $this->getSettingValue(FooterSettings::LINKEDIN),
+                'color'     => $this->getSettingValue(FooterSettings::COLOR),
+                'right_to_left' => right_to_left()
+        ];//$this->getSettingValue(FooterSettings::COLOR)
 
         return $this->renderer->render_from_template($template, $params);
     }    

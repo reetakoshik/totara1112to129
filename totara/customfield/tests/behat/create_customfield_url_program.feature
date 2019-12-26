@@ -47,7 +47,7 @@ Feature: Administrators can add a custom URL field to complete during program cr
     And I press "Save changes"
     Then I should see "Custom URL Field 1"
 
-    When I navigate to "Manage programs" node in "Site administration > Courses"
+    When I navigate to "Manage programs" node in "Site administration > Programs"
     And I press "Add a new program"
     Then I should see "Create new program"
 
@@ -73,7 +73,7 @@ Feature: Administrators can add a custom URL field to complete during program cr
     And I press "Save changes"
     Then I should see "Custom URL Field 1"
 
-    When I navigate to "Manage programs" node in "Site administration > Courses"
+    When I navigate to "Manage programs" node in "Site administration > Programs"
     And I press "Add a new program"
     Then I should see "Create new program"
 
@@ -149,7 +149,7 @@ Feature: Administrators can add a custom URL field to complete during program cr
     And I press "Save changes"
     Then I should see "Custom URL Field 3"
 
-    When I navigate to "Manage programs" node in "Site administration > Courses"
+    When I navigate to "Manage programs" node in "Site administration > Programs"
     And I press "Add a new program"
     Then I should see "Create new program"
 

@@ -1,0 +1,75 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template totara_core/nav_sub
+
+    Creates the totara sub nav.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * data-tw-totaraNav-hasChildren: Has child items
+    * data-tw-totaraNav-item: Menu item
+    * data-tw-totaraNav-chevron: Used to dynamically add chevron
+
+    Context variables required for this template:
+    * subnav: list of items
+    * subnav -> haschildren: Has sub list items
+    * subnav -> class_name: Identifier for this node
+    * subnav -> class_isfirst: First node
+    * subnav -> class_islast: Last node
+    * subnav -> class_isselected: Is current section
+    * subnav -> class_child_isselected: Child item is current section
+    * subnav -> target: _self or _blank
+    * subnav -> url: section URL
+    * subnav -> linktext: Section text
+    * subnav -> external_link -> Bool, has external link
+    * subnav -> external_link -> external_link_icon: New window icon
+
+}}
+
+<nav class="totaraNav_sub">
+    <div class="container-fluid">
+        <ul class="totaraNav_sub--list" role="menubar">
+            {{#subnav}}{{!
+          }}<li id="{{class_name}}"
+                class="totaraNav_sub--list_item
+                {{#haschildren}} totaraNav_sub--list_item_hasChildren{{/haschildren}}
+                {{^haschildren}}{{#external_link}} totaraNav_sub--list_item_externalLink{{/external_link}}{{/haschildren}}
+                {{#class_isselected}} totaraNav_sub--list_item_selected{{/class_isselected}}
+                {{#class_child_isselected}} totaraNav_sub--list_item_childSelected{{/class_child_isselected}}"
+                 data-tw-totaraNav-item="true"
+                {{#haschildren}} data-tw-totaraNav-hasChildren="true"{{/haschildren}}>
+                <a href="{{url}}" class="totaraNav_sub--list_item_link" role="menuitem" tabindex="0" target="{{target}}"
+                    {{#haschildren}} aria-haspopup="true" aria-expanded="false"{{/haschildren}}>
+                    <div class="totaraNav--expand_indent" {{#haschildren}}data-tw-totaraNav-chevron=""{{/haschildren}}></div>{{!
+                  }}<div class="totaraNav_sub--list_item_label">
+                        {{{linktext}}}
+                        {{^haschildren}}{{#external_link}}
+                            {{{external_link_icon}}}
+                        {{/external_link}}{{/haschildren}}
+                    </div>
+                </a>
+                {{#haschildren}}{{> totara_core/nav_expand }}{{/haschildren}}
+            </li>{{!
+          }}{{/subnav}}
+        </ul>
+    </div>
+</nav>

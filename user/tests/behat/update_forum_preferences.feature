@@ -15,7 +15,7 @@ Feature: Update user forum preferences
   Scenario: User with uppercase letters in his username can update his forum preferences
     # We can't login directly with username containing uppercase
     Given I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     Then I should see "User One"
     And I should see "User Two"
 

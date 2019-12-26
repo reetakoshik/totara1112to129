@@ -1,0 +1,204 @@
+// This file is part of Totara LMS
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @package   theme_roots
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Kevin Hottinger <kevin.hottinger@totaralearning.com>
+
+@addBlockPopoverContent-color_neutral_1: @totara_style-color_neutral_1;
+@addBlockPopoverContent-color_theme_1: @totara_style-color_theme_1;
+@addBlockPopoverContent-color_focus: @totara_style-color_neutral_3;
+@addBlockPopoverContent-font_heading_x_small_size: @totara_style-font_heading_x_small_size;
+@addBlockPopoverContent-font_heading_small_size: @totara_style-font_heading_small_size;
+@addBlockPopoverContent-font_heading_large_size: @totara_style-font_heading_large_size;
+@addBlockPopoverContent-spacing_small: @totara_style-spacing_small;
+@addBlockPopoverContent-spacing_medium: @totara_style-spacing_medium;
+@addBlockPopoverContent-spacing_xx_large: @totara_style-spacing_xx_large;
+@addBlockPopoverContent-screen_md_min: @totara_style-screen_md_min;
+
+/*!rtl:begin:ignore*/
+.block_addblock {
+    border: 0;
+    box-shadow: unset;
+    margin: 0;
+
+    .popover {
+        max-width: 302px;
+        padding: 0;
+        right: unset;
+
+        .popover-content {
+            padding: 0;
+        }
+    }
+}
+/*!rtl:end:ignore*/
+
+.addBlock {
+    text-align: center;
+
+    &--trigger {
+        background: @addBlockPopoverContent-color_theme_1;
+        border-color: @addBlockPopoverContent-color_theme_1;
+        border-radius: 20px;
+        color: @addBlockPopoverContent-color_neutral_1;
+        font-size: @addBlockPopoverContent-font_heading_large_size;
+        line-height: 1;
+        min-width: 35px;
+        outline: 0;
+        padding: 3px 5px 1px;
+        text-align: center;
+
+        &:active:hover,
+        &:focus,
+        &:hover {
+            background: @addBlockPopoverContent-color_theme_1;
+            border-color: @addBlockPopoverContent-color_theme_1;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+            color: @addBlockPopoverContent-color_neutral_1;
+            outline: 0;
+        }
+
+        &:active:hover {
+            box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16), 0 3px 6px 0 rgba(0, 0, 0, 0.23);
+        }
+
+        .flex-icon {
+            vertical-align: top;
+            width: auto;
+        }
+
+    }
+}
+
+// Needed to overwrite defaults
+.block .addBlockPopover {
+    height: 250px;
+    overflow: hidden;
+    padding: @addBlockPopoverContent-spacing_small;
+    width: 250px;
+
+    &--close {
+        .totara_style-body_medium;
+        cursor: pointer;
+        font-size: @addBlockPopoverContent-font_heading_small_size;
+        height: @addBlockPopoverContent-spacing_xx_large;
+        position: absolute;
+        right: 0;
+        text-align: right;
+        top: 0;
+        width: @addBlockPopoverContent-spacing_xx_large;
+
+        .flex-icon {
+            padding: @addBlockPopoverContent-spacing_small @addBlockPopoverContent-spacing_small 0 0;
+        }
+
+        // Needed to overwrite defaults
+        /* stylelint-disable declaration-no-important */
+        .ft-state-danger {
+            color: @totara_style-color_neutral_5 !important;
+        }
+    }
+
+    &--heading {
+        h2 {
+            .totara_style-heading_x_small;
+            padding-top: @addBlockPopoverContent-spacing_small;
+        }
+    }
+
+    &--loading {
+        display: none;
+    }
+
+    &--overlay {
+        &::after {
+            background: @addBlockPopoverContent-color_neutral_1;
+            content: '';
+            height: 100%;
+            left: 1%;
+            opacity: .6;
+            position: absolute;
+            top: 0;
+            width: 98%;
+        }
+
+        .addBlockPopover--loading {
+            display: block;
+            position: absolute;
+            text-align: center;
+            top: 50%;
+            width: 100%;
+            z-index: 2;
+        }
+    }
+
+    &--results {
+        overflow-y: auto;
+        margin: @addBlockPopoverContent-spacing_small 0;
+        max-height: 140px;
+
+        &_list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            position: relative;
+
+            &_item {
+                a {
+                    display: block;
+                    padding: @addBlockPopoverContent-spacing_small;
+
+                    &:focus,
+                    &:hover {
+                        background: @addBlockPopoverContent-color_focus;
+                        outline: none;
+                        text-decoration: none;
+                    }
+                }
+
+                &:last-child {
+                    padding-bottom: @addBlockPopoverContent-spacing_medium;
+                }
+            }
+        }
+    }
+
+    &--search {
+        font-size: @addBlockPopoverContent-font_heading_x_small_size;
+        position: relative;
+
+        .flex-icon {
+            .totara_style-textInput-Icon;
+        }
+
+        input[type="text"] {
+            .totara_style-textInput;
+            .totara_style-textInput-withIcon;
+            width: 100%;
+        }
+    }
+}
+
+@media (min-width: @addBlockPopoverContent-screen_md_min) {
+    .block .addBlockPopover {
+        height: 300px;
+        width: 300px;
+
+        &--results {
+            max-height: 190px;
+        }
+    }
+}

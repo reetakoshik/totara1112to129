@@ -331,7 +331,6 @@ if ($perpage) {
 $urlparams += $searchcriteria;
 $urlparams['viewtype'] = $viewtype;
 
-$PAGE->set_pagelayout('coursecategory');
 $programrenderer = $PAGE->get_renderer('totara_program');
 
 if (can_edit_in_category()) {
@@ -342,7 +341,7 @@ if (can_edit_in_category()) {
         navigation_node::override_active_url(new moodle_url('/totara/program/index.php', array('categoryid' => $id, 'viewtype' => $viewtype)));
     }
     $pagetype = ($viewtype == 'program') ? 'programmgmt' : 'managecertifications';
-    admin_externalpage_setup($pagetype, '', $urlparams, $CFG->wwwroot . "/totara/program/manage.php");
+    admin_externalpage_setup($pagetype, '', $urlparams);
     $settingsnode = $PAGE->settingsnav->find_active_node();
     if ($id && $settingsnode) {
         $settingsnode->make_inactive();
@@ -351,6 +350,7 @@ if (can_edit_in_category()) {
     }
 } else {
     $site = get_site();
+    $PAGE->set_pagelayout('admin');
     $PAGE->set_title("$site->shortname: $coursecat->name");
     $PAGE->set_heading($site->fullname);
     $PAGE->set_button($programrenderer->program_search_form($viewtype, '', 'navbar'));
@@ -362,11 +362,22 @@ echo $OUTPUT->header();
 if (!empty($searchcriteria)) {
     echo $OUTPUT->heading(new lang_string('searchresults'));
 } else if (!$coursecat->id) {
+    echo html_writer::start_tag('ul', ['class' => 'buttons unlist']);
+
     if (!empty($CFG->enableprogramcompletioneditor) && has_capability('totara/program:editcompletion', context_system::instance())) {
         $checkallurl = new moodle_url('/totara/program/check_completion.php', array('progorcert' => $viewtype));
-        echo html_writer::tag('ul', html_writer::tag('li', html_writer::link($checkallurl,
-            get_string('checkcompletions', 'totara_program'))));
+        echo html_writer::tag('li', html_writer::link($checkallurl, get_string('checkcompletions', 'totara_program')));
     }
+
+    if ($viewtype == 'program') {
+        $url = new moodle_url('/totara/program/default_image_upload.php');
+        echo html_writer::tag('li', html_writer::link($url, get_string('imagedefaultlink', 'totara_program')));
+    } else if ($viewtype == 'certification') {
+        $url = new moodle_url('/totara/program/default_image_upload.php', ['iscertif' => true]);
+        echo html_writer::tag('li', html_writer::link($url, get_string('imagedefaultlink', 'totara_certification')));
+    }
+
+    echo html_writer::end_tag('ul');
 
     $catlist = array(0 => get_string('top')) + coursecat::make_categories_list('moodle/category:manage');
     $catlist = count($catlist) < MAX_MOVE_CATEGORY ? $catlist : false;
@@ -673,10 +684,7 @@ if (!$programs) {
         $cell->text = html_writer::label($label, 'movetoid', false, array('class' => 'accesshide'));
         $cell->text .= html_writer::select($movetocategories, 'moveto', $id, null, array('id' => 'movetoid', 'class' => 'autosubmit'));
         $cell->text .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'categoryid', 'value' => $id));
-        $PAGE->requires->yui_module('moodle-core-formautosubmit',
-                        'M.core.init_formautosubmit',
-                        array(array('selectid' => 'movetoid', 'nothing' => $id))
-        );
+        $PAGE->requires->js_call_amd('totara_program/management', 'init_autosubmit', ['movetoid']);
         $table->data[] = new html_table_row(array($cell));
     }
 

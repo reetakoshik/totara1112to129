@@ -124,7 +124,7 @@ class totara_core_date_legacy_testcase extends advanced_testcase {
 
         $zones = totara_get_clean_timezone_list();
         foreach ($zones as $k => $v) {
-            $this->assertInternalType('integer', $k);
+            $this->assertIsInt($k);
             $this->assertContains($v , $phpzones);
         }
 

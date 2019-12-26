@@ -11,7 +11,7 @@ Feature: Configure seminar settings
       | configurator | Configurator | User     | c@example.com |
 
     And I log in as "admin"
-    And I navigate to "Define roles" node in "Site administration > Users > Permissions"
+    And I navigate to "Define roles" node in "Site administration > Permissions"
     And I click on "Add a new role" "button"
     And I click on "Continue" "button"
     And I set the following fields to these values:
@@ -28,11 +28,8 @@ Feature: Configure seminar settings
   Scenario: Access all seminar activity settings with modconfig capability
     Given I log in as "configurator"
 
-    When I navigate to "Global settings" node in "Site administration > Seminars"
-    Then I should see "facetoface_fromaddress"
-
     When I navigate to "Activity defaults" node in "Site administration > Seminars"
-    Then I should see "facetoface_multiplesessions"
+    Then I should see "multisignupamount"
 
     When I navigate to "Event defaults" node in "Site administration > Seminars"
     Then I should see "defaultdaysskipweekends"

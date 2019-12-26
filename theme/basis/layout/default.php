@@ -21,40 +21,19 @@
  * @author    David Scotson
  * @author    Joby Harding <joby.harding@totaralearning.com>
  * @author    Petr Skoda <petr.skoda@totaralms.com>
+ * @author    Murali Nair <murali.nair@totaralearning.com>
  * @package   theme_basis
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$knownregionpre = $PAGE->blocks->is_known_region('side-pre');
-$knownregionpost = $PAGE->blocks->is_known_region('side-post');
-
-$grid = new theme_roots\output\bootstrap_grid();
-
-if ($PAGE->blocks->region_has_content('side-pre', $OUTPUT)) {
-    $grid->has_side_pre();
-}
-
-if ($PAGE->blocks->region_has_content('side-post', $OUTPUT)) {
-    $grid->has_side_post();
-}
-
-$regions = $grid->get_regions_classes();
-
 $PAGE->set_popup_notification_allowed(false);
 
 $themerenderer = $PAGE->get_renderer('theme_basis');
-
-$hastotaramenu = false;
-$totaramenu = '';
-if (empty($PAGE->layout_options['nocustommenu'])) {
-    $menudata = totara_build_menu();
-    $totara_core_renderer = $PAGE->get_renderer('totara_core');
-    $totaramenu = $totara_core_renderer->totara_menu($menudata);
-    $hastotaramenu = !empty($totaramenu);
+$full_header = $themerenderer->full_header();
+if (isset($PAGE->layout_options['nonavbar']) && $PAGE->layout_options['nonavbar'] && strpos($full_header, '<input') === false) {
+    $full_header = '';
 }
-
-
 echo $OUTPUT->doctype() ?>
 <html <?php echo $OUTPUT->htmlattributes(); ?>>
 <?php require("{$CFG->dirroot}/theme/basis/layout/partials/head.php"); ?>
@@ -63,34 +42,52 @@ echo $OUTPUT->doctype() ?>
 <?php echo $OUTPUT->standard_top_of_body_html() ?>
 
 <!-- Main navigation -->
-<?php require("{$CFG->dirroot}/theme/roots/layout/partials/header.php"); ?>
+<?php
+$totara_core_renderer = $PAGE->get_renderer('totara_core');
+/*
+// This commented code has been @deprecated since 12.0.
+$hastotaramenu = false;
+$totaramenu = '';
+if (empty($PAGE->layout_options['nocustommenu'])) {
+    $menudata = totara_build_menu();
+    $totaramenu = $totara_core_renderer->totara_menu($menudata);
+    $hastotaramenu = !empty($totaramenu);
+}
+require("{$CFG->dirroot}/theme/roots/layout/partials/header.php");
+*/
+$hasguestlangmenu = (!isset($PAGE->layout_options['langmenu']) || $PAGE->layout_options['langmenu'] );
+$nocustommenu = !empty($PAGE->layout_options['nocustommenu']);
+echo $totara_core_renderer->masthead($hasguestlangmenu, $nocustommenu);
+?>
 
+<?php if ($full_header !== '') { ?>
 <!-- Breadcrumb and edit buttons -->
 <div class="container-fluid breadcrumb-container">
     <div class="row">
         <div class="col-sm-12">
-            <?php echo $OUTPUT->full_header(); ?>
+            <?php echo $full_header; ?>
         </div>
     </div>
 </div>
+<?php } ?>
 
 <!-- Content -->
 <div id="page" class="container-fluid">
-    <div id="page-content" class="row">
-        <div id="region-main" class="<?php echo $regions['content']; ?>">
-            <?php echo $OUTPUT->course_content_header(); ?>
-            <?php echo $OUTPUT->main_content(); ?>
-            <?php echo $OUTPUT->course_content_footer(); ?>
-        </div>
+    <div id="page-content">
 
-        <?php
-        if ($knownregionpre) {
-            echo $OUTPUT->blocks('side-pre', $regions['pre']);
-        }?>
-        <?php
-        if ($knownregionpost) {
-            echo $OUTPUT->blocks('side-post', $regions['post']);
-        }?>
+        <?php echo $themerenderer->blocks_top(); ?>
+        <div class="row">
+            <div id="region-main" class="<?php echo $themerenderer->main_content_classes(); ?>">
+                <?php echo $themerenderer->course_content_header(); ?>
+                <?php echo $themerenderer->main_content(); ?>
+                <?php echo $themerenderer->blocks_main(); ?>
+                <?php echo $themerenderer->course_content_footer(); ?>
+            </div>
+            <?php echo $themerenderer->blocks_pre(); ?>
+            <?php echo $themerenderer->blocks_post(); ?>
+        </div>
+        <?php echo $themerenderer->blocks_bottom(); ?>
+
     </div>
 </div>
 

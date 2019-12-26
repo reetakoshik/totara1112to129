@@ -258,7 +258,7 @@ class totara_reportbuilder_generator_testcase extends advanced_testcase {
     public function test_create_scheduled_report() {
         global $CFG, $DB;
 
-        require_once(__DIR__ . '/../lib.php');
+        require_once($CFG->dirroot . '/totara/reportbuilder/lib.php');
 
         $this->resetAfterTest();
 

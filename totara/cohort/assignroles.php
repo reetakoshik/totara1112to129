@@ -63,6 +63,9 @@ $PAGE->set_url('/totara/cohort/assignroles.php', array('id' => $id));
 $PAGE->set_title(format_string($cohort->name));
 $PAGE->set_heading(format_string($cohort->name));
 
+$strheading = get_string('assignroles', 'totara_cohort');
+totara_cohort_navlinks($cohort->id, format_string($cohort->name), $strheading);
+
 echo $OUTPUT->header();
 
 $PAGE->requires->js_call_amd('totara_cohort/assignroles', 'init');

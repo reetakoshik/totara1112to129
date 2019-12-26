@@ -1,0 +1,49 @@
+{{!
+   This file is part of Totara LMS
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template totara_core/masthead
+
+    Constructs the totara masthead.
+
+    Classes required for JS:
+    * totaraNav
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * masthead_lang: Has masthead language data
+    * masthead_logo: Has masthead_logo data
+    * masthead_menu: The masthead navigation data
+    * masthead_menu -> subnav_has_items: Bool for having subnav data
+    * masthead_plugins: Has masthead plugins data (alert/messages)
+    * masthead_toggle: Has mobile toggle button data
+    * masthead_usermenu: Has masthead usermenu data
+}}
+<nav class="totaraNav" role="navigation">
+    {{#masthead_menu}}
+        {{> totara_core/nav_primary }}
+        {{#subnav_has_items}}{{> totara_core/nav_sub }}{{/subnav_has_items}}
+        {{#js}}
+            require(['totara_core/totaranav'], function(totaraNav) {
+                totaraNav.init(document.querySelector('.totaraNav'));
+            });
+        {{/js}}
+    {{/masthead_menu}}
+</nav>

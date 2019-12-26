@@ -67,9 +67,7 @@ final class create_course_form extends \totara_form\form {
             self::CREATE_COURSE_MULTI_ACTIVITY => $multiactivitylabel,
             self::CREATE_COURSE_SINGLE_ACTIVITY => $singleactivitylabel,
         ];
-        // Switching from create from radios to select for T11 and earlier, in order to be able
-        // to use the onchange_reload client action.
-        $create = new select('create', get_string('course_creation', 'contentmarketplace_goone'), $options);
+        $create = new radios('create', get_string('course_creation', 'contentmarketplace_goone'), $options);
         $create->set_attribute('required', 1);
         $create->add_help_button('course_creation', 'contentmarketplace_goone');
         $settings->add($create);

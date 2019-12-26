@@ -22,5 +22,4 @@
  */
 
 $string['sourcetitle'] = 'Certifications';
-$string['type_prog'] = 'Certification';
 $string['type_certif'] = 'Certification';

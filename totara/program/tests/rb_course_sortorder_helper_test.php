@@ -92,7 +92,7 @@ class rb_course_sortorder_helper_testcase extends advanced_testcase {
 
     public function test_get_order_on_invalid_program() {
         $order = \totara_program\rb_course_sortorder_helper::get_sortorder(0);
-        self::assertInternalType('array', $order);
+        self::assertIsArray($order);
         self::assertCount(0, $order);
     }
 
@@ -107,12 +107,12 @@ class rb_course_sortorder_helper_testcase extends advanced_testcase {
         $definition = new cache_definition();
         $instance = \totara_program\rb_course_sortorder_helper::get_instance_for_cache($definition);
         $results = $instance->load_many_for_cache([$prog1->id, $prog2->id]);
-        self::assertInternalType('array', $results);
+        self::assertIsArray($results);
         self::assertCount(2, $results);
         self::assertArrayHasKey($prog1->id, $results);
         self::assertArrayHasKey($prog2->id, $results);
-        self::assertInternalType('array', $results[$prog1->id]);
-        self::assertInternalType('array', $results[$prog2->id]);
+        self::assertIsArray($results[$prog1->id]);
+        self::assertIsArray($results[$prog2->id]);
         self::assertCount(0, $results[$prog1->id]);
         self::assertCount(0, $results[$prog2->id]);
 
@@ -120,12 +120,12 @@ class rb_course_sortorder_helper_testcase extends advanced_testcase {
         $prog_generator->add_courses_and_courseset_to_program($prog1, [[$course]]);
 
         $results = $instance->load_many_for_cache([$prog1->id, $prog2->id]);
-        self::assertInternalType('array', $results);
+        self::assertIsArray($results);
         self::assertCount(2, $results);
         self::assertArrayHasKey($prog1->id, $results);
         self::assertArrayHasKey($prog2->id, $results);
-        self::assertInternalType('array', $results[$prog1->id]);
-        self::assertInternalType('array', $results[$prog2->id]);
+        self::assertIsArray($results[$prog1->id]);
+        self::assertIsArray($results[$prog2->id]);
         self::assertCount(1, $results[$prog1->id]);
         self::assertCount(0, $results[$prog2->id]);
 

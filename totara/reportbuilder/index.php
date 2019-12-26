@@ -38,14 +38,15 @@ $pageparams = [
 
 $shortname = 'manage_user_reports';
 
-if (!$report = reportbuilder_get_embedded_report($shortname, $pageparams, false, $sid)) {
+$config = (new rb_config())->set_sid($sid)->set_embeddata($pageparams);
+if (!$report = reportbuilder::create_embedded($shortname, $config)) {
     print_error('error:couldnotgenerateembeddedreport', 'totara_reportbuilder');
 }
 
 $url = new moodle_url('/totara/reportbuilder/index.php', $pageparams);
 admin_externalpage_setup('rbmanagereports', '', null, $url);
 
-$PAGE->set_button($PAGE->button . $report->edit_button());
+$PAGE->set_button($report->edit_button() . $PAGE->button);
 
 /** @var totara_reportbuilder_renderer $renderer */
 $renderer = $PAGE->get_renderer('totara_reportbuilder');

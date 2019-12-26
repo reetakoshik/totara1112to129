@@ -26,6 +26,13 @@ class core_role_check_users_selector_testcase extends advanced_testcase {
     private $user1, $user2, $user3;
     private $course1, $course2;
 
+    protected function tearDown() {
+        $this->user1 = $this->user2 = $this->user3 = null;
+        $this->course1 = $this->course2 = null;
+        
+        parent::tearDown();
+    }
+
     public function setUp() {
         parent::setUp();
         $this->resetAfterTest();

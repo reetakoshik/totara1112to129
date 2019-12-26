@@ -30,7 +30,7 @@ require_once(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot . '/totara/reportbuilder/lib.php');
 require_once($CFG->dirroot . '/totara/core/js/lib/setup.php');
 
-$format    = optional_param('format', '', PARAM_ALPHANUM);
+$format = optional_param('format', '', PARAM_ALPHANUM);
 $id = required_param('id', PARAM_INT);
 $sid = optional_param('sid', '0', PARAM_INT);
 $debug = optional_param('debug', 0, PARAM_INT);
@@ -40,7 +40,7 @@ require_login();
 $context = context_system::instance();
 $PAGE->set_context($context);
 $PAGE->set_url('/totara/reportbuilder/report.php', array('id' => $id));
-$PAGE->set_totara_menu_selected('myreports');
+$PAGE->set_totara_menu_selected('\totara_core\totara\menu\myreports');
 $PAGE->set_pagelayout('noblocks');
 
 // We can rely on the report builder record existing here as there is no way to get directly to report.php.
@@ -55,11 +55,10 @@ if ($reportrecord->embedded) {
 $globalrestrictionset = rb_global_restriction_set::create_from_page_parameters($reportrecord);
 
 // New report object.
-$report = new reportbuilder($id, null, false, $sid, null, false, array(), $globalrestrictionset);
+$config = new rb_config();
+$config->set_sid($sid)->set_global_restriction_set($globalrestrictionset);
+$report = reportbuilder::create($id, $config, true);
 
-if (!$report->is_capable($id)) {
-    print_error('nopermission', 'totara_reportbuilder');
-}
 $report->handle_pre_display_actions();
 
 if ($format != '') {
@@ -71,10 +70,6 @@ if ($format != '') {
 
 $PAGE->requires->string_for_js('reviewitems', 'block_totara_alerts');
 $report->include_js();
-
-// display results as graph if report uses the graphical_feedback_questions source
-$graph = (substr($report->source, 0, strlen('graphical_feedback_questions')) ==
-    'graphical_feedback_questions');
 
 $fullname = format_string($report->fullname, true, ['context' => $context]);
 $pagetitle = get_string('report', 'totara_reportbuilder').': '.$fullname;
@@ -102,11 +97,7 @@ $report->display_redirect_link();
 $report->display_restrictions();
 
 // Display heading including filtering stats.
-if ($graph) {
-    $heading = $fullname;
-} else {
-    $heading = $fullname . ': ' . $output->result_count_info($report);
-}
+$heading = $fullname . ': ' . $output->result_count_info($report);
 echo $output->heading($heading);
 echo $debughtml;
 
@@ -121,12 +112,9 @@ $report->display_sidebar_search();
 echo $report->display_saved_search_options();
 
 // Show results.
-if ($graph) {
-    print $report->print_feedback_results();
-} else {
-    echo $output->showhide_button($report->_id, $report->shortname);
-    echo $tablehtml;
-}
+echo $output->showhide_button($report->_id, $report->shortname);
+echo $tablehtml;
+
 
 // Export button.
 $output->export_select($report, $sid);

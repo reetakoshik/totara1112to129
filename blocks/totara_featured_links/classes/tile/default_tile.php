@@ -25,7 +25,9 @@ namespace block_totara_featured_links\tile;
 
 defined('MOODLE_INTERNAL') || die();
 
-use \totara_form\file_area;
+use core\output\flex_icon;
+use core\output\flex_icon_helper;
+use totara_form\file_area;
 
 /**
  * This is the base class for the default tile it can be an example of how to do this in the tile mods
@@ -33,7 +35,8 @@ use \totara_form\file_area;
  * @package block_totara_featured_links
  */
 class default_tile extends base{
-    protected $used_fields = ['heading', // string The title for the tile.
+    protected $used_fields = [
+        'heading',                       // string The title for the tile.
         'textbody',                      // string The description for the tile.
         'url',                           // string The url that the tile links to.
         'background_color',              // string The hex value of the background color.
@@ -41,30 +44,39 @@ class default_tile extends base{
         'alt_text',                      // string The text to go in the sr-only span in the anchor tag.
         'target',                        // string The target for the link either '_self' or '_blank'.
         'heading_location',              // string The location of the heading either 'top' or 'bottom'.
-        'background_appearance'];        // string The background size style 'cover' or 'contain' currently.
+        'background_appearance',         // string The background size style 'cover' or 'contain' currently.
+        'icon',
+        'icon_size'
+    ];
     protected $content_class = 'block-totara-featured-links-content';
     protected $content_template = 'block_totara_featured_links/content';
 
     private const COVER_BACKGROUND_APPEARANCE = 'cover';
 
     /**
-     * {@inheritdoc}
+     * Gets the name of the tile to display in the edit form
+     *
+     * @throws \coding_exception You must override this function.
+     * @return string
      */
-    public static function get_name() {
+    public static function get_name(): string {
         return get_string('default_name', 'block_totara_featured_links');
     }
 
     /**
-     * {@inheritdoc}
+     * This does tile specific things when the tile is added
+     * @return void
      */
-    public function add_tile() {
+    public function add_tile(): void {
 
     }
 
     /**
-     * {@inheritdoc}
+     * Copy the files for the tile to the new location for the new tile
+     * @param base $new_tile the object of the new tile
+     * @return void
      */
-    public function copy_files(base &$new_tile) {
+    public function copy_files(base &$new_tile): void {
         if (empty($this->data->background_img)) {
             return;
         }
@@ -73,18 +85,22 @@ class default_tile extends base{
         $fs = get_file_storage();
         // This extra check if file area is empty adds one query if it is not empty but saves several if it is.
         if (!$fs->is_area_empty($fromcontext->id, 'block_totara_featured_links', 'tile_background', $this->id, false)) {
-            file_prepare_draft_area($draftitemid,
+            file_prepare_draft_area(
+                $draftitemid,
                 $fromcontext->id,
                 'block_totara_featured_links',
                 'tile_background',
                 $this->id,
-                ['subdirs' => 0, 'maxbytes' => 0, 'maxfiles' => 1]);
-            file_save_draft_area_files($draftitemid,
+                ['subdirs' => 0, 'maxbytes' => 0, 'maxfiles' => 1]
+            );
+            file_save_draft_area_files(
+                $draftitemid,
                 $tocontext->id,
                 'block_totara_featured_links',
                 'tile_background',
                 $new_tile->id,
-                ['subdirs' => 0, 'maxbytes' => 0, 'maxfiles' => 1]);
+                ['subdirs' => 0, 'maxbytes' => 0, 'maxfiles' => 1]
+            );
         }
     }
 
@@ -93,14 +109,16 @@ class default_tile extends base{
      * in the filemanager
      * @return \stdClass
      */
-    public function get_content_form_data() {
+    public function get_content_form_data(): \stdClass {
         $dataobj = parent::get_content_form_data();
         // Move background file to the draft area.
         if (isset($this->data->background_img)) {
-            $dataobj->background_img = new file_area(\context_block::instance($this->blockid),
+            $dataobj->background_img = new file_area(
+                \context_block::instance($this->blockid),
                 'block_totara_featured_links',
                 'tile_background',
-                $this->id);
+                $this->id
+            );
         }
         if (!isset($dataobj->background_appearance)) {
             $dataobj->background_appearance = default_tile::COVER_BACKGROUND_APPEARANCE;
@@ -108,18 +126,24 @@ class default_tile extends base{
         if (!isset($this->data->heading_location)) {
             $dataobj->heading_location = self::HEADING_TOP;
         }
+        if (empty($dataobj->icon_size) && empty($this->icon_size)) {
+            $dataobj->icon_size = 'large';
+        }
         return $dataobj;
     }
 
     /**
-     * {@inheritdoc}
+     * Gets the data to be passed to the render_content function
+     *
+     * @return array
      */
-    protected function get_content_template_data() {
+    protected function get_content_template_data(): array {
         $notempty = false;
         if (!empty($this->data_filtered->heading) || !empty($this->data_filtered->textbody)) {
             $notempty = true;
         }
-        return ['heading' => (empty($this->data_filtered->heading) ? '' : $this->data->heading),
+        return [
+            'heading' => (empty($this->data_filtered->heading) ? '' : $this->data->heading),
             'textbody' => (empty($this->data_filtered->textbody) ? '' : $this->data->textbody),
             'content_class' => (empty($this->content_class) ? '' : $this->content_class),
             'heading_location' => (empty($this->data_filtered->heading_location) ? '' : $this->data_filtered->heading_location),
@@ -130,10 +154,14 @@ class default_tile extends base{
     /**
      * Adds the data needed for the default tile type
      * @param \renderer_base $renderer
+     * @param array $settings
      * @return array
      */
-    protected function get_content_wrapper_template_data(\renderer_base $renderer) {
-        $data = parent::get_content_wrapper_template_data($renderer);
+    protected function get_content_wrapper_template_data(\renderer_base $renderer, array $settings = []): array {
+        global $PAGE, $CFG;
+        $PAGE->requires->js_call_amd('block_totara_featured_links/icon_sizer', 'resize', [$this->id]);
+
+        $data = parent::get_content_wrapper_template_data($renderer, $settings);
 
         $data['background_img'] = false;
 
@@ -160,33 +188,60 @@ class default_tile extends base{
             'cover' :
             $this->data_filtered->background_appearance);
 
+        $showicon = (isset($this->data_filtered->icon) &&
+            isset(flex_icon_helper::get_icons($CFG->theme)[$this->data_filtered->icon]));
+
+        if (!empty($this->data_filtered->icon) && $showicon) {
+            $icon = new flex_icon($this->data_filtered->icon);
+            $data['icon'] = [
+                'template' => $icon->get_template(),
+                'context' => $icon->export_for_template($renderer)
+            ];
+        } else {
+            $data['icon'] = false;
+        }
+
+        if (!empty($this->data_filtered->icon_size)) {
+            $data['icon_size'] = $this->data_filtered->icon_size;
+        } else {
+            $data['icon_size'] = 'large';
+        }
+
         return $data;
     }
 
     /**
-     * moves a file from the draft area to a defined area
+     * Adds the tile specific items to the data object.
      * @param \stdClass $data
      * @return void
      */
-    public function save_content_tile($data) {
+    public function save_content_tile($data): void {
         global $CFG;
+        // Moves a file from the draft area to a defined area
         // Saves the Draft area.
         $draftitemid = file_get_submitted_draft_itemid('background_img');
-        file_save_draft_area_files($draftitemid,
-            \context_block::instance($this->blockid)->id,
-            'block_totara_featured_links',
-            'tile_background',
-            $this->id,
-            ['subdirs' => 0, 'maxbytes' => 0, 'maxfiles' => 1]);
+        $blockcontext = \context_block::instance($this->blockid)->id;
+        if (!empty($draftitemid)) {
+            file_save_draft_area_files(
+                $draftitemid,
+                $blockcontext,
+                'block_totara_featured_links',
+                'tile_background',
+                $this->id,
+                ['subdirs' => 0, 'maxbytes' => 0, 'maxfiles' => 1]
+            );
+        }
 
         // Gets the url to the new file.
         $fs = get_file_storage();
-        $files = $fs->get_area_files(\context_block::instance($this->blockid)->id,
+        $files = $fs->get_area_files(
+            $blockcontext,
             'block_totara_featured_links',
             'tile_background',
             $this->id,
             '',
-            false);
+            false
+        );
 
         if ($file = reset($files)) {
             $this->data->background_img = $file->get_filename();
@@ -240,6 +295,12 @@ class default_tile extends base{
         if (isset($data->background_appearance)) {
             $this->data->background_appearance = $data->background_appearance;
         }
+        if (isset($data->icon)) {
+            $this->data->icon = $data->icon;
+        }
+        if (isset($data->icon_size)) {
+            $this->data->icon_size = $data->icon_size;
+        }
         return;
     }
 
@@ -247,7 +308,7 @@ class default_tile extends base{
      * {@inheritdoc}
      * The static tile does not use any custom rules
      */
-    public function is_visible_tile() {
+    public function is_visible_tile(): int {
         return 0;
     }
 
@@ -255,7 +316,7 @@ class default_tile extends base{
      * {@inheritdoc}
      * The static tile does not have any custom rules
      */
-    public function save_visibility_tile($data) {
+    public function save_visibility_tile($data): string{
         return '';
     }
 
@@ -265,7 +326,7 @@ class default_tile extends base{
      *      [ 'sr-only' => string]
      * @return array
      */
-    public function get_accessibility_text() {
+    public function get_accessibility_text(): array {
         $sronly = '';
         if (!empty($this->data->alt_text)) {
             $sronly = $this->data->alt_text;

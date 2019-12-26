@@ -324,6 +324,9 @@ input[type="checkbox"] {
         line-height: 30px;
         padding: 4px 6px;
     }
+    #timeamount {
+        width: 3em;
+    }
     label {
         display: inline;
     }
@@ -405,6 +408,7 @@ input[type="checkbox"] {
         min-width: 140px;
         margin-top: 4px;
         display: inline;
+        white-space: normal;
     }
     label {
         margin-bottom: 0;
@@ -605,6 +609,7 @@ div#dateselector-calendar-panel {
     margin-bottom: @line-height-computed;
     margin-left: 0;
     height: @line-height-computed * 20;
+    overflow-x: auto;
 }
 
 #assignform .userselector label,

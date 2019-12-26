@@ -128,6 +128,34 @@ class totara_program_events_testcase extends advanced_testcase {
         $this->assertSame($other, $event->other);
     }
 
+    public function test_program_completionstateedited() {
+        global $USER;
+
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+
+        $other = array(
+            'oldstate' => STATUS_PROGRAM_INCOMPLETE,
+            'newstate' => STATUS_PROGRAM_COMPLETE,
+            'changedby' => $USER->id
+        );
+        $event = \totara_program\event\program_completionstateedited::create(
+            array(
+                'objectid' => $this->program->id,
+                'context' => context_program::instance($this->program->id),
+                'userid' => $this->user->id,
+                'other' => $other,
+            )
+        );
+        $event->trigger();
+
+        $this->assertSame('prog', $event->objecttable);
+        $this->assertSame($this->program->id, $event->objectid);
+        $this->assertSame('u', $event->crud);
+        $this->assertSame($event::LEVEL_OTHER, $event->edulevel);
+        $this->assertSame($other, $event->other);
+    }
+
     public function test_program_contentupdated() {
         $this->resetAfterTest(true);
         $this->setAdminUser();

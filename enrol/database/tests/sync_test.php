@@ -26,7 +26,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-class enrol_database_testcase extends advanced_testcase {
+class enrol_database_sync_testcase extends advanced_testcase {
     protected static $courses = array();
     protected static $users = array();
     protected static $roles = array();
@@ -228,9 +228,6 @@ class enrol_database_testcase extends advanced_testcase {
 
         $this->init_enrol_database();
 
-        $this->resetAfterTest(false);
-        $this->preventResetByRollback();
-
         $plugin = enrol_get_plugin('database');
 
         // Test basic enrol sync for one user after login.
@@ -408,16 +405,10 @@ class enrol_database_testcase extends advanced_testcase {
         $this->assertEquals(2, $DB->count_records('role_assignments', array('component' => 'enrol_database')));
         $this->assertIsEnrolled(1, 1, ENROL_USER_ACTIVE, 'student');
         $this->assertIsEnrolled(1, 2, ENROL_USER_ACTIVE, 'teacher');
-    }
 
-    /**
-     * @depends test_sync_user_enrolments
-     */
-    public function test_sync_users() {
-        global $DB;
+        // Totara: use one test instead of depends due to parallel run compatibility
+        // public function test_sync_users() {
 
-        $this->resetAfterTest(false);
-        $this->preventResetByRollback();
         $this->reset_enrol_database();
 
         $plugin = enrol_get_plugin('database');
@@ -680,16 +671,10 @@ class enrol_database_testcase extends advanced_testcase {
         $this->assertEquals(0, $DB->count_records('user_enrolments', array()));
         $this->assertEquals(3, $DB->count_records('enrol', array('enrol' => 'database')));
         $this->assertEquals(0, $DB->count_records('role_assignments', array('component' => 'enrol_database')));
-    }
 
-    /**
-     * @depends test_sync_users
-     */
-    public function test_sync_courses() {
-        global $DB;
+        // Totara: use one test instead of depends due to parallel run compatibility
+        // public function test_sync_courses() {
 
-        $this->resetAfterTest(true);
-        $this->preventResetByRollback();
         $this->reset_enrol_database();
 
         $plugin = enrol_get_plugin('database');
@@ -731,6 +716,13 @@ class enrol_database_testcase extends advanced_testcase {
         $this->assertEquals(1, $DB->count_records('course', array('idnumber' => 'yy')));
         $this->assertEquals(1, $DB->count_records('course', array('shortname' => 'xx')));
 
+        // Check default number of sections matches with the created course sections.
+        
+        $recordcourse1 = $DB->get_record('course', $course1);
+        $courseconfig = get_config('moodlecourse');
+        $numsections = $DB->count_records('course_sections', array('course' => $recordcourse1->id));
+        // To compare numsections we have to add topic 0 to default numsections.
+        $this->assertEquals(($courseconfig->numsections + 1), $numsections);
 
         // Test category mapping via idnumber.
 
@@ -759,8 +751,7 @@ class enrol_database_testcase extends advanced_testcase {
         $course8['category'] = $defcat->id;
         $record = $DB->get_record('course', $course8);
         $this->assertFalse(empty($record));
-        $courseformatoptions = course_get_format($record)->get_format_options();
-        $this->assertEquals($courseformatoptions['numsections'], 666);
+        $this->assertEquals(666, course_get_format($record)->get_last_section_number());
 
         // Test invalid category.
 

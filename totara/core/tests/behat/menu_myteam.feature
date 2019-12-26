@@ -8,7 +8,7 @@ Feature: Test Team menu item
     Given I am on a totara site
     And I log in as "admin"
 
-    When I navigate to "Main menu" node in "Site administration > Appearance"
+    When I navigate to "Main menu" node in "Site administration > Navigation"
     Then I should see "Team" in the "#totaramenutable" "css_element"
     And I should see "Team" in the totara menu
 
@@ -62,14 +62,14 @@ Feature: Test Team menu item
   Scenario: I can disable Team for everybody
     Given I am on a totara site
     And I log in as "admin"
-    And I should see "Team" in the "#totaramenu" "css_element"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I should see "Team" in the ".totaraNav" "css_element"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable Team" to "Disable"
     And I press "Save changes"
 
-    When I navigate to "Main menu" node in "Site administration > Appearance"
-    Then I should not see "Team" in the "#totaramenutable" "css_element"
-    And I should not see "Team" in the totara menu
+    When I navigate to "Main menu" node in "Site administration > Navigation"
+    Then I should see "Team" in the "#totaramenutable" "css_element"
+    And I should see "Feature disabled" in the "Team" "table_row"
 
-    When I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    When I navigate to "Manage embedded reports" node in "Site administration > Reports"
     Then I should not see "Team Members (View)"

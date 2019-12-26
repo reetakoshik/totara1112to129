@@ -891,6 +891,9 @@ class totara_reportbuilder_column_testcase extends reportcache_advanced_testcase
 
         $sortorder = 1;
         foreach ($src->columnoptions as $column) {
+            if (isset($column->grouping) and $column->grouping !== 'none') {
+                debugging("Column option grouping was deprecated, use subqueries instead in {$sourcename} {$column->type}-{$column->value}", DEBUG_DEVELOPER);
+            }
             // Create a report.
             $report = new stdClass();
             $report->fullname = $reportname;
@@ -907,14 +910,23 @@ class totara_reportbuilder_column_testcase extends reportcache_advanced_testcase
             $col->value = $column->value;
             $col->heading = $column->defaultheading;
             $col->sortorder = $sortorder++;
-            $colid = $DB->insert_record('report_builder_columns', $col);
-
-            // Add column to the big report with everything.
-            $col->reportid = $bigreportid;
             $DB->insert_record('report_builder_columns', $col);
 
             // Create the reportbuilder object.
-            $rb = new reportbuilder($reportid);
+            $rb = reportbuilder::create($reportid);
+
+            // We will be checking deprecated column's message for each column separately,
+            // so there is no real need to re-check it again in the big report.
+            // Therefore, we are skipping adding them to the big report with all the columns.
+            if ($column->deprecated) {
+                // Check there is a debugging message when a deprecated column is added to the report.
+                $this->assertDebuggingCalled("Column {$col->type}-{$col->value} is a deprecated column in source " . get_class($src));
+            } else {
+                // Add column to the big report with everything.
+                $col->reportid = $bigreportid;
+                $DB->insert_record('report_builder_columns', $col);
+            }
+
             $sql = $rb->build_query();
 
             $message = "\nReport title : {$title}\n";
@@ -947,6 +959,9 @@ class totara_reportbuilder_column_testcase extends reportcache_advanced_testcase
         $sortorder = 1;
 
         foreach ($src->filteroptions as $filter) {
+            if (isset($filter->grouping) and $filter->grouping !== 'none') {
+                debugging("Filter option grouping was deprecated, use subqueries instead in {$sourcename} {$column->type}-{$column->value}", DEBUG_DEVELOPER);
+            }
             // Create a report.
             $report = new stdClass();
             $report->fullname = $reportname;
@@ -996,7 +1011,7 @@ class totara_reportbuilder_column_testcase extends reportcache_advanced_testcase
             $SESSION->{$filtername}[$fname] = array($search);
 
             // Create the reportbuilder object.
-            $rb = new reportbuilder($reportid);
+            $rb = reportbuilder::create($reportid);
 
             // Just try to get the count, we cannot guess the actual number here.
             $rb->get_filtered_count();
@@ -1041,10 +1056,10 @@ class totara_reportbuilder_column_testcase extends reportcache_advanced_testcase
         }
 
         // Test we can execute the query with all columns and filters.
-        $rb = new reportbuilder($bigreportid);
-        list($sql, $params, $cacheschedule) = $rb->build_query(false, true, false);
-        $rs = $DB->get_counted_recordset_sql($sql, $params);
-        $rs->close();
+        $rb = reportbuilder::create($bigreportid);
+        $getdata = new ReflectionMethod(reportbuilder::class, 'get_data');
+        $getdata->setAccessible(true);
+        $getdata->invoke($rb);
 
         if (!$src->cacheable) {
             return;
@@ -1064,44 +1079,30 @@ class totara_reportbuilder_column_testcase extends reportcache_advanced_testcase
         }
 
         if ($DB->get_dbfamily() === 'mysql') {
-            if ($sourcename === 'facetoface_sessions') {
-                // This source has way too many columns for MySQL when using 4byte unicode collations,
-                // we need to drop some basic columns and related filters.
-                $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => 'user', 'value' => 'fullname'));
-                $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => 'user', 'value' => 'namelink'));
-                $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => 'user', 'value' => 'namelinkicon'));
-                $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => 'user', 'value' => 'email'));
-                $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => 'user', 'value' => 'fullname'));
-                $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => 'user', 'value' => 'email'));
-            }
-            if ($sourcename === 'job_assignments') {
-                // Like the above this report has way too many columns and needs to be reduced in order for this test to pass.
-                // This one includes a ton of user fields, we will remove the user fields for each of four types.
-
-                foreach (['user', 'manager', 'appraiser', 'tempmanager'] as $type) {
-                    $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'fullname'));
-                    $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'namelink'));
-                    $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'namelinkicon'));
-                    $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'email'));
-                    $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'emailunobscured'));
-                    $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'auth'));
-                    $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'institution'));
-                    $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'department'));
-                    $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'address'));
-                    $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'city'));
-                    $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'idnumber'));
-                    $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'fullname'));
-                    $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'namelink'));
-                    $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'namelinkicon'));
-                    $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'email'));
-                    $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'emailunobscured'));
-                    $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'auth'));
-                    $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'institution'));
-                    $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'department'));
-                    $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'address'));
-                    $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'city'));
-                    $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'idnumber'));
-                }
+            // There are way too many columns for MySQL to handle, delete jobs related stuff.
+            foreach (['user', 'manager', 'appraiser', 'tempmanager'] as $type) {
+                $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'fullname'));
+                $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'namelink'));
+                $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'namelinkicon'));
+                $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'email'));
+                $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'emailunobscured'));
+                $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'auth'));
+                $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'institution'));
+                $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'department'));
+                $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'address'));
+                $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'city'));
+                $DB->delete_records('report_builder_columns', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'idnumber'));
+                $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'fullname'));
+                $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'namelink'));
+                $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'namelinkicon'));
+                $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'email'));
+                $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'emailunobscured'));
+                $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'auth'));
+                $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'institution'));
+                $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'department'));
+                $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'address'));
+                $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'city'));
+                $DB->delete_records('report_builder_filters', array('reportid' => $bigreportid, 'type' => $type, 'value' => 'idnumber'));
             }
         }
 
@@ -1116,11 +1117,9 @@ class totara_reportbuilder_column_testcase extends reportcache_advanced_testcase
 
         // Now generate the cache table and run the query.
         $this->enable_caching($bigreportid);
-        $rb = new reportbuilder($bigreportid);
+        $rb = reportbuilder::create($bigreportid);
         if ($rb->cache) {
-            list($sql, $params, $cacheschedule) = $rb->build_query(false, true, true);
-            $rs = $DB->get_counted_recordset_sql($sql, $params);
-            $rs->close();
+            $getdata->invoke($rb);
         }
 
         reportbuilder_purge_cache($bigreportid, false);
@@ -1128,6 +1127,7 @@ class totara_reportbuilder_column_testcase extends reportcache_advanced_testcase
 
     public function test_embedded_reports() {
         $this->resetAfterTest();
+        $this->setAdminUser();
 
         $embeddedobjects = reportbuilder_get_all_embedded_reports();
         foreach ($embeddedobjects as $embeddedobject) {

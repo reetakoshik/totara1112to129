@@ -96,6 +96,25 @@ $reportsurl = $CFG->wwwroot.'/course/report.php?id='.$course->id;
 $completion = new completion_info($course);
 $activities = $completion->get_activities();
 
+if ($sifirst !== 'all') {
+    set_user_preference('ifirst', $sifirst);
+}
+if ($silast !== 'all') {
+    set_user_preference('ilast', $silast);
+}
+
+if (!empty($USER->preference['ifirst'])) {
+    $sifirst = $USER->preference['ifirst'];
+} else {
+    $sifirst = 'all';
+}
+
+if (!empty($USER->preference['ilast'])) {
+    $silast = $USER->preference['ilast'];
+} else {
+    $silast = 'all';
+}
+
 // Generate where clause
 $where = array();
 $where_params = array();
@@ -126,7 +145,7 @@ if ($total) {
         implode(' AND ', $where),
         $where_params,
         $group,
-        $firstnamesort ? 'u.firstname ASC' : 'u.lastname ASC',
+        $firstnamesort ? 'u.firstname ASC, u.lastname ASC' : 'u.lastname ASC, u.firstname ASC',
         $csv ? 0 : COMPLETION_REPORT_PAGE,
         $csv ? 0 : $page * COMPLETION_REPORT_PAGE, // TL-9502
         $context,
@@ -159,8 +178,6 @@ if ($csv && $grandtotal && count($activities)>0) { // Only show CSV if there are
     $PAGE->set_title($strcompletion);
     $PAGE->set_heading($course->fullname);
     echo $OUTPUT->header();
-    $PAGE->requires->js('/report/progress/textrotate.js');
-    $PAGE->requires->js_function_call('textrotate_init', null, true);
 
     // Handle groups (if enabled)
     groups_print_course_menu($course,$CFG->wwwroot.'/report/progress/?course='.$course->id);
@@ -186,38 +203,13 @@ if (strlen($sort)) {
 }
 $link .= '&amp;start=';
 
-// Build the the page by Initial bar
-$initials = array('first', 'last');
-$alphabet = explode(',', get_string('alphabet', 'langconfig'));
-
 $pagingbar = '';
-foreach ($initials as $initial) {
-    $var = 'si'.$initial;
 
-    $othervar = $initial == 'first' ? 'silast' : 'sifirst';
-    $othervar = $$othervar != 'all' ? "&amp;{$othervar}={$$othervar}" : '';
-
-    $pagingbar .= ' <div class="initialbar '.$initial.'initial">';
-    $pagingbar .= get_string($initial.'name').':&nbsp;';
-
-    if ($$var == 'all') {
-        $pagingbar .= '<strong>'.get_string('all').'</strong> ';
-    }
-    else {
-        $pagingbar .= "<a href=\"{$link}{$othervar}\">".get_string('all').'</a> ';
-    }
-
-    foreach ($alphabet as $letter) {
-        if ($$var === $letter) {
-            $pagingbar .= '<strong>'.$letter.'</strong> ';
-        }
-        else {
-            $pagingbar .= "<a href=\"$link&amp;$var={$letter}{$othervar}\">$letter</a> ";
-        }
-    }
-
-    $pagingbar .= '</div>';
-}
+// Initials bar.
+$prefixfirst = 'sifirst';
+$prefixlast = 'silast';
+$pagingbar .= $OUTPUT->initials_bar($sifirst, 'firstinitial', get_string('firstname'), $prefixfirst, $url);
+$pagingbar .= $OUTPUT->initials_bar($silast, 'lastinitial', get_string('lastname'), $prefixlast, $url);
 
 // Do we need a paging bar?
 if ($total > COMPLETION_REPORT_PAGE) {
@@ -298,12 +290,14 @@ foreach($activities as $activity) {
         print $sep.csv_quote($displayname).$sep.csv_quote($datetext);
     } else {
         $shortenedname = shorten_text($displayname);
-        print '<th scope="col" class="'.$datepassedclass.'">'.
-            '<a href="'.$CFG->wwwroot.'/mod/'.$activity->modname.
-            '/view.php?id='.$activity->id.'" title="' . s($displayname) . '" class="activity">'.
-            '<span class="completion-activityname">'.$shortenedname.'</span>'.
+        print '<th scope="col" class="completion-header '.$datepassedclass.'">'.
+            '<a href="'.$CFG->wwwroot.'/mod/'.$activity->modname .
+            '/view.php?id='.$activity->id.'" title="' . s($displayname) . '">'.
+            '<div class="rotated-text-container"><span class="rotated-text">'.$shortenedname.'</span></div>'.
+            '<div class="modicon">' .
             $OUTPUT->flex_icon('mod_' . $activity->modname . '|icon', array('alt' => s(get_string('modulename', $activity->modname)))) .
-            '</a>';
+            '</div></a>';
+
         if ($activity->completionexpected) {
             print '<div class="completion-expected"><span>'.$datetext.'</span></div>';
         }

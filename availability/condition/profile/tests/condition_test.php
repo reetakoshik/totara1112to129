@@ -30,6 +30,7 @@ use availability_profile\condition;
  * Unit tests for the user profile condition.
  *
  * @package availability_profile
+ * @group availability
  * @copyright 2014 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

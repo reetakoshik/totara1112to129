@@ -181,19 +181,6 @@ class core_plugin_manager {
 
         $this->installedplugins = array();
 
-        // TODO: Delete this block once Moodle 2.6 or later becomes minimum required version to upgrade.
-        if ($CFG->version < 2013092001.02) {
-            // We did not upgrade the database yet.
-            $modules = $DB->get_records('modules', array(), 'name ASC', 'id, name, version');
-            foreach ($modules as $module) {
-                $this->installedplugins['mod'][$module->name] = $module->version;
-            }
-            $blocks = $DB->get_records('block', array(), 'name ASC', 'id, name, version');
-            foreach ($blocks as $block) {
-                $this->installedplugins['block'][$block->name] = $block->version;
-            }
-        }
-
         $versions = $DB->get_records('config_plugins', array('name'=>'version'));
         foreach ($versions as $version) {
             $parts = explode('_', $version->plugin, 2);
@@ -1152,6 +1139,15 @@ class core_plugin_manager {
     public static function is_deleted_standard_plugin($type, $name) {
         // TOTARA: Do not include plugins that were removed during upgrades to Totara 9 or Moodle 3.0 and earlier.
         $plugins = array(
+            // Moodle merge 3.3 removals.
+            'block_myoverview', 'repository_onedrive',
+            'fileconverter_googledrive', 'fileconverter_unoconv',
+            'tool_dataprivacy', 'tool_policy',
+
+            // Totara 12.0 removals.
+            'auth_fc', 'auth_imap', 'auth_nntp', 'auth_none', 'auth_pam', 'auth_pop3',
+            'tool_innodb', 'cachestore_memcache',
+
             // Totara 10.0 removals.
             'theme_kiwifruitresponsive',
             'theme_customtotararesponsive',
@@ -1223,8 +1219,8 @@ class core_plugin_manager {
             ),
 
             'auth' => array(
-                'cas', 'db', 'email', 'fc', 'imap', 'ldap', 'lti', 'manual', 'mnet',
-                'nntp', 'nologin', 'none', 'pam', 'pop3', 'shibboleth', 'webservice'
+                'cas', 'db', 'email', 'ldap', 'lti', 'manual', 'mnet',
+                'nologin', 'oauth2', 'shibboleth', 'webservice'
                 // Totara
                 , 'connect', 'approved'
             ),
@@ -1232,7 +1228,7 @@ class core_plugin_manager {
             'availability' => array(
                 'completion', 'date', 'grade', 'group', 'grouping', 'profile'
                 // Totara
-                , 'audience', 'hierarchy_organisation', 'hierarchy_position', 'language',
+                , 'audience', 'hierarchy_organisation', 'hierarchy_position', 'language', 'time_since_completion',
             ),
 
             'block' => array(
@@ -1248,12 +1244,14 @@ class core_plugin_manager {
                 'selfcompletion', 'settings', 'site_main_menu',
                 'social_activities', 'tag_flickr', 'tag_youtube', 'tags'
                 // Totara
-                ,'totara_addtoplan', 'totara_alerts',
+                ,'totara_addtoplan', 'totara_alerts', 'totara_community',
                 'totara_my_learning_nav', 'totara_my_team_nav', 'totara_quicklinks',
                 'totara_recent_learning', 'totara_report_graph', 'totara_report_manager', 'totara_stats',
                 'totara_tasks', 'totara_certifications', 'gaccess', 'totara_program_completion',
                 'totara_dashboard', 'totara_report_table', 'last_course_accessed',
-                'current_learning', 'totara_featured_links'
+                'current_learning', 'totara_featured_links',
+                'course_search', 'course_progress_report', 'frontpage_combolist',
+                'admin_subnav', 'admin_related_pages', 'course_navigation',
             ),
 
             'booktool' => array(
@@ -1265,7 +1263,7 @@ class core_plugin_manager {
             ),
 
             'cachestore' => array(
-                'file', 'memcache', 'memcached', 'mongodb', 'session', 'static', 'apcu', 'redis'
+                'file', 'memcached', 'mongodb', 'session', 'static', 'apcu', 'redis'
             ),
 
             'calendartype' => array(
@@ -1457,9 +1455,9 @@ class core_plugin_manager {
             'tool' => array(
                 'assignmentupgrade', 'availabilityconditions', 'behat', 'capability', 'customlang',
                 'dbtransfer', 'filetypes', 'generator', 'health', 'innodb',
-                'langimport', 'log', 'messageinbound', 'mobile', 'multilangupgrade', 'monitor',
+                'langimport', 'log', 'messageinbound', 'mobile', 'multilangupgrade', 'monitor', 'oauth2',
                 'phpunit', 'profiling', 'recyclebin', 'replace', 'spamcleaner', 'task', 'templatelibrary',
-                'unittest', 'uploadcourse', 'uploaduser', 'unsuproles', 'usertours', 'xmldb'
+                'uploadcourse', 'uploaduser', 'unsuproles', 'usertours', 'xmldb'
                 // Totara:
                 , 'totara_sync', 'totara_timezonefix', 'sitepolicy'
             ),
@@ -1469,7 +1467,7 @@ class core_plugin_manager {
                 'appraisal', 'cohort', 'core', 'coursecatalog', 'customfield', 'dashboard', 'feedback360', 'flavour',
                 'hierarchy', 'message', 'oauth', 'plan', 'program', 'question', 'reportbuilder',
                 'certification', 'completionimport', 'mssql', 'generator', 'connect', 'form',
-                'gap', 'job', 'completioneditor', 'userdata', 'contentmarketplace',
+                'gap', 'job', 'completioneditor', 'userdata', 'catalog', 'workflow', 'contentmarketplace',
             ),
             'tabexport' => array(
                 'csv', 'excel', 'ods', 'pdflandscape', 'pdfportrait', 'wkpdflandscape', 'wkpdfportrait',

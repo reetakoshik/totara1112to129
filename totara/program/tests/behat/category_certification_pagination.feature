@@ -32,7 +32,7 @@ Feature: Navigate to all certifications in a category with sub-categories
       | cert11     | cert11     | 2        |
       | cert12     | cert12     | 2        |
 
-    When I navigate to "Manage certifications" node in "Site administration > Courses"
+    When I navigate to "Manage certifications" node in "Site administration > Certifications"
     And I follow "Category 1"
     And I follow "cert1"
     And I follow "Category 1"

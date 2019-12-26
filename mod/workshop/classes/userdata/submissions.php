@@ -100,8 +100,6 @@ class submissions extends \totara_userdata\userdata\item {
             // Copied from \workshop::delete_submission().
             $assessments = $DB->get_fieldset_select('workshop_assessments', 'id', 'submissionid = :submissionid', ['submissionid' => $submission->id]);
 
-            self::purge_data_from_old_tables($submission->id, $assessments);
-
             // Copied from delete assessments.
             $DB->delete_records_list('workshop_grades', 'assessmentid', $assessments);
             foreach ($assessments as $itemid) {
@@ -226,31 +224,5 @@ class submissions extends \totara_userdata\userdata\item {
               WHERE wsub.authorid = :authorid",
             ['authorid' => $user->id]
         );
-    }
-
-    /**
-     * To remove when we get rid of the workshop tables suffixed with _old.
-     *
-     * Not exporting. We were not initially looking to purge as this is old data that is not used within any recent version
-     * of Totara.
-     *
-     * @param int $submissionid
-     * @param array $assessmentids
-     */
-    private static function purge_data_from_old_tables($submissionid, array $assessmentids) {
-        global $DB;
-
-        if (!empty($assessmentids)) {
-            list($insql, $inparams) = $DB->get_in_or_equal($assessmentids);
-            $oldassessmentids = $DB->get_fieldset_select('workshop_assessments_old', 'id', 'newid '.$insql, $inparams);
-
-            if (!empty($oldassessmentids)) {
-                $gradeids = $DB->get_fieldset_select('workshop_grades', 'id', 'assessmentid ' . $insql, $inparams);
-                $DB->delete_records_list('workshop_grades_old', 'newid', $gradeids);
-                $DB->delete_records_list('workshop_comments_old', 'assessmentid ' . $insql, $inparams);
-                $DB->delete_records_list('workshop_assessments_old', 'id', $oldassessmentids);
-            }
-        }
-        $DB->delete_records('workshop_submissions_old', ['newid' => $submissionid]);
     }
 }

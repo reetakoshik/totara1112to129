@@ -5,31 +5,31 @@ Feature: Perform basic dashboard user changes
   I need to change dashboards
 
   Background:
-  Given I am on a totara site
+    Given I am on a totara site
     And the following "users" exist:
       | username |
       | learner1 |
       | learner2 |
-  And the following "cohorts" exist:
+    And the following "cohorts" exist:
       | name | idnumber |
       | Cohort 1 | CH1 |
-  And the following totara_dashboards exist:
-    | name | locked | published | cohorts |
-    | First dashboard | 1 | 1 | CH1 |
-    | Dashboard locked published | 1 | 1 | CH1 |
-    | Dashboard unlocked published | 0 | 1 | CH1 |
-    | Dashboard unpublished | 1 | 0 | CH1 |
-    | Dashboard unassigned | 1 | 1 | |
-  And the following "cohort members" exist:
-    | user     | cohort |
-    | learner1 | CH1    |
-  And I log in as "admin"
-  And I set the following administration settings values:
-    | defaulthomepage | Totara dashboard |
-  And the following "cohort members" exist:
+    And the following totara_dashboards exist:
+      | name | locked | published | cohorts |
+      | First dashboard | 1 | 1 | CH1 |
+      | Dashboard locked published | 1 | 1 | CH1 |
+      | Dashboard unlocked published | 0 | 1 | CH1 |
+      | Dashboard unpublished | 1 | 0 | CH1 |
+      | Dashboard unassigned | 1 | 1 | |
+    And the following "cohort members" exist:
+      | user     | cohort |
+      | learner1 | CH1    |
+    And I log in as "admin"
+    And I set the following administration settings values:
+      | defaulthomepage | Totara dashboard |
+    And the following "cohort members" exist:
       | user     | cohort |
       | learner2 | CH1    |
-  And I log out
+    And I log out
 
   Scenario: Add block to personal version of second dashboard and then reset
     And I log in as "learner1"
@@ -65,6 +65,7 @@ Feature: Perform basic dashboard user changes
     And I click on "Dashboard unlocked published" "link"
     And I press "Blocks editing on"
     And I add the "Latest announcements" block
+    And I add the "Navigation" block if not present
 
     # Move blocks around
     And I click on "span.moodle-core-dragdrop-draghandle" "css_element" in the "Latest announcements" "block"

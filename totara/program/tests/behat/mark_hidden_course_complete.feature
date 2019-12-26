@@ -28,7 +28,7 @@ Feature: Mark hidden course in a program complete via recognition of prior learn
 
   Scenario: Admin can mark a learners course complete by RPL in ROL program page
     Given I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "Learner One" "link"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     And I switch to "Programs" tab

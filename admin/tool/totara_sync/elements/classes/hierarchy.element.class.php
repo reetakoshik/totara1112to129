@@ -50,20 +50,13 @@ abstract class totara_sync_hierarchy extends totara_sync_element {
         return true;
     }
 
+    /**
+     * @param MoodleQuickForm $mform
+     */
     function config_form(&$mform) {
+
         $mform->addElement('selectyesno', 'sourceallrecords', get_string('sourceallrecords', 'tool_totara_sync'));
         $mform->setDefault('sourceallrecords', 0);
-        $mform->addElement('static', 'sourceallrecordsdesc', '', get_string('sourceallrecordsdesc', 'tool_totara_sync'));
-
-        // Empty CSV field setting.
-        $emptyfieldopt = array(
-            false => get_string('emptyfieldskeepdata', 'tool_totara_sync'),
-            true => get_string('emptyfieldsremovedata', 'tool_totara_sync')
-        );
-        $mform->addElement('select', 'csvsaveemptyfields', get_string('emptyfieldsbehaviourhierarchy', 'tool_totara_sync'), $emptyfieldopt);
-        $default = !empty($this->config->csvsaveemptyfields);
-        $mform->setDefault('csvsaveemptyfields', $default);
-        $mform->addHelpButton('csvsaveemptyfields', 'emptyfieldsbehaviourhierarchy', 'tool_totara_sync');
 
         $mform->addElement('header', 'crud', get_string('allowedactions', 'tool_totara_sync'));
         $mform->addElement('checkbox', 'allow_create', get_string('create', 'tool_totara_sync'));
@@ -72,6 +65,7 @@ abstract class totara_sync_hierarchy extends totara_sync_element {
         $mform->setDefault('allow_update', 1);
         $mform->addElement('checkbox', 'allow_delete', get_string('delete', 'tool_totara_sync'));
         $mform->setDefault('allow_delete', 1);
+        $mform->setExpanded('crud');
     }
 
     function config_save($data) {
@@ -127,6 +121,20 @@ abstract class totara_sync_hierarchy extends totara_sync_element {
             throw new totara_sync_exception($elname, "{$elname}sync", 'sanitycheckfailed');
         }
 
+        // Initialise to safe defaults if settings not present.
+        if (!isset($this->config->sourceallrecords)) {
+            $this->config->sourceallrecords = 0;
+        }
+        if (!isset($this->config->allow_create)) {
+            $this->config->allow_create = 0;
+        }
+        if (!isset($this->config->allow_update)) {
+            $this->config->allow_update = 0;
+        }
+        if (!isset($this->config->allow_delete)) {
+            $this->config->allow_delete = 0;
+        }
+
         // Make sure the required deleted column is present if necessary.
         $synctablecolumns = $DB->get_columns($synctable);
         $deletedcolumnpresent = isset($synctablecolumns['deleted']);
@@ -168,11 +176,8 @@ abstract class totara_sync_hierarchy extends totara_sync_element {
         if (isset($sql)) {
             $rs = $DB->get_recordset_sql($sql);
 
-            $iscsvimport = substr(get_class($this->get_source()), -4) === '_csv';
-            $saveemptyfields = !$iscsvimport || !empty($this->config->csvsaveemptyfields);
-
             foreach ($rs as $item) {
-                $this->sync_item($item, $synctable, $saveemptyfields);
+                $this->sync_item($item, $synctable);
             }
             $rs->close();
         }
@@ -224,12 +229,16 @@ abstract class totara_sync_hierarchy extends totara_sync_element {
      *
      * @param stdClass $newitem object with escaped values
      * @param string $synctable sync table name
-     * @param bool $saveemptyfields true if empty strings should erase data, false if the field should be ignored
+     * @param bool $unused @deprecated 12.0 No longer in use by internal code.
      * @return bool true because someone didn't like calling return without a value
      * @throws totara_sync_exception
      */
-    function sync_item($newitem, $synctable, $saveemptyfields) {
+    function sync_item($newitem, $synctable, $unused = false) {
         global $DB;
+
+        if ($unused !== false) {
+            debugging('The third parameter of sync_item is deprecated', DEBUG_DEVELOPER);
+        }
 
         if (empty($this->config->allow_create) && empty($this->config->allow_update)) {
             // not allowed to create/update, so return early
@@ -238,55 +247,61 @@ abstract class totara_sync_hierarchy extends totara_sync_element {
 
         $elname = $this->get_name();
 
-        if (!$newitem->frameworkid = $DB->get_field("{$elname}_framework", 'id', array('idnumber' => $newitem->frameworkidnumber))) {
+        if ($newitem->frameworkidnumber === null) {
+            // Ignore empty fields, set the old frameworkid.
+            if (!$newitem->frameworkid = $DB->get_field($elname, 'frameworkid', array('idnumber' => $newitem->idnumber))) {
+                throw new totara_sync_exception($elname, 'syncitem', 'existingitemxframeworkidnotfound',
+                    $newitem->idnumber);
+            }
+        } else if (!$newitem->frameworkid = $DB->get_field("{$elname}_framework", 'id', array('idnumber' => $newitem->frameworkidnumber))) {
             throw new totara_sync_exception($elname, 'syncitem', 'frameworkxnotfound',
                 $newitem->frameworkidnumber);
         }
 
+
+        // null = keep current value
+        // <number> = assign value
+        //
         // Ensure newitem's parent is synced first - only non-existent or not already synced parent items.
-        // The condition must use !== '' because it needs to handle 0 as a valid parentidnumber.
-
-        if (empty($this->config->sourceallrecords)) {
-            $parentselect = "idnumber = ?";
-            $parentparams = array($newitem->parentidnumber);
+        if ($newitem->parentidnumber !== null && $newitem->parentidnumber !== '') {
+            // Cant find parent so try sync parent first
+            if (!$parentid = $DB->get_field_select($elname, 'id', "idnumber = ?", array($newitem->parentidnumber))) {
+                // Sync parent first (recursive)
+                $sql = "SELECT *
+                    FROM {{$synctable}}
+                    WHERE idnumber = ? ";
+                if (!$newparent = $DB->get_record_sql($sql, array($newitem->parentidnumber), IGNORE_MULTIPLE)) {
+                    throw new totara_sync_exception($elname, 'syncitem', 'parentxnotfound',
+                        $newitem->parentidnumber);
+                }
+                try {
+                    $this->sync_item($newparent, $synctable);
+                } catch (totara_sync_exception $e) {
+                    throw new totara_sync_exception($elname, 'syncitem', 'cannotsyncitemparent',
+                        $newitem->parentidnumber, $e->getMessage());
+                }
+                // Update parentid with the newly-created one
+                $newitem->parentid = $DB->get_field($elname, 'id', array('idnumber' => $newitem->parentidnumber));
+            } else {
+                $newitem->parentid = $parentid;
+            }
+        } else if ($newitem->parentidnumber === null) {
+            // If null then we keep the current value (if it exists).
+            $newitem->parentid = $DB->get_field($elname, 'parentid', array('idnumber' => $newitem->idnumber));
         } else {
-            $parentselect = "idnumber = ? AND timemodified = ?";
-            $parentparams = array($newitem->parentidnumber, $newitem->timemodified);
+            // Zero will erase the existing parentid.
+            $newitem->parentid = 0;
         }
 
-        if ($newitem->parentidnumber !== '' && !$parentid = $DB->get_field_select($elname, 'id', $parentselect, $parentparams)) {
-
-            // Sync parent first (recursive)
-            $sql = "SELECT *
-                      FROM {{$synctable}}
-                     WHERE idnumber = ? ";
-            if (!$newparent = $DB->get_record_sql($sql, array($newitem->parentidnumber), IGNORE_MULTIPLE)) {
-                throw new totara_sync_exception($elname, 'syncitem', 'parentxnotfound',
-                    $newitem->parentidnumber);
-            }
-            try {
-                $this->sync_item($newparent, $synctable, $saveemptyfields);
-            } catch (totara_sync_exception $e) {
-                throw new totara_sync_exception($elname, 'syncitem', 'cannotsyncitemparent',
-                    $newitem->parentidnumber, $e->getMessage());
-            }
-            // Update parentid with the newly-created one
-            $parentid = $DB->get_field($elname, 'id', array('idnumber' => $newitem->parentidnumber));
-
-        // This action is only required for CSV imports. If csvsaveemptyfields is set to zero, an
-        // empty string for the parentid should not update or delete the existing value. To ensure
-        // this we need to retrieve the existing value and set the parentid to it.
-        } else if ($newitem->parentidnumber === '' && isset($this->config->csvsaveemptyfields) && $this->config->csvsaveemptyfields == 0) {
-            $parentid = $DB->get_field($elname, 'parentid', array('idnumber' => $newitem->idnumber));
-        }
-
-        $newitem->parentid = isset($parentid) && $parentid !== '' ? $parentid : 0;
-
-        if (!isset($newitem->typeidnumber) || (($newitem->typeidnumber === "") && !$saveemptyfields)) {
-            unset($newitem->typeid);
-        } else if (empty($newitem->typeidnumber)) {
+        if (!isset($newitem->typeidnumber) && $newitem->typeidnumber === null) {
+            // Use existing value.
+            $typeid = $DB->get_field("{$elname}", 'typeid', array('idnumber' => $newitem->idnumber));
+            $newitem->typeid = $typeid;
+        } else if ($newitem->typeidnumber === 0) {
+            // Delete
             $newitem->typeid = 0;
         } else {
+            // Process new idnumber
             $newitem->typeid = $DB->get_field($elname.'_type', 'id', array('idnumber' => $newitem->typeidnumber));
         }
 
@@ -309,17 +324,11 @@ abstract class totara_sync_hierarchy extends totara_sync_element {
                     "{$elname} {$newitem->idnumber}");
             }
 
-            $iscsvimport = substr(get_class($this->get_source()), -4) === '_csv';
-
             // Save custom field data
             if ($customfields = json_decode($newitem->customfields)) {
                 foreach ($customfields as $name=>$value) {
                     if ($value === null) {
                         continue; // Null means "don't update the existing data", so skip this field.
-                    }
-
-                    if ($iscsvimport && $value === "" && !$saveemptyfields) {
-                        continue; // CSV import and empty fields are not saved, so skip this field.
                     }
 
                     $hitem->{$name} = $value;
@@ -352,10 +361,6 @@ abstract class totara_sync_hierarchy extends totara_sync_element {
             if ($value === null) {
                 unset($newitem->$field); // Null means "don't update the existing data", so skip this field.
             }
-
-            if ($value === "" && !$saveemptyfields) {
-                unset($newitem->$field); // CSV import and empty fields are not saved, so skip this field.
-            }
         }
 
         $newitem->usermodified = get_admin()->id;
@@ -369,17 +374,18 @@ abstract class totara_sync_hierarchy extends totara_sync_element {
             // Remove old custom field data
             $this->hierarchy->delete_custom_field_data($dbitem->id);
         }
+
         if (isset($newitem->typeid) && !empty($newitem->typeid)) {
             // Add/update custom field data
-            if ($newcustomfields = json_decode($newitem->customfields)) {
+            if (isset($newitem->customfields)) {
+                $newcustomfields = json_decode($newitem->customfields);
                 foreach ($newcustomfields as $name=>$value) {
                     if ($value === null) {
                         continue; // Null means "don't update the existing data", so skip this field.
                     }
 
-                    if ($value === "" && !$saveemptyfields) {
-                        continue; // CSV import and empty fields are not saved, so skip this field.
-                    }
+                    // TODO: TL-16855 Check saving of menu customfield so it default data
+                    // when deleting value
 
                     $newitem->{$name} = $value;
                 }
@@ -486,18 +492,23 @@ abstract class totara_sync_hierarchy extends totara_sync_element {
             $items = $DB->get_records($elname, array(), '', 'id, idnumber, parentid');
             foreach ($items as $item) {
                 if (!isset($nodes[$item->idnumber])) {
-                    $nodes[$item->idnumber] = ($item->parentid == 0) ? 0 : $items[$item->parentid]->idnumber;
+                    $nodes[$item->idnumber] = ($item->parentid == 0) ? '' : $items[$item->parentid]->idnumber;
                 }
             }
+            unset($items);
         }
 
         // Start eliminating nodes from the valid trees
         // Start at the top so get all the root nodes (no parentid)
-        $top_nodes_1 = array_keys($nodes, '');
-        $top_nodes_2 = array_keys($nodes, '0');
+        $top_nodes_1 = array_keys($nodes, '', true);
+        $top_nodes_2 = array_keys($nodes, '0', true);
+        $top_nodes_3 = array_keys($nodes, 0, true);
+        $top_nodes_4 = array_keys($nodes, null, true);
 
         // Merge top level nodes into one array
-        $goodnodes = array_merge($top_nodes_1, $top_nodes_2);
+        $goodnodes = array_merge($top_nodes_1, $top_nodes_2, $top_nodes_3, $top_nodes_4);
+
+        unset($top_nodes_1, $top_nodes_2, $top_nodes_3, $top_nodes_4);
 
         while (!empty($goodnodes)) {
             $newgoodnodes = array();

@@ -45,6 +45,13 @@ class behat_partial_named_selector extends \Behat\Mink\Selector\PartialNamedSele
             $this->registerNamedXpath($name, $xpath);
         }
 
+        foreach (self::$customreplacements as $from => $tos) {
+            $this->registerReplacement($from, implode(' or ', $tos));
+        }
+
+        $this->registerReplacement('%iconMatch%', "(contains(concat(' ', @class, ' '), ' icon ') or name() = 'img')");
+        $this->registerReplacement('%imgAltMatch%', './/*[%iconMatch% and (%altMatch% or %titleMatch%)]');
+
         // Call the constructor after adding any new selector or replacement values.
         parent::__construct();
     }
@@ -118,7 +125,7 @@ class behat_partial_named_selector extends \Behat\Mink\Selector\PartialNamedSele
      * xpaths that represents that names and includes a placeholder that
      * will be replaced by the locator. These are Moodle's own xpaths.
      *
-     * @var string[] XPaths for moodle elements.
+     * @var array XPaths for moodle elements.
      */
     protected static $moodleselectors = array(
         'activity' => <<<XPATH
@@ -160,6 +167,18 @@ XPATH
     normalize-space(descendant::div[@class='hd']) = %locator%]
         |
 .//div[@data-region='modal' and descendant::*[@data-region='title'] = %locator%]
+        |
+.//div[
+        contains(concat(' ', normalize-space(@class), ' '), ' modal-content ')
+            and
+        normalize-space(descendant::h4[contains(concat(' ', normalize-space(@class), ' '), ' modal-title ')]) = %locator%
+    ]
+        |
+.//div[
+        contains(concat(' ', normalize-space(@class), ' '), ' modal ')
+            and
+        normalize-space(descendant::*[contains(concat(' ', normalize-space(@class), ' '), ' modal-header ')] = %locator%)
+    ]
 XPATH
         , 'list_item' => <<<XPATH
 .//li[contains(normalize-space(.), %locator%) and not(.//li[contains(normalize-space(.), %locator%)])]
@@ -226,6 +245,27 @@ XPATH
 .//*[@data-passwordunmask='wrapper']
     /descendant::input[@id = %locator% or @id = //label[contains(normalize-space(string(.)), %locator%)]/@for]
 XPATH
+        ],
+    ];
+
+    /**
+     * Mink comes with a number of named replacements.
+     * Sometimes we want to add our own.
+     *
+     * @var array XPaths for moodle elements.
+     */
+    protected static $customreplacements = [
+        '%buttonMatch%' => [
+            'upstream' => '%idOrNameMatch% or %valueMatch% or %titleMatch%',
+            'aria' => '%ariaLabelMatch%',
+        ],
+        '%ariaLabelMatch%' => [
+            'moodle' => 'contains(./@aria-label, %locator%)',
+        ],
+        // Totara: check aria-label for input field
+        '%labelTextMatch%' => [
+            'upstream' => './@id = //label[%tagTextMatch%]/@for',
+            'aria' => '%ariaLabelMatch%',
         ],
     ];
 

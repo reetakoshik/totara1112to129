@@ -382,4 +382,10 @@ class totara_core_generator extends component_generator_base {
 
         profile_save_data($user);
     }
+
+    public function create_menu_item(array $data = []) {
+        $unsavedemptyitem = \totara_core\totara\menu\menu::get();
+        $item = $unsavedemptyitem->create($data);
+        return $item;
+    }
 }

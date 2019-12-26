@@ -41,11 +41,17 @@ class message_sent_search_testcase extends advanced_testcase {
      */
     protected $messagesentareaid = null;
 
+    protected function tearDown() {
+        $this->messagesentareaid = null;
+
+        parent::tearDown();
+    }
+
     /**
      * Setting up the test environment
      * @return void
      */
-    public function setUp() {
+    protected function setUp() {
         $this->resetAfterTest(true);
         set_config('enableglobalsearch', true);
 

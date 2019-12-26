@@ -31,7 +31,7 @@ class totara_core_totara_testcase extends advanced_testcase {
         global $CFG;
 
         $majorversion = totara_major_version();
-        $this->assertInternalType('string', $majorversion);
+        $this->assertIsString($majorversion);
         $this->assertRegExp('/^[0-9]+$/', $majorversion);
 
         $TOTARA = null;

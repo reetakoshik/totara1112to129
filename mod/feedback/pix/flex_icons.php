@@ -32,4 +32,16 @@ $icons = array(
                     'classes' => 'fa-bullhorn',
                 ),
         ),
+    'mod_feedback|notrequired' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-question-circle-o',
+                ),
+        ),
+);
+
+$aliases = array(
+    'mod_feeback|required' => 'required',
+    'mod_feeback|notrequired' => 'required',
 );

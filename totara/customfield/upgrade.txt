@@ -1,6 +1,10 @@
 This files describes API changes for code that uses the question API,
 information provided here is intended especially for developers.
 
+=== 12.0 ===
+
+* Removed deprecated function customfield_record()
+
 === 11.0 ===
 
 * customfield_get_fields function has been deprecated, this function was used only in one place and duplicated the functionality of customfield_get_data.

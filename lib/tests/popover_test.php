@@ -58,7 +58,14 @@ class core_output_popover_testcase extends basic_testcase {
             'contenttemplate' => $template,
             'contenttemplatecontext' => $context,
             'title' => $title,
-            'contentraw' => ''
+            'contentraw' => '',
+            'arrow_placement' => null,
+            'close_on_focus_out' => true,
+            'placement_max_height' => null,
+            'max_height' => null,
+            'placement_max_width' => null,
+            'max_width' => null,
+            'trigger' => ''
         );
         $this->assertSame($output, $popover->export_for_template($OUTPUT));
     }
@@ -83,7 +90,14 @@ class core_output_popover_testcase extends basic_testcase {
             'contenttemplate' => false,
             'contenttemplatecontext' => false,
             'title' => $title,
-            'contentraw' => $content
+            'contentraw' => $content,
+            'arrow_placement' => null,
+            'close_on_focus_out' => true,
+            'placement_max_height' => null,
+            'max_height' => null,
+            'placement_max_width' => null,
+            'max_width' => null,
+            'trigger' => ''
         );
         $this->assertSame($output, $popover->export_for_template($OUTPUT));
     }

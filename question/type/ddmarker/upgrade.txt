@@ -1,0 +1,7 @@
+This files describes API changes for the ddmarker question type,
+information provided here is intended especially for developers.
+
+=== 12.5 ===
+
+* qtype_ddmarker_renderer::formulation_and_controls() has changed to use
+  get_outer_question_div_unique_id() for generating id of the outer div of the question.

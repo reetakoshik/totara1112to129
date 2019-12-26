@@ -65,8 +65,81 @@ $observers = array(
     array(
         'eventname'   => '\core\event\cohort_member_added',
         'callback'    => 'core_badges_observer::cohort_criteria_review',
-    )
+    ),
 
+    // Added by Totara.
+    array(
+        'eventname' => '\core\event\course_created',
+        'callback'  => 'core_course\totara_catalog\course::object_update_observer'
+    ),
+    array(
+        'eventname' => '\core\event\course_updated',
+        'callback'  => 'core_course\totara_catalog\course::object_update_observer'
+    ),
+    array(
+        'eventname' => '\core\event\course_deleted',
+        'callback'  => 'core_course\totara_catalog\course::object_update_observer'
+    ),
+    array(
+        'eventname' => '\core\event\tag_added',
+        'callback'  => 'core_course\totara_catalog\course::object_update_observer'
+    ),
+    array(
+        'eventname' => '\core\event\tag_updated',
+        'callback'  => 'core_course\totara_catalog\course::object_update_observer'
+    ),
+    array(
+        'eventname' => '\core\event\tag_removed',
+        'callback'  => 'core_course\totara_catalog\course::object_update_observer'
+    ),
+    array(
+        'eventname' => '\totara_customfield\event\customfield_data_deleted',
+        'callback'  => 'core_course\totara_catalog\course::object_update_observer'
+    ),
+    array(
+        'eventname' => '\core\event\course_section_updated',
+        'callback'  => 'core_course\totara_catalog\course::object_update_observer'
+    ),
+    array(
+        'eventname' => '\core\event\course_section_deleted',
+        'callback'  => 'core_course\totara_catalog\course::object_update_observer'
+    ),
+    array(
+        'eventname' => '\core\event\course_module_created',
+        'callback'  => 'core_course\totara_catalog\course::object_update_observer'
+    ),
+    array(
+        'eventname' => '\core\event\course_module_deleted',
+        'callback'  => 'core_course\totara_catalog\course::object_update_observer'
+    ),
+    array(
+        'eventname' => '\core\event\course_module_updated',
+        'callback'  => 'core_course\totara_catalog\course::object_update_observer'
+    ),
+    array(
+        'eventname' => '\core\event\course_category_updated',
+        'callback'  => 'core_course\totara_catalog\course::object_update_observer'
+    ),
+    array(
+        'eventname' => '\core\event\course_restored',
+        'callback'  => 'core_course\totara_catalog\course::object_update_observer'
+    ),
+    array(
+        'eventname' => '\core\event\admin_settings_changed',
+        'callback'  => 'core_tag\totara_catalog\tags_observer::changed'
+    ),
+    array(
+        'eventname' => '\core\event\tag_area_updated',
+        'callback'  => 'core_tag\totara_catalog\tags_observer::tag_area_updated'
+    ),
+    array(
+        'eventname' => '\totara_customfield\event\customfield_created',
+        'callback'  => 'core_course\totara_catalog\course\observer\customfield_changed::update_default_data'
+    ),
+    array(
+        'eventname' => '\totara_customfield\event\customfield_updated',
+        'callback'  => 'core_course\totara_catalog\course\observer\customfield_changed::update_default_data'
+    ),
 );
 
 // List of all events triggered by Moodle can be found using Events list report.

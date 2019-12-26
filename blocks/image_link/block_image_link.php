@@ -3,28 +3,37 @@
 class block_image_link extends block_base 
 {
     function init() {
-        $this->title = get_string('pluginname', 'block_image_link');
+
+    $caption = isset($this->block->config->image_caption) ? $this->block->config->image_caption : '';
+  
+        if($caption){
+            $this->title = $caption;
+        } 
+        else{
+            $this->title = get_string('pluginname', 'block_image_link');
+        }  
+
     }
 
     public function instance_allow_multiple() {
         return true;
     }
 
-    public function hide_header() {
-        return $this->imageUrl() ? true : false;
-    }
+    // public function hide_header() {
+    //     return $this->imageUrl() ? true : false;
+    // }
 
     public function get_content() {
         if ($this->content !== null) {
           return $this->content;
         }
-
+        $caption = isset($this->config->image_caption) ? $this->config->image_caption : '';
+        
         $link = isset($this->config->image_link) ? $this->config->image_link : '';
         if (strpos($link, 'http://') === false && strpos($link, 'https://') === false) {
             $link = "http://$link";
         }
-
-        $caption = isset($this->config->image_caption) ? $this->config->image_caption : '';
+        
         $color = isset($this->config->color) && $this->config->color != -1 ? $this->config->color : '';
         $target = isset($this->config->new_window) && $this->config->new_window ? 'target="_blank"' : '';
         $imageUrl = $this->imageUrl();
@@ -33,23 +42,35 @@ class block_image_link extends block_base
         $headerStyle = $color ? "style=\"background-color: $color; color: white;\"" : '';
         $topColor = $color ? $color : '#f3f3f3';
         $bodyStyle = $imageUrl ? "style=\"border-top: 3px solid $topColor; background-image: url($imageUrl); \"" : '';
+        if($headerStyle){
+            $id = '#inst'.$this->instance->id;
+     
+            echo '<style type="text/css">
+              '.$id.' .header{
+             background-color:'.$color.'; } 
+            </style>';
+
+         }
 
         $this->content =  new stdClass;
 
         if ($imageUrl) {
-            $this->content->text = 
-                "<div class=\"header $headerClass\" $headerStyle>".
+           /* $this->content->text = "<div class=\"header $headerClass\" $headerStyle>".
                     "<h2>
                         <a href=\"$link\" $target>
                             $caption
                         </a>
                     </h2>
-                </div>
+                </div>";*/
+            $this->content->text = 
+                "
                 <div $bodyStyle class=\"image\">
                     <a href=\"$link\" $target></a>
                 </div>";
-        }
         
+        
+       
+                }
         return $this->content;
     }
 

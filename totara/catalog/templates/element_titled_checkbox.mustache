@@ -1,0 +1,81 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Matthias Bonk <matthias.bonk@totaralearning.com>
+   @package totara_catalog
+}}
+{{!
+
+    @template totara_form/element_checkbox
+
+    This template generates Totara form checkbox element. It is the same as the basic checkbox template apart from
+    styling related adjustments.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+     * form_item_template string this template, used for dynamic partials
+     * name__xxxx bool true where xxxx is the name of this form item
+     * name string name of this item
+     * id string id of this item
+     * label string
+     * frozen bool
+     * checkedvalue string
+     * uncheckedvalue string
+     * checked bool
+     * required bool
+
+    Other context variables for following partials:
+     * totara_form/help_button
+     * totara_form/validation_errors
+
+    Example context (json):
+      {
+          "form_item_template":"totara_form\/element_checkbox",
+          "name__checkbox":true,
+          "name":"checkbox",
+          "id":"tfiid_checkbox_totara_form_form_testform_element_compilation",
+          "label":"Checkbox",
+          "frozen":false,
+          "amdmodule":"totara_form\/form_element_checkbox",
+          "required":false,
+          "checkedvalue":"checked",
+          "uncheckedvalue":"empty",
+          "checked":false,
+          "errors_has_items":false,
+          "errors":[],
+          "helphtml":false,
+          "elementtype":"totara_form\\form\\element\\checkbox",
+          "elementid":"tfiid_checkbox_totara_form_form_testform_element_compilation",
+          "elementclassification":"element"
+          "checkboxtitle": "Enable"
+      }
+}}
+<div class="tf_element totara_form_element_checkbox">
+    {{^frozen}}<input type="hidden" name="{{name}}" value="{{uncheckedvalue}}" />{{/frozen}}
+    {{#label}}
+    <div class="tf_element_title"><label class="legend" for="{{id}}">{{{.}}}{{#required}}{{> totara_form/required_suffix}}{{/required}}</label>{{> totara_form/help_button}}</div>
+    {{/label}}
+    <div class="tf_element_input">{{> totara_form/validation_errors}}<input type="checkbox" id="{{id}}" {{#frozen}}disabled data-{{/frozen}}name="{{name}}" value="{{checkedvalue}}"
+                                                                            data-value-unchecked="{{uncheckedvalue}}" {{#checked}}checked{{/checked}} {{#required}}required{{/required}}
+    /> <label class="legend" for="{{id}}">{{checkboxtitle}}</label><span class="tf_loading" style="display: none;">{{#pix}} i/loading, core, loading, totara_core{{/pix}}</span></div>
+</div>

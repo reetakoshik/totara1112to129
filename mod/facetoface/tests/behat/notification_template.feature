@@ -50,9 +50,7 @@ Feature: Edit seminar notification templates
 
   @javascript
   Scenario: Updating templates can be set to update the notifications in a seminar activity
-    When I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    When I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name              | Test seminar name        |
       | Description       | Test seminar description |
@@ -72,8 +70,7 @@ Feature: Edit seminar notification templates
       | Body                  | A customised body  |
       | Update all activities | 1                  |
     And I press "Save changes"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I navigate to "Notifications" node in "Seminar administration"
     And I click on "Edit" "link" in the "A customised title" "table_row"
@@ -85,9 +82,7 @@ Feature: Edit seminar notification templates
 
   @javascript
   Scenario: Updating templates can be set to not update the notifications in a seminar activity
-    When I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    When I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name              | Test seminar name        |
       | Description       | Test seminar description |
@@ -105,8 +100,7 @@ Feature: Edit seminar notification templates
       | Body                  | A customised body  |
       | Update all activities | 0                  |
     And I press "Save changes"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I navigate to "Notifications" node in "Seminar administration"
     And I click on "Edit" "link" in the "Seminar registration closed" "table_row"

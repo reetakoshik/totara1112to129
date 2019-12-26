@@ -50,7 +50,6 @@ class behat_permissions extends behat_base {
         \behat_hooks::set_step_readonly(false);
 
         $parentnodes = get_string('administrationsite') . ' > ' .
-            get_string('users', 'admin') . ' > ' .
             get_string('permissions', 'role');
 
         // Go to home page.
@@ -200,7 +199,6 @@ class behat_permissions extends behat_base {
     public function i_define_the_allowed_role_assignments_for_a_role_as($rolename, $table) {
         \behat_hooks::set_step_readonly(false);
         $parentnodes = get_string('administrationsite') . ' > ' .
-            get_string('users', 'admin') . ' > ' .
             get_string('permissions', 'role');
 
         // Go to home page.

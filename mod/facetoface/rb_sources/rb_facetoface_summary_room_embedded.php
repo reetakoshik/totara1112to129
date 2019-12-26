@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 class rb_facetoface_summary_room_embedded extends rb_base_embedded {
 
     public function __construct($data) {
-        $this->url = '/mod/facetoface/room.php';
+        $this->url = '/mod/facetoface/reports/rooms.php';
         $this->source = 'facetoface_room_assignments';
         $this->shortname = 'facetoface_summary_room';
         $this->fullname = get_string('embedded:seminarroomsupcoming', 'mod_facetoface');

@@ -951,4 +951,18 @@ class competency extends hierarchy {
         }
     }
 
+    /**
+     * Return the fields to include in export
+     *
+     * @return array Array of heading and query field maps
+     */
+    protected function get_export_fields() {
+        $fields = array_merge(
+            parent::get_export_fields(),
+            ['aggregationmethod' => 'hierarchy.aggregationmethod']
+        );
+
+        return $fields;
+    }
+
 }  // class

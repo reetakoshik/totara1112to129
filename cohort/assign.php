@@ -60,7 +60,7 @@ if ($context->contextlevel == CONTEXT_COURSECAT) {
 } else {
     navigation_node::override_active_url(new moodle_url('/cohort/index.php', array()));
 }
-totara_cohort_navlinks($cohort->id, $cohort->name, get_string('assign', 'cohort'));
+totara_cohort_navlinks($cohort->id, format_string($cohort->name), get_string('assign', 'cohort'));
 
 $PAGE->set_title(get_string('assigncohorts', 'cohort'));
 $PAGE->set_heading($COURSE->fullname);

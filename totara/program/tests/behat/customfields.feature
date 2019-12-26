@@ -10,7 +10,7 @@ Feature: Program and certification customfields can be created and populated
     # Add images to the private files block to use later
     And I click on "Dashboard" in the totara menu
     And I press "Customise this page"
-    And I select "Private files" from the "Add a block" singleselect
+    And I add the "Private files" block
     And I follow "Manage private files..."
     When I upload "totara/program/tests/fixtures/leaves-blue.png" file to "Files" filemanager
     And I upload "totara/program/tests/fixtures/leaves-green.png" file to "Files" filemanager
@@ -20,32 +20,32 @@ Feature: Program and certification customfields can be created and populated
     When I navigate to "Custom fields" node in "Site administration > Courses"
     And I follow "Programs / Certifications"
     # Checkbox.
-    And I click on "Checkbox" "option"
+    And I set the field "Create a new custom field" to "Checkbox"
     And I set the following fields to these values:
       | Full name                   | Program checkbox |
       | Short name (must be unique) | checkbox       |
     And I press "Save changes"
     # Date/time
-    And I click on "Date/time" "option"
+    And I set the field "Create a new custom field" to "Date/time"
     And I set the following fields to these values:
       | Full name                   | Program date/time |
       | Short name (must be unique) | datetime        |
       | Include time?               | 1               |
     And I press "Save changes"
     # File
-    And I click on "File" "option"
+    And I set the field "Create a new custom field" to "File"
     And I set the following fields to these values:
       | Full name                   | Program file |
       | Short name (must be unique) | file       |
     And I press "Save changes"
     # Location
-    And I click on "Location" "option"
+    And I set the field "Create a new custom field" to "Location"
     And I set the following fields to these values:
       | Full name                   | Program location |
       | Short name (must be unique) | location       |
     And I press "Save changes"
     # Menu of choices
-    And I click on "Menu of choices" "option"
+    And I set the field "Create a new custom field" to "Menu of choices"
     And I set the following fields to these values:
       | Full name                   | Program menu of choices |
       | Short name (must be unique) | menuofchoices         |
@@ -57,7 +57,7 @@ Feature: Program and certification customfields can be created and populated
       """
     And I press "Save changes"
     # Multi-select
-    And I click on "Multi-select" "option"
+    And I set the field "Create a new custom field" to "Multi-select"
     And I set the following fields to these values:
       | Full name                   | Program multi select |
       | Short name (must be unique) | multiselect        |
@@ -66,19 +66,19 @@ Feature: Program and certification customfields can be created and populated
       | multiselectitem[2][option]  | Tuatara            |
     And I press "Save changes"
     # Text area
-    And I click on "Text area" "option"
+    And I set the field "Create a new custom field" to "Text area"
     And I set the following fields to these values:
       | Full name                   | Program text area |
       | Short name (must be unique) | textarea        |
     And I press "Save changes"
     # Text input
-    And I click on "Text input" "option"
+    And I set the field "Create a new custom field" to "Text input"
     And I set the following fields to these values:
       | Full name                   | Program text input |
       | Short name (must be unique) | textinput        |
     And I press "Save changes"
     # URL
-    And I click on "URL" "option"
+    And I set the field "Create a new custom field" to "URL"
     And I set the following fields to these values:
       | Full name                   | Program address |
       | Short name (must be unique) | url           |

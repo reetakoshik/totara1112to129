@@ -78,7 +78,8 @@ switch ($action) {
 
             // To be able to sort the filter back into the correct group of the select box
             // we need the translated label
-            $reportbuilder = new reportbuilder($reportid);
+            $config = (new rb_config())->set_nocache(true);
+            $reportbuilder = reportbuilder::create($reportid, $config, false); // No access control for managing of reports here.
             $searchcolumn->typelabel = $reportbuilder->get_type_heading($searchcolumn->type);
 
             echo json_encode((array)$searchcolumn);

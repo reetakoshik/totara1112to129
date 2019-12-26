@@ -447,7 +447,7 @@ Y.Moodle.mod_quiz.util.slot = {
                 // Font style icon
                 require(['core/templates'], function (templates) {
                     icon = link.one('.flex-icon');
-                    templates.renderIcon('unlock-alt', newstring).done(function (html) {
+                    templates.renderIcon('unlock', newstring).done(function (html) {
                         templates.replaceNode(icon.getDOMNode(), html, '');
                     });
                 });

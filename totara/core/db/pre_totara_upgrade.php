@@ -30,11 +30,18 @@
 
 defined('MOODLE_INTERNAL') || die();
 global $DB, $CFG, $TOTARA;
+require_once(__DIR__ . '/upgradelib.php');
 
 $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
 // Always update all language packs if we can, because they are used in Totara upgrade/install scripts.
 totara_upgrade_installed_languages();
+
+// Add parentid to context table and create context_map table.
+totara_core_upgrade_context_tables();
+
+// Migrate block title from storing in the config to a new model.
+totara_core_migrate_old_block_titles();
 
 // One-off fix for incorrect default setting from Moodle.
 if (!empty($CFG->totara_build) and $CFG->totara_build < '20181026.00') {

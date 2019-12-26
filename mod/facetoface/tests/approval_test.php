@@ -90,14 +90,15 @@ class mod_facetoface_approval_testcase extends advanced_testcase {
         global $PAGE;
         $PAGE->set_course($course);
 
-        $form = new mod_facetoface_mod_form($cm, 0, $cm, $course);
+        $currentdata = (object)array_merge((array)$facetoface, (array)$cm);
+        $form = new mod_facetoface_mod_form($currentdata, 0, $cm, $course);
         $mockdata = array(
             'name' => 'test',
             'modulename' => 'facetoface',
             'instance' => $cm->instance,
             'coursemodule' => $cm->id,
             'cmidnumber' => $cm->idnumber,
-            'availabilityconditionsjson' => '{}',
+            'availabilityconditionsjson' => '',
         );
         // Many errors.
         $mockdata['selectedapprovers'] = "$user1,$user2,$inactive,$user2,$admin,$guest,$deleted";
@@ -133,20 +134,5 @@ class mod_facetoface_approval_testcase extends advanced_testcase {
         $mockdata['selectedapprovers'] = "$user1,$user2,$nonadmin";
         $errors = $form->validation($mockdata, array());
         $this->assertArrayNotHasKey('approvaloptions', $errors);
-    }
-
-    // TODO - manager, role, admin notification checks
-    public function test_cancellation_send_delete_session() {
-/*
-        $session = $this->f2f_generate_data();
-
-        // Call facetoface_delete_session function for session1.
-        $this->emailsink = $this->redirectEmails();
-        facetoface_delete_session($session);
-        $this->emailsink->close();
-
-        $emails = $this->get_emails();
-        $this->assertCount(4, $emails, 'Wrong no of cancellation notifications sent out.');
- */
     }
 }

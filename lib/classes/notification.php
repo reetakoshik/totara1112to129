@@ -170,6 +170,16 @@ class notification {
     protected static function add_to_session_queue($object) {
         global $SESSION;
 
+        if (!\core\session\manager::is_session_active()) {
+            if (!PHPUNIT_TEST) {
+                error_log('Invalid use of \core\notification detected - session is not active: ' . $object->message);
+            }
+            if (!isset($SESSION)) {
+                // Totara: This only hides errors, the data will not be carried over to the next page!
+                $SESSION = new stdClass();
+            }
+        }
+
         // Add the notification directly to the session.
         // This will either be fetched in the header, or by JS in the footer.
         if (!isset($SESSION->notifications) || !array($SESSION->notifications)) {

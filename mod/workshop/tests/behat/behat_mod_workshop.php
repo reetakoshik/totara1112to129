@@ -52,8 +52,7 @@ class behat_mod_workshop extends behat_base {
         $phaseliteral = behat_context_helper::escape($phase);
         $switchphase = behat_context_helper::escape(get_string('switchphase', 'workshop'));
 
-        $xpath = "//*[@class='userplan']/descendant::div[./span[contains(.,$phaseliteral)]]/".
-                "descendant-or-self::a[./span[text()=$switchphase]]";
+        $xpath = "//*[@class='userplan']/descendant::div[./span[contains(.,$phaseliteral)]]//a";
         $continue = $this->escape(get_string('continue'));
 
         $this->execute('behat_general::click_link', $workshopname);

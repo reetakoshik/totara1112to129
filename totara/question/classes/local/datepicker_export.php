@@ -44,6 +44,12 @@ class datepicker_export extends export_helper {
 
         if ($param1->withtime) {
             $format = get_string('strfdateattime', 'langconfig');
+
+            if (!empty($param1->withtimezone)) {
+                $answerfield .= 'tz';
+                $timezone = $answerrow->$answerfield;
+                return userdate($data, $format, $timezone) . ' ' . $timezone;
+            }
         } else {
             $format = get_string('strfdateshortmonth', 'langconfig');
         }

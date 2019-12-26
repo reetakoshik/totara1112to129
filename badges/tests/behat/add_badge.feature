@@ -14,19 +14,20 @@ Feature: Add badges to the system
     And I set the field "Default badge issuer name" to "Test Badge Site"
     And I set the field "Default badge issuer contact details" to "testuser@example.com"
     And I press "Save changes"
-    And I follow "Badges"
-    When I follow "Add a new badge"
+    And I follow "Manage badges"
+    When I click on "Add a new badge" "button"
     Then the field "issuercontact" matches value "testuser@example.com"
     And the field "issuername" matches value "Test Badge Site"
 
   @javascript
   Scenario: Accessing the badges
-    Given I navigate to "Site badges" node in "Site pages"
+    Given I navigate to "Manage badges" node in "Site administration > Badges"
     Then I should see "There are no badges available."
 
   @javascript @_file_upload
   Scenario: Add a badge
-    Given I navigate to "Add a new badge" node in "Site administration > Badges"
+    Given I navigate to "Manage badges" node in "Site administration > Badges"
+    And I press "Add a new badge"
     And I set the following fields to these values:
       | Name | Test Badge |
       | Description | Test badge description |

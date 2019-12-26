@@ -1,4 +1,4 @@
-@block @block_calendar_upcoming
+@block @block_calendar_upcoming @javascript
 Feature: View a site event on the frontpage
   In order to view a site event
   As a teacher

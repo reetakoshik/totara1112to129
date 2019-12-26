@@ -1,0 +1,56 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Kevin Hottinger <kevin.hottinger@totaralearning.com>
+   @package totara_catalog
+}}
+{{!
+
+    @template totara_catalog/toggleFilterPanel
+
+    This template toggles visibility of filter panel on mobile.
+
+    Classes required for JS:
+    * tw-toggleFilterPanel__trigger_hide: Hide trigger
+    * tw-toggleFilterPanel__trigger_show: Show trigger
+
+    Data attributes required for JS:
+    * data-core-autoinitialise: State of this JS auto initilise
+    * data-core-autoinitialise-amd: AMD to be linked to template
+    * data-tw-toggleFilterPanel-extraContent: Target to add active filter count
+    * data-tw-toggleFilterPanel-trigger: Trigger to toggle visibility of mobile filters
+
+    Context variables required for this template:
+    * none
+}}
+
+<div class="tw-toggleFilterPanel"
+    data-tw-toggleFilterPanel=""
+    data-core-autoinitialise="true"
+    data-core-autoinitialise-amd="totara_catalog/toggle_filter_panel">
+
+    <div class="tw-toggleFilterPanel__trigger" data-tw-toggleFilterPanel-trigger="">
+        <a href="#" class="tw-toggleFilterPanel__trigger_show">
+            {{#str}}filtersshow, totara_catalog, ,{{/str}}
+            <span class="tw-toggleFilterPanel__count" data-tw-toggleFilterPanel-extraContent=""></span>
+        </a>
+        <a href="#" class="tw-toggleFilterPanel__trigger_hide">
+            {{#str}}filtershide, totara_catalog, ,{{/str}}
+        </a>
+    </div>
+</div>

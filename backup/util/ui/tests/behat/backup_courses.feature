@@ -63,7 +63,7 @@ Feature: Backup Totara courses
     And I should see "Test assign"
     And I should not see "Test data"
 
-    @javascript
+  @javascript
   Scenario: Backup a course using the one click backup button
     When I perform a quick backup of course "Course 2"
     Then I should see "Import a backup file"

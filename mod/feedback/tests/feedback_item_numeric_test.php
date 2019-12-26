@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 
-require("{$CFG->dirroot}/mod/feedback/item/numeric/lib.php");
+require_once("{$CFG->dirroot}/mod/feedback/item/numeric/lib.php");
 
 class feedback_item_numeric_testcase extends advanced_testcase {
 

@@ -1,4 +1,4 @@
-@core @core_block
+@core @core_block @javascript
 Feature: The context of a block can always be returned to it's original state.
   In order to revert actions when configuring blocks
   As an admin
@@ -9,8 +9,7 @@ Feature: The context of a block can always be returned to it's original state.
       | fullname | shortname | category |
       | Course 1 | C1 | 0 |
     And I log in as "admin"
-    And I am on site homepage
-    When I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Turn editing on"
     And I add the "Tags" block
     Then I should see "Tags" in the "Tags" "block"

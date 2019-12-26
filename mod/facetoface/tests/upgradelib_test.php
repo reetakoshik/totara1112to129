@@ -1,4 +1,10 @@
 <?php
+use mod_facetoface\signup\state\booked;
+use mod_facetoface\signup\state\requested;
+use mod_facetoface\signup\state\fully_attended;
+use mod_facetoface\signup\state\partially_attended;
+use mod_facetoface\signup\state\no_show;
+
 /*
  * This file is part of Totara LMS
  *
@@ -78,7 +84,8 @@ class mod_facetoface_upgradelib_testcase extends advanced_testcase {
         $cancellationexp = text_to_html(get_string('setting:defaultcancellationinstrmngrdefault', 'facetoface') . "test");
         $this->assertEquals($cancellationexp, $cancellation);
 
-        $rolerequest = $DB->get_field('facetoface_notification', 'managerprefix', array('title' => 'Test title 4'));
+        $rolerequest = $DB->get_field_select('facetoface_notification', 'managerprefix',
+            $DB->sql_compare_text('title') . ' = :title', array('title' => 'Test title 4'));
         $rolerequestexp = text_to_html("test" . get_string('setting:defaultrolerequestinstrmngrdefault', 'facetoface'));
         $this->assertEquals($rolerequestexp, $rolerequest);
 
@@ -87,7 +94,8 @@ class mod_facetoface_upgradelib_testcase extends advanced_testcase {
         $reminderexp = text_to_html(get_string('setting:defaultreminderinstrmngrdefault_v92', 'facetoface'));
         $this->assertEquals($reminderexp, $reminder);
 
-        $request = $DB->get_field('facetoface_notification', 'managerprefix', array('title' => 'Test title 3'));
+        $request = $DB->get_field_select('facetoface_notification', 'managerprefix',
+            $DB->sql_compare_text('title') . ' = :title', array('title' => 'Test title 3'));
         $requestexp = text_to_html(get_string('setting:defaultrequestinstrmngrdefault_v92', 'facetoface'));
         $this->assertEquals($requestexp, $request);
     }
@@ -123,8 +131,8 @@ class mod_facetoface_upgradelib_testcase extends advanced_testcase {
         $sid = $facetofacegenerator->add_session(array('facetoface' => $facetoface->id, 'sessiondates' => $sessiondates));
 
         // We still need to add the calendar entries.
-        $session = facetoface_get_session($sid);
-        facetoface_update_calendar_entries($session);
+        $seminarevent = new \mod_facetoface\seminar_event($sid);
+        \mod_facetoface\calendar::update_entries($seminarevent);
 
         $events = $DB->get_records('event', array('modulename' => 'facetoface', 'eventtype' => 'facetofacesession', 'courseid' => $course->id),
             'timestart');
@@ -179,5 +187,136 @@ class mod_facetoface_upgradelib_testcase extends advanced_testcase {
             $event = array_shift($events);
             $this->verifySessionDate($event, $sessiondates[$i]->timestart, 3 * HOURSECS, 1);
         }
+    }
+
+    /**
+     * Convert string grade to float grade if necessary.
+     *
+     * @param mixed $grade
+     * @return float|null
+     */
+    private function fixup_grade($grade) : ?float {
+        if (is_null($grade)) {
+            return null;
+        }
+        if (is_float($grade)) {
+            return $grade;
+        }
+        if (is_string($grade)) {
+            if ($grade === '') {
+                return null;
+            } else if (is_numeric($grade)) {
+                return (float)$grade;
+            }
+        }
+        $this->fail("'{$grade}' is neither numeric string, float nor null");
+    }
+
+    /**
+     * @return array
+     */
+    public function data_fake_signups_status() {
+        return [
+            [ requested::get_code(), null, null ],
+            [ booked::get_code(), null, null ],
+            [ fully_attended::get_code(), fully_attended::get_grade(), fully_attended::get_grade() ],
+            [ partially_attended::get_code(), partially_attended::get_grade(), partially_attended::get_grade() ],
+            [ no_show::get_code(), no_show::get_grade(), no_show::get_grade() ],
+            [ 0, null, null ],
+            [ 999, 0, 0 ],
+        ];
+    }
+
+    /**
+     * @param int $statuscode
+     * @param float|null $expectedgrade_first
+     * @param float|null $expectedgrade_last
+     * @dataProvider data_fake_signups_status
+     */
+    public function test_facetoface_upgradelib_fixup_seminar_grades(int $statuscode, ?float $expectedgrade_first, ?float $expectedgrade_last) {
+        global $DB;
+        /** @var \moodle_database $DB */
+        $this->resetAfterTest();
+
+        // simulate buggy situation by manually inserting database records
+        // note that the code doesn't set correct foreign keys and timecreated
+        $first = $DB->insert_record('facetoface_signups_status', [
+            'statuscode' => $statuscode,
+            'superceded' => 1,
+            'grade' => 0.000,
+            'signupid' => 99999,
+            'createdby' => 77777,
+            'timecreated' => 88888,
+        ]);
+        $last = $DB->insert_record('facetoface_signups_status', [
+            'statuscode' => $statuscode,
+            'superceded' => 0,
+            'grade' => 0.000,
+            'signupid' => 99999,
+            'createdby' => 77777,
+            'timecreated' => 88888,
+        ]);
+
+        facetoface_upgradelib_fixup_seminar_grades();
+        $first_grade = $this->fixup_grade($DB->get_field('facetoface_signups_status', 'grade', [ 'id' => $first ], MUST_EXIST));
+        $last_grade = $this->fixup_grade($DB->get_field('facetoface_signups_status', 'grade', [ 'id' => $last ], MUST_EXIST));
+
+        $this->assertSame($expectedgrade_first, $first_grade);
+        $this->assertSame($expectedgrade_last, $last_grade);
+    }
+
+    /**
+     * @return array
+     */
+    public function data_fake_signups_status_with_grade() {
+        $any = 42;
+        return [
+            [ requested::get_code(), $any, null, null ],
+            [ booked::get_code(), $any, null, null ],
+            [ fully_attended::get_code(), $any, fully_attended::get_grade(), $any ],
+            [ partially_attended::get_code(), $any, partially_attended::get_grade(), $any ],
+            [ no_show::get_code(), $any, no_show::get_grade(), $any ],
+            [ 0, $any, null, null ],
+            [ 999, $any, 0, $any ],
+        ];
+    }
+
+    /**
+     * @param int $statuscode
+     * @param float|null $initgrade_last
+     * @param float|null $expectedgrade_first
+     * @param float|null $expectedgrade_last
+     * @dataProvider data_fake_signups_status_with_grade
+     */
+    public function test_facetoface_upgradelib_fixup_seminar_grades_with_grade(int $statuscode, ?float $initgrade_last, ?float $expectedgrade_first, ?float $expectedgrade_last) {
+        global $DB;
+        /** @var \moodle_database $DB */
+        $this->resetAfterTest();
+
+        // simulate buggy situation by manually inserting database records
+        // note that the code doesn't set correct foreign keys and timecreated
+        $first = $DB->insert_record('facetoface_signups_status', [
+            'statuscode' => $statuscode,
+            'superceded' => 1,
+            'grade' => 0.000,
+            'signupid' => 99999,
+            'createdby' => 77777,
+            'timecreated' => 88888,
+        ]);
+        $last = $DB->insert_record('facetoface_signups_status', [
+            'statuscode' => $statuscode,
+            'superceded' => 0,
+            'grade' => $initgrade_last,
+            'signupid' => 99999,
+            'createdby' => 77777,
+            'timecreated' => 88888,
+        ]);
+
+        facetoface_upgradelib_fixup_seminar_grades();
+        $first_grade = $this->fixup_grade($DB->get_field('facetoface_signups_status', 'grade', [ 'id' => $first ], MUST_EXIST));
+        $last_grade = $this->fixup_grade($DB->get_field('facetoface_signups_status', 'grade', [ 'id' => $last ], MUST_EXIST));
+
+        $this->assertSame($expectedgrade_first, $first_grade);
+        $this->assertSame($expectedgrade_last, $last_grade);
     }
 }

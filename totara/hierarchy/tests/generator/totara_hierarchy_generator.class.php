@@ -609,6 +609,81 @@ class totara_hierarchy_generator extends component_generator_base {
         $this->create_hierarchy_type_customfield($customfield);
     }
 
+    public function create_hierarchy_type_location($data, $locationdata = []) {
+        $customfield = $data;
+        $customfield['field']  = 'location';
+
+        if (empty($customfield['param2']) && empty($locationdata)) {
+            $locationdata = [
+                "address" => "",
+                "size" => "medium", // small, medium, large
+                "view" => "map", // map, satellite, hybrid
+                "display" => "address", // address, map, both
+                "zoom" => 12,
+                "location" => [
+                    "latitude" => -36.866669999999999,
+                    "longitude" => 174.76666
+                ]
+            ];
+        }
+
+        //$customfield['param2'] = json_encode($locationdata);
+        $customfield['param2'] = $locationdata;
+        $this->create_hierarchy_type_customfield($customfield);
+    }
+
+    public function create_hierarchy_type_textarea($data, $cols = null, $rows = null) {
+        $customfield = $data;
+        $customfield['field']  = 'textarea';
+
+        if (empty($customfield['param1']) && empty($cols)) {
+            $customfield['param1'] = 30;
+        }
+        if (empty($customfield['param2']) && empty($rows)) {
+            $customfield['param2'] = 10;
+        }
+
+        $customfield['value'] = [
+            'text' => $customfield['value'],
+            'format' => '1'
+        ];
+
+        $this->create_hierarchy_type_customfield($customfield);
+    }
+
+    public function create_hierarchy_type_multiselect($data, $multiselectdata = []) {
+        $customfield = $data;
+        $customfield['field']  = 'multiselect';
+
+        if (empty($customfield['param1']) && empty($multiselectdata)) {
+            $multiselectdata = [[
+                    "option" => "a",
+                    "icon" => "",
+                    "default" => "0",
+                    "delete" => 0
+                ],[
+                    "option" => "b",
+                    "icon" => "",
+                    "default" => "0",
+                    "delete" => 0
+                ], [
+                    "option" => "c",
+                    "icon" => "",
+                    "default" => "0",
+                    "delete" => 0
+                ], [
+                    "option" => "d",
+                    "icon" => "",
+                    "default" => "0",
+                    "delete" => 0
+                ]
+            ];
+        }
+
+        $customfield['param1'] = $multiselectdata;
+        $this->create_hierarchy_type_customfield($customfield);
+    }
+
     public function create_hierarchy_type_generic_menu($data) {
         $customfield = $data;
         $customfield['field']  = 'menu';
@@ -633,6 +708,9 @@ class totara_hierarchy_generator extends component_generator_base {
         $data->typeid = $typeid;
         $data->datatype = $datatype;
         $data->description_editor = array('text' => '', 'format' => '1', 'itemid' => time());
+        if ($datatype == 'textarea') {
+            $data->defaultdata_editor = array('text' => '', 'format' => 0);
+        }
         $data->hidden   = 0;
         $data->locked   = 0;
         $data->required = 0;
@@ -652,6 +730,9 @@ class totara_hierarchy_generator extends component_generator_base {
         }
         if (isset($customfield['param5'])) {
             $data->param5 = $customfield['param5'];
+        }
+        if ($datatype == 'multiselect' && isset($customfield['param1'])) {
+            $data->multiselectitem = $customfield['param1'];
         }
         $data->fullname  = ucfirst($customfield['hierarchy']).' type '.$datatype;
 
@@ -681,11 +762,35 @@ class totara_hierarchy_generator extends component_generator_base {
         }
         $field = $data['field'];
         $input = "customfield_{$field}{$typeid}";
-
+        if ($field == 'textarea') {
+            $input .= '_editor';
+        }
         $item = new \stdClass();
         $item->id = $hierarchyid;
         $item->typeid = $typeid;
-        $item->{$input} = $data['value'];
+
+        if ($field == 'location') {
+            if (isset($data['value']['address'])) {
+                $item->{$input.'address'} = $data['value']['address'];
+            }
+            if (isset($data['value']['size'])) {
+                $item->{$input.'size'} = $data['value']['size'];
+            }
+            if (isset($data['value']['view'])) {
+                $item->{$input.'view'} = $data['value']['view'];
+            }
+            if (isset($data['value']['display'])) {
+                $item->{$input.'display'} = $data['value']['display'];
+            }
+            if (isset($data['value']['location']['latitude'])) {
+                $item->{$input . 'latitude'} = $data['value']['latitude'];
+            }
+            if (isset($data['value']['location']['longitude'])) {
+                $item->{$input . 'longitude'} = $data['value']['longitude'];
+            }
+        } else {
+            $item->{$input} = $data['value'];
+        }
         customfield_save_data($item, $data['hierarchy'], $shortprefix.'_type');
     }
 
@@ -933,7 +1038,7 @@ class totara_hierarchy_generator extends component_generator_base {
             // Get the base goal item.
             $item = $DB->get_record('goal', array('id' => $hierarchyid));
             $baseclassname = "totara_assign_goal";
-            $baseclass = new $baseclassname('goal', $item);
+            $baseclass = new totara_assign_goal('goal', $item);
             // Assign random pos, org or cohort groups to this goal.
             $grouptypes = array('pos', 'org', 'cohort');
             $groupstoassign = mt_rand(1,3);

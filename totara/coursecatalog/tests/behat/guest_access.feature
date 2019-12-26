@@ -8,7 +8,7 @@ Feature: Guest users can auto-enrol themself via course catalog in courses where
     Given I am on a totara site
     And I log in as "admin"
     And I set the following administration settings values:
-      | Enhanced catalog | 1 |
+      | catalogtype | enhanced |
       | Guest login button | Show |
     And I log out
     Given the following "users" exist:
@@ -22,8 +22,7 @@ Feature: Guest users can auto-enrol themself via course catalog in courses where
       | user | course | role |
       | teacher1 | C1 | editingteacher |
     And I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Forum" to section "1" and I fill the form with:
       | Forum name | Test forum name |
       | Description | Test forum description |
@@ -37,7 +36,7 @@ Feature: Guest users can auto-enrol themself via course catalog in courses where
     And I press "Save changes"
     And I log out
     And I log in as "student1"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I click on ".rb-display-expand" "css_element"
     Then I should see "Guest access"
     And I press "Enrol"
@@ -54,7 +53,7 @@ Feature: Guest users can auto-enrol themself via course catalog in courses where
     And I press "Save changes"
     And I log out
     And I log in as "student1"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I click on ".rb-display-expand" "css_element"
     Then I should see "Guest access"
     And I set the following fields to these values:

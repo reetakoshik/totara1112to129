@@ -66,7 +66,7 @@ $PAGE->set_context($systemcontext);
 $PAGE->set_pagelayout('report');
 $PAGE->set_url($currenturl);
 $ownplan = ($USER->id == $plan->userid);
-$menuitem = ($ownplan) ? 'learningplans' : 'myteam';
+$menuitem = ($ownplan) ? '\totara_plan\totara\menu\learningplans' : '\totara_core\totara\menu\myteam';
 $PAGE->set_totara_menu_selected($menuitem);
 
 /// Javascript stuff

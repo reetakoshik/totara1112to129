@@ -34,9 +34,6 @@ define('ASSIGNTYPE_COHORT', 3);
 define('ASSIGNTYPE_INDIVIDUAL', 5);
 define('ASSIGNTYPE_MANAGERJA', 6);
 
-/** @deprecated since 9.0 */
-define('ASSIGNTYPE_MANAGER', 4);
-
 global $ASSIGNMENT_CATEGORY_CLASSNAMES;
 
 $ASSIGNMENT_CATEGORY_CLASSNAMES = array(
@@ -73,9 +70,6 @@ $COMPLETION_EVENTS_CLASSNAMES = array(
 /**
  * Class representing the program assignments
  *
- * @property-read stdClass[] assignments Previously a protected property, this is now a virtual property
- *      loaded only when requested. It is DEPRECATED. It will be removed in Totara 11.
- *      You should convert your code to call get_assignments() instead.
  */
 class prog_assignments {
 
@@ -101,46 +95,6 @@ class prog_assignments {
     }
 
     /**
-     * Returns the requested property.
-     *
-     * @deprecated since Totara 10, this will be removed in Totara 11.
-     * @param string $name
-     * @return mixed
-     */
-    public function __get($name) {
-        if ($name === 'assignments') {
-            // If they are requesting assignments
-            $this->ensure_assignments_init();
-            debugging('The assignments property no longer exists, please call get_assignments instead.', DEBUG_DEVELOPER);
-            return $this->get_assignments();
-        }
-        // We don't check if the property exists, this class existed before this magic method did and code may be abusing
-        // it by setting virtual properties. To ensure any such horrid hacks continue to work we will just assume the requested
-        // property exists and if not you will get the standard system response.
-        return $this->$name;
-    }
-
-    /**
-     * Magic __call method.
-     *
-     * @deprecated since Totara 10, this will be removed in Totara 11
-     * @param string $method The method being called.
-     * @param array $arguments
-     * @return mixed
-     * @throws coding_exception if the requested method does not exist.
-     */
-    public function __call($method, array $arguments = array()) {
-        if ($method === 'init_assignments') {
-            // init_assignments has been deprecated, it is now a private method.
-            // To reset the assignments please call prog_assignments->reset()
-            // To get the assignments please call prog_assignments->get_assignments()
-            debugging(__METHOD__.' has been deprecated, please update your code.', DEBUG_DEVELOPER);
-            return call_user_func([$this, $method], $arguments);
-        }
-        throw new coding_exception('Invalid method call "'.__METHOD__.'"');
-    }
-
-    /**
      * Ensures that assignments are loaded.
      */
     public function ensure_assignments_init() {
@@ -153,22 +107,10 @@ class prog_assignments {
      * Resets the assignments property so that it contains only the assignments
      * that are currently stored in the database. This is necessary after
      * assignments are updated
-     *
-     * @param int $programid Deprecated, do not use. Will be removed in Totara 11.
      */
-    private function init_assignments($programid = null) {
+    private function init_assignments() {
         global $DB;
-        if ($programid === null) {
-            $programid = $this->programid;
-        } else {
-            // Deprecated in Totara 10.
-            debugging('The programid argument of init_assignments has been deprecated.', DEBUG_DEVELOPER);
-        }
-        if ($this->programid !== $programid) {
-            // Deprecated in Totara 10.
-            debugging('A prog_assignments id mismatch detected, fix your code!', DEBUG_DEVELOPER);
-        }
-        $this->assignmentrecords = $DB->get_records('prog_assignment', array('programid' => $programid));;
+        $this->assignmentrecords = $DB->get_records('prog_assignment', array('programid' => $this->programid));;
     }
 
     /**
@@ -514,6 +456,11 @@ abstract class prog_assignment_category {
         // Store list of seen ids
         $seenids = array();
 
+        // Clear the completion caches in all cases
+        if (isset($data->id)) {
+            totara_program\progress\program_progress_cache::mark_program_cache_stale($data->id);
+        }
+
         // If theres inputs for this assignment category (this)
         if (isset($data->item[$this->id])) {
 
@@ -634,7 +581,7 @@ abstract class prog_assignment_category {
      * @param array $userids Array of user IDs that we want to remove
      * @return bool $success True if the delete statement was successfully executed.
      */
-    function remove_outdated_assignments($programid, $assignmenttypeid, $userids) {
+    public function remove_outdated_assignments($programid, $assignmenttypeid, $userids) {
         global $DB;
 
         // Do nothing if it's not a group assignment or the id of the assignment type is not given or no users are passed.
@@ -661,12 +608,16 @@ abstract class prog_assignment_category {
             $sql = "DELETE FROM {prog_user_assignment}
                      WHERE userid {$sql}
                        AND programid = :programid
-                       AND assignmentid IN (SELECT id
-                                              FROM {prog_assignment}
-                                             WHERE assignmenttype = :assigntype
-                                               AND assignmenttypeid = :assigntypeid)";
+                       AND EXISTS (SELECT 1
+                         FROM {prog_assignment} pa
+                         WHERE pa.assignmenttype = :assigntype
+                           AND pa.assignmenttypeid = :assigntypeid
+                           AND pa.id = {prog_user_assignment}.assignmentid)";
             $result &= $DB->execute($sql, $params);
         }
+
+        // Clear the program completion caches for this program
+        totara_program\progress\program_progress_cache::mark_program_cache_stale($programid);
 
         return $result;
     }
@@ -1813,50 +1764,6 @@ class individuals_category extends prog_assignment_category {
         $title = addslashes_js(get_string('addindividualstoprogram', 'totara_program'));
         $url = 'find_individual.php?programid='.$programid;
         return "M.totara_programassignment.add_category({$this->id}, 'individuals', '{$url}', '{$title}');";
-    }
-}
-
-/**
- * @deprecated since Totara 10. Use $program->set_timedue or prog_load_completion() and prog_write_completion() instead.
- *
- * Class user_assignment
- */
-class user_assignment {
-    public $userid, $assignment, $timedue;
-
-    public function __construct($userid, $assignment, $programid) {
-        debugging('user_assignment is deprecated, use prog_load_completion() and prog_write_completion() instead.', DEBUG_DEVELOPER);
-
-        global $DB;
-        $this->userid = $userid;
-        $this->assignment = $assignment;
-        $this->programid = $programid;
-
-        $this->completion = $DB->get_record('prog_completion', array('programid' => $programid,
-                                                                     'userid' => $userid,
-                                                                     'coursesetid' => '0'));
-    }
-
-    /*
-     *  Updates timedue for a user assignment
-     *
-     *  @param $timedue int New timedue
-     *  @return bool Success
-     */
-    public function update($timedue) {
-        global $DB;
-        if (!empty($this->completion)) {
-            $completion_todb = new stdClass();
-            $completion_todb->id = $this->completion->id;
-            $completion_todb->timedue = $timedue;
-
-            $DB->update_record('prog_completion', $completion_todb);
-
-            prog_write_completion_log($this->programid, $this->userid, 'Completion timedue updated using deprecated class user_assignment');
-            return true;
-        }
-
-        return false;
     }
 }
 

@@ -37,7 +37,7 @@ $systemcontext = context_system::instance();
 $can_upload_any = false;
 foreach ($elements as $e) {
     $elementname = $e->get_name();
-    if (has_capability('tool/totara_sync:upload' . $elementname, $systemcontext)) {
+    if ($e->can_upload_file()) {
         $can_upload_any = true;
         break;
     }
@@ -45,33 +45,30 @@ foreach ($elements as $e) {
 
 if ($data = $form->get_data()) {
 
-    $fileaccess = get_config('totara_sync', 'fileaccess');
-    if ($fileaccess == FILE_ACCESS_UPLOAD) {
-        $fs = get_file_storage();
-        $readyfiles = array();
-        foreach ($elements as $e) {
-            $elementname = $e->get_name();
-            if (!has_capability('tool/totara_sync:upload' . $elementname, $systemcontext)) {
-                continue;
-            }
-
-            //delete any existing uploaded files
-            $fs->delete_area_files($systemcontext->id, 'totara_sync', $elementname);
-
-            //save draftfile to file directory
-            if (isset($data->$elementname)) {
-                $draftid = $data->$elementname;
-                file_save_draft_area_files($draftid, $systemcontext->id, 'totara_sync', $elementname, $draftid, array('subdirs' => true));
-                set_config('sync_'.$elementname.'_itemid', $draftid, 'totara_sync');
-            } else {
-                continue;
-            }
-
-            //delete the draftfile - at this point it should be safe to assume $USER is the uploader
-            $draft_context = context_user::instance($USER->id);
-            $fs->delete_area_files($draft_context->id, 'user', 'draft', $draftid);
+    $fs = get_file_storage();
+    $readyfiles = array();
+    foreach ($elements as $e) {
+        $elementname = $e->get_name();
+        if (!$e->can_upload_file()) {
+            continue;
         }
-   }
+
+        //delete any existing uploaded files
+        $fs->delete_area_files($systemcontext->id, 'totara_sync', $elementname);
+
+        //save draftfile to file directory
+        if (isset($data->$elementname)) {
+            $draftid = $data->$elementname;
+            file_save_draft_area_files($draftid, $systemcontext->id, 'totara_sync', $elementname, $draftid, array('subdirs' => true));
+            set_config('sync_'.$elementname.'_itemid', $draftid, 'totara_sync');
+        } else {
+            continue;
+        }
+
+        //delete the draftfile - at this point it should be safe to assume $USER is the uploader
+        $draft_context = context_user::instance($USER->id);
+        $fs->delete_area_files($draft_context->id, 'user', 'draft', $draftid);
+    }
 
     totara_set_notification(get_string('uploadsuccess', 'tool_totara_sync'), $FULLME,
         array('class'=>'notifysuccess'));
@@ -82,10 +79,7 @@ if ($data = $form->get_data()) {
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('uploadsyncfiles', 'tool_totara_sync'));
 
-if (get_config('totara_sync', 'fileaccess') == FILE_ACCESS_DIRECTORY) {
-    $link = html_writer::link(new moodle_url('admin/tool/totara_sync/admin/elements.php', null), get_string('uploadaccessdeniedlink', 'tool_totara_sync'));
-    print_string('uploadaccessdenied', 'tool_totara_sync', $link);
-} else if ($can_upload_any) {
+if ($can_upload_any) {
     $form->display();
 } else {
     // @todo error message

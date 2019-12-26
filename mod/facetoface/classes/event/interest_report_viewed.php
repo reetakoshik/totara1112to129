@@ -98,7 +98,7 @@ class interest_report_viewed extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/facetoface/interestreport.php', array('facetofaceid' => $this->other['facetofaceid']));
+        return new \moodle_url('/mod/facetoface/reports/interests.php', array('facetofaceid' => $this->other['facetofaceid']));
     }
 
     /**

@@ -13,13 +13,14 @@ Feature: Users can expand the certification info
       | fullname | shortname | format |
       | Course 1 | C1 | topics |
     And I log in as "admin"
+    And I set the following administration settings values:
+      | catalogtype | enhanced |
     And I click on "Certifications" in the totara menu
     And I press "Create Certification"
     And I press "Save changes"
     And I set the following administration settings values:
-      | Enhanced catalog   | 1       |
-      | Guest login button | Show    |
-      | enableprograms     | Disable |
+      | Guest login button | Show     |
+      | enableprograms     | Disable  |
     And I log out
 
   @javascript

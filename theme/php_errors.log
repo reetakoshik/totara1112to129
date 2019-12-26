@@ -1,1 +1,0 @@
-[19-Feb-2019 15:38:34 Asia/Kolkata] PHP Warning:  rename(/var/www/totaradata1110/localcache/theme/1550570855/golearningzone/pix/theme/favicon.ico.tmp,/var/www/totaradata1110/localcache/theme/1550570855/golearningzone/pix/theme/favicon.ico): No such file or directory in /var/www/html/totaralearn1110/theme/image.php on line 312

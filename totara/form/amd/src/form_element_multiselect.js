@@ -73,27 +73,13 @@ define(['jquery', 'totara_form/form'], function($, Form) {
      */
     MultiSelect.prototype.init = function(done) {
         var id = this.id,
-            input = $('#' + id),
-            self = this,
-            deferred = $.Deferred(),
-            submitselector = 'input[type="submit"]:not([formnovalidate])';
+            input = $('#' + id);
 
         this.input = input;
         // Call the changed method when this element is changed.
         this.input.change($.proxy(this.changed, this));
 
-        if (input.attr('required')) {
-            require(['totara_form/modernizr'], function (mod) {
-                if (!mod.input.required) {
-                    input.change($.proxy(self.polyFillValidate, self));
-                    input.closest('form').find(submitselector).click($.proxy(self.polyFillValidate, self));
-                }
-                deferred.resolve();
-            });
-        } else {
-            deferred.resolve();
-        }
-        deferred.done(done);
+        done();
     };
 
     /**

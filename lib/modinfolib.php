@@ -54,6 +54,12 @@ if (!defined('MAX_MODINFO_CACHE_SIZE')) {
  *     Is an array of grouping id => array of group id => group id. Includes grouping id 0 for 'all groups'
  */
 class course_modinfo {
+    /** @var int Maximum time the course cache building lock can be held */
+    const COURSE_CACHE_LOCK_EXPIRY = 180;
+
+    /** @var int Time to wait for the course cache building lock before throwing an exception */
+    const COURSE_CACHE_LOCK_WAIT = 60;
+
     /**
      * List of fields from DB table 'course' that are cached in MUC and are always present in course_modinfo::$course
      * @var array
@@ -448,7 +454,17 @@ class course_modinfo {
         // Retrieve modinfo from cache. If not present or cacherev mismatches, call rebuild and retrieve again.
         $coursemodinfo = $cachecoursemodinfo->get($course->id);
         if ($coursemodinfo === false || ($course->cacherev != $coursemodinfo->cacherev)) {
-            $coursemodinfo = self::build_course_cache($course);
+            $lock = self::get_course_cache_lock($course->id);
+            try {
+                // Only actually do the build if it's still needed after getting the lock (not if
+                // somebody else, who might have been holding the lock, built it already).
+                $coursemodinfo = $cachecoursemodinfo->get($course->id);
+                if ($coursemodinfo === false || ($course->cacherev != $coursemodinfo->cacherev)) {
+                    $coursemodinfo = self::inner_build_course_cache($course, $lock);
+                }
+            } finally {
+                $lock->release();
+            }
         }
 
         // Set initial values
@@ -578,6 +594,34 @@ class course_modinfo {
     }
 
     /**
+     * Gets a lock for rebuilding the cache of a single course.
+     *
+     * Caller must release the returned lock.
+     *
+     * This is used to ensure that the cache rebuild doesn't happen multiple times in parallel.
+     * This function will wait up to 1 minute for the lock to be obtained. If the lock cannot
+     * be obtained, it throws an exception.
+     *
+     * @param int $courseid Course id
+     * @return \core\lock\lock Lock (must be released!)
+     * @throws moodle_exception If the lock cannot be obtained
+     */
+    protected static function get_course_cache_lock($courseid) {
+        // Get database lock to ensure this doesn't happen multiple times in parallel. Wait a
+        // reasonable time for the lock to be released, so we can give a suitable error message.
+        // In case the system crashes while building the course cache, the lock will automatically
+        // expire after a (slightly longer) period.
+        $lockfactory = \core\lock\lock_config::get_lock_factory('core_modinfo');
+        $lock = $lockfactory->get_lock('build_course_cache_' . $courseid,
+                self::COURSE_CACHE_LOCK_WAIT, self::COURSE_CACHE_LOCK_EXPIRY);
+        if (!$lock) {
+            throw new moodle_exception('locktimeout', '', '', null,
+                    'core_modinfo/build_course_cache_' . $courseid);
+        }
+        return $lock;
+    }
+
+    /**
      * Builds and stores in MUC object containing information about course
      * modules and sections together with cached fields from table course.
      *
@@ -589,11 +633,29 @@ class course_modinfo {
      *     necessary fields it is re-requested from database)
      */
     public static function build_course_cache($course) {
-        global $DB, $CFG;
-        require_once("$CFG->dirroot/course/lib.php");
         if (empty($course->id)) {
             throw new coding_exception('Object $course is missing required property \id\'');
         }
+
+        $lock = self::get_course_cache_lock($course->id);
+        try {
+            return self::inner_build_course_cache($course, $lock);
+        } finally {
+            $lock->release();
+        }
+    }
+
+    /**
+     * Called to build course cache when there is already a lock obtained.
+     *
+     * @param stdClass $course object from DB table course
+     * @param \core\lock\lock $lock Lock object - not actually used, just there to indicate you have a lock
+     * @return stdClass Course object that has been stored in MUC
+     */
+    protected static function inner_build_course_cache($course, \core\lock\lock $lock) {
+        global $DB, $CFG;
+        require_once("{$CFG->dirroot}/course/lib.php");
+
         // Ensure object has all necessary fields.
         foreach (self::$cachedfields as $key) {
             if (!isset($course->$key)) {
@@ -690,6 +752,8 @@ class course_modinfo {
  * @property-read int $added Time that this course-module was added (unix time) - from course_modules table
  * @property-read int $visible Visible setting (0 or 1; if this is 0, students cannot see/access the activity) - from
  *    course_modules table
+ * @property-read int $visibleoncoursepage Visible on course page setting - from course_modules table, adjusted to
+ *    whether course format allows this module to have the "stealth" mode
  * @property-read int $visibleold Old visible setting (if the entire section is hidden, the previous value for
  *    visible is stored in this field) - from course_modules table
  * @property-read int $groupmode Group mode (one of the constants NOGROUPS, SEPARATEGROUPS, or VISIBLEGROUPS) - from
@@ -832,6 +896,12 @@ class cm_info implements IteratorAggregate {
      * @var int
      */
     private $visible;
+
+    /**
+     * Visible on course page setting - from course_modules table
+     * @var int
+     */
+    private $visibleoncoursepage;
 
     /**
      * Old visible setting (if the entire section is hidden, the previous value for
@@ -999,6 +1069,12 @@ class cm_info implements IteratorAggregate {
     private $uservisible;
 
     /**
+     * True if this course-module is visible to the CURRENT user on the course page
+     * @var bool
+     */
+    private $uservisibleoncoursepage;
+
+    /**
      * @var moodle_url
      */
     private $url;
@@ -1093,6 +1169,7 @@ class cm_info implements IteratorAggregate {
         'showdescription' => false,
         'uservisible' => 'get_user_visible',
         'visible' => false,
+        'visibleoncoursepage' => false,
         'visibleold' => false,
         'deletioninprogress' => false
     );
@@ -1366,18 +1443,18 @@ class cm_info implements IteratorAggregate {
         } else if (!empty($this->icon)) {
             if (substr($this->icon, 0, 4) === 'mod/') {
                 list($modname, $iconname) = explode('/', substr($this->icon, 4), 2);
-                $icon = $output->pix_url($iconname, $modname);
+                $icon = $output->image_url($iconname, $modname);
             } else {
                 if (!empty($this->iconcomponent)) {
                     // Icon  has specified component
-                    $icon = $output->pix_url($this->icon, $this->iconcomponent);
+                    $icon = $output->image_url($this->icon, $this->iconcomponent);
                 } else {
                     // Icon does not have specified component, use default
-                    $icon = $output->pix_url($this->icon);
+                    $icon = $output->image_url($this->icon);
                 }
             }
         } else {
-            $icon = $output->pix_url('icon', $this->modname);
+            $icon = $output->image_url('icon', $this->modname);
         }
         return $icon;
     }
@@ -1546,7 +1623,7 @@ class cm_info implements IteratorAggregate {
 
         // Standard fields from table course_modules.
         static $cmfields = array('id', 'course', 'module', 'instance', 'section', 'idnumber', 'added',
-            'score', 'indent', 'visible', 'visibleold', 'groupmode', 'groupingid',
+            'score', 'indent', 'visible', 'visibleoncoursepage', 'visibleold', 'groupmode', 'groupingid',
             'completion', 'completiongradeitemnumber', 'completionview', 'completionexpected',
             'showdescription', 'availability', 'deletioninprogress');
         foreach ($cmfields as $key) {
@@ -1722,6 +1799,8 @@ class cm_info implements IteratorAggregate {
         $this->idnumber         = isset($mod->idnumber) ? $mod->idnumber : '';
         $this->name             = $mod->name;
         $this->visible          = $mod->visible;
+        // Totara: We don't use the column so we make it optional
+        $this->visibleoncoursepage = isset($mod->visibleoncoursepage) ? $mod->visibleoncoursepage : 1;
         $this->sectionnum       = $mod->section; // Note weirdness with name here
         $this->groupmode        = isset($mod->groupmode) ? $mod->groupmode : 0;
         $this->groupingid       = isset($mod->groupingid) ? $mod->groupingid : 0;
@@ -2329,19 +2408,19 @@ class cached_cm_info {
 
     /**
      * Name of icon for this activity. Normally, this should be used together with $iconcomponent
-     * to define the icon, as per pix_url function.
+     * to define the icon, as per image_url function.
      * For backward compatibility, if this value is of the form 'mod/forum/icon' then an icon
      * within that module will be used.
      * @see cm_info::get_icon_url()
-     * @see renderer_base::pix_url()
+     * @see renderer_base::image_url()
      * @var string
      */
     public $icon;
 
     /**
-     * Component for icon for this activity, as per pix_url; leave blank to use default 'moodle'
+     * Component for icon for this activity, as per image_url; leave blank to use default 'moodle'
      * component
-     * @see renderer_base::pix_url()
+     * @see renderer_base::image_url()
      * @var string
      */
     public $iconcomponent;

@@ -212,9 +212,7 @@ Feature: Filter seminar events in calendar by their customfields
     And I press "Add a room"
 
     # Add 2 seminars using different custom fields and rooms
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
 
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Seminar one        |
@@ -255,8 +253,7 @@ Feature: Filter seminar events in calendar by their customfields
     And I click on "#id_customfield_multiselect_2" "css_element"
     And I press "Save changes"
 
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Seminar two        |
       | Description | Seminar two desc   |

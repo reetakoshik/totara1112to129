@@ -190,6 +190,7 @@ $string['no_items_available_yet'] = 'No questions have been set up yet';
 $string['non_anonymous'] = 'User\'s name will be logged and shown with answers';
 $string['non_anonymous_entries'] = 'Non anonymous entries ({$a})';
 $string['non_respondents_students'] = 'Non respondents learners ({$a})';
+$string['not_completed_yet'] = 'Not completed yet';
 $string['not_started'] = 'Not started';
 $string['no_templates_available_yet'] = 'No templates available yet';
 $string['not_selected'] = 'Not selected';
@@ -279,7 +280,6 @@ $string['cancel_moving'] = 'Cancel moving';
 $string['movedown_item'] = 'Move this question down';
 $string['move_here'] = 'Move here';
 $string['moveup_item'] = 'Move this question up';
-$string['not_completed_yet'] = 'Not completed yet';
 $string['notavailable'] = 'this feedback is not available';
 $string['saving_failed_because_missing_or_false_values'] = 'Saving failed because missing or false values';
 $string['cannotunmap'] = 'Database problem, unable to unmap';
@@ -302,10 +302,6 @@ $string['radiobutton_rated'] = 'Radiobutton (rated)';
 // Deprecated since Moodle 3.2.
 $string['start'] = 'Start';
 $string['stop'] = 'End';
-
-// Deprecated since Totara 10.
-$string['generategrade'] = 'Generate Grade';
-$string['generategrade_help'] = 'If you want to use this feedback as a prerequisite for a conditional activity, requiring that the feedback must be completed before that conditional activity becomes available, then you must set **Generate Grade** to **Yes**.';
 
 // Archives
 $string['error:completedhistorynotfound'] = 'Completed history not found for id : {$a}';

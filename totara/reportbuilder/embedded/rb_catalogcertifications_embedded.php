@@ -28,16 +28,16 @@ class rb_catalogcertifications_embedded extends rb_base_embedded {
         $this->url = '/totara/coursecatalog/certifications.php';
         $this->source = 'certification';
         $this->shortname = 'catalogcertifications';
-        $this->fullname = get_string('catalogcertifications', 'totara_coursecatalog');
+        $this->fullname = get_string('reportbasedcertifications', 'totara_coursecatalog');
 
         $this->columns = array(
             array(
-                'type' => 'prog',
+                'type' => 'certif',
                 'value' => 'progexpandlink',
                 'heading' => get_string('certifname', 'totara_certification')
             ),
             array(
-                'type' => 'prog',
+                'type' => 'certif',
                 'value' => 'summary',
                 'heading' => get_string('programsummary', 'totara_certification')
             )
@@ -48,24 +48,25 @@ class rb_catalogcertifications_embedded extends rb_base_embedded {
 
         $this->toolbarsearchcolumns = array(
             array(
-                'type' => 'prog',
+                'type' => 'certif',
                 'value' => 'fullname'
             ),
             array(
-                'type' => 'prog',
+                'type' => 'certif',
                 'value' => 'summary'
             )
         );
 
-        $this->contentmode = REPORT_BUILDER_CONTENT_MODE_ALL;
-
-        $this->contentsettings = array(
-            'prog_availability' => array(
-                'enable' => 1
-            )
-        );
-
         parent::__construct();
+    }
+
+    /**
+     * Hide this embedded report if feature disabled or hidden.
+     * @return bool
+     */
+    public static function is_report_ignored() {
+        global $CFG;
+        return ($CFG->catalogtype !== 'enhanced' || !totara_feature_visible('certifications'));
     }
 
     /**

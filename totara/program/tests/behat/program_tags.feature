@@ -26,7 +26,7 @@ Feature: Site managers should be able to add tags to programs
   @javascript
   Scenario: Adding tags to programs
     When I log in as "man1"
-    And I navigate to "Manage programs" node in "Site administration > Courses"
+    And I navigate to "Manage programs" node in "Site administration > Programs"
     And I click on "Miscellaneous" "link"
     And I click on "Program Tags Tests" "link"
     # Yes this needs to happen twice, once to get to the overview page, once to edit the details.

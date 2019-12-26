@@ -39,6 +39,7 @@ $planid = required_param('planid', PARAM_INT);
 
 // Permissions check
 require_login();
+require_sesskey();
 
 // Check permission to access the plan
 $plan = new development_plan($planid);

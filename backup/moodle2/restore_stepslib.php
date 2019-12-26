@@ -381,6 +381,10 @@ class restore_gradebook_structure_step extends restore_structure_step {
             //'itemid'   => $itemid
         );
         $rs = $DB->get_recordset('backup_ids_temp', $conditions);
+        // Totara: Records in set may be changed, which could lock MSSQL unless pre-loaded.
+        if ($DB->get_dbfamily() === 'mssql') {
+            $rs->preload();
+        }
 
         // We need this for calculation magic later on.
         $mappings = array();
@@ -419,6 +423,10 @@ class restore_gradebook_structure_step extends restore_structure_step {
                  WHERE gi.id {$sql} AND
                        calculation IS NOT NULL";
         $rs = $DB->get_recordset_sql($sql, $params);
+        // Totara: Records in set may be changed, which could lock MSSQL unless pre-loaded.
+        if ($DB->get_dbfamily() === 'mssql') {
+            $rs->preload();
+        }
         foreach ($rs as $gradeitem) {
             // Collect all of the used grade item id references
             if (preg_match_all('/##gi(\d+)##/', $gradeitem->calculation, $matches) < 1) {
@@ -466,6 +474,10 @@ class restore_gradebook_structure_step extends restore_structure_step {
         );
 
         $rs = $DB->get_recordset('grade_categories', $conditions);
+        // Totara: Records in set may be changed, which could lock MSSQL unless pre-loaded.
+        if ($DB->get_dbfamily() === 'mssql') {
+            $rs->preload();
+        }
         // Get all the parents correct first as grade_category::build_path() loads category parents from the DB
         foreach ($rs as $gc) {
             if (!empty($gc->parent)) {
@@ -479,6 +491,10 @@ class restore_gradebook_structure_step extends restore_structure_step {
 
         // Now we can rebuild all the paths
         $rs = $DB->get_recordset('grade_categories', $conditions);
+        // Totara: Records in set may be changed, which could lock MSSQL unless pre-loaded.
+        if ($DB->get_dbfamily() === 'mssql') {
+            $rs->preload();
+        }
         foreach ($rs as $gc) {
             $grade_category = new stdClass();
             $grade_category->id = $gc->id;
@@ -1607,6 +1623,9 @@ class restore_section_structure_step extends restore_structure_step {
                 $restorefiles = true;
             }
 
+            // Totara: Make sure visible sections are visible.
+            $section->visible = $data->visible;
+
             // Don't update availability (I didn't see a useful way to define
             // whether existing or new one should take precedence).
 
@@ -1889,7 +1908,7 @@ class restore_course_structure_step extends restore_structure_step {
         }
         if (empty($CFG->enablecompletion)) {
             $data->enablecompletion = 0;
-            $data->completionstartonenrol = 0;
+            $data->completionstartonenrol = 1;
             $data->completionprogressonview = 0;
             $data->completionnotify = 0;
         }
@@ -2064,6 +2083,7 @@ class restore_course_structure_step extends restore_structure_step {
         global $DB;
 
         // Add course related files, without itemid to match
+        $this->add_related_files('course', 'images', null); // Totara: background image for grid catalogue
         $this->add_related_files('course', 'summary', null);
         $this->add_related_files('course', 'overviewfiles', null);
         // Restore files for file custom field types.
@@ -3220,6 +3240,10 @@ class restore_course_completion_structure_step extends restore_structure_step {
                 \core_completion\helper::log_course_completion($data->course, $data->userid,
                     "Created completion in restore_course_completion_structure_step->process_course_completions");
             }
+            if (!empty($params['reaggregate'])) {
+                \core_completion\helper::log_course_reaggregation($data->course, $data->userid,
+                    "Completion reaggregation scheduled in restore_course_completion_structure_step->process_course_completions");
+            }
             $transaction->allow_commit();
             // Remove any existing cache.
             $cache = cache::make('core', 'coursecompletion');
@@ -3250,9 +3274,14 @@ class restore_course_completion_structure_step extends restore_structure_step {
             );
 
             $transaction = $DB->start_delegated_transaction();
-            $DB->insert_record('course_completion_history', $params);
-            \core_completion\helper::log_course_completion($courseid, $userid,
-                "Created historical completion in restore_course_completion_structure_step->process_course_completion_history");
+            $newid = $DB->insert_record('course_completion_history', $params);
+
+            \core_completion\helper::log_course_completion_history(
+                $newid,
+                "Created historical completion in " .
+                "restore_course_completion_structure_step->process_course_completion_history"
+            );
+
             $transaction->allow_commit();
         }
     }
@@ -3952,14 +3981,19 @@ class restore_block_instance_structure_step extends restore_structure_step {
             if ($key !== false) {
                 self::$duplicatedblocks[$key]['counter']++;
             } else {
+                $comparelength = strlen($params['configdata']);
+                if ($comparelength == 0) {
+                    $comparelength = 32;
+                }
                 $sql = "SELECT COUNT(id)
-                     FROM {block_instances} 
-                     WHERE blockname = :blockname 
-                       AND parentcontextid = :parentcontextid 
+                     FROM {block_instances}
+                     WHERE blockname = :blockname
+                       AND parentcontextid = :parentcontextid
                        AND showinsubcontexts = :showinsubcontexts
-                       AND pagetypepattern = :pagetypepattern 
+                       AND pagetypepattern = :pagetypepattern
                        AND defaultregion = :defaultregion
-                       AND {$DB->sql_compare_text('configdata')} = :configdata";
+                       AND {$DB->sql_compare_text('configdata', $comparelength)} = :configdata";
+
                 // Add subpagepattern to the select.
                 $sql .= ($data->subpagepattern === null) ? ' AND subpagepattern IS NULL' : ' AND subpagepattern = :subpagepattern';
                 $birecs = $DB->count_records_sql($sql, $params);
@@ -4495,6 +4529,8 @@ class restore_create_categories_and_questions extends restore_structure_step {
 
         // With newitemid = 0, let's create the question
         if (!$questionmapping->newitemid) {
+            $data->stamp = make_unique_id_code();
+            $data->version = make_unique_id_code();
             $newitemid = $DB->insert_record('question', $data);
             $this->set_mapping('question', $oldid, $newitemid);
             // Also annotate them as question_created, we need

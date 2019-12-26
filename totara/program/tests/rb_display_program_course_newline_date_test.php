@@ -29,7 +29,7 @@ require_once($CFG->dirroot . '/totara/reportbuilder/lib.php');
 /**
  * @group totara_program
  */
-class rb_display_program_course_newline_date_testcase extends advanced_testcase {
+class totara_program_rb_display_program_course_newline_date_testcase extends advanced_testcase {
 
     /**
      * Test resorting when there are no courses.
@@ -153,15 +153,16 @@ class rb_display_program_course_newline_date_testcase extends advanced_testcase 
      */
     public function test_display_no_courses_forced_resort() {
         $this->resetAfterTest();
+        $this->setAdminUser();
         self::force_resort_required(true);
 
         /** @var totara_reportbuilder_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('totara_reportbuilder');
-        $generator->create_default_standard_report(['shortname' => 'PO', 'source' => 'program_overview']);
+        $rid = $generator->create_default_standard_report(['shortname' => 'PO', 'source' => 'program_overview']);
 
-        $report = new reportbuilder(null, 'PO');
+        $report = reportbuilder::create($rid);
         $column = new rb_column('course', 'shortname', 'shortname', 'shortname', []);
-        $row = new stdClass;
+        $row = new stdClass();
 
         $result = \totara_program\rb\display\program_course_newline_date::display('', 'html', $row, $column, $report);
         self::assertSame('', $result);
@@ -175,15 +176,16 @@ class rb_display_program_course_newline_date_testcase extends advanced_testcase 
      */
     public function test_display_no_courses_forced_no_resort() {
         $this->resetAfterTest();
+        $this->setAdminUser();
         self::force_resort_required(false);
 
         /** @var totara_reportbuilder_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('totara_reportbuilder');
-        $generator->create_default_standard_report(['shortname' => 'PO', 'source' => 'program_overview']);
+        $rid = $generator->create_default_standard_report(['shortname' => 'PO', 'source' => 'program_overview']);
 
-        $report = new reportbuilder(null, 'PO');
+        $report = reportbuilder::create($rid);
         $column = new rb_column('course', 'shortname', 'shortname', 'shortname', []);
-        $row = new stdClass;
+        $row = new stdClass();
 
         $result = \totara_program\rb\display\program_course_newline_date::display('', 'html', $row, $column, $report);
         self::assertSame('', $result);
@@ -197,15 +199,16 @@ class rb_display_program_course_newline_date_testcase extends advanced_testcase 
      */
     public function test_display_one_course_forced_resort() {
         $this->resetAfterTest();
+        $this->setAdminUser();
         self::force_resort_required(true);
 
         /** @var totara_reportbuilder_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('totara_reportbuilder');
-        $generator->create_default_standard_report(['shortname' => 'PO', 'source' => 'program_overview']);
+        $rid = $generator->create_default_standard_report(['shortname' => 'PO', 'source' => 'program_overview']);
 
-        $report = new reportbuilder(null, 'PO');
+        $report = reportbuilder::create($rid);
         $column = new rb_column('course', 'shortname', 'shortname', 'shortname', []);
-        $row = new stdClass;
+        $row = new stdClass();
 
         $result = \totara_program\rb\display\program_course_newline_date::display('-1|-2|1536382548', 'html', $row, $column, $report);
         self::assertSame('8 Sep 2018', $result);
@@ -219,15 +222,16 @@ class rb_display_program_course_newline_date_testcase extends advanced_testcase 
      */
     public function test_display_one_course_forced_no_resort() {
         $this->resetAfterTest();
+        $this->setAdminUser();
         self::force_resort_required(false);
 
         /** @var totara_reportbuilder_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('totara_reportbuilder');
-        $generator->create_default_standard_report(['shortname' => 'PO', 'source' => 'program_overview']);
+        $rid = $generator->create_default_standard_report(['shortname' => 'PO', 'source' => 'program_overview']);
 
-        $report = new reportbuilder(null, 'PO');
+        $report = reportbuilder::create($rid);
         $column = new rb_column('course', 'shortname', 'shortname', 'shortname', []);
-        $row = new stdClass;
+        $row = new stdClass();
 
         $result = \totara_program\rb\display\program_course_newline_date::display('-1|-2|1536382548', 'html', $row, $column, $report);
         self::assertSame('8 Sep 2018', $result);
@@ -243,15 +247,16 @@ class rb_display_program_course_newline_date_testcase extends advanced_testcase 
      */
     public function test_display_many_courses_forced_resort() {
         $this->resetAfterTest();
+        $this->setAdminUser();
         self::force_resort_required(true);
 
         /** @var totara_reportbuilder_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('totara_reportbuilder');
-        $generator->create_default_standard_report(['shortname' => 'PO', 'source' => 'program_overview']);
+        $rid = $generator->create_default_standard_report(['shortname' => 'PO', 'source' => 'program_overview']);
 
-        $report = new reportbuilder(null, 'PO');
+        $report = reportbuilder::create($rid);
         $column = new rb_column('course', 'shortname', 'shortname', 'shortname', []);
-        $row = new stdClass;
+        $row = new stdClass();
 
         $result = \totara_program\rb\display\program_course_newline_date::display('-1|-2|1536382548', 'html', $row, $column, $report);
         self::assertSame('8 Sep 2018', $result);
@@ -299,15 +304,16 @@ class rb_display_program_course_newline_date_testcase extends advanced_testcase 
      */
     public function test_display_many_courses_forced_no_resort() {
         $this->resetAfterTest();
+        $this->setAdminUser();
         self::force_resort_required(false);
 
         /** @var totara_reportbuilder_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('totara_reportbuilder');
-        $generator->create_default_standard_report(['shortname' => 'PO', 'source' => 'program_overview']);
+        $rid = $generator->create_default_standard_report(['shortname' => 'PO', 'source' => 'program_overview']);
 
-        $report = new reportbuilder(null, 'PO');
+        $report = reportbuilder::create($rid);
         $column = new rb_column('course', 'shortname', 'shortname', 'shortname', []);
-        $row = new stdClass;
+        $row = new stdClass();
 
         $result = \totara_program\rb\display\program_course_newline_date::display('-1|-2|1536382548', 'html', $row, $column, $report);
         self::assertSame('8 Sep 2018', $result);

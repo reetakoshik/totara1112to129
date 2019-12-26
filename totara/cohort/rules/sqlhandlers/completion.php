@@ -43,6 +43,7 @@ define('COHORT_RULE_COMPLETION_OP_AFTER_FUTURE_DURATION', 100);
 
 define ('COHORT_PICKER_PROGRAM_COMPLETION', 0);
 define ('COHORT_PICKER_COURSE_COMPLETION', 1);
+define ('COHORT_PICKER_CERTIFICATION_COMPLETION', 2);
 
 global $COHORT_RULE_COMPLETION_OP;
 $COHORT_RULE_COMPLETION_OP = array(
@@ -242,6 +243,34 @@ class cohort_rule_sqlhandler_completion_date_program extends cohort_rule_sqlhand
     }
 }
 
+/**
+ * Rule for checking whether user has certified all the certifications in a list before a fixed date
+ */
+class cohort_rule_sqlhandler_completion_date_certification extends cohort_rule_sqlhandler_completion_date {
+    protected function construct_sql_snippet($certnum, $comparison, $lov) {
+        global $DB;
+        $sqlhandler = new stdClass();
+        list($sqlin, $params) = $DB->get_in_or_equal($lov, SQL_PARAMS_NAMED, 'cdp'.$this->ruleid);
+        $sqlhandler->sql = "{$certnum} =
+                  (
+                    SELECT count(DISTINCT(p.id))
+                      FROM {prog} p
+                      JOIN {certif} c ON c.id = p.certifid
+                 LEFT JOIN {certif_completion} cc ON cc.certifid = c.id
+                 LEFT JOIN {certif_completion_history} cch ON cch.certifid = c.id
+                     WHERE p.id {$sqlin}
+                       AND (
+                            (cc.userid = u.id AND cc.timecompleted != 0 AND  cc.timecompleted {$comparison})
+                            OR
+                            (cch.userid = u.id AND cch.timecompleted != 0 AND cch.timecompleted {$comparison})
+                           )
+                 )";
+
+        $sqlhandler->params = $params;
+        return $sqlhandler;
+    }
+}
+
 
 /**
  * Rule for checking whether user took longer than a specified duration to complete all
@@ -270,25 +299,6 @@ class cohort_rule_sqlhandler_completion_duration_course extends cohort_rule_sqlh
                   ) {$comparison})";
         $sqlhandler->params = $params;
         return $sqlhandler;
-    }
-}
-
-/**
- * @deprecated Since 9.0
- * This class has been replaced by the cohort_rule_sqlhandler_completion_duration_started_program
- * and cohort_rule_sqlhandler_completion_duration_assigned_program classes.
- */
-class cohort_rule_sqlhandler_completion_duration_program extends cohort_rule_sqlhandler_completion_duration_assigned_program {
-    protected function construct_sql_snippet($goalnum, $comparison, $lov) {
-
-        $message = 'The completion_duration_program has been deprecated and split into 2 new functions.
-    * Completion_duration_started_program now does what the deprecated function should have been doing
-    * Completion_duration_assigned_program now does what the deprecated function was actually doing
-    Please update your code to use one of the new functions.';
-
-        debugging($message, DEBUG_DEVELOPER);
-
-        return parent::construct_sql_snippet($goalnum, $comparison, $lov);
     }
 }
 

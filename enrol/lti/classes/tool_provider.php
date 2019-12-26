@@ -286,7 +286,10 @@ class tool_provider extends ToolProvider {
 
         // Check if there is an image to process.
         if ($image) {
-            helper::update_user_profile_image($user->id, $image);
+            $imageresult = helper::update_user_profile_image($user->id, $image);
+            if ($imageresult !== true) {
+                debugging("Error updating LTI user '{$user->id}' avatar: {$imageresult}", DEBUG_DEVELOPER);
+            }
         }
 
         // Check if we need to force the page layout to embedded.

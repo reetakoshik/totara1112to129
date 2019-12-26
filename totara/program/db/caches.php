@@ -22,6 +22,32 @@
  */
 
 $definitions = array(
+    // Cache for user's progress towards program completion
+    'program_progressinfo' => array(
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'simpledata' => true,
+        'staticacceleration' => true,
+        'staticaccelerationsize' => 10
+    ),
+    // Cache containing all user keys in program_progressinfo belonging to a specific program
+    // This cache is used to avoid purging the progressinfo cache when a specific program is changed
+    'program_users' => array(
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'simpledata' => true,
+        'staticacceleration' => true,
+        'staticaccelerationsize' => 10
+    ),
+    // Cache containing all program keys in program_progressinfo belonging to a specific user
+    // This cache is used to avoid purging the progressinfo cache when a user performs actions
+    'user_programs' => array(
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'simpledata' => true,
+        'staticacceleration' => true,
+        'staticaccelerationsize' => 10
+    ),
 
     // Used to store course sortorder within progammes.
     // The key is the program id (int) and the data is an array of courseids in the correct order (int[])
@@ -34,5 +60,4 @@ $definitions = array(
         'staticaccelerationsize' => 100, // Small memory footprint, so make it large.
         'datasource'             => '\totara_program\rb_course_sortorder_helper',
     ),
-
 );

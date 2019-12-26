@@ -37,6 +37,10 @@ require_once($CFG->dirroot . '/mod/facetoface/lib.php');
 require_once($CFG->libdir . '/completionlib.php');
 require_once($CFG->dirroot . '/completion/criteria/completion_criteria_activity.php');
 
+use \mod_facetoface\signup;
+use \mod_facetoface\signup_helper;
+use \mod_facetoface\signup\state\fully_attended;
+
 class mod_facetoface_archive_testcase extends advanced_testcase {
     /**
      * Is archive completion supported?
@@ -45,9 +49,6 @@ class mod_facetoface_archive_testcase extends advanced_testcase {
         $this->assertTrue(facetoface_supports(FEATURE_ARCHIVE_COMPLETION));
     }
 
-    /**
-     * @depends test_module_supports_archive_completion
-     */
     public function test_archive() {
         global $DB, $CFG;
 
@@ -104,9 +105,9 @@ class mod_facetoface_archive_testcase extends advanced_testcase {
         $manager = $this->getDataGenerator()->create_user();
         $this->assertEquals(4, $DB->count_records('user')); // Guest + Admin + test users.
 
-        // Create a session date in the past, future sessions should not be archived.
+        // Create a session date in the future in order to signup then move it back in time, future sessions should not be archived.
         $sessdate = new stdClass();
-        $sessdate->timestart = time() - (7 * DAYSECS);
+        $sessdate->timestart = time() + (1 * HOURSECS);
         $sessdate->timefinish = $sessdate->timestart + (8 * HOURSECS);
         $sessdate->sessiontimezone = 'Pacific/Auckland';
 
@@ -120,7 +121,13 @@ class mod_facetoface_archive_testcase extends advanced_testcase {
         $session->discountcost = 0;
         $session->usermodified = $manager->id;
         $session->waitlisteveryone = 0;
-        $sessid = facetoface_add_session($session, array($sessdate));
+
+        $seminarevent = new \mod_facetoface\seminar_event();
+        $seminarevent->from_record($session);
+        $seminarevent->save();
+        facetoface_save_dates($seminarevent->to_record(), array($sessdate));
+
+        $sessid = $seminarevent->get_id();
         $session = facetoface_get_session($sessid); // Reload to get the correct dates + id;
         $this->assertEquals(1, $DB->count_records('facetoface_sessions'));
 
@@ -138,21 +145,25 @@ class mod_facetoface_archive_testcase extends advanced_testcase {
 
         // Signup the user to the session.
         $this->assertEquals(0, $DB->count_records('facetoface_signups'));
-        facetoface_user_import($course, $facetoface, $session, $user->id, array('suppressemail' => true));
+        \mod_facetoface\signup_helper::signup(\mod_facetoface\signup::create($user->id, new \mod_facetoface\seminar_event($session->id))->set_skipusernotification());
         $this->assertEquals(1, $DB->count_records('facetoface_signups'));
+
+        $sessdate->timestart = time() - (7 * DAYSECS);
+        $sessdate->timefinish = $sessdate->timestart + (8 * HOURSECS);
+        facetoface_save_dates($seminarevent->get_id(), array($sessdate));
 
         // Trigger the completion - manager marks signup fully attended.
         $this->assertEquals(1, $DB->count_records('facetoface_signups_status'));
         $this->assertEquals(1, $DB->count_records('facetoface_signups_status', array('superceded' => 0)));
-        $this->assertEquals(MDL_F2F_STATUS_BOOKED, $DB->get_field('facetoface_signups_status', 'statuscode', array('superceded' => 0)));
-        $data = new stdClass();
-        $data->s = $session->id;
+
+        $this->assertEquals(\mod_facetoface\signup\state\booked::get_code(), $DB->get_field('facetoface_signups_status', 'statuscode', array('superceded' => 0)));
+
         $signup = $DB->get_record('facetoface_signups', array());
-        $data->{'submissionid_' . $signup->id} = MDL_F2F_STATUS_FULLY_ATTENDED;
-        facetoface_take_attendance($data);
+        \mod_facetoface\signup_helper::process_attendance($seminarevent, [$signup->id => fully_attended::get_code()]);
+
         $this->assertEquals(2, $DB->count_records('facetoface_signups_status'));
         $this->assertEquals(1, $DB->count_records('facetoface_signups_status', array('superceded' => 0)));
-        $this->assertEquals(MDL_F2F_STATUS_FULLY_ATTENDED, $DB->get_field('facetoface_signups_status', 'statuscode', array('superceded' => 0)));
+        $this->assertEquals(\mod_facetoface\signup\state\fully_attended::get_code(), $DB->get_field('facetoface_signups_status', 'statuscode', array('superceded' => 0)));
 
         // Update completion state.
         $completioninfo = new completion_info($course);

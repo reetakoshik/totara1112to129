@@ -111,7 +111,7 @@ Feature: The certification tile should work as expected
     And I click on "OK" "button" in the "Select certification" "totaradialogue"
     And I click on "Save changes" "button"
 
-    When I navigate to "Manage certifications" node in "Site administration > Courses"
+    When I navigate to "Manage certifications" node in "Site administration > Certifications"
     And I follow "Miscellaneous"
     And I click on "Delete" "link" in the "TestCertificationName" "table_row"
     And I click on "Continue" "button"

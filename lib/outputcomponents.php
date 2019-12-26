@@ -359,7 +359,7 @@ class user_picture implements renderable {
             $size = (int)$this->size;
         }
 
-        $defaulturl = $renderer->pix_url('u/'.$filename); // default image
+        $defaulturl = $renderer->image_url('u/'.$filename); // default image
 
         if ((!empty($CFG->forcelogin) and !isloggedin()) ||
             (!empty($CFG->forceloginforprofileimage) && (!isloggedin() || isguestuser()))) {
@@ -427,7 +427,6 @@ class user_picture implements renderable {
             // If the currently requested page is https then we'll return an
             // https gravatar page.
             if (is_https()) {
-                $gravatardefault = str_replace($CFG->wwwroot, $CFG->httpswwwroot, $gravatardefault); // Replace by secure url.
                 return new moodle_url("https://secure.gravatar.com/avatar/{$md5}", array('s' => $size, 'd' => $gravatardefault));
             } else {
                 return new moodle_url("http://www.gravatar.com/avatar/{$md5}", array('s' => $size, 'd' => $gravatardefault));
@@ -525,7 +524,7 @@ class help_icon implements renderable, templatable {
             'context' => $helpflex->export_for_template($output)
         ];
 
-        $data->url = (new moodle_url($CFG->httpswwwroot . '/help.php', [
+        $data->url = (new moodle_url('/help.php', [
             'component' => $this->component,
             'identifier' => $this->identifier,
             'lang' => current_language()
@@ -596,7 +595,12 @@ class pix_icon implements renderable, templatable {
         }
 
         if (empty($this->attributes['class'])) {
-            $this->attributes['class'] = 'smallicon';
+            $this->attributes['class'] = '';
+        }
+
+        // Set an additional class for big icons so that they can be styled properly.
+        if (substr($pix, 0, 2) === 'b/') {
+            $this->attributes['class'] .= ' iconsize-big';
         }
     }
 
@@ -617,12 +621,22 @@ class pix_icon implements renderable, templatable {
      */
     public function export_for_template(renderer_base $output) {
         $attributes = $this->attributes;
-        $attributes['src'] = $output->pix_url($this->pix, $this->component)->out(false);
+        $extraclasses = '';
+
+        if(isset($attributes['class'])) {
+            $extraclasses = $attributes['class'];
+            unset($attributes['class']);
+        }
+
+        $attributes['src'] = $output->image_url($this->pix, $this->component)->out(false);
         $templatecontext = array();
         foreach ($attributes as $name => $value) {
             $templatecontext[] = array('name' => $name, 'value' => $value);
         }
-        $data = array('attributes' => $templatecontext);
+        $data = array(
+            'attributes' => $templatecontext,
+            'extraclasses' => $extraclasses
+        );
 
         return $data;
     }
@@ -643,6 +657,18 @@ class pix_icon implements renderable, templatable {
             'title' => $attributes
         ];
     }
+}
+
+/**
+ * Data structure representing an activity icon.
+ *
+ * The difference is that activity icons will always render with the standard icon system (no font icons).
+ *
+ * @copyright 2017 Damyon Wiese
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package core
+ */
+class image_icon extends pix_icon {
 }
 
 /**
@@ -976,11 +1002,11 @@ class single_select implements renderable, templatable {
         $data->name = $this->name;
         $data->method = $this->method;
         $data->action = $this->method === 'get' ? $this->url->out_omit_querystring(true) : $this->url->out_omit_querystring();
-        $data->classes = 'autosubmit ' . $this->class;
+        $data->classes = $this->class;
         $data->label = $this->label;
         $data->disabled = $this->disabled;
         $data->title = $this->tooltip;
-        $data->formid = $this->formid;
+        $data->formid = !empty($this->formid) ? $this->formid : html_writer::random_id('single_select_f');
         $data->id = !empty($attributes['id']) ? $attributes['id'] : html_writer::random_id('single_select');
         unset($attributes['id']);
 
@@ -998,6 +1024,7 @@ class single_select implements renderable, templatable {
         if (is_string($this->nothing) && $this->nothing !== '') {
             $nothing = ['' => $this->nothing];
             $hasnothing = true;
+            $nothingkey = '';
         } else if (is_array($this->nothing)) {
             $nothingvalue = reset($this->nothing);
             if ($nothingvalue === 'choose' || $nothingvalue === 'choosedots') {
@@ -1006,25 +1033,30 @@ class single_select implements renderable, templatable {
                 $nothing = $this->nothing;
             }
             $hasnothing = true;
+            $nothingkey = key($this->nothing);
         }
         if ($hasnothing) {
             $options = $nothing + $this->options;
         } else {
             $options = $this->options;
         }
-        $data->hasnothing = $hasnothing;
-        $data->nothingkey = $hasnothing ? key($nothing) : false;
 
         foreach ($options as $value => $name) {
             if (is_array($options[$value])) {
                 foreach ($options[$value] as $optgroupname => $optgroupvalues) {
                     $sublist = [];
                     foreach ($optgroupvalues as $optvalue => $optname) {
-                        $sublist[] = [
+                        $option = [
                             'value' => $optvalue,
                             'name' => $optname,
                             'selected' => strval($this->selected) === strval($optvalue),
                         ];
+
+                        if ($hasnothing && $nothingkey === $optvalue) {
+                            $option['ignore'] = 'data-ignore';
+                        }
+
+                        $sublist[] = $option;
                     }
                     $data->options[] = [
                         'name' => $optgroupname,
@@ -1033,12 +1065,18 @@ class single_select implements renderable, templatable {
                     ];
                 }
             } else {
-                $data->options[] = [
+                $option = [
                     'value' => $value,
                     'name' => $options[$value],
                     'selected' => strval($this->selected) === strval($value),
                     'optgroup' => false
                 ];
+
+                if ($hasnothing && $nothingkey === $value) {
+                    $option['ignore'] = 'data-ignore';
+                }
+
+                $data->options[] = $option;
             }
         }
 
@@ -1284,9 +1322,6 @@ class url_select implements renderable, templatable {
         unset($attributes['title']);
 
         $data->showbutton = $this->showbutton;
-        if (empty($this->showbutton)) {
-            $data->classes .= ' autosubmit';
-        }
 
         // Select options.
         $nothing = false;
@@ -1300,8 +1335,6 @@ class url_select implements renderable, templatable {
                 $nothing = $this->nothing;
             }
         }
-        $data->hasnothing = !empty($nothing);
-        $data->nothingkey = $data->hasnothing ? key($nothing) : false;
         $data->options = $this->flatten_options($this->urls, $nothing);
 
         // Label attributes.
@@ -3351,6 +3384,105 @@ class paging_bar implements renderable, templatable {
 }
 
 /**
+ * Component representing initials bar.
+ *
+ * @copyright 2017 Ilya Tregubov
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @since Moodle 3.3
+ * @package core
+ * @category output
+ */
+class initials_bar implements renderable, templatable {
+
+    /**
+     * @var string Currently selected letter.
+     */
+    public $current;
+
+    /**
+     * @var string Class name to add to this initial bar.
+     */
+    public $class;
+
+    /**
+     * @var string The name to put in front of this initial bar.
+     */
+    public $title;
+
+    /**
+     * @var string URL parameter name for this initial.
+     */
+    public $urlvar;
+
+    /**
+     * @var string URL object.
+     */
+    public $url;
+
+    /**
+     * @var array An array of letters in the alphabet.
+     */
+    public $alpha;
+
+    /**
+     * Constructor initials_bar with only the required params.
+     *
+     * @param string $current the currently selected letter.
+     * @param string $class class name to add to this initial bar.
+     * @param string $title the name to put in front of this initial bar.
+     * @param string $urlvar URL parameter name for this initial.
+     * @param string $url URL object.
+     * @param array $alpha of letters in the alphabet.
+     */
+    public function __construct($current, $class, $title, $urlvar, $url, $alpha = null) {
+        $this->current       = $current;
+        $this->class    = $class;
+        $this->title    = $title;
+        $this->urlvar    = $urlvar;
+        $this->alpha    = $alpha;
+
+        $this->url    = new moodle_url($url);
+        $this->url->remove_params('page');
+    }
+
+    /**
+     * Export for template.
+     *
+     * @param renderer_base $output The renderer.
+     * @return stdClass
+     */
+    public function export_for_template(renderer_base $output) {
+        $data = new stdClass();
+
+        if ($this->alpha == null) {
+            $this->alpha = explode(',', get_string('alphabet', 'langconfig'));
+        }
+
+        if ($this->current == 'all') {
+            $this->current = '';
+        }
+
+        foreach ($this->alpha as $letter) {
+            $groupletter = new stdClass();
+            $groupletter->name = $letter;
+            $groupletter->url = $this->url->out(false, array($this->urlvar => $letter));
+            if ($letter == $this->current) {
+                $groupletter->selected = $this->current;
+            }
+            $data->letter[] = $groupletter;
+        }
+
+        $data->class = $this->class;
+        $data->title = $this->title;
+        $data->url = $this->url->out(false, array($this->urlvar => ''));
+        $data->current = $this->current;
+        $data->all = get_string('all');
+
+        return $data;
+    }
+}
+
+/**
  * This class represents how a block appears on a page.
  *
  * During output, each block instance is asked to return a block_contents object,
@@ -3392,6 +3524,12 @@ class block_contents {
     public $skipid;
 
     /**
+     * @var bool If there is no block header to display set to true
+     *
+     */
+    public $noheader = false;
+
+    /**
      * @var int If this is the contents of a real block, this should be set
      * to the block_instance.id. Otherwise this should be set to 0.
      */
@@ -3416,6 +3554,20 @@ class block_contents {
      * <h2> tags. Please do not cause invalid XHTML.
      */
     public $title = '';
+
+    /**
+     * Title which is never empty
+     *
+     * @var string
+     */
+    public $dock_title = '';
+
+    /**
+     * Flag to indicate whether this block instance is hideable (could be reduced to header only)
+     *
+     * @var bool
+     */
+    public $is_hideable = true;
 
     /**
      * @var string The label to use when the block does not, or will not have a visible title.
@@ -3455,7 +3607,7 @@ class block_contents {
     /**
      * @var array A (possibly empty) array of editing controls. Each element of
      * this array should be an array('url' => $url, 'icon' => $icon, 'caption' => $caption).
-     * $icon is the icon name. Fed to $OUTPUT->pix_url.
+     * $icon is the icon name. Fed to $OUTPUT->image_url.
      */
     public $controls = array();
 

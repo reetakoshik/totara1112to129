@@ -363,6 +363,7 @@ class core_enrol_externallib_testcase extends externallib_advanced_testcase {
 
         $this->resetAfterTest(true);
 
+        $timenow = time();
         $coursedata1 = array(
             'fullname'         => '<b>Course 1</b>',                // Adding tags here to check that external_format_string works.
             'shortname'         => '<b>Course 1</b>',               // Adding tags here to check that external_format_string works.
@@ -370,11 +371,17 @@ class core_enrol_externallib_testcase extends externallib_advanced_testcase {
             'summaryformat'    => FORMAT_MOODLE,
             'lang'             => 'en',
             'enablecompletion' => true,
-            'showgrades'       => true
+            'showgrades'       => true,
+            'startdate'        => $timenow,
+            'enddate'          => $timenow + WEEKSECS
+        );
+
+        $coursedata2 = array(
+            'lang'             => 'kk', // Check invalid language pack.
         );
 
         $course1 = self::getDataGenerator()->create_course($coursedata1);
-        $course2 = self::getDataGenerator()->create_course();
+        $course2 = self::getDataGenerator()->create_course($coursedata2);
         $courses = array($course1, $course2);
 
         // Enrol $USER in the courses.
@@ -411,6 +418,9 @@ class core_enrol_externallib_testcase extends externallib_advanced_testcase {
                 foreach ($coursedata1 as $fieldname => $value) {
                     $this->assertEquals($courseenrol[$fieldname], $course1->$fieldname);
                 }
+            } else {
+                // Check language pack. Should be empty since an incorrect one was used when creating the course.
+                $this->assertEmpty($courseenrol['lang']);
             }
         }
     }

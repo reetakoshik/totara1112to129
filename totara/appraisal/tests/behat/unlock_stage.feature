@@ -35,18 +35,16 @@ Feature: Test unlocking an appraisal stage for a role
     And the following "questions" exist in "totara_appraisal" plugin:
       | appraisal   | stage       | page       | name     | type          | default | roles           | ExtraInfo |
       | Appraisal1  | App1_Stage1 | App1_Page1 | App1-Q1  | text          | 2       | learner,manager |           |
-      | Appraisal1  | App1_Stage2 | App1_Page2 | App1-Q2  | text          | 2       | manager,manager |           |
+      | Appraisal1  | App1_Stage2 | App1_Page2 | App1-Q2  | text          | 2       | learner,manager |           |
     And the following "assignments" exist in "totara_appraisal" plugin:
       | appraisal   | type     | id     |
       | Appraisal1  | audience | AppAud |
 
-  @javascript
-  Scenario: Verify stage not completed for learner with a manager
-    Given I log in as "admin"
-    When I navigate to "Manage appraisals" node in "Site administration > Appraisals"
+    # Activate appraisal.
+    When I log in as "admin"
+    And I navigate to "Manage appraisals" node in "Site administration > Appraisals"
     And I click on "Activate" "link" in the "Appraisal1" "table_row"
     And I press "Activate"
-    Then I should see " Close" in the "Appraisal1" "table_row"
     And I log out
 
     # Learner completes stage one.
@@ -74,13 +72,59 @@ Feature: Test unlocking an appraisal stage for a role
     Then I should see "This appraisal was completed"
     And I log out
 
+  @javascript
+  Scenario: Check that an appraisal stage can be unlocked for all roles
+    # Admin edits stage.
+    When I log in as "admin"
+    And I navigate to "Manage appraisals" node in "Site administration > Appraisals"
+    And I follow "Appraisal1"
+    And I switch to "Assignments" tab
+    And I click on "Edit" "link" in the "learner lastname" "table_row"
+    And I set the field "Role / user to change" to "All roles"
+    And I press "Apply"
+    Then I should see "Editing current stage was completed"
+    And I log out
+
+    # Check Manager must complete the stage.
+    When I log in as "manager"
+    And I click on "All Appraisals" in the totara menu
+    And I follow "Appraisal1"
+    Then I should see "learner lastname must complete this stage"
+    And I should see "You must complete this stage"
+    And I should not see "You have completed this stage"
+    When I press "Start"
+    And I click on "Complete stage" "button"
+    Then I should see "You have completed this stage"
+    And I log out
+
+    # Learner can re-complete stages.
+    When I log in as "learner"
+    And I click on "Latest Appraisal" in the totara menu
+    And I press "Start"
+    And I click on "Complete stage" "button"
+    And I press "Start"
+    And I click on "Complete stage" "button"
+    Then I should see "You have completed this stage"
+    And I log out
+
+    # Check Manager must complete the stage.
+    When I log in as "manager"
+    And I click on "All Appraisals" in the totara menu
+    And I follow "Appraisal1"
+    And I press "Start"
+    And I click on "Complete stage" "button"
+    Then I should see "This appraisal was completed"
+
+  @javascript
+  Scenario: Check that an appraisal stage can be unlocked for a learner
     # Admin edits stage
     When I log in as "admin"
     And I navigate to "Manage appraisals" node in "Site administration > Appraisals"
     And I follow "Appraisal1"
     And I switch to "Assignments" tab
     And I click on "Edit" "link" in the "learner lastname" "table_row"
-    And I press "Save changes"
+    And I set the field "Role / user to change" to "Learner - learner lastname"
+    And I press "Apply"
     Then I should see "Editing current stage was completed"
     And I log out
 

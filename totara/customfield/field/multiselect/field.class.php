@@ -211,6 +211,12 @@ class customfield_multiselect extends customfield_base {
 
     public function edit_validate_field($itemnew, $prefix, $tableprefix) {
         global $DB;
+
+        // Check if the field is part of the form
+        if (!isset($itemnew->{$this->inputname})) {
+            return array();
+        }
+
         if ($this->is_hidden()) {
             return array();
         }
@@ -276,11 +282,15 @@ class customfield_multiselect extends customfield_base {
             $data = array();
         }
 
+        if (!empty($extradata['isexport'])) {
+            $extradata['display'] = 'list-text';
+        }
+
         foreach ($data as $item) {
             $return[] = self::get_item_string(format_string($item['option']), $item['icon'], $extradata['display']);
         }
 
-        if (isset($extradata['display']) && $extradata['display'] == 'list-text') {
+        if (!empty($extradata['isexport']) || (isset($extradata['display']) && $extradata['display'] == 'list-text')) {
             $glue = ', ';
         } else {
             $glue = ' ';

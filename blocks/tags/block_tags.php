@@ -24,6 +24,7 @@
 
 class block_tags extends block_base {
     public function init() {
+        // Totara: Title override is done via $this->get_title();
         $this->title = get_string('pluginname', 'block_tags');
     }
 
@@ -37,16 +38,6 @@ class block_tags extends block_base {
 
     public function instance_allow_config() {
         return true;
-    }
-
-    public function specialization() {
-
-        // Load userdefined title and make sure it's never empty.
-        if (empty($this->config->title)) {
-            $this->title = get_string('pluginname', 'block_tags');
-        } else {
-            $this->title = format_string($this->config->title, true, ['context' => $this->context]);
-        }
     }
 
     public function get_content() {

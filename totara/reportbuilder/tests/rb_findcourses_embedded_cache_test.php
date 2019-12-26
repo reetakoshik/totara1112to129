@@ -169,6 +169,8 @@ class totara_reportbuilder_rb_findcourses_embedded_cache_testcase extends report
         $this->getDataGenerator()->enrol_user($this->user2->id, $this->course2->id);
         $this->getDataGenerator()->enrol_user($this->user3->id, $this->course2->id);
         $this->getDataGenerator()->enrol_user($this->user4->id, $this->course3->id);
+
+        $this->setAdminUser();
     }
 
     /**
@@ -218,7 +220,6 @@ class totara_reportbuilder_rb_findcourses_embedded_cache_testcase extends report
         $this->resetAfterTest();
         // Enable and create tags
         $CFG->usetags = true;
-        set_config('coursetagging', 1, 'moodlecourse');
 
         $objects = core_tag_tag::create_if_missing(core_tag_collection::get_default(), ['taga', 'tagb', 'tagc'], true);
         $tags = [];
@@ -305,8 +306,6 @@ class totara_reportbuilder_rb_findcourses_embedded_cache_testcase extends report
 
         // Enable and create tags
         $CFG->usetags = true;
-        set_config('coursetagging', 1, 'moodlecourse');
-
 
         $objects = core_tag_tag::create_if_missing(core_tag_collection::get_default(), ['taga', 'tagb', 'tagc'], true);
         $tags = [];
@@ -423,7 +422,7 @@ class totara_reportbuilder_rb_findcourses_embedded_cache_testcase extends report
 
         // Set up report and embedded object for is_capable checks.
         $shortname = $this->report_builder_data['shortname'];
-        $report = reportbuilder_get_embedded_report($shortname, array(), false, 0);
+        $report = reportbuilder::create_embedded($shortname);
         $embeddedobject = $report->embedobj;
         $userid = $this->user1->id;
 

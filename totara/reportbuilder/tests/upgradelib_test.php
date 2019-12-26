@@ -37,7 +37,8 @@ require_once($CFG->dirroot . '/totara/reportbuilder/db/upgradelib.php');
  * @group totara_reportbuilder
  */
 class totara_reportbuilder_upgradelib_testcase extends advanced_testcase {
-    private $report, $user;
+
+    private $report, $user, $rbcolumn, $contcol, $rbfilter, $contfil, $rbsaved, $contsave;
 
     public function setUp() {
         global $DB;
@@ -122,6 +123,19 @@ class totara_reportbuilder_upgradelib_testcase extends advanced_testcase {
         $contsave->ispublic = 1;
         $contsave->id = $DB->insert_record('report_builder_saved', $contsave);
         $this->contsave = $contsave;
+    }
+
+    protected function tearDown() {
+        $this->report = null;
+        $this->user = null;
+        $this->rbcolumn = null;
+        $this->contcol = null;
+        $this->rbfilter = null;
+        $this->contfil = null;
+        $this->rbsaved = null;
+        $this->contsave = null;
+
+        parent::tearDown();
     }
 
     public function test_upgradelib_migrate_columns() {

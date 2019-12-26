@@ -1,4 +1,4 @@
-@block @block_comments
+@block @block_comments @javascript
 Feature: Enable Block comments on an activity page and view comments
   In order to enable the comments block on an activity page
   As a teacher
@@ -20,15 +20,12 @@ Feature: Enable Block comments on an activity page and view comments
       | activity | course | idnumber | name           | intro                 |
       | page    | C1      | page1    | Test page name | Test page description |
     And I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I follow "Test page name"
     And I add the "Comments" block
-    And I follow "Show comments"
     And I add "I'm a comment from the teacher" comment to comments block
     And I log out
     When I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test page name"
-    And I follow "Show comments"
     Then I should see "I'm a comment from the teacher"

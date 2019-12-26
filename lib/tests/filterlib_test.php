@@ -325,7 +325,7 @@ class core_filterlib_testcase extends advanced_testcase {
 
     private function assert_filter_list($expectedfilters, $filters) {
         $this->setup_available_in_context_tests();
-        $this->assertEquals($expectedfilters, array_keys($filters), '', 0, 10, true);
+        $this->assertEqualsCanonicalizing($expectedfilters, array_keys($filters));
     }
 
     public function test_globally_on_is_returned() {

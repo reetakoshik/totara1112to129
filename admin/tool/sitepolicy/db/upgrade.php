@@ -40,7 +40,7 @@ function xmldb_tool_sitepolicy_upgrade($oldversion) {
 
     // Totara 11 branching line.
 
-    if ($oldversion < 2018022702) {
+    if ($oldversion < 2018050800) {
         // Add format fields for policytext and whatsnew.
         $table = new xmldb_table('tool_sitepolicy_localised_policy');
         $field = new xmldb_field('policytextformat', XMLDB_TYPE_INTEGER, '2', null, null, null, '1', 'policytext');
@@ -59,10 +59,10 @@ function xmldb_tool_sitepolicy_upgrade($oldversion) {
         }
 
         // Connect savepoint reached.
-        upgrade_plugin_savepoint(true, 2018022702, 'tool', 'sitepolicy');
+        upgrade_plugin_savepoint(true, 2018050800, 'tool', 'sitepolicy');
     }
 
-    if ($oldversion < 2018022703) {
+    if ($oldversion < 2018082800) {
         global $DB;
 
         // Update report filter type currentversion => policytitle and reset default value.
@@ -116,7 +116,7 @@ function xmldb_tool_sitepolicy_upgrade($oldversion) {
         }
 
         // Point of noreturn.
-        upgrade_plugin_savepoint(true, 2018022703, 'tool', 'sitepolicy');
+        upgrade_plugin_savepoint(true, 2018082800, 'tool', 'sitepolicy');
     }
 
     return true;

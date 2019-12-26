@@ -25,7 +25,7 @@ Feature: The generators create the expected position assignments
       | user  | fullname | manager  | position | organisation |
       | user1 | First ja | manager1 | POS001   | ORG001       |
     When I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "User 1"
     And I follow "First ja"
     Then I should see "First position" in the "#positiontitle" "css_element"

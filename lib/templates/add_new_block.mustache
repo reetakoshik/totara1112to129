@@ -1,0 +1,80 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template core/add_new_block
+
+    This template is for the pseudo block that allows other blocks to be added
+    to a page region.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * hasblocks: boolean if this is false then the content shows a "no blocks to
+      add" message.
+    * actionurl: string URL (excluding query parameters) to select a block for
+      the region.
+    * hidden: list of [name, value] hashes to render as hidden fields.
+    * label: text of the accompanying label to the list of available blocks.
+    * id: unique HTML selection list element id.
+    * blocks: list of hashes that can be added in this format: [blockname,
+      blocktitle]
+    * plusicon: Icon context
+
+    Example context (json):
+    {
+        "hasblocks": true,
+        "actionurl": "http://www.example.com/frontpage.php",
+        "hidden": [
+            [name => "bui_addblockregion", "value" => "top"],
+            [name => "sesskey", "value" => "12345"]
+        ],
+        "label": "add a block",
+        "id": "12345",
+        "blocks": [
+            ["blockname" => "blk1", "blocktitle" = "Block#1"],
+            ["blockname" => "blk2", "blocktitle" = "Block#2"]
+        ]
+    }
+}}
+<div class="singleselect">
+    {{#hasblocks}}
+
+    <div class="addBlock">
+        <form method="get" action="{{actionurl}}">
+            {{#hidden}}
+            <input type="hidden" name="{{name}}" value="{{value}}" />
+            {{/hidden}}
+            <input type="hidden" name="bui_addblock" value="">
+        </form>
+        <button class="addBlock--trigger" data-addblock="{{addblockregion}}">
+            {{#plusicon}}{{#context}}{{> &&template }}{{/context}}{{/plusicon}}
+        </button>
+
+        <noscript>{{#str}}noscript, core{{/str}}</noscript>
+    </div>
+
+    {{/hasblocks}}
+    {{^hasblocks}}
+    {{#str}}noblockstoaddhere, core{{/str}}
+    {{/hasblocks}}
+</div>

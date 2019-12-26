@@ -45,6 +45,15 @@ class backup_step_testcase extends advanced_testcase {
         require_once($CFG->dirroot . '/backup/moodle2/backup_custom_fields.php');
     }
 
+    protected function tearDown() {
+        $this->moduleid = null;
+        $this->sectionid = null;
+        $this->courseid = null;
+        $this->userid = null;
+
+        parent::tearDown();
+    }
+
     protected function setUp() {
         global $DB, $CFG;
         parent::setUp();

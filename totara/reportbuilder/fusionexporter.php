@@ -38,10 +38,8 @@ require_login();
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url('/totara/reportbuilder/fusionexporter.php', array('id' => $id));
 
-$report = new reportbuilder($id, null, false, $sid);
-if (!$report->is_capable($id)) {
-    print_error('nopermission', 'totara_reportbuilder');
-}
+$config = (new rb_config())->set_sid($sid);
+$report = reportbuilder::create($id, $config, true);
 
 $returnurl = new moodle_url('/totara/reportbuilder/fusionexporter.php', array('id' => $id, 'sid' => $sid));
 $returnurl->param('sesskey', sesskey());

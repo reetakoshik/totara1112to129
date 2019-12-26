@@ -49,7 +49,8 @@ class totara_reportbuilder_rb_filters_default_value_testcase extends advanced_te
         $this->add_filter($rid, 'user', 'fullname', 1, 'Name', 1, 1, ['operator' => 3, 'value' => 'default text']);
         $this->add_filter($rid, 'user', 'deleted', 1, 'User Status', 1, 1, ['operator'=> 1, 'value' => 0]);
 
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
 
         // Assert filters.
         $filters = $report->get_filters();
@@ -84,7 +85,8 @@ class totara_reportbuilder_rb_filters_default_value_testcase extends advanced_te
         $this->add_filter($rid, 'course_category', 'path', 1, 'Category', 0, 1, ['operator' => 1, 'value' => 1, 'recursive' => 1]);
         $this->add_filter($rid, 'course', 'startdate', 1, 'Course start date', 0, 1, ['after' => 0, 'before' => 0, 'daysafter'=> 22, 'daysbefore' => 13]);
 
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
 
         // Assert filters.
         $filters = $report->get_filters();
@@ -122,7 +124,8 @@ class totara_reportbuilder_rb_filters_default_value_testcase extends advanced_te
         $this->add_filter($rid, 'course', 'id', 1, '', 0, 1, ['operator'=> 1, 'value' => "{$course1->id},{$course2->id}"]);
         $this->add_filter($rid, 'cohort', 'enrolledcoursecohortids', 1, '', 0, 1, ['value' => "{$audience1->id},{$audience2->id}"]);
 
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
 
         // Assert filters.
         $filters = $report->get_filters();
@@ -133,7 +136,7 @@ class totara_reportbuilder_rb_filters_default_value_testcase extends advanced_te
         $this->assertEquals('status', $filter->value);
         $this->assertEquals('1', $filter->advanced);
         $this->assertEquals(['operator' => 1, 'value' => ["1", "1", "1", "0", "0"]], $filter->defaultvalue);
-        $this->assertEquals('Badge status matches any selected "Not available to users", "Available to users", "Locked - Not available to users"',
+        $this->assertEquals('Badge status Any of the selected "Not available to users", "Available to users", "Locked - Not available to users"',
             $filter->get_label($filter->defaultvalue));
 
         $filter = array_shift($filters);
@@ -149,7 +152,7 @@ class totara_reportbuilder_rb_filters_default_value_testcase extends advanced_te
         $this->assertEquals('enrolledcoursecohortids', $filter->value);
         $this->assertEquals('1', $filter->advanced);
         $this->assertEquals(['value' => "{$audience1->id},{$audience2->id}"], $filter->defaultvalue);
-        $this->assertEquals('Course is enrolled in by audience "' . $audience1->name . '" or "' . $audience2->name . '"',
+        $this->assertEquals('Course with enrolled audience(s) "' . $audience1->name . '" or "' . $audience2->name . '"',
             $filter->get_label($filter->defaultvalue));
     }
 }

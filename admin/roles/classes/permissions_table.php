@@ -90,13 +90,12 @@ class core_role_permissions_table extends core_role_capability_table_base {
             unset($forbitable[$id]);
         }
 
-        $flexicon_prevent = \core\output\flex_icon::get_icon('delete-ns', ['alt'=> 'prevent']);
+        $flexicon_prevent = new \core\output\flex_icon('delete-ns', array('alt'=> 'prevent'));
+        $flexicon_unprohibit = new \core\output\flex_icon('delete-ns', array('alt'=> 'unprohibit'));
         $data_flexicon_prevent = [
             'template' => $flexicon_prevent->get_template(),
             'context' => $flexicon_prevent->export_for_template($OUTPUT)
         ];
-
-        $flexicon_unprohibit = new \core\output\flex_icon('delete-ns', array('alt'=> 'unprohibit'));
         $data_flexicon_unprohibit = [
             'template' => $flexicon_unprohibit->get_template(),
             'context' => $flexicon_unprohibit->export_for_template($OUTPUT)

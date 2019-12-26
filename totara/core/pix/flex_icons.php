@@ -23,6 +23,22 @@
  */
 
 /* Developer documentation is in /pix/flex_icons.php file. */
+$icons = array(
+    'totara_core|accordion-expanded' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-chevron-down',
+                ),
+        ),
+    'totara_core|accordion-collapsed' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-chevron-right ft-flip-rtl',
+                ),
+        ),
+    );
 
 $aliases = array(
     'totara_core|bookings' => 'calendar',

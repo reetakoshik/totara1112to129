@@ -25,6 +25,8 @@ require_once('test_helper.php');
 
 defined('MOODLE_INTERNAL') || die();
 
+use block_totara_featured_links\tile\default_tile;
+
 /**
  * Tests the generator for the totara_featured_links block.
  */
@@ -44,14 +46,19 @@ class block_totara_featured_links_generator_testcase extends test_helper {
         $this->blockgenerator = $this->getDataGenerator()->get_plugin_generator('block_totara_featured_links');
     }
 
+    public function tearDown() {
+        parent::tearDown();
+        $this->blockgenerator = null;
+    }
+
     /**
-     * Tests the \block_totara_featured_links\tile\base::get_tile_instance() method.
+     * Tests the block_totara_featured_links\tile\base::get_tile_instance() method.
      *
      * Here we want to test that the generator returns an accurate tile object that matches the real one.
      */
     public function test_create_default_tile() {
         global $DB;
-        $this->resetAfterTest(); // Changing the database, we must reset.
+        $this->resetAfterTest();
         $blockinstance = $this->blockgenerator->create_instance();
         $tile = $this->blockgenerator->create_default_tile($blockinstance->id);
 
@@ -61,7 +68,7 @@ class block_totara_featured_links_generator_testcase extends test_helper {
         $this->assertTrue($DB->record_exists('block_totara_featured_links_tiles', ['id' => $tile->id]));
 
         // Manually get the tile instance so that we can compare the real one with the generator one.
-        $realtile = new \block_totara_featured_links\tile\default_tile($tile->id);
+        $realtile = new default_tile($tile->id);
 
         $realtile_reflection = new ReflectionClass($realtile);
         $realtile_properties = [];
@@ -81,9 +88,9 @@ class block_totara_featured_links_generator_testcase extends test_helper {
 
             $this->assertEquals($expectedvalue, $tile_properties[$expectedname], 'The generated tile '.$expectedname.' property value does not match the real tiles value.');
 
-            // I'm excluding stdClass cause they have to point to the same object so it doesn't make sense for them to be the same here.
+            // I'm excluding \stdClass cause they have to point to the same object so it doesn't make sense for them to be the same here.
             if (!$expectedvalue instanceof \stdClass && !$tile_properties[$expectedname] instanceof \stdClass) {
-                $this->assertSame($expectedvalue,
+                $this->assertEquals($expectedvalue,
                     $tile_properties[$expectedname],
                     'The generated tile ' . $expectedname . ' property value is not of the same type as the real tiles value.'
                 );

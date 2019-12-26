@@ -263,7 +263,7 @@ class helper {
         global $OUTPUT;
 
         return \html_writer::span(
-            $OUTPUT->pix_icon('t/filler', '', 'tool_usertours', $options),
+            $OUTPUT->pix_icon('spacer', '', 'core', $options),
             'action-icon'
         );
     }

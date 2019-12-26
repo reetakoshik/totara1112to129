@@ -102,7 +102,6 @@ class overview implements \renderable {
                 'enablecourserpl' => null,                  // Totara.
                 'enablebadges' => null,                     // Totara.
                 'audiencevisibility' => null,               // Totara.
-                'enhancedcatalog' => null,                  // Totara.
                 'feature_reportbuilder' => '1',             // Fake setting to mimic Report Builder.
                 'enableglobalrestrictions' => null,         // Totara.
                 'enablegoals' => null,                      // Totara.

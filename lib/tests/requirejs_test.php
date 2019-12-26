@@ -36,9 +36,9 @@ defined('MOODLE_INTERNAL') || die();
 class core_requirejs_testcase extends advanced_testcase {
 
     /**
-     * Test requirejs loader
+     * Test requirejs loader for single files
      */
-    public function test_requirejs() {
+    public function test_find_one() {
         global $CFG;
 
         // Find a core module.
@@ -59,9 +59,15 @@ class core_requirejs_testcase extends advanced_testcase {
         $result = core_requirejs::find_one_amd_module('mod_assign', 'grading_panel', true);
         $expected = ['mod_assign/grading_panel' => $CFG->dirroot . '/mod/assign/amd/src/grading_panel.js'];
         $this->assertEquals($expected, $result);
+    }
 
+    /**
+     * Tests requirejs when loading all files
+     */
+    public function test_find_all() {
         // Find all modules - no debugging.
         $result = core_requirejs::find_all_amd_modules(true);
+        $nonminified = array_keys($result);
         foreach ($result as $key => $path) {
             // Lets verify the first part of the key is a valid component name and the second part correctly contains "min" or not.
             list($component, $template) = explode('/', $key, 2);
@@ -78,6 +84,7 @@ class core_requirejs_testcase extends advanced_testcase {
 
         // Find all modules - debugging.
         $result = core_requirejs::find_all_amd_modules(false);
+        $minified = array_keys($result);
         foreach ($result as $key => $path) {
             // Lets verify the first part of the key is a valid component name and the second part correctly contains "min" or not.
             list($component, $template) = explode('/', $key, 2);
@@ -91,5 +98,8 @@ class core_requirejs_testcase extends advanced_testcase {
             $this->assertContains('.min', $path);
         }
 
+        sort($nonminified);
+        sort($minified);
+        $this->assertSame($nonminified, $minified, 'AMD source files do not match minified files - have you run grunt?');
     }
 }

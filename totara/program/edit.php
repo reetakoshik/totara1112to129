@@ -163,7 +163,14 @@ if ($overviewfilesoptions) {
     file_prepare_standard_filemanager($program, 'overviewfiles', $overviewfilesoptions, $programcontext, 'totara_program', 'overviewfiles', 0);
 }
 
-$program->tags = core_tag_tag::get_item_tags_array('totara_program', 'prog', $program->id);
+$program->tags = core_tag_tag::get_item_tags_array(
+    'totara_program',
+    'prog',
+    $program->id,
+    core_tag_tag::BOTH_STANDARD_AND_NOT,
+    0,
+    false
+);
 
 $detailsform = new program_edit_form($currenturl,
                 array('program' => $program, 'overviewfiles' => $overviewfiles, 'action' => $action, 'category' => $progcategory,
@@ -210,6 +217,8 @@ if ($data = $detailsform->get_data()) {
         $data->id = $program->id;
         customfield_save_data($data, 'program', 'prog');
 
+        $program->save_image($data->image);
+
         if (isset($data->savechanges)) {
             $nexturl = $viewurl;
         }
@@ -250,6 +259,13 @@ if ($data = $detailsform->get_data()) {
             core_tag_tag::set_item_tags('totara_program', 'prog', $program->id, $programcontext, $data->tags);
         }
 
+        $hook = new \totara_program\hook\program_edit_form_save_changes($data, $program->id);
+        if (!empty($program->certifid)) {
+            $hook->set_certification();
+        }
+
+        $hook->execute();
+
         $other = array('certifid' => empty($program->certifid) ? 0 : $program->certifid);
         $dataevent = array('id' => $program->id, 'other' => $other);
         $event = \totara_program\event\program_updated::create_from_data($dataevent)->trigger();
@@ -260,6 +276,21 @@ if ($data = $detailsform->get_data()) {
     // Reload program to reflect any changes.
     $program = new program($id);
 }
+
+// Load the image in the file manager.
+$imagedraftitemid = file_get_submitted_draft_itemid('images');
+file_prepare_draft_area(
+    $imagedraftitemid,
+    $program->get_context()->id,
+    'totara_program',
+    'images',
+    $program->id,
+    [
+        'subdirs' => 0,
+        'maxfiles' => 1
+    ]
+);
+$program->image = $imagedraftitemid;
 
 // Trigger event.
 $dataevent = array('id' => $program->id, 'other' => array('section' => 'general'));

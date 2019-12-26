@@ -32,9 +32,10 @@ $debug = optional_param('debug', 0, PARAM_INT);
 $syscontext = context_system::instance();
 admin_externalpage_setup('userdatadeletedusers');
 
-$report = reportbuilder_get_embedded_report('userdata_deleted_users', array(), false, $sid);
+$config = (new rb_config())->set_sid($sid);
+$report = reportbuilder::create_embedded('userdata_deleted_users', $config);
 
-$PAGE->set_button($report->edit_button());
+$PAGE->set_button($report->edit_button() . $PAGE->button);
 
 /** @var totara_reportbuilder_renderer|core_renderer $output */
 $output = $PAGE->get_renderer('totara_reportbuilder');

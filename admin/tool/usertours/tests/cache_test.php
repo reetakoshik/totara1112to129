@@ -148,7 +148,7 @@ class tool_usertours_cache_testcase extends advanced_testcase {
             ],
             (object) [
                 'name' => 'my_glob_2',
-                'pathmatch' => '/my/%'
+                'pathmatch' => '/my/profile.php?param1=%&param2=%'
             ],
             (object) [
                 'name' => 'frontpage_only',
@@ -164,12 +164,17 @@ class tool_usertours_cache_testcase extends advanced_testcase {
             'Matches expected glob' => [
                 $tourconfigs,
                 '/my/index.php',
+                ['my_glob_1'],
+            ],
+            'Matches expected glob 1 and 2' => [
+                $tourconfigs,
+                '/my/profile.php?param1=2&param2=text',
                 ['my_glob_1', 'my_glob_2'],
             ],
             'Matches expected glob and exact' => [
                 $tourconfigs,
                 '/my/view.php',
-                ['my_exact_1', 'my_glob_1', 'my_glob_2'],
+                ['my_exact_1', 'my_glob_1'],
             ],
             'Special constant FRONTPAGE must match front page only' => [
                 $tourconfigs,
@@ -248,7 +253,7 @@ class tool_usertours_cache_testcase extends advanced_testcase {
         $tour = $this->helper_create_tour((object)['enabled' => false]);
 
         $data = \tool_usertours\cache::get_stepdata($tour->get_id());
-        $this->assertInternalType('array', $data);
+        $this->assertIsArray($data);
         $this->assertEmpty($data);
     }
 
@@ -265,11 +270,11 @@ class tool_usertours_cache_testcase extends advanced_testcase {
         $tour2 = $this->helper_create_tour((object)['enabled' => false]);
 
         $data = \tool_usertours\cache::get_stepdata($tour1->get_id());
-        $this->assertInternalType('array', $data);
+        $this->assertIsArray($data);
         $this->assertCount(3, $data);
 
         $data = \tool_usertours\cache::get_stepdata($tour2->get_id());
-        $this->assertInternalType('array', $data);
+        $this->assertIsArray($data);
         $this->assertEmpty($data);
     }
 
@@ -292,7 +297,7 @@ class tool_usertours_cache_testcase extends advanced_testcase {
         $steps[0]->set_sortorder(10)->persist();
 
         $data = \tool_usertours\cache::get_stepdata($tour->get_id());
-        $this->assertInternalType('array', $data);
+        $this->assertIsArray($data);
         $this->assertCount(4, $data);
 
         // Re-order the steps.

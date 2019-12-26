@@ -45,10 +45,9 @@ Feature: See that course visibility affects Record of Learning: Courses content 
   @javascript
   Scenario: Normal visibility (default), hidden.
     When I log in as "admin"
-    And I click on "Courses" in the totara menu
-    And I click on "RoLCourseVisibility Test Course 1" "link"
+    And I am on "RoLCourseVisibility Test Course 1" course homepage
     And I click on "Edit settings" "link" in the "Administration" "block"
-    And I set the field "Visible" to "0"
+    And I set the field "Course visibility" to "0"
     And I press "Save and display"
     Then I should see "Topic 1"
 
@@ -75,10 +74,9 @@ Feature: See that course visibility affects Record of Learning: Courses content 
   @javascript
   Scenario: Normal visibility (default), hidden, 2nd course assigned.
     When I log in as "admin"
-    And I click on "Courses" in the totara menu
-    And I click on "RoLCourseVisibility Test Course 1" "link"
+    And I am on "RoLCourseVisibility Test Course 1" course homepage
     And I click on "Edit settings" "link" in the "Administration" "block"
-    And I set the field "Visible" to "0"
+    And I set the field "Course visibility" to "0"
     And I press "Save and display"
     Then I should see "Topic 1"
 
@@ -105,10 +103,9 @@ Feature: See that course visibility affects Record of Learning: Courses content 
   @javascript
   Scenario: Normal vis hidden, switch to audience vis.
     When I log in as "admin"
-    And I click on "Courses" in the totara menu
-    And I click on "RoLCourseVisibility Test Course 1" "link"
+    And I am on "RoLCourseVisibility Test Course 1" course homepage
     And I click on "Edit settings" "link" in the "Administration" "block"
-    And I set the field "Visible" to "0"
+    And I set the field "Course visibility" to "0"
     And I press "Save and display"
     Then I should see "Topic 1"
 
@@ -124,7 +121,7 @@ Feature: See that course visibility affects Record of Learning: Courses content 
     # Switch the site setting, course is now set to all users (default).
     When I log out
     And I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
@@ -151,7 +148,7 @@ Feature: See that course visibility affects Record of Learning: Courses content 
   @javascript
   Scenario: Audience visibility, all users (default).
     When I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
@@ -177,13 +174,12 @@ Feature: See that course visibility affects Record of Learning: Courses content 
   @javascript
   Scenario: Audience visibility, enrolled users and auds.
     When I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
 
-    When I click on "Courses" in the totara menu
-    And I click on "RoLCourseVisibility Test Course 1" "link"
+    When I am on "RoLCourseVisibility Test Course 1" course homepage
     And I click on "Edit settings" "link" in the "Administration" "block"
     And I set the field "Visibility" to "Enrolled users and members of the selected audiences"
     And I press "Save and display"
@@ -210,13 +206,12 @@ Feature: See that course visibility affects Record of Learning: Courses content 
   @javascript
   Scenario: Audience visibility, enrolled users.
     When I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
 
-    When I click on "Courses" in the totara menu
-    And I click on "RoLCourseVisibility Test Course 1" "link"
+    When I am on "RoLCourseVisibility Test Course 1" course homepage
     And I click on "Edit settings" "link" in the "Administration" "block"
     And I set the field "Visibility" to "Enrolled users only"
     And I press "Save and display"
@@ -243,13 +238,12 @@ Feature: See that course visibility affects Record of Learning: Courses content 
   @javascript
   Scenario: Audience visibility, no users.
     When I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
 
-    When I click on "Courses" in the totara menu
-    And I click on "RoLCourseVisibility Test Course 1" "link"
+    When I am on "RoLCourseVisibility Test Course 1" course homepage
     And I click on "Edit settings" "link" in the "Administration" "block"
     And I set the field "Visibility" to "No users"
     And I press "Save and display"
@@ -278,13 +272,12 @@ Feature: See that course visibility affects Record of Learning: Courses content 
   @javascript
   Scenario: Audience visibility, no users, 2nd course assigned.
     When I log in as "admin"
-    And I navigate to "Advanced features" node in "Site administration"
+    And I navigate to "Advanced features" node in "Site administration > System information"
     And I set the field "Enable audience-based visibility" to "1"
     And I press "Save changes"
     Then I should see "Changes saved"
 
-    When I click on "Courses" in the totara menu
-    And I click on "RoLCourseVisibility Test Course 1" "link"
+    When I am on "RoLCourseVisibility Test Course 1" course homepage
     And I click on "Edit settings" "link" in the "Administration" "block"
     And I set the field "Visibility" to "No users"
     And I press "Save and display"

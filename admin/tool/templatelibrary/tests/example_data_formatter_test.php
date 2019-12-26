@@ -106,7 +106,7 @@ JSON;
 
         global $PAGE, $OUTPUT;
 
-        $imgsrc = $OUTPUT->pix_url('logo', 'totara_core');
+        $imgsrc = $OUTPUT->image_url('logo', 'totara_core');
 
         // Different quote configurations.
         $templatecontext = array(

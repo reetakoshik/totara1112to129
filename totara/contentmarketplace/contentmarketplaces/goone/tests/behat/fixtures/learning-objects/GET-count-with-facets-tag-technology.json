@@ -1,0 +1,53 @@
+{
+  "total": 20540,
+  "hits": [],
+  "facets": {
+    "instance": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": 1866847,
+          "doc_count": 49,
+          "name": "GO1 Content"
+        },
+        {
+          "key": 101,
+          "doc_count": 20463,
+          "name": "Content provider 101"
+        },
+        {
+          "key": 102,
+          "doc_count": 28,
+          "name": "Content provider 102"
+        }
+      ]
+    },
+    "language": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": "en",
+          "doc_count": 20540
+        }
+      ]
+    },
+    "tag": {
+      "doc_count_error_upper_bound": 6,
+      "sum_other_doc_count": 3823,
+      "buckets": [
+        {
+          "key": "Communication",
+          "doc_count": 7,
+          "type": "premium"
+        },
+        {
+          "key": "Technology",
+          "doc_count": 20540,
+          "type": "premium"
+        }
+      ]
+    }
+  }
+}

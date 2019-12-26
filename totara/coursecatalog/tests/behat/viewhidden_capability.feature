@@ -86,7 +86,7 @@ Feature: Check that granting view hidden capabilities allows users to see hidden
         # Log in as manager1 and check that the hidden items cannot be seen.
     Then I log out
     And I log in as "manager1"
-    And I navigate to "Manage courses and categories" node in "Site administration > Courses"
+    And I navigate to "Courses and categories" node in "Site administration > Courses"
     Then I click on "Miscellaneous" "text" in the ".category-listing" "css_element"
     And I should see "Miscellaneous" in the ".course-listing" "css_element"
     And I should not see "cat0_course1" in the ".course-listing" "css_element"
@@ -138,7 +138,7 @@ Feature: Check that granting view hidden capabilities allows users to see hidden
         # Log in as manager1 and check that the hidden items cannot be seen.
     Then I log out
     And I log in as "manager1"
-    And I navigate to "Manage courses and categories" node in "Site administration > Courses"
+    And I navigate to "Courses and categories" node in "Site administration > Courses"
     Then I click on "Miscellaneous" "text" in the ".category-listing" "css_element"
     And I should see "Miscellaneous" in the ".course-listing" "css_element"
     And I should see "cat0_course1" in the ".course-listing" "css_element"
@@ -195,7 +195,7 @@ Feature: Check that granting view hidden capabilities allows users to see hidden
     # Log in as manager1 and check that the manager can see everything under cat1 and cat2.
     Then I log out
     And I log in as "manager1"
-    And I navigate to "Manage courses and categories" node in "Site administration > Courses"
+    And I navigate to "Courses and categories" node in "Site administration > Courses"
     Then I click on "Miscellaneous" "text" in the ".category-listing" "css_element"
     And I should see "Miscellaneous" in the ".course-listing" "css_element"
     And I should not see "cat0_course1" in the ".course-listing" "css_element"
@@ -247,7 +247,7 @@ Feature: Check that granting view hidden capabilities allows users to see hidden
     # Log in as manager1 and check that the manager can see everything under cat1 and cat2.
     Then I log out
     And I log in as "manager1"
-    And I navigate to "Manage courses and categories" node in "Site administration > Courses"
+    And I navigate to "Courses and categories" node in "Site administration > Courses"
     Then I click on "Miscellaneous" "text" in the ".category-listing" "css_element"
     And I should see "Miscellaneous" in the ".course-listing" "css_element"
     And I should see "cat0_course1" in the ".course-listing" "css_element"

@@ -90,6 +90,7 @@ trait report_saved_trait {
             "{$join}.name",
             [
                 'joins' => [$join],
+                'displayfunc' => 'format_string'
             ]
         );
     }

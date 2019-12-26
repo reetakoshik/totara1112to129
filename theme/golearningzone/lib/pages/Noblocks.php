@@ -1,5 +1,5 @@
 <?php
-
+//die("here");
 namespace GoLearningZone\Pages;
 
 use GoLearningZone\Traits\Theme as ThemeTrait;
@@ -9,7 +9,8 @@ class Noblocks extends Base
     use ThemeTrait;
 
     public function render()
-    {
+    {	
+    	
         $template = 'theme_golearningzone/noblocks';
 
         $params = $this->getDefaultPageValues();

@@ -29,9 +29,7 @@ require_once($CFG->dirroot.'/totara/message/lib.php');
 defined('MOODLE_INTERNAL') || die();
 
 class rb_source_totaramessages extends rb_base_source {
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
+    use \totara_job\rb\source\report_trait;
 
     public function __construct($groupid, rb_global_restriction_set $globalrestrictionset = null) {
         if ($groupid instanceof rb_global_restriction_set) {
@@ -54,6 +52,7 @@ class rb_source_totaramessages extends rb_base_source {
         $this->defaultfilters = $this->define_defaultfilters();
         $this->requiredcolumns = $this->define_requiredcolumns();
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_totaramessages');
+        $this->usedcomponents[] = 'totara_message';
 
         parent::__construct();
     }
@@ -101,11 +100,11 @@ class rb_source_totaramessages extends rb_base_source {
         );
 
         // Include a join for the user that the message was sent to.
-        $this->add_user_table_to_joinlist($joinlist, 'msg', 'useridto', 'userto');
+        $this->add_core_user_tables($joinlist, 'msg', 'useridto', 'userto');
 
         // Include some standard joins. Including the user the message was sent from.
-        $this->add_user_table_to_joinlist($joinlist, 'msg', 'useridfrom');
-        $this->add_job_assignment_tables_to_joinlist($joinlist, 'msg', 'useridfrom');
+        $this->add_core_user_tables($joinlist, 'msg', 'useridfrom');
+        $this->add_totara_job_tables($joinlist, 'msg', 'useridfrom');
 
         return $joinlist;
     }
@@ -120,7 +119,8 @@ class rb_source_totaramessages extends rb_base_source {
                 'msg.subject',
                 array('joins' => 'msg',
                       'dbdatatype' => 'text',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'format_string')
             ),
             new rb_column_option(
                 'message_values',
@@ -129,7 +129,8 @@ class rb_source_totaramessages extends rb_base_source {
                 'msg.fullmessagehtml',
                 array('joins' => 'msg',
                       'dbdatatype' => 'text',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'format_text')
             ),
             new rb_column_option(
                 'message_values',
@@ -138,7 +139,7 @@ class rb_source_totaramessages extends rb_base_source {
                 'base.urgency',
                 array(
                     'defaultheading' => get_string('msgurgency', 'rb_source_totaramessages'),
-                    'displayfunc' => 'urgency_link'
+                    'displayfunc' => 'message_urgency_link'
                 )
             ),
             new rb_column_option(
@@ -146,7 +147,7 @@ class rb_source_totaramessages extends rb_base_source {
                 'urgency_text',
                 get_string('msgurgency', 'rb_source_totaramessages'),
                 'base.urgency',
-                array('displayfunc' => 'urgency_text')
+                array('displayfunc' => 'message_urgency_text')
                 ),
             new rb_column_option(
                 'message_values',
@@ -155,7 +156,7 @@ class rb_source_totaramessages extends rb_base_source {
                 'base.msgtype',
                 array(
                     'joins' => array('msg'),
-                    'displayfunc' => 'msgtype_link',
+                    'displayfunc' => 'message_type_link',
                     'extrafields' => array(
                         'msgid' => 'base.messageid',
                         'msgsubject' => 'msg.subject',
@@ -170,7 +171,7 @@ class rb_source_totaramessages extends rb_base_source {
                 'base.msgtype',
                 array(
                     'defaultheading' => get_string('msgtype', 'rb_source_totaramessages'),
-                    'displayfunc' => 'msgtype_text'
+                    'displayfunc' => 'message_type_text'
                 )
             ),
             new rb_column_option(
@@ -183,7 +184,7 @@ class rb_source_totaramessages extends rb_base_source {
                 $DB->sql_substr('base.icon', 1, $DB->sql_position("'-'", 'base.icon').'-1') .
                 " ELSE 'base.icon' " .
                 " END ",
-                array('displayfunc' => 'msgcategory_text')
+                array('displayfunc' => 'message_category_text')
             ),
             new rb_column_option(
                 'message_values',
@@ -212,16 +213,17 @@ class rb_source_totaramessages extends rb_base_source {
                 array('nosort' => true,
                       'noexport' => true,
                       'hidden' => 1,
+                      'displayfunc' => 'integer'
                     )
             ),
         );
 
         // Add columns for the user the message was sent to.
-        $this->add_user_fields_to_columns($columnoptions, 'userto', 'userto', true);
+        $this->add_core_user_columns($columnoptions, 'userto', 'userto', true);
 
         // Include some standard columns. Including the user that the message was sent from.
-        $this->add_user_fields_to_columns($columnoptions, 'auser', 'user', true);
-        $this->add_job_assignment_fields_to_columns($columnoptions);
+        $this->add_core_user_columns($columnoptions, 'auser', 'user', true);
+        $this->add_totara_job_columns($columnoptions);
 
         return $columnoptions;
     }
@@ -263,11 +265,11 @@ class rb_source_totaramessages extends rb_base_source {
         );
 
         // Add filters for the user the message was sent to.
-        $this->add_user_fields_to_filters($filteroptions, 'userto', true);
+        $this->add_core_user_filters($filteroptions, 'userto', true);
 
         // Include some standard filters. Including the user that the message was sent from.
-        $this->add_user_fields_to_filters($filteroptions, 'user', true);
-        $this->add_job_assignment_fields_to_filters($filteroptions, 'msg', 'useridfrom'); // Note these relate to the sender.
+        $this->add_core_user_filters($filteroptions, 'user', true);
+        $this->add_totara_job_filters($filteroptions, 'msg', 'useridfrom'); // Note these relate to the sender.
 
         return $filteroptions;
     }
@@ -345,7 +347,7 @@ class rb_source_totaramessages extends rb_base_source {
                 'dismiss_link',
                 get_string('dismissmsg', 'rb_source_totaramessages'),
                 'base.messageid',
-                array('displayfunc' => 'dismiss_link',
+                array('displayfunc' => 'message_dismiss_link',
                       'required' => true,
                       'noexport' => true,
                       //'capability' => 'moodle/local:updatethingy',
@@ -361,8 +363,17 @@ class rb_source_totaramessages extends rb_base_source {
     //
     //
 
-    // generate urgency icon link
+    /**
+     * Generate urgency icon link
+     *
+     * @deprecated Since Totara 12.0
+     * @param $comp
+     * @param $row
+     * @param int $export
+     * @return mixed
+     */
     function rb_display_urgency_link($comp, $row, $export = 0) {
+        debugging('rb_source_totaramessages::rb_display_urgency_link has been deprecated since Totara 12.0. Use totara_message\rb\display\message_urgency_link::display', DEBUG_DEVELOPER);
         global $OUTPUT;
         $display = totara_message_urgency_text($row->message_values_urgency);
         if ($export) {
@@ -372,14 +383,31 @@ class rb_source_totaramessages extends rb_base_source {
         return $OUTPUT->pix_icon($display['icon'], $display['text'], 'moodle', array('title' => $display['text'], 'class' => 'iconsmall'));
     }
 
-    // generate urgency text
+    /**
+     * Generate urgency text
+     *
+     * @deprecated Since Totara 12.0
+     * @param $urgency
+     * @param $row
+     * @return mixed
+     */
     function rb_display_urgency_text($urgency, $row) {
+        debugging('rb_source_totaramessages::rb_display_urgency_text has been deprecated since Totara 12.0. Use totara_message\rb\display\message_urgency_text::display', DEBUG_DEVELOPER);
         $display = totara_message_urgency_text($urgency);
         return $display['text'];
     }
 
-    // generate type icon link
+    /**
+     * Generate type icon link
+     *
+     * @deprecated Since Totara 12.0
+     * @param $comp
+     * @param $row
+     * @param int $export
+     * @return mixed
+     */
     function rb_display_msgtype_link($comp, $row, $export = 0) {
+        debugging('rb_source_totaramessages::rb_display_msgtype_link has been deprecated since Totara 12.0. Use totara_message\rb\display\message_type_link::display', DEBUG_DEVELOPER);
         global $OUTPUT;
         $subject = format_string($row->msgsubject);
         $icon = !empty($row->msgicon) ? format_string($row->msgicon) : 'default';
@@ -389,19 +417,30 @@ class rb_source_totaramessages extends rb_base_source {
         return $OUTPUT->pix_icon("/msgicons/" . $icon, $subject, 'totara_core', array('title' => $subject));
     }
 
-    // generate status type text
+    /**
+     * Generate message type text
+     *
+     * @deprecated Since Totara 12.0
+     * @param $msgtype
+     * @param $row
+     * @return mixed
+     */
     function rb_display_msgtype_text($msgtype, $row) {
+        debugging('rb_source_totaramessages::rb_display_msgtype_text has been deprecated since Totara 12.0. Use totara_message\rb\display\message_type_text::display', DEBUG_DEVELOPER);
         $display = totara_message_msgtype_text($msgtype);
         return $display['text'];
     }
 
     /**
      * Display category
+     *
+     * @deprecated Since Totara 12.0
      * @param string $comp
      * @param stdClass $row
      * @return string
      */
     function rb_display_msgcategory_text($comp, $row) {
+        debugging('rb_source_totaramessages::rb_display_msgcategory_text has been deprecated since Totara 12.0. Use totara_message\rb\display\message_category_text::display', DEBUG_DEVELOPER);
         global $TOTARA_MESSAGE_CATEGORIES;
         if ($comp != '' && in_array($comp, $TOTARA_MESSAGE_CATEGORIES)) {
             return get_string($comp, 'totara_message');
@@ -409,16 +448,32 @@ class rb_source_totaramessages extends rb_base_source {
         return $comp;
     }
 
-    // generate dismiss message link
+    /**
+     * Generate dismiss message link
+     *
+     * @deprecated Since Totara 12.0
+     * @param $id
+     * @param $row
+     * @return string
+     */
     function rb_display_dismiss_link($id, $row) {
+        debugging('rb_source_totaramessages::rb_display_dismiss_link has been deprecated since Totara 12.0. Use totara_message\rb\display\message_dismiss_link::display', DEBUG_DEVELOPER);
         $out = totara_message_dismiss_action($id);
         $out .= html_writer::checkbox('totara_message_' . $id, $id, false, '', array('id' => 'totara_msgcbox_'.$id, 'class' => "selectbox"));
 
         return $out;
     }
 
-    // generate message checkbox
+    /**
+     * Generate message checkbox
+     *
+     * @deprecated Since Totara 12.0
+     * @param $id
+     * @param $row
+     * @return string
+     */
     function rb_display_message_checkbox($id, $row) {
+        debugging('rb_source_totaramessages::rb_display_message_checkbox has been deprecated since Totara 12.0', DEBUG_DEVELOPER);
         return html_writer::checkbox('totara_message_' . $id, $id, false, '', array('id' => 'totara_message', 'class' => "selectbox"));
     }
 

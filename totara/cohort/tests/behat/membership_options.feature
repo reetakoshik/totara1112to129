@@ -27,7 +27,7 @@ Feature: Verify membership options work correctly.
 
     # Navigate to Audiences.
     Given I log in as "admin"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Audience 1"
     And I switch to "Rule sets" tab
 
@@ -75,7 +75,7 @@ Feature: Verify membership options work correctly.
 
     # Navigate to Audiences.
     Given I log in as "admin"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Audience 1"
     And I switch to "Rule sets" tab
 
@@ -136,7 +136,7 @@ Feature: Verify membership options work correctly.
 
     # Navigate to Audiences.
     Given I log in as "admin"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Audience 1"
     And I switch to "Rule sets" tab
 
@@ -198,7 +198,7 @@ Feature: Verify membership options work correctly.
 
     # Navigate to Audiences.
     Given I log in as "admin"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Audience 1"
     And I switch to "Rule sets" tab
 
@@ -233,7 +233,7 @@ Feature: Verify membership options work correctly.
 
     # Navigate to Audiences and check the new users has been added.
     When I am on homepage
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Audience 1"
     And I switch to "Members" tab
     Then I should see "firstname12 lastname12" in the "#cohort_members" "css_element"
@@ -246,7 +246,7 @@ Feature: Verify membership options work correctly.
 
     # Navigate to Audiences.
     Given I log in as "admin"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Audience 1"
     And I switch to "Rule sets" tab
 
@@ -286,7 +286,7 @@ Feature: Verify membership options work correctly.
 
     # Navigate to Audiences and check the new users have been added.
     When I am on homepage
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Audience 1"
     And I switch to "Members" tab
     Then I should not see "firstname12 lastname12" in the "#cohort_members" "css_element"
@@ -299,7 +299,7 @@ Feature: Verify membership options work correctly.
 
     # Navigate to Audiences.
     Given I log in as "admin"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Audience 1"
     And I switch to "Rule sets" tab
 
@@ -346,7 +346,7 @@ Feature: Verify membership options work correctly.
 
     # Navigate to Audiences and check the new users have been removed.
     When I log in as "admin"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Audience 1"
     And I switch to "Members" tab
     Then I should not see "firstname10 lastname10" in the "#cohort_members" "css_element"
@@ -359,7 +359,7 @@ Feature: Verify membership options work correctly.
 
     # Navigate to Audiences.
     Given I log in as "admin"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Audience 1"
     And I switch to "Rule sets" tab
 
@@ -409,7 +409,7 @@ Feature: Verify membership options work correctly.
 
     # Navigate to Audiences and check the new users have NOT been removed.
     When I log in as "admin"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Audience 1"
     And I switch to "Members" tab
     Then I should see "firstname10 lastname10" in the "#cohort_members" "css_element"

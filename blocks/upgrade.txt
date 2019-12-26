@@ -1,5 +1,11 @@
 This files describes API changes in /blocks/* - activity modules,
 information provided here is intended especially for developers.
+=== 12 ===
+
+* Introduced block_edit_form::has_common_settings() method to allow custom blocks to turn new settings off.
+  Please note, that new settings are not built on top of the existing configuration model. Even if a third-party block already has the settings such as title override or similar
+  the common settings will be an extra layer of override, which is disabled by default. Essentially that should not interfere with the existing functionality,
+  the worst case scenario it will be duplicated. However implementing has_common_settings() method will allow third party blocks to opt out of using custom settings.
 
 === 10 ===
 

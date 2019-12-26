@@ -65,7 +65,7 @@ class core_dml_testcase extends database_driver_testcase {
     public function test_get_server_info() {
         $DB = $this->tdb;
         $result = $DB->get_server_info();
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertArrayHasKey('description', $result);
         $this->assertArrayHasKey('version', $result);
     }
@@ -378,7 +378,7 @@ class core_dml_testcase extends database_driver_testcase {
         $params[] = 1;
         $params[] = time();
         $sqlarray = $DB->fix_sql_params($sql, $params);
-        $this->assertInternalType('array', $sqlarray);
+        $this->assertIsArray($sqlarray);
         $this->assertCount(3, $sqlarray[1]);
 
         // Named params missing from array.
@@ -408,7 +408,7 @@ class core_dml_testcase extends database_driver_testcase {
         $sql = "SELECT * FROM {{$tablename}} WHERE name = :name, course = :course";
         $params = array('name' => 'record1', 'course' => 1, 'extrastuff'=>'haha');
         $sqlarray = $DB->fix_sql_params($sql, $params);
-        $this->assertInternalType('array', $sqlarray);
+        $this->assertIsArray($sqlarray);
         $this->assertCount(2, $sqlarray[1]);
 
         // Params exceeding 30 chars length.
@@ -640,7 +640,7 @@ class core_dml_testcase extends database_driver_testcase {
         $dbman->create_table($table);
 
         $indices = $DB->get_indexes($tablename);
-        $this->assertInternalType('array', $indices);
+        $this->assertIsArray($indices);
         $this->assertCount(2, $indices);
         // We do not care about index names for now.
         $first = array_shift($indices);
@@ -694,7 +694,7 @@ class core_dml_testcase extends database_driver_testcase {
         $dbman->create_table($table);
 
         $columns = $DB->get_columns($tablename);
-        $this->assertInternalType('array', $columns);
+        $this->assertIsArray($columns);
 
         $fields = $table->getFields();
         $this->assertCount(count($columns), $fields);
@@ -1361,7 +1361,7 @@ class core_dml_testcase extends database_driver_testcase {
             $rids[] = $record->id;
         }
         $rs->close();
-        $this->assertEquals($ids, $rids, '', 0, 0, true);
+        $this->assertEqualsCanonicalizing($ids, $rids);
     }
 
     public function test_get_records() {
@@ -1478,7 +1478,7 @@ class core_dml_testcase extends database_driver_testcase {
         $DB->insert_record($tablename, array('course' => 2));
 
         $records = $DB->get_records_list($tablename, 'course', array(3, 2));
-        $this->assertInternalType('array', $records);
+        $this->assertIsArray($records);
         $this->assertCount(3, $records);
         $this->assertEquals(1, reset($records)->id);
         $this->assertEquals(2, next($records)->id);
@@ -1627,7 +1627,7 @@ class core_dml_testcase extends database_driver_testcase {
         $DB->insert_record($tablename, array('course' => 2));
 
         $records = $DB->get_records_menu($tablename, array('course' => 3));
-        $this->assertInternalType('array', $records);
+        $this->assertIsArray($records);
         $this->assertCount(2, $records);
         $this->assertNotEmpty($records[1]);
         $this->assertNotEmpty($records[2]);
@@ -1655,7 +1655,7 @@ class core_dml_testcase extends database_driver_testcase {
         $DB->insert_record($tablename, array('course' => 5));
 
         $records = $DB->get_records_select_menu($tablename, "course > ?", array(2));
-        $this->assertInternalType('array', $records);
+        $this->assertIsArray($records);
 
         $this->assertCount(3, $records);
         $this->assertArrayHasKey(1, $records);
@@ -1687,7 +1687,7 @@ class core_dml_testcase extends database_driver_testcase {
         $DB->insert_record($tablename, array('course' => 5));
 
         $records = $DB->get_records_sql_menu("SELECT * FROM {{$tablename}} WHERE course > ?", array(2));
-        $this->assertInternalType('array', $records);
+        $this->assertIsArray($records);
 
         $this->assertCount(3, $records);
         $this->assertArrayHasKey(1, $records);
@@ -1903,7 +1903,7 @@ class core_dml_testcase extends database_driver_testcase {
         $DB->insert_record($tablename, array('course' => 6));
 
         $fieldset = $DB->get_fieldset_select($tablename, 'course', "course > ?", array(1));
-        $this->assertInternalType('array', $fieldset);
+        $this->assertIsArray($fieldset);
 
         $this->assertCount(3, $fieldset);
         $this->assertEquals(3, $fieldset[0]);
@@ -1932,7 +1932,7 @@ class core_dml_testcase extends database_driver_testcase {
         $DB->insert_record($tablename, array('course' => 6, 'onebinary' => $binarydata));
 
         $fieldset = $DB->get_fieldset_sql("SELECT * FROM {{$tablename}} WHERE course > ?", array(1));
-        $this->assertInternalType('array', $fieldset);
+        $this->assertIsArray($fieldset);
 
         $this->assertCount(3, $fieldset);
         $this->assertEquals(2, $fieldset[0]);
@@ -1940,7 +1940,7 @@ class core_dml_testcase extends database_driver_testcase {
         $this->assertEquals(4, $fieldset[2]);
 
         $fieldset = $DB->get_fieldset_sql("SELECT onebinary FROM {{$tablename}} WHERE course > ?", array(1));
-        $this->assertInternalType('array', $fieldset);
+        $this->assertIsArray($fieldset);
 
         $this->assertCount(3, $fieldset);
         $this->assertEquals($binarydata, $fieldset[0]);
@@ -4690,6 +4690,41 @@ class core_dml_testcase extends database_driver_testcase {
             $this->assertTrue(true, 'Regexp operations not supported. Test skipped');
         }
 
+    }
+
+    public function test_sql_regex_word_boundaries() {
+        $DB = $this->tdb;
+        $dbman = $DB->get_manager();
+
+        if (!$DB->sql_regex_supported()) {
+            $this->markTestSkipped('Regexp operations not supported. Test skipped');
+        }
+
+        $table = $this->get_test_table();
+        $tablename = $table->getName();
+
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('name', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $dbman->create_table($table);
+
+        $id1 = $DB->insert_record($tablename, array('name' => 'Count to one and two and three'));
+        $id2 = $DB->insert_record($tablename, array('name' => 'Someone has two and three and four'));
+        $id3 = $DB->insert_record($tablename, array('name' => 'Test three and four and five is gone'));
+
+        $params = array('search' => $DB->sql_regex_word_boundary_start() . 'one' . $DB->sql_regex_word_boundary_end());
+        $records = $DB->get_records_select($tablename, 'name ' . $DB->sql_regex() . ' :search', $params);
+        $this->assertCount(1, $records);
+        $this->assertArrayHasKey($id1, $records);
+        $this->assertArrayNotHasKey($id2, $records);
+        $this->assertArrayNotHasKey($id3, $records);
+
+        $params = array('search' => $DB->sql_regex_word_boundary_start() . 'two' . $DB->sql_regex_word_boundary_end());
+        $records = $DB->get_records_select($tablename, 'name ' . $DB->sql_regex() . ' :search', $params);
+        $this->assertCount(2, $records);
+        $this->assertArrayHasKey($id1, $records);
+        $this->assertArrayHasKey($id2, $records);
+        $this->assertArrayNotHasKey($id3, $records);
     }
 
     /**

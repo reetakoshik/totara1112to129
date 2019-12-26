@@ -32,4 +32,7 @@ orgxnotexist,tool_totara_sync
 posxnotexist,tool_totara_sync
 selfassignedmanagerx,tool_totara_sync
 selfassignedappraiserx,tool_totara_sync
-
+nocsvfilepath,tool_totara_sync
+notifymessagestart,tool_totara_sync
+enablescheduledsync,tool_totara_sync
+generalsettings,tool_totara_sync

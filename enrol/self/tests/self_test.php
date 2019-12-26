@@ -680,6 +680,7 @@ class enrol_self_testcase extends advanced_testcase {
         // We do not have a teacher enrolled at this point, so it should send as no reply user.
         $contact = $selfplugin->get_welcome_email_contact(ENROL_SEND_EMAIL_FROM_COURSE_CONTACT, $context);
         $this->assertEquals($noreplyuser, $contact);
+        $this->assertObjectHasAttribute('maildisplay', $contact);
 
         // By default, course contact is assigned to teacher role.
         // Enrol a teacher, now it should send emails from teacher email's address.
@@ -689,12 +690,14 @@ class enrol_self_testcase extends advanced_testcase {
         $contact = $selfplugin->get_welcome_email_contact(ENROL_SEND_EMAIL_FROM_COURSE_CONTACT, $context);
         $this->assertEquals($user1->username, $contact->username);
         $this->assertEquals($user1->email, $contact->email);
+        $this->assertObjectHasAttribute('maildisplay', $contact);
 
         // Now let's enrol another teacher.
         $selfplugin->enrol_user($instance1, $user2->id, $editingteacherrole->id);
         $contact = $selfplugin->get_welcome_email_contact(ENROL_SEND_EMAIL_FROM_COURSE_CONTACT, $context);
         $this->assertEquals($user1->username, $contact->username);
         $this->assertEquals($user1->email, $contact->email);
+        $this->assertObjectHasAttribute('maildisplay', $contact);
 
         // Get manager role, and enrol user as manager.
         $managerrole = $DB->get_record('role', ['archetype' => 'manager']);
@@ -710,18 +713,21 @@ class enrol_self_testcase extends advanced_testcase {
         $contact = $selfplugin->get_welcome_email_contact(ENROL_SEND_EMAIL_FROM_KEY_HOLDER, $context);
         $this->assertEquals($user3->username, $contact->username);
         $this->assertEquals($user3->email, $contact->email);
+        $this->assertObjectHasAttribute('maildisplay', $contact);
 
         // Now let's enrol another manager.
         $selfplugin->enrol_user($instance1, $user4->id, $managerrole->id);
         $contact = $selfplugin->get_welcome_email_contact(ENROL_SEND_EMAIL_FROM_KEY_HOLDER, $context);
         $this->assertEquals($user3->username, $contact->username);
         $this->assertEquals($user3->email, $contact->email);
+        $this->assertObjectHasAttribute('maildisplay', $contact);
 
         $instance1->customint4 = ENROL_SEND_EMAIL_FROM_NOREPLY;
         $DB->update_record('enrol', $instance1);
 
         $contact = $selfplugin->get_welcome_email_contact(ENROL_SEND_EMAIL_FROM_NOREPLY, $context);
         $this->assertEquals($noreplyuser, $contact);
+        $this->assertObjectHasAttribute('maildisplay', $contact);
     }
 
     /**

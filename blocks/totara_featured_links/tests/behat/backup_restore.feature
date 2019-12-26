@@ -10,24 +10,23 @@ Feature: The content of the featured links blocks should be carried over when ba
       | fullname | shortname | format |
       | Course 1 | C1 | topics |
     And I log in as "admin"
-    And I click on "Find Learning" "link"
-    And I click on "Course 1" "link"
-    And I click on "Turn editing on" "button"
+    And I am on "Course 1" course homepage with editing mode on
 
     And I add the "Featured Links" block
     And I configure the "Featured Links" block
-    And I set the field "Title for the block" to "Featured Links1"
+      | Override default block title | Yes             |
+      | Block title                  | Featured Links1 |
     And I click on "Save changes" "button"
-    And I click on "Add Tile" "link" in the "Featured Links1" "block"
+    And I click on "Add Tile" "link" in the "Featured Links" "block"
     And I set the following fields to these values:
-      | URL         | www.example.com                |
+      | URL         | https://www.example.com        |
       | Description | The featured links tile exists |
     And I click on "Save changes" "button"
 
     And I add the "Featured Links" block
     And I click on "Add Tile" "link" in the "Featured Links" "block"
     And I set the following fields to these values:
-      | URL         | www.example.com |
+      | URL         | https://www.example.com |
       | Description | Second FLB |
     And I click on "Save changes" "button"
 
@@ -44,5 +43,5 @@ Feature: The content of the featured links blocks should be carried over when ba
     And I click on "Continue" "button"
 
     Then I should see "C1_1"
-    And I should see "The featured links tile exists" in the "Featured Links1" "block"
+    And I should see "The featured links tile exists" in the "Featured Links" "block"
     And I should see "Second FLB" in the "Featured Links" "block"

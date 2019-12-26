@@ -33,7 +33,7 @@ global $CFG;
 require_once($CFG->dirroot . '/totara/hierarchy/lib.php');
 require_once($CFG->dirroot . '/totara/hierarchy/prefix/organisation/lib.php');
 
-class movehierarchyitem_test extends advanced_testcase {
+class totara_hierarchy_moveitem_testcase extends advanced_testcase {
 //TODO: add tests for moving hierarchy items between frameworks
 
     private $frame1, $frame2;
@@ -41,9 +41,11 @@ class movehierarchyitem_test extends advanced_testcase {
     private $org;
 
     protected function tearDown() {
-        $this->frame1 = null;
-        $this->org1 = null;
+        $this->frame1 = $this->frame2 = null;
+        $this->org1 = $this->org2 = $this->org3 = $this->org4 = $this->org5 = $this->org6 = $this->org7 = $this->org8 = null;
+        $this->org9 = $this->org10 = $this->org11 = $this->org12 = $this->org13 = $this->org14 = $this->org15 = $this->org16 = null;
         $this->org = null;
+
         parent::tearDown();
     }
 

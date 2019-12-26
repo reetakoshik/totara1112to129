@@ -1,0 +1,77 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Carl Anderson <carl.anderson@totaralearning.com>
+   @package totara_core
+}}
+{{!
+    @template totara_core/quickaccesssettings_item
+
+    This template generates a user's quick access menu for admin navigation
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * data-x-widget: Widget name
+
+   Context variables required for this template:
+    * [parent] -> breadcrumbs: (unknown) fully qualified breadcrumb html
+    * [parent] -> label: (string) display name for the item
+    * [parent] -> url: (string) url for this item to link to
+
+    Example context (json):
+      {
+        "label" : "Item 1",
+        "url" : "https://www.example.com/item1.php",
+      }
+ }}
+
+<li data-quickaccesssettings-item-key="{{key}}" class="totara_core__QuickAccessSettings__item" aria-label="{{label}}" tabindex="-1">
+    <div class="totara_core__QuickAccessSettings__item--name">
+        <a href="{{url}}" aria-label="{{#str}}quickaccesssettings:itemname,totara_core{{/str}} {{page}}">{{page}}</a>
+    </div>
+
+    <div class="totara_core__QuickAccessSettings__item--label"
+         data-core-autoinitialise="true"
+         data-core-autoinitialise-amd="totara_core/inline-edit"
+         data-quickaccesssettings-item-action="rename"
+         data-inline-edit-max-length="100"
+         aria-label="{{#str}}quickaccesssettings:itemlabel,totara_core{{/str}} {{label}}">
+        <span data-inline-edit>
+            {{label}}
+        </span>
+        <a href="#" data-inline-edit-control>
+            {{#flex_icon}}edit,quickaccesssettings:edititemname,totara_core{{/flex_icon}}
+        </a>
+    </div>
+
+    <div class="totara_core__QuickAccessSettings__item--controls">
+        <a href="#" data-quickaccesssettings-item-action="moveup">
+            {{#flex_icon}}arrow-up,quickaccesssettings:reorderitem-up,totara_core{{/flex_icon}}
+        </a>
+
+        <a href="#" data-quickaccesssettings-item-action="movedown">
+            {{#flex_icon}}arrow-down,quickaccesssettings:reorderitem-down,totara_core{{/flex_icon}}
+        </a>
+
+        <a href="#" data-quickaccesssettings-item-action="delete">
+            {{#flex_icon}}delete,quickaccesssettings:deleteitem,totara_core{{/flex_icon}}
+        </a>
+    </div>
+</li>

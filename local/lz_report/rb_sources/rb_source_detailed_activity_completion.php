@@ -10,6 +10,8 @@ require_once __DIR__.'/../detailed_course_completion/sources_traits/course_param
  
 class rb_source_detailed_activity_completion extends rb_base_source 
 {   
+    use \core_course\rb\source\report_trait;
+    use \totara_job\rb\source\report_trait;
     use activity_completion_columns;
     use activity_completion_joins;
     use activity_completion_filters;
@@ -94,31 +96,31 @@ class rb_source_detailed_activity_completion extends rb_base_source
         $this->init_base();
 
         $this->add_activity_table_to_joinlist($this->joinlist);
-        $this->add_user_table_to_joinlist($this->joinlist, 'course_user_enrolments', 'userid');
-        $this->add_course_table_to_joinlist($this->joinlist, 'course_module', 'course');
-        $this->add_course_category_table_to_joinlist($this->joinlist, 'course', 'category');
+        $this->add_core_user_tables($this->joinlist, 'course_user_enrolments', 'userid');
+        $this->add_core_course_tables($this->joinlist, 'course_module', 'course');
+        $this->add_core_course_category_tables($this->joinlist, 'course', 'category');
         $this->add_course_completion_tables_to_joinlist(
             $this->joinlist, 'course_module', 'course', 'auser', 'id'
         );
-        $this->add_job_assignment_tables_to_joinlist($this->joinlist, 'course_user_enrolments', 'userid');
+        $this->add_totara_job_tables($this->joinlist, 'course_user_enrolments', 'userid');
 
         $this->add_global_report_restriction_join('course_user_enrolments', 'userid', 'course_user_enrolments');
 
         $this->add_activity_completion_fields_to_columns($this->columnoptions, 'course_module_completion');
         $this->add_activity_fields_to_columns($this->columnoptions);
-        $this->add_user_fields_to_columns($this->columnoptions);
+        $this->add_core_user_columns($this->columnoptions);
         $this->add_course_completion_status_field_to_columns($this->columnoptions);
-        $this->add_course_fields_to_columns($this->columnoptions);
+        $this->add_core_course_columns($this->columnoptions);
         $this->add_course_completion_fields_to_column($this->columnoptions);
-        $this->add_course_category_fields_to_columns($this->columnoptions, 'course_category');
-        $this->add_job_assignment_fields_to_columns($this->columnoptions);
+        $this->add_core_course_category_columns($this->columnoptions, 'course_category');
+        $this->add_totara_job_columns($this->columnoptions);
 
-        $this->add_user_fields_to_filters($this->filteroptions);
-        $this->add_course_fields_to_filters($this->filteroptions);
-        $this->add_course_category_fields_to_filters($this->filteroptions);
+        $this->add_core_user_filters($this->filteroptions);
+        $this->add_core_course_filters($this->filteroptions);
+        $this->add_core_course_category_filters($this->filteroptions);
         $this->add_activity_fields_to_filters($this->filteroptions);
         $this->add_activity_completion_fields_to_filters($this->filteroptions);
-        $this->add_job_assignment_fields_to_filters($this->filteroptions);
+        $this->add_totara_job_filters($this->filteroptions);
 
         $this->add_basic_user_content_options($this->contentoptions);
         $this->add_course_completion_content($this->contentoptions);

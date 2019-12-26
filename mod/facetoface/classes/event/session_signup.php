@@ -22,6 +22,8 @@
  */
 
 namespace mod_facetoface\event;
+use mod_facetoface\signup;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -31,17 +33,44 @@ defined('MOODLE_INTERNAL') || die();
  * Extra information about the event.
  *
  * - userid User ID who was signed-up
- * - sessionid Session ID
+ * - sessionid Seminar Event id
  *
  * }
  *
  * @author Alastair Munro <alastair.munro@totaralms.com>
+ * @author Valerii Kuznetsov <valerii.kuznetsov@totaralearning.com>
  * @package mod_facetoface
  */
 class session_signup extends \core\event\base {
 
     /** @var bool Flag for prevention of direct create() call. */
     protected static $preventcreatecall = true;
+
+    /**
+     * Create instance of event.
+     *
+     * @param \stdClass $usersignup
+     * @param \context_module $context
+     * @param int $userid
+     * @return session_signup
+     */
+    public static function create_from_signup(signup $signup, \context_module $context) {
+
+        $data = [
+            'context' => $context,
+            'objectid' => $signup->get_id(),
+            'other' => [
+                'userid' => $signup->get_userid(),
+                'sessionid' => $signup->get_sessionid()
+            ]
+        ];
+
+        self::$preventcreatecall = false;
+        $event = self::create($data);
+        self::$preventcreatecall = true;
+        $event->usersignup = $signup;
+        return $event;
+    }
 
     /** @var \stdClass */
     protected $usersignup;
@@ -53,6 +82,7 @@ class session_signup extends \core\event\base {
      * @param \context_module $context
      * @param int $userid
      * @return session_signup
+     * @deprecated since Totara 12.0 use session_signup::create_from_signup() instead.
      */
     public static function create_from_instance(\stdClass $usersignup, \context_module $context) {
         $data = array(
@@ -121,7 +151,7 @@ class session_signup extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/facetoface/attendees.php', array('s' => $this->other['sessionid']));
+        return new \moodle_url('/mod/facetoface/attendees/view.php', array('s' => $this->other['sessionid']));
     }
 
     /**

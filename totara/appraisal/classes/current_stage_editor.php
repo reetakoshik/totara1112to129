@@ -54,6 +54,12 @@ class current_stage_editor {
         return $currentstages;
     }
 
+    /**
+     * @param int $appraisalid
+     * @param int $learnerid
+     * @param int $roleassignmentid either a role assignment id or -1 to indicate all roles
+     * @param int $stageid
+     */
     public static function set_stage_for_role_assignment(int $appraisalid, int $learnerid, int $roleassignmentid, int $stageid) {
         global $CFG, $DB;
         require_once($CFG->dirroot.'/totara/appraisal/lib.php');
@@ -90,13 +96,27 @@ class current_stage_editor {
 
         list($insql, $inparams) = $DB->get_in_or_equal($stageidstodelete, SQL_PARAMS_NAMED);
 
-        // All stage completion records for the role.
-        $select = "appraisalstageid {$insql} AND appraisalroleassignmentid = :roleassignmentid";
-        $DB->delete_records_select(
-            'appraisal_stage_data',
-            $select,
-            array_merge(array('roleassignmentid' => $roleassignmentid), $inparams)
-        );
+        if ($roleassignmentid != -1) {
+            // All stage completion records for the role.
+            $select = "appraisalstageid {$insql} AND appraisalroleassignmentid = :roleassignmentid";
+            $DB->delete_records_select(
+                'appraisal_stage_data',
+                $select,
+                array_merge(array('roleassignmentid' => $roleassignmentid), $inparams)
+            );
+        } else {
+            // All stage completion records for all roles.
+            $select = "appraisalstageid {$insql}
+                   AND appraisalroleassignmentid IN
+                        (SELECT id
+                           FROM {appraisal_role_assignment}
+                          WHERE appraisaluserassignmentid = :userassignmentid)";
+            $DB->delete_records_select(
+                'appraisal_stage_data',
+                $select,
+                array_merge(array('userassignmentid' => $userassignment->id), $inparams)
+            );
+        }
 
         // All affected stages scheduled messages for the learner.
         $select = "userid = :userid AND eventid IN (SELECT id FROM {appraisal_event} WHERE appraisalstageid {$insql})";
@@ -106,13 +126,23 @@ class current_stage_editor {
             array_merge(array('userid' => $learnerid), $inparams)
         );
 
-        // Change the active page for the role (this is a nicety).
-        $DB->set_field(
-            'appraisal_role_assignment',
-            'activepageid',
-            null, // The first page will be automatically selected.
-            array('id' => $roleassignmentid)
-        );
+        if ($roleassignmentid != -1) {
+            // Change the active page for the role (this is a nicety).
+            $DB->set_field(
+                'appraisal_role_assignment',
+                'activepageid',
+                null, // The first page will be automatically selected.
+                array('id' => $roleassignmentid)
+            );
+        } else {
+            // Change the active page for all roles (this is a nicety).
+            $DB->set_field(
+                'appraisal_role_assignment',
+                'activepageid',
+                null, // The first page will be automatically selected.
+                array('appraisaluserassignmentid' => $userassignment->id)
+            );
+        }
 
         $transaction->allow_commit();
     }

@@ -52,7 +52,7 @@ class totara_reportbuilder_rb_completionimport_course_embedded_testcase extends 
         // Set up report and embedded object for is_capable checks.
         $syscontext = context_system::instance();
         $shortname = 'completionimport_course';
-        $report = reportbuilder_get_embedded_report($shortname, array(), false, 0);
+        $report = reportbuilder::create_embedded($shortname);
         $embeddedobject = $report->embedobj;
         $roleuser = $DB->get_record('role', array('shortname'=>'user'));
         $userid = $this->user1->id;

@@ -1,0 +1,39 @@
+.comp2{
+	font-weight: bolder;
+	font-size: 26px;
+	color: #000000;
+	text-align: center;
+}
+.comp3 {
+	font-size: 16px;
+	color: #000000;
+}
+
+.odograph{
+	text-align: center;
+}
+
+#chartdiv-license-text,#chartdiv2-license-text,#chartdiv3-license-text{
+ display: none !important;
+}
+
+.comp1 {
+    float: left;
+    margin-right: 20px;
+        margin-left: 30px;
+}
+.comp12 {
+       float: left;
+    display: inline-block;
+}
+ 
+/*.chartPanel{ height:260px  !important; }*/
+
+.generaltable{
+border-top: 1px solid #ccc;
+
+} 
+.zc-img, #chartdiv-tools, #chartdiv2-tools, #chartdiv3-trigger-c{
+    display: none;
+}
+    

@@ -31,6 +31,7 @@ class block_totara_stats_edit_form extends block_edit_form {
         global $USER;
         $mform = $this->_form;
         $stats = totara_stats_manager_stats($USER);
+        $mform->addElement('header', 'configheader', get_string('customblocksettings', 'block'));
         foreach ($stats as $stat) {
             $varname = 'config_'.$stat->string;
             $mform->addElement('header', $varname.'_header', get_string($stat->string.'_config', 'block_totara_stats'));

@@ -46,9 +46,9 @@
     }
 
 }}
-<div id="fitem_{{ element.id }}" class="fitem fitem_{{ element.type }}">
+<div id="fitem_{{ element.id }}" class="fitem fitem_{{ element.type }}" {{#element.groupname}}data-groupname="{{.}}"{{/element.groupname}}>
     <div class="fitemtitle">
-      <label for="{{element.id}}">{{{ label }}}</label>
+      <label for="{{element.id}}">{{{ label }}}{{#required}}{{#flex_icon}}required,requiredelement,form,form-required{{/flex_icon}}{{/required}}</label>
         {{{ helpbutton }}}
     </div>
     <div class="felement {{# error }} error{{/ error }} f{{ element.type }}">

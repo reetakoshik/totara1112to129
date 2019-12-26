@@ -497,7 +497,7 @@ class block_totara_my extends block_base
 		
 		//call appropriate renderers for every row 
         $table = new html_table();
-        $table->attributes['class'] = 'totara_my';
+        $table->attributes['class'] = 'totara_my table table-responsive tableTotaraMy';
         $table->head = $this->get_table_header();
         $hasdata = ($signups or $programs or $certs);
         $programcourses = $this->get_all_user_prgram_courses();
@@ -550,7 +550,9 @@ class block_totara_my extends block_base
             $table->head = null;//$table->head = $this->get_table_empty_header();
             $table->data[0]=new html_table_row(array('<td colspan="4">'.html_writer::tag('norecentlearning', get_string('norecentlearning', 'block_totara_my')).'</td>'));
         }
-        $this->content->text = html_writer::table($table);
+         $this->content->text .= html_writer::start_tag('div', array('class' => 'totaratable'));
+        $this->content->text .= html_writer::table($table);
+        $this->content->text .= html_writer::end_tag('div');
 		
         return $this->content;
     }

@@ -429,7 +429,7 @@ Feature: Evidence custom fields.
         # Add images to the private files block to use later
     And I click on "Dashboard" in the totara menu
     And I press "Customise this page"
-    And I select "Private files" from the "Add a block" singleselect
+    And I add the "Private files" block
     And I follow "Manage private files..."
     And I upload "totara/plan/tests/fixtures/pic1.png" file to "Files" filemanager
     Then I should see "pic1.png"

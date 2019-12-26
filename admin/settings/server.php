@@ -47,7 +47,7 @@ $temp->add(new admin_setting_configtext('techsupportphone', new lang_string('tec
 
 $temp->add($setting);
 $temp->add(new admin_setting_configtext('supportpage', new lang_string('supportpage', 'admin'), new lang_string('configsupportpage', 'admin'), '', PARAM_URL));
-$ADMIN->add('server', $temp);
+$ADMIN->add('systeminformation', $temp);
 
 
 // "sessionhandling" settingpage

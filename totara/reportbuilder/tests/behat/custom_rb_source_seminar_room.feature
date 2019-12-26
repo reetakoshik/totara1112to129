@@ -29,8 +29,7 @@ Feature: I am able to edit the custom room
   @javascript
   Scenario: I add a custom room into the course and I should be able to see it
     Given I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course101"
+    And I am on "Course101" course homepage
     And I turn editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Seminar 1           |

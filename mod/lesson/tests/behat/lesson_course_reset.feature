@@ -26,8 +26,7 @@ Feature: Lesson reset
       | activity | name             | intro                   | course | idnumber |
       | lesson   | Test lesson name | Test lesson description | C1     | lesson1  |
     And I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I follow "Test lesson name"
     And I follow "Add a question page"
     And I set the field "Select a question type" to "True/false"
@@ -46,7 +45,7 @@ Feature: Lesson reset
   Scenario: Use course reset to clear all attempt data
     When I log out
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test lesson name"
     And I should see "Cat is an amphibian"
     And I set the following fields to these values:
@@ -56,7 +55,7 @@ Feature: Lesson reset
     And I should see "Congratulations - end of lesson reached"
     And I log out
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test lesson name"
     And I navigate to "Reports > Overview" in current page administration
     And I should see "Sam1 Student1"

@@ -52,10 +52,10 @@ class totara_core_persistent_login_testcase extends advanced_testcase {
         global $CFG;
         $this->resetAfterTest();
 
-        $CFG->httpswwwroot = 'http://www.xample.com/totara';
+        $CFG->wwwroot = 'http://www.xample.com/totara';
         $this->assertFalse(persistent_login::is_cookie_secure());
 
-        $CFG->httpswwwroot = 'https://www.xample.com/totara';
+        $CFG->wwwroot = 'https://www.xample.com/totara';
         $this->assertTrue(persistent_login::is_cookie_secure());
     }
 

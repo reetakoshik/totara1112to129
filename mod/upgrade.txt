@@ -1,6 +1,14 @@
 This files describes API changes in /mod/* - activity modules,
 information provided here is intended especially for developers.
 
+=== 12 ===
+
+ * External functions that were returning file information now return the following additional file fields:
+   - mimetype (the file mime type)
+   - isexternalfile (if is a file reference to a external repository)
+   - repositorytype (the repository name in case is a external file)
+   Those fields are VALUE_OPTIONAL for backwards compatibility.
+
 === 10 ===
 
 * Old /mod/MODULENAME/pix/icon.gif and enrol/paypal/pix/icon.gif GIF icons have been removed. Please use pix_icon

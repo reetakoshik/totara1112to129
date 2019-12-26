@@ -1,0 +1,50 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Sam Hemelryk <sam.hemelryk@totaralearning.com>
+   @package block_course_search
+}}
+{{!
+
+    @template block_course_search/search_form
+
+    This template generates a course search form
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+     * count: A unique number for this form instance.
+     * searchurl: A URL to send the form submission to.
+     * value: The initial value of the search input.
+
+    Example context (json):
+      {'count':1,'searchurl':'/course/search.php','value':''}
+}}
+<form action="{{searchurl}}" method="get" class="form-inline" role="form">
+    <div class="input-group">
+        <label for="coursesearchbox{{count}}" class="sr-only">{{#str}}searchcourses{{/str}}</label>
+        <input type="text" id="coursesearchbox{{count}}" size="30" name="search" class="form-control" value="{{value}}" placeholder="{{#str}}searchcourses{{/str}}" />
+        <span class="input-group-btn">
+            <button type="submit" class="btn btn-default">{{#str}}go{{/str}}</button>
+        </span>
+    </div>
+</form>

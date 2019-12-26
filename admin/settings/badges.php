@@ -83,12 +83,4 @@ if (($hassiteconfig || has_any_capability(array(
             empty($CFG->enablebadges)
         )
     );
-
-    $ADMIN->add('badges',
-        new admin_externalpage('newbadge',
-            new lang_string('newbadge', 'badges'),
-            new moodle_url('/badges/newbadge.php', array('type' => BADGE_TYPE_SITE)),
-            array('moodle/badges:createbadge'), empty($CFG->enablebadges)
-        )
-    );
 }

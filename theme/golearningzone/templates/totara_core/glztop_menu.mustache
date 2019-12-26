@@ -1,0 +1,43 @@
+<div class="totara-navbar-container{{#subnav_has_items}} totara-navbar-container-with-subnav{{/subnav_has_items}}">
+    <div class="container-fluid">
+        <div id="totara-navbar" class="totara-navbar navbar-collapse collapse">
+            <div class="totara-menu">
+                {{! The following ID is for compatibility with JavaScript }}
+                {{! accessibility YUI module for menu navigation.         }}
+                <nav id="totaramenu" class="totara-menu-nav">
+                    <ul class="totara-menu-nav-list navbar navbar-nav">
+                        {{#menuitems}}
+                            <li class="totara-menu-nav-item menu-{{class_name}}{{#haschildren}} haschildren{{/haschildren}}{{#class_isfirst}} first{{/class_isfirst}}{{#class_islast}} last{{/class_islast}}{{#class_isselected}} selected{{/class_isselected}}{{#class_child_isselected}} child-selected{{/class_child_isselected}}">
+                                <a class="totara-menu-nav-item-link" target="{{target}}" href="{{url}}">{{{linktext}}}</a>{{#haschildren}}<span class="totara-menu-arrow"></span>{{/haschildren}}
+                                {{#haschildren}}
+                                    <ul class="totara-menu-nav-list navbar navbar-nav">
+                                        <div class="triangle-left"></div><div class="triangle-right"></div>
+                                        {{#children}}
+                                            <li class="totara-menu-nav-item menu-{{class_name}}{{#class_isfirst}} first{{/class_isfirst}}{{#class_islast}} last{{/class_islast}}{{#class_isselected}} selected{{/class_isselected}}">
+                                                <a class="totara-menu-nav-item-link" target="{{target}}" href="{{url}}">{{{linktext}}}</a>
+                                            </li>
+                                        {{/children}}
+                                    </ul>
+                                {{/haschildren}}
+                            </li>
+                        {{/menuitems}}
+                    </ul>
+                </nav>
+
+                {{#subnav_has_items}}
+                {{! The subnav is hidden from screen-readers }}
+                    <nav class="totara-menu-subnav" aria-hidden="true">
+                        <ul class="totara-menu-subnav-list">
+                            {{#subnav}}
+                                <li class="totara-menu-subnav-item{{#class_isselected}} selected{{/class_isselected}}">
+                                    <a tabindex="-1" class="totara-menu-subnav-item-link" target="{{target}}" href="{{url}}">{{{linktext}}}</a>
+                                </li>
+                            {{/subnav}}
+                            <div class="clearfix"></div>
+                        </ul>
+                    </nav>
+                {{/subnav_has_items}}
+            </div>
+        </div>
+    </div>
+</div>

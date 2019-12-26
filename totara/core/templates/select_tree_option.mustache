@@ -1,0 +1,87 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Kevin Hottinger <kevin.hottinger@totaralearning.com>
+   @package totara_core
+}}
+{{!
+
+    @template totara_core/select_tree_option
+
+    This template generates tree select options
+
+    Classes required for JS:
+    * tw-selectTree__active: Display active item
+    * tw-selectTree__hidden: Toggle visibility of nodes
+
+    Data attributes required for JS:
+    * data-tw-selector-active: bool, selector state for grouping events
+    * data-tw-selectTree-label: String, label of item
+    * data-tw-selectTree-list: Target for expanding lists
+    * data-tw-selectTree-toggle: Target for toggling items
+    * data-tw-selectTree-urlVal: String, key of item
+
+    Context variables required for this template:
+    * active: bool, true if this tree option is the active tree option
+    * children: array containing select_tree_option data
+    * default: bool, true if this tree option is the default tree option
+    * has_children: bool, true if this tree option has children tree options
+    * key: string, unique ID for this select
+    * name: string, name of this tree option
+    * parents_are_selectable: bool, true if clicking a parent name selects the option, false if it behaves like a chevron
+
+}}
+
+<li role="none" class="tw-selectTree__list_item">
+    <div class="tw-selectTree__list_row {{#active}}tw-selectTree__active{{/active}}"
+    {{^default}}{{#active}}data-tw-selector-active=""{{/active}}{{/default}}
+    {{#default}}data-tw-selectTree-default=""{{/default}}>
+        {{#has_children}}
+        <a role="treeitem" aria-expanded="false" href="#" class="tw-selectTree__list_row_icon"
+        data-tw-selectTree-toggle="{{{key}}}">{{!
+          }}<span class="tw-selectTree__list_row_icon_expand">
+                {{#flex_icon}}tree-list-collapsed, expand, core{{/flex_icon}}
+            </span>{{!
+          }}<span class="tw-selectTree__list_row_icon_expanded tw-selectTree__hidden">
+                {{#flex_icon}}tree-list-expanded, closebuttontitle, core{{/flex_icon}}
+            </span>{{!
+      }}</a>
+        {{/has_children}}
+        {{^has_children}}
+        <span class="tw-selectTree__list_row_icon">
+            <span class="tw-selectTree__list_row_icon_none"></span>
+        </span>
+        {{/has_children}}
+        <a role="treeitem" href="#" class="tw-selectTree__list_row_link"
+            {{#has_children}}
+                {{#parents_are_selectable}}data-tw-selectTree-urlVal="{{{key}}}"{{/parents_are_selectable}}
+                {{^parents_are_selectable}}data-tw-selectTree-toggle="{{{key}}}"{{/parents_are_selectable}}
+            {{/has_children}}
+            {{^has_children}}
+                data-tw-selectTree-urlVal="{{{key}}}"
+            {{/has_children}}
+            data-tw-selectTree-label="{{name}}">
+            {{{name}}}
+        </a>
+    </div>
+    {{#has_children}}
+        <ul role="group" class="tw-selectTree__list tw-selectTree__hidden" data-tw-selectTree-list="">
+            {{#children}}{{> totara_core/select_tree_option}}{{/children}}
+        </ul>
+    {{/has_children}}
+</li>

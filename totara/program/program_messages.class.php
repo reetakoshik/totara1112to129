@@ -658,7 +658,7 @@ class prog_messages_manager {
 
         // Add the save and return button
         if ($updateform) {
-            $mform->addElement('submit', 'savechanges', get_string('savechanges'), array('class'=>'return-overview'));
+            $mform->addElement('submit', 'savechanges', get_string('savechanges'), array('class'=>'return-overview programEditContentFrm'));
             $template_values['%savechanges%'] = array('name'=>'savechanges', 'value'=>null);
         }
         $templatehtml .= '%savechanges%'."\n";

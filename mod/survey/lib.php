@@ -576,7 +576,7 @@ function survey_shorten_name ($name, $numwords) {
  * @param object $question
  */
 function survey_print_multi($question) {
-    global $USER, $DB, $qnum, $checklist, $DB, $OUTPUT; //TODO: this is sloppy globals abuse
+    global $USER, $DB, $qnum, $DB, $OUTPUT; //TODO: this is sloppy globals abuse
 
     $stripreferthat = get_string("ipreferthat", "survey");
     $strifoundthat = get_string("ifoundthat", "survey");
@@ -605,6 +605,7 @@ function survey_print_multi($question) {
         $P = "";
     }
 
+    echo "<colgroup colspan=\"7\"></colgroup>";
     echo "<tr class=\"smalltext\"><th scope=\"row\">$strresponses</th>";
     echo "<th scope=\"col\" class=\"hresponse\">". get_string('notyetanswered', 'survey'). "</th>";
     foreach ($options as $key => $val) {
@@ -612,7 +613,7 @@ function survey_print_multi($question) {
     }
     echo "</tr>\n";
 
-    echo "<tr><th scope=\"col\" colspan=\"7\">$question->intro</th></tr>\n";
+    echo "<tr><th scope=\"colgroup\" colspan=\"7\">$question->intro</th></tr>\n";
 
     $subquestions = survey_get_subquestions($question);
 
@@ -634,15 +635,13 @@ function survey_print_multi($question) {
             echo $q->text ."</th>\n";
 
             $default = get_accesshide($strdefault);
-            echo "<td class=\"whitecell\"><label for=\"q$P$q->id\"><input type=\"radio\" name=\"q$P$q->id\" id=\"q$P" . $q->id . "_D\" value=\"0\" checked=\"checked\" />$default</label></td>";
+            echo "<td class=\"whitecell\"><label for=\"q$P$q->id\"><input type=\"radio\" name=\"q$P$q->id\" id=\"q$P" . $q->id . "_D\" value=\"0\" checked=\"checked\" data-survey-default=\"true\" />$default</label></td>";
 
             for ($i=1;$i<=$numoptions;$i++) {
                 $hiddentext = get_accesshide($options[$i-1]);
                 $id = "q$P" . $q->id . "_$i";
                 echo "<td><label for=\"$id\"><input type=\"radio\" name=\"q$P$q->id\" id=\"$id\" value=\"$i\" />$hiddentext</label></td>";
             }
-            $checklist["q$P$q->id"] = 0;
-
         } else {
             echo "<th scope=\"row\" class=\"optioncell\">";
             echo "<b class=\"qnumtopcell\">$qnum</b> &nbsp; ";
@@ -651,7 +650,7 @@ function survey_print_multi($question) {
             echo "<span class=\"option\">$q->text</span></th>\n";
 
             $default = get_accesshide($strdefault);
-            echo '<td class="whitecell"><label for="qP'.$q->id.'"><input type="radio" name="qP'.$q->id.'" id="qP'.$q->id.'" value="0" checked="checked" />'.$default.'</label></td>';
+            echo '<td class="whitecell"><label for="qP'.$q->id.'"><input type="radio" name="qP'.$q->id.'" id="qP'.$q->id.'" value="0" checked="checked" data-survey-default="true" />'.$default.'</label></td>';
 
 
             for ($i=1;$i<=$numoptions;$i++) {
@@ -668,16 +667,13 @@ function survey_print_multi($question) {
             echo "<span class=\"option\">$q->text</span></th>\n";
 
             $default = get_accesshide($strdefault);
-            echo '<td class="whitecell"><label for="q'. $q->id .'"><input type="radio" name="q'.$q->id. '" id="q'. $q->id .'" value="0" checked="checked" />'.$default.'</label></td>';
+            echo '<td class="whitecell"><label for="q'. $q->id .'"><input type="radio" name="q'.$q->id. '" id="q'. $q->id .'" value="0" checked="checked" data-survey-default="true" />'.$default.'</label></td>';
 
             for ($i=1;$i<=$numoptions;$i++) {
                 $hiddentext = get_accesshide($options[$i-1]);
                 $id = "q" . $q->id . "_$i";
                 echo "<td><label for=\"$id\"><input type=\"radio\" name=\"q$q->id\" id=\"$id\" value=\"$i\" />$hiddentext</label></td>";
             }
-
-            $checklist["qP$q->id"] = 0;
-            $checklist["q$q->id"] = 0;
         }
         echo "</tr>\n";
     }
@@ -1155,6 +1151,29 @@ function survey_check_updates_since(cm_info $cm, $from, $filter = array()) {
     if (!empty($answers)) {
         $updates->answers->updated = true;
         $updates->answers->itemids = array_keys($answers);
+    }
+
+    // Now, teachers should see other students updates.
+    if (has_capability('mod/survey:readresponses', $cm->context)) {
+        $select = 'survey = ? AND time > ?';
+        $params = array($cm->instance, $from);
+
+        if (groups_get_activity_groupmode($cm) == SEPARATEGROUPS) {
+            $groupusers = array_keys(groups_get_activity_shared_group_members($cm));
+            if (empty($groupusers)) {
+                return $updates;
+            }
+            list($insql, $inparams) = $DB->get_in_or_equal($groupusers);
+            $select .= ' AND userid ' . $insql;
+            $params = array_merge($params, $inparams);
+        }
+
+        $updates->useranswers = (object) array('updated' => false);
+        $answers = $DB->get_records_select('survey_answers', $select, $params, '', 'id');
+        if (!empty($answers)) {
+            $updates->useranswers->updated = true;
+            $updates->useranswers->itemids = array_keys($answers);
+        }
     }
     return $updates;
 }

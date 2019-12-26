@@ -29,14 +29,13 @@ use block_totara_featured_links\form\element\audience_list;
 use block_totara_featured_links\form\validator\visibility_form_audience_validator;
 use block_totara_featured_links\form\validator\visibility_form_custom_validator;
 use block_totara_featured_links\form\validator\visibility_form_preset_rules_validator;
-use context_system;
 use totara_form\form\clientaction\hidden_if;
 use totara_form\form\element\checkbox;
 use totara_form\form\element\checkboxes;
 use totara_form\form\element\hidden;
 use totara_form\form\element\radios;
-use totara_form\form\group\section;
 use totara_form\form\element\static_html;
+use totara_form\form\group\section;
 
 /**
  * Class base_form_visibility
@@ -75,7 +74,8 @@ abstract class base_form_visibility extends base_form {
         $visibility = $group->add(new radios(
             'visibility',
             get_string('visibility_label', 'block_totara_featured_links'),
-            $visibility_options));
+            $visibility_options)
+        );
         $visibility->add_validator(new visibility_form_custom_validator());
 
         /** @var section $audience */
@@ -83,7 +83,7 @@ abstract class base_form_visibility extends base_form {
         $audience->set_collapsible(true);
         $audience->set_expanded(true);
 
-        if (has_capability('totara/coursecatalog:manageaudiencevisibility', context_system::instance())) {
+        if (has_capability('totara/coursecatalog:manageaudiencevisibility', \context_system::instance())) {
             $audience_checkbox = $audience->add(
                 new checkbox('audience_showing',
                     get_string('audience_showing', 'block_totara_featured_links')
@@ -105,12 +105,14 @@ abstract class base_form_visibility extends base_form {
             $add_audience_button->add_validator(new visibility_form_audience_validator());
             $add_audience_button->set_allow_xss(true);
 
-            $audience_aggregation = $audience->add(new radios('audience_aggregation',
+            $audience_aggregation = $audience->add(new radios(
+                'audience_aggregation',
                 get_string('audience_aggregation_label', 'block_totara_featured_links'),
                 [
                     base::AGGREGATION_ANY => get_string('audience_aggregation_any', 'block_totara_featured_links'),
                     base::AGGREGATION_ALL => get_string('audience_aggregation_all', 'block_totara_featured_links')
-                ]));
+                ]
+            ));
             $this->model->add_clientaction(new hidden_if($audiencelist))->is_empty($audience_checkbox)->is_empty($audiences_visible);
             $this->model->add_clientaction(new hidden_if($add_audience_button))->is_empty($audience_checkbox);
             $this->model->add_clientaction(new hidden_if($audience_aggregation))->is_empty($audience_checkbox);
@@ -142,14 +144,17 @@ abstract class base_form_visibility extends base_form {
                 'guest' => get_string('preset_checkbox_guest', 'block_totara_featured_links'),
                 'notguest' => get_string('preset_checkbox_notguest', 'block_totara_featured_links'),
                 'admin' => get_string('preset_checkbox_admin', 'block_totara_featured_links')
-            ]));
+            ]
+        ));
         $preset_checkboxes->add_validator(new visibility_form_preset_rules_validator());
-        $presets_aggregation = $presets->add(new radios('presets_aggregation',
+        $presets_aggregation = $presets->add(new radios(
+            'presets_aggregation',
             get_string('preset_aggregation_label', 'block_totara_featured_links'),
             [
                 base::AGGREGATION_ANY => get_string('preset_aggregation_any', 'block_totara_featured_links'),
                 base::AGGREGATION_ALL => get_string('preset_aggregation_all', 'block_totara_featured_links')
-            ]));
+            ]
+        ));
 
         $this->model->add_clientaction(new hidden_if($preset_checkboxes))->is_empty($preset_checkbox);
         $this->model->add_clientaction(new hidden_if($presets_aggregation))->is_empty($preset_checkbox);
@@ -191,12 +196,13 @@ abstract class base_form_visibility extends base_form {
         );
         $aggregation->set_collapsible(true);
         $aggregation->set_expanded(true);
-        $aggregation->add(new radios('overall_aggregation',
-                get_string('aggregation_label', 'block_totara_featured_links'),
-                [
-                    base::AGGREGATION_ANY => get_string('aggregation_any', 'block_totara_featured_links'),
-                    base::AGGREGATION_ALL => get_string('aggregation_all', 'block_totara_featured_links')
-                ])
+        $aggregation->add(new radios(
+            'overall_aggregation',
+            get_string('aggregation_label', 'block_totara_featured_links'),
+            [
+                base::AGGREGATION_ANY => get_string('aggregation_any', 'block_totara_featured_links'),
+                base::AGGREGATION_ALL => get_string('aggregation_all', 'block_totara_featured_links')
+            ])
         );
 
         if (!empty($audience)) {

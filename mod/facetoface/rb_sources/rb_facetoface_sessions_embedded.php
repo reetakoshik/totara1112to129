@@ -27,6 +27,9 @@ class rb_facetoface_sessions_embedded extends rb_base_embedded {
     public $contentmode, $contentsettings, $embeddedparams;
     public $hidden, $accessmode, $accesssettings, $shortname;
 
+    /** @var string $returnpage  */
+    public $returnpage = 'view';
+
     public function __construct($data) {
         if (!empty($data['sessionid'])) {
             $this->embeddedparams['sessionid'] = $data['sessionid'];
@@ -34,7 +37,7 @@ class rb_facetoface_sessions_embedded extends rb_base_embedded {
         if (!empty($data['status'])) {
             $this->embeddedparams['status'] = $data['status'];
         }
-        $this->url = '/mod/facetoface/attendees.php';
+        $this->url = '/mod/facetoface/attendees/view.php';
         $this->source = 'facetoface_sessions';
         $this->shortname = 'facetoface_sessions';
         $this->fullname = get_string('embedded:seminareventattendance', 'mod_facetoface');

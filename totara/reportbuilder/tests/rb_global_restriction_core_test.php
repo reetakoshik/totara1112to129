@@ -68,6 +68,7 @@ class totara_reportbuilder_rb_global_restriction_core_testcase extends advanced_
         parent::setUp();
 
         $this->resetAfterTest();
+        $this->setAdminUser();
 
         $CFG->enableglobalrestrictions = 1;
 
@@ -95,11 +96,12 @@ class totara_reportbuilder_rb_global_restriction_core_testcase extends advanced_
         $rid = $this->create_report('user', 'Test user report 1');
         $DB->set_field('report_builder', 'globalrestriction', '1', array('id' => $rid));
 
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
         $this->add_column($report, 'user', 'id', null, null, null, 0);
 
         // Test report without restrictions.
-        $report = new reportbuilder($rid);
+        $report = reportbuilder::create($rid);
         list($sql, $params, $cache) = $report->build_query(false, true);
         $records = $DB->get_records_sql($sql, $params);
 
@@ -107,7 +109,8 @@ class totara_reportbuilder_rb_global_restriction_core_testcase extends advanced_
 
         // Test report with restrictions.
         $globalrestrictionset = rb_global_restriction_set::create_from_ids($report, array($this->restr->id));
-        $report = new reportbuilder($rid, null, false, null, null, false, array(), $globalrestrictionset);
+        $config = (new rb_config())->set_global_restriction_set($globalrestrictionset);
+        $report = reportbuilder::create($rid, $config);
         $this->assertNotNull($report->globalrestrictionset);
         list($sql, $params, $cache) = $report->build_query(false, true);
         $records = $DB->get_records_sql($sql, $params);
@@ -125,7 +128,8 @@ class totara_reportbuilder_rb_global_restriction_core_testcase extends advanced_
         $rid = $this->create_report('course_completion_all', 'Test course completion report');
         $DB->set_field('report_builder', 'globalrestriction', '1', array('id' => $rid));
 
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
         $this->add_column($report, 'user', 'id', null, null, null, 0);
 
         // Create course and mock completion data.
@@ -150,7 +154,7 @@ class totara_reportbuilder_rb_global_restriction_core_testcase extends advanced_
         ));
 
         // Test without restrictions.
-        $report = new reportbuilder($rid);
+        $report = reportbuilder::create($rid);
         $this->assertNull($report->globalrestrictionset);
         list($sql, $params, $cache) = $report->build_query(false, true);
         $records = $DB->get_records_sql($sql, $params);
@@ -160,7 +164,8 @@ class totara_reportbuilder_rb_global_restriction_core_testcase extends advanced_
         $globalrestrictionset = rb_global_restriction_set::create_from_ids($report, array($this->restr->id));
 
         // Instantiate report with restrictions.
-        $report = new reportbuilder($rid, null, false, null, null, false, array(), $globalrestrictionset);
+        $config = (new rb_config())->set_global_restriction_set($globalrestrictionset);
+        $report = reportbuilder::create($rid, $config);
         $this->assertNotNull($report->globalrestrictionset);
         list($sql, $params, $cache) = $report->build_query(false, true);
         $records = $DB->get_records_sql($sql, $params);
@@ -177,7 +182,8 @@ class totara_reportbuilder_rb_global_restriction_core_testcase extends advanced_
         $rid = $this->create_report('cohort', 'Test audience report');
         $DB->set_field('report_builder', 'globalrestriction', '1', array('id' => $rid));
 
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
         $this->add_column($report, 'user', 'id', null, null, null, 0);
 
         $cohort = $this->getDataGenerator()->create_cohort();
@@ -185,7 +191,7 @@ class totara_reportbuilder_rb_global_restriction_core_testcase extends advanced_
         cohort_add_member($cohort->id, $this->uservis->id);
 
         // Test without restrictions.
-        $report = new reportbuilder($rid);
+        $report = reportbuilder::create($rid);
         $this->assertNull($report->globalrestrictionset);
         list($sql, $params, $cache) = $report->build_query(false, true);
         $records = $DB->get_recordset_sql($sql, $params);
@@ -200,7 +206,8 @@ class totara_reportbuilder_rb_global_restriction_core_testcase extends advanced_
         $globalrestrictionset = rb_global_restriction_set::create_from_ids($report, array($this->restr->id));
 
         // Instantiate report with restrictions.
-        $report = new reportbuilder($rid, null, false, null, null, false, array(), $globalrestrictionset);
+        $config = (new rb_config())->set_global_restriction_set($globalrestrictionset);
+        $report = reportbuilder::create($rid, $config);
         $this->assertNotNull($report->globalrestrictionset);
         list($sql, $params, $cache) = $report->build_query(false, true);
         $records = $DB->get_recordset_sql($sql, $params);
@@ -228,7 +235,8 @@ class totara_reportbuilder_rb_global_restriction_core_testcase extends advanced_
         $rid = $this->create_report('user', 'Test user report 1');
         $DB->set_field('report_builder', 'globalrestriction', '1', array('id' => $rid));
 
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
         $this->add_column($report, 'user', 'id', null, null, null, 0);
 
         // Show none when no restrictions.
@@ -236,7 +244,8 @@ class totara_reportbuilder_rb_global_restriction_core_testcase extends advanced_
 
         // Test with no selected restrictions.
         $globalrestrictionset = rb_global_restriction_set::create_from_ids($report, array());
-        $report = new reportbuilder($rid, null, false, null, null, false, array(), $globalrestrictionset);
+        $config = (new rb_config())->set_global_restriction_set($globalrestrictionset);
+        $report = reportbuilder::create($rid, $config);
         $this->assertNotNull($report->globalrestrictionset);
         list($sql, $params, $cache) = $report->build_query(false, true);
         $records = $DB->get_records_sql($sql, $params);
@@ -245,7 +254,8 @@ class totara_reportbuilder_rb_global_restriction_core_testcase extends advanced_
 
         // Test report with restrictions.
         $globalrestrictionset = rb_global_restriction_set::create_from_ids($report, array($restrall->id));
-        $report = new reportbuilder($rid, null, false, null, null, false, array(), $globalrestrictionset);
+        $config = (new rb_config())->set_global_restriction_set($globalrestrictionset);
+        $report = reportbuilder::create($rid, $config);
         $this->assertNull($report->globalrestrictionset);
         list($sql, $params, $cache) = $report->build_query(false, true);
         $records = $DB->get_records_sql($sql, $params);
@@ -254,7 +264,8 @@ class totara_reportbuilder_rb_global_restriction_core_testcase extends advanced_
 
         // Test report with restrictions.
         $globalrestrictionset = rb_global_restriction_set::create_from_ids($report, array($restrall->id, $this->restr->id));
-        $report = new reportbuilder($rid, null, false, null, null, false, array(), $globalrestrictionset);
+        $config = (new rb_config())->set_global_restriction_set($globalrestrictionset);
+        $report = reportbuilder::create($rid, $config);
         $this->assertNull($report->globalrestrictionset);
         list($sql, $params, $cache) = $report->build_query(false, true);
         $records = $DB->get_records_sql($sql, $params);

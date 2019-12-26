@@ -199,9 +199,11 @@ class mod_lti_locallib_testcase extends advanced_testcase {
      * Verify that lti_build_request does handle resource_link_id as expected
      */
     public function test_lti_buid_request_resource_link_id() {
+        global $DB;
         $this->resetAfterTest();
 
-        self::setUser($this->getDataGenerator()->create_user());
+        $user = $this->getDataGenerator()->create_user();
+        self::setUser($user);
         $course   = $this->getDataGenerator()->create_course();
         $instance = $this->getDataGenerator()->create_module('lti', array(
             'intro'       => "<p>This</p>\nhas\r\n<p>some</p>\nnew\n\rlines",
@@ -220,6 +222,16 @@ class mod_lti_locallib_testcase extends advanced_testcase {
         // Normal call, we expect $instance->id to be used as resource_link_id.
         $params = lti_build_request($instance, $typeconfig, $course, null);
         $this->assertSame($instance->id, $params['resource_link_id']);
+
+        // Totara: we expect resource_link_id to include revision number if there is submission history.
+        $history = [
+            ['ltiid' => $instance->id, 'userid' => $user->id, 'launchid' => 12345, 'timecreated' => time()],
+            ['ltiid' => $instance->id, 'userid' => $user->id, 'launchid' => 67890, 'timecreated' => time()],
+        ];
+        $DB->insert_records('lti_submission_history', $history);
+        $params = lti_build_request($instance, $typeconfig, $course, null);
+        $this->assertSame($instance->id . '_' . (count($history) + 1), $params['resource_link_id']);
+        $this->assertSame(lti_get_resource_link_id($instance->id), $params['resource_link_id']);
 
         // If there is a resource_link_id set, it gets precedence.
         $instance->resource_link_id = $instance->id + 99;

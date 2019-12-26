@@ -35,22 +35,23 @@ define(['jquery', 'core/config', 'core/templates', 'core/notification'], functio
      * Watches a form DOM elementand confirms that it has been fully initialised
      *
      * @param {String} formid HTML id of the form to watch (NOTE: thsi already needs to have been added to the DOM)
-     * @returns {Deferred} resolved once the form has completed it's initialisation process
+     * @returns {Promise} resolved once the form has completed it's initialisation process
      */
     function addCompletewatch(formid) {
-        var p = new $.Deferred();
-        var formElement = document.getElementById(formid);
-        var observerCallback = function() {
-            if (formElement.getAttribute('data-totara_form-initialised') === 'true') {
-                observer.disconnect();
-                p.resolve();
-            }
-        };
+        var p = new Promise(function(resolve) {
+            var formElement = document.getElementById(formid);
+            var observerCallback = function() {
+                if (formElement.getAttribute('data-totara_form-initialised') === 'true') {
+                    observer.disconnect();
+                    resolve();
+                }
+            };
 
-        var observer = new MutationObserver(observerCallback);
-        observer.observe(formElement, {
-            attributes: true,   // required for IE11 (at minimum)
-            attributeFilter: ['data-totara_form-initialised']
+            var observer = new MutationObserver(observerCallback);
+            observer.observe(formElement, {
+                attributes: true,   // required for IE11 (at minimum)
+                attributeFilter: ['data-totara_form-initialised']
+            });
         });
 
         return p;

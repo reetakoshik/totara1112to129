@@ -75,10 +75,10 @@ Feature: Totara form radios element tests
       | F is visible when hiddenif reference is yes          | Yes   |
       | G is visible when required radios is not empty (yes) | No    |
     And I should see the following Totara form fields having these values:
-      | Basic radios                    | Yes      |
+      | Basic radios                    | 1        |
       | Horizontal radios               | $@NULL@$ |
-      | Required basic radios           | No       |
-      | Radios with current data        | Yes      |
+      | Required basic radios           | 1        |
+      | Radios with current data        | 0        |
     And I press "Save changes"
     Then I should see "The form has been submit"
     And "radios_basic" row "Value" column of "form_results" table should contain "«1»"
@@ -169,8 +169,8 @@ Feature: Totara form radios element tests
     And I should see the following Totara form fields having these values:
       | Basic radios                    | Yes      |
       | Horizontal radios               | $@NULL@$ |
-      | Required basic radios           | No       |
-      | Radios with current data        | Yes      |
+      | Required basic radios           | Yes      |
+      | Radios with current data        | No       |
     And I press "Save changes"
     Then I should see "The form has been submit"
     And "radios_basic" row "Value" column of "form_results" table should contain "«1»"

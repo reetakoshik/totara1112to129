@@ -20,6 +20,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @copyright 2016 onwards Totara Learning Solutions LTD
  * @author    Joby Harding <joby.harding@totaralearning.com>
+ * @author    Murali Nair <murali.nair@totaralearning.com>
  * @package   theme_roots
  */
 
@@ -27,79 +28,155 @@ namespace theme_roots\output;
 
 /**
  * Class bootstrap_grid
- *
- * Class based implementation of theme_bootstrap
- * lib function with the same name. We re-implement
- * as that function contains some rtl switching which
- * actually breaks the layout in Totara.
- *
- * @package theme_bootstrap
  */
-class bootstrap_grid {
+final class bootstrap_grid {
+
+    const REGION_PRE = 'side-pre';
+    const REGION_POST = 'side-post';
+    const REGION_TOP = 'top';
+    const REGION_BOTTOM = 'bottom';
+    const REGION_MAIN = 'main';
+
+    const CONTENT = 'content';
+
+    private $regions = [
+        self::REGION_PRE    => false,
+        self::REGION_POST   => false,
+        self::REGION_TOP    => false,
+        self::REGION_BOTTOM => false,
+        self::REGION_MAIN   => false,
+    ];
+
+    private $classes = [];
 
     /**
-     * @var bool
+     * Initialise a new grid given the page and output.
+     *
+     * @param \moodle_page   $page
+     * @param \renderer_base $output
+     *
+     * @throws \coding_exception
+     * @return bootstrap_grid
      */
-    protected $side_pre = false;
+    public static function initialise(\moodle_page $page, \renderer_base $output) {
+        if ($page->state === $page::STATE_BEFORE_HEADER) {
+            throw new \coding_exception('Bootstrap grid cannot be used until the page is being printed.');
+        }
+        $regions = [];
+        foreach ($page->blocks->get_regions() as $region) {
+            if ($page->blocks->region_has_content($region, $output)) {
+                $regions[] = $region;
+            }
+        }
 
-    /**
-     * @var bool
-     */
-    protected $side_post = false;
-
-    /**
-     * Set gridf
-     */
-    public function has_side_pre() {
-        $this->side_pre = true;
-
-        return $this;
+        return new self($regions, $page->blocks->get_add_block_regions());
     }
 
-    public function has_side_post() {
-        $this->side_post = true;
-
-        return $this;
+    /**
+     * Bootstrap grid constructor.
+     *
+     * @param array $regions             An array of regions that are to be displayed.
+     * @param array $regions_allowingadd An array of regions supporting the adding of blocks.
+     */
+    public function __construct(array $regions = [], array $regions_allowingadd = []) {
+        $this->resolve_display($regions);
+        $this->resolve_classes($regions_allowingadd);
     }
 
     /**
-     * Return classes which should be applied to configured regions.
+     * Returns true if the given region should be shown.
+     *
+     * @param string $region
+     *
+     * @return bool
      */
-    public function get_regions_classes() {
-
-        // NOTE: when making changes here make sure you apply them also to theme/roots/less/totara/core.less
-
-        if ($this->side_pre && $this->side_post) {
-            return array(
-                'content' => 'col-sm-12 col-md-6 col-md-push-3',
-                'pre' => 'col-sm-6 col-md-3 col-md-pull-6',
-                'post' => 'col-sm-6 col-md-3',
-            );
+    public function show(string $region): bool {
+        if (isset($this->regions[$region])) {
+            return ($this->regions[$region] !== false);
         }
 
-        if ($this->side_pre && !$this->side_post) {
-            return array(
-                'content' => 'col-sm-12 col-md-9 col-md-push-3',
-                'pre' => 'col-sm-6 col-md-3 col-md-pull-9',
-                'post' => 'empty',
-            );
+        return false;
+    }
+
+    /**
+     * Returns true if the given region has classes.
+     *
+     * @param string $region
+     *
+     * @return bool
+     */
+    public function has_classes(string $region): bool {
+        if (!isset($this->classes[$region])) {
+            return false;
         }
 
-        if (!$this->side_pre && $this->side_post) {
-            return array(
-                'content' => 'col-sm-12 col-md-9',
-                'pre' => 'empty',
-                'post' => 'col-sm-6 col-sm-offset-6 col-md-3 col-md-offset-0',
-            );
+        return $this->classes[$region] !== '';
+    }
+
+    /**
+     * Returns the classes that should be added to the region, or content.
+     *
+     * @param string $region
+     *
+     * @return string
+     */
+    public function classes(string $region): string {
+        if (!$this->has_classes($region)) {
+            return '';
         }
 
-        // No side-pre or side-post.
-        return array(
-            'content' => 'col-md-12',
-            'pre' => 'empty',
-            'post' => 'empty',
-        );
+        return $this->classes[$region];
+    }
 
+    /**
+     * Resolves display of regions.
+     *
+     * @param array $regionswithcontent
+     */
+    private function resolve_display(array $regionswithcontent): void {
+        foreach ($this->regions as $region => &$display) {
+            if (in_array($region, $regionswithcontent)) {
+                $display = true;
+            }
+        }
+    }
+
+    /**
+     * Resolves the CSS classes that should applied to the grid regions and content.
+     *
+     * When making changes here make sure you apply them also to theme/roots/less/totara/core.less
+     *
+     * @param array $regions_allowingadd
+     */
+    private function resolve_classes(array $regions_allowingadd): void {
+        $this->classes[self::CONTENT] = 'col-md-12';
+        $this->classes[self::REGION_TOP] = 'col-sm-12';
+        $this->classes[self::REGION_BOTTOM] = 'col-sm-12';
+        $this->classes[self::REGION_MAIN] = '';
+        $this->classes[self::REGION_PRE] = 'empty';
+        $this->classes[self::REGION_POST] = 'empty';
+
+        // The content of the page, which needs to respond to missing block regions etc.
+        if ($this->show(self::REGION_PRE) && $this->show(self::REGION_POST)) {
+            $this->classes[self::CONTENT] = 'col-sm-12 col-md-6 col-md-push-3';
+            $this->classes[self::REGION_PRE] = 'col-sm-6 col-md-3 col-md-pull-6';
+            $this->classes[self::REGION_POST] = 'col-sm-6 col-md-3';
+        } else if ($this->show(self::REGION_PRE)) {
+            $this->classes[self::CONTENT] = 'col-sm-12 col-md-9 col-md-push-3';
+            $this->classes[self::REGION_PRE] = 'col-sm-6 col-md-3 col-md-pull-9';
+            $this->classes[self::REGION_POST] = 'empty';
+        } else if ($this->show(self::REGION_POST)) {
+            $this->classes[self::CONTENT] = 'col-sm-12 col-md-9';
+            $this->classes[self::REGION_PRE] = 'empty';
+            $this->classes[self::REGION_POST] = 'col-sm-6 col-sm-offset-6 col-md-3 col-md-offset-0';
+        }
+
+        // Add the editing region border class to all regions that support adding blocks.
+        foreach ($this->regions as $region => $display) {
+            if ($display && in_array($region, $regions_allowingadd)) {
+                $this->classes[$region] .= ' editing-region-border';
+            }
+        }
     }
 
 }

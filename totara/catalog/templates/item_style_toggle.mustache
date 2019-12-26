@@ -1,0 +1,91 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Kevin Hottinger <kevin.hottinger@totaralearning.com>
+   @package totara_catalog
+}}
+{{!
+
+    @template totara_catalog/item_style_toggle
+
+    This template generates Catalog item style toggle buttons
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * data-core-autoinitialise: State of this JS auto initilise
+    * data-core-autoinitialise-amd: AMD to be linked to template
+    * data-tw-catalogItemStyleToggle_trigger: Trigger for rerendering item grid with different layout
+
+    Context variables required for this template:
+    * grid_template_data: Array, data for the grid
+    * grid_template_data->single_column: Bool, whether the grid is currently shown as single column or not.
+    * single_column: Layout set to single column
+
+}}
+
+<div class="tw-catalogItemStyleToggle"
+    data-core-autoinitialise="true"
+    data-core-autoinitialise-amd="totara_catalog/item_style_toggle">
+
+    <a href="#" class="tw-catalogItemStyleToggle__btn tw-catalogItemStyleToggle__btn--narrow
+    {{#grid_template_data}}{{^single_column}}tw-catalogItemStyleToggle__btn_active{{/single_column}}{{/grid_template_data}}"
+    data-tw-catalogItemStyleToggle_trigger="narrow">
+        {{#flex_icon}}view-grid, tile_view, totara_catalog,{{/flex_icon}}
+    </a>
+    <a href="#" class="tw-catalogItemStyleToggle__btn tw-catalogItemStyleToggle__btn--wide
+    {{#grid_template_data}}{{#single_column}}tw-catalogItemStyleToggle__btn_active{{/single_column}}{{/grid_template_data}}"
+    data-tw-catalogItemStyleToggle_trigger="wide">
+        {{#flex_icon}}view-list, list_view, totara_catalog,{{/flex_icon}}
+    </a>
+</div>
+        
+{{#js}}       
+$(document).ready(function() {        
+var wwwroot = M.cfg.wwwroot;        
+    $(".catalog_1").click(function() {        
+      if($("#catalog_1").prop("checked") == true) {       
+          $("#catalog_1").prop('checked', false);       
+          $("#imgcatalog_1").prop('src', wwwroot + '/theme/golearningzone/pix/uncheckbox.png');       
+      } else {        
+          $("#catalog_1").prop('checked', true);        
+          $("#imgcatalog_1").prop('src', wwwroot + '/theme/golearningzone/pix/checkbox.png');       
+      }       
+    });       
+            
+    $(".catalog_2").click(function() {        
+      if($("#catalog_2").prop("checked") == true) {       
+          $("#catalog_2").prop('checked', false);       
+          $("#imgcatalog_2").prop('src', wwwroot + '/theme/golearningzone/pix/uncheckbox.png');       
+      } else {        
+          $("#catalog_2").prop('checked', true);        
+          $("#imgcatalog_2").prop('src', wwwroot + '/theme/golearningzone/pix/checkbox.png');       
+      }       
+    });       
+    $(".catalog_3").click(function() {        
+      if($("#catalog_3").prop("checked") == true) {       
+          $("#catalog_3").prop('checked', false);       
+          $("#imgcatalog_3").prop('src', wwwroot + '/theme/golearningzone/pix/uncheckbox.png');       
+      } else {        
+          $("#catalog_3").prop('checked', true);        
+          $("#imgcatalog_3").prop('src', wwwroot + '/theme/golearningzone/pix/checkbox.png');       
+      }       
+    });       
+});       
+{{/js}}

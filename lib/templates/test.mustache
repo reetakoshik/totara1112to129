@@ -35,7 +35,9 @@
     Example context (json):
     {
         "title": "hello",
-        "strkey": "viewmyteam"
+        "strkey": "viewmyteam",
+        "date": 1293876000,
+        "another": "Lorem ipsum dolor sit amet, consectetur adipiscing elit,"
     }
 }}
 <div id="template_string_check">
@@ -44,7 +46,7 @@
 </div>
 <div id="template_string_with_variable">
     <p>test string rendering with variable</p>
-    <p>{{#str}} skipa, access, {{title}} {{/str}}</p>
+    <p>{{#str}} skipa, access, {{{ title}}} {{/str}}</p>
 </div>
 <div id="template_string_with_variable_key">
     <p>test string rendering with variable</p>
@@ -56,7 +58,7 @@
 </div>
 <div id="template_pix_alt">
     <p>test pix icon with plain string alt and without flex equivilent alt (edit)</p>
-    <p>{{#pix}} e/decrease_indent, core, argh{{/pix}}</p>
+    <p>{{#pix}} e/decrease_indent, core, test case{{/pix}}</p>
 </div>
 <div id="template_pix_alt_variable">
     <p>test pix icon with a string helper alt that has a parameter and no flex equivilent</p>
@@ -72,7 +74,7 @@
 </div>
 <div id="template_flex_pix_alt">
     <p>test pix icon with flex translation and plain string alt</p>
-    <p>{{#pix}} req, core, argh{{/pix}}</p>
+    <p>{{#pix}} req, core, test case{{/pix}}</p>
 </div>
 <div id="template_flex_pix_alt_variable">
     <p>test pix icon with flex translation and string helper alt</p>
@@ -88,7 +90,7 @@
 </div>
 <div id="template_flex_alt">
     <p>test flex icon with plain text alt</p>
-    <p>{{#flex_icon}} settings, {"alt":"argh"} {{/flex_icon}}</p>
+    <p>{{#flex_icon}} settings, {"alt":"test case"} {{/flex_icon}}</p>
 </div>
 <div id="template_flex_string_alt">
     <p>test flex icon with string helper alt</p>
@@ -97,4 +99,12 @@
 <div id="template_flex_string_data">
     <p>test flex icon with json data</p>
     <p>{{#flex_icon}} delete, {"alt":"{{#str}} skipa, access, {{title}} {{/str}}", "classes": "muppet"} {{/flex_icon}}</p>
+</div>
+<div id="template_userdata_helper">
+    <p>test flex icon with json data</p>
+    <p>{{#userdate}} {{{date}}}, {{#str}} strftimedate, langconfig {{/str}} {{/userdate}}</p>
+</div>
+<div id="template_shorten_helper">
+    <p>test flex icon with json data</p>
+    <p>{{#shortentext}} 30, {{another}} {{/shortentext}}</p>
 </div>

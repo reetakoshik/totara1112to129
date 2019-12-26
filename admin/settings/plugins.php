@@ -457,7 +457,7 @@ if ($hassiteconfig && !empty($CFG->enableplagiarism)) {
         $plugin->load_settings($ADMIN, 'plagiarism', $hassiteconfig);
     }
 }
-$ADMIN->add('reports', new admin_externalpage('comments', new lang_string('comments'), $CFG->wwwroot.'/comment/', 'moodle/site:viewreports'));
+$ADMIN->add('security', new admin_externalpage('comments', new lang_string('commentsmonitoring', 'admin'), $CFG->wwwroot.'/comment/', 'moodle/site:viewreports'));
 
 // Course reports settings
 if ($hassiteconfig) {

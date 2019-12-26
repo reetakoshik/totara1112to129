@@ -3277,10 +3277,6 @@ class auth_connect_util_testcase extends advanced_testcase {
             $this->assertSame('Unsupported redirect detected, script execution terminated', $ex->getMessage());
             $this->assertFalse($DB->record_exists('auth_connect_sso_sessions', array('ssotoken' => $ssotoken)));
             $this->assertFalse($DB->record_exists('auth_connect_sso_sessions', array('ssotoken' => $ssotoken)));
-            $expected = new stdClass();
-            $expected->loginerrormsg = 'Single sign-on failed';
-            $expected->authconnectssofailed = 1;
-            $this->assertEquals($expected, $SESSION);
         }
 
         // Make sure logged in users cannot start SSO.
@@ -3301,7 +3297,6 @@ class auth_connect_util_testcase extends advanced_testcase {
             $this->assertInstanceOf('coding_exception', $ex);
             $this->assertSame('Coding error detected, it must be fixed by a programmer: user must not be logged in yet', $ex->getMessage());
             $this->assertFalse($DB->record_exists('auth_connect_sso_sessions', array('ssotoken' => $ssotoken)));
-            $this->assertEquals($expected, $SESSION);
         }
     }
 
@@ -3396,31 +3391,6 @@ class auth_connect_util_testcase extends advanced_testcase {
         $server->status = util::SERVER_STATUS_DELETING;
         $this->assertNull($result);
         $this->assertCount(2, $DB->get_records('auth_connect_sso_requests'));
-    }
-
-    public function test_validate_sso_possible() {
-        $this->resetAfterTest();
-
-        try {
-            util::validate_sso_possible();
-            $this->fail('exception expected when not auth enabled');
-        } catch (moodle_exception $ex) {
-            $this->assertSame('Unsupported redirect detected, script execution terminated', $ex->getMessage());
-        }
-
-        $this->set_auth_enabled(true);
-        util::validate_sso_possible();
-
-        $this->setGuestUser();
-        util::validate_sso_possible();
-
-        $this->setAdminUser();
-        try {
-            util::validate_sso_possible();
-            $this->fail('exception expected when user logged in');
-        } catch (moodle_exception $ex) {
-            $this->assertSame('Unsupported redirect detected, script execution terminated', $ex->getMessage());
-        }
     }
 
     public function test_warn_if_not_https() {

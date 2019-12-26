@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="lib/db" VERSION="20171127" COMMENT="XMLDB file for core Moodle tables"
+<XMLDB PATH="lib/db" VERSION="20181002" COMMENT="XMLDB file for core Moodle tables"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../lib/xmldb/xmldb.xsd"
 >
@@ -175,6 +175,7 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="course" UNIQUE="false" FIELDS="course"/>
+        <INDEX NAME="moduleinstance" UNIQUE="false" FIELDS="moduleinstance"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="course_completion_crit_compl" COMMENT="Course completion user records">
@@ -224,6 +225,7 @@
         <INDEX NAME="course" UNIQUE="false" FIELDS="course"/>
         <INDEX NAME="timecompleted" UNIQUE="false" FIELDS="timecompleted"/>
         <INDEX NAME="useridcourse" UNIQUE="true" FIELDS="userid, course"/>
+        <INDEX NAME="status" UNIQUE="false" FIELDS="status"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="enrol" COMMENT="Instances of enrolment plugins used in courses, fields marked as custom have a plugin defined meaning, core does not touch them. Create a new linked table if you need even more custom fields.">
@@ -306,6 +308,7 @@
         <FIELD NAME="score" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="indent" TYPE="int" LENGTH="5" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="visibleoncoursepage" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Totara: Not used ATM, as we didn't take Stealth mode changes. If stealth visibility is allowed for the course, this controls whether activity is visible on course page"/>
         <FIELD NAME="visibleold" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="groupmode" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="groupingid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -370,8 +373,8 @@
     <TABLE NAME="course_request" COMMENT="course requests">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="fullname" TYPE="char" LENGTH="254" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="shortname" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="fullname" TYPE="char" LENGTH="1333" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="shortname" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="summary" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="summaryformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="category" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -447,14 +450,17 @@
         <FIELD NAME="repeatid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="modulename" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="instance" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="type" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Totara: Not used as a part of Moodle's new Course Overview Block (MDL-55611)"/>
         <FIELD NAME="eventtype" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timestart" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timeduration" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timesort" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Totara: Not used as a part of Moodle's new Course Overview Block (MDL-55611)"/>
         <FIELD NAME="visible" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="uuid" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="sequence" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="subscriptionid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The event_subscription id this event is associated with."/>
+        <FIELD NAME="priority" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Totara: Not used as a part of Moodle's new Course Overview Block (MDL-55611). The event's display priority. For multiple events with the same module name, instance and eventtype (e.g. for group overrides), the one with the higher priority will be displayed."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -464,6 +470,7 @@
         <INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
         <INDEX NAME="timestart" UNIQUE="false" FIELDS="timestart"/>
         <INDEX NAME="timeduration" UNIQUE="false" FIELDS="timeduration"/>
+        <INDEX NAME="type-timesort" UNIQUE="false" FIELDS="type, timesort" COMMENT="Totara: Not used as a part of Moodle's new Course Overview Block (MDL-55611)"/>
         <INDEX NAME="groupid-courseid-visible-userid" UNIQUE="false" FIELDS="groupid, courseid, visible, userid" COMMENT="used for calendar view"/>
       </INDEXES>
     </TABLE>
@@ -1005,6 +1012,7 @@
         <FIELD NAME="instanceid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="path" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="depth" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="parentid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Used by Totara SQL access code"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -1013,17 +1021,21 @@
         <INDEX NAME="contextlevel-instanceid" UNIQUE="true" FIELDS="contextlevel, instanceid"/>
         <INDEX NAME="instanceid" UNIQUE="false" FIELDS="instanceid"/>
         <INDEX NAME="path" UNIQUE="false" FIELDS="path" HINTS="varchar_pattern_ops"/>
+        <INDEX NAME="parentid" UNIQUE="false" FIELDS="parentid"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="context_temp" COMMENT="Used by build_context_path() in upgrade and cron to keep context depths and paths in sync.">
+    <TABLE NAME="context_map" COMMENT="Map context hierarchy into a flat structure to make parent-child queries in Totara SQL access more efficient">
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="This id isn't autonumeric/sequence. It's the context-&gt;id"/>
-        <FIELD NAME="path" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="depth" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="parentid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of parent context"/>
+        <FIELD NAME="childid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of child context"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="parentid_childid_ix" UNIQUE="true" FIELDS="parentid, childid"/>
+      </INDEXES>
     </TABLE>
     <TABLE NAME="capabilities" COMMENT="this defines all capabilities">
       <FIELDS>
@@ -2419,6 +2431,26 @@
         <INDEX NAME="uq_external_file" UNIQUE="true" FIELDS="referencehash, repositoryid" COMMENT="The combination of repositoryid and reference field is supposed to be a unique identification of an external file. Because the reference is a TEXT field, we can't use to compose the index. So we use the referencehash instead and the file API is responsible to keep it up-to-date"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="file_conversion" COMMENT="Table to track file conversions.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="sourcefileid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="targetformat" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="status" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="statusmessage" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="converter" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="destfileid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="data" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="sourcefileid" TYPE="foreign" FIELDS="sourcefileid" REFTABLE="files" REFFIELDS="id"/>
+        <KEY NAME="destfileid" TYPE="foreign" FIELDS="destfileid" REFTABLE="files" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
     <TABLE NAME="repository" COMMENT="This table contains one entry for every configured external repository instance.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
@@ -2499,6 +2531,7 @@
         <FIELD NAME="defaultregion" TYPE="char" LENGTH="16" NOTNULL="true" SEQUENCE="false" COMMENT="Which block region this block should appear in on each page, in the absence of a specific position in the block_positions table."/>
         <FIELD NAME="defaultweight" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Used to order the blocks within a block region. Again, may be overridden by the block_positions table for a specific page where this block appears."/>
         <FIELD NAME="configdata" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="A serialized blob of configuration data for this block instance."/>
+        <FIELD NAME="common_config" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Json encoded common block configuration data"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -3470,6 +3503,101 @@
       <INDEXES>
         <INDEX NAME="cmidruleoutcome" UNIQUE="false" FIELDS="cmid, ruleoutcome" COMMENT="Index on cmid and outcome so we can quickly find what to do when an activity is completed."/>
         <INDEX NAME="cmidcompetencyid" UNIQUE="true" FIELDS="cmid, competencyid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="oauth2_endpoint" COMMENT="Describes the named endpoint for an oauth2 service.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The time this record was created."/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The time this record was modified."/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The user who modified this record."/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The service name."/>
+        <FIELD NAME="url" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The url to the endpoint"/>
+        <FIELD NAME="issuerid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The identity provider this service belongs to."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="issuer_id_key" TYPE="foreign" FIELDS="issuerid" REFTABLE="oauth2_issuer" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="oauth2_issuer" COMMENT="Details for an oauth 2 connect identity issuer.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this record was created."/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this record was modified."/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The user who modified this record"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The name of this identity issuer"/>
+        <FIELD NAME="image" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="baseurl" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The base url to the issuer"/>
+        <FIELD NAME="clientid" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The client id used to connect to this oauth2 service."/>
+        <FIELD NAME="clientsecret" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The secret used to connect to this oauth2 service."/>
+        <FIELD NAME="loginscopes" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The scopes requested for a normal login attempt."/>
+        <FIELD NAME="loginscopesoffline" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The scopes requested for a login attempt to generate a refresh token."/>
+        <FIELD NAME="loginparams" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Additional parameters sent for a login attempt."/>
+        <FIELD NAME="loginparamsoffline" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Additional parameters sent for a login attempt to generate a refresh token."/>
+        <FIELD NAME="alloweddomains" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Allowed domains for this issuer."/>
+        <FIELD NAME="scopessupported" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The list of scopes this service supports."/>
+        <FIELD NAME="enabled" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="showonloginpage" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="basicauth" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Use HTTP Basic authentication scheme when sending client ID and password"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The defined sort order."/>
+        <FIELD NAME="requireconfirmation" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Authentication requires email confirmation"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="oauth2_system_account" COMMENT="Stored details used to get an access token as a system user for this oauth2 service.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this record was created."/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time this record was modified."/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The user who modified this record."/>
+        <FIELD NAME="issuerid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The id of the oauth 2 identity issuer"/>
+        <FIELD NAME="refreshtoken" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The refresh token used to request access tokens."/>
+        <FIELD NAME="grantedscopes" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The scopes that this system account has been granted access to."/>
+        <FIELD NAME="email" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The email that was connected to this issuer."/>
+        <FIELD NAME="username" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The username that was connected as a system account to this issue."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="issueridkey" TYPE="foreign-unique" FIELDS="issuerid" REFTABLE="oauth2_issuer" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="oauth2_user_field_mapping" COMMENT="Mapping of oauth user fields to moodle fields.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The time this record was modified"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The time this record was created."/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The user who modified this record."/>
+        <FIELD NAME="issuerid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The oauth issuer."/>
+        <FIELD NAME="externalfield" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="The fieldname returned by the userinfo endpoint."/>
+        <FIELD NAME="internalfield" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the Moodle field this user field maps to."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="issuerkey" TYPE="foreign" FIELDS="issuerid" REFTABLE="oauth2_issuer" REFFIELDS="id"/>
+        <KEY NAME="uniqinternal" TYPE="unique" FIELDS="issuerid, internalfield"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="course_completion_defaults" COMMENT="Totara: Not used (MDL-58138). Default settings for activities completion">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="module" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="completion" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="completionview" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="completionusegrade" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="completionexpected" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="customrules" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="module" TYPE="foreign" FIELDS="module" REFTABLE="modules" REFFIELDS="id"/>
+        <KEY NAME="course" TYPE="foreign" FIELDS="course" REFTABLE="course" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="coursemodule" UNIQUE="true" FIELDS="course, module"/>
       </INDEXES>
     </TABLE>
   </TABLES>

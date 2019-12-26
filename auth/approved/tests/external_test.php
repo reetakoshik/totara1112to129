@@ -482,24 +482,24 @@ class auth_approved_external_testcase extends advanced_testcase {
     }
 
     private function assert_search_result_valid($result, $totalcount, $paginated = false) {
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertArrayHasKey('total', $result);
         $this->assertArrayHasKey('managers', $result);
         $this->assertArrayHasKey('warnings', $result);
-        $this->assertInternalType('int', $result['total']);
+        $this->assertIsInt($result['total']);
         $this->assertGreaterThanOrEqual(0, $result['total']);
-        $this->assertInternalType('array', $result['managers']);
+        $this->assertIsArray($result['managers']);
         if (!$paginated) {
             $this->assertCount($result['total'], $result['managers']);
             $this->assertCount($totalcount, $result['managers']);
         }
         $this->assertSame($totalcount, $result['total']);
-        $this->assertInternalType('array', $result['warnings']);
+        $this->assertIsArray($result['warnings']);
         $this->assertCount(0, $result['warnings']);
     }
 
     private function assert_expected_user($result, $title, $user, $job) {
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertArrayHasKey('displayname', $result);
         $this->assertArrayHasKey('jaid', $result);
         $this->assertEquals($title, $result['displayname']);

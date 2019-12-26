@@ -1,0 +1,61 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Carl Anderson <carl.anderson@totaralearning.com>
+   @package totara_core
+}}
+{{!
+    @template totara_core/accordion
+
+    This template generates an accordion
+
+    Classes required for JS:
+    * totara_core__Accordion__item
+    * totara_core__Accordion__item__header
+    * totara_core__Accordion__item__body
+    * collapsed
+
+    Data attributes required for JS:
+    * none
+
+   Context variables required for this template
+    * none
+
+    Example context (json):
+      {}
+ }}
+
+<li class="totara_core__Accordion__item collapsed {{$class}}{{/class}}"
+    role="presentation"
+    {{$attr}}{{/attr}}>
+        <div role="link" class="totara_core__Accordion__item__header {{$header_class}}{{/header_class}}"
+            aria-controls="totara_core__Accordion__item__body--{{uniqid}}"
+            aria-label="{{$aria-label}}{{#str}}accordion:accordionitem,totara_core{{/str}}{{/aria-label}}"
+            aria-expanded="false">
+            <span class="totara_core__Accordion__item__header__icon">
+                {{#flex_icon}}totara_core|accordion-collapsed{{/flex_icon}}
+            </span>
+            {{$header_html}}{{/header_html}}
+        </div>
+
+        <section id="totara_core__Accordion__item__body--{{uniqid}}"
+            class="totara_core__Accordion__item__body {{$body_class}}{{/body_class}}"
+            role="region">
+            {{$body_html}}{{/body_html}}
+        </section>
+</li>

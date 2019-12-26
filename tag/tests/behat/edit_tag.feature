@@ -85,6 +85,7 @@ Feature: Users can edit tags to add description or rename
     And I should not see "Dog"
     And I log out
 
+  @javascript
   Scenario: Renaming the tag from tag view page
     When I log in as "manager1"
     And I press "Customise this page"
@@ -234,9 +235,9 @@ Feature: Users can edit tags to add description or rename
     And I navigate to "Manage tags" node in "Site administration > Appearance"
     And I follow "Default collection"
     And I should not see "Reset filter"
-    And I set the field "Search" to "t"
+    And I set the field "id_tagfilter" to "t"
     And I press "Search"
-    Then the field "Search" matches value "t"
+    Then the field "id_tagfilter" matches value "t"
     And I should not see "Dog"
     And I should see "Cat"
     And I should see "Turtle"

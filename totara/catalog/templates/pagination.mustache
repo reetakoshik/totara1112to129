@@ -1,0 +1,66 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Kevin Hottinger <kevin.hottinger@totaralearning.com>
+   @package totara_catalog
+}}
+{{!
+
+    @template totara_catalog/pagination
+
+    This template generates pagination btn.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * data-core-autoinitialise: State of this JS auto initilise
+    * data-core-autoinitialise-amd: AMD to be linked to template
+    * data-tw-pagination: Hook to regenerate content.
+    * data-tw-pagination-limitFrom: End point of last dataset
+    * data-tw-pagination-maxCount: Max number of records to display
+    * data-tw-pagination-trigger: trigger for events
+
+    Context variables required for this template:
+    * end_of_results: Has no more results
+    * limit_from: End point of last dataset
+    * max_count: Max number of records to display
+
+    Example context (json):
+    {
+        "limit_from": 6,
+        "max_count": 6,
+        "end_of_results": true
+    }
+}}
+<div class="tw-catalogPagination"
+    data-core-autoinitialise="true"
+    data-core-autoinitialise-amd="totara_catalog/pagination"
+    data-tw-pagination="">
+
+    <div>
+        {{^end_of_results}}
+        <a href="#" class="tw-catalogPagination__btn btn"
+            data-tw-pagination-trigger=""
+            data-tw-pagination-limitFrom="{{limit_from}}"
+            data-tw-pagination-maxCount="{{max_count}}">
+            {{#str}}load_more, totara_catalog{{/str}}
+        </a>
+        {{/end_of_results}}
+    </div>
+</div>

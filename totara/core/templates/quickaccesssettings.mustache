@@ -1,0 +1,99 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Carl Anderson <carl.anderson@totaralearning.com>
+   @package totara_core
+}}
+{{!
+    @template totara_core/quickaccesssettings
+
+    This template generates a user's quick access menu for admin navigation
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * data-core-autoinitialise: true
+    * data-core-autoinitialise-amd: totara_core/quickaccesssettings
+    * data-quickaccesssettings-addgroup
+
+   Context variables required for this template:
+    * [parent] -> has_groups : (bool) whether this menu has any groups
+    * [parent] -> group_count: (int) the number of groups
+    * [parent] -> groups: (array) the list of groups
+    * groups -> title: (string) display name for this group
+    * groups -> has_items: (bool) whether this group contains any items
+    * groups -> item_count: (int)  how many items this group contains
+    * groups -> items: (array) list of items in this group
+    * items -> label: (string) display name for the item
+    * items -> url: (string) url for this item to link to
+
+    Example context (json):
+      {
+        "has_groups" : true,
+        "group_count" : 2,
+        "groups" : [
+            {
+                "title" : "Core",
+                "has_items" : true,
+                "item_count" : 2
+                "items" : [
+                    {
+                        "label" : "Item 1",
+                        "url" : "https://www.example.com/item1.php",
+                    },
+                    {
+                        "label" : "Item 2",
+                        "url" : "https://www.example.com/item2.php",
+                    }
+                ]
+            },
+            {
+                "title" : "Learn",
+                "has_items" : true,
+                "item_count" : 1
+                "items" : [
+                    {
+                        "label" : "Item 1",
+                        "url" : "https://www.example.com/item3.php",
+                    }
+                ]
+            }
+        ]
+      }
+ }}
+
+<div class="totara_core__QuickAccessSettings"
+     data-core-autoinitialise="true"
+     data-core-autoinitialise-amd="totara_core/quickaccesssettings"
+     aria-live="polite">
+{{< totara_core/accordion}}
+    {{$allow_multiple}}false{{/allow_multiple}}
+    {{$always_open}}true{{/always_open}}
+    {{$classes}}totara_core__QuickAccessSettings__group-list{{/classes}}
+    {{$accordion_body}}
+        {{#groups}}
+            {{> totara_core/quickaccesssettings_group }}
+        {{/groups}}
+    {{/accordion_body}}
+{{/ totara_core/accordion}}
+
+    <button class="totara_core__QuickAccessSettings__button btn btn-default" data-quickaccesssettings-addgroup>
+        {{#str}}quickaccessmenu:addgroup,totara_core{{/str}}
+    </button>
+</div>

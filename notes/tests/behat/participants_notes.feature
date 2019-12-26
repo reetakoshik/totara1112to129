@@ -1,10 +1,10 @@
-@core @core_notes
+@core @core_notes @javascript
 Feature: Add notes to course participants
   In order to share information with other staff
   As a teacher
   I need to add notes from the course particpants list
 
-  Scenario: An teacher can add multiple notes
+  Scenario: A teacher can add multiple notes
     Given the following "users" exist:
       | username | firstname | lastname | email |
       | teacher1 | Teacher | 1 | teacher1@example.com |
@@ -31,13 +31,12 @@ Feature: Add notes to course participants
     And I press "Save changes"
     And I log out
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Participants"
     And I set the field with xpath "//tr[contains(normalize-space(.), 'Student 1')]//input[@type='checkbox']" to "1"
     And I set the field with xpath "//tr[contains(normalize-space(.), 'Student 2')]//input[@type='checkbox']" to "1"
     And I set the field with xpath "//tr[contains(normalize-space(.), 'Student 3')]//input[@type='checkbox']" to "1"
     And I set the field "With selected users..." to "Add a new note"
-    And I press "OK"
     # Add a note to student 1, but leave student 2 empty and student 3 with space.
     When I set the field with xpath "//tr[contains(normalize-space(.), 'Student 1')]//textarea" to "Student 1 needs to pick up his game"
     And I set the field with xpath "//tr[contains(normalize-space(.), 'Student 2')]//textarea" to ""
@@ -51,7 +50,7 @@ Feature: Add notes to course participants
     And I follow "Participants"
     And I follow "Student 2"
     And I follow "Notes"
-    And I follow "Course 1"
+    And I click on "Course 1" "link" in the "Navigation" "block"
     And I follow "Participants"
     And I follow "Notes"
     Then I should see "Student 1"

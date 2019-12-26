@@ -695,7 +695,7 @@ class mod_assign_locallib_testcase extends mod_assign_base_testcase {
      * We only test combinations of plugins here. Individual plugins are tested
      * in their respective test files.
      *
-     * @dataProvider test_new_submission_empty_testcases
+     * @dataProvider provider_new_submission_empty_testcases
      * @param string $data The file submission data
      * @param bool $expected The expected return value
      */
@@ -729,7 +729,7 @@ class mod_assign_locallib_testcase extends mod_assign_base_testcase {
      *
      * @return array of testcases
      */
-    public function test_new_submission_empty_testcases() {
+    public function provider_new_submission_empty_testcases() {
         return [
             'With file and onlinetext' => [
                 [
@@ -799,6 +799,20 @@ class mod_assign_locallib_testcase extends mod_assign_base_testcase {
         $this->assertEquals($student->id, $participant->id);
         $this->assertFalse($participant->submitted);
         $this->assertFalse($participant->requiregrading);
+        $this->assertFalse($participant->grantedextension);
+    }
+
+    public function test_get_participant_granted_extension() {
+        $assign = $this->create_instance(array('grade' => 100));
+        $student = $this->students[0];
+        $this->setUser($this->editingteachers[0]);
+        $assign->save_user_extension($student->id, time());
+        $participant = $assign->get_participant($student->id);
+
+        $this->assertEquals($student->id, $participant->id);
+        $this->assertFalse($participant->submitted);
+        $this->assertFalse($participant->requiregrading);
+        $this->assertTrue($participant->grantedextension);
     }
 
     public function test_get_participant_with_ungraded_submission() {
@@ -828,6 +842,7 @@ class mod_assign_locallib_testcase extends mod_assign_base_testcase {
         $this->assertEquals($student->id, $participant->id);
         $this->assertTrue($participant->submitted);
         $this->assertTrue($participant->requiregrading);
+        $this->assertFalse($participant->grantedextension);
     }
 
     public function test_get_participant_with_graded_submission() {
@@ -867,6 +882,7 @@ class mod_assign_locallib_testcase extends mod_assign_base_testcase {
         $this->assertEquals($student->id, $participant->id);
         $this->assertTrue($participant->submitted);
         $this->assertFalse($participant->requiregrading);
+        $this->assertFalse($participant->grantedextension);
     }
 
     public function test_count_teams() {
@@ -2596,8 +2612,8 @@ Anchor link 2:<a title=\"bananas\" href=\"../logo-240x60.gif\">Link text</a>
         $this->assertFalse(in_array($this->extrastudents[1]->id, $groupmembers[0]));
 
         // Lists of group members for students and extrastudents should be the same.
-        $this->assertEquals($groupmembers[0], $assign->get_shared_group_members($cm, $this->extrastudents[0]->id));
-        $this->assertEquals($groupmembers[1], $assign->get_shared_group_members($cm, $this->extrastudents[1]->id));
+        $this->assertEqualsCanonicalizing($groupmembers[0], $assign->get_shared_group_members($cm, $this->extrastudents[0]->id));
+        $this->assertEqualsCanonicalizing($groupmembers[1], $assign->get_shared_group_members($cm, $this->extrastudents[1]->id));
 
         // Get all group members for extrastudent 3 wich can access all groups.
         $allgroupmembers = $assign->get_shared_group_members($cm, $this->extrastudents[3]->id);
@@ -3085,5 +3101,52 @@ Anchor link 2:<a title=\"bananas\" href=\"../logo-240x60.gif\">Link text</a>
 
         // Check that the grade was updated in the gradebook by fix_null_grades.
         $this->assertEquals($gradebookvalue, $gradegrade->finalgrade);
+    }
+
+    /**
+     * Test grade override displays 'Graded' for students
+     */
+    public function test_grade_submission_override() {
+        global $DB, $PAGE, $OUTPUT;
+
+        $this->setUser($this->editingteachers[0]);
+        $assign = $this->create_instance(array('assignsubmission_onlinetext_enabled' => 1));
+
+        $studentid = $this->students[0]->id;
+
+        // Simulate adding a grade.
+        $this->setUser($this->teachers[0]);
+        $data = new stdClass();
+        $data->grade = '50.0';
+        $assign->testable_apply_grade_to_user($data, $studentid, 0);
+
+        // Set grade override.
+        $gradegrade = grade_grade::fetch(array('userid' => $studentid, 'itemid' => $assign->get_grade_item()->id));
+
+        // Check that grade submission is not overridden yet.
+        $this->assertEquals(false, $gradegrade->is_overridden());
+
+        // Simulate a submission.
+        $this->setUser($this->students[0]);
+        $submission = $assign->get_user_submission($studentid, true);
+
+        $PAGE->set_url(new moodle_url('/mod/assign/view.php', array('id' => $assign->get_course_module()->id)));
+
+        // Set override grade grade, and check that grade submission has been overridden.
+        $gradegrade->set_overridden(true);
+        $this->assertEquals(true, $gradegrade->is_overridden());
+
+        // Check that submissionslocked message 'This assignment is not accepting submissions' does not appear for student.
+        $gradingtable = new assign_grading_table($assign, 1, '', 0, true);
+        $output = $assign->get_renderer()->render($gradingtable);
+        $this->assertContains(get_string('submissionstatus_', 'assign'), $output);
+
+        $assignsubmissionstatus = $assign->get_assign_submission_status_renderable($this->students[0], true);
+        $output2 = $assign->get_renderer()->render($assignsubmissionstatus);
+
+        // Check that submissionslocked 'This assignment is not accepting submissions' message does not appear for student.
+        $this->assertNotContains(get_string('submissionslocked', 'assign'), $output2);
+        // Check that submissionstatus_marked 'Graded' message does appear for student.
+        $this->assertContains(get_string('submissionstatus_marked', 'assign'), $output2);
     }
 }

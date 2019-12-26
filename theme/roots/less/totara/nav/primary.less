@@ -1,0 +1,171 @@
+//
+// This file is part of Totara Learn
+//
+// Copyright (C) 2018 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @copyright 2018 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Kevin Hottinger <kevin.hottinger@totaralearning.com>
+// @package   theme_roots
+
+
+.totaraNav_prim {
+    background: @totaranav_prim-color_background;
+    z-index: @totaranav_prim-z-index;
+
+    // On mobile wrap over flow items with rows
+    > .container-fluid {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    &--list {
+        background: inherit;
+        height: 100vh;
+        left: -100%;
+        margin: auto 0;
+        max-width: 100%;
+        min-height: 35px;
+        padding: 0 @totaranav-spacing_medium;
+        position: fixed;
+
+        // Link colours
+        &_close,
+        &_item_link {
+            color: @totaranav_prim-color_font;
+
+            &:focus,
+            &:hover {
+                background: @totaranav_prim-color_background_active;
+                color: @totaranav_prim-color_font;
+                text-decoration: none;
+            }
+        }
+
+        // Mobile close button
+        &_close {
+            display: inline-block;
+            font-size: 1.5em;
+            line-height: 1;
+            padding: @totaranav-spacing_small;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        // List display on mobile
+        &_hideMobile {
+            transition: 0.3s;
+        }
+
+        // List display on mobile
+        &_showMobile {
+            background: inherit;
+            box-shadow: 0 3px 6px 0 @totaranav_prim-color_background_expanded;
+            left: 0;
+            overflow-y: scroll;
+            transition: 0.5s;
+            width: 80%;
+            z-index: 3;
+        }
+    }
+
+    &--list_item {
+        &_link {
+            display: flex;
+            padding: @totaranav-spacing_small;
+        }
+
+        // Make spacing smaller on li with icons
+        &_externalLink &_link,
+        &_hasChildren &_link {
+            padding-right: @totaranav-spacing_small;
+        }
+
+        &_label {
+            max-width: 100%;
+            word-wrap: break-word;
+        }
+    }
+
+    // Navigation level indentation
+    .totaraNav--expand_indent {
+        display: inline-block;
+        min-width: @totaranav-spacing_large;
+    }
+}
+
+@media (min-width: @totaranav-screen_sm_min) {
+    .totaraNav_prim {
+        &--list {
+            &_showMobile {
+                width: 280px;
+            }
+        }
+    }
+}
+
+@media (min-width: @totaranav-screen_md_min) {
+    .totaraNav_prim {
+        // On desktop wrap over flow items with columns
+        > .container-fluid {
+            flex-wrap: nowrap;
+        }
+
+        &--list {
+            display: block;
+            height: auto;
+            left: 0;
+            padding: 0;
+            position: relative;
+            width: auto;
+
+            &_close {
+                display: none;
+            }
+
+            &_showMobile {
+                box-shadow: none;
+                width: auto;
+            }
+        }
+
+        &--list_item {
+            display: inline-block;
+            vertical-align: top;
+
+            &_link {
+                padding: @totaranav-spacing_small @totaranav-spacing_medium;
+
+                .totaraNav--expand_indent {
+                    display: none;
+                }
+            }
+
+            &_hasChildren &_link {
+                .totaraNav--expand_indent {
+                    display: inline-block;
+                    min-width: 1.2em;
+                    order: 2;
+                    text-align: right;
+                }
+            }
+
+            &_selected &_link {
+                background: @totaranav_prim-color_background_selected;
+            }
+        }
+    }
+}

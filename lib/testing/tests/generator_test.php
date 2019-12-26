@@ -145,7 +145,7 @@ class core_test_generator_testcase extends advanced_testcase {
         $record = $generator->create_user(array('username' => 'bloodyhack666'), array('noinsert' => true));
         $postcount = $DB->count_records('user');
         $this->assertSame($prevcount, $postcount);
-        $this->assertInternalType('array', $record);
+        $this->assertIsArray($record);
         $this->assertFalse(isset($record['id']));
         $this->assertSame('bloodyhack666', $record['username']);
 
@@ -188,7 +188,7 @@ class core_test_generator_testcase extends advanced_testcase {
         $this->assertSame('', $course->idnumber);
         $this->assertSame('topics', $course->format);
         $this->assertEquals(0, $course->newsitems);
-        $this->assertEquals(5, $course->numsections);
+        $this->assertEquals(5, course_get_format($course)->get_last_section_number());
         $this->assertRegExp('/^Test course \d/', $course->summary);
         $this->assertSame(FORMAT_MOODLE, $course->summaryformat);
 

@@ -1,4 +1,4 @@
-@javascript @tool @tool_sitepolicy @totara @language_packs
+@javascript @tool @tool_sitepolicy @totara
 Feature: Give or withhold user consent
   As a user
   I am required to view all user published policies and give
@@ -188,7 +188,7 @@ Feature: Give or withhold user consent
     And the following "multiversionpolicies" exist in "tool_sitepolicy" plugin:
       | hasdraft | numpublished | allarchived | title    | languages |statement          | numoptions | consentstatement       | providetext | withholdtext | mandatory |
       | 0        | 1            | 0           | Policy 1 | en        |Policy 1 statement | 1          | P1 - Consent statement | Yes         | No           | none      |
-    And I navigate to "Users > Accounts > Browse list of users" in site administration
+    And I navigate to "Users > Browse list of users" in site administration
     And I follow "Learner One"
     And I follow "Log in as"
     And I should see "You are logged in as Learner One"

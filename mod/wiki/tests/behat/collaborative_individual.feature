@@ -20,8 +20,7 @@ Feature: A teacher can set a wiki to be collaborative or individual
       | student1 | C1 | student |
       | student2 | C1 | student |
     And I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Wiki" to section "1" and I fill the form with:
       | Wiki name | Collaborative wiki name |
       | Description | Collaborative wiki description |
@@ -45,7 +44,7 @@ Feature: A teacher can set a wiki to be collaborative or individual
     And I press "Save"
     And I log out
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     When I follow "Collaborative wiki name"
     Then I should see "Collaborative teacher1 edition"
     And I follow "Edit"
@@ -63,7 +62,7 @@ Feature: A teacher can set a wiki to be collaborative or individual
     And I press "Save"
     And I log out
     And I log in as "student2"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Individual wiki name"
     And I should not see "Individual teacher1 edition"
     And I should not see "Individual student1 edition"
@@ -73,7 +72,7 @@ Feature: A teacher can set a wiki to be collaborative or individual
     And I press "Save"
     And I log out
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Collaborative wiki name"
     And I should see "Collaborative student1 edition"
     And I follow "Course 1"
@@ -86,5 +85,3 @@ Feature: A teacher can set a wiki to be collaborative or individual
     And I set the field "uid" to "Student 2"
     And I should see "Individual student2 edition"
     And I should not see "Individual teacher1 edition"
-
-

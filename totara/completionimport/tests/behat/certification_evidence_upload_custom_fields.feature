@@ -86,7 +86,7 @@ Feature: Verify certification completion data with custom fields can be successf
     And I should see "1 Records created as evidence"
     And I should see "1 Records in total"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob1 Learner1"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     And I follow "Completed certification : Cert1"
@@ -99,7 +99,7 @@ Feature: Verify certification completion data with custom fields can be successf
 
   Scenario: Verify a successful certification evidence upload expecting default custom field values to be used and visible in the import report.
     Given I log in as "admin"
-    When I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    When I navigate to "Manage embedded reports" node in "Site administration > Reports"
     And I click on "Settings" "link" in the "Completion import: Certification status" "table_row"
     And I follow "Columns"
     And I set the field "newcolumns" to "Date completed"
@@ -145,7 +145,7 @@ Feature: Verify certification completion data with custom fields can be successf
     And I should see "1 Records created as evidence"
     And I should see "1 Records in total"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Bob1 Learner1"
     And I click on "Record of Learning" "link" in the ".profile_tree" "css_element"
     And I follow "Completed certification : Cert1"

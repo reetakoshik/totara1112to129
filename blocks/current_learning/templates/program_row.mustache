@@ -101,7 +101,7 @@
             <span class="expanded-icon">{{#flex_icon}}expanded{{/flex_icon}}</span>
         </span>
         <span tabindex="0" data-toggle="tooltip" data-placement="top" data-container="body" title="{{title}}">
-            {{#flex_icon}}{{icon}}{{/flex_icon}}
+            {{#icondata}}{{#context}}{{> &&template}}{{/context}}{{/icondata}}
         </span>
         <a href="{{url_view}}">
             <h3>{{{fullname}}}</h3>
@@ -113,7 +113,12 @@
                 </span>
             {{/dueinfo}}
             {{#progress}}
-                <span class="label label-default">{{summary}}</span>
+                {{#pbar}}
+                   {{> core/progress_bar }}
+                {{/pbar}}
+                {{^pbar}}
+                    <span class="label label-default">{{summary}}</span>
+                {{/pbar}}
             {{/progress}}
         </div>
     </div>

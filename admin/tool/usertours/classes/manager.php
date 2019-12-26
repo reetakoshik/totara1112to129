@@ -139,7 +139,7 @@ class manager {
      * @param   string  $action     The action to perform.
      */
     public function execute($action) {
-        admin_externalpage_setup('tool_usertours/tours');
+        admin_externalpage_setup('toolusertours');
         // Add the main content.
         switch($action) {
             case self::ACTION_NEWTOUR:
@@ -276,9 +276,7 @@ class manager {
             $linkproperties = $config->linkproperties;
             $linkproperties['href'] = $config->link;
             $action .= \html_writer::start_tag('a', $linkproperties);
-            $action .= \html_writer::img(
-                $OUTPUT->pix_url($config->img, 'tool_usertours'),
-                $config->title);
+            $action .= $OUTPUT->pix_icon($config->img, $config->title, 'tool_usertours');
             $action .= \html_writer::div($config->title);
             $action .= \html_writer::end_tag('a');
             $action .= \html_writer::end_tag('li');
@@ -825,7 +823,7 @@ class manager {
         $existingtourrecords->close();
 
         foreach ($shippedtours as $filename => $version) {
-            $filepath = $CFG->dirroot . '/admin/tool/usertours/tours/' . $filename;
+            $filepath = $CFG->dirroot . "/{$CFG->admin}/tool/usertours/tours/" . $filename;
             $tourjson = file_get_contents($filepath);
             $tour = self::import_tour_from_json($tourjson);
 

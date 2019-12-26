@@ -23,6 +23,9 @@ clitypevaluedefault,admin
 cliunknowoption,admin
 cliyesnoprompt,admin
 componentisuptodate,error
+configfilenotwritten,install
+configfilewritten,install
+configurationcompletesub,install
 curlphpextensionnotinstalled,admin
 databasehost,install
 databasename,install
@@ -48,6 +51,7 @@ ishttpswarning,admin
 langdownloaderror,install
 language,moodle
 libcurlwarning,admin
+maturitycorewarning,admin
 memorylimithelp,install
 missingrequiredfield,error
 moodlelogo,moodle
@@ -69,6 +73,7 @@ phpversionhelp,install
 phpversion,install
 poweredbyx,totara_core
 previous,moodle
+releasenoteslink,admin
 reload,moodle
 remotedownloaderror,error
 sitenothttps,admin

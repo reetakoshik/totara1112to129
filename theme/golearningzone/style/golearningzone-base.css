@@ -2411,7 +2411,7 @@ table.ygtvtable {
 }
 
 .progressbar_container {
-  width: auto !important;
+  /*width: auto !important;*/
 }
 
 .block_last_course_accessed .progressbar_container {
@@ -2891,6 +2891,10 @@ div[id*="listing"] {
   float: right;
   text-align: right;
 }
+.mark-all-read-button:hover, .mark-all-read-button:focus{
+	text-decoration:none;
+}
+	
 
 @media (min-width: 768px) {
   #view-program-content > h2 {

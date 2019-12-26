@@ -56,7 +56,8 @@ $shortname = 'team_members';
 $reportrecord = $DB->get_record('report_builder', array('shortname' => $shortname));
 $globalrestrictionset = rb_global_restriction_set::create_from_page_parameters($reportrecord);
 
-if (!$report = reportbuilder_get_embedded_report($shortname, null, false, $sid, $globalrestrictionset)) {
+$config = (new rb_config())->set_sid($sid)->set_global_restriction_set($globalrestrictionset);
+if (!$report = reportbuilder::create_embedded($shortname, $config)) {
     print_error('error:couldnotgenerateembeddedreport', 'totara_reportbuilder');
 }
 
@@ -93,7 +94,7 @@ if ($PAGE->user_allowed_editing()) {
     $USER->editing = 0;
 }
 
-$PAGE->set_totara_menu_selected('myteam');
+$PAGE->set_totara_menu_selected('\totara_core\totara\menu\myteam');
 $PAGE->set_title($strheading);
 $PAGE->set_heading(format_string($SITE->fullname));
 $PAGE->set_button($report->edit_button().$editbutton);

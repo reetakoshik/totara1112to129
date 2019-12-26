@@ -18,15 +18,14 @@ Feature: Managers can create courses
     And I enrol "Student 1" user as "Student"
     And I log out
     When I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I follow "Announcements"
     And "Add a new topic" "button" should exist
     And "Subscription mode > Forced subscription" "link" should not exist in current page administration
     And "Subscription mode > Forced subscription" "text" should exist in current page administration
     And I log out
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Announcements"
     And "Add a new topic" "button" should not exist
     And "Forced subscription" "text" should exist in current page administration
@@ -68,3 +67,35 @@ Feature: Managers can create courses
       | id_enddate_day | 24 |
       | id_enddate_month | October |
       | id_enddate_year | 2016 |
+
+  @javascript
+  Scenario: Course shortname can be 255 characters
+    Given the following "users" exist:
+      | username | firstname | lastname | email |
+      | teacher1 | Teacher | 1 | teacher1@example.com |
+      | student1 | Student | 1 | student1@example.com |
+    When I log in as "admin"
+    And I create a course with:
+      | Course full name | Course 1 |
+      | Course short name | This is a very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very long shortname |
+    When I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
+    And I set the following fields to these values:
+      | Report Name | Courses Report |
+      | Source      | Courses        |
+    And I press "Create report"
+    And I switch to "Columns" tab
+    And I add the "Course Shortname" column to the report
+    And I follow "View This Report"
+    Then I should see "This is a very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very long shortname"
+    And I should see "Course 1"
+
+    When I follow "Course 1"
+    And I follow "Edit settings"
+    And I set the following fields to these values:
+      | Course short name | This is still a very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very long shortname |
+    And I press "Save and display"
+    And I follow "Reports"
+    And I follow "Courses Report"
+    Then I should see "This is still a very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very long shortname"
+    And I should see "Course 1"

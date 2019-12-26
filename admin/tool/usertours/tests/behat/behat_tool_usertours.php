@@ -64,7 +64,16 @@ class behat_tool_usertours extends behat_base {
         \behat_hooks::set_step_readonly(false);
         $this->execute('behat_tool_usertours::i_open_the_user_tour_settings_page');
         $this->execute('behat_general::click_link', $this->escape($tourname));
+        $this->execute('behat_tool_usertours::i_add_steps_to_the_tour', $table);
+    }
 
+    /**
+     * Add new steps to the current user tour.
+     *
+     * @Given /^I add steps to the tour:$/
+     * @param   TableNode   $table
+     */
+    public function i_add_steps_to_the_tour(TableNode $table) {
         foreach ($table->getHash() as $step) {
             $this->execute('behat_general::click_link', get_string('newstep', 'tool_usertours'));
 

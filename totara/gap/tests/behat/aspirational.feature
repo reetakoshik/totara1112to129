@@ -25,7 +25,7 @@ Feature: Add aspirational position to user profile
 
   Scenario: Manage aspirational position in user profile
     Given I log in as "manager1"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "Sam1 Student1" "link"
     And I click on "Edit profile" "link" in the "div.userprofile" "css_element"
     And I should see "Aspirational position"

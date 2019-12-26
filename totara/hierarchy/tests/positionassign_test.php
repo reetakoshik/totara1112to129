@@ -31,7 +31,7 @@ require_once($CFG->dirroot . '/lib/accesslib.php');
 require_once($CFG->dirroot . '/totara/hierarchy/lib.php');
 require_once($CFG->dirroot . '/totara/hierarchy/prefix/position/lib.php');
 
-class positionassign_test extends advanced_testcase {
+class totara_hierarchy_positionassign_testcase extends advanced_testcase {
 
     protected $user1, $user2, $user3, $user4, $user5;
 
@@ -50,9 +50,10 @@ class positionassign_test extends advanced_testcase {
     );
 
     protected function tearDown() {
-        $this->user1 = null;
+        $this->user1 = $this->user2 = $this->user3 = $this->user4 = $this->user5 = null;
         $this->pos_framework_data = null;
         $this->pos_data = null;
+
         parent::tearDown();
     }
 

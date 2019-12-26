@@ -50,6 +50,13 @@ class totara_userdata_export_request_testcase extends advanced_testcase {
         $this->filestorage = get_file_storage();
     }
 
+    protected function tearDown() {
+        $this->filestorage = null;
+        $this->systemcontext = null;
+
+        parent::tearDown();
+    }
+
     /**
      * Test the abilities to purge, export and count
      */

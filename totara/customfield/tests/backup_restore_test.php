@@ -32,7 +32,7 @@ class totara_customfield_backup_restore_testcase extends advanced_testcase {
     protected $course1, $course2;
 
     protected function tearDown() {
-        $this->course1 = null;
+        $this->course1 = $this->course2 = null;
         parent::tearDown();
     }
 

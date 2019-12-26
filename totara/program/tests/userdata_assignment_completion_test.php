@@ -29,7 +29,6 @@ use totara_userdata\userdata\target_user;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-
 require_once($CFG->dirroot . '/totara/program/tests/userdata_assignment_completion_base_testcase.php');
 
 /**

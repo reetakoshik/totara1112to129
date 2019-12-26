@@ -91,9 +91,9 @@ if ($canupdateitems) {
 // Set page context so that export can use functions like format_text.
 $PAGE->set_context(context_system::instance());
 
-if ($format!='') {
+if ($format != '') {
     \totara_hierarchy\event\framework_exported::create_from_instance($prefix, $framework)->trigger();
-    $hierarchy->export_data($format);
+    $hierarchy->export_data($format, false);
     die;
 }
 
@@ -362,8 +362,9 @@ foreach ($customfieldrss as $customfieldrs) {
     $customfieldrs->close();
 }
 
-if ($num_on_page > 0) {
-    $hierarchy->export_select($baseurl);
-}
+echo html_writer::start_tag('div', array('id' => 'id_exportoneframework'));
+echo $OUTPUT->heading(get_string('exportframework', 'totara_hierarchy') . $OUTPUT->help_icon('exportframework', 'totara_hierarchy'), 3);
+$hierarchy->export_select($baseurl);
+echo html_writer::end_tag('div');
 
 echo $OUTPUT->footer();

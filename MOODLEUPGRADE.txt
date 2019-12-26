@@ -5,9 +5,9 @@ These instructions detail the process for upgrading a Moodle site to Totara.
 
 Totara migration requirements:
 
-* Moodle 3.2.9 (Build: 20180517)
+* Moodle 3.3.9 (Build: 20181112)
 * Oracle database is not supported.
-* MSSQL only: Database user requires additional permissions: ALTER SETTINGS(SERVER).
+* MSSQL only: Database user requires additional permissions: ALTER SETTINGS(SERVER), full text search must be enabled.
 * all other requirements listed in INSTALL.txt
 
 NOTE: Additional plugins, custom themes or customised Moodle code are likely to
@@ -17,6 +17,12 @@ NOTE: Additional plugins, custom themes or customised Moodle code are likely to
     You can migrate to this Totara release only from one exact Moodle release
     specified above. If you are using lower Moodle version you must upgrade to
     the required Moodle release first.
+
+    If the Moodle site you are upgrading from used oauth2 authentication plugin
+    users created via this plugin will not be able to access the site after the
+    upgrade. These accounts may be converted to manual accounts and users issued
+    with a new passwords using password reset. If you require assistance to convert
+    oauth2 users to manual accounts please contact Totara Support.
 
     For more information see http://docs.moodle.org/en/Upgrading
 

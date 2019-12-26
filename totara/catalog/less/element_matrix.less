@@ -1,0 +1,72 @@
+//
+// This file is part of Totara Learn
+//
+// Copyright (C) 2018 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @copyright 2018 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Matthias Bonk <matthias.bonk@totaralearning.com>
+// @package   theme_roots
+
+// Size
+@catalog_matrix-spacing_x_small: @totara_style-spacing_x_small;
+// Colours
+@catalog_matrix-color_neutral_4: @totara_style-color_neutral_4;
+
+.totara_catalog-matrix {
+    legend {
+        border: none;
+        margin: 0;
+    }
+
+    table {
+        width: 100%;
+
+        th, td {
+            padding: @catalog_matrix-spacing_x_small;
+        }
+
+        th:first-child {
+            width: 25%;
+        }
+
+        tr {
+            border-bottom: 1px solid @catalog_matrix-color_neutral_4;
+        }
+
+        input[type="text"] {
+            margin: 0;
+        }
+
+        label {
+            font-weight: normal;
+            margin: 0 0 0 @catalog_matrix-spacing_x_small;
+        }
+    }
+
+    &__addfilter {
+        margin: @catalog_matrix-spacing_x_small 0 0 @catalog_matrix-spacing_x_small;
+    }
+
+    tr:last-child .totara_catalog-matrix__action[data-action="move-down"],
+    tr:first-child .totara_catalog-matrix__action[data-action="move-up"] {
+        visibility: hidden;
+    }
+
+    .totara_catalog-matrix__action[data-action="delete"] {
+        margin-left: 1.3em;
+    }
+}

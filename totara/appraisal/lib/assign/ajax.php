@@ -96,23 +96,23 @@ foreach ($userdata as $userid => $user) {
 
     $columns = array($link, $assignviastring);
 
-    if (!empty($stageinfo[$userid]->name)) {
-        $columns[] = $stageinfo[$userid]->name;
-    } else if (!empty($stageinfo[$userid]->timecompleted)) {
-        $columns[] = get_string('completed', 'totara_appraisal');
-    } else {
-        $columns[] = get_string('notyetstarted', 'totara_appraisal');
-    }
-
+    $edit_icon = '';
     if ($canunlockstages && $appraisal->get()->status == $appraisal::STATUS_ACTIVE) {
-        $edit = $OUTPUT->action_icon(
+        $edit_icon =  '&nbsp;&nbsp;' . $OUTPUT->action_icon(
             new moodle_url(
                 '/totara/appraisal/edit_current_stage.php',
                 array('appraisalid' => $itemid, 'learnerid' => $userid)
             ),
-            new pix_icon('t/edit', get_string('edit'))
+            new pix_icon('t/edit', get_string('edit'), 'moodle', ['class' => 'fa-pencil'])
         );
-        $columns[] = $edit;
+    }
+
+    if (!empty($stageinfo[$userid]->name)) {
+        $columns[] = $stageinfo[$userid]->name . $edit_icon;
+    } else if (!empty($stageinfo[$userid]->timecompleted)) {
+        $columns[] = get_string('completed', 'totara_appraisal') . $edit_icon;
+    } else {
+        $columns[] = get_string('notyetstarted', 'totara_appraisal');
     }
 
     $aadata[] = $columns;

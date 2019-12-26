@@ -17,18 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Totara navigation edit page.
- *
- * @package    totara
+ * @package    totara_core
  * @subpackage navigation
  * @author     Oleg Demeshev <oleg.demeshev@totaralms.com>
  */
 namespace totara_core\totara\menu;
 
-use \totara_core\totara\menu\menu as menu;
 use totara_job\job_assignment;
 
-class myteam extends \totara_core\totara\menu\item {
+class myteam extends item {
 
     protected function get_default_title() {
         return get_string('team', 'totara_core');
@@ -38,10 +35,6 @@ class myteam extends \totara_core\totara\menu\item {
         return '/my/teammembers.php';
     }
 
-    public function get_default_visibility() {
-        return menu::SHOW_WHEN_REQUIRED;
-    }
-
     public function get_default_sortorder() {
         return 50000;
     }
@@ -49,21 +42,20 @@ class myteam extends \totara_core\totara\menu\item {
     protected function check_visibility() {
         global $USER;
 
-        static $cache = null;
-
-        if (!totara_feature_visible('myteam')) {
-            $cache = null;
-            return menu::HIDE_ALWAYS;
+        if (!isloggedin() or isguestuser()) {
+            return false;
         }
+
+        static $cache = null;
 
         if (isset($cache)) {
             return $cache;
         }
 
         if (job_assignment::has_staff($USER->id) || is_siteadmin()) {
-            $cache = menu::SHOW_ALWAYS;
+            $cache = true;
         } else {
-            $cache = menu::HIDE_ALWAYS;
+            $cache = false;
         }
         return $cache;
     }
@@ -75,5 +67,9 @@ class myteam extends \totara_core\totara\menu\item {
      */
     public function is_disabled() {
         return totara_feature_disabled('myteam');
+    }
+
+    public function get_incompatible_preset_rules(): array {
+        return ['can_view_my_team'];
     }
 }

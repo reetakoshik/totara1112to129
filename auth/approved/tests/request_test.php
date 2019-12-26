@@ -49,7 +49,7 @@ class auth_approved_request_testcase extends advanced_testcase {
 
     public function test_get_statuses() {
         $statuses = \auth_approved\request::get_statuses();
-        $this->assertInternalType('array', $statuses);
+        $this->assertIsArray($statuses);
         $this->assertArrayHasKey(\auth_approved\request::STATUS_PENDING, $statuses);
         $this->assertArrayHasKey(\auth_approved\request::STATUS_APPROVED, $statuses);
         $this->assertArrayHasKey(\auth_approved\request::STATUS_REJECTED, $statuses);
@@ -100,6 +100,7 @@ class auth_approved_request_testcase extends advanced_testcase {
         $expected->managerjaid = 0;
         $expected->managerfreetext = 'managerfreetext';
         $expected->profilefields = json_encode(['profile_field_fake' => $data->profile_field_fake]);
+        $expected->extradata = '';
         $this->assertSame((array)$expected, (array)$record);
 
         // Test with partial details and no freetext.
@@ -131,6 +132,7 @@ class auth_approved_request_testcase extends advanced_testcase {
         $expected->organisationid = 0;
         $expected->managerjaid = 0;
         $expected->profilefields = json_encode([]);
+        $expected->extradata = '';
         $this->assertSame((array)$expected, (array)$record);
 
         // Test freetext empty to null conversions.
@@ -169,6 +171,7 @@ class auth_approved_request_testcase extends advanced_testcase {
         $expected->managerjaid = 0;
         $expected->managerfreetext = null;
         $expected->profilefields = json_encode([]);
+        $expected->extradata = '';
 
         $this->assertSame((array)$expected, (array)$record);
 
@@ -333,7 +336,7 @@ class auth_approved_request_testcase extends advanced_testcase {
         $messagesink->clear();
 
         $result = \auth_approved\request::confirm_request($token);
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(3, $result);
         $this->assertTrue($result[0]);
         $this->assertSame('Thank you for confirming your account request, an email should have been sent to your address at test_1@example.com with information describing the account approval process.', $result[1]);
@@ -460,7 +463,7 @@ class auth_approved_request_testcase extends advanced_testcase {
         $messagesink->clear();
 
         $result = \auth_approved\request::confirm_request($token);
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(3, $result);
         $this->assertTrue($result[0]);
         $this->assertSame('Thank you for confirming your account request, you can now log in using your requested username: ' . $request->username, $result[1]);
@@ -556,7 +559,7 @@ class auth_approved_request_testcase extends advanced_testcase {
         $messagesink->clear();
 
         $result = \auth_approved\request::confirm_request($token);
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(3, $result);
         $this->assertTrue($result[0]);
         $this->assertSame('Thank you for confirming your account request, you can now log in using your requested username: ' . $request->username, $result[1]);
@@ -685,7 +688,7 @@ class auth_approved_request_testcase extends advanced_testcase {
         // Finally confirm you can't reject an already approved request.
         $request = $this->create_request(2);
         $newuserid = \auth_approved\request::approve_request($request->id, 'A custom approval message', false);
-        $this->assertInternalType('int', $newuserid);
+        $this->assertIsInt($newuserid);
         $this->assertGreaterThan(0, $newuserid);
 
         $result = \auth_approved\request::reject_request($request->id, 'A custom rejection message');
@@ -717,7 +720,7 @@ class auth_approved_request_testcase extends advanced_testcase {
         $supportuser = \core_user::get_support_user();
 
         $newuserid = \auth_approved\request::approve_request($request->id, 'A custom approval message', true);
-        $this->assertInternalType('int', $newuserid);
+        $this->assertIsInt($newuserid);
         $this->assertGreaterThan(0, $newuserid);
 
         $this->assertSame(1, $emailsink->count());

@@ -39,13 +39,20 @@ if (!confirm_sesskey()) {
     redirect($returnurl);
 }
 
+$oldvalue = $CFG->auth;
+
 switch ($action) {
     case 'disable':
         // remove from enabled list
         $key = array_search($auth, $authsenabled);
         if ($key !== false) {
             unset($authsenabled[$key]);
-            set_config('auth', implode(',', $authsenabled));
+
+            $newvalue = implode(',', $authsenabled);
+            add_to_config_log('auth', $oldvalue, $newvalue, null);
+            set_config('auth', $newvalue);
+
+            \totara_core\event\auth_update::disabled($auth)->trigger();
         }
 
         if ($auth == $CFG->registerauth) {
@@ -60,7 +67,11 @@ switch ($action) {
         if (!in_array($auth, $authsenabled)) {
             $authsenabled[] = $auth;
             $authsenabled = array_unique($authsenabled);
-            set_config('auth', implode(',', $authsenabled));
+            $newvalue = implode(',', $authsenabled);
+
+            add_to_config_log('auth', $oldvalue, $newvalue, null);
+            set_config('auth', $newvalue);
+            \totara_core\event\auth_update::enabled($auth)->trigger();
         }
         \core\session\manager::gc(); // Remove stale sessions.
         core_plugin_manager::reset_caches();

@@ -32,4 +32,4 @@ $temp = new admin_externalpage(
     new moodle_url('/admin/tool/monitor/managerules.php', array('courseid' => 0)),
     'tool/monitor:managerules'
 );
-$ADMIN->add('reports', $temp);
+$ADMIN->add('server', $temp);

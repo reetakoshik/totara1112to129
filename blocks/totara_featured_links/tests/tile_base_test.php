@@ -20,14 +20,17 @@
  * @author Andrew McGhie <andrew.mcghie@totaralearning.com>
  * @package block_totara_featured_links
  */
+
 require_once('test_helper.php');
+
 use block_totara_featured_links\tile\base;
+use block_totara_featured_links\tile\default_tile;
 
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Tests the static methods on the abstract \block_totara_featured_links\tile\base class
+ * Tests the static methods on the abstract block_totara_featured_links\tile\base class
  */
 class block_totara_featured_links_tile_base_testcase extends test_helper {
 
@@ -45,11 +48,17 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
         $this->blockgenerator = $this->getDataGenerator()->get_plugin_generator('block_totara_featured_links');
     }
 
+    public function tearDown() {
+        parent::tearDown();
+        $this->blockgenerator = null;
+    }
+
     /**
-     * Tests the \block_totara_featured_links\tile\base::get_tile_instance() method.
+     * Tests the block_totara_featured_links\tile\base::get_tile_instance() method.
      */
     public function test_get_tile_instance() {
-        $this->resetAfterTest(); // Changing the database, we must reset.
+        $this->resetAfterTest();
+        $this->setAdminUser();
 
         // First up test with a real id.
         $blockinstance = $this->blockgenerator->create_instance();
@@ -63,11 +72,12 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
     }
 
     /**
-     * Tests the \block_totara_featured_links\tile\base::squash_ordering() method.
+     * Tests the block_totara_featured_links\tile\base::squash_ordering() method.
      */
     public function test_squash_ordering() {
         global $DB;
-        $this->resetAfterTest(); // Changing the database, we must reset.
+        $this->resetAfterTest();
+        $this->setAdminUser();
 
         $blockinstance1 = $this->blockgenerator->create_instance();
         $blockinstance2 = $this->blockgenerator->create_instance();
@@ -99,13 +109,13 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
         $DB->set_field('block_totara_featured_links_tiles', 'sortorder', '4', ['id' => $tile2_c->id]);
 
         // Refresh the objects and confirm the sortorder.
-        $tile1_a = new \block_totara_featured_links\tile\default_tile($tile1_a->id);
-        $tile1_b = new \block_totara_featured_links\tile\default_tile($tile1_b->id);
-        $tile1_c = new \block_totara_featured_links\tile\default_tile($tile1_c->id);
+        $tile1_a = new default_tile($tile1_a->id);
+        $tile1_b = new default_tile($tile1_b->id);
+        $tile1_c = new default_tile($tile1_c->id);
 
-        $tile2_a = new \block_totara_featured_links\tile\default_tile($tile2_a->id);
-        $tile2_b = new \block_totara_featured_links\tile\default_tile($tile2_b->id);
-        $tile2_c = new \block_totara_featured_links\tile\default_tile($tile2_c->id);
+        $tile2_a = new default_tile($tile2_a->id);
+        $tile2_b = new default_tile($tile2_b->id);
+        $tile2_c = new default_tile($tile2_c->id);
 
         $this->assertEquals(5, $tile1_a->sortorder);
         $this->assertEquals(9, $tile1_b->sortorder);
@@ -119,13 +129,13 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
         base::squash_ordering($blockinstance2->id);
 
         // Refresh the objects and confirm the sortorder.
-        $tile1_a = new \block_totara_featured_links\tile\default_tile($tile1_a->id);
-        $tile1_b = new \block_totara_featured_links\tile\default_tile($tile1_b->id);
-        $tile1_c = new \block_totara_featured_links\tile\default_tile($tile1_c->id);
+        $tile1_a = new default_tile($tile1_a->id);
+        $tile1_b = new default_tile($tile1_b->id);
+        $tile1_c = new default_tile($tile1_c->id);
 
-        $tile2_a = new \block_totara_featured_links\tile\default_tile($tile2_a->id);
-        $tile2_b = new \block_totara_featured_links\tile\default_tile($tile2_b->id);
-        $tile2_c = new \block_totara_featured_links\tile\default_tile($tile2_c->id);
+        $tile2_a = new default_tile($tile2_a->id);
+        $tile2_b = new default_tile($tile2_b->id);
+        $tile2_c = new default_tile($tile2_c->id);
 
         $this->assertEquals(5, $tile1_a->sortorder);
         $this->assertEquals(9, $tile1_b->sortorder);
@@ -139,13 +149,13 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
         base::squash_ordering($blockinstance1->id);
 
         // Refresh the objects and confirm the sortorder.
-        $tile1_a = new \block_totara_featured_links\tile\default_tile($tile1_a->id);
-        $tile1_b = new \block_totara_featured_links\tile\default_tile($tile1_b->id);
-        $tile1_c = new \block_totara_featured_links\tile\default_tile($tile1_c->id);
+        $tile1_a = new default_tile($tile1_a->id);
+        $tile1_b = new default_tile($tile1_b->id);
+        $tile1_c = new default_tile($tile1_c->id);
 
-        $tile2_a = new \block_totara_featured_links\tile\default_tile($tile2_a->id);
-        $tile2_b = new \block_totara_featured_links\tile\default_tile($tile2_b->id);
-        $tile2_c = new \block_totara_featured_links\tile\default_tile($tile2_c->id);
+        $tile2_a = new default_tile($tile2_a->id);
+        $tile2_b = new default_tile($tile2_b->id);
+        $tile2_c = new default_tile($tile2_c->id);
 
         $this->assertEquals(1, $tile1_a->sortorder);
         $this->assertEquals(3, $tile1_b->sortorder);
@@ -157,7 +167,7 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
     }
 
     /**
-     * Tests the \block_totara_featured_links\tile\base::squash_ordering() method on a block
+     * Tests the block_totara_featured_links\tile\base::squash_ordering() method on a block
      * instance with no tiles.
      *
      * This is a simple test, there are no tiles, so there is no action taken.
@@ -170,13 +180,58 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
         base::squash_ordering($blockinstance->id);
     }
 
+    public function test_squash_ordering_of_subtiles() {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        /** @var block_totara_featured_links_generator $featuredlinksgenerator */
+        $featuredlinksgenerator = $this->getDataGenerator()->get_plugin_generator('block_totara_featured_links');
+
+        $block1 = $featuredlinksgenerator->create_instance();
+
+        $data = new stdClass();
+        $data->sortorder = 2;
+        $gallerytile1 = $featuredlinksgenerator->create_gallery_tile($block1->id, 0, $data);
+        $data->sortorder = 1;
+        $gallerytile2 = $featuredlinksgenerator->create_gallery_tile($block1->id, 0, $data);
+        $data->parentid = $gallerytile1->id;
+        $defaulttile1 = $featuredlinksgenerator->create_default_tile($block1->id, $gallerytile1->id, $data);
+        $data->sortorder = 4;
+        $data->parentid = $gallerytile1->id;
+        $defaulttile2 = $featuredlinksgenerator->create_default_tile($block1->id, $gallerytile1->id, $data);
+
+        base::squash_ordering($block1->id);
+
+        $gallerytile1data = $DB->get_record('block_totara_featured_links_tiles', ['id' => $gallerytile1->id]);
+        $gallerytile2data = $DB->get_record('block_totara_featured_links_tiles', ['id' => $gallerytile2->id]);
+
+        $this->assertEquals(2, $gallerytile1data->sortorder);
+        $this->assertEquals(1, $gallerytile2data->sortorder);
+
+        $defaulttile1data = $DB->get_record('block_totara_featured_links_tiles', ['id' => $defaulttile1->id]);
+        $defaulttile2data = $DB->get_record('block_totara_featured_links_tiles', ['id' => $defaulttile2->id]);
+
+        $this->assertEquals($defaulttile1->sortorder, $defaulttile1data->sortorder);
+        $this->assertEquals($defaulttile2->sortorder, $defaulttile2data->sortorder);
+
+        base::squash_ordering($block1->id, $gallerytile1->id);
+
+        $defaulttile1data = $DB->get_record('block_totara_featured_links_tiles', ['id' => $defaulttile1->id]);
+        $defaulttile2data = $DB->get_record('block_totara_featured_links_tiles', ['id' => $defaulttile2->id]);
+
+        $this->assertEquals(1, $defaulttile1data->sortorder);
+        $this->assertEquals(2, $defaulttile2data->sortorder);
+
+    }
+
     /**
-     * Tests the \block_totara_featured_links\tile\base::squash_ordering() method on a block
+     * Tests the block_totara_featured_links\tile\base::squash_ordering() method on a block
      * instance with tiles which have the same sortorder.
      */
     public function test_squash_ordering_with_duplicate_sort_values() {
         global $DB;
-        $this->resetAfterTest(); // Changing the database, we must reset.
+        $this->resetAfterTest();
+        $this->setAdminUser();
 
         $blockinstance = $this->blockgenerator->create_instance();
         $tile1 = $this->blockgenerator->create_default_tile($blockinstance->id);
@@ -188,9 +243,9 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
         $DB->set_field('block_totara_featured_links_tiles', 'sortorder', '1', ['id' => $tile3->id]);
 
         // Refresh the objects and confirm the sortorder.
-        $tile1 = new \block_totara_featured_links\tile\default_tile($tile1->id);
-        $tile2 = new \block_totara_featured_links\tile\default_tile($tile2->id);
-        $tile3 = new \block_totara_featured_links\tile\default_tile($tile3->id);
+        $tile1 = new default_tile($tile1->id);
+        $tile2 = new default_tile($tile2->id);
+        $tile3 = new default_tile($tile3->id);
 
         $this->assertEquals(5, $tile1->sortorder);
         $this->assertEquals(5, $tile2->sortorder);
@@ -199,9 +254,9 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
         base::squash_ordering($blockinstance->id);
 
         // Refresh the objects.
-        $tile1 = new \block_totara_featured_links\tile\default_tile($tile1->id);
-        $tile2 = new \block_totara_featured_links\tile\default_tile($tile2->id);
-        $tile3 = new \block_totara_featured_links\tile\default_tile($tile3->id);
+        $tile1 = new default_tile($tile1->id);
+        $tile2 = new default_tile($tile2->id);
+        $tile3 = new default_tile($tile3->id);
 
         // We don't know the exact sortorderorder now, what is important is that we no longer have a duplicate.
         // So check that the sortorderorders are unique.
@@ -226,6 +281,7 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
 
     public function test_get_next_sortorder() {
         $this->resetAfterTest();
+        $this->setAdminUser();
         $base = $this->getMockForAbstractClass('\block_totara_featured_links\tile\base');
         $blockinstance = $this->blockgenerator->create_instance();
         $this->assertEquals(1, $this->call_protected_method($base, 'get_next_sortorder', [$blockinstance->id]));
@@ -242,6 +298,7 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
     public function test_remove_tile() {
         global $DB;
         $this->resetAfterTest();
+        $this->setAdminUser();
         $blockinstance = $this->blockgenerator->create_instance();
         $tile1 = $this->blockgenerator->create_default_tile($blockinstance->id);
         $tile2 = $this->blockgenerator->create_default_tile($blockinstance->id);
@@ -281,6 +338,7 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
     public function test_save_ordering() {
         global $DB;
         $this->resetAfterTest();
+        $this->setAdminUser();
         $instance = $this->blockgenerator->create_instance();
         $tile1 = $this->blockgenerator->create_default_tile($instance->id);
         $tile2 = $this->blockgenerator->create_default_tile($instance->id);
@@ -317,6 +375,7 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
     public function test_save_visibility () {
         global $DB;
         $this->resetAfterTest();
+        $this->setAdminUser();
         $blockinstance = $this->blockgenerator->create_instance();
         $tile1 = $this->blockgenerator->create_default_tile($blockinstance->id);
         $data = new \stdClass();
@@ -358,11 +417,12 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
 
     public function test_is_visible() {
         $this->resetAfterTest();
+        $this->setAdminUser();
         $blockinstance = $this->blockgenerator->create_instance();
         $tile1 = $this->blockgenerator->create_default_tile($blockinstance->id);
         $this->assertTrue($tile1->is_visible());
         $data = new \stdClass();
-        $data->visibility = \block_totara_featured_links\tile\base::VISIBILITY_HIDE;
+        $data->visibility = base::VISIBILITY_HIDE;
         $tile1->save_visibility($data);
         $this->assertFalse($tile1->is_visible());
     }
@@ -373,7 +433,7 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
         $blockinstance = $this->blockgenerator->create_instance();
         $tile1 = $this->blockgenerator->create_default_tile($blockinstance->id);
         $data = new \stdClass();
-        $data->visibility = \block_totara_featured_links\tile\base::VISIBILITY_CUSTOM;
+        $data->visibility = base::VISIBILITY_CUSTOM;
         $data->preset_showing = 1;
         $data->presets_checkboxes = ['loggedin'];
         $tile1->save_visibility($data);
@@ -386,6 +446,7 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
     public function test_is_visible_audience() {
         global $USER;
         $this->resetAfterTest();
+        $this->setAdminUser();
         $blockinstance = $this->blockgenerator->create_instance();
         $tile1 = $this->blockgenerator->create_default_tile($blockinstance->id);
         $audience1 = $this->getDataGenerator()->create_cohort();
@@ -396,7 +457,7 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
         $this->setGuestUser();
 
         $data = new \stdClass();
-        $data->visibility = \block_totara_featured_links\tile\base::VISIBILITY_CUSTOM;
+        $data->visibility = base::VISIBILITY_CUSTOM;
         $data->audience_showing = 1;
         $data->audiences_visible = $audience1->id;
         $tile1->save_visibility($data);
@@ -409,6 +470,7 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
     public function test_is_visible_aggregation() {
         global $USER;
         $this->resetAfterTest();
+        $this->setAdminUser();
         $blockinstance = $this->blockgenerator->create_instance();
         $tile1 = $this->blockgenerator->create_default_tile($blockinstance->id);
         $audience1 = $this->getDataGenerator()->create_cohort();
@@ -420,7 +482,7 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
         $generator->create_cohort_member(['userid' => $USER->id, 'cohortid' => $audience2->id]);
 
         $data = new \stdClass();
-        $data->visibility = \block_totara_featured_links\tile\base::VISIBILITY_CUSTOM;
+        $data->visibility = base::VISIBILITY_CUSTOM;
         $data->audience_showing = 1;
         $data->audiences_visible = $audience1->id.','.$audience2->id;
         $tile1->save_visibility($data);
@@ -459,6 +521,7 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
 
     public function test_get_visibility_form_data() {
         $this->resetAfterTest();
+        $this->setAdminUser();
         $blockinstance = $this->blockgenerator->create_instance();
         $tile1 = $this->blockgenerator->create_default_tile($blockinstance->id);
         $data = $tile1->get_visibility_form_data();
@@ -472,6 +535,7 @@ class block_totara_featured_links_tile_base_testcase extends test_helper {
         global $PAGE;
         $PAGE->set_url(new \moodle_url('/'));
         $this->resetAfterTest();
+        $this->setAdminUser();
         $blockinstance = $this->blockgenerator->create_instance();
         $data = base::export_for_template_add_tile($blockinstance->id);
         $this->assertEquals('array', gettype($data));

@@ -64,7 +64,11 @@ $shortname = 'completionimport_' . $importname;
 $reportrecord = $DB->get_record('report_builder', array('shortname' => $shortname));
 $globalrestrictionset = rb_global_restriction_set::create_from_page_parameters($reportrecord);
 
-if (!$report = reportbuilder_get_embedded_report($shortname, $pageparams, false, $sid, $globalrestrictionset)) {
+$config = (new rb_config())
+    ->set_sid($sid)
+    ->set_embeddata($pageparams)
+    ->set_global_restriction_set($globalrestrictionset);
+if (!$report = reportbuilder::create_embedded($shortname, $config)) {
     print_error('error:couldnotgenerateembeddedreport', 'totara_reportbuilder');
 }
 

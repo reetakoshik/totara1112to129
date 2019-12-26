@@ -24,6 +24,9 @@
 
     This template generates a list of icons available to use with course or progreams.
 
+    Deprecated variables:
+    * attributes (since Totara 12)
+
     Classes required for JS:
     * none
 
@@ -37,39 +40,17 @@
     {
         "icons": [{
             "id": "achieving-success",
-            "attributes": [{
-                "name": "alt",
-                "value": "Achieving Success"
-            }, {
-                "name": "title",
-                "value": "Achieving Success"
-            }, {
-                "name": "class",
-                "value": "course_icon"
-            }, {
-                "name": "src",
-                "value": "__WWWROOT__/totara/core/pix/courseicons/achieving-success.png"
-            }]
+            "name": "Achieving Success",
+            "url": "__WWWROOT__/totara/core/pix/courseicons/achieving-success.png"
         }, {
             "id": "advanced-accounting",
-            "attributes": [{
-                "name": "alt",
-                "value": "Advanced Accounting"
-            }, {
-                "name": "title",
-                "value": "Advanced Accounting"
-            }, {
-                "name": "class",
-                "value": "course_icon"
-            }, {
-                "name": "src",
-                "value": "__WWWROOT__/totara/core/pix/courseicons/advanced-accounting.png"
-            }]
+            "name": "Advanced Accounting",
+            "url": "__WWWROOT__/totara/core/pix/courseicons/advanced-accounting.png"
         }]
      }
 }}
 <ul id="icon-selectable">
     {{#icons}}
-        <li id="{{id}}">{{>core/pix_icon}}</li>
+        <li id="{{id}}"><img class="course_icon" alt="{{name}}" title="{{name}}" src="{{url}}"/></li>
     {{/icons}}
 </ul>

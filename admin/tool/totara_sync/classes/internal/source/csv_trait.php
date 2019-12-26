@@ -35,31 +35,56 @@ defined('MOODLE_INTERNAL') || die();
 trait csv_trait {
 
     /**
+     * Holds data in csv string that can be accessed from memory, rather than reading from a file.
+     *
+     * Intended for testing.
+     *
+     * The data is not directly read from this variable, but is inserted into a php stream that can
+     * be accessed from php's file functions.
+     *
+     * @var string csv string of data
+     */
+    protected $csv_in_memory = null;
+
+    /**
+     * Stores the path to a temp file that must be cleaned up after processing.
+     *
+     * @var string file path
+     */
+    private $tempfilepath = null;
+
+    /**
      * Adds the details fields to the csv settings form. This includes a static element that shows
      * the expected structure of the csv file as well as fields for encoding and delimiter.
      *
      * @param \MoodleQuickForm $mform
      */
     protected function config_form_add_csv_details($mform) {
-        global $CFG, $OUTPUT;
+        global $CFG;
 
         // Add some source file details
         $mform->addElement('header', 'fileheader', get_string('filedetails', 'tool_totara_sync'));
         $mform->setExpanded('fileheader');
-        if (get_config('totara_sync', 'fileaccess') == FILE_ACCESS_DIRECTORY) {
-            $mform->addElement('static', 'nameandloc', get_string('nameandloc', 'tool_totara_sync'),
-                \html_writer::tag('strong', $this->get_filepath()));
-        } else {
-            $link = "{$CFG->wwwroot}/admin/tool/totara_sync/admin/uploadsourcefiles.php";
-            $mform->addElement('static', 'uploadfilelink', get_string('uploadfilelink', 'tool_totara_sync', $link));
+
+        try {
+            if ($this->get_element()->get_fileaccess() == FILE_ACCESS_DIRECTORY) {
+                $mform->addElement('static', 'nameandloc', get_string('nameandloc', 'tool_totara_sync'),
+                    \html_writer::tag('strong', $this->get_filepath()));
+            } else {
+                $link = "{$CFG->wwwroot}/admin/tool/totara_sync/admin/uploadsourcefiles.php";
+                $mform->addElement('static', 'uploadfilelink', get_string('uploadfilelink', 'tool_totara_sync', $link));
+            }
+        } catch (\totara_sync_exception $e) {
+            $mform->addElement('static', 'configurefileaccess', '', get_string('configurefileaccess', 'tool_totara_sync'));
         }
 
         $encodings = \core_text::get_encodings();
-        $mform->addElement('select', 'csvjobassignmentencoding', get_string('csvencoding', 'tool_totara_sync'), $encodings);
-        $mform->setType('csvjobassignmentencoding', PARAM_ALPHANUMEXT);
-        $default = $this->get_config('csvjobassignmentencoding');
+        $encodingconfig = 'csv' . $this->get_element_name() . 'encoding';
+        $mform->addElement('select', $encodingconfig, get_string('csvencoding', 'tool_totara_sync'), $encodings);
+        $mform->setType($encodingconfig, PARAM_ALPHANUMEXT);
+        $default = $this->get_config($encodingconfig);
         $default = (!empty($default) ? $default : 'UTF-8');
-        $mform->setDefault('csvjobassignmentencoding', $default);
+        $mform->setDefault($encodingconfig, $default);
 
         $delimiteroptions = array(
             ',' => get_string('comma', 'tool_totara_sync'),
@@ -85,7 +110,8 @@ trait csv_trait {
     protected function config_save_csv_file_details($data) {
         // Make sure we use a tab character for the delimiter, if a tab is selected.
         $this->set_config('delimiter', $data->{'delimiter'} == '\t' ? "\t" : $data->{'delimiter'});
-        $this->set_config('csvjobassignmentencoding', $data->{'csvjobassignmentencoding'});
+        $encodingconfig = 'csv' . $this->get_element_name() . 'encoding';
+        $this->set_config($encodingconfig, $data->{$encodingconfig});
     }
 
     /**
@@ -145,15 +171,16 @@ trait csv_trait {
 
         $fs = get_file_storage();
         $systemcontext = \context_system::instance();
-        $fieldid = get_config('totara_sync', 'sync_jobassignment_itemid');
+        $fieldidconfig = 'sync_' . $this->get_element_name() . '_itemid';
+        $fieldid = get_config('totara_sync', $fieldidconfig);
 
         // Check the file exist
-        if (!$fs->file_exists($systemcontext->id, 'totara_sync', 'jobassignment', $fieldid, '/', '')) {
+        if (!$fs->file_exists($systemcontext->id, 'totara_sync', $this->get_element_name(), $fieldid, '/', '')) {
             throw new \totara_sync_exception($this->get_element_name(), 'populatesynctablecsv', 'nofileuploaded', $this->get_element_name(), null, 'warn');
         }
 
         // Get the file
-        $fsfiles = $fs->get_area_files($systemcontext->id, 'totara_sync', 'jobassignment', $fieldid, 'id DESC', false);
+        $fsfiles = $fs->get_area_files($systemcontext->id, 'totara_sync', $this->get_element_name(), $fieldid, 'id DESC', false);
         $fsfile = reset($fsfiles);
 
         // Set up the temp dir
@@ -161,11 +188,97 @@ trait csv_trait {
         check_dir_exists($tempdir, true, true);
 
         // Create temporary file (so we know the filepath)
-        $fsfile->copy_content_to($tempdir.'/jobassignment.php');
+        $storefilepath = $tempdir. '/' . $this->get_element_name() . '.csv';
+        $fsfile->copy_content_to($storefilepath);
         $itemid = $fsfile->get_itemid();
-        $fs->delete_area_files($systemcontext->id, 'totara_sync', 'jobassignment', $itemid);
-        $storefilepath = $tempdir.'/jobassignment.php';
+        $fs->delete_area_files($systemcontext->id, 'totara_sync', $this->get_element_name(), $itemid);
 
         return $storefilepath;
     }
+
+    /**
+     * Sets csv data that will be accessed from memory rather than having to access a file.
+     *
+     * Intended for testing.
+     *
+     * @param string $contents
+     */
+    public function set_csv_in_memory($contents) {
+        $this->csv_in_memory = $contents;
+    }
+
+    /**
+     * Uses php's file API to access csv data saved in memory.
+     *
+     * @return bool|resource
+     */
+    protected function get_csv_from_memory() {
+        $file = fopen('php://temp/', 'r+');
+        fputs($file, $this->csv_in_memory);
+        rewind($file);
+
+        return $file;
+    }
+
+    /**
+     * Gets a file resource which provides access to the csv we wish to process.
+     *
+     * Considers the file access settings in order to do so.
+     *
+     * @return bool|resource
+     */
+    protected function open_csv_file() {
+        $fileaccess = $this->get_element()->get_fileaccess();
+
+        switch($fileaccess) {
+            case FILE_ACCESS_DIRECTORY:
+                $storefilepath = $this->copy_csv_file_from_directory();
+                break;
+            case FILE_ACCESS_UPLOAD:
+                $storefilepath = $this->copy_csv_file_from_upload();
+                break;
+            case TOTARA_SYNC_FILE_ACCESS_MEMORY:
+                // We support just having the file contents in memory for unit tests.
+                // Be aware that we miss out of totara_sync_clean_csvfile by returning here. If you are
+                // testing that code, you'll need to the full file operations in your test.
+                return $this->get_csv_from_memory();
+                break;
+            default:
+                throw new \totara_sync_exception($this->get_element_name(), 'populatesynctablecsv', 'invalidfileaccess', $fileaccess);
+        }
+
+        $encodingconfig = 'csv' . $this->get_element_name() . 'encoding';
+        $encoding = $this->get_config($encodingconfig);
+        $storefilepath = totara_sync_clean_csvfile($storefilepath, $encoding, $fileaccess, $this->get_element_name());
+
+        // Open file from store for processing.
+        if (!$file = fopen($storefilepath, 'r')) {
+            throw new \totara_sync_exception($this->get_element_name(), 'populatesynctablecsv', 'cannotopenx', $storefilepath);
+        }
+
+        if ($fileaccess == FILE_ACCESS_UPLOAD) {
+            // If this was an uploaded file. We need to make sure it gets cleaned up.
+            $this->tempfilepath = $storefilepath;
+        }
+
+        return $file;
+    }
+
+    /**
+     * Close the csv file resource. Clean up the temp file if necessary.
+     *
+     * @param resource $file
+     */
+    protected function close_csv_file($file) {
+        fclose($file);
+        // Done, clean up the file(s)
+        if (isset($this->tempfilepath)) {
+            unlink($this->tempfilepath);
+        }
+    }
+
+    /**
+     * @return \totara_sync_element
+     */
+    abstract public function get_element();
 }

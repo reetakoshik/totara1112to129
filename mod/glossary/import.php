@@ -229,7 +229,7 @@ if ($xml = glossary_read_imported_file($result)) {
             $importedentries++;
 
             $xmlaliases = @$xmlentry['#']['ALIASES'][0]['#']['ALIAS']; // ignore missing ALIASES
-            $sizeofxmlaliases = sizeof($xmlaliases);
+            $sizeofxmlaliases = is_array($xmlaliases) ? sizeof($xmlaliases) : 0;
             for($k = 0; $k < $sizeofxmlaliases; $k++) {
             /// Importing aliases
                 $xmlalias = $xmlaliases[$k];

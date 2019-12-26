@@ -6,26 +6,44 @@
     text-align: center;
     list-style: none;
 }
-/*rtl:ignore*/
-#page-report-completion-index #completion-progress th svg {
-    direction: ltr;
+
+#page-report-completion-index .criterianame,
+#page-report-completion-index .criteriaicon,
+#page-report-completion-index .completion-progresscell {
+    text-align: center;
 }
-/* stylelint-disable */
-.ie8 div.ie-vertical-completion {
-    writing-mode: tb-lr;
-    max-height: 24% !important;
-    text-align: right !important;
+
+/* Custom CSS for rotated header.. */
+#page-report-completion-index .rotated-text-container {
+    display: inline-block;
+    width: 3em;
 }
-.ie8 th.ie-vertical-completion {
-    height: 24% !important;
-    overflow: hidden !important;
+
+#page-report-completion-index .rotated-text {
+    display: inline-block;
+    white-space: nowrap;
+
+    transform-origin: 0 0;
+    vertical-align: middle;
 }
-.ie8 span.ie-block-completion {
+
+/*rtl:begin:ignore*/
+#page-report-completion-index.dir-ltr .rotated-text {
+    transform: translate(0, 100%) rotate(-90deg);
+}
+
+#page-report-completion-index.dir-rtl .rotated-text {
+    transform: translate(0, 100%) rotate(90deg);
+}
+/*rtl:end:ignore*/
+
+#page-report-completion-index .rotated-text span {
     display: block;
+    text-align: left;
 }
-.ie8 span.ie-color-completion {
-    display: block;
-    color: #238e23;
-    padding-left: 4px;
+
+#page-report-completion-index .rotated-text:after {
+    content: "";
+    float: left;
+    margin-top: 100%;
 }
-/* stylelint-enable */

@@ -51,7 +51,7 @@ class totara_reportbuilder_rb_cohort_associations_visible_embedded_testcase exte
         // Set up report and embedded object for is_capable checks.
         $syscontext = context_system::instance();
         $shortname = 'cohort_associations_visible';
-        $report = reportbuilder_get_embedded_report($shortname, array(), false, 0);
+        $report = reportbuilder::create_embedded($shortname);
         $embeddedobject = $report->embedobj;
         $roleuser = $DB->get_record('role', array('shortname'=>'user'));
         $userid = $this->user1->id;

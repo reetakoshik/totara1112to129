@@ -17,9 +17,9 @@ Feature: Seminar sessions report overview
       | student6  | Sam6      | Student6 | student6@example.com |
       | student7  | Sam7      | Student7 | student7@example.com |
     And the following "courses" exist:
-      | fullname | shortname | category | enablecompletion | completionstartonenrol |
-      | Course 1 | C1        | 0        | 1                | 1                      |
-      | Course 2 | C2        | 0        | 1                | 1                      |
+      | fullname | shortname | category | enablecompletion |
+      | Course 1 | C1        | 0        | 1                |
+      | Course 2 | C2        | 0        | 1                |
     And the following "course enrolments" exist:
       | user     | course | role           |
       | teacher1 | C1     | editingteacher |
@@ -40,7 +40,8 @@ Feature: Seminar sessions report overview
     And I press "Save changes"
 
     # Prepare report
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | Seminar Summary          |
       | Source      | Seminar Sessions |
@@ -84,9 +85,7 @@ Feature: Seminar sessions report overview
     And I press "Save changes"
 
     # 1: (1st activity of C1) Underbooked, upcoming, manager approval
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name             | Test seminar name 1      |
       | Description      | Test seminar description |
@@ -132,8 +131,7 @@ Feature: Seminar sessions report overview
   Scenario: Check active seminar sessions summary report
     # Prepare 4 sessions in three activities:
     # 2: (2nd activity of C1) Two dates, self approved, overbooked, 1st started, 2nd upcoming
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name              | Test seminar name 2      |
       | Description       | Test seminar description |
@@ -175,9 +173,9 @@ Feature: Seminar sessions report overview
     And I click on the link "Attendees" in row 1
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Sam1 Student1, student1@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I click on "Sam2 Student2, student2@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     And I press "Confirm"
@@ -206,14 +204,13 @@ Feature: Seminar sessions report overview
     And I click on the link "Attendees" in row 1
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Sam3 Student3, student3@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     And I press "Confirm"
 
     # 4: (1st activity of C2) Fully booked, ended, no one
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 2"
+    And I am on "Course 2" course homepage
     #And I turn editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name              | Test seminar name 3      |
@@ -243,14 +240,13 @@ Feature: Seminar sessions report overview
     And I follow "Attendees"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Sam6 Student6, student6@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     And I press "Confirm"
 
     # 5: (1st activity of C2) N/A, ended, no one
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 2"
+    And I am on "Course 2" course homepage
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name              | Test seminar name 4      |
       | Description       | Test seminar description |
@@ -277,7 +273,7 @@ Feature: Seminar sessions report overview
     And I follow "Attendees"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Sam7 Student7, student7@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     And I press "Confirm"

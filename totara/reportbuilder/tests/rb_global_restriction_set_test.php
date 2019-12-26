@@ -118,6 +118,7 @@ class totara_reportbuilder_rb_global_restriction_set_testcase extends advanced_t
         parent::setUp();
 
         $this->resetAfterTest();
+        $this->setAdminUser();
 
         $CFG->enableglobalrestrictions = 1;
 
@@ -144,10 +145,11 @@ class totara_reportbuilder_rb_global_restriction_set_testcase extends advanced_t
         $rid = $this->create_report('user', 'Test user report 1');
         $DB->set_field('report_builder', 'globalrestriction', '1', array('id' => $rid));
 
-        $report = new reportbuilder($rid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($rid, $config);
         $this->add_column($report, 'user', 'id', null, null, null, 0);
 
-        $this->report = new reportbuilder($rid);
+        $this->report = reportbuilder::create($rid);
         $this->reportrecord = $DB->get_record('report_builder', array('id' => $this->report->_id));
 
         // Just in case reset the caches.

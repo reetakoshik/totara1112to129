@@ -140,5 +140,22 @@
         <INDEX NAME="ltiid" UNIQUE="false" FIELDS="ltiid"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="lti_submission_history" COMMENT="Tracking of user submission history for the LTI activity">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="ltiid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="launchid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="ltiid" TYPE="foreign" FIELDS="ltiid" REFTABLE="lti" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="ltiid-userid" UNIQUE="false" FIELDS="ltiid, userid"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

@@ -24,35 +24,18 @@ echo $OUTPUT->box_start();
 
 echo $OUTPUT->container_start();
 
-echo html_writer::tag('p', 'You can build images manually using pix_url() to get the image path, but you have to specify all the info manually (including width, height and alt attributes):');
+echo html_writer::tag('p', 'You can build images manually using image_url() to get the image path, but you have to specify all the info manually (including width, height and alt attributes):');
+echo html_writer::tag('p', html_writer::tag('strong', 'NOTE:') . 'This should not be used for icons (use pix_icon or flex_icon instead)');
 
 $attr = array(
-    'src' => $OUTPUT->pix_url('logo', 'totara_core'),
+    'src' => $OUTPUT->image_url('logo', 'totara_core'),
     'alt' => 'Totara logo',
     'width' => 253,
     'height' => 177,
 );
 echo html_writer::empty_tag('img', $attr);
 
-echo html_writer::tag('p', 'If you are creating icons which use the standard (16x16px) or small (11x11px) icon sizes, then just set the CSS class instead to "icon" or "iconsmall".');
-
-$attr = array(
-    'src' => $OUTPUT->pix_url('i/risk_xss'),
-    'alt' => 'XSS Risk',
-    'class' => 'icon',
-);
-echo '16x16 icon: ' . html_writer::empty_tag('img', $attr);
-
-$attr = array(
-    'src' => $OUTPUT->pix_url('t/delete'),
-    'alt' => 'Delete',
-    'class' => 'iconsmall',
-);
-echo '11x11 icon: ' . html_writer::empty_tag('img', $attr);
-
-echo html_writer::tag('p', 'Generally the component should be "moodle" for existing moodle images, "totara_core" for core totara images, "totara_modname" for module specfic images. It is possible to specify a theme image directly, but this should be avoided unless the image is only used by the theme - normally the theme would just override the core or module image if required');
-
-echo html_writer::tag('p', 'Instead of building the image tag manually, you can render a pix_icon object');
+echo html_writer::tag('p', 'Icons could also previously be loaded using pix_url, but these have been deprecated as this does not support font icons. Instead use pix_icon or flex_icon objects');
 
 $attr = array('width' => 11, 'height' => 11); // any extra attributes you want
 $icon = new pix_icon('t/edit', 'Edit', 'moodle', $attr);
@@ -60,6 +43,8 @@ echo $OUTPUT->render($icon);
 
 echo html_writer::tag('p', 'Or you can call the helper method to just render the pix_icon directly');
 echo $OUTPUT->pix_icon('t/edit', 'Edit', 'moodle', $attr);
+
+echo html_writer::tag('p', 'Generally the component should be "moodle" for existing moodle images, "totara_core" for core totara images, "totara_modname" for module specfic images. It is possible to specify a theme image directly, but this should be avoided unless the image is only used by the theme - normally the theme would just override the core or module image if required');
 
 echo html_writer::tag('p', 'This will set the title to be the same as the alt text, and by default assign the "smallicon" class unless you set any other class via the attributes.');
 

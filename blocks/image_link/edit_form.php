@@ -20,7 +20,7 @@ class block_image_link_edit_form extends block_edit_form
         );
         $mform->addHelpButton('config_image', 'image', 'block_image_link');
 
-        $mform->addElement(
+       $mform->addElement(
             'text', 
             'config_image_caption', 
             get_string('image-caption', 'block_image_link')
@@ -76,11 +76,12 @@ class block_image_link_edit_form extends block_edit_form
             ['subdirs' => true]
         );
 
-        $entry->image = $draftitemid;
+        $defaults->image = $draftitemid;
 
         parent::set_data($defaults);
 
         if ($data = parent::get_data() && $this->draftfileExist($draftitemid)) {
+            
             file_save_draft_area_files(
                 $draftitemid, 
                 $this->block->context->id, 
@@ -97,6 +98,21 @@ class block_image_link_edit_form extends block_edit_form
         global $USER;
         
         $usercontext = context_user::instance($USER->id);
+        $files = get_file_storage()->get_area_files(
+               $this->block->context->id, 
+                'block_image_link', 
+                'content',
+                 0
+             );
+        if($files){
+           $fs = get_file_storage();
+           $fs->delete_area_files(
+            $this->block->context->id, 
+                'block_image_link', 
+                'content',
+                 0
+        );}
+           
         $fs = get_file_storage();
         $draftfiles = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftitemid, 'id');
 

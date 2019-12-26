@@ -415,9 +415,9 @@ class manager {
             throw new \moodle_exception('locktimeout');
         }
 
-        $where = '(nextruntime IS NULL OR nextruntime < :timestart1)';
+        // Totara: task_adhoc.nextruntime is NOT NULL, it is set in future for delayed execution, time()-1 for immediate execution
         $params = array('timestart1' => $timestart);
-        $records = $DB->get_records_select('task_adhoc', $where, $params);
+        $records = $DB->get_records_select('task_adhoc', 'nextruntime < :timestart1', $params, 'nextruntime ASC, id ASC');
 
         foreach ($records as $record) {
 

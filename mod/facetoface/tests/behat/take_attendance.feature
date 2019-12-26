@@ -1,4 +1,4 @@
-@javascript @mod @mod_facetoface @totara @takeattendance
+@javascript @mod @mod_facetoface @totara
 Feature: Take attendance for seminar sessions
   In order to take attendance in a seminar session
   As a teacher
@@ -14,8 +14,8 @@ Feature: Take attendance for seminar sessions
       | student3  | Sam3      | Student3 | student3@example.com |
       | student4  | Sam4      | Student4 | student4@example.com |
     And the following "courses" exist:
-      | fullname | shortname | category | enablecompletion | completionstartonenrol |
-      | Course 1 | C1        | 0        | 1                | 1                      |
+      | fullname | shortname | category | enablecompletion |
+      | Course 1 | C1        | 0        | 1                |
     And the following "course enrolments" exist:
       | user     | course | role           |
       | teacher1 | C1     | editingteacher |
@@ -28,9 +28,7 @@ Feature: Take attendance for seminar sessions
       | Enable restricted access | 1 |
     And I log out
     And I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test seminar name        |
       | Description | Test seminar description |
@@ -61,16 +59,16 @@ Feature: Take attendance for seminar sessions
     And I click on "Attendees" "link"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Sam1 Student1, student1@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I click on "Sam2 Student2, student2@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I click on "Sam3 Student3, student3@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I click on "Sam4 Student4, student4@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     # We must wait here, because the refresh may not happen before the save button is clicked otherwise.
     And I wait "1" seconds
     And I press "Continue"
@@ -83,15 +81,18 @@ Feature: Take attendance for seminar sessions
 
   Scenario: Set attendance for individual users
     Given I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "View all events" "link"
     And I click on "Attendees" "link"
-    And I click on "Take attendance" "link"
-    And I click on "Fully attended" "option" in the "Sam1 Student1" "table_row"
+    And I switch to "Take attendance" tab
+    And I set the field "Sam1 Student1's attendance" to "Fully attended"
     And I press "Save attendance"
     Then I should see "Successfully updated attendance"
-    And I should see "Sam1 Student1"
+    And I switch to "Attendees" tab
+    And I should see "Fully attended" in the "Sam1 Student1" "table_row"
+    And I should see "Booked" in the "Sam2 Student2" "table_row"
+    And I should see "Booked" in the "Sam3 Student3" "table_row"
+    And I should see "Booked" in the "Sam4 Student4" "table_row"
     When I navigate to "Course completion" node in "Course administration > Reports"
     And I click on "Sam1 Student1" "link"
     Then I should see "Completed" in the "#criteriastatus" "css_element"
@@ -103,13 +104,12 @@ Feature: Take attendance for seminar sessions
 
   Scenario: Set attendance in bulk
     Given I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I click on "View all events" "link"
     And I click on "Attendees" "link"
     And I click on "Take attendance" "link"
-    And I click on "input[class='selectedcheckboxes']" "css_element" in the "Sam1 Student1" "table_row"
-    And I click on "input[class='selectedcheckboxes']" "css_element" in the "Sam2 Student2" "table_row"
+    And I click on "Select Sam1 Student1" "checkbox"
+    And I click on "Select Sam2 Student2" "checkbox"
     And I click on "Fully attended" "option" in the "#menubulkattendanceop" "css_element"
     And I press "Save attendance"
     Then I should see "Successfully updated attendance"
@@ -124,4 +124,32 @@ Feature: Take attendance for seminar sessions
     And I navigate to "Course completion" node in "Course administration > Reports"
     And I click on "Sam3 Student3" "link"
     Then I should not see "Completed" in the "#criteriastatus" "css_element"
+    And I log out
+
+  Scenario: Reset attendance for user
+    Given I log in as "teacher1"
+    And I am on "Course 1" course homepage
+    And I click on "View all events" "link"
+    And I click on "Attendees" "link"
+    And I switch to "Take attendance" tab
+    And I set the field "Sam1 Student1's attendance" to "Fully attended"
+    And I press "Save attendance"
+    Then I should see "Successfully updated attendance"
+    And I switch to "Attendees" tab
+    And I should see "Fully attended" in the "Sam1 Student1" "table_row"
+    And I should see "Booked" in the "Sam2 Student2" "table_row"
+    When I switch to "Take attendance" tab
+    And I set the field "Sam1 Student1's attendance" to "Partially attended"
+    And I press "Save attendance"
+    Then I should see "Successfully updated attendance"
+    And I switch to "Attendees" tab
+    And I should see "Partially attended" in the "Sam1 Student1" "table_row"
+    And I should see "Booked" in the "Sam2 Student2" "table_row"
+    When I switch to "Take attendance" tab
+    And I set the field "Sam1 Student1's attendance" to "Not set"
+    And I press "Save attendance"
+    Then I should see "Successfully updated attendance"
+    And I switch to "Attendees" tab
+    And I should see "Booked" in the "Sam1 Student1" "table_row"
+    And I should see "Booked" in the "Sam2 Student2" "table_row"
     And I log out

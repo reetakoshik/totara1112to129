@@ -25,8 +25,9 @@ global $CFG;
 require_once($CFG->dirroot . '/mod/facetoface/rb_sources/rb_facetoface_base_source.php');
 require_once($CFG->dirroot . '/totara/customfield/field/location/define.class.php');
 
-class rb_source_facetoface_asset_assignments extends rb_facetoface_base_source
-{
+class rb_source_facetoface_asset_assignments extends rb_facetoface_base_source {
+    use \core_course\rb\source\report_trait;
+
     public function __construct($groupid, rb_global_restriction_set $globalrestrictionset = null) {
         if ($groupid instanceof rb_global_restriction_set) {
             throw new coding_exception('Wrong parameter orders detected during report source instantiation.');
@@ -46,6 +47,7 @@ class rb_source_facetoface_asset_assignments extends rb_facetoface_base_source
         $this->requiredcolumns = $this->define_requiredcolumns();
         $this->paramoptions = $this->define_paramoptions();
         $this->defaultfilters = $this->define_defaultfilters();
+        $this->usedcomponents[] = 'totara_cohort';
         $this->add_customfields();
 
         parent::__construct();
@@ -73,7 +75,7 @@ class rb_source_facetoface_asset_assignments extends rb_facetoface_base_source
 
         $this->add_session_common_to_joinlist($joinlist, 'sessiondate');
         $this->add_session_status_to_joinlist($joinlist);
-        $this->add_course_table_to_joinlist($joinlist, 'facetoface', 'course');
+        $this->add_core_course_tables($joinlist, 'facetoface', 'course');
 
         return $joinlist;
     }
@@ -87,7 +89,7 @@ class rb_source_facetoface_asset_assignments extends rb_facetoface_base_source
             $intimezone = '_in_timezone';
         }
 
-        $this->add_course_fields_to_columns($columnoptions);
+        $this->add_core_course_columns($columnoptions);
         $this->add_facetoface_common_to_columns($columnoptions);
         $this->add_assets_fields_to_columns($columnoptions, 'asset');
         $this->add_session_common_to_columns($columnoptions, 'sessiondate');
@@ -100,7 +102,7 @@ class rb_source_facetoface_asset_assignments extends rb_facetoface_base_source
     protected function define_filteroptions() {
         $filteroptions = array();
 
-        $this->add_course_fields_to_filters($filteroptions);
+        $this->add_core_course_filters($filteroptions);
 
         $filteroptions[] = new rb_filter_option(
             'facetoface',
@@ -233,7 +235,7 @@ class rb_source_facetoface_asset_assignments extends rb_facetoface_base_source
     }
 
     protected function add_customfields() {
-        $this->add_custom_fields_for(
+        $this->add_totara_customfield_component(
             'facetoface_room',
             'room',
             'facetofaceroomid',
@@ -242,7 +244,7 @@ class rb_source_facetoface_asset_assignments extends rb_facetoface_base_source
             $this->filteroptions
         );
 
-        $this->add_custom_fields_for(
+        $this->add_totara_customfield_component(
             'facetoface_asset',
             'asset',
             'facetofaceassetid',
@@ -251,7 +253,7 @@ class rb_source_facetoface_asset_assignments extends rb_facetoface_base_source
             $this->filteroptions
         );
 
-        $this->add_custom_fields_for(
+        $this->add_totara_customfield_component(
             'facetoface_session',
             'sessions',
             'facetofacesessionid',

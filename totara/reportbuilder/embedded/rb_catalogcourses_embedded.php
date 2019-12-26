@@ -29,7 +29,7 @@ class rb_catalogcourses_embedded extends rb_base_embedded {
         $this->url = '/totara/coursecatalog/courses.php';
         $this->source = 'courses';
         $this->shortname = 'catalogcourses';
-        $this->fullname = get_string('catalogcourses', 'totara_coursecatalog');
+        $this->fullname = get_string('reportbasedcourses', 'totara_coursecatalog');
         $this->defaultsortcolumn = 'course_courselinkicon';
 
         $this->columns = array(
@@ -88,7 +88,7 @@ class rb_catalogcourses_embedded extends rb_base_embedded {
      */
     public static function is_report_ignored() {
         global $CFG;
-        return empty($CFG->enhancedcatalog);
+        return ($CFG->catalogtype !== 'enhanced');
     }
 
     /**
@@ -122,6 +122,7 @@ class rb_catalogcourses_embedded extends rb_base_embedded {
 
         $buttons = "";
 
+
         $buttons .= html_writer::start_div('breadcrumb-button');
 
         // Show the course request button, if it is enabled (returns empty string if not).
@@ -130,19 +131,21 @@ class rb_catalogcourses_embedded extends rb_base_embedded {
         $buttons .= ob_get_contents();
         ob_end_clean();
 
-        $marketplaceenabled = \totara_contentmarketplace\local::is_enabled();
-        /** @var totara_contentmarketplace\plugininfo\contentmarketplace $plugin */
-        $plugin = core_plugin_manager::instance()->get_plugin_info('contentmarketplace_goone');
-        if ($marketplaceenabled && $plugin->is_enabled()) {
-            $exploreurl = new \moodle_url('/totara/contentmarketplace/explorer.php', array('marketplace' => 'goone'));
+        $wm = new \totara_contentmarketplace\workflow_manager\exploremarketplace();
+        if ($wm->workflows_available()) {
+            $exploreurl = $wm->get_url();
             $explorebutton = new single_button($exploreurl, get_string('explore_totara_content', 'totara_contentmarketplace'), 'get');
             $buttons .= $OUTPUT->render($explorebutton);
         }
 
         if ($categoryid !== false) {
-            $createurl = new moodle_url("/course/edit.php", array('category' => $categoryid));
-            $createbutton = new single_button($createurl, get_string('addcourse', 'totara_coursecatalog'), 'get');
-            $buttons .= $OUTPUT->render($createbutton);
+            $wm = new \core_course\workflow_manager\coursecreate();
+            $wm->set_params(['category' => $categoryid]);
+            if ($wm->workflows_available()) {
+                $createurl = $wm->get_url();
+                $createbutton = new single_button($createurl, get_string('addcourse', 'totara_coursecatalog'), 'get', true);
+                $buttons .= $OUTPUT->render($createbutton);
+            }
         }
 
         $buttons .= html_writer::end_div();

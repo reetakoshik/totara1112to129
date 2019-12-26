@@ -1,4 +1,6 @@
 <?php
+//error_reporting(E_ALL | E_STRICT);
+//ini_set('display_errors', '1');
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -39,9 +41,10 @@ $renderer = $PAGE->get_renderer('totara_reportbuilder');
 $strheading = get_string('sourcetitle', 'rb_source_activities');
 $shortname = 'activities';
 $sid = optional_param('sid', '0', PARAM_INT);
+
 $debug  = optional_param('debug', 0, PARAM_INT);
 
-if (!$report = reportbuilder_get_embedded_report($shortname, null, false, $sid)) {
+if (!$report = reportbuilder::create_embedded($shortname, null, false, $sid)) {
     print_error('error:couldnotgenerateembeddedreport', 'totara_reportbuilder');
 }
 
@@ -57,7 +60,6 @@ $report->include_js();
 $fullname = format_string($report->fullname);
 $pagetitle = format_string(get_string('report', 'totara_core') . ': ' . $fullname);
 
-$PAGE->set_pagelayout('noblocks');
 $PAGE->set_title($pagetitle);
 $PAGE->set_button($report->edit_button());
 $PAGE->set_heading($fullname);

@@ -1,0 +1,50 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Kevin Hottinger <kevin.hottinger@totaralearning.com>
+   @package totara_core
+}}
+{{!
+
+    @template totara_core/select_region_primary
+
+    This template generates a primary select region
+
+    Classes required for JS:
+    * None
+
+    Data attributes required for JS:
+    * data-core-autoinitialise: State of this JS auto initilise
+    * data-core-autoinitialise-amd: AMD to be linked to template
+
+    Context variables required for this template:
+    * selectors: array containing list of select data
+    * selectors -> template_data: array containing select data
+    * selectors -> template_name: string, template required for selector type
+}}
+<section class="tw-selectRegionPrimary"
+    data-core-autoinitialise="true"
+    data-core-autoinitialise-amd="totara_core/select_region_primary">
+
+    {{! Display selectors }}
+    {{#selectors}}
+    <section class="tw-selectRegionPrimary__selector">
+        {{#template_data}}{{> &&template_name }}{{/template_data}}
+    </section>
+    {{/selectors}}
+</section>

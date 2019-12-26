@@ -39,6 +39,41 @@ $icons = array(
                     'classes' => 'fa-dot-circle-o',
                 ),
         ),
+    'mod_data|field/menu' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-bars',
+                ),
+        ),
+    'mod_data|field/multimenu' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-bars',
+                ),
+        ),
+    'mod_data|field/number' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-hashtag',
+                ),
+        ),
+    'mod_data|field/textarea' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-font',
+                ),
+        ),
+    'mod_data|field/text' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-i-cursor',
+                ),
+        ),
 );
 
 $aliases = array(

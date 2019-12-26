@@ -32,8 +32,7 @@ Feature: Add - Remove seminar attendees
 
   Scenario: Add users to a seminar session with dates
     Given I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I follow "Add a new event"
     And I click on "Edit session" "link"
@@ -57,7 +56,7 @@ Feature: Add - Remove seminar attendees
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I set the following fields to these values:
       | searchtext | Sam1 Student1 |
-    And I press "Search"
+    And I click on "Search" "button" in the "#region-main" "css_element"
     And I click on "Sam1 Student1, student1@example.com" "option"
     And I press "Add"
     And I wait "1" seconds
@@ -68,10 +67,56 @@ Feature: Add - Remove seminar attendees
     When I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     Then I should see "Sam1 Student1, student1@example.com"
 
+  Scenario: Add and remove users to a seminar in past
+    Given I log in as "admin"
+    And I am on "Course 1" course homepage
+    And I follow "Test seminar name"
+    And I follow "Add a new event"
+    And I click on "Edit session" "link"
+    And I set the following fields to these values:
+      | timestart[day]     | 1    |
+      | timestart[month]   | 1    |
+      | timestart[year]    | 2018 |
+      | timestart[hour]    | 11   |
+      | timestart[minute]  | 00   |
+      | timefinish[day]    | 1    |
+      | timefinish[month]  | 1    |
+      | timefinish[year]   | 2018 |
+      | timefinish[hour]   | 12   |
+      | timefinish[minute] | 00   |
+    And I press "OK"
+    And I set the following fields to these values:
+      | capacity           | 1    |
+    And I press "Save changes"
+
+    When I click on "Attendees" "link"
+    And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
+    And I set the following fields to these values:
+      | searchtext | Sam1 Student1 |
+    And I click on "Search" "button" in the "#region-main" "css_element"
+    And I click on "Sam1 Student1, student1@example.com" "option"
+    And I press "Add"
+    And I wait "1" seconds
+    And I press "Continue"
+    And I press "Confirm"
+    Then I should see "Sam1 Student1"
+    # View existing attendees in "Users to add" select box
+    And I click on "Remove users" "option" in the "#menuf2f-actions" "css_element"
+    And I should see "Sam1 Student1, student1@example.com"
+    And I click on "Sam1 Student1, student1@example.com" "option"
+    And I press "Remove"
+    And I wait "1" seconds
+    And I press "Continue"
+    When I press "Confirm"
+    Then I should not see "Sam1 Student1"
+    And I should see "There are no records in this report"
+    And I switch to "Cancellations" tab
+    And I should see "Sam1 Student1" in the "User cancellation" "table_row"
+
+
   Scenario: Add and remove users to a Seminar session without dates (waitlist)
     Given I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I follow "Add a new event"
     And I click on "Delete" "link" in the ".f2fmanagedates" "css_element"
@@ -91,8 +136,7 @@ Feature: Add - Remove seminar attendees
 
   Scenario: Add users by username via textarea
     Given I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I follow "Add a new event"
     And I click on "Delete" "link" in the ".f2fmanagedates" "css_element"
@@ -119,8 +163,7 @@ Feature: Add - Remove seminar attendees
 
   Scenario: Add users by email via textarea
     Given I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I follow "Add a new event"
     And I click on "Delete" "link" in the ".f2fmanagedates" "css_element"
@@ -148,8 +191,7 @@ Feature: Add - Remove seminar attendees
   @_file_upload
   Scenario: Add users via file upload and then remove
     Given I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I follow "Add a new event"
     And I click on "Edit session" "link"
@@ -172,7 +214,7 @@ Feature: Add - Remove seminar attendees
 
     When I click on "Attendees" "link"
     And I click on "Add users via file upload" "option" in the "#menuf2f-actions" "css_element"
-    And I upload "mod/facetoface/tests/fixtures/f2f_attendees.csv" file to "CSV text file" filemanager
+    And I upload "mod/facetoface/tests/fixtures/f2f_attendees.csv" file to "CSV file" filemanager
     And I press "Continue"
     And I press "Confirm"
     And I should see "Sam1 Student1"
@@ -190,8 +232,7 @@ Feature: Add - Remove seminar attendees
 
   Scenario: Use the allow scheduling conflicts checkbox
     Given I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I follow "Add a new event"
     And I click on "Edit session" "link"
@@ -220,8 +261,7 @@ Feature: Add - Remove seminar attendees
     And I press "Confirm"
     Then I should see "Sam1 Student1"
 
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test seminar name two    |
       | Description | Test seminar description |
@@ -247,13 +287,14 @@ Feature: Add - Remove seminar attendees
     When I click on "Attendees" "link"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Sam1 Student1, student1@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I wait "1" seconds
     And I press "Continue"
     Then I should see "1 problem(s) encountered during import."
     When I click on "View results" "link"
-    Then I should see "Sam1 Student1 is already booked to attend Test seminar name at 11:00 AM to 12:00 PM on 1 January 2020. Please select another user or change the session"
-    When I press "Close"
+    Then I should see "Sam1 Student1"
+    And I should see "The signup user has conflicting signups"
+    When I press exact "Close"
     And I set the following fields to these values:
       | Allow scheduling conflicts | 1 |
     And I press "Continue"
@@ -269,8 +310,7 @@ Feature: Add - Remove seminar attendees
   Scenario: Use invalid csv file to test the errors
     Given I log in as "admin"
 
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I follow "Add a new event"
     And I click on "Edit session" "link"
@@ -293,7 +333,7 @@ Feature: Add - Remove seminar attendees
 
     When I click on "Attendees" "link"
     And I click on "Add users via file upload" "option" in the "#menuf2f-actions" "css_element"
-    And I upload "mod/facetoface/tests/fixtures/f2f_attendees_invalid_columns.csv" file to "CSV text file" filemanager
+    And I upload "mod/facetoface/tests/fixtures/f2f_attendees_invalid_columns.csv" file to "CSV file" filemanager
     And I press "Continue"
     And I should see "Invalid CSV file format - number of columns is not constant!"
 
@@ -304,8 +344,7 @@ Feature: Add - Remove seminar attendees
     And I log out
 
     And I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I navigate to "Edit settings" node in "Seminar administration"
     And I set the following fields to these values:
@@ -344,8 +383,7 @@ Feature: Add - Remove seminar attendees
     And I log out
 
     And I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I navigate to "Edit settings" node in "Seminar administration"
     And I set the following fields to these values:
@@ -356,7 +394,7 @@ Feature: Add - Remove seminar attendees
 
     And I click on "Attendees" "link"
     And I click on "Add users via file upload" "option" in the "#menuf2f-actions" "css_element"
-    And I upload "mod/facetoface/tests/fixtures/f2f_attendees_with_ja.csv" file to "CSV text file" filemanager
+    And I upload "mod/facetoface/tests/fixtures/f2f_attendees_with_ja.csv" file to "CSV file" filemanager
     And I press "Continue"
     When I press "Confirm"
     Then I should see "job1" in the "Sam1 Student1" "table_row"
@@ -368,8 +406,7 @@ Feature: Add - Remove seminar attendees
       | Show user identity | ID number |
     And I log out
     And I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I follow "Add a new event"
     And I click on "Edit session" "link"
@@ -434,8 +471,7 @@ Feature: Add - Remove seminar attendees
       | moodle/site:viewuseridentity | Prohibit |
     And I log out
     And I log in as "teacher1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I follow "Add a new event"
     And I click on "Edit session" "link"

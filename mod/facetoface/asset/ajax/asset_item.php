@@ -26,6 +26,8 @@ define('AJAX_SCRIPT', true);
 require_once(__DIR__ . '/../../../../config.php');
 require_once($CFG->dirroot . '/mod/facetoface/lib.php');
 
+use \mod_facetoface\asset;
+
 $facetofaceid = required_param('facetofaceid', PARAM_INT);
 $itemseq = required_param('itemids', PARAM_SEQUENCE);
 $itemids = explode(',', $itemseq);
@@ -56,12 +58,18 @@ $PAGE->set_url('/mod/facetoface/asset/ajax/asset_item.php', array(
     'itemids' => $itemseq
 ));
 
-list($insql, $inparams) = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
-$sql = "SELECT fa.id, fa.name, fa.hidden, fa.custom
-          FROM {facetoface_asset} fa
-         WHERE fa.id $insql
-      ORDER BY fa.name ASC, fa.id ASC";
-$assets = $DB->get_records_sql($sql, $inparams);
+$assets = array();
+foreach($itemids as $itemid) {
+    $asset = new asset($itemid);
+    $res = (object)[
+        'id' => $asset->get_id(),
+        'name' => $asset->get_name(),
+        'hidden' => $asset->get_hidden(),
+        'custom' => $asset->get_custom()
+    ];
+
+    $assets[] = $res;
+}
 
 // Render assets list.
 echo json_encode(array_values($assets));

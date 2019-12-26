@@ -39,6 +39,62 @@ $icons = array(
                     'classes' => 'fa-moon-o',
                 ),
         ),
+    'mod_scorm|assetc' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-file-archive-o',
+                ),
+        ),
+    'mod_scorm|asset' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-file-archive-o',
+                ),
+        ),
+    'mod_scorm|browsed' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-book',
+                ),
+        ),
+    'mod_scorm|completed' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-check-square-o',
+                ),
+        ),
+    'mod_scorm|failed' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-times',
+                ),
+        ),
+    'mod_scorm|incomplete' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-pencil-square-o',
+                ),
+        ),
+    'mod_scorm|popdown' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-window-close-o',
+                ),
+        ),
+    'mod_scorm|popup' =>
+        array(
+            'data' =>
+                array(
+                    'classes' => 'fa-window-restore',
+                ),
+        ),
 );
 
 $aliases = array(

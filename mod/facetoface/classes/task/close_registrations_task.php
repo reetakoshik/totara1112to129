@@ -71,8 +71,8 @@ class close_registrations_task extends \core\task\scheduled_task {
               ORDER BY s.facetoface, s.id";
         $params = array(
             'now'      => $time,
-            'req' => MDL_F2F_STATUS_REQUESTED,
-            'adreq' => MDL_F2F_STATUS_REQUESTEDADMIN,
+            'req' => \mod_facetoface\signup\state\requested::get_code(),
+            'adreq' => \mod_facetoface\signup\state\requestedadmin::get_code(),
         );
 
         $sessions = $DB->get_records_sql($sql, $params);

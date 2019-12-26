@@ -58,7 +58,7 @@ function xmldb_totara_certification_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2017121100, 'totara', 'certification');
     }
 
-    if ($oldversion < 2018022701) {
+    if ($oldversion < 2018112000) {
         $table = new xmldb_table('certif_completion');
         $field = new xmldb_field('baselinetimeexpires', XMLDB_TYPE_INTEGER, '10', null, false, null);
 
@@ -82,7 +82,7 @@ function xmldb_totara_certification_upgrade($oldversion) {
         }
 
         // Savepoint reached
-        upgrade_plugin_savepoint(true, 2018022701, 'totara', 'certification');
+        upgrade_plugin_savepoint(true, 2018112000, 'totara', 'certification');
     }
 
     return true;

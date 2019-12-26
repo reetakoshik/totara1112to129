@@ -26,8 +26,7 @@ Feature: Assign a manager to a user via the job assignment page and send message
   Scenario: Send message to attendee and manager using CC recipient's manager
     Given I log in as "admin"
 
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Seminar 15838"
     And I follow "Add a new event"
     And I press "Save changes"
@@ -36,7 +35,7 @@ Feature: Assign a manager to a user via the job assignment page and send message
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I set the following fields to these values:
       | searchtext | User One |
-    And I press "Search"
+    And I click on "Search" "button" in the "#region-main" "css_element"
     And I click on "User One, user1@example.com" "option"
     And I press "Add"
     And I wait "1" seconds
@@ -58,8 +57,7 @@ Feature: Assign a manager to a user via the job assignment page and send message
     And the following config values are set as admin:
       | facetoface_selectjobassignmentonsignupglobal | 1 |
 
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Seminar 15838"
     And I follow "Add a new event"
     And I press "Save changes"
@@ -68,7 +66,7 @@ Feature: Assign a manager to a user via the job assignment page and send message
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I set the following fields to these values:
       | searchtext | User |
-    And I press "Search"
+    And I click on "Search" "button" in the "#region-main" "css_element"
     And I click on "User One, user1@example.com" "option"
     And I click on "User Two, user2@example.com" "option"
     And I press "Add"

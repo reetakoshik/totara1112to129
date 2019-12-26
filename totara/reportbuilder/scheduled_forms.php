@@ -328,7 +328,7 @@ class scheduled_reports_add_form extends moodleform {
             if ($sources[$report->source]->scheduleable) {
                 try {
                     if ($report->embedded) {
-                        $reportobject = new reportbuilder($report->id);
+                        $reportobject = reportbuilder::create($report->id);
                     }
                     $reportselect[$report->id] = format_string($report->fullname);
                 } catch (moodle_exception $e) {

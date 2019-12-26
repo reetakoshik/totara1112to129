@@ -47,6 +47,8 @@ try {
     $branchtype = required_param('type', PARAM_INT);
     // This identifies the block instance requesting AJAX extension
     $instanceid = optional_param('instance', null, PARAM_INT);
+    // Totara: This identifies the block type requesting AJAX extension
+    $blockname = optional_param('blocktype', null, PARAM_PLUGIN);
 
     $PAGE->set_context(context_system::instance());
 
@@ -57,13 +59,14 @@ try {
 
     if ($instanceid!==null) {
         // Get the db record for the block instance
-        $blockrecord = $DB->get_record('block_instances', array('id'=>$instanceid,'blockname'=>'navigation'));
+        $blockrecord = $DB->get_record('block_instances', array('id'=>$instanceid,'blockname'=>$blockname));
         if ($blockrecord!=false) {
 
             // Instantiate a block_instance object so we can access config
-            $block = block_instance('navigation', $blockrecord);
+            $block = block_instance($blockname, $blockrecord);
 
-            $trimmode = block_navigation::TRIM_RIGHT;
+            $blockclass = 'block_' . $blockname;
+            $trimmode = $blockclass::TRIM_RIGHT;
             $trimlength = 50;
 
             // Set the trim mode
@@ -131,9 +134,9 @@ if (empty($branch) || ($branch->nodetype !== navigation_node::NODETYPE_BRANCH &&
 //     throw new coding_exception('No further information available for this branch');
 }
 
-// Prepare an XML converter for the branch
+// Prepare a JSON converter for the branch
 $converter->set_expandable($navigation->get_expandable());
-// Set XML headers
-header('Content-type: text/plain; charset=utf-8');
-// Convert and output the branch as XML
+// Set headers
+echo $OUTPUT->header();
+// Convert and output the branch as JSON
 echo $converter->convert($branch);

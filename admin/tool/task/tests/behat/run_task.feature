@@ -16,7 +16,7 @@ Feature: Run scheduled task
       | user     | course | role           |
       | student1 | C1     | student        |
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I should see "Topic 1"
     When I run the scheduled task "\core\task\context_cleanup_task"
     Then I should see "Topic 1"
@@ -36,7 +36,7 @@ Feature: Run scheduled task
       | user     | course | role           |
       | student1 | C1     | student        |
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I should see "Topic 1"
     When I run the scheduled task "\core\task\context_cleanup_task"
     Then I should see "Topic 1"

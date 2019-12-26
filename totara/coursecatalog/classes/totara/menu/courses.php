@@ -26,8 +26,6 @@
 
 namespace totara_coursecatalog\totara\menu;
 
-use \totara_core\totara\menu\menu as menu;
-
 class courses extends \totara_core\totara\menu\item {
 
     protected function get_default_title() {
@@ -37,7 +35,7 @@ class courses extends \totara_core\totara\menu\item {
     protected function get_default_url() {
         global $CFG;
 
-        if (!empty($CFG->enhancedcatalog)) {
+        if ($CFG->catalogtype === 'enhanced') {
             return '/totara/coursecatalog/courses.php';
         } else {
             return '/course/index.php';
@@ -46,10 +44,6 @@ class courses extends \totara_core\totara\menu\item {
 
     public function get_default_sortorder() {
         return 71000;
-    }
-
-    public function get_default_visibility() {
-        return menu::SHOW_WHEN_REQUIRED;
     }
 
     protected function get_default_parent() {

@@ -1,5 +1,5 @@
-@block @block_activity_results
-Feature: The activity results block displays student scores as scales
+@block @block_activity_results @javascript
+Feature: The activity results block displays student low scores as scales
   In order to be display student scores as scales
   As a user
   I need to see the activity results block
@@ -25,15 +25,14 @@ Feature: The activity results block displays student scores as scales
       | student4 | C1 | student |
       | student5 | C1 | student |
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "Scales" in the course gradebook
     And I press "Add a new scale"
     And I set the following fields to these values:
       | Name | My Scale |
       | Scale | Disappointing, Not good enough, Average, Good, Very good, Excellent! |
     And I press "Save changes"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Assignment" to section "1" and I fill the form with:
       | Assignment name | Test assignment |
       | Description | Offline text |

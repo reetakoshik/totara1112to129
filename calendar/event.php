@@ -87,7 +87,7 @@ if ($courseid != SITEID) {
 
 $PAGE->set_url($url);
 $PAGE->set_pagelayout('admin');
-$PAGE->set_totara_menu_selected('calendar');
+$PAGE->set_totara_menu_selected('\totara_core\totara\menu\calendar');
 
 $calendar = new calendar_information(0, 0, 0, $time);
 

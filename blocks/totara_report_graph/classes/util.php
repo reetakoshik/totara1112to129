@@ -159,7 +159,11 @@ class util {
                 \rb_global_restriction_set::get_user_all_restrictions_ids($reportfor, true)
             );
 
-            $report = new \reportbuilder($rawreport->id, null, false, $rawreport->savedid, $reportfor, false, array(), $allrestr);
+            $config = new \rb_config();
+            $config->set_sid($rawreport->savedid);
+            $config->set_reportfor($reportfor);
+            $config->set_global_restriction_set($allrestr);
+            $report = \reportbuilder::create($rawreport->id, $config, true);
             $svgdata = self::get_svg($report);
 
             if (!$svgdata) {

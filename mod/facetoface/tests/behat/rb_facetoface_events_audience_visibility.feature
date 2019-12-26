@@ -1,5 +1,5 @@
 @totara @totara_reportbuilder @totara_cohort @mod_facetoface @javascript
-Feature: Test the visibility to see the seminar events report depending on the course audience visibility setting,
+Feature: Test the visibility to see the seminar events report depending on the course audience visibility setting
   In order to test the visibility
   As an admin
   I need to create a course with audience visibility setting, create seminar with event, create seminar event report
@@ -21,19 +21,18 @@ Feature: Test the visibility to see the seminar events report depending on the c
       | facetoface | Seminar 17392A | C17392A | S17392A  |
       | facetoface | Seminar 17392B | C17392B | S17392B  |
 
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 17392A"
+    And I am on "Course 17392A" course homepage
     And I follow "Seminar 17392A"
     And I follow "Add a new event"
     And I press "Save changes"
 
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 17392B"
+    And I am on "Course 17392B" course homepage
     And I follow "Seminar 17392B"
     And I follow "Add a new event"
     And I press "Save changes"
 
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "Seminar Events"
     And I set the field "Source" to "Seminar Events"
     And I press "Create report"
@@ -57,8 +56,7 @@ Feature: Test the visibility to see the seminar events report depending on the c
 
     #  Learner see seminar with visibility All users and should not see a seminar with visibility No users
     And I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 17392B"
+    And I am on "Course 17392B" course homepage
     And I navigate to "Edit settings" node in "Course administration"
     And I set the field "Visibility" to "No users"
     And I press "Save and display"

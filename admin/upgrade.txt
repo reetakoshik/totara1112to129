@@ -1,15 +1,29 @@
 This files describes API changes in /admin/*.
 
-=== 11.12 ===
+=== 12.3 ===
 
 * Added default value to core_admin_renderer::admin_notifications_page for users that have logged in
     in the last 3 months
 
-=== 11.3 ===
+=== 12 ===
 
 * Icon helpers are no longer used in the following templates, icon data is passed via context data:
 ** admin/templates/setting_configcolourpicker.mustache
 ** admin/templates/setting_emoticons.mustache
+* The admin settings admin_setting_configselect and admin_setting_configmultiselect now support the optgroup tag.
+  Grouping of options can be created with this new tag.
+  For using it, the option parameters needs the Group names as indexes:
+  [
+    "Spain" =>  ["madrid" => "Madrid", "barcelona" => "Barcelona"],
+    "France" => ["paris" => "Paris", "marseille" => "Marseille"],
+  ]
+* Template setting_courselist_frontpage.mustache has been deprecated
+* Admin settings categories have been restructured:
+** 'accounts' has been removed and split into 'users' and 'roles'
+** 'language' and 'location' categories have been merged into one 'localisation' category
+** 'frontpage' category has been replaced with 'navigationcat' which now contains setting for both
+   site front page and general site navigation
+** reportbuilder related pages have been extracted into their own 'reportsmain' category
 
 === 11 ===
 

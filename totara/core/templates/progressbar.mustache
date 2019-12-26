@@ -21,6 +21,9 @@
 
     Display a progress bar.
 
+    !!! DEPRECATED !!!!
+    This template was deprecated in Totara 12 and will be removed in a future release.
+
     Classes required for JS:
     * none
 
@@ -39,4 +42,4 @@
         "perecent": 75
     }
 }}
-{{^showlabel}}{{{icon}}}{{/showlabel}}{{#showlabel}} {{percentcompletestr}}{{/showlabel}}
+{{^showlabel}}{{{icon}}}{{/showlabel}}{{#showlabel}} {{#str}} xpercentcomplete, totara_core, {{percent}} {{/str}}{{/showlabel}}

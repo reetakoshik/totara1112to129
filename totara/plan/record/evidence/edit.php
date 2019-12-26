@@ -55,16 +55,13 @@ if (!$user = $DB->get_record('user', array('id' => $userid))) {
     print_error('error:usernotfound', 'totara_plan');
 }
 
-$canaccess = has_capability('totara/plan:accessanyplan', $systemcontext);
-$canedit = has_capability('totara/plan:editsiteevidence', $systemcontext);
-
 if (!empty($evidenceid)) {
     // Editing or deleting, check record exists
     if (!$item = $DB->get_record('dp_plan_evidence', array('id' => $evidenceid))) {
         print_error('error:evidenceidincorrect', 'totara_plan');
     } else {
         // Check if its readonly
-        if ($item->readonly && !($canaccess || $canedit)) {
+        if ($item->readonly && !can_create_or_edit_evidence($userid, true, true)) {
             print_error('evidence_readonly', 'totara_plan');
         }
         // Check that the user owns this evidence
@@ -72,8 +69,7 @@ if (!empty($evidenceid)) {
     }
 }
 
-// users can only view their own and their staff's pages
-if ($USER->id != $userid && !(\totara_job\job_assignment::is_managing($USER->id, $userid)) && !($canaccess || $canedit)) {
+if (!can_create_or_edit_evidence($userid, !empty($evidenceid))) {
     print_error('error:cannotviewpage', 'totara_plan');
 }
 
@@ -149,8 +145,6 @@ if ($data = $mform->get_data()) {
         $data->usermodified = $USER->id;
         $data->planid = 0;
         $data->id = $DB->insert_record('dp_plan_evidence', $data);
-
-        $DB->update_record('dp_plan_evidence', $data);
 
         // Add the items custom fields.
         customfield_save_data($data, 'evidence', 'dp_plan_evidence');

@@ -32,18 +32,6 @@ if (!defined('MOODLE_INTERNAL')) {
 class totara_core_renderer extends plugin_renderer_base {
 
     /**
-     * Displays a count of the number of active users in the last year
-     *
-     * @param integer $activeusers Number of active users in the last year
-     * @return string HTML to output.
-     * @deprecated since 9.0.
-     */
-    public function totara_print_active_users($activeusers) {
-        debugging('totara_print_active_users has been deprecated please use active_users', DEBUG_DEVELOPER);
-        return $this->active_users($activeusers);
-    }
-
-    /**
     * Displays a count of the number of active users in the last year
     *
     * @param integer $activeusers Number of active users in the last year
@@ -71,7 +59,6 @@ class totara_core_renderer extends plugin_renderer_base {
 
         $data = new stdClass();
         $data->timeoccured = userdate($latesterror->timeoccured);
-        $data->lastoccuredstr = get_string('lasterroroccuredat', 'totara_core', $data->timeoccured);
         $data->downloadbutton = $this->output->single_button(new moodle_url('/admin/index.php', array('geterrors' => 1)), get_string('downloaderrorlog', 'totara_core'), 'post');
         $output = $this->render_from_template('totara_core/errorlog_link', $data);
 
@@ -107,23 +94,6 @@ class totara_core_renderer extends plugin_renderer_base {
         $output .= get_string('totaracopyright', 'totara_core', get_string('totaralearn', 'totara_core'));
         $output .= html_writer::end_div();
         return $output;
-    }
-
-    /**
-     * Returns markup for displaying a progress bar for a user's course progress
-     *
-     * Optionally with a link to the user's profile if they have the correct permissions
-     *
-     * @deprecated since 9.0
-     * @access  public
-     * @param   $userid     int
-     * @param   $courseid   int
-     * @param   $status     int     COMPLETION_STATUS_ constant
-     * @return  string html to display
-     */
-    public function display_course_progress_icon($userid, $courseid, $status) {
-        debugging("display_course_progress_icon has been deprecated. Use course_progress_bar instead", DEBUG_DEVELOPER);
-        return $this->course_progress_bar($userid, $courseid, $status);
     }
 
     /**
@@ -182,6 +152,12 @@ class totara_core_renderer extends plugin_renderer_base {
             }
         }
 
+        if ($percent != 100 && $progressinfo->count_criteria() == 0) {
+            // Not completed without criteria, may be due to completion tracking changes
+            $data->statustext = get_string('statusnottracked', 'completion');
+            return $data;
+        }
+
         $data->statustext = get_string($COMPLETION_STATUS[$status], 'completion');
         $data->percent = $percent;
         $pbar = new \static_progress_bar('', '0');
@@ -194,18 +170,6 @@ class totara_core_renderer extends plugin_renderer_base {
         $data->pbar = $pbar->export_for_template($OUTPUT);
 
         return $data;
-    }
-
-    /**
-     * Print out the Totara My Team nav section.
-     *
-     * @deprecated since 9.0
-     * @param integer $numteammembers The number of members in the team.
-     * @return string HTML
-     */
-    public function print_my_team_nav($numteammembers) {
-        debugging("print_my_team_nav has been deprecated. Please use my_team_nav instead.", DEBUG_DEVELOPER);
-        return $this->my_team_nav($numteammembers);
     }
 
     /**
@@ -229,19 +193,6 @@ class totara_core_renderer extends plugin_renderer_base {
         $data->href = (string) new moodle_url('/my/teammembers.php');
 
         return $this->output->render_from_template('totara_core/my_team_nav', $data);
-    }
-
-    /**
-     * Print out the table of visible reports.
-     *
-     * @deprecated since 9.0
-     * @param array $reports array of report objects visible to this user.
-     * @param bool $canedit if this user is an admin with editing turned on.
-     * @return string HTML
-     */
-    public function print_report_manager($reports, $canedit) {
-        debugging("print_report_manager has been deprecated. Use report_list instead.", DEBUG_DEVELOPER);
-        return $this->report_list($reports, $canedit);
     }
 
     /**
@@ -308,21 +259,6 @@ class totara_core_renderer extends plugin_renderer_base {
 
         return $report_list;
     }
-
-
-    /**
-     * Returns markup for displaying saved scheduled reports.
-     *
-     * @deprecated since 9.0.
-     * @param array $scheduledreports List of scheduled reports.
-     * @param boolean $showoptions boolean Show actions to edit or delete the scheduled report.
-     * @return string HTML
-     */
-    public function print_scheduled_reports($scheduledreports, $showoptions=true) {
-        debugging("print_scheduled_reports has been deprecated. Please use scheduled_reports_list instead.");
-        return $this->scheduled_reports($scheduledreports, $showoptions);
-    }
-
 
     /**
      * Uses a template to generate markup for displaying saved scheduled reports.
@@ -403,22 +339,6 @@ class totara_core_renderer extends plugin_renderer_base {
     }
 
     /**
-    * Render a set of toolbars (either top or bottom)
-    *
-    * @deprecated since 9.0
-    * @param string $position 'top' or 'bottom'
-    * @param int $numcolumns
-    * @param array $toolbar array of left and right arrays
-    *              eg. $toolbar[0]['left'] = <first row left content>
-    *                  $toolbar[0]['right'] = <first row right content>
-    *                  $toolbar[1]['left'] = <second row left content>
-    */
-    public function print_toolbars($position='top', $numcolumns, $toolbar) {
-        debugging('print_toolbars has been deprecated please use table_toolbars', DEBUG_DEVELOPER);
-        echo $this->table_toolbars($toolbar, $position);
-    }
-
-    /**
      * Render a set of toolbars (either top or bottom)
      *
      * @param array $toolbar array of left and right arrays
@@ -470,23 +390,6 @@ class totara_core_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Generate markup for search box
-     *
-     * @deprecated since 9.0
-     * @param string $action the form action
-     * @param array $hiddenfields array of hidden field names and values
-     * @param string $placeholder the form input placeholder text
-     * @param string $value the form input value text
-     * @param string $formid the form id
-     * @param string $inputid the form input id
-     * @return string the html form
-     */
-    public function print_totara_search($action, $hiddenfields = null, $placeholder = '', $value = '', $formid = null, $inputid = null) {
-        debugging('print_totara_search has been deprecated please use totara_search', DEBUG_DEVELOPER);
-        return $this->totara_search($action, $hiddenfields, $placeholder = '', $value = '', $formid, $inputid);
-    }
-
-    /**
      * Generate markup for search box.
      *
      * @param string $action the form action
@@ -520,16 +423,6 @@ class totara_core_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Generate markup for totara menu
-     *
-     * @deprecated since 9.0
-     */
-    public function print_totara_menu($menudata, $parent=null, $selected_items=array()) {
-        debugging('print_totara_menu has been deprecated please use totara_menu', DEBUG_DEVELOPER);
-        return $this->totara_menu($menudata, $parent, $selected_items);
-    }
-
-    /**
      * Generate markup for totara menu. This function is called recursively.
      *
      * @param $menudata array the menu data
@@ -543,26 +436,106 @@ class totara_core_renderer extends plugin_renderer_base {
         return $this->render($menu);
     }
 
-    /**
-     * Renders the totara_menu and returns the HTML to display it.
-     *
-     * @param totara_menu $totaramenu
-     * @return string HTML fragment
-     */
-    protected function render_totara_menu(totara_core\output\totara_menu $totaramenu) {
-        $contextdata = $totaramenu->export_for_template($this);
+    public function glztop_menu($menudata, $parent=null, $selected_items=array()) {
+       global $CFG;
 
-        return $this->render_from_template('totara_core/totara_menu', $contextdata);
+       $menudata = totara_build_menu();
+       $mastheadmenu = new totara_core\output\glztop_menu($menudata, $parent, $selected_items);
+       
+       $mastheadmenudata = $mastheadmenu->export_for_template($this->output);
+        
+       return $this->render_from_template('theme_golearningzone/glztop_menu', $mastheadmenudata);
+   }
+    /**
+     * Render the masthead.
+     *
+     * @return string the html output
+     */
+    public function masthead(bool $hasguestlangmenu = true, bool $nocustommenu = false) {
+        global $USER;
+
+        if ($nocustommenu || !empty($this->page->layout_options['nototaramenu']) || !empty($this->page->layout_options['nocustommenu'])) {
+            // No totara menu, or the old legacy no custom menu, in which case DO NOT generate the totara menu, its costly.
+            $mastheadmenudata = new stdClass;
+        } else {
+            $menudata = totara_build_menu();
+            $mastheadmenu = new totara_core\output\masthead_menu($menudata);
+            $mastheadmenudata = $mastheadmenu->export_for_template($this->output);
+        }
+
+        $mastheadlogo = new totara_core\output\masthead_logo();
+
+        $mastheaddata = new stdClass();
+        $mastheaddata->masthead_lang = $hasguestlangmenu && (!isloggedin() || isguestuser()) ? $this->output->lang_menu() : '';
+        $mastheaddata->masthead_logo = $mastheadlogo->export_for_template($this->output);
+        $mastheaddata->masthead_menu = $mastheadmenudata;
+        $mastheaddata->masthead_plugins = $this->output->navbar_plugin_output();
+        $mastheaddata->masthead_search = $this->output->search_box();
+        // Even if we don't have a "navbar" we need this option, due to the poor design of the nonavbar option in the past.
+        $mastheaddata->masthead_toggle = $this->output->navbar_button();
+        $mastheaddata->masthead_usermenu = $this->output->user_menu();
+
+        if (totara_core\quickaccessmenu\factory::can_current_user_have_quickaccessmenu()) {
+            $menuinstance = totara_core\quickaccessmenu\factory::instance($USER->id);
+
+            if (!empty($menuinstance->get_possible_items())) {
+                $adminmenu = $menuinstance->get_menu();
+                $quickaccessmenu = totara_core\output\quickaccessmenu::create_from_menu($adminmenu);
+                $mastheaddata->masthead_quickaccessmenu = $quickaccessmenu->get_template_data();
+            }
+        }
+
+        return $this->render_from_template('totara_core/masthead', $mastheaddata);
+    }
+
+    public function mastheadglz(bool $hasguestlangmenu = true, bool $nocustommenu = false) {
+        global $USER;
+
+        if ($nocustommenu || !empty($this->page->layout_options['nototaramenu']) || !empty($this->page->layout_options['nocustommenu'])) {
+            // No totara menu, or the old legacy no custom menu, in which case DO NOT generate the totara menu, its costly.
+            $mastheadmenudata = new \stdClass;
+        } else {
+            $mastheadmenudata = new \stdClass;
+            //$menudata = totara_build_menu();
+            //$mastheadmenu = new totara_core\output\masthead_menu($menudata);
+            //$mastheadmenudata = $mastheadmenu->export_for_template($this->output);
+        }
+
+        //$mastheadlogo = new totara_core\output\masthead_logo();
+
+        $mastheaddata = new \stdClass();
+        //$mastheaddata->masthead_lang = $hasguestlangmenu && (!isloggedin() || isguestuser()) ? $this->output->lang_menu() : '';
+        //$mastheaddata->masthead_logo = $mastheadlogo->export_for_template($this->output);
+        $mastheaddata->masthead_menu = $mastheadmenudata;
+        //$mastheaddata->masthead_plugins = $this->output->navbar_plugin_output();
+        //$mastheaddata->masthead_search = $this->output->search_box();
+        // Even if we don't have a "navbar" we need this option, due to the poor design of the nonavbar option in the past.
+        //$mastheaddata->masthead_toggle = $this->output->navbar_button();
+        //$mastheaddata->masthead_usermenu = $this->output->user_menu();
+
+        if (totara_core\quickaccessmenu\factory::can_current_user_have_quickaccessmenu()) {
+            $menuinstance = totara_core\quickaccessmenu\factory::instance($USER->id);
+
+            if (!empty($menuinstance->get_possible_items())) {
+                $adminmenu = $menuinstance->get_menu();
+                $quickaccessmenu = totara_core\output\quickaccessmenu::create_from_menu($adminmenu);
+                $mastheaddata->masthead_quickaccessmenu = $quickaccessmenu->get_template_data();
+            }
+        }
+
+        return $this->render_from_template('totara_core/mastheadglz', $mastheaddata);
     }
 
     /**
-     * Displaying notices at top of page
+     * Renders the totara_menu and returns the HTML to display it.
+     * @deprecated since 12.0
      *
-     * @deprecated since 9.0
+     * @param totara_core\output\totara_menu $totaramenu
+     * @return string HTML fragment
      */
-    public function print_totara_notifications() {
-        debugging('print_totara_notifications has been deprecated please use totara_notifications', DEBUG_DEVELOPER);
-        return $this->totara_notifications();
+    protected function render_totara_menu(totara_core\output\totara_menu $totaramenu) {
+        debugging('totara_core_renderer::ender_totara_menu was deprecated in 12.0. Instead, use totara_core_renderer::masthead.');
+        return '';
     }
 
     /**
@@ -588,21 +561,6 @@ class totara_core_renderer extends plugin_renderer_base {
     /**
      * Displays relevant progress bar
      *
-     * @deprecated since 9.0
-     * @param $percent int a percentage value (0-100)
-     * @param $size string large, medium...
-     * @param $showlabel boolean show completion text label
-     * @param $tooltip string required tooltip text
-     * @return $out html string
-     */
-    public function print_totara_progressbar($percent, $size='medium', $showlabel=false, $tooltip='DEFAULTTOOLTIP') {
-        debugging('print_totara_progressbar has been deprecated please use progressbar', DEBUG_DEVELOPER);
-        return $this->progressbar($percent, $size, $showlabel, $tooltip);
-    }
-
-    /**
-     * Displays relevant progress bar
-     *
      * @param int $percent a percentage value (0-100)
      * @param string $size large, medium...
      * @param boolean $showlabel show completion text label
@@ -610,47 +568,29 @@ class totara_core_renderer extends plugin_renderer_base {
      * @return html string
      */
     public function progressbar($percent, $size='medium', $showlabel=false, $tooltip='DEFAULTTOOLTIP') {
+        global $OUTPUT;
+
         $percent = round($percent);
 
-        if ($percent < 0 || $percent > 100) {
-            return 'progress bar error- invalid value...';
-        }
-
-        // Add more sizes if as neccessary :)!
-        switch ($size) {
-        case 'large' :
-            $bar_foreground = 'progressbar-large';
-            $pixelvalue = ($percent / 100) * 121;
-            $pixeloffset = round($pixelvalue - 120);
-            $class = 'totara_progress_bar_large';
-            break;
-        case 'medium' :
-        default :
-            $bar_foreground = 'progressbar-medium';
-            $pixelvalue = ($percent / 100) * 61;
-            $pixeloffset = round($pixelvalue - 60);
-            $class = 'totara_progress_bar_medium';
-            break;
-        }
-
-        if ($tooltip == 'DEFAULTTOOLTIP') {
-            $tooltip = get_string('xpercent', 'totara_core', $percent);
-        }
-
-        // This is really unfortunate - in the future we should be using a dynamic progressbar model
-        // rather than switching icons and setting a background position.
-        $icon = $this->pix_icon($bar_foreground, $tooltip, 'totara_core', array('title' => $tooltip, 'style' => 'background-position: ' . $pixeloffset . 'px 0px;', 'class' => $class));
-
         $data = new stdClass();
-        $data->icon = $icon;
-        $data->percent = $percent;
-        $data->percentcompletestr = get_string('xpercentcomplete', 'totara_core', $percent);
 
-        if ($showlabel) {
-            $data->showlabel = true;
+        if ($percent < 0 || $percent > 100) {
+            $data->statustext = 'progress bar error- invalid value...';
+        } else {
+            $pbar = new \static_progress_bar('', '0');
+            $pbar->set_progress((string)$percent);
+
+            if ($tooltip == 'DEFAULTTOOLTIP') {
+                $statustext = get_string('xpercent', 'totara_core', $percent);
+            } else {
+                $statustext = $tooltip;
+            }
+
+            $pbar->add_popover(\core\output\popover::create_from_text($statustext));
+            $data->pbar = $pbar->export_for_template($OUTPUT);
         }
 
-        return $this->render_from_template('totara_core/progressbar', $data);
+        return $this->output->render_from_template('totara_core/course_progress_bar', $data);
     }
 
     /**
@@ -660,18 +600,6 @@ class totara_core_renderer extends plugin_renderer_base {
      */
     public function comment_template() {
         return $this->render_from_template('totara_core/comment_template', null);
-    }
-
-    /**
-     * Print list of icons.
-     *
-     * @deprecated since 9.0
-     * @param string $type Choose the group of Totara icons to return
-     * @return string HTML
-     */
-    public function print_icons_list($type = 'course') {
-        debugging("print_icons_list has been deprecated. Please use icon_list instead.",DEBUG_DEVELOPER);
-        return $this->icon_list($type);
     }
 
     /**
@@ -700,12 +628,13 @@ class totara_core_renderer extends plugin_renderer_base {
                 $file->get_filearea(), $id, $file->get_filepath(), $filename, true);
 
             // Build the icon data so we can use the core/pic_icon template.
+            /** @deprecated since Totara 12 */
             $attributes = array();
             $attributes[] = array ('name' => 'alt', 'value' => $name);
             $attributes[] = array ('name' => 'title', 'value' => $name);
             $attributes[] = array ('name' => 'class', 'value' => 'course_icon');
             $attributes[] = array ('name' => 'src', 'value' => $src);
-            $icon = array('id' => $file->get_pathnamehash(), 'attributes' => $attributes);
+            $icon = array('id' => $file->get_pathnamehash(), 'attributes' => $attributes, 'name' => $name, 'url' => $src);
             $icons[] = $icon;
         }
 
@@ -714,14 +643,15 @@ class totara_core_renderer extends plugin_renderer_base {
             if ($icon != '.' && $icon != '..') {
                 $id = str_replace('.png', '', $icon);
                 $name = ucwords(strtr($icon, array('.png' => '', '_' => ' ', '-' => ' ')));
-                $src = $this->pix_url("{$type}icons/{$id}", 'totara_core');
+                $src = $this->image_url("{$type}icons/{$id}", 'totara_core');
 
+                /** @deprecated since Totara 12 */
                 $attributes = array();
                 $attributes[] = array ('name' => 'alt', 'value' => $name);
                 $attributes[] = array ('name' => 'title', 'value' => $name);
                 $attributes[] = array ('name' => 'class', 'value' => 'course_icon');
                 $attributes[] = array ('name' => 'src', 'value' => $src);
-                $icon = array('id' => $id, 'attributes' => $attributes);
+                $icon = array('id' => $id, 'attributes' => $attributes, 'name' => $name, 'url' => $src);
                 $icons[] = $icon;
             }
         }
@@ -858,25 +788,28 @@ class totara_core_renderer extends plugin_renderer_base {
      * Render the tabs used when editing custom menu items.
      *
      * @param string $currenttab Name of the current tab.
-     * @param integer $item The item for linking to.
+     * @param stdClass|null $record The item for linking to.
      *
-     * @return HTML to render the tabs.
+     * @return string HTML to render the tabs.
      */
-    public function totara_menu_tabs($currenttab, $item = null) {
+    public function totara_menu_tabs($currenttab, $record = null) {
+        if (empty($record->id)) {
+            return '';
+        }
 
         // Setup the top row of tabs.
         $toprow = array();
 
         $disabled = array();
         // Disable the access tab unless the menu item has custom visibility.
-        if ($item->visibility != \totara_core\totara\menu\menu::SHOW_CUSTOM) {
+        if ($record->visibility != \totara_core\totara\menu\item::VISIBILITY_CUSTOM) {
             $disabled[] = 'rules';
         }
 
-        $toprow[] = new tabobject('edit', new moodle_url('/totara/core/menu/edit.php', array('id' => $item->id)),
+        $toprow[] = new tabobject('edit', new moodle_url('/totara/core/menu/edit.php', array('id' => $record->id)),
                 get_string('menuitem:edit', 'totara_core'));
 
-        $toprow[] = new tabobject('rules', new moodle_url('/totara/core/menu/rules.php', array('id' => $item->id)),
+        $toprow[] = new tabobject('rules', new moodle_url('/totara/core/menu/rules.php', array('id' => $record->id)),
                 get_string('menuitem:editaccess', 'totara_core'));
 
         return print_tabs(array($toprow), $currenttab, $disabled, null, true);

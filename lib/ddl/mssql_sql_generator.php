@@ -331,6 +331,69 @@ class mssql_sql_generator extends sql_generator {
             throw new coding_exception($error);
         }
 
+        $hints = $xmldb_index->getHints();
+        $fields = $xmldb_index->getFields();
+        if (in_array('full_text_search', $hints)) {
+            $tablename = $this->getTableName($xmldb_table);
+            $fieldname = reset($fields);
+
+            // Note that accessing database at this stage is not allowed because we create list of sql commands before execution.
+            $sqls = array();
+
+            // Create search catalogue for this instance if it does not exist.
+            $prefix = $this->mdb->get_prefix();
+            $sqls[] = "IF NOT EXISTS (SELECT 1 FROM sys.fulltext_catalogs WHERE name = '{$prefix}search_catalog') 
+                         BEGIN
+                           CREATE FULLTEXT CATALOG {$prefix}search_catalog
+                         END";
+            $indexname = $this->getNameForObject($xmldb_table->getName(), 'id', 'fts'); // Yes, 'id' is corect here because it is shared by all full text search indices.
+            $language = $this->mdb->get_ftslanguage();
+            // Microsoft is using either language code numbers or names of languages.
+            if (is_number($language)) {
+                $language = intval($language);
+            } else {
+                $language = "'$language'";
+            }
+
+            // Add required unique index if it does not exist yet.
+            $sqls[] = "IF NOT EXISTS (SELECT 1
+                                        FROM sys.indexes i
+                                        JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+                                        JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+                                        JOIN sys.tables t ON i.object_id = t.object_id
+                                       WHERE t.name = '{$tablename}' AND i.name = '{$indexname}' AND c.name = 'id') 
+                         BEGIN
+                           CREATE UNIQUE INDEX {$indexname} ON {$tablename}(id) 
+                         END";
+
+            $sqls[] = "IF EXISTS (SELECT 1
+                                    FROM sys.fulltext_indexes i
+                                    JOIN sys.fulltext_index_columns ic ON i.object_id = ic.object_id
+                                    JOIN sys.tables t ON i.object_id = t.object_id
+                                    JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+                                   WHERE t.name = '{$tablename}')
+                         BEGIN
+                           ALTER FULLTEXT INDEX ON {$tablename} ADD ({$fieldname} Language {$language})
+                         END
+                       ELSE
+                         BEGIN
+                           IF EXISTS (SELECT 1
+                                        FROM sys.fulltext_indexes i
+                                        JOIN sys.tables t ON i.object_id = t.object_id
+                                       WHERE t.name = '{$tablename}')
+                             BEGIN
+                               ALTER FULLTEXT INDEX ON {$tablename} ADD ({$fieldname} Language {$language})
+                             END
+                           ELSE
+                             BEGIN
+                               CREATE FULLTEXT INDEX ON {$tablename} ({$fieldname} Language {$language})
+                                 KEY INDEX {$indexname} ON {$prefix}search_catalog WITH CHANGE_TRACKING AUTO
+                             END 
+                         END";
+
+            return $sqls;
+        }
+
         // NOTE: quiz_report table has a messed up nullable name field, ignore it.
 
         if ($xmldb_index->getUnique() and count($xmldb_index->getFields()) === 1 and $xmldb_table->getName() !== 'quiz_reports') {
@@ -350,6 +413,25 @@ class mssql_sql_generator extends sql_generator {
             }
         }
         return parent::getCreateIndexSQL($xmldb_table, $xmldb_index);
+    }
+
+    /**
+     * Given one xmldb_table and one xmldb_index, return the SQL statements needed to drop the index from the table.
+     *
+     * @param xmldb_table $xmldb_table The xmldb_table instance to drop the index on.
+     * @param xmldb_index $xmldb_index The xmldb_index to drop.
+     * @return array An array of SQL statements to drop the index.
+     */
+    public function getDropIndexSQL($xmldb_table, $xmldb_index) {
+        if (in_array('full_text_search', $xmldb_index->getHints())) {
+            $results = array();
+            $tablename = $this->getTableName($xmldb_table);
+            $fieldname = $xmldb_index->getFields()[0];
+            $results[] = "ALTER FULLTEXT INDEX ON {$tablename} DROP ({$fieldname})";
+            return $results;
+        }
+
+        return parent::getDropIndexSQL($xmldb_table, $xmldb_index);
     }
 
     /**
@@ -593,9 +675,9 @@ class mssql_sql_generator extends sql_generator {
         $fieldname = $xmldb_field->getName();
 
         // Look for any default constraint in this field and drop it
-        if ($default = $this->mdb->get_record_sql("SELECT id, object_name(cdefault) AS defaultconstraint
-                                                     FROM syscolumns
-                                                    WHERE id = object_id(?)
+        if ($default = $this->mdb->get_record_sql("SELECT object_id, object_name(default_object_id) AS defaultconstraint
+                                                     FROM sys.columns
+                                                    WHERE object_id = object_id(?)
                                                           AND name = ?", array($tablename, $fieldname))) {
             return $default->defaultconstraint;
         } else {
@@ -652,7 +734,7 @@ class mssql_sql_generator extends sql_generator {
             case 'fk':
             case 'ck':
                 if ($check = $this->mdb->get_records_sql("SELECT name
-                                                            FROM sysobjects
+                                                            FROM sys.objects
                                                            WHERE lower(name) = ?", array(strtolower($object_name)))) {
                     return true;
                 }
@@ -660,7 +742,7 @@ class mssql_sql_generator extends sql_generator {
             case 'ix':
             case 'uix':
                 if ($check = $this->mdb->get_records_sql("SELECT name
-                                                            FROM sysindexes
+                                                            FROM sys.indexes
                                                            WHERE lower(name) = ?", array(strtolower($object_name)))) {
                     return true;
                 }
@@ -1051,5 +1133,39 @@ class mssql_sql_generator extends sql_generator {
         $sqls[] = "IF OBJECT_ID ('{$tablestable}', 'U') IS NOT NULL DROP TABLE {$tablestable}";
 
         $this->mdb->change_database_structure($sqls);
+    }
+
+    /**
+     * Returns false as MSSQL testing showed that for the queries tested 2 queries was faster than a counted recordset.
+     *
+     * Overridden despite the value matching the default as we know based upon performance testing that false is the correct result.
+     * For results on performance testing of paginated results see parent class.
+     *
+     * @return bool
+     */
+    public function recommends_counted_recordset(): bool {
+        return false;
+    }
+
+    /**
+     * Get statement to switch FTS accent sensitivity.
+     *
+     * @param bool $switch If accent sensitivity should be enabled/disabled.
+     * @return array
+     */
+    public function get_fts_change_accent_sensitivity_sql(bool $switch): array {
+        $sqls = [];
+
+        // First confirm if accent sensitivity is not already on the correct setting.
+        if ($switch === $this->mdb->is_fts_accent_sensitive()) {
+            return $sqls;
+        }
+
+        // Rebuild catalog with accent_sensitivity on/off.
+        $onoff = $switch ? 'ON' : 'OFF';
+        $sqls[] = 'ALTER FULLTEXT CATALOG ' . $this->mdb->get_prefix() . 'search_catalog'
+            . ' REBUILD WITH ACCENT_SENSITIVITY = ' . $onoff;
+
+        return $sqls;
     }
 }

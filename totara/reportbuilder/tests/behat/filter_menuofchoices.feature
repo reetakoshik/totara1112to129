@@ -46,7 +46,7 @@ Feature: Verify menuofchoices custom field filter works in the reports
     And I press "Save and display"
 
     # Create 'courses' custom report.
-    And I navigate to "Manage user reports" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
     And I press "Create report"
     And I set the following fields to these values:
       | Report Name | Test courses report |

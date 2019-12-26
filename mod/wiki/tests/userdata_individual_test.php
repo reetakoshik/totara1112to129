@@ -93,8 +93,8 @@ class mod_wiki_userdata_individual_test extends wiki_testcase {
 
         $contexts = individual::get_compatible_context_levels();
 
-        $this->assertEquals($expected, $contexts,
-            "Individual wiki user_data item is expected to work with a wide range of contexts", .0, 10, true);
+        $this->assertEqualsCanonicalizing($expected, $contexts,
+            "Individual wiki user_data item is expected to work with a wide range of contexts");
     }
 
 
@@ -859,7 +859,7 @@ class mod_wiki_userdata_individual_test extends wiki_testcase {
         $expected = array_column($expected, 'id');
         $actual = array_column($actual, 'id');
 
-        $this->assertEquals($expected, $actual, $error, .0, 10, true);
+        $this->assertEqualsCanonicalizing($expected, $actual, $error);
     }
 
     /**

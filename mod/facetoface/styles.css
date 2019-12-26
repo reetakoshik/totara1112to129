@@ -30,11 +30,8 @@
 
 .f2fsessionlinks,
 .f2fsessionnotice {
-    font-size: 11px;
-    font-weight: bold;
-    line-height: 14px;
     display: block;
-    padding: 3px;
+    padding: 12px 0 8px;
 }
 
 .f2factivityname {
@@ -306,4 +303,33 @@ ul.assetlist {
 
 .f2f-usersbox {
     margin-bottom: 48px;
+}
+
+.f2f-booked-type-error {
+    border: 1px solid #bb4247;
+    display: inline-block;
+}
+
+.f2f-booked-type-error-hint {
+    color: #bb4247;
+    display: inline-block;
+    width: 50%;
+}
+
+select.menuf2f-actions,
+select.menuf2f-select {
+    display: inline-block;
+}
+
+select.menuf2f-select {
+    margin-right: 0.5em;
+}
+
+.dir-rtl select.menuf2f-select {
+    margin-left: 0.5em;
+}
+
+.mod_facetoface__no-events-message {
+    padding: 25px;
+    margin-bottom: 20px;
 }

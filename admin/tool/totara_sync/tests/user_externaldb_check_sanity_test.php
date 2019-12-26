@@ -98,7 +98,7 @@ class tool_totara_sync_user_externaldb_check_sanity_testcase extends advanced_te
             $this->dbname = $CFG->dbname;
             $this->dbuser = $CFG->dbuser;
             $this->dbpass = !empty($CFG->dbpass) ? $CFG->dbpass : '';
-            $this->dbtable = $CFG->phpunit_prefix . 'totara_sync_user_source';
+            $this->dbtable = $CFG->prefix . 'totara_sync_user_source';
         }
 
         if (!empty($this->dbtype) &&

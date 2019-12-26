@@ -49,6 +49,15 @@ class sqlsrv_native_moodle_recordset extends moodle_recordset {
      * in MDL-37734.
      */
     public function transaction_starts() {
+        $this->preload();
+    }
+
+    /**
+     * Load all data into memory, this is used for various hacks
+     * that try to work around limitations in sqlsrv driver.
+     * @since Totara 12.9
+     */
+    public function preload() {
         if ($this->buffer !== null) {
             $this->unregister();
             return;

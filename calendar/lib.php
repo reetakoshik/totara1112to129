@@ -425,7 +425,6 @@ function calendar_get_mini($courses, $groups, $users, $calmonth = false, $calyea
             } else {
                 $popupdata = calendar_get_popup(false, $daytime, $popupcontent);
             }
-            $cellattributes = array_merge($cellattributes, $popupdata);
 
             // Class and cell content
             if(isset($typesbyday[$day]['startglobal'])) {
@@ -440,7 +439,12 @@ function calendar_get_mini($courses, $groups, $users, $calmonth = false, $calyea
             if ($finishclass) {
                 $class .= ' duration_finish';
             }
+
+            $popover = \core\output\popover::create_from_text($popupdata['data-core_calendar-popupcontent'], $popupdata['data-core_calendar-title']);
+            $popover->arrow_placement = 'bottom';
+            $popover->trigger= 'manual';
             $cell = html_writer::link($dayhref, $day);
+            $cell .= html_writer::div($OUTPUT->render_from_template($popover->get_template(), $popover->export_for_template($OUTPUT)));
         } else {
             $cell = $day;
         }
@@ -482,8 +486,11 @@ function calendar_get_mini($courses, $groups, $users, $calmonth = false, $calyea
             if (!isset($eventsbyday[$day]) && !isset($durationbyday[$day])) {
                 $class .= ' eventnone';
                 $popupdata = calendar_get_popup(true, false);
-                $cellattributes = array_merge($cellattributes, $popupdata);
+                $popover = \core\output\popover::create_from_text($popupdata['data-core_calendar-popupcontent'], $popupdata['data-core_calendar-title']);
+                $popover->arrow_placement = 'bottom';
+                $popover->trigger= 'manual';
                 $cell = html_writer::link('#', $day);
+                $cell .= html_writer::div($OUTPUT->render_from_template($popover->get_template(), $popover->export_for_template($OUTPUT)));
             }
             $cell = get_accesshide($today . ' ') . $cell;
         }
@@ -503,7 +510,7 @@ function calendar_get_mini($courses, $groups, $users, $calmonth = false, $calyea
 
     static $jsincluded = false;
     if (!$jsincluded) {
-        $PAGE->requires->yui_module('moodle-calendar-info', 'Y.M.core_calendar.info.init');
+        $PAGE->requires->js_call_amd('core_calendar/calendar', 'init');
         $jsincluded = true;
     }
     return $content;
@@ -1164,6 +1171,14 @@ function calendar_time_representation($time) {
     if(empty($timeformat)){
         $timeformat = get_config(NULL,'calendar_site_timeformat');
     }
+
+    // Allow language customization of selected time format.
+    if ($timeformat === CALENDAR_TF_12) {
+        $timeformat = get_string('strftimetime12', 'langconfig');
+    } else if ($timeformat === CALENDAR_TF_24) {
+        $timeformat = get_string('strftimetime24', 'langconfig');
+    }
+
     // The ? is needed because the preference might be present, but empty
     return userdate($time, empty($timeformat) ? $langtimeformat : $timeformat);
 }

@@ -1,4 +1,4 @@
-@core @core_user
+@core @core_user @core_grades
 Feature: The student can navigate to their grades page and user grade report.
   In order to view my grades and the user grade report
   As a user
@@ -28,7 +28,7 @@ Feature: The student can navigate to their grades page and user grade report.
       | assign | C1 | a3 | Test assignment three | Submit something! | 150 |
       | assign | C2 | a4 | Test assignment four | Submit something! | 150 |
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I navigate to "View > Grader report" in the course gradebook
     And I turn editing mode on
     And I give the grade "150.00" to the user "Student 1" for the grade item "Test assignment one"
@@ -61,12 +61,13 @@ Feature: The student can navigate to their grades page and user grade report.
     And I follow "Grades" in the user menu
     Then I should see "My badges from Acceptance test site web site"
 
+  @javascript
   Scenario: Log in as a parent and view a childs grades.
     When I log in as "admin"
     And I am on site homepage
     And I turn editing mode on
     And I add the "Mentees" block
-    And I navigate to "Define roles" node in "Site administration > Users > Permissions"
+    And I navigate to "Define roles" node in "Site administration > Permissions"
     And I click on "Add a new role" "button"
     And I click on "Continue" "button"
     And I set the following fields to these values:
@@ -78,7 +79,7 @@ Feature: The student can navigate to their grades page and user grade report.
     | moodle/user:viewuseractivitiesreport | 1 |
     | moodle/user:viewdetails | 1 |
     And I click on "Create this role" "button"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Student 1"
     And I click on "Preferences" "link" in the ".profile_tree" "css_element"
     And I follow "Assign roles relative to this user"

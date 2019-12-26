@@ -44,7 +44,7 @@ $systemcontext = context_system::instance();
 $PAGE->set_context($systemcontext);
 $PAGE->set_url('/totara/plan/components/course/view.php', array('id' => $id, 'itemid' => $caid));
 $PAGE->set_pagelayout('report');
-$PAGE->set_totara_menu_selected('learningplans');
+$PAGE->set_totara_menu_selected('\totara_plan\totara\menu\learningplans');
 
 // Permissions check.
 if (!$plan->can_view()) {

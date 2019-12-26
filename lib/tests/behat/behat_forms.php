@@ -58,6 +58,19 @@ class behat_forms extends behat_base {
     }
 
     /**
+     * Presses button with exactly specified id|name|title|alt|value.
+     *
+     * @When /^I press exact "(?P<button_string>(?:[^"]|\\")*)"$/
+     * @throws ElementNotFoundException Thrown by behat_base::find
+     * @param string $button
+     * @returns array
+     */
+    public function press_button_exact($button) {
+        \behat_hooks::set_step_readonly(false);
+        $this->execute('behat_general::i_click_on', array($button, 'button_exact'));
+    }
+
+    /**
      * Press button with specified id|name|title|alt|value and switch to main window.
      *
      * @When /^I press "(?P<button_string>(?:[^"]|\\")*)" and switch to main window$/
@@ -128,11 +141,16 @@ class behat_forms extends behat_base {
         // so, we will use the reduced timeout as it is a common task and we should save time.
         try {
 
-            // Expand fieldsets link.
-            $xpath = "//div[@class='collapsible-actions']" .
-                "/descendant::a[contains(concat(' ', @class, ' '), ' collapseexpand ')]" .
+            // Expand all fieldsets link - which will only be there if there is more than one collapsible section.
+            $expandallxpath = "//div[@class='collapsible-actions']" .
+                "//a[contains(concat(' ', @class, ' '), ' collapseexpand ')]" .
                 "[not(contains(concat(' ', @class, ' '), ' collapse-all '))]";
-            $collapseexpandlink = $this->find('xpath', $xpath, false, false, self::REDUCED_TIMEOUT);
+            // Else, look for the first expand fieldset link.
+            $expandonlysection = "//legend[@class='ftoggler']" .
+                    "//a[contains(concat(' ', @class, ' '), ' fheader ') and @aria-expanded = 'false']";
+
+            $collapseexpandlink = $this->find('xpath', $expandallxpath . '|' . $expandonlysection,
+                    false, false, self::REDUCED_TIMEOUT);
             $collapseexpandlink->click();
             \behat_hooks::set_step_readonly(false);
 

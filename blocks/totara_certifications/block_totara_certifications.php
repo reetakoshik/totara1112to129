@@ -52,11 +52,28 @@ class block_totara_certifications extends block_base {
         $this->content->footer = '';
         $certifications = array();
 
+        $params = array('uid' => $USER->id,
+            'cert' => CERTIFPATH_CERT,
+            'recert' => CERTIFPATH_RECERT,
+            'due' => CERTIFRENEWALSTATUS_DUE,
+            'raised' => PROGRAM_EXCEPTION_RAISED,
+            'dismissed' => PROGRAM_EXCEPTION_DISMISSED,
+            'contextlevel' => CONTEXT_PROGRAM
+        );
+
+        // Take into account the visibility of the certification.
+        list($visibilitysql, $visibilityparams) = totara_visibility_where($USER->id, 'p.id', 'p.visible',
+            'p.audiencevisible', 'p', 'certification');
+
+        $params = array_merge($params, $visibilityparams);
+
         $sql = "SELECT p.id as pid, p.fullname, cfc.timewindowopens, cfc.certifpath
                   FROM {prog} p
             INNER JOIN {certif_completion} cfc
                     ON (cfc.certifid = p.certifid AND cfc.userid = :uid)
-                 WHERE p.visible = 1
+             LEFT JOIN {context} ctx
+                    ON (ctx.instanceid = p.id AND ctx.contextlevel = :contextlevel)
+                 WHERE {$visibilitysql}
                    AND (cfc.certifpath = :cert OR (cfc.certifpath = :recert AND cfc.renewalstatus = :due))
                    AND EXISTS (SELECT id
                                  FROM {prog_user_assignment} pua
@@ -68,13 +85,6 @@ class block_totara_certifications extends block_base {
               ORDER BY cfc.timewindowopens DESC";
 
         // As timewindowopens is 0 for CERTs they will come at top, in any order.
-
-        $params = array('uid' => $USER->id,
-                       'cert' => CERTIFPATH_CERT,
-                     'recert' => CERTIFPATH_RECERT,
-                        'due' => CERTIFRENEWALSTATUS_DUE,
-                     'raised' => PROGRAM_EXCEPTION_RAISED,
-                  'dismissed' => PROGRAM_EXCEPTION_DISMISSED);
         $renewals = $DB->get_records_sql($sql, $params);
 
         foreach ($renewals as $renewal) {

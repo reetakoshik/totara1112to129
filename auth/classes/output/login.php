@@ -65,8 +65,6 @@ class login implements renderable, templatable {
     public $instructions;
     /** @var moodle_url The form action login URL. */
     public $loginurl;
-    /** @var bool Whether the password can be auto completed. */
-    public $passwordautocomplete;
     /** @var bool Whether the username should be remembered. */
     public $rememberusername = false;
     /** @var bool Whether the "remember me" option was selected. */
@@ -104,7 +102,6 @@ class login implements renderable, templatable {
         $this->cookieshelpicon = new help_icon('cookiesenabled', 'core');
 
         $this->autofocusform = !empty($CFG->loginpageautofocus);
-        $this->passwordautocomplete = !empty($CFG->loginpasswordautocomplete);
 
         if (!empty($CFG->persistentloginenable)) {
             $this->rememberusername = true;
@@ -115,8 +112,8 @@ class login implements renderable, templatable {
         }
         $this->rememberusernamechecked = !empty($frm->rememberusernamechecked);
 
-        $this->forgotpasswordurl = new moodle_url($CFG->httpswwwroot . '/login/forgot_password.php');
-        $this->loginurl = new moodle_url($CFG->httpswwwroot . '/login/index.php');
+        $this->forgotpasswordurl = new moodle_url('/login/forgot_password.php');
+        $this->loginurl = new moodle_url('/login/index.php');
         $this->signupurl = new moodle_url('/login/signup.php');
 
         // Authentication instructions.
@@ -132,12 +129,7 @@ class login implements renderable, templatable {
         }
 
         // Identity providers.
-        $identityproviders = [];
-        foreach ($authsequence as $authname) {
-            $authplugin = get_auth_plugin($authname);
-            $identityproviders = array_merge($identityproviders, $authplugin->loginpage_idp_list($SESSION->wantsurl));
-        }
-        $this->identityproviders = $identityproviders;
+        $this->identityproviders = \auth_plugin_base::get_identity_providers($authsequence);
     }
 
     /**
@@ -152,15 +144,7 @@ class login implements renderable, templatable {
     public function export_for_template(renderer_base $output) {
         global $CFG;
 
-        $identityproviders = array_map(function($idp) use ($output) {
-            $icon = $idp['icon'];
-            $idp['icon'] = array(
-                'context' => $icon->export_for_template($output),
-                'template' => $icon->get_template($output)
-            );
-            $idp['icon'] = array_merge($idp['icon'], $icon->export_for_pix($output));
-            return $idp;
-        }, $this->identityproviders);
+        $identityproviders = \auth_plugin_base::prepare_identity_providers_for_output($this->identityproviders, $output);
 
         $data = new stdClass();
         $data->autofocusform = $this->autofocusform;
@@ -181,7 +165,6 @@ class login implements renderable, templatable {
         $data->rememberusername = $this->rememberusername;
         $data->rememberusernamechecked = $this->rememberusernamechecked;
         $data->rememberusernamelabel = $this->rememberusernamelabel;
-        $data->passwordautocomplete = $this->passwordautocomplete;
         $data->signupurl = $this->signupurl->out(false);
         $data->username = $this->username;
         $data->skiplinktext = get_string('skipa', 'access', get_string('login', 'core'));

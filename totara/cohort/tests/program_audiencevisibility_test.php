@@ -348,14 +348,14 @@ class totara_cohort_program_audiencevisibility_testcase extends reportcache_adva
         }
 
         // Make the test toggling the new catalog.
-        for ($i = 0; $i < 2; $i++) {
-            // Toggle enhanced catalog.
-            set_config('enhancedcatalog', $i);
-            $this->assertEquals($i, $CFG->enhancedcatalog);
+        foreach (['moodle', 'enhanced'] as $catalogtype) {
+            set_config('catalogtype', $catalogtype);
+            $this->assertEquals($catalogtype, $CFG->catalogtype);
+            $enhancedcatalog = ($catalogtype === 'enhanced');
 
             // Test #1: Login as $user and see what programs he can see.
             self::setUser($this->{$user});
-            if ($CFG->enhancedcatalog) {
+            if ($enhancedcatalog) {
                 $content = $this->get_report_result('catalogprograms', array(), false, array());
             } else {
                 $programrenderer = $PAGE->get_renderer('totara_program');
@@ -380,12 +380,12 @@ class totara_cohort_program_audiencevisibility_testcase extends reportcache_adva
                 $this->assertTrue($isviewable);
 
                 // Test #3: Try to do a search for programs.
-                if ($CFG->enhancedcatalog) {
+                if ($enhancedcatalog) {
                     $this->assertCount(1, $search);
                     $r = array_shift($search);
                     $this->assertEquals($this->{$program}->fullname, $r->prog_progexpandlink);
                 } else {
-                    $this->assertInternalType('int', strpos($search, $this->{$program}->fullname));
+                    $this->assertIsInt(strpos($search, $this->{$program}->fullname));
                 }
             }
 
@@ -399,10 +399,10 @@ class totara_cohort_program_audiencevisibility_testcase extends reportcache_adva
                 $this->assertFalse($isviewable);
 
                 // Test #3: Try to do a search for programs.
-                if ($CFG->enhancedcatalog) {
+                if ($enhancedcatalog) {
                     $this->assertCount(0, $search);
                 } else {
-                    $this->assertInternalType('int', strpos($search, 'No programs were found'));
+                    $this->assertIsInt(strpos($search, 'No programs were found'));
                 }
             }
 
@@ -434,7 +434,7 @@ class totara_cohort_program_audiencevisibility_testcase extends reportcache_adva
         $program = new program($program->id);
         $access = $program->is_viewable($user) && prog_is_accessible($program, $user);
 
-        if ($CFG->enhancedcatalog) { // New catalog.
+        if ($CFG->catalogtype === 'enhanced') { // Enhanced catalog.
             $search = array();
             if (is_array($content)) {
                 $search = totara_search_for_value($content, 'prog_progexpandlink', TOTARA_SEARCH_OP_EQUAL, $program->fullname);

@@ -1,4 +1,4 @@
-@mod @mod_choice
+@mod @mod_choice @javascript
 Feature: Test the display of the choice module on Dashboard
   In order to know my status in a choice activity
   As a user
@@ -25,8 +25,7 @@ Feature: Test the display of the choice module on Dashboard
     And I add the "Course overview" block
     And I log out
     And I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Choice" to section "1"
     And I expand all fieldsets
     And I set the following fields to these values:
@@ -47,13 +46,14 @@ Feature: Test the display of the choice module on Dashboard
 
   Scenario: View my home as a student before answering the choice
     Given I log in as "student1"
-    Then I should see "You have Choices that need attention"
-    And I should see "Not answered yet"
+    And I should see "You have Choices that need attention"
+    When I click on "You have Choices that need attention" "text"
+    Then I should see "Not answered yet"
     And I log out
 
   Scenario: View my home as a student after answering the choice
     Given I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I choose "Option 1" from "Test choice name" choice activity
     And I should see "Your selection: Option 1"
     And I should see "Your choice has been saved"
@@ -64,13 +64,14 @@ Feature: Test the display of the choice module on Dashboard
 
   Scenario: View my home as a teacher
     Given I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I choose "Option 1" from "Test choice name" choice activity
     And I should see "Your selection: Option 1"
     And I should see "Your choice has been saved"
     And "Save my choice" "button" should not exist
     And I log out
     When I log in as "teacher1"
-    Then I should see "You have Choices that need attention"
-    And I should see "View 1 responses"
+    And I should see "You have Choices that need attention"
+    When I click on "You have Choices that need attention" "text"
+    Then I should see "View 1 responses"
     And I log out

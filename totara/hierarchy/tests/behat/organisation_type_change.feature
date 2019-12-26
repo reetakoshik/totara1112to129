@@ -10,7 +10,7 @@ Feature: Test organisation type changes in hierarchies
       | user      | role      | contextlevel | reference |
       | manager   | manager   | System       |           |
     And I log in as "manager"
-    And I navigate to "Manage types" node in "Site administration > Hierarchies > Organisations"
+    And I navigate to "Manage types" node in "Site administration > Organisations"
     And I press "Add a new type"
     And I set the following fields to these values:
     | Type full name | Organisation type 1 |
@@ -26,7 +26,7 @@ Feature: Test organisation type changes in hierarchies
       | Full name                   | Custom field 1_2 |
       | Short name (must be unique) | CF1_2            |
     And I press "Save changes"
-    And I navigate to "Manage types" node in "Site administration > Hierarchies > Organisations"
+    And I navigate to "Manage types" node in "Site administration > Organisations"
     And I press "Add a new type"
     And I set the following fields to these values:
       | Type full name | Organisation type 2 |
@@ -37,7 +37,7 @@ Feature: Test organisation type changes in hierarchies
       | Full name                   | Custom field 2_1 |
       | Short name (must be unique) | CF2_1            |
     And I press "Save changes"
-    And I navigate to "Manage organisations" node in "Site administration > Hierarchies > Organisations"
+    And I navigate to "Manage organisations" node in "Site administration > Organisations"
     And I press "Add new organisation framework"
     And I set the following fields to these values:
       | Name | My organisation frameworkd 1 |
@@ -99,7 +99,7 @@ Feature: Test organisation type changes in hierarchies
     And I should see "Type: Organisation type 1" in the "My organisation 3" "table_row"
 
     # Bulk change types
-    When I navigate to "Manage types" node in "Site administration > Hierarchies > Organisations"
+    When I navigate to "Manage types" node in "Site administration > Organisations"
     And I set the following fields to these values:
       | Reclassify of all items from the type: | Organisation type 1 |
     And I click on "Choose" "button" in the "Organisation type 2" "table_row"
@@ -107,7 +107,7 @@ Feature: Test organisation type changes in hierarchies
       | Data in Custom field 1_1 (Text input): | Transfer to Custom field 2_1 (Text input) |
       | Data in Custom field 1_2 (Text input): | Delete this data                          |
     When I press "Reclassify items and transfer/delete data"
-    And I navigate to "Manage organisations" node in "Site administration > Hierarchies > Organisations"
+    And I navigate to "Manage organisations" node in "Site administration > Organisations"
     And I follow "My organisation frameworkd 1"
     And I should see "Type: Organisation type 2" in the "My organisation 1" "table_row"
     And I should see "Type: Organisation type 2" in the "My organisation 2" "table_row"

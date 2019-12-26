@@ -9,7 +9,7 @@ class Popup extends Base
     use ThemeTrait;
 
     public function render()
-    {
+    {	
         $template = 'theme_golearningzone/popup';
 
         $params = $this->getDefaultPageValues();

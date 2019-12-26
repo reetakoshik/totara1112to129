@@ -17,16 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Totara navigation edit page.
- *
- * @package    totara
- * @subpackage navigation
+ * @package    totara_coursecatalogue
  * @author     Oleg Demeshev <oleg.demeshev@totaralms.com>
  */
 
 namespace totara_coursecatalog\totara\menu;
-
-use \totara_core\totara\menu\menu as menu;
 
 class programs extends \totara_core\totara\menu\item {
 
@@ -37,7 +32,7 @@ class programs extends \totara_core\totara\menu\item {
     protected function get_default_url() {
         global $CFG;
 
-        if (!empty($CFG->enhancedcatalog)) {
+        if ($CFG->catalogtype === 'enhanced') {
             return '/totara/coursecatalog/programs.php';
         } else {
             return '/totara/program/index.php';
@@ -46,18 +41,6 @@ class programs extends \totara_core\totara\menu\item {
 
     public function get_default_sortorder() {
         return 72000;
-    }
-
-    public function get_default_visibility() {
-        return menu::SHOW_WHEN_REQUIRED;
-    }
-
-    protected function check_visibility() {
-        if (totara_feature_visible('programs')) {
-            return menu::SHOW_ALWAYS;
-        } else {
-            return menu::HIDE_ALWAYS;
-        }
     }
 
     /**
@@ -71,5 +54,9 @@ class programs extends \totara_core\totara\menu\item {
 
     protected function get_default_parent() {
         return '\totara_coursecatalog\totara\menu\findlearning';
+    }
+
+    public function get_incompatible_preset_rules(): array {
+        return ['can_view_programs'];
     }
 }

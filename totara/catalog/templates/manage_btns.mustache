@@ -1,0 +1,74 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Kevin Hottinger <kevin.hottinger@totaralearning.com>
+   @package totara_catalog
+}}
+{{!
+
+    @template totara_catalog/manage_btns
+
+    This template generates Catalog manage buttons.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * data-core-autoinitialise: State of this JS auto initilise
+    * data-core-autoinitialise-amd: AMD to be linked to template
+    * data-tw-catalogManageBtnsGroup: Trigger for displaying dialog list
+
+    Context variables required for this template:
+    * has_buttons: Bool, Has data for single buttons
+    * buttons: data
+    * buttons -> url: string, URL for button
+    * buttons -> label: string, text for button
+    * has_create_dropdown: Bool, has data for 'create' dropdown
+    * create_buttons: array of availble buttons data
+    * buttons -> url: string, link for individual button
+    * buttons -> label: string, text for link
+}}
+
+<div class="tw-catalogManageBtns"
+    data-core-autoinitialise="true"
+    data-core-autoinitialise-amd="totara_catalog/manage_btns">
+
+    {{#has_buttons}}{{#buttons}}
+        <a href="{{{url}}}" class="tw-catalogManageBtns__btn btn">
+            {{label}}
+        </a>
+    {{/buttons}}{{/has_buttons}}
+
+    {{#has_create_dropdown}}
+    <div class="tw-catalogManageBtns__group" data-tw-catalogManageBtnsGroup="">
+        <div class="tw-catalogManageBtns__btn">
+            {{#str}}create, core{{/str}}
+            {{#flex_icon}}expandable, expand, core{{/flex_icon}}
+        </div>
+        <ul class="tw-catalogManageBtns__group_options">
+            {{#create_buttons}}
+            <li class="tw-catalogManageBtns__group_options_item">
+                <a href="{{{url}}}" class="tw-catalogManageBtns__group_options_item_link">
+                    {{label}}
+                </a>
+            </li>
+            {{/create_buttons}}
+        </ul>
+    </div>
+    {{/has_create_dropdown}}
+</div>

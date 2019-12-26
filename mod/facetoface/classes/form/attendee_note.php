@@ -46,6 +46,9 @@ class attendee_note extends \moodleform {
         $mform->addElement('hidden', 's', $this->_customdata['s']);
         $mform->setType('s', PARAM_INT);
 
+        $mform->addElement('hidden', 'return', $this->_customdata['return']);
+        $mform->setType('return', PARAM_ALPHA);
+
         $signup = new \stdClass();
         $signup->id = $attendeenote->submissionid;
         customfield_definition($mform, $signup, 'facetofacesignup', 0, 'facetoface_signup');

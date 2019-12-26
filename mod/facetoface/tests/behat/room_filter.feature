@@ -4,7 +4,7 @@ Feature: Filter session by pre-defined rooms
   As a site manager
   I need to create rooms
 
-Background:
+  Background:
     Given I am on a totara site
     And the following "courses" exist:
       | fullname | shortname | category |
@@ -61,8 +61,7 @@ Background:
 
   @javascript
   Scenario: Add sessions with different rooms and filter sessions by rooms
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
 
     And I follow "Add a new event"

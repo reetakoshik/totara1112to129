@@ -159,7 +159,7 @@ echo html_writer::tag('title', 'LoadSCO');
             document.body.innerHTML = "<p><?php echo get_string('activityloading', 'scorm');?>" +
                                         "<span id='countdown'><?php echo $delayseconds ?></span> " +
                                         "<?php echo get_string('numseconds', 'moodle', '');?>. &nbsp; " +
-                                        "<img src='<?php echo $OUTPUT->pix_url('wait', 'scorm') ?>'></p>";
+                                        "<?php echo str_replace("\n", ' ', addslashes($OUTPUT->pix_icon('wait', '', 'scorm'))); ?></p>";
             var e = document.getElementById("countdown");
             var cSeconds = parseInt(e.innerHTML);
             var timer = setInterval(function() {
@@ -196,7 +196,7 @@ echo html_writer::tag('title', 'LoadSCO');
         if (cWin == null) {
             document.body.innerHTML = <?php echo json_encode(get_string('popup_simple_popupblockednotice', 'scorm')); ?> + "<p><a href=\"javascript:openContentWindow();\" onclick=\"openContentWindow();\">" + <?php echo json_encode(get_string('popup_simple_popupmanuallaunch', 'scorm')); ?> + "</a></p>";
         } else if (cWin.closed) {
-            document.body.innerHTML = <?php echo json_encode(get_string('popup_simple_redirectingnotice', 'scorm')); ?> + "&nbsp;<img src='<?php echo $OUTPUT->pix_url('wait', 'scorm') ?>'></p>";
+            document.body.innerHTML = <?php echo json_encode(get_string('popup_simple_redirectingnotice', 'scorm')); ?> + "&nbsp;<?php $OUTPUT->pix_icon('wait', '', 'scorm')?></p>";
             setTimeout((function(){window.top.location = "<?php echo $CFG->wwwroot.'/course/view.php?id='.$scorm->course; ?>";}),2000);
         } else {
             setTimeout(checkContentWindowOpen,2000);

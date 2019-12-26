@@ -197,10 +197,10 @@ if ($canupdatescales && $scale_used) {
 
 
 // Display warning if proficient values don't make sense
-$maxprof = $DB->get_field('comp_scale_values', 'MAX(sortorder)', array('proficient' => 1, 'scaleid' => $scale->id));
-$minnoneprof = $DB->get_field('comp_scale_values', 'MIN(sortorder)', array('proficient' => 0, 'scaleid' => $scale->id));
-if (isset($maxprof) && isset($minnoneprof) && $maxprof > $minnoneprof) {
-    echo $OUTPUT->container(get_string('nonsensicalproficientvalues', 'totara_hierarchy'), 'notifyproblem');
+if (totara_competency_scale_proficient_not_in_order($id)) {
+    echo html_writer::empty_tag('br');
+    $warning_icon = $OUTPUT->render(new \core\output\flex_icon('warning'));
+    echo html_writer::div($warning_icon . ' ' . get_string('competenctscaleoutoforderthis', 'totara_hierarchy'));
 }
 
 // Display scale values

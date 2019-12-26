@@ -6,6 +6,7 @@
     require_once($CFG->libdir.'/adminlib.php');
     require_once($CFG->libdir.'/blocklib.php');
     require_once($CFG->libdir.'/tablelib.php');
+    require_once($CFG->dirroot . '/totara/reportbuilder/lib.php');
 
     admin_externalpage_setup('manageblocks');
 
@@ -50,6 +51,9 @@
         add_to_config_log('block_visibility', $block->visible, '1', $block->name);
         core_plugin_manager::reset_caches();
         admin_get_root(true, false);  // settings not required - only pages
+
+        // Regenerate reportbuilder cache for any potentially missing embedded reports.
+        reportbuilder::generate_embedded_reports();
     }
 
     if (!empty($protect) && confirm_sesskey()) {

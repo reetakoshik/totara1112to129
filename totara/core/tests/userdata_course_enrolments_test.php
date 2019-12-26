@@ -120,8 +120,6 @@ class totara_core_userdata_course_enrolments_testcase extends advanced_testcase 
     }
 
     public function test_export_system_context() {
-        $this->resetAfterTest(false);
-
         $data = $this->create_test_data('manual');
 
         $export = course_enrolments::execute_export(
@@ -140,17 +138,10 @@ class totara_core_userdata_course_enrolments_testcase extends advanced_testcase 
         $this->assertContains($data['group1a']->id, $export->data['groups'][$data['course1']->id][0]);
         $this->assertContains($data['group2a']->id, $export->data['groups'][$data['course2']->id][0]);
         $this->assertContains($data['group3a']->id, $export->data['groups'][$data['course3']->id][0]);
-
-        return $data;
     }
 
-    /**
-     * @param array $data
-     * @return array
-     * @depends test_export_system_context
-     */
-    public function test_export_multiple_enrolments_system_context($data) {
-        $this->resetAfterTest(false);
+    public function test_export_multiple_enrolments_system_context() {
+        $data = $this->create_test_data('manual');
 
         $export = course_enrolments::execute_export(
             new target_user($data['user3']),
@@ -171,17 +162,10 @@ class totara_core_userdata_course_enrolments_testcase extends advanced_testcase 
         $this->assertCount(2, $export->data['groups'][$data['course3']->id][0]);
         $this->assertContains($data['group3a']->id, $export->data['groups'][$data['course3']->id][0]);
         $this->assertContains($data['group3b']->id, $export->data['groups'][$data['course3']->id][0]);
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @return array
-     * @depends test_export_system_context
-     */
-    public function test_count_system_context($data) {
-        $this->resetAfterTest(false);
+    public function test_count_system_context() {
+        $data = $this->create_test_data('manual');
 
         $count = course_enrolments::execute_count(
             new target_user($data['user1']),
@@ -189,17 +173,10 @@ class totara_core_userdata_course_enrolments_testcase extends advanced_testcase 
         );
 
         $this->assertEquals(3, $count);
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @return mixed
-     * @depends test_count_system_context
-     */
-    public function test_count_multiple_enrolments_system_context($data) {
-        $this->resetAfterTest(false);
+    public function test_count_multiple_enrolments_system_context() {
+        $data = $this->create_test_data('manual');
 
         $count = course_enrolments::execute_count(
             new target_user($data['user3']),
@@ -207,16 +184,10 @@ class totara_core_userdata_course_enrolments_testcase extends advanced_testcase 
         );
 
         $this->assertEquals(3, $count);
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @depends test_count_multiple_enrolments_system_context
-     */
-    public function test_purge_system_context($data) {
-        $this->resetAfterTest(false);
+    public function test_purge_system_context() {
+        $data = $this->create_test_data('manual');
 
         $result = course_enrolments::execute_purge(
             new target_user($data['user1']),
@@ -252,16 +223,10 @@ class totara_core_userdata_course_enrolments_testcase extends advanced_testcase 
         $this->assertTrue(groups_is_member($data['group1a']->id, $data['user3']->id));
         $this->assertTrue(groups_is_member($data['group3a']->id, $data['user3']->id));
         $this->assertTrue(groups_is_member($data['group3b']->id, $data['user3']->id));
-
-        return $data;
     }
 
-    /**
-     * @param array $data
-     * @depends test_purge_system_context
-     */
-    public function test_purge_multiple_enrolments_system_context(array $data) {
-        $this->resetAfterTest(true);
+    public function test_purge_multiple_enrolments_system_context() {
+        $data = $this->create_test_data('manual');
 
         $result = course_enrolments::execute_purge(
             new target_user($data['user3']),
@@ -283,8 +248,6 @@ class totara_core_userdata_course_enrolments_testcase extends advanced_testcase 
     }
 
     public function test_export_category_context() {
-        $this->resetAfterTest(false);
-
         $data = $this->create_test_data('manual');
 
         $export = course_enrolments::execute_export(
@@ -303,17 +266,10 @@ class totara_core_userdata_course_enrolments_testcase extends advanced_testcase 
         $this->assertArrayNotHasKey($data['course1']->id, $export->data['groups']);
         $this->assertContains($data['group2a']->id, $export->data['groups'][$data['course2']->id][0]);
         $this->assertContains($data['group3a']->id, $export->data['groups'][$data['course3']->id][0]);
-
-        return $data;
     }
 
-    /**
-     * @param array $data
-     * @return array
-     * @depends test_export_category_context
-     */
-    public function test_export_multiple_enrolments_category_context($data) {
-        $this->resetAfterTest(false);
+    public function test_export_multiple_enrolments_category_context() {
+        $data = $this->create_test_data('manual');
 
         $export = course_enrolments::execute_export(
             new target_user($data['user3']),
@@ -334,17 +290,10 @@ class totara_core_userdata_course_enrolments_testcase extends advanced_testcase 
         $this->assertCount(2, $export->data['groups'][$data['course3']->id][0]);
         $this->assertContains($data['group3a']->id, $export->data['groups'][$data['course3']->id][0]);
         $this->assertContains($data['group3b']->id, $export->data['groups'][$data['course3']->id][0]);
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @return array
-     * @depends test_export_category_context
-     */
-    public function test_count_category_context($data) {
-        $this->resetAfterTest(false);
+    public function test_count_category_context() {
+        $data = $this->create_test_data('manual');
 
         $count = course_enrolments::execute_count(
             new target_user($data['user1']),
@@ -356,13 +305,8 @@ class totara_core_userdata_course_enrolments_testcase extends advanced_testcase 
         return $data;
     }
 
-    /**
-     * @param $data
-     * @return mixed
-     * @depends test_count_category_context
-     */
-    public function test_count_multiple_enrolments_category_context($data) {
-        $this->resetAfterTest(false);
+    public function test_count_multiple_enrolments_category_context() {
+        $data = $this->create_test_data('manual');
 
         $count = course_enrolments::execute_count(
             new target_user($data['user3']),
@@ -374,12 +318,8 @@ class totara_core_userdata_course_enrolments_testcase extends advanced_testcase 
         return $data;
     }
 
-    /**
-     * @param $data
-     * @depends test_count_multiple_enrolments_category_context
-     */
-    public function test_purge_category_context($data) {
-        $this->resetAfterTest(false);
+    public function test_purge_category_context() {
+        $data = $this->create_test_data('manual');
 
         $result = course_enrolments::execute_purge(
             new target_user($data['user1']),
@@ -417,16 +357,10 @@ class totara_core_userdata_course_enrolments_testcase extends advanced_testcase 
         $this->assertTrue(groups_is_member($data['group1a']->id, $data['user3']->id));
         $this->assertTrue(groups_is_member($data['group3a']->id, $data['user3']->id));
         $this->assertTrue(groups_is_member($data['group3b']->id, $data['user3']->id));
-
-        return $data;
     }
 
-    /**
-     * @param array $data
-     * @depends test_purge_category_context
-     */
-    public function test_purge_multiple_enrolments_category_context(array $data) {
-        $this->resetAfterTest(true);
+    public function test_purge_multiple_enrolments_category_context() {
+        $data = $this->create_test_data('manual');
 
         $result = course_enrolments::execute_purge(
             new target_user($data['user3']),
@@ -450,8 +384,6 @@ class totara_core_userdata_course_enrolments_testcase extends advanced_testcase 
     }
 
     public function test_export_course_context() {
-        $this->resetAfterTest(false);
-
         $data = $this->create_test_data('manual');
 
         $export = course_enrolments::execute_export(
@@ -470,17 +402,10 @@ class totara_core_userdata_course_enrolments_testcase extends advanced_testcase 
         $this->assertArrayNotHasKey($data['course1']->id, $export->data['groups']);
         $this->assertArrayNotHasKey($data['course2']->id, $export->data['groups']);
         $this->assertContains($data['group3a']->id, $export->data['groups'][$data['course3']->id][0]);
-
-        return $data;
     }
 
-    /**
-     * @param array $data
-     * @return array
-     * @depends test_export_course_context
-     */
-    public function test_export_multiple_enrolments_course_context($data) {
-        $this->resetAfterTest(false);
+    public function test_export_multiple_enrolments_course_context() {
+        $data = $this->create_test_data('manual');
 
         $export = course_enrolments::execute_export(
             new target_user($data['user3']),
@@ -501,17 +426,10 @@ class totara_core_userdata_course_enrolments_testcase extends advanced_testcase 
         $this->assertCount(2, $export->data['groups'][$data['course3']->id][0]);
         $this->assertContains($data['group3a']->id, $export->data['groups'][$data['course3']->id][0]);
         $this->assertContains($data['group3b']->id, $export->data['groups'][$data['course3']->id][0]);
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @return array
-     * @depends test_export_course_context
-     */
-    public function test_count_course_context($data) {
-        $this->resetAfterTest(false);
+    public function test_count_course_context() {
+        $data = $this->create_test_data('manual');
 
         $count = course_enrolments::execute_count(
             new target_user($data['user1']),
@@ -519,17 +437,10 @@ class totara_core_userdata_course_enrolments_testcase extends advanced_testcase 
         );
 
         $this->assertEquals(1, $count);
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @return mixed
-     * @depends test_count_course_context
-     */
-    public function test_count_multiple_enrolments_course_context($data) {
-        $this->resetAfterTest(false);
+    public function test_count_multiple_enrolments_course_context() {
+        $data = $this->create_test_data('manual');
 
         $count = course_enrolments::execute_count(
             new target_user($data['user3']),
@@ -537,16 +448,10 @@ class totara_core_userdata_course_enrolments_testcase extends advanced_testcase 
         );
 
         $this->assertEquals(2, $count);
-
-        return $data;
     }
 
-    /**
-     * @param $data
-     * @depends test_count_multiple_enrolments_course_context
-     */
-    public function test_purge_course_context($data) {
-        $this->resetAfterTest(false);
+    public function test_purge_course_context() {
+        $data = $this->create_test_data('manual');
 
         $result = course_enrolments::execute_purge(
             new target_user($data['user1']),
@@ -586,16 +491,10 @@ class totara_core_userdata_course_enrolments_testcase extends advanced_testcase 
         $this->assertTrue(groups_is_member($data['group1a']->id, $data['user3']->id));
         $this->assertTrue(groups_is_member($data['group3a']->id, $data['user3']->id));
         $this->assertTrue(groups_is_member($data['group3b']->id, $data['user3']->id));
-
-        return $data;
     }
 
-    /**
-     * @param array $data
-     * @depends test_purge_course_context
-     */
-    public function test_purge_multiple_enrolments_course_context(array $data) {
-        $this->resetAfterTest(true);
+    public function test_purge_multiple_enrolments_course_context() {
+        $data = $this->create_test_data('manual');
 
         $result = course_enrolments::execute_purge(
             new target_user($data['user3']),
@@ -649,12 +548,9 @@ class totara_core_userdata_course_enrolments_testcase extends advanced_testcase 
     /**
      * @dataProvider data_provider_enrol_plugins
      * @param $pluginname
-     * @throws coding_exception
-     * @throws dml_exception
      */
     public function test_purge_course_context_different_plugins($pluginname) {
         global $DB;
-        $this->resetAfterTest(true);
 
         $data = $this->create_test_data($pluginname);
 

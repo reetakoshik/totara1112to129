@@ -37,10 +37,6 @@ class block_totara_program_completion extends block_base {
     }
 
     public function specialization() {
-        if (!empty($this->config->title)) {
-            $this->title = format_string($this->config->title);
-        }
-
         if (!empty($this->config->titlelink)) {
             $link = new moodle_url($this->config->titlelink);
             $this->title = html_writer::link($link, $this->title);

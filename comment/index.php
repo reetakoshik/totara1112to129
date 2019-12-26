@@ -26,11 +26,10 @@ require_once('../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->dirroot.'/comment/locallib.php');
 
-require_login();
 admin_externalpage_setup('comments', '', null, '', array('pagelayout'=>'report'));
 
 $context = context_system::instance();
-require_capability('moodle/comment:delete', $context);
+require_capability('moodle/site:viewreports', $context); // Totara: allow viewing with correct capability.
 
 $PAGE->requires->js_init_call('M.core_comment.init_admin', null, true);
 
@@ -47,7 +46,9 @@ if ($action and !confirm_sesskey()) {
     $action = '';
 }
 
-if ($action === 'delete') {
+$hasdeletecap = has_capability('moodle/comment:delete', $context);
+// Totara: check 'delete' capability for deletion.
+if ($action === 'delete' && $hasdeletecap) {
     // delete a single comment
     if (!empty($commentid)) {
         if (!$confirm) {
@@ -61,7 +62,7 @@ if ($action === 'delete') {
             die;
         } else {
             if ($manager->delete_comment($commentid)) {
-                redirect($CFG->httpswwwroot.'/comment/');
+                redirect($CFG->wwwroot.'/comment/');
             } else {
                 $err = 'cannotdeletecomment';
             }
@@ -81,13 +82,13 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('comments'));
 echo $OUTPUT->box_start('generalbox commentsreport');
 if (!empty($err)) {
-    print_error($err, 'error', $CFG->httpswwwroot.'/comment/');
+    print_error($err, 'error', $CFG->wwwroot.'/comment/');
 }
 if (empty($action)) {
     echo '<form method="post">';
     $return = $manager->print_comments($page);
     // if no comments available, $return will be false
-    if ($return) {
+    if ($return && $hasdeletecap) {
         echo '<input type="submit" class="btn btn-primary" id="comments_delete" name="batchdelete"
             value="'.get_string('delete').'" />';
     }

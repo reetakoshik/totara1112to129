@@ -172,6 +172,10 @@ function competency_scale_display_table($scales) {
     ///
 
     if ($scales) {
+
+        $warning_icon = $OUTPUT->render(new \core\output\flex_icon('warning'));
+        $included_outoforder = false;
+
         $table = new html_table();
         $table->head  = array(get_string('scale'), get_string('used'));
         if ($can_edit || $can_delete) {
@@ -183,7 +187,14 @@ function competency_scale_display_table($scales) {
             $scale_used = competency_scale_is_used($scale->id);
             $scale_assigned = competency_scale_is_assigned($scale->id);
             $line = array();
-            $line[] = $OUTPUT->action_link(new moodle_url('/totara/hierarchy/prefix/competency/scale/view.php', array('id' => $scale->id, 'prefix' => 'competency')), format_string($scale->name));
+            $name_link = $OUTPUT->action_link(new moodle_url('/totara/hierarchy/prefix/competency/scale/view.php', array('id' => $scale->id, 'prefix' => 'competency')), format_string($scale->name));
+
+            if (totara_competency_scale_proficient_not_in_order($scale->id)) {
+                $name_link .= ' ' . $warning_icon;
+                $included_outoforder = true;
+            }
+
+            $line[] = $name_link;
             if ($scale_used) {
                 $line[] = get_string('yes');
             } else if ($scale_assigned) {
@@ -221,6 +232,10 @@ function competency_scale_display_table($scales) {
     $templatedata = new stdClass();
     $templatedata->heading = get_string('competencyscales', 'totara_hierarchy');
 
+    if ($included_outoforder) {
+        $templatedata->informationaltext = $warning_icon . get_string('competenctscaleoutoforderexist', 'totara_hierarchy');
+    }
+
     if ($scales) {
         $templatedata->scales = $table->export_for_template($OUTPUT);
     } else {
@@ -234,4 +249,15 @@ function competency_scale_display_table($scales) {
     }
 
     echo $OUTPUT->render_from_template('totara_hierarchy/admin_scales', $templatedata);
+}
+
+function totara_competency_scale_proficient_not_in_order($scaleid) {
+    global $DB;
+    $maxprof = $DB->get_field('comp_scale_values', 'MAX(sortorder)', array('proficient' => 1, 'scaleid' => $scaleid));
+    $minnoneprof = $DB->get_field('comp_scale_values', 'MIN(sortorder)', array('proficient' => 0, 'scaleid' => $scaleid));
+    if (isset($maxprof) && isset($minnoneprof) && $maxprof > $minnoneprof) {
+        return true;
+    } else {
+        return false;
+    }
 }

@@ -13,6 +13,7 @@ $THEME->sheets = [
     'totara',
     'golearningzone-base',
     'header',
+	'login',
     'block',
     'panel',
     'team',
@@ -23,14 +24,22 @@ $THEME->sheets = [
     'palette_orange',
     'palette_green',
     'palette_custom',
+	'animate',
+	'font-open-sans',
+	'glzcss',
+    'glzcss125',
+    'responsive'
 ];
-
+$enableheadr = get_config('theme_golearningzone','rmbtitle');
+if($enableheadr ==1){
+array_push($THEME->sheets, 'blockheader');
+}
 $THEME->layouts = [
     'admin' => [
         'file'          => 'admin.php',
         'regions'       => ['side-pre'],
-        'defaultregion' => 'side-pre',
-        'options'       => ['fluid' => true],
+        //'defaultregion' => 'side-pre',
+        //'options'       => ['fluid' => true],
     ],
 
     'frontpage' => [
@@ -64,51 +73,63 @@ $THEME->layouts = [
         ],
     ],
 
-    'noblocks' => [
-        'file'    => 'noblocks.php',
-        'regions' => [],
-        'options' => [],
-    ],
-
     'popup'   => [
         'file'    => 'popup.php',
         'regions' => [],
         'options' => [],
     ],
 
-    // 'maintenance' => [
-    //     'file'    => 'default.php',
-    //     'regions' => [],
-    //     'options' => [],
-    //  ],
+    'maintenance' => [
+        'file'    => 'noblocks.php',
+        'regions' => [],
+        'options' => [],
+     ],
+    
+    /*'maintenance' => array(
+        'file' => 'noblocks.php',
+        'regions' => array(),
+        'options' => array('noblocks'=>true, 'nofooter'=>true, 'nonavbar'=>true, 'nocustommenu'=>true, 'nocourseheaderfooter'=>true),
+    ),*/
 
-    'standard' => [
+    /*'standard' => [
         'file'          => 'default.php',
         'regions'       => ['side-pre', 'side-post'],
         'defaultregion' => 'side-post',
-    ],
+    ],*/
 
+    'standard' => array(
+        'file' => 'default.php',
+        'regions' => array('side-pre'),
+        'defaultregion' => 'side-pre',
+    ),
+	
+    'standardgoal' => array(
+        'file' => 'defaultgoal.php',
+        'regions' => array('side-pre'),
+        'defaultregion' => 'side-pre',
+    ),
+	
     'course' => [
         'file'          => 'course.php',
-        'regions'       => ['side-post'],
-        'defaultregion' => 'side-post',
+        'regions'       => ['first','side-pre'],
+        'defaultregion' => 'side-pre',
     ],
 
     'secure' => [
         'file'          => 'default.php',
-        'regions'       => ['side-pre', 'side-post'],
+        'regions'       => ['side-pre'],
         'defaultregion' => 'side-pre',
     ],
 
     'coursecategory' => [
         'file'          => 'default.php',
-        'regions'       => ['side-pre', 'side-post'],
+        'regions'       => ['side-pre'],
         'defaultregion' => 'side-pre',
     ],
 
     'incourse' => [
         'file'          => 'report.php',
-        'regions'       => ['side-pre', 'side-post'],
+        'regions'       => ['side-pre'],
         'defaultregion' => 'side-pre',
     ],
 
@@ -116,7 +137,6 @@ $THEME->layouts = [
         'file'          => 'dashboard.php',
         'regions'       => [
             'side-pre',
-            'side-post',
             'first',
             'second-left',
             'second-right',
@@ -147,7 +167,7 @@ $THEME->layouts = [
 
     'mypublic' => [
         'file'          => 'mypublic.php',
-        'regions'       => ['side-pre', 'side-post'],
+        'regions'       => ['side-pre'],
         'defaultregion' => 'side-pre',
     ],
 
@@ -155,6 +175,11 @@ $THEME->layouts = [
         'file'    => 'empty.php',
         'regions' => [],
         'options' => [],
+    ],
+    'noblocks' => [
+        'file'    => 'noblocks.php',
+        'regions' => [],
+        'options' => array('noblocks'=>true),
     ],
 ];
 

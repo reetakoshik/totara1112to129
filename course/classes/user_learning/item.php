@@ -194,16 +194,6 @@ class item extends item_base implements item_has_progress {
             // The user may be enrolled via the program only or was marked completed via rpl.
             // In this case it may not be tracked for completion, but we still want to show progress
 
-            if (!$info->is_tracked_user($this->user->id)) {
-                // The user is not being tracked for completion, but may have been marked completed via rpl
-
-                $completion = new \completion_completion(['userid' => $this->user->id, 'course' => $this->id]);
-                $status = \completion_completion::get_status($completion);
-                if ($status != 'complete' && $status != 'completeviarpl') {
-                    return;
-                }
-            }
-
             $this->progress_canbecompleted = true;
             // But they may not already be complete.
             $this->progress_complete = false;
@@ -226,7 +216,8 @@ class item extends item_base implements item_has_progress {
             }
 
             $this->progressinfo = $completion->get_progressinfo();
-            $this->progress_percentage = $completion->get_percentagecomplete();
+            // Default to 0 if not tracked
+            $this->progress_percentage = (int)$completion->get_percentagecomplete();
 
             if (empty($status)) {
                 if ($this->progress_hascompletioncriteria) {
@@ -261,7 +252,6 @@ class item extends item_base implements item_has_progress {
         $record = new \stdClass;
         $record->summarytext = (string)$this->progress_summary;
         if ($this->progress_canbecompleted && $this->progress_hascompletioncriteria) {
-            // TODO: Need to get a better way to get the width right
             $pbar = new \static_progress_bar('', '0');
             $pbar->set_progress((int)$this->progress_percentage);
             $completion = new \completion_completion(['userid' => $this->user->id, 'course' => $this->id]);

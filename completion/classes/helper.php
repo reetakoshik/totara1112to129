@@ -99,17 +99,13 @@ final class helper {
 
             $transaction->allow_commit();
 
-            // Update the cached coursecompletion and progressinfo records.
-            // To avoid reading the full course completion structure just to use the
-            // completion_completion::mark_progressinfo_stale() function, we access
-            // the progressinfo cache directly
-            $cache = \cache::make('totara_core', 'completion_progressinfo');
-            $key = $coursecompletion->course . '_' . $coursecompletion->userid;
-            $cache->delete($key);
-
+            // Update the cached record.
             $cache = \cache::make('core', 'coursecompletion');
             $key = $coursecompletion->userid . '_' . $coursecompletion->course;
             $cache->delete($key);
+
+            // Mark progress caches stale
+            self::mark_progress_caches_stale($coursecompletion->course, $coursecompletion->userid);
 
             return $coursecompletion->id;
         } else {
@@ -184,9 +180,10 @@ final class helper {
      * @param \stdClass $critcompl A course_completion_crit_compl record to be saved, including 'id' if this is an update.
      *                             Must contain at least 'userid', 'course' and 'criteriaid', even when updating using 'id'.
      * @param string $message If provided, will be added to the course completion log message.
+     * @param boolean $reaggregation Set true to schedule reaggregation
      * @return int the record id
      */
-    public static function write_criteria_completion($critcompl, $message = '') {
+    public static function write_criteria_completion($critcompl, $message = '', $reaggregation = false) {
         global $DB;
 
         // Decide if this is an insert or update.
@@ -235,7 +232,14 @@ final class helper {
 
         self::log_criteria_completion($critcompl->id, $message);
 
+        if ($reaggregation) {
+            self::schedule_reaggregation_of_completion($critcompl->course, $critcompl->userid);
+        }
+
         $transaction->allow_commit();
+
+        // Mark progress caches stale
+        self::mark_progress_caches_stale($critcompl->course, $critcompl->userid);
 
         return $critcompl->id;
     }
@@ -300,6 +304,9 @@ final class helper {
         self::log_course_module_completion($modulecompletion->id, $message);
 
         $transaction->allow_commit();
+
+        // Mark progress caches stale
+        \totara_program\progress\program_progress_cache::mark_user_cache_stale($modulecompletion->userid);
 
         return $modulecompletion->id;
     }
@@ -444,6 +451,27 @@ final class helper {
             $description,
             $changeuserid
         );
+    }
+
+    /**
+     * Write a log message (in the course completion log) when a reaggregation flag has been set.
+     *
+     * @param int $courseid
+     * @param int $userid
+     * @param string $message
+     * @param int|null $changeuserid
+     */
+    public static function log_course_reaggregation($courseid, $userid, $message = '', $changeuserid = null) {
+        global $DB;
+        if (empty($message)) {
+            $message = 'Course completion reaggregation logged';
+        }
+        $reaggregate = $DB->get_field('course_completions', 'reaggregate', array('course' => $courseid, 'userid' => $userid));
+        if (!empty($reaggregate)) {
+            $description = $message . '<br/>' .
+                '<ul><li>Reaggregate: ' . self::format_log_date($reaggregate) . '</li></ul>';
+            self::save_completion_log($courseid, $userid, $description, $changeuserid);
+        }
     }
 
     /**
@@ -998,4 +1026,37 @@ final class helper {
         return !empty($usetimecompleted);
     }
 
+    /**
+     * Mark progressinfo caches stale to ensure completion data is re-read from the database on next view
+     *
+     * @param int @courseid
+     * @param int @userid
+     */
+    public static function mark_progress_caches_stale($courseid, $userid) {
+        $course = (object) array('id' => $courseid);
+        $info = new \completion_info($course);
+        $info->mark_progressinfo_stale($userid);
+        \totara_program\progress\program_progress_cache::mark_user_cache_stale($userid);
+    }
+
+    /**
+     * Schedule the reaggregation of the course completion of a given user.
+     * The function will fail if it is already scheduled.
+     *
+     * @param int $courseid ID of the course.
+     * @param int $userid ID of the user.
+     * @param int $time The timestamp to schedule, 0 to schedule as soon as possible
+     * @return bool true if succeeds
+     */
+    public static function schedule_reaggregation_of_completion($courseid, $userid, $time = 0) {
+        global $DB;
+        if ($time <= 0) {
+            $time = time();
+        }
+        $success = $DB->set_field('course_completions', 'reaggregate', $time, array('course' => $courseid, 'userid' => $userid, 'reaggregate' => 0));
+        if ($success) {
+            self::log_course_reaggregation($courseid, $userid, 'Completion reaggregation scheduled');
+        }
+        return $success;
+    }
 }

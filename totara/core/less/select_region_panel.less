@@ -1,0 +1,121 @@
+//
+// This file is part of Totara Learn
+//
+// Copyright (C) 2018 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @copyright 2018 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Kevin Hottinger <kevin.hottinger@totaralearning.com>
+// @package   theme_roots
+
+// Variables
+// Colours
+@selectRegionPanel-color_neutral_2: @totara_style-color_neutral_2;
+// Spacing
+@selectRegionPanel-spacing_small: @totara_style-spacing_small;
+@selectRegionPanel-spacing_x_small: @totara_style-spacing_x_small;
+// Breakpoints
+@selectRegionPanel-screen_sm_min: @totara_style-screen_sm_min;
+
+.tw-selectRegionPanel {
+    padding: @selectRegionPanel-spacing_small 0;
+
+    &__content_hidden {
+        display: none;
+    }
+
+    &__heading {
+        display: flex;
+
+        &_clear {
+            .totara_style-body_small;
+            display: inline-block;
+            flex-shrink: 0;
+            letter-spacing: normal;
+            text-transform: none;
+            word-wrap: break-word;
+
+            &_link {
+                max-width: 100%;
+                overflow: hidden;
+                padding: @selectRegionPanel-spacing_small;
+                vertical-align: sub;
+            }
+        }
+
+        &_count {
+            display: inline-block;
+        }
+
+        &_text {
+            .totara_style-heading_label_medium;
+            margin: 0 0 @selectRegionPanel-spacing_small;
+            min-width: 0;
+            padding: 0 @selectRegionPanel-spacing_x_small;
+            word-wrap: break-word;
+        }
+    }
+
+    &__hiddenOnSmall {
+        max-height: 0;
+        overflow: hidden;
+        padding-bottom: 0;
+        transition: max-height 0.1s ease-in;
+
+        &_show {
+            max-height: 1000px;
+            padding-bottom: @selectRegionPanel-spacing_small;
+        }
+    }
+
+    &__selector {
+        padding: @selectRegionPanel-spacing_small 0;
+
+        &_header {
+            .totara_style-heading_label_small;
+            margin: 0 @selectRegionPanel-spacing_x_small @selectRegionPanel-spacing_x_small;
+        }
+    }
+}
+
+@media (min-width: @selectRegionPanel-screen_sm_min) {
+    .tw-selectRegionPanel {
+        padding: @selectRegionPanel-spacing_small;
+
+        &__hiddenOnSmall {
+            display: block;
+            max-height: none;
+            overflow: initial;
+            padding-bottom: @selectRegionPanel-spacing_small;
+        }
+
+        &__heading {
+            &_count {
+                padding: 0 .2rem;
+            }
+
+            &_text {
+                padding: 0 @selectRegionPanel-spacing_small;
+            }
+        }
+
+        &__selector {
+            &_header {
+                margin: 0 @selectRegionPanel-spacing_small @selectRegionPanel-spacing_x_small;
+            }
+        }
+    }
+}

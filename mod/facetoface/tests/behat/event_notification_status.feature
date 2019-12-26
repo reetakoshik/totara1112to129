@@ -15,9 +15,7 @@ Feature: Seminar event notification must not be available for user after it has 
       | user     | course | role           |
       | student1 | C1     | student        |
     When I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | Name        | Test seminar name        |
       | Description | Test seminar description |
@@ -42,28 +40,25 @@ Feature: Seminar event notification must not be available for user after it has 
   @javascript
   Scenario Outline: Seminar booking confirmation notifications are not available when disabled
     Given I am on a totara site
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I navigate to "Notifications" node in "Seminar administration"
     And I click on "Edit" "link" in the "Seminar booking confirmation: [facetofacename], [starttime]-[finishtime], [sessiondate]" "table_row"
     And I set the field "Status" to "<signup_enabled>"
     And I press "Save"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I follow "Attendees"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Boris Nikolaevich, boris@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     When I press "Continue"
     Then I <visibility> "Send booking confirmation to new attendees"
     And I <visibility> "Send booking confirmation to new attendees' managers"
     And I log out
 
     And I log in as "student1"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     When I follow "Sign-up"
     Then I <visibility> "Receive confirmation by"
@@ -79,20 +74,18 @@ Feature: Seminar event notification must not be available for user after it has 
   @javascript
   Scenario Outline: Seminar booking cancellation notifications are not available when disabled
     Given I am on a totara site
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I navigate to "Notifications" node in "Seminar administration"
     And I click on "Edit" "link" in the "Seminar booking cancellation" "table_row"
     And I set the field "Status" to "<cancellation_enabled>"
     And I press "Save"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
     And I follow "Attendees"
     And I click on "Add users" "option" in the "#menuf2f-actions" "css_element"
     And I click on "Boris Nikolaevich, boris@example.com" "option"
-    And I press "Add"
+    And I press exact "add"
     And I press "Continue"
     And I press "Confirm"
     And I click on "Remove users" "option" in the "#menuf2f-actions" "css_element"

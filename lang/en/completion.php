@@ -76,6 +76,7 @@ $string['completiondisabled'] = 'Disabled, not shown in activity settings';
 $string['completionenabled'] = 'Enabled, control via completion and activity settings';
 $string['completionexpected'] = 'Expect completed on';
 $string['completionexpected_help'] = 'This setting specifies the date when the activity is expected to be completed. The date is not shown to learners and is only displayed in the activity completion report.';
+$string['completionexpectedfor'] = 'Expected completion for \'{$a->modulename}\' activity \'{$a->instancename}\'';
 $string['completionicons'] = 'Completion tick boxes';
 $string['completionicons_help'] = 'A tick next to activity name indicates completion. This helps track your progress through courses accurately.
 
@@ -243,9 +244,6 @@ $string['aggregateall']='All';
 $string['aggregateany']='Any';
 $string['completiondependencies']='Completion dependencies';
 $string['completiondependencies_help'] = 'These are courses that a learner is required to complete before this course can be marked as complete.';
-$string['completionstartonenrol']='Completion tracking begins on enrolment';
-$string['completionstartonenrolhelp']='Begin tracking a learner\'s progress in course completion after course enrolment';
-$string['completionstartonenrol_help'] = 'Begin tracking a learner\'s progress in course completion after course enrolment.';
 $string['courseaggregationmethod']='Aggregation method';
 $string['courseaggregationmethod_help'] = 'An aggregation method of **All** means this criteria will be marked as complete when the learner has complete all the selected courses. If the aggregation method is set to **Any** only one of the selected courses will be required for the learner to complete the course.';
 $string['coursegrade_help'] = 'When enabled this criteria will be marked complete for a learner when they achieve the grade specified or higher.';
@@ -297,3 +295,10 @@ $string['tooltipcompletioncourseone'] = 'One other course needs to be completed'
 $string['tooltipcompletioncoursemany'] = '{$a} other courses need to be completed';
 $string['userdatacomponentname'] = 'Completion';
 $string['userdataitemcourse_completion'] = 'Course completions (including activity completion)';
+
+
+// Deprecated since 12.0.
+
+$string['completionstartonenrol']='Completion tracking begins on enrolment';
+$string['completionstartonenrolhelp']='Begin tracking a learner\'s progress in course completion after course enrolment';
+$string['completionstartonenrol_help'] = 'Begin tracking a learner\'s progress in course completion after course enrolment.';

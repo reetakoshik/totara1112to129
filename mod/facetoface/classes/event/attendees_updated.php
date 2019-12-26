@@ -22,6 +22,9 @@
  */
 
 namespace mod_facetoface\event;
+
+use mod_facetoface\seminar_event;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -53,6 +56,26 @@ class attendees_updated extends \core\event\base {
         $data = array(
             'context' => $context,
             'other' => array('sessionid' => $session->id),
+        );
+
+        self::$preventcreatecall = false;
+        $event = self::create($data);
+        self::$preventcreatecall = true;
+
+        return $event;
+    }
+
+    /**
+     * Create from session.
+     *
+     * @param seminar_event $session
+     * @param \context_module $context
+     * @return attendees_updated
+     */
+    public static function create_from_seminar_event(seminar_event $seminarevent, \context_module $context) {
+        $data = array(
+            'context' => $context,
+            'other' => array('sessionid' => $seminarevent->get_id()),
         );
 
         self::$preventcreatecall = false;
@@ -96,7 +119,7 @@ class attendees_updated extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/facetoface/attendees.php', array('s' => $this->other['sessionid']));
+        return new \moodle_url('/mod/facetoface/attendees/view.php', array('s' => $this->other['sessionid']));
     }
 
     /**
@@ -106,8 +129,7 @@ class attendees_updated extends \core\event\base {
      */
     public function get_legacy_logdata() {
         return array($this->courseid, 'facetoface', 'Add/remove attendees',
-            "attendees.php?s={$this->other['sessionid']}",
-            $this->other['sessionid'], $this->contextinstanceid);
+            "attendees/view.php?s={$this->other['sessionid']}", $this->other['sessionid'], $this->contextinstanceid);
     }
 
     /**

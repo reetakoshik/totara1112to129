@@ -49,7 +49,8 @@ trait program_display_completion_status
             ? 'local_lz_report/progressbar_completed'
             : 'local_lz_report/progressbar_inprogress';
 
-        return $OUTPUT->render_from_template($templatename, ['progress' => $progress]);
+        $id = 'program_progress_'.$completion->userid. '_' . $completion->programid;
+        return $OUTPUT->render_from_template($templatename, ['progress' => $progress, 'pid' => $id]);
     }
 
     private function render_details($statusData)

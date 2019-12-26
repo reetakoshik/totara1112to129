@@ -1,4 +1,4 @@
-@core @core_blog
+@core @core_blog @javascript
 Feature: Delete a blog entry
   In order to manage my blog entries
   As a user
@@ -48,4 +48,3 @@ Feature: Delete a blog entry
     And I press "Cancel"
     And I should see "Blog post one"
     And I should see "Blog post two"
-

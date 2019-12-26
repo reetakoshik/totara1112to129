@@ -24,16 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-if (!empty($PAGE->theme->settings->favicon)) {
-    $faviconurl = $PAGE->theme->setting_file_url('favicon', 'favicon');
-} else {
-    $faviconurl = $OUTPUT->favicon();
-}
-
 ?>
 <head>
     <title><?php echo $OUTPUT->page_title(); ?></title>
-    <link rel="shortcut icon" href="<?php echo $faviconurl; ?>" />
+    <link rel="shortcut icon" href="<?php echo $OUTPUT->favicon(); ?>" />
     <?php echo $OUTPUT->standard_head_html(); ?>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimal-ui">
 </head>

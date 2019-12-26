@@ -64,7 +64,7 @@ if ($sessiondateid) {
 
 $context = context_module::instance($cm->id);
 
-require_login($course, false, $cm);
+ajax_require_login($course, false, $cm);
 require_sesskey();
 require_capability('mod/facetoface:editevents', $context);
 
@@ -75,7 +75,6 @@ $jsmodule = array(
 
 $PAGE->requires->js_init_call('M.totara_f2f_dateintervalkeeper.init', array(), false, $jsmodule);
 
-// Include the same strings as mod/facetoface/sessions.php, because we override the lang string cache with this ugly hack.
 $PAGE->requires->strings_for_js(array('save', 'delete'), 'totara_core');
 $PAGE->requires->strings_for_js(array('cancel', 'ok', 'edit', 'loadinghelp'), 'moodle');
 $PAGE->requires->strings_for_js(array('chooseassets', 'chooseroom', 'dateselect', 'useroomcapacity', 'nodatesyet',

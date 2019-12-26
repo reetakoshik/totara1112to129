@@ -216,6 +216,9 @@ class flex_icon extends \pix_icon {
     /**
      * Create a flex icon from legacy pix_icon if possible.
      *
+     * Note pix_url has been deprecated in favour of rendering the icon directly. In some cases it has been replaced
+     * with image_url (although image_url should only be used for images, and not icons)
+     *
      * @param string|\moodle_url $pixurl
      * @param string|array $customdata list of custom classes added to flex icon
      * @return flex_icon|null returns null if flex matching flex icon cannot be found

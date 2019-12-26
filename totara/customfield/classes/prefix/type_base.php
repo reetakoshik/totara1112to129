@@ -145,10 +145,19 @@ abstract class type_base {
         }
 
         // Remove any user data associated with this field.
+        $infodata = $DB->get_records_select($tableprefix.'_info_data', 'fieldid=?', [$id]);
         $DB->delete_records($tableprefix.'_info_data', array('fieldid' => $id));
 
         // Try to remove the record from the database.
         $DB->delete_records($tableprefix.'_info_field', array('id' => $id));
+
+        // Trigger events
+        if ($infodata) {
+            foreach ($infodata as $data) {
+                $event = \totara_customfield\event\customfield_data_deleted::create_by_type($data->id, $tableprefix, (array)$data);
+                $event->trigger();
+            }
+        }
 
         // Reorder the remaining fields.
         $this->reorder_fields();

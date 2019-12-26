@@ -27,11 +27,6 @@ defined('MOODLE_INTERNAL') || die();
  * TC clients.
  */
 class rb_source_connect_clients extends rb_base_source {
-
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
-
     public function __construct() {
         $this->usedcomponents[] = 'totara_connect';
         $this->base = '{totara_connect_clients}';

@@ -97,7 +97,10 @@ class appraisal_message_test extends appraisal_testcase {
         $this->assertEquals(appraisal_message::EVENT_APPRAISAL_ACTIVATION, $msgtest->type);
         $this->assertEquals(0, $msgtest->delta);
         $this->assertEquals(0, $msgtest->deltaperiod);
-        $this->assertEquals($roles, $msgtest->roles);
+        $msgtestroles = $msgtest->roles;
+        sort($roles);
+        sort($msgtestroles);
+        $this->assertEquals($roles, $msgtestroles);
         $this->assertEquals(0, $msgtest->stageiscompleted);
         foreach ($roles as $role) {
             $content = $msgtest->get_message($role);
@@ -502,11 +505,11 @@ class appraisal_message_test extends appraisal_testcase {
         foreach ($emails as $email) {
             if ($email->subject == 'Appraisal activation immediate') {
                 $location = array_search($email->to, $expectedactivation);
-                $this->assertInternalType('int', $location);
+                $this->assertIsInt($location);
                 unset($expectedactivation[$location]);
             } else if ($email->subject == 'Stage due before') {
                 $location = array_search($email->to, $expectedduedatemsg);
-                $this->assertInternalType('int', $location);
+                $this->assertIsInt($location);
                 unset($expectedduedatemsg[$location]);
             } else {
                 $this->assertTrue(false, 'Unexpected Email Type');
@@ -572,7 +575,7 @@ class appraisal_message_test extends appraisal_testcase {
             array('Stage due immediate', 'username3@example.com'));
         foreach ($emails as $email) {
             $location = array_search(array($email->subject, $email->to), $expectedemails);
-            $this->assertInternalType('int', $location);
+            $this->assertIsInt($location);
             unset($expectedemails[$location]);
         }
         $sink->close();
@@ -611,7 +614,7 @@ class appraisal_message_test extends appraisal_testcase {
             array('Stage completion immediate', 'username1@example.com'));
         foreach ($emails as $email) {
             $location = array_search(array($email->subject, $email->to), $expectedemails);
-            $this->assertInternalType('int', $location);
+            $this->assertIsInt($location);
             unset($expectedemails[$location]);
         }
         $sink->close();
@@ -656,7 +659,7 @@ class appraisal_message_test extends appraisal_testcase {
             array('Stage due after incomplete', 'username3@example.com'));
         foreach ($emails as $email) {
             $location = array_search(array($email->subject, $email->to), $expectedemails);
-            $this->assertInternalType('int', $location);
+            $this->assertIsInt($location);
             unset($expectedemails[$location]);
         }
         $sink->close();
@@ -694,11 +697,6 @@ class appraisal_message_test extends appraisal_testcase {
     }
 
     public function test_activated_appraisal_new_appraisee_notification() {
-        global $CFG;
-        $legacy_behavior = isset($CFG->legacy_appraisal_activation_message_behavior)
-                           ? $CFG->legacy_appraisal_activation_message_behavior : null;
-        $CFG->legacy_appraisal_activation_message_behavior = false;
-
         $this->resetAfterTest();
         $sink = $this->redirectEmails();
         $this->assertTrue(phpunit_util::is_redirecting_phpmailer());
@@ -744,70 +742,50 @@ class appraisal_message_test extends appraisal_testcase {
         $sink->clear();
 
         $sink->close();
-
-        if (!is_null($legacy_behavior)) {
-            $CFG->legacy_appraisal_activation_message_behavior = $legacy_behavior;
-        }
-        else {
-            unset($CFG->legacy_appraisal_activation_message_behavior);
-        }
     }
 
-    public function test_legacy_activated_appraisal_new_appraisee_notification() {
-        global $CFG;
-        $legacy_behavior = isset($CFG->legacy_appraisal_activation_message_behavior)
-                           ? $CFG->legacy_appraisal_activation_message_behavior : null;
-        $CFG->legacy_appraisal_activation_message_behavior = true;
-
+    public function test_appraisal_close() {
         $this->resetAfterTest();
         $sink = $this->redirectEmails();
-        $this->assertTrue(phpunit_util::is_redirecting_phpmailer());
-
-        $learner1 = $this->getDataGenerator()->create_user(array('username' => 'learner1'));
-        [$appraisal] = $this->prepare_appraisal_with_users([], [$learner1]);
-
-        $roles = [appraisal::ROLE_LEARNER];
-        $notification = new appraisal_message();
-        $notification->event_appraisal($appraisal->id); // By default this is activation.
-        $notification->set_delta(0);
-        $notification->set_roles($roles);
-        $notification->set_message(0, 'Appraisal activation', 'Body 1');
-        $notification->save();
-
-        $validationstatus = $appraisal->validate();
-        $this->assertEmpty($validationstatus[0]);
-        $this->assertEmpty($validationstatus[1]);
-
+        $this->setAdminUser();
+        /** @var appraisal $appraisal */
+        list($appraisal, $users) = $this->prepare_appraisal_with_users();
+        $this->assertCount(2, $users);
+        $appraisal->validate();
         $appraisal->activate();
-        \appraisal::send_scheduled();
+
+        $formdata = new stdClass();
+        $formdata->sendalert = true;
+        $formdata->id = $appraisal->id;
+        $formdata->alerttitle = 'Test alert title';
+        $formdata->alertbody_editor['text'] = 'Test alert body text';
+
+        $appraisal->close($formdata);
+        appraisal::send_scheduled();
 
         $emails = $sink->get_messages();
-        $this->assertCount(1, $emails);
-        $this->assertSame('Appraisal activation', $emails[0]->subject, "wrong subject");
-        $this->assertSame($learner1->email, $emails[0]->to, "wrong email");
+        $this->assertCount(2, $emails);
+        $this->assertSame('Test alert title', $emails[0]->subject);
+        $this->assertSame('Test alert title', $emails[1]->subject);
+
+        // Check that both emails have the same content.
+        // Remove multipart boundary because that's the only expected difference between the two messages.
+        preg_match('|\R--(.{0,69})\R|', $emails[0]->body, $matches);
+        $boundary = $matches[1];
+        $body_0 = str_replace($boundary, '', $emails[0]->body);
+
+        preg_match('|\R--(.{0,69})\R|', $emails[1]->body, $matches);
+        $boundary = $matches[1];
+        $body_1 = str_replace($boundary, '', $emails[1]->body);
+
+        $this->assertContains('Test alert body text', $body_0);
+
+        // A bug (TL-20258) used to append a contexturl string for each appraisal closure message.
+        // Make sure the bug is not re-introduced by checking both bodies are the same and don't contain this text.
+        $this->assertSame($body_0, $body_1);
+        $this->assertNotContains('More details can be found at', $body_1);
+
         $sink->clear();
-
-        // Add new appraisees after activation.
-        $learner2 = $this->getDataGenerator()->create_user(['username' => 'learner2']);
-        $cohortgenerator = $this->getDataGenerator()->get_plugin_generator('totara_cohort');
-        $cohort = $cohortgenerator->create_cohort(['name' => 'newappraisees']);
-        $cohortgenerator->cohort_assign_users($cohort->id, [$learner2->id]);
-        $this->getDataGenerator()->get_plugin_generator('totara_appraisal')->create_group_assignment($appraisal, 'cohort', $cohort->id);
-
-        // Simulate a cron run.
-        $appraisal->check_assignment_changes();
-
-        $emails = $sink->get_messages();
-        $this->assertCount(0, $emails);
-        $sink->clear();
-
         $sink->close();
-
-        if (!is_null($legacy_behavior)) {
-            $CFG->legacy_appraisal_activation_message_behavior = $legacy_behavior;
-        }
-        else {
-            unset($CFG->legacy_appraisal_activation_message_behavior);
-        }
     }
 }

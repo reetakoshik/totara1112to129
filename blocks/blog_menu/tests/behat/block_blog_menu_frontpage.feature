@@ -1,4 +1,4 @@
-@block @block_blog_menu
+@block @block_blog_menu @javascript
 Feature: Enable Block blog menu on the frontpage
   In order to enable the blog menu on the frontpage
   As an admin

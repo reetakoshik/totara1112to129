@@ -27,7 +27,11 @@ defined('MOODLE_INTERNAL') || die();
 
 class rb_source_ojt_topic_item_completion extends rb_base_source {
 
-
+    use \core_course\rb\source\report_trait;
+    use \totara_job\rb\source\report_trait;
+    use \totara_program\rb\source\program_trait;
+    use \totara_cohort\rb\source\report_trait;
+    use \core_tag\rb\source\report_trait;
     public $base, $joinlist, $columnoptions, $filteroptions;
     public $contentoptions, $paramoptions, $defaultcolumns;
     public $defaultfilters, $requiredcolumns, $sourcetitle;

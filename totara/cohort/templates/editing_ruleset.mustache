@@ -60,14 +60,14 @@
         {{^broken}}
         <span class="cohort_rule_text">{{{ruledescription}}}</span>
         <a href="{{{editurl}}}" class="ruledef-edit" data-ruletype="{{ruletype}}-{{rulename}}" data-ruleid="{{id}}">
-            {{#pix}} t/edit, core, {{#str}}edit, core{{/str}} {{/pix}}
+            {{#pix}} t/edit, core, edit, core {{/pix}}
         </a>
         {{/broken}}
         {{#broken}}
             <strong class="error">{{brokenruleinfostr}}</strong>
         {{/broken}}
         <a href="#" title="{{#str}}delete, core{{/str}}" class="ruledef-delete" data-ruleid="{{id}}">
-            {{#pix}} t/delete, core, {{#str}}delete, core{{/str}}{{/pix}}
+            {{#pix}} t/delete, core, delete, core{{/pix}}
         </a>
     </li>
     {{/rules}}

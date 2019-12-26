@@ -1,4 +1,4 @@
-@block @block_activity_modules
+@block @block_activity_modules @javascript
 Feature: Block activity modules
   In order to overview activity modules in a course
   As a manager
@@ -110,8 +110,7 @@ Feature: Block activity modules
 
     When I log in as "admin"
     And I am on course index
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add the "Activities" block
     And I click on "Assignments" "link" in the "Activities" "block"
     Then I should see "Test assignment name"

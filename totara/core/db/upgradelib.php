@@ -119,13 +119,6 @@ function totara_core_fix_old_upgraded_mssql() {
         'url' => array('externalurl'),
         'wiki_pages' => array('cachedcontent'),
         'wiki_versions' => array('content'),
-        'workshop_old' => array('description'),
-        'workshop_elements_old' => array('description'),
-        'workshop_rubrics_old' => array('description'),
-        'workshop_submissions_old' => array('description'),
-        'workshop_grades_old' => array('feedback'),
-        'workshop_stockcomments_old' => array('comments'),
-        'workshop_comments_old' => array('comments'),
         'block_rss_client' => array('title', 'description'),
         'block_quicklinks' => array('title'),
         'block_totara_stats' => array('data'),
@@ -342,6 +335,10 @@ function totara_core_upgrade_delete_moodle_plugins() {
     // NOTE: this should match \core_plugin_manager::is_deleted_standard_plugin() data.
 
     $deleteplugins = array(
+        // Moodle GDPR stuff.
+        'tool_dataprivacy',
+        'tool_policy',
+
         // Totara 10.0 removals.
         'theme_kiwifruitresponsive',
         'theme_customtotararesponsive',
@@ -384,6 +381,16 @@ function totara_core_upgrade_delete_moodle_plugins() {
         if (!get_config($deleteplugin, 'version')) {
             // Not installed.
             continue;
+        }
+        if ($deleteplugin === 'tool_dataprivacy') {
+            if ($DB->record_exists('tool_dataprivacy_request', array())) {
+                continue;
+            }
+        }
+        if ($deleteplugin === 'tool_policy') {
+            if ($DB->record_exists('tool_policy', array())) {
+                continue;
+            }
         }
         if ($deleteplugin === 'auth_radius') {
             if ($DB->record_exists('user', array('auth' => 'radius', 'deleted' => 0))) {
@@ -467,5 +474,445 @@ function totara_core_migrate_bogus_course_backup_areas() {
     $contexids = $DB->get_records_sql($sql, array('courselevel' => CONTEXT_COURSE));
     foreach ($contexids as $contextid => $unused) {
         totara_core_migrate_bogus_course_backup_area($contextid);
+    }
+}
+
+/**
+ * Makes sure that context related tables are up to date.
+ *
+ * NOTE: this must be called before upgrade starts executing.
+ */
+function totara_core_upgrade_context_tables() {
+    global $DB;
+
+    $dbman = $DB->get_manager();
+
+    $updated = false;
+
+    // Add parentid to context table.
+    $table = new xmldb_table('context');
+    $field = new xmldb_field('parentid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'depth');
+    $index = new xmldb_index('parentid', XMLDB_INDEX_NOTUNIQUE, array('parentid'));
+    if (!$dbman->field_exists($table, $field)) {
+        $dbman->add_field($table, $field);
+        $updated = true;
+    }
+    if (!$dbman->index_exists($table, $index)) {
+        $dbman->add_index($table, $index);
+    }
+
+    // Remove fake context_temp table, real temp table is used in Totara.
+    $table = new xmldb_table('context_temp');
+    if ($dbman->table_exists($table)) {
+        $dbman->drop_table($table);
+    }
+
+    // Add context_map table to be used for flattening context tree.
+    $table = new xmldb_table('context_map');
+    $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+    $table->add_field('parentid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+    $table->add_field('childid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+    $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+    $table->add_index('parentid_childid_ix', XMLDB_INDEX_UNIQUE, array('parentid', 'childid'));
+    if (!$dbman->table_exists($table)) {
+        $dbman->create_table($table);
+        $updated = true;
+    }
+
+    if ($updated) {
+        // Add parentid to context and build context_map.
+        $systemcontext = context_system::instance();
+        $systemcontext->mark_dirty();
+        upgrade_set_timeout(7200);
+        \context_helper::build_all_paths(true, false);
+    }
+}
+
+/**
+ * The logic here is copied from blocks_add_default_course_blocks which is used during install.
+ * The block API must be functioning, but to be safe only use the structures used there.
+ *
+ * @see blocks_add_default_course_blocks()
+ */
+function totara_core_migrate_frontpage_display() {
+    global $CFG, $DB;
+
+    $tryupgrade = true;
+
+    if ($tryupgrade && !class_exists('moodle_page')) {
+        // We need to be able to use moodle_page.
+        $tryupgrade = false;
+    }
+
+    if ($tryupgrade && !defined('SITEID')) {
+        // We don't know the siteid.
+        $tryupgrade = false;
+    }
+
+    $course = $DB->get_record('course', ['id' => SITEID]);
+    if ($tryupgrade && !$course) {
+        // We don't have the site course.
+        $tryupgrade = false;
+    }
+
+    if ($tryupgrade) {
+        $blocks = [];
+
+        if (!empty(get_config('core', 'courseprogress'))) {
+            // Add an instance of block_course_progress_report
+            $blocks[] = 'course_progress_report';
+        }
+
+        $frontpage = get_config('core', 'frontpageloggedin');
+        $frontpagelayout = explode(',', $frontpage);
+
+        foreach ($frontpagelayout as $widget) {
+            switch ($widget) {
+                // Display the main part of the front page.
+                case '0': // FRONTPAGENEWS
+                    // Add an instance of the news items block.
+                    $blocks[] = 'news_items';
+                    break;
+
+                case '5': // FRONTPAGEENROLLEDCOURSELIST
+                    // Add course_list
+                    $blocks[] = 'course_list';
+                    break;
+
+                case '6': // FRONTPAGEALLCOURSELIST
+                case '2': // FRONTPAGECATEGORYNAMES
+                case '4': // FRONTPAGECATEGORYCOMBO
+                    // Add frontpage_combolist block.
+                    $blocks[] = 'frontpage_combolist';
+                    break;
+                case '7': // FRONTPAGECOURSESEARCH
+                    // Add course_search block
+                    $blocks[] = 'course_search';
+                    break;
+            }
+        }
+
+        if (!empty($blocks)) {
+            $blocks = array_unique($blocks);
+
+            foreach ($blocks as $key => $name) {
+                // Ensure the block is visible, it needs to be so that we can add it.
+                if (!$DB->record_exists('block', ['name' => $name])) {
+                    // Likely the block is not installed yet.
+                    $file = $CFG->dirroot . '/blocks/' . $name . '/version.php';
+                    if (file_exists($file)) {
+                        // OK, it's going to be installed later on.
+                        set_config('frontpage_migration', 1, 'block_' . $name);
+                    }
+                    unset($blocks[$key]); // Remove it, we can't add it yet.
+                }
+            }
+
+            $page = new moodle_page();
+            $page->set_course($course);
+            $page->blocks->add_blocks(['main' => $blocks], 'site-index');
+        }
+    }
+}
+
+/**
+ * Migrate block title to the new way of storing it
+ */
+function totara_core_migrate_old_block_titles() {
+    global $DB;
+
+    $dbman = $DB->get_manager();
+
+    $table = new xmldb_table('block_instances');
+    $field = new xmldb_field('common_config', XMLDB_TYPE_TEXT);
+
+    // Only proceed if the field doesn't exist.
+    if ($dbman->field_exists($table, $field)) {
+        return;
+    }
+
+    $dbman->add_field($table, $field);
+
+    $instances = $DB->get_records_sql("SELECT id, configdata, blockname FROM {block_instances} WHERE configdata <> ''");
+
+    foreach ($instances as $id => $instance) {
+
+        // We upgrade border for all blocks and title only for those which had user-configurable title
+
+        $title_upgrade_elegible = [
+            'html',
+            'totara_featured_links',
+            'totara_report_graph',
+            'totara_report_table',
+            'totara_quick_links',
+            'totara_program_completion',
+            'tags',
+            'tag_youtube',
+            'tag_flickr',
+            'rss_client',
+            'mentees',
+            'glossary_random',
+            'blog_tags',
+        ];
+
+        $config = (array) unserialize(base64_decode($instance->configdata));
+
+        // Explicitly converting config values to proper types below to avoid any confusions down the road as we
+        // expect title to be a string.
+
+        $common_config = [];
+
+        if (isset($config['title']) && in_array($instance->blockname, $title_upgrade_elegible)) {
+
+            // HTML block is a very special boy, it allows you to have an empty title, the rest just replace
+            // it with default if title is not specified.
+            if ($instance->blockname == 'html' || !empty($config['title'])) {
+                $common_config['title'] = (string) $config['title'];
+                $common_config['override_title'] = true;
+            }
+        }
+
+        if (isset($config['display_with_border'])) {
+            $common_config['show_border'] = (bool) $config['display_with_border'];
+        }
+
+        if (!empty($common_config)) {
+            $DB->update_record('block_instances', (object) [
+                'id' => $id,
+                'common_config' => json_encode($common_config),
+            ]);
+        }
+    }
+}
+
+/**
+ * Add new 'course_navigation' block to all existing courses.
+ * The block API must be functioning, but to be safe only use the structures used there.
+ */
+function totara_core_add_course_navigation() {
+    global $CFG, $DB;
+
+    if (!class_exists('moodle_page')) {
+        // We need to be able to use moodle_page.
+        return;
+    }
+
+    if (!$courses = $DB->get_records('course')) {
+        // We don't have any courses yet.
+        return;
+    }
+
+    // Ensure the block is visible, so that we can add it.
+    if (!$DB->record_exists('block', ['name' => 'course_navigation'])) {
+        // Likely the block is not installed yet.
+        $file = $CFG->dirroot . '/blocks/course_navigation/version.php';
+        if (file_exists($file)) {
+            // OK, it's going to be installed later on.
+            set_config('navigation_migration', 1, 'block_course_navigation');
+        }
+        return;
+    }
+
+    foreach ($courses as $course) {
+        $page = new moodle_page();
+        $page->set_course($course);
+        $page->blocks->add_blocks(['side-pre' => ['course_navigation']], '*', null, true, -10);
+    }
+}
+
+function totara_core_upgrade_course_defaultimage_config() {
+    global $DB;
+
+    $fs = get_file_storage();
+    $context = context_system::instance();
+
+    // If the file system has more than one files for setting 'defaultimage', then we will kinda assure that the
+    // latest file is the used file for that specific setting.
+    $files = $fs->get_area_files(
+        $context->id,
+        'course',
+        'defaultimage',
+        false,
+        'timemodified DESC',
+        false
+    );
+
+    if (!empty($files)) {
+        $oldfile = reset($files);
+
+        if (!$fs->file_exists($context->id, 'course', 'defaultimage', 0, '/', $oldfile->get_filename())) {
+            // Start writing the old file to the file storage system. So that the admin settting is able to find it.
+            // There is only one default image, and it must be a ZERO.
+            $rc = [
+                'contextid' => $context->id,
+                'component' => 'course',
+                'filearea' => 'defaultimage',
+                'timemodified' => time(),
+                'itemid' => 0,
+                'source' => $oldfile->get_source(),
+                'filepath' => '/',
+                'filename' => $oldfile->get_filename()
+            ];
+
+            $fs->create_file_from_storedfile($rc, $oldfile);
+            set_config('defaultimage', $oldfile->get_filepath() . $oldfile->get_filename(), 'course');
+
+            // Just remove this old file, it is no longer being used.
+            $oldfile->delete();
+        }
+    } else if (false !== get_config('course', 'defaultimage')) {
+        // This seemed wrong that system admin was trying to use some random URL as their default image. But it is
+        // really an edge case.
+        unset_config('defaultimage', 'course');
+    }
+
+    // We need to remove pretty much all the course defaultimage that has itemid > zero. After the default image is
+    // being set to zero at this point.
+    $sql = "SELECT DISTINCT itemid FROM {files} WHERE itemid > 0 AND component = 'course' AND filearea = 'defaultimage'";
+    $records = $DB->get_records_sql($sql);
+    foreach ($records as $itemid => $unused) {
+        $fs->delete_area_files($context->id, 'course', 'defaultimage', $itemid);
+    }
+}
+
+/**
+ * Upgrading course 'images' itemid to zero. Because course image should be found via context course id. Not item id.
+ * @return void
+ */
+function totara_core_upgrade_course_images() {
+    global $DB;
+
+    $fs = get_file_storage();
+
+    // For older version, itemid of course-images is being set as courseid.
+    $sql = "SELECT DISTINCT itemid FROM {files} WHERE itemid > 0 AND component = 'course' AND filearea = 'images'";
+    $records = $DB->get_records_sql($sql);
+
+    foreach ($records as $itemid => $unused) {
+        $ctx = context_course::instance($itemid, IGNORE_MISSING);
+        if (!$ctx) {
+            continue;
+        }
+
+        // The latest file should be the file that is being used for the course.
+        $files = $fs->get_area_files($ctx->id, 'course', 'images', $itemid, 'timemodified DESC', false);
+
+        if (!empty($files)) {
+            $oldfile = reset($files);
+
+            if (!$fs->file_exists($ctx->id, 'course', 'images', 0, '/', $oldfile->get_filename())) {
+                $rc = [
+                    'contextid' => $ctx->id,
+                    'component' => 'course',
+                    'filearea' => 'images',
+                    'itemid' => 0,
+                    'source' => $oldfile->get_source(),
+                    'filepath' => '/',
+                    'filename' => $oldfile->get_filename()
+                ];
+
+                $fs->create_file_from_storedfile($rc, $oldfile);
+            }
+        }
+
+        // Does not really matter if the files are there or not. This will ensure we are removing unused files.
+        $fs->delete_area_files($ctx->id, 'course', 'images', $itemid);
+    }
+}
+
+/**
+ * Upgrade to remove the invalid tags from system. Steps explaination of upgrading:
+ * + Load the whole list of tag_instances
+ * + Then start looking into each tag instance and checking if it is invalid with name or not (record with special
+ * + characters encoded).
+ * + Checking that if there are any original record for this invalid record
+ * + If there is, then start the cleaning process. Luckily that the tag component itself does auto-clean up.
+ *
+ * @return void
+ */
+function totara_core_core_tag_upgrade_tags() {
+    global $DB;
+
+    $taginstances = $DB->get_records_sql(
+        "SELECT ti.*
+         FROM {tag_instance} ti
+         INNER JOIN {tag} t ON t.id = ti.tagid
+         WHERE t.isstandard = 0"
+    );
+
+    $tagstobedeleted = [];
+
+    foreach ($taginstances as $taginstance) {
+        // Current tag that is being used for instance mapping.
+        $tag = $DB->get_record('tag', ['id' => $taginstance->tagid]);
+        $name = $tag->name;
+
+        // Detect whether tag name changes.
+        $name_changed = false;
+
+        while ($name !== htmlspecialchars_decode($name)) {
+            // We only want it to go back to the very first decoded value (skipping the middle encoded value).
+            $name = htmlspecialchars_decode($name);
+            $name = clean_param($name, PARAM_TAG);
+            $name_changed = true;
+        }
+
+        // If name didn't get encoded, then we don't need to do anything.
+        if (!$name_changed) {
+            continue;
+        }
+
+        $sql = "
+            SELECT t.id FROM {tag} t
+            INNER JOIN {tag_coll} tc ON tc.id = t.tagcollid
+            INNER JOIN {tag_area} ta ON ta.tagcollid = tc.id
+            WHERE t.name = :name
+            AND ta.component = :component
+            AND ta.itemtype = :type
+        ";
+
+        // Tag component does not allow us to have more than one tags that share a same name in a collection.
+        // Therefore, it should have only one tag with specific '$name' and being a part of
+        // '$component' and '$type'.
+        $previoustag = $DB->get_record_sql(
+            $sql,
+            [
+                'name' => $name,
+                'component' => $taginstance->component,
+                'type' => $taginstance->itemtype,
+            ]
+        );
+
+        if ($previoustag) {
+            if ($taginstance->tagid !== $previoustag->id) {
+                // Previous record is being existed, we need to update this invalid into the previous one.
+                $taginstance->tagid = $previoustag->id;
+                $DB->update_record('tag_instance', $taginstance);
+
+                if (!isset($tagstobedeleted[$tag->id])) {
+                    $tagstobedeleted[$tag->id] = $tag->id;
+                }
+            }
+        } else {
+            // No standard tag matches this one, update this non-standard tag.
+            $rawname = $tag->rawname;
+            while ($rawname !== htmlspecialchars_decode($rawname)) {
+                // We only want it to go back to the very first decoded value (skipping the middle encoded value).
+                $rawname = htmlspecialchars_decode($rawname);
+                $rawname = clean_param($rawname, PARAM_TAG);
+            }
+            $tag->name = $name;
+            $tag->rawname = $rawname;
+            $DB->update_record('tag', $tag);
+        }
+    }
+
+    foreach ($tagstobedeleted as $tagid) {
+        if ($DB->record_exists('tag_instance', ['tagid' => $tagid])) {
+            // There are other instances that using these to-be-deleted tags
+            continue;
+        }
+
+        $DB->delete_records('tag', ['id' => $tagid]);
     }
 }

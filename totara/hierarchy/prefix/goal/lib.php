@@ -476,14 +476,14 @@ class goal extends hierarchy {
      * Update the users assigned to a goal.
      *
      * @param int       $goalid         The id of the goal to update.
-     * @param int       $type           The GOAL_ASSIGNMENT_TYPE we are updating
+     * @param int       $assignmenttype The GOAL_ASSIGNMENT_TYPE we are updating
      * @param stdClass  $assignment     A record from goal_grp_type
      */
-    public function update_user_assignments($goalid, $type, $assignment) {
-        global $DB, $USER;
+    public function update_user_assignments($goalid, $assignmenttype, $assignment) {
+        global $CFG, $DB, $USER;
 
         // Set up some variables that we are going to need.
-        switch ($type) {
+        switch ($assignmenttype) {
             case GOAL_ASSIGNMENT_AUDIENCE:
                 $item_table = 'cohort_members';
                 $item_field = 'cohortid';
@@ -502,6 +502,8 @@ class goal extends hierarchy {
                 $assign_field = 'orgid';
                 $include_children = $assignment->includechildren;
                 break;
+            default:
+                return;
         }
 
         // Set up the default scale value.
@@ -515,52 +517,152 @@ class goal extends hierarchy {
         $scale = $DB->get_record_sql($sql, array($goalid));
         $defaultscalevalueid = $scale->defaultid;
 
+        $ruleitemid = $assignment->$assign_field;
+
         // Get new assignments as array($userid).
-        $new = $DB->get_fieldset_select($item_table, 'userid', "{$item_field} = ?", array($assignment->$assign_field));
+        if (empty($include_children)) {
+            $requireduserassignments = $DB->get_records(
+                $item_table,
+                [$item_field => $ruleitemid],
+                '',
+                "DISTINCT {$DB->sql_concat($item_field, "'_'", 'userid')}, {$item_field} AS reasonitemid, userid"
+            );
+        } else {
+            require_once($CFG->dirroot . '/totara/hierarchy/prefix/position/lib.php');
+            require_once($CFG->dirroot . '/totara/hierarchy/prefix/organisation/lib.php');
 
-        // Get current assignments as array($userid).
-        $params = array('assigntype' => $type, 'assignmentid' => $assignment->id);
-        $current = $DB->get_records('goal_user_assignment', $params);
+            if ($assignmenttype == GOAL_ASSIGNMENT_AUDIENCE) {
+                // Cohort's do not have children, this should never happen.
+                print_error('error:includechildrencohort', 'totara_hierarchy');
+            }
 
-        $current_index = array();
-        foreach ($current as $id => $item) {
-            $current_index[$id] = $item->userid;
+            /** @var hierarchy $item */
+            $typeinfo = self::goal_assignment_type_info($assignmenttype);
+            $item = new $typeinfo->fullname();
+
+            $childrenruleitems = $item->get_item_descendants($ruleitemid);
+
+            $childruleitemids = [];
+            foreach ($childrenruleitems as $childruleitem) {
+                $childruleitemids[] = $childruleitem->id;
+            }
+
+            list($insql, $inparams) = $DB->get_in_or_equal($childruleitemids, SQL_PARAMS_NAMED);
+
+            $requireduserassignments = $DB->get_records_select(
+                $item_table,
+                "{$item_field} {$insql}",
+                $inparams,
+                '',
+                "DISTINCT {$DB->sql_concat($item_field, "'_'", 'userid')}, {$item_field} AS reasonitemid, userid"
+            );
         }
 
-        $user_assignment = new stdClass();
-        $user_assignment->assigntype = $type;
-        $user_assignment->assignmentid = $assignment->id;
-        $user_assignment->goalid = $goalid;
-        $user_assignment->timemodified = time();
-        $user_assignment->usermodified = $USER->id;
+        // Get current assignments, including those marked as OLD.
+        $select = "(assigntype = :assigntype AND assignmentid = :assignmentid) OR " .
+            $DB->sql_like('extrainfo', ':oldextrainfo');
+        $params = array(
+            'assigntype' => $assignmenttype,
+            'assignmentid' => $assignment->id,
+            'oldextrainfo' => "OLD:{$assignmenttype},{$assignment->id}%",
+        );
+        $currentuserassignments = $DB->get_records_select('goal_user_assignment', $select, $params);
+
+        // Set up some template records which will be filled in and saved later.
+        $new_user_assignment = new stdClass();
+        $new_user_assignment->assigntype = $assignmenttype;
+        $new_user_assignment->assignmentid = $assignment->id;
+        $new_user_assignment->goalid = $goalid;
+        $new_user_assignment->timemodified = time();
+        $new_user_assignment->usermodified = $USER->id;
 
         $default_scale = new stdClass();
         $default_scale->scalevalueid = $defaultscalevalueid;
         $default_scale->goalid = $goalid;
 
-        foreach ($new as $user) {
-            if ($index = array_search($user, $current_index, true)) {
-                // Already exists, we're cool. Pop off the current array.
-                unset($current[$index]);
-            } else {
-                $user_assignment->userid = $user;
-                $default_scale->userid = $user;
+        // Scan the user assignments that we want to end up with, and find which ones already exist.
+        foreach ($requireduserassignments as $requireduserassignment) {
+            // Make sure the user has a goal item record.
+            $goalrecords = self::get_goal_items(
+                array('goalid' => $goalid, 'userid' => $requireduserassignment->userid),
+                self::SCOPE_COMPANY
+            );
+            if (empty($goalrecords)) {
+                $default_scale->userid = $requireduserassignment->userid;
+                self::insert_goal_item($default_scale, self::SCOPE_COMPANY);
+            }
 
-                $DB->insert_record('goal_user_assignment', $user_assignment);
-                $goalrecords = self::get_goal_items(array('goalid' => $goalid, 'userid' => $user), self::SCOPE_COMPANY);
-                if (empty($goalrecords)) {
-                    self::insert_goal_item($default_scale, self::SCOPE_COMPANY);
+            // See if there is an existing goal_user_assignment record to update.
+            $alreadyexists = false;
+            $extrainfo = "{$assignmenttype},{$assignment->id},{$requireduserassignment->reasonitemid}";
+
+            foreach ($currentuserassignments as $currentuserassignment) {
+                // Only search records for the current $user.
+                if ($currentuserassignment->userid != $requireduserassignment->userid) {
+                    continue;
                 }
+
+                // If the current assignment exists then do nothing.
+                if ($currentuserassignment->assigntype == $assignmenttype
+                    && $currentuserassignment->assignmentid == $assignment->id
+                    && $currentuserassignment->extrainfo == 'ITEM:' . $extrainfo) {
+                    unset($currentuserassignments[$currentuserassignment->id]);
+                    $alreadyexists = true;
+                    break;
+                }
+
+                // If the current assignment matches an archived record then un-archive it.
+                if ($currentuserassignment->extrainfo == 'OLD:' . $extrainfo) {
+                    $currentuserassignment->assigntype = $assignmenttype;
+                    $currentuserassignment->assignmentid = $assignment->id;
+                    $currentuserassignment->extrainfo = 'ITEM:' . $extrainfo;
+                    $currentuserassignment->timemodified = time();
+                    $currentuserassignment->usermodified = $USER->id;
+
+                    $DB->update_record('goal_user_assignment', $currentuserassignment);
+
+                    unset($currentuserassignments[$currentuserassignment->id]);
+                    $alreadyexists = true;
+                    break;
+                }
+            }
+
+            // Insert new goal_user_assignment records.
+            if (!$alreadyexists) {
+                $new_user_assignment->userid = $requireduserassignment->userid;
+                $new_user_assignment->extrainfo = 'ITEM:' . $extrainfo;
+                $DB->insert_record('goal_user_assignment', $new_user_assignment);
             }
         }
 
-        // Anything left on current will be a removed assignment.
-        foreach ($current as $deleted) {
-            $deleted->timemodified = time();
-            $deleted->extrainfo = "OLD:{$type},{$assignment->$assign_field}";
-            $deleted->assigntype = GOAL_ASSIGNMENT_INDIVIDUAL;
-            $deleted->assignmentid = 0;
-            $DB->update_record('goal_user_assignment', $deleted);
+        // Skip anything that is already marked OLD.
+        foreach ($currentuserassignments as $key => $currentuserassignment) {
+            if (substr($currentuserassignment->extrainfo, 0, 3) == 'OLD') {
+                unset($currentuserassignments[$key]);
+            }
+        }
+
+        // Anything left needs to be marked OLD.
+        $this->archive_user_assignments($currentuserassignments, $ruleitemid);
+    }
+
+    /**
+     * Marks the specified company goal user assignments as OLD. It assumes that these assignments exist. It converts
+     * them into individual assignments.
+     *
+     * @param stdClass[] $currentuserassignments
+     * @param int $ruleitemid The id of the item in the rule which this user is assigned by (used with legacy data).
+     */
+    public function archive_user_assignments(array $currentuserassignments, $ruleitemid) {
+        global $DB, $USER;
+
+        foreach ($currentuserassignments as $currentuserassignment) {
+            $currentuserassignment->assigntype = GOAL_ASSIGNMENT_INDIVIDUAL;
+            $currentuserassignment->assignmentid = 0;
+            $currentuserassignment->extrainfo = str_replace('ITEM', 'OLD', $currentuserassignment->extrainfo);
+            $currentuserassignment->timemodified = time();
+            $currentuserassignment->usermodified = $USER->id;
+            $DB->update_record('goal_user_assignment', $currentuserassignment);
         }
     }
 
@@ -615,6 +717,8 @@ class goal extends hierarchy {
     /**
      * Create the user assignments for a group assignment.
      *
+     * @deprecated since Totara 12.4 - use update_user_assignments instead.
+     *
      * @param int       $type               The GOAL_ASSIGNMENT_TYPE
      * @param stdclass  $assignment         A record from the goal_grp_type table
      * @param string    $includechildren    Whether or not to include children,
@@ -622,85 +726,8 @@ class goal extends hierarchy {
      *                  'GOAL/POS/ORG' indicates which children to add.
      */
     public function create_user_assignments($type, $assignment, $includechildren = null) {
-        global $DB, $USER, $CFG;
-
-        require_once($CFG->dirroot . '/totara/hierarchy/prefix/position/lib.php');
-        require_once($CFG->dirroot . '/totara/hierarchy/prefix/organisation/lib.php');
-
-        $typeinfo = self::goal_assignment_type_info($type);
-        $field = $typeinfo->field;
-
-        // Get all the users assigned to $item.
-        $users = $DB->get_fieldset_select($typeinfo->members_table, 'userid',
-                "{$typeinfo->members_field} = ?", array($assignment->$field));
-
-        $childusers = array();
-        if (!empty($includechildren)) {
-            if ($type == GOAL_ASSIGNMENT_AUDIENCE) {
-                // Cohort's do not have children, this should never happen.
-                print_error('error:includechildrencohort', 'totara_hierarchy');
-            }
-
-            $item = new $typeinfo->fullname();
-            $itemfield = $assignment->$field;
-
-            $children = $item->get_item_descendants($itemfield);
-
-            foreach ($children as $child) {
-                $assigned = $DB->get_fieldset_select($typeinfo->members_table, 'userid',
-                        "{$typeinfo->members_field} = ?", array($child->id));
-                $childusers = array_merge($childusers, $assigned);
-            }
-        }
-
-        // Set up the user assignment data.
-        $user_assignment = new stdClass();
-        $user_assignment->assigntype = $type;
-        $user_assignment->assignmentid = $assignment->id;
-        $user_assignment->goalid = $assignment->goalid; // This is here to order by later.
-        $user_assignment->timemodified = time();
-        $user_assignment->usermodified = $USER->id;
-
-        // Set up the default scale value.
-        $sql = "SELECT s.defaultid
-                FROM {goal} g
-                JOIN {goal_scale_assignments} sa
-                    ON g.frameworkid = sa.frameworkid
-                JOIN {goal_scale} s
-                    ON sa.scaleid = s.id
-                WHERE g.id = ?";
-        $scale = $DB->get_record_sql($sql, array($assignment->goalid));
-        $default_scale = new stdClass();
-        $default_scale->goalid = $assignment->goalid;
-        $default_scale->scalevalueid = $scale->defaultid;
-
-        // Create assignments for all the users.
-        foreach ($users as $user) {
-            $user_assignment->userid = $user;
-            $default_scale->userid = $user;
-
-            $DB->insert_record('goal_user_assignment', $user_assignment);
-            $goalrecords = self::get_goal_items(array('goalid' => $assignment->goalid, 'userid' => $user),
-                    self::SCOPE_COMPANY);
-            if (empty($goalrecords)) {
-                self::insert_goal_item($default_scale, self::SCOPE_COMPANY);
-            }
-        }
-
-        foreach ($childusers as $childuser) {
-            $user_assignment->userid = $childuser;
-            $default_scale->userid = $childuser;
-
-            // This means it was an assignment created by a parent (position etc).
-            $user_assignment->extrainfo = "PAR:{$type},{$assignment->id}";
-
-            $DB->insert_record('goal_user_assignment', $user_assignment);
-            $goalrecords = self::get_goal_items(array('goalid' => $assignment->goalid, 'userid' => $childuser),
-                    self::SCOPE_COMPANY);
-            if (empty($goalrecords)) {
-                self::insert_goal_item($default_scale, self::SCOPE_COMPANY);
-            }
-        }
+        debugging('Function goal::create_user_assignments has been deprecated. Use update_user_assignments instead.', DEBUG_DEVELOPER);
+        $this->update_user_assignments($assignment->goalid, $type, $assignment);
     }
 
     /**
@@ -731,7 +758,7 @@ class goal extends hierarchy {
             if ($assignment->assigntype == GOAL_ASSIGNMENT_INDIVIDUAL && $canedit) {
                 // Set up the edit and delete icons.
                 $del_params = array('goalid' => $assignment->goalid, 'assigntype' => $assignment->assigntype,
-                    'modid' => $assignment->userid);
+                    'modid' => $assignment->userid, 'assignment_id' => $assignment->id);
                 $del_url = new moodle_url('/totara/hierarchy/prefix/goal/assign/remove.php', $del_params);
                 $del_str = get_string('delete');
                 $del_button = ' ' . $OUTPUT->action_icon($del_url, new pix_icon('t/delete', $del_str));
@@ -1000,7 +1027,8 @@ class goal extends hierarchy {
                     if (!empty($assignment->extrainfo) && ($extrainfo = str_replace('OLD:', '', $assignment->extrainfo))) {
                         // This is an old assignment that has been transfered.
                         $args = explode(',', $extrainfo);
-                        $type = self::goal_assignment_type_info($args[0], $assignment->goalid, $args[1]);
+                        $modid = count($args) == 3 ? $args[2] : $args[1];
+                        $type = self::goal_assignment_type_info($args[0], $assignment->goalid, $modid);
                         $replace = new stdClass();
                         $replace->type = get_string('assign' . $type->fullname, 'totara_hierarchy');
                         $replace->name = format_string($type->modname);
@@ -1367,18 +1395,6 @@ class goal extends hierarchy {
                     GOAL_ASSIGNMENT_MANAGER => true,
                     GOAL_ASSIGNMENT_ADMIN => true,
                 );
-            } else if (in_array($USER->id, $managers) || in_array($USER->id, $teamleaders) || in_array($USER->id, $appraisers)) {
-                // Manager, manager's manager and appraiser permissions.
-                $permissions['can_view_personal'] = has_capability('totara/hierarchy:viewstaffpersonalgoal', $context);
-                $permissions['can_edit_personal'] = has_capability('totara/hierarchy:managestaffpersonalgoal', $context);
-                $permissions['can_view_company'] = has_capability('totara/hierarchy:viewstaffcompanygoal', $context);
-                $permissions['can_edit_company'] = has_capability('totara/hierarchy:managestaffcompanygoal', $context);
-                $permissions['can_edit'] = array(
-                    GOAL_ASSIGNMENT_INDIVIDUAL => $permissions['can_edit_company'],
-                    GOAL_ASSIGNMENT_SELF => $permissions['can_edit_personal'],
-                    GOAL_ASSIGNMENT_MANAGER => $permissions['can_edit_personal'],
-                    GOAL_ASSIGNMENT_ADMIN => false,
-                );
             } else if ($userid == $USER->id) {
                 // User permissions.
                 $permissions['can_view_personal'] = has_capability('totara/hierarchy:viewownpersonalgoal', $context);
@@ -1389,6 +1405,18 @@ class goal extends hierarchy {
                     GOAL_ASSIGNMENT_INDIVIDUAL => $permissions['can_edit_company'],
                     GOAL_ASSIGNMENT_SELF => $permissions['can_edit_personal'],
                     GOAL_ASSIGNMENT_MANAGER => false,
+                    GOAL_ASSIGNMENT_ADMIN => false,
+                );
+            } else if (in_array($USER->id, $managers) || in_array($USER->id, $teamleaders) || in_array($USER->id, $appraisers)) {
+                // Manager, manager's manager and appraiser permissions.
+                $permissions['can_view_personal'] = has_capability('totara/hierarchy:viewstaffpersonalgoal', $context);
+                $permissions['can_edit_personal'] = has_capability('totara/hierarchy:managestaffpersonalgoal', $context);
+                $permissions['can_view_company'] = has_capability('totara/hierarchy:viewstaffcompanygoal', $context);
+                $permissions['can_edit_company'] = has_capability('totara/hierarchy:managestaffcompanygoal', $context);
+                $permissions['can_edit'] = array(
+                    GOAL_ASSIGNMENT_INDIVIDUAL => $permissions['can_edit_company'],
+                    GOAL_ASSIGNMENT_SELF => $permissions['can_edit_personal'],
+                    GOAL_ASSIGNMENT_MANAGER => $permissions['can_edit_personal'],
                     GOAL_ASSIGNMENT_ADMIN => false,
                 );
             } else {

@@ -37,7 +37,7 @@
  */
 
 $plugins = array(
-    'jquery'  => array('files' => array('jquery-3.2.1.min.js')),
+    'jquery'  => array('files' => array('jquery-3.3.1.min.js')),
     'migrate3' => array('files' => array('jquery-migrate-3.0.0.min.js')),
     'ui'      => array('files' => array('ui-1.12.1/jquery-ui.min.js')),
     'ui-css'  => array('files' => array('ui-1.12.1/theme/smoothness/jquery-ui.min.css')),

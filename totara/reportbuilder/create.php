@@ -30,7 +30,7 @@ require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->dirroot . '/totara/reportbuilder/lib.php');
 require_once($CFG->dirroot . '/totara/reportbuilder/report_forms.php');
 
-admin_externalpage_setup('rbcreatereport');
+admin_externalpage_setup('rbmanagereports');
 
 $output = $PAGE->get_renderer('totara_reportbuilder');
 
@@ -130,7 +130,8 @@ if ($fromform = $mform->get_data()) {
                 $DB->insert_record('report_builder_search_cols', $todb);
             }
         }
-        $report = new reportbuilder($newid);
+        $config = (new rb_config())->set_nocache(true);
+        $report = reportbuilder::create($newid, $config, false); // No access control for managing of reports here.
         \totara_reportbuilder\event\report_created::create_from_report($report, false)->trigger();
         $transaction->allow_commit();
         redirect($CFG->wwwroot . '/totara/reportbuilder/general.php?id='.$newid);

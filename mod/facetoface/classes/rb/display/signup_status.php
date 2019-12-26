@@ -30,14 +30,15 @@ namespace mod_facetoface\rb\display;
  */
 class signup_status extends \totara_reportbuilder\rb\display\base {
     public static function display($value, $format, \stdClass $row, \rb_column $column, \reportbuilder $report) {
-        global $MDL_F2F_STATUS, $CFG;
+        global $CFG;
+
         // Needed for the global.... GRRR.
         require_once($CFG->dirroot . '/mod/facetoface/lib.php');
 
         // NOTE: Globals like $MDL_F2F_STATUS from lib.php are strictly forbidden for a very long time!
         // Please never introduce any new ones.
-        if (isset($MDL_F2F_STATUS[$value])) {
-            return get_string('status_'.$MDL_F2F_STATUS[$value], 'facetoface');
+        if ($value) {
+            return \mod_facetoface\signup\state\state::from_code($value)::get_string();
         }
         // This should not happen, let's just return the raw number, and show a debugging notice in case
         // anyone cares.

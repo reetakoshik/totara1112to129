@@ -45,6 +45,8 @@ function xmldb_facetoface_install() {
         'setting:defaultsessioncancellationsubjectdefault' => get_string('setting:defaultsessioncancellationsubjectdefault', 'facetoface'),
         'setting:defaultregistrationexpiredsubjectdefault' => get_string('setting:defaultregistrationexpiredsubjectdefault', 'facetoface'),
         'setting:defaultpendingreqclosuresubjectdefault' => get_string('setting:defaultpendingreqclosuresubjectdefault', 'facetoface'),
+        'setting:defaultwaitlistautocleansubjectdefault' => get_string('setting:defaultwaitlistautocleansubjectdefault', 'facetoface'),
+        'setting:defaultundercapacitysubjectdefault' => get_string('setting:defaultundercapacitysubjectdefault', 'facetoface'),
     );
 
     foreach ($titles as $key => $title) {
@@ -202,6 +204,22 @@ function xmldb_facetoface_install() {
     $tpl_regclose->ccmanager = 1;
     $tpl_regclose->managerprefix = text_to_html(get_string('setting:defaultpendingreqclosureinstrmngrcopybelow_v92', 'facetoface'));
     $DB->insert_record('facetoface_notification_tpl', $tpl_regclose);
+
+    $tpl_waitlistautoclean = new stdClass();
+    $tpl_waitlistautoclean->status = 1;
+    $tpl_waitlistautoclean->reference = 'waitlistautoclean';
+    $tpl_waitlistautoclean->title = $titles['setting:defaultwaitlistautocleansubjectdefault'];
+    $tpl_waitlistautoclean->body = text_to_html(get_string('setting:defaultwaitlistautocleanmessagedefault', 'facetoface'));
+    $tpl_waitlistautoclean->ccmanager = 0;
+    $DB->insert_record('facetoface_notification_tpl', $tpl_waitlistautoclean);
+
+    $tpl_undercapacity = new stdClass();
+    $tpl_undercapacity->status = 1;
+    $tpl_undercapacity->reference = 'undercapacity';
+    $tpl_undercapacity->title = $titles['setting:defaultundercapacitysubjectdefault'];
+    $tpl_undercapacity->body = text_to_html(get_string('setting:defaultundercapacitymessagedefault', 'facetoface'));
+    $tpl_undercapacity->ccmanager = 0;
+    $DB->insert_record('facetoface_notification_tpl', $tpl_undercapacity);
 
     // Setting room, building, and address as default filters.
     set_config('facetoface_calendarfilters', 'room_1');

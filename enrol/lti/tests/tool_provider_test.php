@@ -41,7 +41,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2016 Jun Pataleta <jun@moodle.com>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_provider_testcase extends advanced_testcase {
+class enrol_lti_tool_provider_testcase extends advanced_testcase {
 
     /**
      * @var stdClass $tool The LTI tool.
@@ -428,6 +428,8 @@ class tool_provider_testcase extends advanced_testcase {
         @$tp->onLaunch();
         ob_end_clean();
 
+        $this->assertDebuggingNotCalled(); // Totara: make sure there are no problems.
+
         $this->assertEquals($userimageurl, $tp->resourceLink->getSetting('custom_user_image'));
 
         $username = helper::create_username($tp->consumer->getKey(), $tp->user->ltiUserId);
@@ -435,7 +437,7 @@ class tool_provider_testcase extends advanced_testcase {
         // User was found.
         $this->assertNotFalse($user);
         // User picture was set.
-        $this->assertNotEmpty($user->picture);
+        $this->assertNotEquals('0', $user->picture);
     }
 
     /**

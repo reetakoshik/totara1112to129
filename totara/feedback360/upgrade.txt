@@ -1,6 +1,10 @@
 This file describes API changes in Totara Feedback360,
 information provided here is intended especially for developers.
 
+=== 12 ===
+
+* Removed deprecated class request_select_form
+* Removed deprecated methods feedback360::get_available_forms()
 
 === 10 ===
 

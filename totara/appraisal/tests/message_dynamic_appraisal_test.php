@@ -21,73 +21,38 @@
  * @package totara_appraisal
  */
 global $CFG;
-require_once($CFG->dirroot.'/totara/appraisal/tests/appraisal_testcase.php');
-
-use \totara_job\job_assignment;
+require_once($CFG->dirroot.'/totara/appraisal/tests/message_appraisal_testcase.php');
 
 /**
  * Tests the sending of activation notifications for dynamic appraisals.
  */
-class totara_appraisal_messages_dynamic_test extends appraisal_testcase {
+class totara_appraisal_messages_dynamic_test  extends totara_appraisal_messages_testcase {
     /**
-     * @var stdClass test execution context with these fields:
-     *      - [appraisal] appraisal: test appraisal
-     *      - [array] appraisee0: result from appraisee_details().
-     *      - [array] appraisee1: result from appraisee_details().
-     *      - [totara_appraisal_generator] generator: appraisal generator.
-     *      - [array[string=>mixed]] restores: system configuration values to
-     *        be restored after the test.
-     *      - [phpunit_phpmailer_sink] sink: email sink.
-     *      - [array] tasks: cron tasks
+     * Sets up the test environment.
+     *
+     * @return \stdClass parent::setup_test_env() generated test environment.
      */
-    private $testenv;
+    private function setup_dynamic_appraisal_test_env(): \stdClass {
+        $test_env = $this->setup_test_env();
 
-    public function setUp(): void {
-        parent::setUp();
-        $this->resetAfterTest();
-
-        $generator = $this->getDataGenerator()->get_plugin_generator('totara_appraisal');
-        $appraisal = $generator->create_appraisal();
-
-        $appraisalid = $appraisal->id;
-        $roles = [
-            appraisal::ROLE_LEARNER => appraisal::ACCESS_CANANSWER,
-            appraisal::ROLE_MANAGER => appraisal::ACCESS_CANANSWER
-        ];
-        $stage = $generator->create_stage($appraisalid);
-        $page = $generator->create_page($stage->id);
-        $generator->create_question($page->id, ['roles' => $roles]);
-        $generator->create_message($appraisalid, ['roles' => array_keys($roles), 'messageto' => null]);
-
-        $restores = $this->restorable_config_values();
+        // setup_test_env() records the current $CFG/system config settings. So
+        // set_config() needs to be done after that.
         set_config('dynamicappraisals', true);
 
-        $this->testenv = (object) [
-            'appraisal' => $appraisal,
-            'appraisee0' => $this->appraisee_details('u0'),
-            'appraisee1' => $this->appraisee_details('u1'),
-            'generator' => $generator,
-            'restores' => $restores,
-            'sink' => $this->redirectEmails(),
-            'tasks' => [
-                new totara_appraisal\task\scheduled_messages(),
-                new totara_appraisal\task\update_learner_assignments_task(),
-                new totara_appraisal\task\cleanup_task()
-            ]
-        ];
+        return $test_env;
     }
 
-    public function tearDown(): void {
-        $this->testenv->appraisal->close();
-        $this->testenv->sink->close();
-
-        foreach ($this->testenv->restores as $key => $value) {
-            set_config($key, $value);
-        }
-
-        $this->testenv = null;
-
-        parent::tearDown();
+    /**
+     * Cleans up the test environment after a test.
+     *
+     * @param \stdClass $context setup_static_appraisal_test_env() generated test
+     *        context.
+     */
+    final protected function cleanup_dynamic_appraisal_test_env(
+        \stdClass $context
+    ): void {
+        // Restores the original $CFG/system config settings.
+        $this->cleanup_test_env($context);
     }
 
     /**
@@ -98,24 +63,48 @@ class totara_appraisal_messages_dynamic_test extends appraisal_testcase {
      * 4) run cron tasks again
      */
     public function test_no_multijob_with_before_no_after(): void {
+        $test_env = $this->setup_dynamic_appraisal_test_env();
         set_config('totara_job_allowmultiplejobs', false);
 
         // Step #1
-        [$appraisee, $manager, $cohort, ] = $this->testenv->appraisee0;
-        $this->assign_cohort_step($this->testenv, $cohort);
+        $appraisees = $test_env->pre_activation_appraisees;
+        array_map(
+            function (array $tuple) use ($test_env): void {
+                [, , $cohort, ] = $tuple;
+                $this->assign_cohort_step($test_env, $cohort);
+            },
+            $appraisees
+        );
 
         // Step #2
-        $this->activate_step($this->testenv, []);
+        $this->activate_step($test_env, []);
 
         // Step #3
-        $recipients = [
-            'Learner' => $appraisee->email,
-            'Manager' => $manager->email
-        ];
-        $this->cron_step($this->testenv, $recipients);
+        // Appraisal activation sorts out appraisee job assignments. Execution
+        // ultimately reaches appraisal::send_appraisal_wide_message() which does
+        // a BULK send of emails for ALL managers in the appraisals. Duplicates
+        // are prevented because the system keeps track of emails *within* the
+        // bulk invocation.
+        $emails = array_reduce(
+            $appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, $manager, , ] = $tuple;
+
+                $to_send = array_merge(
+                    $acc, $this->emails_for_appraisee($test_env, $appraisee)
+                );
+
+                return $this->emails_for_manager(
+                    $to_send, $test_env, $appraisee, $manager, true
+                );
+            },
+            []
+        );
+        $this->cron_step($test_env, $emails);
 
         // Step #4
-        $this->cron_step($this->testenv, []);
+        $this->cron_step($test_env, []);
+        $this->cleanup_dynamic_appraisal_test_env($test_env);
     }
 
     /**
@@ -128,35 +117,80 @@ class totara_appraisal_messages_dynamic_test extends appraisal_testcase {
      * 6) run cron tasks
      */
     public function test_no_multijob_with_before_with_after_with_update(): void {
+        $test_env = $this->setup_dynamic_appraisal_test_env();
         set_config('totara_job_allowmultiplejobs', false);
 
         // Step #1
-        [$appraisee, $manager, $cohort, ] = $this->testenv->appraisee0;
-        $this->assign_cohort_step($this->testenv, $cohort);
+        $pre_activation_appraisees = $test_env->pre_activation_appraisees;
+        array_map(
+            function (array $tuple) use ($test_env): void {
+                [, , $cohort, ] = $tuple;
+                $this->assign_cohort_step($test_env, $cohort);
+            },
+            $pre_activation_appraisees
+        );
 
         // Step #2
-        $this->activate_step($this->testenv, []);
+        $this->activate_step($test_env, []);
 
         // Step #3
-        $recipients = [
-            'Learner' => $appraisee->email,
-            'Manager' => $manager->email
-        ];
-        $this->cron_step($this->testenv, $recipients);
+        // Appraisal activation sorts out appraisee job assignments. Execution
+        // ultimately reaches appraisal::send_appraisal_wide_message() which does
+        // a BULK send of emails for ALL managers in the appraisals. Duplicates
+        // are prevented because the system keeps track of emails *within* the
+        // bulk invocation.
+        $emails = array_reduce(
+            $pre_activation_appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, $manager, , ] = $tuple;
+
+                $to_send = array_merge(
+                    $acc, $this->emails_for_appraisee($test_env, $appraisee)
+                );
+
+                return $this->emails_for_manager(
+                    $to_send, $test_env, $appraisee, $manager, true
+                );
+            },
+            []
+        );
+        $this->cron_step($test_env, $emails);
 
         // Step #4
-        [$appraisee1, $manager1, $cohort1, ] = $this->testenv->appraisee1;
-        $this->assign_cohort_step($this->testenv, $cohort1);
+        $post_activation_appraisees = $test_env->post_activation_appraisees;
+        array_map(
+            function (array $tuple) use ($test_env): void {
+                [, , $cohort, ] = $tuple;
+                $this->assign_cohort_step($test_env, $cohort);
+            },
+            $post_activation_appraisees
+        );
 
         // Step #5
-        $recipients1 = [
-            'Learner' => $appraisee1->email,
-            'Manager' => $manager1->email
-        ];
-        $this->update_button_step($this->testenv, $recipients1);
+        // Appraisee job assignment happens upon pressing the update button but
+        // this time, it is appraisal::check_assignment_changes() that handles
+        // it. This is NOT a bulk operation and since emails are not tracked in
+        // *between* invocations, it is possible for duplicate emails to occur.
+        $emails = array_reduce(
+            $post_activation_appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, $manager, , ] = $tuple;
+
+                $to_send = array_merge(
+                    $acc, $this->emails_for_appraisee($test_env, $appraisee)
+                );
+
+                return $this->emails_for_manager(
+                    $to_send, $test_env, $appraisee, $manager, false
+                );
+            },
+            []
+        );
+        $this->update_button_step($test_env, $emails);
 
         // Step #6
-        $this->cron_step($this->testenv, []);
+        $this->cron_step($test_env, []);
+        $this->cleanup_dynamic_appraisal_test_env($test_env);
     }
 
     /**
@@ -168,32 +202,76 @@ class totara_appraisal_messages_dynamic_test extends appraisal_testcase {
      * 5) run cron tasks
      */
     public function test_no_multijob_with_before_with_after_no_update(): void {
+        $test_env = $this->setup_dynamic_appraisal_test_env();
         set_config('totara_job_allowmultiplejobs', false);
 
         // Step #1
-        [$appraisee, $manager, $cohort, ] = $this->testenv->appraisee0;
-        $this->assign_cohort_step($this->testenv, $cohort);
+        $pre_activation_appraisees = $test_env->pre_activation_appraisees;
+        array_map(
+            function (array $tuple) use ($test_env): void {
+                [, , $cohort, ] = $tuple;
+                $this->assign_cohort_step($test_env, $cohort);
+            },
+            $pre_activation_appraisees
+        );
 
         // Step #2
-        $this->activate_step($this->testenv, []);
+        $this->activate_step($test_env, []);
 
         // Step #3
-        $recipients = [
-            'Learner' => $appraisee->email,
-            'Manager' => $manager->email
-        ];
-        $this->cron_step($this->testenv, $recipients);
+        // Appraisal activation sorts out appraisee job assignments. Execution
+        // ultimately reaches appraisal::send_appraisal_wide_message() which does
+        // a BULK send of emails for ALL managers in the appraisals. Duplicates
+        // are prevented because the system keeps track of emails *within* the
+        // bulk invocation.
+        $emails = array_reduce(
+            $pre_activation_appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, $manager, , ] = $tuple;
+
+                $to_send = array_merge(
+                    $acc, $this->emails_for_appraisee($test_env, $appraisee)
+                );
+
+                return $this->emails_for_manager(
+                    $to_send, $test_env, $appraisee, $manager, true
+                );
+            },
+            []
+        );
+        $this->cron_step($test_env, $emails);
 
         // Step #4
-        [$appraisee1, $manager1, $cohort1, ] = $this->testenv->appraisee1;
-        $this->assign_cohort_step($this->testenv, $cohort1);
+        $post_activation_appraisees = $test_env->post_activation_appraisees;
+        array_map(
+            function (array $tuple) use ($test_env): void {
+                [, , $cohort, ] = $tuple;
+                $this->assign_cohort_step($test_env, $cohort);
+            },
+            $post_activation_appraisees
+        );
 
         // Step #5
-        $recipients1 = [
-            'Learner' => $appraisee1->email,
-            'Manager' => $manager1->email
-        ];
-        $this->cron_step($this->testenv, $recipients1);
+        // appraisal::check_assignment_changes() is called from the cron task;
+        // This is NOT a bulk operation and it is possible for duplicate emails
+        // to occur.
+        $emails = array_reduce(
+            $post_activation_appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, $manager, , ] = $tuple;
+
+                $to_send = array_merge(
+                    $acc, $this->emails_for_appraisee($test_env, $appraisee)
+                );
+
+                return $this->emails_for_manager(
+                    $to_send, $test_env, $appraisee, $manager, false
+                );
+            },
+            []
+        );
+        $this->cron_step($test_env, $emails);
+        $this->cleanup_dynamic_appraisal_test_env($test_env);
     }
 
     /**
@@ -203,21 +281,43 @@ class totara_appraisal_messages_dynamic_test extends appraisal_testcase {
      * 3) run cron tasks
      */
     public function test_no_multijob_no_before_with_after_no_update(): void {
+        $test_env = $this->setup_dynamic_appraisal_test_env();
         set_config('totara_job_allowmultiplejobs', false);
 
         // Step #1
-        $this->activate_step($this->testenv, []);
+        $this->activate_step($test_env, []);
 
         // Step #2
-        [$appraisee1, $manager1, $cohort1, ] = $this->testenv->appraisee1;
-        $this->assign_cohort_step($this->testenv, $cohort1);
+        $post_activation_appraisees = $test_env->post_activation_appraisees;
+        array_map(
+            function (array $tuple) use ($test_env): void {
+                [, , $cohort, ] = $tuple;
+                $this->assign_cohort_step($test_env, $cohort);
+            },
+            $post_activation_appraisees
+        );
 
         // Step #3
-        $recipients1 = [
-            'Learner' => $appraisee1->email,
-            'Manager' => $manager1->email
-        ];
-        $this->cron_step($this->testenv, $recipients1);
+        // appraisal::check_assignment_changes() is called from the cron task;
+        // This is NOT a bulk operation and it is possible for duplicate emails
+        // to occur.
+        $emails = array_reduce(
+            $post_activation_appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, $manager, , ] = $tuple;
+
+                $to_send = array_merge(
+                    $acc, $this->emails_for_appraisee($test_env, $appraisee)
+                );
+
+                return $this->emails_for_manager(
+                    $to_send, $test_env, $appraisee, $manager, false
+                );
+            },
+            []
+        );
+        $this->cron_step($test_env, $emails);
+        $this->cleanup_dynamic_appraisal_test_env($test_env);
     }
 
     /**
@@ -228,24 +328,54 @@ class totara_appraisal_messages_dynamic_test extends appraisal_testcase {
      * 4) run cron tasks
      */
     public function test_no_multijob_no_before_with_after_with_update(): void {
+        $test_env = $this->setup_dynamic_appraisal_test_env();
         set_config('totara_job_allowmultiplejobs', false);
 
         // Step #1
-        $this->activate_step($this->testenv, []);
+        $this->activate_step($test_env, []);
 
         // Step #2
-        [$appraisee1, $manager1, $cohort1, ] = $this->testenv->appraisee1;
-        $this->assign_cohort_step($this->testenv, $cohort1);
+        $post_activation_appraisees = $test_env->post_activation_appraisees;
+        array_map(
+            function (array $tuple) use ($test_env): void {
+                [, , $cohort, ] = $tuple;
+                $this->assign_cohort_step($test_env, $cohort);
+            },
+            $post_activation_appraisees
+        );
 
         // Step #3
-        $this->update_button_step($this->testenv, []);
+        // On the UI, it is possible to press the "update" button at this time;
+        // Incredibly, it has no effect because *there were no appraisees before
+        // activation*. Unlike test_no_multijob_with_before_with_after_with_update(),
+        // no emails will be sent out at this time; cron must run first in order
+        // to assign the appraisees!
+        $this->update_button_step($test_env, []);
 
         // Step #4
-        $recipients1 = [
-            'Learner' => $appraisee1->email,
-            'Manager' => $manager1->email
-        ];
-        $this->cron_step($this->testenv, $recipients1);
+        // Even though the appraisal was activated, the appraisal wide activated
+        // message was not triggered because *there were no appraisees before*.
+        // Which means it is still pending. And because the appraisal messages
+        // cron task runs first in this test harness, that means a BULK send of
+        // messages occurs. Duplicates are prevented because it is a bulk send,
+        // very unlike test_no_multijob_with_before_with_after_with_update().
+        $emails = array_reduce(
+            $post_activation_appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, $manager, , ] = $tuple;
+
+                $to_send = array_merge(
+                    $acc, $this->emails_for_appraisee($test_env, $appraisee)
+                );
+
+                return $this->emails_for_manager(
+                    $to_send, $test_env, $appraisee, $manager, true
+                );
+            },
+            []
+        );
+        $this->cron_step($test_env, $emails);
+        $this->cleanup_dynamic_appraisal_test_env($test_env);
     }
 
     /**
@@ -257,29 +387,62 @@ class totara_appraisal_messages_dynamic_test extends appraisal_testcase {
      * 5) run cron tasks
      */
     public function test_multijob_with_before_no_after(): void {
+        $test_env = $this->setup_dynamic_appraisal_test_env();
         set_config('totara_job_allowmultiplejobs', true);
 
         // Step #1
-        [$appraisee, $manager, $cohort, $appraiseeja] = $this->testenv->appraisee0;
-        $this->assign_cohort_step($this->testenv, $cohort);
+        $pre_activation_appraisees = $test_env->pre_activation_appraisees;
+        array_map(
+            function (array $tuple) use ($test_env): void {
+                [, , $cohort, ] = $tuple;
+                $this->assign_cohort_step($test_env, $cohort);
+            },
+            $pre_activation_appraisees
+        );
+
 
         // Step #2
-        $this->activate_step($this->testenv, []);
+        $this->activate_step($test_env, []);
 
         // Step #3
-        $recipients = [
-            'Learner' => $appraisee->email
-        ];
-        $this->cron_step($this->testenv, $recipients);
+        // Appraisal activation DOES NOT sort out appraisee job assignments; that
+        // only happens when appraisees viewing an appraisal. So only emails to
+        // appraisees go out now.
+        $emails = array_reduce(
+            $pre_activation_appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, , , ] = $tuple;
+
+                return array_merge(
+                    $acc,
+                    $this->emails_for_appraisee($test_env, $appraisee)
+                );
+            },
+            []
+        );
+        $this->cron_step($test_env, $emails);
 
         // Step #4
-        $recipients = [
-            'Manager' => $manager->email
-        ];
-        $this->view_appraisal_step($this->testenv, $recipients, $appraisee, $appraiseeja);
+        // Unlike activation, appraisal_user_assignment::with_job_assignment()
+        // is the method handling job assignment changes for the appraisee. This
+        // is NOT a bulk operation and since emails are not tracked *between*
+        // invocations, it is possible for duplicate emails to occur.
+        $emails = array_reduce(
+            $pre_activation_appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, $manager, , ] = $tuple;
+
+                return $this->emails_for_manager(
+                    $acc, $test_env, $appraisee, $manager, false
+                );
+            },
+            []
+        );
+        $this->view_appraisal_step($test_env, $pre_activation_appraisees, $emails);
 
         // Step #5
-        $this->cron_step($this->testenv, []);
+        $this->cron_step($test_env, []);
+        $this->cleanup_dynamic_appraisal_test_env($test_env);
     }
 
     /**
@@ -294,45 +457,107 @@ class totara_appraisal_messages_dynamic_test extends appraisal_testcase {
      * 8) run cron tasks
      */
     public function test_multijob_with_before_with_after_with_update(): void {
+        $test_env = $this->setup_dynamic_appraisal_test_env();
         set_config('totara_job_allowmultiplejobs', true);
 
         // Step #1
-        [$appraisee, $manager, $cohort, $appraiseeja] = $this->testenv->appraisee0;
-        $this->assign_cohort_step($this->testenv, $cohort);
+        $pre_activation_appraisees = $test_env->pre_activation_appraisees;
+        array_map(
+            function (array $tuple) use ($test_env): void {
+                [, , $cohort, ] = $tuple;
+                $this->assign_cohort_step($test_env, $cohort);
+            },
+            $pre_activation_appraisees
+        );
 
         // Step #2
-        $this->activate_step($this->testenv, []);
+        $this->activate_step($test_env, []);
 
         // Step #3
-        $recipients = [
-            'Learner' => $appraisee->email
-        ];
-        $this->cron_step($this->testenv, $recipients);
+        // Appraisal activation DOES NOT sort out appraisee job assignments; that
+        // only happens when appraisees viewing an appraisal. So only emails to
+        // appraisees go out now.
+        $emails = array_reduce(
+            $pre_activation_appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, , , ] = $tuple;
+
+                return array_merge(
+                    $acc,
+                    $this->emails_for_appraisee($test_env, $appraisee)
+                );
+            },
+            []
+        );
+        $this->cron_step($test_env, $emails);
 
         // Step #4
-        $recipients = [
-            'Manager' => $manager->email
-        ];
-        $this->view_appraisal_step($this->testenv, $recipients, $appraisee, $appraiseeja);
+        // Unlike activation, appraisal_user_assignment::with_job_assignment()
+        // is the method handling job assignment changes for the appraisee. This
+        // is NOT a bulk operation and since emails are not tracked *between*
+        // invocations, it is possible for duplicate emails to occur.
+        $emails = array_reduce(
+            $pre_activation_appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, $manager, , ] = $tuple;
+
+                return $this->emails_for_manager(
+                    $acc, $test_env, $appraisee, $manager, false
+                );
+            },
+            []
+        );
+        $this->view_appraisal_step($test_env, $pre_activation_appraisees, $emails);
 
         // Step #5
-        [$appraisee1, $manager1, $cohort1, $appraisee1ja] = $this->testenv->appraisee1;
-        $this->assign_cohort_step($this->testenv, $cohort1);
+        $post_activation_appraisees = $test_env->post_activation_appraisees;
+        array_map(
+            function (array $tuple) use ($test_env): void {
+                [, , $cohort, ] = $tuple;
+                $this->assign_cohort_step($test_env, $cohort);
+            },
+            $post_activation_appraisees
+        );
 
         // Step #6
-        $recipients1 = [
-            'Learner' => $appraisee1->email
-        ];
-        $this->update_button_step($this->testenv, $recipients1);
+        // Appraisees still need to view the appraisal first before their managers
+        // know about it. So only appraisee emails at this time. And because there
+        // were appraisee assigned before activation, the update method itself
+        // sends emails, not the appraisal message sending cron task.
+        $emails = array_reduce(
+            $post_activation_appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, , , ] = $tuple;
+
+                return array_merge(
+                    $acc,
+                    $this->emails_for_appraisee($test_env, $appraisee)
+                );
+            },
+            []
+        );
+        $this->update_button_step($test_env, $emails);
 
         // Step #7
-        $recipients1 = [
-            'Manager' => $manager1->email
-        ];
-        $this->view_appraisal_step($this->testenv, $recipients1, $appraisee1, $appraisee1ja);
+        // Appraisees view the appraisal and their managers get emails. But this
+        // is NOT a bulk operation and since emails are not tracked *between*
+        // invocations, it is possible for duplicate emails to occur.
+        $emails = array_reduce(
+            $post_activation_appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, $manager, , ] = $tuple;
+
+                return $this->emails_for_manager(
+                    $acc, $test_env, $appraisee, $manager, false
+                );
+            },
+            []
+        );
+        $this->view_appraisal_step($test_env, $post_activation_appraisees, $emails);
 
         // Step #8
-        $this->cron_step($this->testenv, []);
+        $this->cron_step($test_env, []);
+        $this->cleanup_dynamic_appraisal_test_env($test_env);
     }
 
     /**
@@ -347,45 +572,103 @@ class totara_appraisal_messages_dynamic_test extends appraisal_testcase {
      * 8) run cron tasks
      */
     public function test_multijob_with_before_with_after_no_update(): void {
+        $test_env = $this->setup_dynamic_appraisal_test_env();
         set_config('totara_job_allowmultiplejobs', true);
 
         // Step #1
-        [$appraisee, $manager, $cohort, $appraiseeja] = $this->testenv->appraisee0;
-        $this->assign_cohort_step($this->testenv, $cohort);
+        $pre_activation_appraisees = $test_env->pre_activation_appraisees;
+        array_map(
+            function (array $tuple) use ($test_env): void {
+                [, , $cohort, ] = $tuple;
+                $this->assign_cohort_step($test_env, $cohort);
+            },
+            $pre_activation_appraisees
+        );
 
         // Step #2
-        $this->activate_step($this->testenv, []);
+        $this->activate_step($test_env, []);
 
         // Step #3
-        $recipients = [
-            'Learner' => $appraisee->email
-        ];
-        $this->cron_step($this->testenv, $recipients);
+        // Appraisal activation DOES NOT sort out appraisee job assignments; that
+        // only happens when appraisees viewing an appraisal. So only emails to
+        // appraisees go out now.
+        $emails = array_reduce(
+            $pre_activation_appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, , , ] = $tuple;
+
+                return array_merge(
+                    $acc,
+                    $this->emails_for_appraisee($test_env, $appraisee)
+                );
+            },
+            []
+        );
+        $this->cron_step($test_env, $emails);
 
         // Step #4
-        $recipients = [
-            'Manager' => $manager->email
-        ];
-        $this->view_appraisal_step($this->testenv, $recipients, $appraisee, $appraiseeja);
+        // Appraisees view the appraisal and their managers get emails. But this
+        // is NOT a bulk operation and since emails are not tracked *between*
+        // invocations, it is possible for duplicate emails to occur.
+        $emails = array_reduce(
+            $pre_activation_appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, $manager, , ] = $tuple;
+
+                return $this->emails_for_manager(
+                    $acc, $test_env, $appraisee, $manager, false
+                );
+            },
+            []
+        );
+        $this->view_appraisal_step($test_env, $pre_activation_appraisees, $emails);
 
         // Step #5
-        [$appraisee1, $manager1, $cohort1, $appraisee1ja] = $this->testenv->appraisee1;
-        $this->assign_cohort_step($this->testenv, $cohort1);
+        $post_activation_appraisees = $test_env->post_activation_appraisees;
+        array_map(
+            function (array $tuple) use ($test_env): void {
+                [, , $cohort, ] = $tuple;
+                $this->assign_cohort_step($test_env, $cohort);
+            },
+            $post_activation_appraisees
+        );
 
         // Step #6
-        $recipients1 = [
-            'Learner' => $appraisee1->email
-        ];
-        $this->cron_step($this->testenv, $recipients1);
+        // Only appraisee emails now.
+        $emails = array_reduce(
+            $post_activation_appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, , , ] = $tuple;
+
+                return array_merge(
+                    $acc,
+                    $this->emails_for_appraisee($test_env, $appraisee)
+                );
+            },
+            []
+        );
+        $this->cron_step($test_env, $emails);
 
         // Step #7
-        $recipients1 = [
-            'Manager' => $manager1->email
-        ];
-        $this->view_appraisal_step($this->testenv, $recipients1, $appraisee1, $appraisee1ja);
+        // Appraisees view the appraisal and their managers get emails. But this
+        // is NOT a bulk operation and since emails are not tracked *between*
+        // invocations, it is possible for duplicate emails to occur.
+        $emails = array_reduce(
+            $post_activation_appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, $manager, , ] = $tuple;
+
+                return $this->emails_for_manager(
+                    $acc, $test_env, $appraisee, $manager, false
+                );
+            },
+            []
+        );
+        $this->view_appraisal_step($test_env, $post_activation_appraisees, $emails);
 
         // Step #8
-        $this->cron_step($this->testenv, []);
+        $this->cron_step($test_env, []);
+        $this->cleanup_dynamic_appraisal_test_env($test_env);
     }
 
     /**
@@ -397,27 +680,57 @@ class totara_appraisal_messages_dynamic_test extends appraisal_testcase {
      * 5) run cron tasks
      */
     public function test_multijob_no_before_with_after_with_update(): void {
+        $test_env = $this->setup_dynamic_appraisal_test_env();
         set_config('totara_job_allowmultiplejobs', true);
 
         // Step #1
-        $this->activate_step($this->testenv, []);
+        $this->activate_step($test_env, []);
 
         // Step #2
-        [$appraisee1, $manager1, $cohort1, $appraisee1ja] = $this->testenv->appraisee1;
-        $this->assign_cohort_step($this->testenv, $cohort1);
+        $post_activation_appraisees = $test_env->post_activation_appraisees;
+        array_map(
+            function (array $tuple) use ($test_env): void {
+                [, , $cohort, ] = $tuple;
+                $this->assign_cohort_step($test_env, $cohort);
+            },
+            $post_activation_appraisees
+        );
 
         // Step #3
-        $this->update_button_step($this->testenv, []);
+        // On the UI, it is possible to press the "update" button at this time;
+        // Incredibly, it has no effect because *there were no appraisees before
+        // activation*. Unlike test_no_multijob_with_before_with_after_with_update(),
+        // no emails will be sent out at this time.
+        $this->update_button_step($test_env, []);
 
         // Step #4
-        $this->view_appraisal_step($this->testenv, [], $appraisee1, $appraisee1ja);
+        // The appraisee can actually view the appraisal after assignment even
+        // though he does not get any notification. The system now knows which
+        // job assignment to use; but since cron did not run and there were no
+        // appraisees before activation, the system wide activation message is
+        // *still pending*. And that means no emails here either!
+        $this->view_appraisal_step($test_env, $post_activation_appraisees, []);
 
         // Step #5
-        $recipients1 = [
-            'Learner' => $appraisee1->email,
-            'Manager' => $manager1->email
-        ];
-        $this->cron_step($this->testenv, $recipients1);
+        // Only now do the recipients get emails; because this is a bulk send,
+        // there are no duplicates.
+        $emails = array_reduce(
+            $post_activation_appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, $manager, , ] = $tuple;
+
+                $to_send = array_merge(
+                    $acc, $this->emails_for_appraisee($test_env, $appraisee)
+                );
+
+                return $this->emails_for_manager(
+                    $to_send, $test_env, $appraisee, $manager, true
+                );
+            },
+            []
+        );
+        $this->cron_step($test_env, $emails);
+        $this->cleanup_dynamic_appraisal_test_env($test_env);
     }
 
     /**
@@ -429,197 +742,59 @@ class totara_appraisal_messages_dynamic_test extends appraisal_testcase {
      * 5) run cron tasks
      */
     public function test_multijob_no_before_with_after_no_update(): void {
+        $test_env = $this->setup_dynamic_appraisal_test_env();
         set_config('totara_job_allowmultiplejobs', true);
 
         // Step #1
-        $this->activate_step($this->testenv, []);
+        $this->activate_step($test_env, []);
 
         // Step #2
-        [$appraisee1, $manager1, $cohort1, $appraisee1ja] = $this->testenv->appraisee1;
-        $this->assign_cohort_step($this->testenv, $cohort1);
+        $post_activation_appraisees = $test_env->post_activation_appraisees;
+        array_map(
+            function (array $tuple) use ($test_env): void {
+                [, , $cohort, ] = $tuple;
+                $this->assign_cohort_step($test_env, $cohort);
+            },
+            $post_activation_appraisees
+        );
 
         // Step #3
-        $recipients1 = [
-            'Learner' => $appraisee1->email
-        ];
-        $this->cron_step($this->testenv, $recipients1);
+        // Appraisal activation DOES NOT sort out appraisee job assignments; that
+        // only happens when appraisees viewing an appraisal. So only emails to
+        // appraisees go out now.
+        $emails = array_reduce(
+            $post_activation_appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, , , ] = $tuple;
+
+                return array_merge(
+                    $acc,
+                    $this->emails_for_appraisee($test_env, $appraisee)
+                );
+            },
+            []
+        );
+        $this->cron_step($test_env, $emails);
 
         // Step #4
-        $recipients1 = [
-            'Manager' => $manager1->email
-        ];
-        $this->view_appraisal_step($this->testenv, $recipients1, $appraisee1, $appraisee1ja);
+        // Appraisees view the appraisal and their managers get emails. But this
+        // is NOT a bulk operation and since emails are not tracked *between*
+        // invocations, it is possible for duplicate emails to occur.
+        $emails = array_reduce(
+            $post_activation_appraisees,
+            function (array $acc, array $tuple) use ($test_env): array {
+                [$appraisee, $manager, , ] = $tuple;
+
+                return $this->emails_for_manager(
+                    $acc, $test_env, $appraisee, $manager, false
+                );
+            },
+            []
+        );
+        $this->view_appraisal_step($test_env, $post_activation_appraisees, $emails);
 
         // Step #5
-        $this->cron_step($this->testenv, []);
-    }
-
-    /**
-     * Generates a (user, manager, cohort containing that user, appraisee ja)
-     * tuple.
-     *
-     * @param string name user name.
-     *
-     * @return array the tuple.
-     */
-    private function appraisee_details(string $name): array {
-        $generator = $this->getDataGenerator();
-        $manager = $generator->create_user(['username' => $name . '_manager']);
-        $mgrja = job_assignment::create_default($manager->id)->id;
-
-        $appraisee = $generator->create_user(['username' => $name]);
-        $appraiseeid = $appraisee->id;
-        $appraiseeja = job_assignment::create_default(
-            $appraiseeid, ['managerjaid' => $mgrja]
-        );
-
-        $cohorts = $generator->get_plugin_generator('totara_cohort');
-        $cohort = $cohorts->create_cohort(['name' => $name . '_cohort']);
-        $cohorts->cohort_assign_users($cohort->id, [$appraiseeid]);
-
-        return [$appraisee, $manager, $cohort, $appraiseeja];
-    }
-
-    /**
-     * Retrieves system configuration values that need to be restored after a
-     * test runs.
-     *
-     * @return array[string=>mixed] values that must be restored.
-     */
-    private function restorable_config_values(): array {
-        $keys = [
-            'dynamicappraisals',
-            'totara_job_allowmultiplejobs'
-        ];
-
-        return array_reduce(
-            $keys,
-
-            function (array $acc, string $key): array {
-                $acc[$key] = get_config(null, $key);
-                return $acc;
-            },
-
-            []
-        );
-    }
-
-    /**
-     * Convenience function assign a cohort to the test appraisal.
-     *
-     * @param stdClass $context test execution context.
-     * @param stdClass $cohort cohort details.
-     */
-    private function assign_cohort_step(stdClass $context, stdClass $cohort): void {
-        $context->generator->create_group_assignment(
-            $context->appraisal, 'cohort', $cohort->id
-        );
-    }
-
-    /**
-     * Activates an appraisal.
-     *
-     * @param stdClass $context test execution context.
-     * @param array[string=>string] $recipients expected notification recipients;
-     *        a mapping of role names to email addresses.
-     */
-    private function activate_step(stdClass $context, array $recipients): void {
-        $context->appraisal->activate();
-        $this->check_email_step($context, $recipients);
-    }
-
-    /**
-     * Convenience function to run the specified cron tasks.
-     *
-     * @param stdClass $context test execution context.
-     * @param array[string=>string] $recipients expected notification recipients;
-     *        a mapping of role names to email addresses.
-     */
-    private function cron_step(stdClass $context, array $recipients): void {
-        foreach ($context->tasks as $task) {
-            $task->execute();
-        }
-
-        $this->check_email_step($context, $recipients);
-    }
-
-    /**
-     * Convenience function to simulate the pressing of the "update" button when
-     * assign users after activation.
-     *
-     * @param stdClass $context test execution context.
-     * @param array[string=>string] $recipients expected notification recipients;
-     *        a mapping of role names to email addresses.
-     */
-    private function update_button_step(stdClass $context, array $recipients): void {
-        $context->appraisal->check_assignment_changes();
-        $this->check_email_step($context, $recipients);
-    }
-
-    /**
-     * Convenience function to simulate when the appraisee first views the
-     * appraisal.
-     *
-     * @param stdClass $context test execution context.
-     * @param array[string=>string] $recipients expected notification recipients;
-     *        a mapping of role names to email addresses.
-     * @param stdClass $appraisee appraisee who "views the appraisal".
-     * @param job_assignment $ja appraisee job assignment.
-     */
-    private function view_appraisal_step(
-        stdClass $context,
-        array $recipients,
-        stdClass $appraisee,
-        job_assignment $ja
-    ): void {
-        appraisal_role_assignment::get_role(
-            $context->appraisal->id,
-            $appraisee->id,
-            $appraisee->id,
-            appraisal::ROLE_LEARNER
-        )->get_user_assignment()->with_job_assignment(
-            $ja->id
-        );
-
-        $this->check_email_step($context, $recipients);
-    }
-
-    /**
-     * Checks the correct emails are sent out.
-     *
-     * @param stdClass $context test execution context.
-     * @param array[string=>string] $recipients expected notification recipients;
-     *        a mapping of role names to email addresses.
-     */
-    private function check_email_step(stdClass $context, array $recipients): void {
-        $emails = $context->sink->get_messages();
-        $this->assertCount(count($recipients), $emails, 'wrong email count');
-
-        $actual = array_reduce(
-            $emails,
-
-            function (array $result, stdClass $email): array {
-                $addr = $email->to;
-                $subject = $email->subject;
-
-                if (strpos($subject, 'Learner') !== false) {
-                    $result['Learner'] = $addr;
-                }
-                else if (strpos($subject, 'Manager') !== false) {
-                    $result['Manager'] = $addr;
-                }
-
-                return $result;
-            },
-
-            []
-        );
-        $context->sink->clear();
-
-        // Sort both array's the same way, we're not worried about the order, just the result.
-        ksort($recipients);
-        ksort($actual);
-
-        $this->assertSame($recipients, $actual, "wrong email recipients");
+        $this->cron_step($test_env, []);
+        $this->cleanup_dynamic_appraisal_test_env($test_env);
     }
 }

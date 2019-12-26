@@ -40,10 +40,9 @@ Feature: Test appraisal stage completion with missing roles
     And the following "pages" exist in "totara_appraisal" plugin:
       | appraisal   | stage      | name      |
       | Appraisal1  | App1_Stage | App1_Page |
-     And the following "questions" exist in "totara_appraisal" plugin:
-      | appraisal   | stage      | page      | name     | type          | default | roles   | ExtraInfo |
-      | Appraisal1  | App1_Stage | App1_Page | App1-Q1  | text          | 2       | manager |           |
-
+    And the following "questions" exist in "totara_appraisal" plugin:
+      | appraisal   | stage      | page      | name     | type          | default | roles           | ExtraInfo |
+      | Appraisal1  | App1_Stage | App1_Page | App1-Q1  | text          | 2       | learner,manager |           |
     And the following "assignments" exist in "totara_appraisal" plugin:
       | appraisal   | type     | id     |
       | Appraisal1  | audience | AppAud |
@@ -179,7 +178,7 @@ Feature: Test appraisal stage completion with missing roles
 
     # Now assign a manager to learner2
     When I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "learner2 lastname"
     And I follow "Learner2 Job"
     And I press "Choose manager"
@@ -252,7 +251,7 @@ Feature: Test appraisal stage completion with missing roles
 
     # Now remove the manager
     When I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "learner1 lastname"
     And I follow "Learner1 Job"
     And I click on "Delete" "link" in the "#managertitle" "css_element"
@@ -341,7 +340,7 @@ Feature: Test appraisal stage completion with missing roles
 
     # Now remove the manager
     When I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "learner1 lastname"
     And I follow "Learner1 Job"
     And I click on "Delete" "link" in the "#managertitle" "css_element"

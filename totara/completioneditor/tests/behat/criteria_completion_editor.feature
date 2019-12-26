@@ -18,9 +18,7 @@ Feature: Criteria completion records can be edited
 
   Scenario: Activity-based criteria completion records based on timemodified without grades (Feedback) can be edited
     # Set up the activity and criteria and navigate to the completion editor.
-    When I click on "Courses" in the totara menu
-    And I click on "Course One" "link"
-    And I turn editing mode on
+    When I am on "Course One" course homepage with editing mode on
     And I add a "Feedback" to section "1" and I fill the form with:
       | Name                | Test feedback 1           |
       | Description         | Test feedback description |
@@ -189,9 +187,7 @@ Feature: Criteria completion records can be edited
 
   Scenario: Activity-based criteria completion records based on timemodified and grades (Quiz) can be edited
     # Set up the activity and criteria and navigate to the completion editor.
-    When I click on "Courses" in the totara menu
-    And I click on "Course One" "link"
-    And I turn editing mode on
+    When I am on "Course One" course homepage with editing mode on
     And I add a "Quiz" to section "1" and I fill the form with:
       | Name                | Test quiz 1                                       |
       | Description         | Test quiz description                             |
@@ -361,8 +357,7 @@ Feature: Criteria completion records can be edited
 
   Scenario: Non-activity criteria completion records can be edited
     # Set up the criteria and navigate to the completion editor.
-    When I click on "Courses" in the totara menu
-    And I click on "Course One" "link"
+    When I am on "Course One" course homepage
     And I navigate to "Course completion" node in "Course administration"
     And I expand all fieldsets
     And I set the field "id_criteria_self_value" to "1"

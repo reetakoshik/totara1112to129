@@ -1,0 +1,9 @@
+This files describes API changes in /filter/filter_tex,
+information provided here is intended especially for developers.
+
+=== 12 ===
+
+* Removed deprecated methods:
+  * latex::execute() in latex.php
+  * filter_tex_get_cmd() in lib.php
+  * execute() in texdebug.php

@@ -105,26 +105,7 @@ class auth_plugin_base {
      * The fields we can lock and update from/to external authentication backends
      * @var array
      */
-    var $userfields = array(
-        'firstname',
-        'lastname',
-        'email',
-        'city',
-        'country',
-        'lang',
-        'description',
-        'url',
-        'idnumber',
-        'institution',
-        'department',
-        'phone1',
-        'phone2',
-        'address',
-        'firstnamephonetic',
-        'lastnamephonetic',
-        'middlename',
-        'alternatename'
-    );
+    var $userfields = \core_user::AUTHSYNCFIELDS;
 
     /**
      * Moodle custom fields to sync with.
@@ -406,40 +387,6 @@ class auth_plugin_base {
     }
 
     /**
-     * Prints a form for configuring this authentication plugin.
-     *
-     * This function is called from admin/auth.php, and outputs a full page with
-     * a form for configuring this plugin.
-     *
-     * @param object $config
-     * @param object $err
-     * @param array $user_fields
-     */
-    function config_form($config, $err, $user_fields) {
-        //override if needed
-    }
-
-    /**
-     * A chance to validate form data, and last chance to
-     * do stuff before it is inserted in config_plugin
-     * @param object object with submitted configuration settings (without system magic quotes)
-     * @param array $err array of error messages
-     */
-     function validate_form($form, &$err) {
-        //override if needed
-    }
-
-    /**
-     * Processes and stores configuration data for this authentication plugin.
-     *
-     * @param object object with submitted configuration settings (without system magic quotes)
-     */
-    function process_config($config) {
-        //override if needed
-        return true;
-    }
-
-    /**
      * Hook for overriding behaviour of login page.
      * This method is called from login/index.php page for all enabled auth plugins.
      *
@@ -644,6 +591,151 @@ class auth_plugin_base {
      */
     public function allow_persistent_login(stdClass $user) {
         return true;
+    }
+
+    /**
+     * Update a local user record from an external source.
+     * This is a lighter version of the one in moodlelib -- won't do
+     * expensive ops such as enrolment.
+     *
+     * @param string $username username
+     * @param array $updatekeys fields to update, false updates all fields.
+     * @param bool $triggerevent set false if user_updated event should not be triggered.
+     *             This will not affect user_password_updated event triggering.
+     * @param bool $suspenduser Should the user be suspended?
+     * @return stdClass|bool updated user record or false if there is no new info to update.
+     */
+    protected function update_user_record($username, $updatekeys = false, $triggerevent = false, $suspenduser = false) {
+        global $CFG, $DB;
+
+        require_once($CFG->dirroot.'/user/profile/lib.php');
+
+        // Just in case check text case.
+        $username = trim(core_text::strtolower($username));
+
+        // Get the current user record.
+        $user = $DB->get_record('user', array('username' => $username, 'mnethostid' => $CFG->mnet_localhost_id));
+        if (empty($user)) { // Trouble.
+            error_log($this->errorlogtag . get_string('auth_usernotexist', 'auth', $username));
+            print_error('auth_usernotexist', 'auth', '', $username);
+            die;
+        }
+
+        // Protect the userid from being overwritten.
+        $userid = $user->id;
+
+        $needsupdate = false;
+
+        if ($newinfo = $this->get_userinfo($username)) {
+            $newinfo = truncate_userinfo($newinfo);
+
+            if (empty($updatekeys)) { // All keys? this does not support removing values.
+                $updatekeys = array_keys($newinfo);
+            }
+
+            if (!empty($updatekeys)) {
+                $newuser = new stdClass();
+                $newuser->id = $userid;
+                // The cast to int is a workaround for MDL-53959.
+                $newuser->suspended = (int) $suspenduser;
+                // Load all custom fields.
+                $profilefields = (array) profile_user_record($user->id, false);
+                $newprofilefields = [];
+
+                foreach ($updatekeys as $key) {
+                    if (isset($newinfo[$key])) {
+                        $value = $newinfo[$key];
+                    } else {
+                        $value = '';
+                    }
+
+                    if (!empty($this->config->{'field_updatelocal_' . $key})) {
+                        if (preg_match('/^profile_field_(.*)$/', $key, $match)) {
+                            // Custom field.
+                            $field = $match[1];
+                            $currentvalue = isset($profilefields[$field]) ? $profilefields[$field] : null;
+                            $newprofilefields[$field] = $value;
+                        } else {
+                            // Standard field.
+                            $currentvalue = isset($user->$key) ? $user->$key : null;
+                            $newuser->$key = $value;
+                        }
+
+                        // Only update if it's changed.
+                        if ($currentvalue !== $value) {
+                            $needsupdate = true;
+                        }
+                    }
+                }
+            }
+
+            if ($needsupdate) {
+                user_update_user($newuser, false, $triggerevent);
+                profile_save_custom_fields($newuser->id, $newprofilefields);
+                return $DB->get_record('user', array('id' => $userid, 'deleted' => 0));
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Return the list of enabled identity providers.
+     *
+     * Each identity provider data contains the keys url, name and iconurl (or
+     * icon). See the documentation of {@link auth_plugin_base::loginpage_idp_list()}
+     * for detailed description of the returned structure.
+     *
+     * @param array $authsequence site's auth sequence (list of auth plugins ordered)
+     * @return array List of arrays describing the identity providers
+     */
+    public static function get_identity_providers($authsequence) {
+        global $SESSION;
+
+        $identityproviders = [];
+        foreach ($authsequence as $authname) {
+            $authplugin = get_auth_plugin($authname);
+            $wantsurl = (isset($SESSION->wantsurl)) ? $SESSION->wantsurl : '';
+            $identityproviders = array_merge($identityproviders, $authplugin->loginpage_idp_list($wantsurl));
+        }
+        return $identityproviders;
+    }
+
+    /**
+     * Prepare a list of identity providers for output.
+     *
+     * @param array $identityproviders as returned by {@link self::get_identity_providers()}
+     * @param renderer_base $output
+     * @return array the identity providers ready for output
+     */
+    public static function prepare_identity_providers_for_output($identityproviders, renderer_base $output) {
+        $data = [];
+        foreach ($identityproviders as $idp) {
+            if (isset($idp['authtype']) && $idp['authtype'] == 'oauth2') {
+                // Some auth providers (e.g. OAuth2) use image icons.
+                if (!empty($idp['icon'])) {
+                    // Pre-3.3 auth plugins provide icon as a pix_icon instance. New auth plugins (since 3.3) provide iconurl.
+                    $idp['iconurl'] = $output->image_url($idp['icon']->pix, $idp['icon']->component);
+                }
+                if ($idp['iconurl'] instanceof moodle_url) {
+                    $idp['iconurl'] = $idp['iconurl']->out(false);
+                }
+                unset($idp['icon']);
+                if ($idp['url'] instanceof moodle_url) {
+                    $idp['url'] = $idp['url']->out(false);
+                }
+            } else {
+                // Other auth providers may have either flex or image icons.
+                $icon = $idp['icon'];
+                $idp['icon'] = [
+                    'context' => $icon->export_for_template($output),
+                    'template' => $icon->get_template($output)
+                ];
+                $idp['icon'] = array_merge($idp['icon'], $icon->export_for_pix($output));
+            }
+            $data[] = $idp;
+        }
+        return $data;
     }
 }
 

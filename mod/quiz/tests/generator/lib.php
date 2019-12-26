@@ -95,4 +95,27 @@ class mod_quiz_generator extends testing_module_generator {
 
         return parent::create_instance($record, (array)$options);
     }
+
+    /**
+     * Age a quiz's responses the specified number of seconds
+     *
+     * @param string $quizname Quiz whose responses we want to age
+     * @param int $seconds Number of seconds to age
+     */
+    public function age_quiz_responses($quizname, $seconds) {
+        global $CFG, $DB;
+        $quiz = $DB->get_record('quiz', array('name' => $quizname), '*', MUST_EXIST);
+        $sql = "UPDATE {quiz_attempts} 
+                   SET timefinish = timefinish - :seconds
+                 WHERE quiz = :quizid";
+        $DB->execute($sql, ['seconds' => $seconds, 'quizid' => $quiz->id]);
+
+        // Also update grade_grades, which may be hidden based on the quiz response time.
+        require_once($CFG->dirroot . "/lib/grade/grade_item.php");
+        $grade_item = grade_item::fetch(array('courseid' => $quiz->course, 'itemmodule' => 'quiz', 'iteminstance' => $quiz->id));
+        $sql2 = "UPDATE {grade_grades}
+                    SET hidden = hidden - :seconds
+                  WHERE itemid = :gradeitemid AND hidden > 1";
+        $DB->execute($sql2, ['seconds' => $seconds, 'gradeitemid' => $grade_item->id]);
+    }
 }

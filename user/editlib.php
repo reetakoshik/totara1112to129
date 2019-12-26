@@ -57,7 +57,7 @@ function useredit_setup_preference_page($userid, $courseid) {
         require_login($course);
     } else if (!isloggedin()) {
         if (empty($SESSION->wantsurl)) {
-            $SESSION->wantsurl = $CFG->httpswwwroot.'/user/preferences.php';
+            $SESSION->wantsurl = $CFG->wwwroot.'/user/preferences.php';
         }
         redirect(get_login_url());
     } else {
@@ -206,8 +206,10 @@ function useredit_update_picture(stdClass $usernew, moodleform $userform, $filem
  *
  * @param stdClass $user The current user object.
  * @param stdClass $usernew The updated user object.
+ * @deprecated Since Totara 12
  */
 function useredit_update_bounces($user, $usernew) {
+    debugging("useredit_update_bounces() has been deprecated, please use \\core_user\\email_bounce_counter instead", DEBUG_DEVELOPER);
     if (!isset($usernew->email)) {
         // Locked field.
         return;

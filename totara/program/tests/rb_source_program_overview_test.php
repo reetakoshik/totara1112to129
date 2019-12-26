@@ -31,7 +31,7 @@ require_once($CFG->dirroot . '/totara/reportbuilder/tests/reportcache_advanced_t
 class totara_program_rb_source_program_overview_testcase extends reportcache_advanced_testcase {
     protected $load = 0;
     protected $report_builder_data = array('id' => 123, 'fullname' => 'Program Overview', 'shortname' => 'report_program_overview',
-                                           'source' => 'program_overview', 'hidden' => 0, 'embedded' => 0, 'accessmode' => 1);
+                                           'source' => 'program_overview', 'hidden' => 0, 'embedded' => 0, 'accessmode' => 0);
 
 
     protected $report_builder_columns_data = array(
@@ -96,6 +96,7 @@ class totara_program_rb_source_program_overview_testcase extends reportcache_adv
     public function test_load_overview() {
         global $DB;
         $this->resetAfterTest();
+        $this->setAdminUser();
 
         $usernum = 10;
         $coursenum = 2;
@@ -139,16 +140,6 @@ class totara_program_rb_source_program_overview_testcase extends reportcache_adv
         }
         $this->output_log("Start report testing...");
         $usecache = 0;
-        $startime = microtime();
-        $result = $this->get_report_result($this->report_builder_data['id'], array(), $usecache);
-        $total = count($result);
-        $duration = microtime_diff($startime, microtime());
-        $this->output_log("Records: $total \n Report generated in: $duration sec");
-        $this->assertEquals($usernum * $programnum, $total);
-
-        $this->output_log("Start report testing...");
-        $usecache = 1;
-        $this->enable_caching($this->report_builder_data['id']);
         $startime = microtime();
         $result = $this->get_report_result($this->report_builder_data['id'], array(), $usecache);
         $total = count($result);

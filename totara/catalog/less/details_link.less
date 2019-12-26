@@ -1,0 +1,93 @@
+//
+// This file is part of Totara Learn
+//
+// Copyright (C) 2018 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @copyright 2018 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Kevin Hottinger <kevin.hottinger@totaralearning.com>
+// @package   theme_roots
+
+// Size
+@catalogDetailsLink-spacing_medium: @totara_style-spacing_medium;
+@catalogDetailsLink-spacing_small: @totara_style-spacing_small;
+// Colours
+@catalogDetailsLink-color_neutral_1: @totara_style-color_neutral_1;
+@catalogDetailsLink-color_neutral_2: @totara_style-color_neutral_2;
+@catalogDetailsLink-color_neutral_4: @totara_style-color_neutral_4;
+@catalogDetailsLink-color_theme_1: @totara_style-color_theme_1;
+// Break points
+@catalogDetailsLink-screen_sm_min: @totara_style-screen_sm_min;
+
+.tw-catalogDetailsLink {
+    background: @catalogDetailsLink-color_neutral_2;
+    border: 1px solid @catalogDetailsLink-color_neutral_4;
+    border-radius: 5px;
+    clear: both;
+    margin-bottom: 2.8rem;
+    padding: @catalogDetailsLink-spacing_medium;
+    width: 100%;
+
+    &__option {
+        &_title {
+            .totara_style-heading_label_small;
+            margin-top: 0;
+            text-transform: unset;
+        }
+
+        &_content {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        &_description {
+            height: 100%;
+            margin: auto auto auto 0;
+        }
+
+        &_btn {
+            background: @catalogDetailsLink-color_theme_1;
+            border-radius: 3px;
+            color: @catalogDetailsLink-color_neutral_1;
+            display: inline-block;
+            font-weight: bold;
+            margin-top: @catalogDetailsLink-spacing_small;
+            padding: @catalogDetailsLink-spacing_small @catalogDetailsLink-spacing_medium;
+            text-align: center;
+            transition: background-color .2s ease;
+            width: 100%;
+
+            &:active,
+            &:focus,
+            &:hover {
+                background: darken(@catalogDetailsLink-color_theme_1, 5%);
+                color: @catalogDetailsLink-color_neutral_1;
+                text-decoration: none;
+            }
+        }
+    }
+}
+
+@media (min-width: @catalogDetailsLink-screen_sm_min) {
+    .tw-catalogDetailsLink {
+        &__option {
+            &_btn {
+                margin-top: 0;
+                width: auto;
+            }
+        }
+    }
+}

@@ -37,7 +37,7 @@ class auth_plugin_webservice extends auth_plugin_base {
      */
     public function __construct() {
         $this->authtype = 'webservice';
-        $this->config = get_config('auth/webservice');
+        $this->config = get_config('auth_webservice');
     }
 
     /**
@@ -138,24 +138,15 @@ class auth_plugin_webservice extends auth_plugin_base {
     }
 
     /**
-     * Prints a form for configuring this authentication plugin.
+     * Totara: WS users cannot login, which means they cannot edit profile.
      *
-     * This function is called from admin/auth.php, and outputs a full page with
-     * a form for configuring this plugin.
-     *
-     * @param array $page An object containing all the data for this page.
+     * @return bool
      */
-    function config_form($config, $err, $user_fields) {
+    function can_edit_profile() {
+        return false;
     }
 
     /**
-     * Processes and stores configuration data for this authentication plugin.
-     */
-    function process_config($config) {
-        return true;
-    }
-
-   /**
      * Confirm the new user as registered. This should normally not be used,
      * but it may be necessary if the user auth_method is changed to manual
      * before the user is confirmed.

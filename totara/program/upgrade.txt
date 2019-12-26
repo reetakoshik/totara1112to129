@@ -1,6 +1,39 @@
 This files describes API changes in Totara Program,
 information provided here is intended especially for developers.
 
+=== 12.8 ===
+
+* Added new parameter $data to totara_program_renderer::display_set_completion(), this contains data to set the values of the set completion dialog.
+
+=== 12.0 ===
+
+* Removed deprecated file assignment/remove_item.php
+* Removed deprecated methods:
+  * program::is_accessible()
+  * program::delete_completion_record()
+  * course_set::get_course_warnings()
+  * prog_assignments::__get()
+  * prog_assignments::__call()
+  * prog_store_position_assignment()
+* Removed deprecated class user_assignment
+* Removed deprecated functions and properties in JavaScript:
+  * program_assignment.total_count
+  * program_assignment.is_setup
+  * program_assignment.update_total_user_count()
+  * program_assignment.setup()
+  * category.user_count_label
+  * category.update_user_count()
+* Deprecated the following report builder display functions and replaced with display classes
+  * rb_source_program_completion::rb_display_program_completion_status(), please call totara_program\rb\display\program_completion_status::display() instead.
+  * rb_source_program_membership::rb_display_prog_status(), please call totara_program\rb\display\program_completion_status::display() instead.
+  * rb_source_program_membership::rb_display_edit_completion(), please call totara_program\rb\display\program_edit_completion::display() instead.
+  * rb_source_program_overview::rb_display_program_completion_status(), please call totara_program\rb\display\program_completion_status::display() instead.
+  * rb_source_program_overview::rb_display_course_status_list(), please call totara_program\rb\display\program_course_status_list::display() instead.
+  * rb_source_program_overview::rb_display_category_link_list(), please call totara_program\rb\display\program_category_link_list::display() instead.
+  * rb_source_program_overview::rb_display_coursename_list(), please call totara_program\rb\display\program_course_name_list::display() instead.
+* Updated totara_program_renderer::coursecat_tree, removing a reference to an unnecessary JavaScript function call
+* totara_program_renderer::display_duedate_highlight_info() has changed, fixing a HTML validation issue
+
 === 10 ===
 
 API Changes:

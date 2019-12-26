@@ -26,7 +26,7 @@
  * @author  Petr Skoda <petr.skoda@totaralearning.com>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'totara_form/form', 'totara_form/modernizr'], function($, Form, Modernizr) {
+define(['jquery', 'totara_form/form'], function($, Form) {
 
     /**
      * UTC10Date element
@@ -74,34 +74,15 @@ define(['jquery', 'totara_form/form', 'totara_form/modernizr'], function($, Form
         // Call the changed method when this element is changed.
         this.input.change($.proxy(this.changed, this));
 
-        if (this.input.attr('required') && !Modernizr.input.required) {
-            var requiredDeferred = $.Deferred();
-            deferreds.push(requiredDeferred);
-            // Polyfill the required attribute.
-            require(['totara_form/polyfill_required-lazy'], function (poly) {
-                poly.init(id);
-                requiredDeferred.resolve();
-            });
-        }
-
         if (!(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent))) {
-            this.input.attr('type', 'text');
             var dateDeferred = $.Deferred();
+            this.input.attr('type', 'text');
             deferreds.push(dateDeferred);
             // Polyfill the date/time functionality.
             require(['totara_form/polyfill_date-lazy'], function(date) {
                 date.init(id, false).done(function() {
                     dateDeferred.resolve();
                 });
-            });
-        }
-
-        if (this.input.attr('placeholder') && !Modernizr.input.placeholder ) {
-            var placeholderDeferred = $.Deferred();
-            deferreds.push(placeholderDeferred);
-            require(['totara_form/polyfill_placeholder-lazy'], function (poly) {
-                poly.init(id);
-                placeholderDeferred.resolve();
             });
         }
 

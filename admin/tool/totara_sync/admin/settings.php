@@ -77,7 +77,7 @@ $form->set_data($config);
 
 // Output.
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('generalsettings', 'tool_totara_sync'));
+echo $OUTPUT->heading(get_string('defaultsettings', 'tool_totara_sync'));
 
 $form->display();
 

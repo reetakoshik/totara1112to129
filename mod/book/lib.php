@@ -295,15 +295,10 @@ function book_supports($feature) {
 function book_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $booknode) {
     global $USER, $PAGE, $OUTPUT;
 
-    $plugins = core_component::get_plugin_list('booktool');
-    foreach ($plugins as $plugin => $dir) {
-        if (file_exists("$dir/lib.php")) {
-            require_once("$dir/lib.php");
-        }
-        $function = 'booktool_'.$plugin.'_extend_settings_navigation';
-        if (function_exists($function)) {
-            $function($settingsnav, $booknode);
-        }
+    if ($booknode->children->count() > 0) {
+        $firstkey = $booknode->children->get_key_list()[0];
+    } else {
+        $firstkey = null;
     }
 
     $params = $PAGE->url->params();
@@ -318,8 +313,20 @@ function book_extend_settings_navigation(settings_navigation $settingsnav, navig
             $edit = '1';
         }
         $url = new moodle_url('/mod/book/view.php', array('id'=>$params['id'], 'chapterid'=>$params['chapterid'], 'edit'=>$edit, 'sesskey'=>sesskey()));
-        $booknode->add($string, $url, navigation_node::TYPE_SETTING);
+        $editnode = navigation_node::create($string, $url, navigation_node::TYPE_SETTING);
+        $booknode->add_node($editnode, $firstkey);
         $PAGE->set_button($OUTPUT->single_button($url, $string));
+    }
+
+    $plugins = core_component::get_plugin_list('booktool');
+    foreach ($plugins as $plugin => $dir) {
+        if (file_exists("$dir/lib.php")) {
+            require_once("$dir/lib.php");
+        }
+        $function = 'booktool_'.$plugin.'_extend_settings_navigation';
+        if (function_exists($function)) {
+            $function($settingsnav, $booknode);
+        }
     }
 }
 
@@ -586,6 +593,11 @@ function book_export_contents($cm, $baseurl) {
             $file['userid']       = $fileinfo->get_userid();
             $file['author']       = $fileinfo->get_author();
             $file['license']      = $fileinfo->get_license();
+            $file['mimetype']     = $fileinfo->get_mimetype();
+            $file['isexternalfile'] = $fileinfo->is_external_file();
+            if ($file['isexternalfile']) {
+                $file['repositorytype'] = $fileinfo->get_repository_type();
+            }
             $contents[] = $file;
         }
     }

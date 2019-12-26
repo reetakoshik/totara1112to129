@@ -128,7 +128,8 @@ if (!empty($add)) {
 
     if ($usetags) {
         // Retrieve module's official tags
-        $data->tags = core_tag_tag::get_item_tags_array('core', 'course_modules', $cm->id);
+        $data->tags = core_tag_tag::get_item_tags_array('core', 'course_modules', $cm->id,
+            core_tag_tag::BOTH_STANDARD_AND_NOT, 0, false); // Totara: Do not encoded the special characters.
     }
 
 } else {

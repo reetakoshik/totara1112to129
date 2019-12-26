@@ -32,6 +32,7 @@ class totara_rb_content_hierarchy_restrictions_testcase extends advanced_testcas
     /**
      * Setup the test data structure
      */
+
     protected function setup_data() {
         global $DB;
 
@@ -262,7 +263,8 @@ class totara_rb_content_hierarchy_restrictions_testcase extends advanced_testcas
 
         // The Report
         $data->reportid = $this->create_report('user', 'Test User Report');
-        $data->report = new reportbuilder($data->reportid, null, false, null, null, true);
+        $config = (new rb_config())->set_nocache(true);
+        $data->report = reportbuilder::create($data->reportid, $config);
 
         $update = $DB->get_record('report_builder', ['id' => $data->reportid]);
         $update->accessmode = REPORT_BUILDER_ACCESS_MODE_NONE;
@@ -382,7 +384,7 @@ class totara_rb_content_hierarchy_restrictions_testcase extends advanced_testcas
         $data = $this->setup_data();
 
         reportbuilder::update_setting($data->reportid, 'current_org_content', 'enable', 1);
-        reportbuilder::update_setting($data->reportid, 'current_org_content', 'recursive', 0); //CONTENT_ORG_EQUAL
+        reportbuilder::update_setting($data->reportid, 'current_org_content', 'recursive', 0); //CONTENT_org_EQUAL
 
         // Admin shouldn't see anyone.
         $content = new rb_current_org_content($USER->id);
@@ -412,7 +414,7 @@ class totara_rb_content_hierarchy_restrictions_testcase extends advanced_testcas
         $data = $this->setup_data();
 
         reportbuilder::update_setting($data->reportid, 'current_org_content', 'enable', 1);
-        reportbuilder::update_setting($data->reportid, 'current_org_content', 'recursive', 1); //CONTENT_ORG_EQUALANDBELOW
+        reportbuilder::update_setting($data->reportid, 'current_org_content', 'recursive', 1); //CONTENT_org_EQUALANDBELOW
 
         // Admin shouldn't see anyone.
         $content = new rb_current_org_content($USER->id);
@@ -442,7 +444,7 @@ class totara_rb_content_hierarchy_restrictions_testcase extends advanced_testcas
         $data = $this->setup_data();
 
         reportbuilder::update_setting($data->reportid, 'current_org_content', 'enable', 1);
-        reportbuilder::update_setting($data->reportid, 'current_org_content', 'recursive', 2); //CONTENT_ORG_BELOW
+        reportbuilder::update_setting($data->reportid, 'current_org_content', 'recursive', 2); //CONTENT_org_BELOW
 
         // Admin shouldn't see anyone.
         $content = new rb_current_org_content($USER->id);

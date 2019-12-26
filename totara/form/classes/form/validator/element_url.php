@@ -89,8 +89,11 @@ class element_url extends element_validator {
             return;
         }
 
-        if (validateUrlSyntax($value, 's+H?S?F?E-u-P-a+I?p?f?q?r?')) {
-            // Url is in correct format - must be a subset of PARAM_URL.
+        // Make sure this will pass as PARAM_URL.
+        $value = clean_param($value, PARAM_URL);
+        if ($value !== '' and validateUrlSyntax($value, 's+H?S?F?E-u-P-a+I?p?f?q?r?')) {
+            // Url is in correct format - must be a subset of PARAM_URL,
+            // schema is required, relative links are not supported here.
             return;
         }
 

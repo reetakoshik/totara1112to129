@@ -29,7 +29,7 @@ require_once($CFG->dirroot . '/totara/reportbuilder/lib.php');
 /**
  * @group totara_program
  */
-class rb_display_program_category_link_list_testcase extends advanced_testcase {
+class totara_program_rb_display_program_category_link_list_testcase extends advanced_testcase {
 
     /**
      * Test resorting when there are no courses.

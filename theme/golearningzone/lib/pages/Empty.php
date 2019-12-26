@@ -10,7 +10,7 @@ class EmptyPage extends Base
     use ThemeTrait;
 
     public function render()
-    {
+    {   
         global $CFG;
         $template = 'theme_golearningzone/empty';
         $renderer = $this->renderer;

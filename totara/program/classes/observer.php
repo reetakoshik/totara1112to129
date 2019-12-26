@@ -683,6 +683,8 @@ class totara_program_observer {
             }
         }
 
+        \totara_program\progress\program_progress_cache::mark_user_cache_stale($userid);
+
         return true;
     }
 }

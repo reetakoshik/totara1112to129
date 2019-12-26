@@ -75,7 +75,7 @@ class program_content_edit_form extends moodleform {
         $this->template_html .= html_writer::empty_tag('br');
 
         // Add the save and return button
-        $mform->addElement('submit', 'savechanges', get_string('savechanges'), array('class'=>"savechanges-content program-savechanges"));
+        $mform->addElement('submit', 'savechanges', get_string('savechanges'), array('class'=>"savechanges-content program-savechanges programEditContentFrm"));
         $this->template_values['%savechanges%'] = array('name'=>'savechanges', 'value'=>null);
         $this->template_html .= '%savechanges%'."\n";
     }

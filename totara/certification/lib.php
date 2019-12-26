@@ -139,22 +139,6 @@ class certification_event_handler {
     }
 
     /**
-     * User is unassigned to a program event handler
-     * Delete certification completion record
-     *
-     * @deprecated since Totara 10. Call certif_conditionally_delete_completion directly instead.
-     * @param \totara_program\event\program_unassigned $event
-     */
-    public static function unassigned(\totara_program\event\program_unassigned $event) {
-        debugging('certification_event_handler::unassigned() is deprecated, call certif_conditionally_delete_completion directly instead.', DEBUG_DEVELOPER);
-
-        $programid = $event->objectid;
-        $userid = $event->userid;
-
-        certif_conditionally_delete_completion($programid, $userid, 'Completion conditionally deleted in deprecated function certification_event_handler::unassigned()');
-    }
-
-    /**
      * Program completion event handler
      *
      * @param \totara_program\event\program_completed $event
@@ -210,44 +194,6 @@ class certification_event_handler {
 // Stages functions.
 
 /**
- * @deprecated since 9.0 - use certif_create_completion instead.
- *
- * Assign certification to user
- *
- * Assign to cert path to do initial certification.
- * Note: If learner has prior completion of courses in the program, they are assigned to the CERT path here.
- * When cron invokes program competion (assuming all courses in the program are completed),
- * they will be set on RECERT path in the program completion event handler
- *
- * @param integer $certificationid
- * @param integer $userid
- */
-function assign_certification_stage($certificationid, $userid) {
-    global $DB;
-
-    /* Current assignment:
-     * When an assignment is updated - this event (sometimes) gets called too
-     * the changed data is program competion (due) date - which does not affect certif_completion
-     * so we just need to check if already exists.
-     *
-     * Assignment completion
-     * Relative date added   - not called
-     * Relative date removed - called (not unassign)
-     * Fixed date added      - not called
-     * Fixed date removed    - not called (nor unassign)
-     */
-
-    debugging('assign_certification_stage() is deprecated. Please use certif_create_completion() instead.', DEBUG_DEVELOPER);
-
-    $completionid = $DB->get_field('certif_completion', 'id', array('certifid' => $certificationid, 'userid' => $userid));
-
-    if (!$completionid) {
-        $programid = $DB->get_field('prog', 'id', array('certifid' => $certificationid));
-        certif_create_completion($programid, $userid);
-    }
-}
-
-/**
  * Updates a course & users's certif_completion record's status to 'in progress'
  * Can be called multiple times without a problem as will only overwrite appropriate statuses
  *
@@ -300,6 +246,9 @@ function inprogress_certification_stage($courseid, $userid) {
             $DB->update_record('certif_completion', $todb);
         }
     }
+
+    \totara_program\progress\program_progress_cache::mark_user_cache_stale($userid);
+
     return true;
 }
 
@@ -1570,44 +1519,6 @@ function certif_get_certifications($categoryid="all", $sort="cf.sortorder ASC", 
     }
 
     return $certifications;
-}
-
-/**
- * Remove existing certif_completions if user unassigned
- * (effectively if no corresponding rec in prog_user_assignment)
- *
- * @deprecated since Totara 10. This functionality is already covered in existing Totara code.
- * @param StdClass $program
- */
-function delete_removed_users($program) {
-    debugging('delete_removed_users() is deprecated and should never be used.', DEBUG_DEVELOPER);
-
-    global $DB;
-
-    // Get user assignments only if there are assignments for this program.
-    $user_assignments = $DB->get_records('prog_user_assignment', array('programid' => $program->id));
-
-    $certificationcompletions = $DB->get_records('certif_completion', array('certifid' => $program->certifid));
-
-    // Check if completion record is not present in program user assignment but
-    // is in certification completion so delete from certification completions.
-    foreach ($user_assignments as $assignment) {
-        foreach ($certificationcompletions as $k => $certification) {
-            if ($certification->userid == $assignment->userid) {
-                unset($certificationcompletions[$k]);
-            }
-        }
-    }
-
-    // Remove and certification completions left in list, as no longer in program user assignment.
-    if (count($certificationcompletions)) {
-        list($usql, $params) = $DB->get_in_or_equal(array_keys($certificationcompletions));
-        $DB->delete_records_select('certif_completion', "id $usql", $params);
-    }
-
-    foreach ($certificationcompletions as $completiondeleted) {
-        prog_log_completion($program->id, $completiondeleted->userid, '!!! certif_completion deleted by deprecated, faulty function delete_removed_users !!!');
-    }
 }
 
 /**

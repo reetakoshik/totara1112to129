@@ -48,7 +48,8 @@ $category = null;
 if ($id) {
     $cohort = $DB->get_record('cohort', array('id'=>$id), '*', MUST_EXIST);
     if ($usetags) {
-        $cohort->tags = core_tag_tag::get_item_tags_array('core', 'cohort', $cohort->id);
+        $cohort->tags = core_tag_tag::get_item_tags_array('core', 'cohort', $cohort->id,
+            \core_tag_tag::BOTH_STANDARD_AND_NOT, 0, false); // Totara: Do not encode the special characters.
     }
 
     $context = context::instance_by_id($cohort->contextid, MUST_EXIST);
@@ -83,7 +84,8 @@ $PAGE->set_context($context);
 $baseurl = new moodle_url('/cohort/edit.php', array('contextid' => $context->id, 'id' => $cohort->id));
 $PAGE->set_url($baseurl);
 $PAGE->set_context($context);
-$PAGE->set_pagelayout('admin');
+//$PAGE->set_pagelayout('admin');
+$PAGE->set_pagelayout('noblocks');
 $PAGE->set_heading($COURSE->fullname);
 
 if ($context->contextlevel == CONTEXT_COURSECAT) {
@@ -94,7 +96,7 @@ if ($context->contextlevel == CONTEXT_COURSECAT) {
     navigation_node::override_active_url(new moodle_url('/cohort/index.php', array()));
 }
 if ($id && $cohort->name) {
-    $PAGE->navbar->add(s($cohort->name), $CFG->wwwroot.'/cohort/view.php?id='.$id);
+    $PAGE->navbar->add(format_string($cohort->name), $CFG->wwwroot.'/cohort/view.php?id='.$id);
 }
 
 if ($delete and $cohort->id) {

@@ -53,6 +53,7 @@ if ($id == 0) {
     $template->ccmanager = 0;
     $template->managerprefix = '';
     $template->status = '1';
+    $template->reference = 0;
 
 } else {
     $template = $DB->get_record('facetoface_notification_tpl', array('id' => $id));
@@ -69,7 +70,8 @@ $template = file_prepare_standard_editor($template, 'body', $editoroptions, $con
 $template = file_prepare_standard_editor($template, 'managerprefix', $editoroptions, $contextsystem, null, null, $id);
 
 // Load data.
-$form = new mod_facetoface_notification_template_form(null, compact('id', 'editoroptions'));
+$reference = $template->reference;
+$form = new mod_facetoface_notification_template_form(null, compact('id', 'editoroptions', 'reference'));
 $form->set_data($template);
 
 // Process data.
@@ -88,8 +90,9 @@ if ($form->is_cancelled()) {
 
         // Update all activities with notifications base off this template.
         if ($data->updateactivities) {
-            $sql = "UPDATE {facetoface_notification} SET title = ?, body = ?, ccmanager = ?, managerprefix = ?, status = ? WHERE templateid = ?";
-            $params = array($data->title, $data->body, $data->ccmanager, $data->managerprefix, $data->status, $data->id);
+            // Do not update 'Status' value as some seminar notifications might be disabled.
+            $sql = "UPDATE {facetoface_notification} SET title = ?, body = ?, ccmanager = ?, managerprefix = ? WHERE templateid = ?";
+            $params = array($data->title, $data->body, $data->ccmanager, $data->managerprefix, $data->id);
 
             $DB->execute($sql, $params);
         }

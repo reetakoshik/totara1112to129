@@ -1,4 +1,4 @@
-@block @block_comments
+@block @block_comments @javascript
 Feature: Enable Block comments on the frontpage and view comments
   In order to enable the comments block on the frontpage
   As a admin
@@ -12,10 +12,8 @@ Feature: Enable Block comments on the frontpage and view comments
     And I am on site homepage
     And I navigate to "Turn editing on" node in "Front page settings"
     And I add the "Comments" block
-    And I follow "Show comments"
     And I add "I'm a comment from admin" comment to comments block
     And I log out
     When I log in as "teacher1"
     And I am on site homepage
-    And I follow "Show comments"
     Then I should see "I'm a comment from admin"

@@ -1,5 +1,5 @@
 @javascript @totara @totara_coursecatalog @enrol
-Feature: Users can auto-enrol themself in courses where self enrolment is allowed
+Feature: Users can auto-enrol themselves in courses where enrolment via plugins is enabled
   In order to participate in courses
   As a user
   I need to auto enrol me in courses
@@ -26,13 +26,12 @@ Feature: Users can auto-enrol themself in courses where self enrolment is allowe
     And I follow "Manage enrol plugins"
     And I click on "Enable" "link" in the "Seminar direct enrolment" "table_row"
     And I set the following administration settings values:
-      | Enhanced catalog   | 1    |
+      | catalogtype | enhanced |
       | Guest login button | Show |
     And I log out
 
     Given I log in as "teacher1"
-
-    Given I follow "Course 1"
+    Given I am on "Course 1" course homepage
     When I add "Self enrolment" enrolment method with:
       | Enrolment key            | moodle_rules |
       | Use group enrolment keys | Yes          |
@@ -43,8 +42,7 @@ Feature: Users can auto-enrol themself in courses where self enrolment is allowe
       | Enrolment key | Test-groupenrolkey1 |
     And I press "Save changes"
 
-    Given I follow "Course 1"
-    And I turn editing mode on
+    Given I am on "Course 1" course homepage with editing mode on
     And I add a "Forum" to section "1" and I fill the form with:
       | Forum name  | Test forum name        |
       | Description | Test forum description |
@@ -83,7 +81,7 @@ Feature: Users can auto-enrol themself in courses where self enrolment is allowe
 
   Scenario: Self-enrolment through course catalog requiring a group enrolment key or guest access or seminar
     When I log in as "student1"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I click on ".rb-display-expand" "css_element"
     And I set the following fields to these values:
       | Enrolment key | Test-groupenrolkey1 |
@@ -94,7 +92,7 @@ Feature: Users can auto-enrol themself in courses where self enrolment is allowe
     And I log out
 
     When I log in as "student2"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I click on ".rb-display-expand" "css_element"
     Then I should see "Guest access"
     And I set the following fields to these values:
@@ -104,8 +102,7 @@ Feature: Users can auto-enrol themself in courses where self enrolment is allowe
     And I log out
 
     When I log in as "student3"
-    And I should see "Courses" in the "Navigation" "block"
-    And I click on "Courses" "link_or_button" in the "Navigation" "block"
+    And I click on "Courses" in the totara menu
     And I click on ".rb-display-expand" "css_element"
     And I click on "Sign-up" "link" in the "1 January 2020" "table_row"
     And I press "Sign-up"

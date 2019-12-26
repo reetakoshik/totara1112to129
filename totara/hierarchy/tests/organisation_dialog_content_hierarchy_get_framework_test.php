@@ -30,7 +30,7 @@ require_once("{$CFG->dirroot}/totara/reportbuilder/lib.php");
 /**
  * Class organisation_dialog_content_hierarchy_get_framework_test
  */
-class organisation_dialog_content_hierarchy_get_framework_test extends advanced_testcase {
+class totara_hierarchy_organisation_dialog_content_hierarchy_get_framework_testcase extends advanced_testcase {
     /**
      * Create an organisation framework and 2 associate organisations
      * @return stdClass
@@ -71,33 +71,31 @@ class organisation_dialog_content_hierarchy_get_framework_test extends advanced_
         /** @var totara_reportbuilder_generator $reportgenerator */
         $reportgenerator = $generator->get_plugin_generator("totara_reportbuilder");
 
-        $reportgenerator->create_default_standard_report((object)[
+        $rid = $reportgenerator->create_default_standard_report((object)[
             'fullname' => 'ROL',
             'shortname' => 'ROL',
             'source' => 'dp_certification',
             'contentmode' => 1,
-            'accessmode' => 1
+            'accessmode' => 0,
         ]);
-
-        $report = new reportbuilder(null, 'ROL');
 
         $type = str_replace("rb_", "", rb_current_org_content::class);
         $DB->insert_records('report_builder_settings', [
             (object) [
-                'reportid' => $report->_id,
+                'reportid' => $rid,
                 'type' => $type,
                 'name' => 'enable',
                 'value' => '1'
             ],
             (object) [
-                'reportid' => $report->_id,
+                'reportid' => $rid,
                 'type' => $type,
                 'name' => 'recursive',
                 'value' => rb_current_org_content::CONTENT_ORG_EQUAL
             ]
         ]);
 
-        return $report->_id;
+        return $rid;
     }
 
     /**

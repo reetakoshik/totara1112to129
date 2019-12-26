@@ -119,8 +119,11 @@ class block_course_list extends block_list {
 
                     $this->content->icons[] = '';
                     $this->content->items[] = get_string('nocoursesyet');
-                    if (has_capability('moodle/course:create', context_coursecat::instance($category->id))) {
-                        $this->content->footer = '<a href="'.$CFG->wwwroot.'/course/edit.php?category='.$category->id.'">'.get_string("addnewcourse").'</a> ...';
+                    $wm = new \core_course\workflow_manager\coursecreate();
+                    $wm->set_params(['category' => $category->id]);
+                    if ($wm->workflows_available()) {
+                        $url = $wm->get_url();
+                        $this->content->footer = '<a href="'.$url.'">'.get_string("addnewcourse").'</a> ...';
                     }
                     $this->get_remote_courses();
                 }

@@ -81,24 +81,8 @@ define(['jquery', 'totara_form/form'], function($, Form) {
         done();
     };
 
-    // Reverted this to an older version for Totara 11 and earier as T12 was upgraded
-    // to support arrays in validators.
     ListeditorElement.prototype.getValue = function() {
-
-        // Find the hidden fields and concat their values together.
-        var id = this.id,
-            inputs = $('#' + id + ' input[type=hidden]');
-
-        var value = '';
-        for (var i = 0, len = inputs.length; i < len; i++) {
-            var input = inputs[i];
-            if (i > 0) {
-                value = value + ",";
-            }
-            value = value + $(input).val();
-        }
-
-        return value;
+        return this.container.find('input').map(function() {return $(this).val();}).get();
     };
 
     ListeditorElement.prototype.showLoading = function() {

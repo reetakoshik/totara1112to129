@@ -42,6 +42,11 @@
     * contentraw string sanitised text for displaying inside the popover. Either this or template and templatecontext will be present
     * contenttemplate string The name of the template which will be displayed inside the popover
     * contenttemplatecontext object if using a template, this contains the context for it.
+    * arrow_placement: string for positioning arrow. This is optional.
+    * placement_max_height: int, height needed for placing popover. This is optional.
+    * placement_max_width: int, width needed for placing popover. This is optional.
+    * close_on_focus_out: boolean, close if focus lost on popover. This is optional.
+    * trigger: string, trigger type for popover. This is optional.
 
     Example context (json):
     {
@@ -52,7 +57,12 @@
         }
     }
 }}
-<div class="popover__wrapper" data-enhanced="false" data-title="{{title}}" data-component="/core/output/popover">
+<div class="popover__wrapper" data-enhanced="false" data-title="{{title}}" data-component="/core/output/popover"
+    {{#arrow_placement}}data-arrow_placement="{{arrow_placement}}"{{/arrow_placement}}
+    {{#close_on_focus_out}}data-close_on_focus_out=""{{/close_on_focus_out}}
+    {{#placement_max_height}}data-placement_max_height="{{max_height}}"{{/placement_max_height}}
+    {{#placement_max_width}}data-placement_max_width="{{max_width}}"{{/placement_max_width}}
+    {{#trigger}}data-trigger="{{trigger}}"{{/trigger}}>
     <div class="popover__content">
         {{#contenttemplatecontext}}
             {{> &&contenttemplate}}

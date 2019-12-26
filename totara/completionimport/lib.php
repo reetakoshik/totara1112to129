@@ -134,7 +134,7 @@ function get_tablename($importname) {
 /**
  * Returns the SQL to compare the shortname if not empty or idnumber if shortname is empty
  *
- * @deprecated since Totara 11
+ * @deprecated since Totara 12
  * @param string $relatedtable eg: "{course}" if a table or 'c' if its an alias
  * @param string $importtable eg: "{totara_compl_import_course}" or "i"
  * @param string $shortnamefield courseshortname or certificationshortname
@@ -144,7 +144,7 @@ function get_tablename($importname) {
 function get_shortnameoridnumber($relatedtable, $importtable, $shortnamefield, $idnumberfield) {
     global $DB;
 
-    debugging(__FUNCTION__ . ' was deprecated in Totara 11. There is now a resolved reference to the course/cert on the import record', DEBUG_DEVELOPER);
+    debugging(__FUNCTION__ . ' was deprecated in Totara 12. There is now a resolved reference to the course/cert on the import record', DEBUG_DEVELOPER);
 
     $notemptyshortname = $DB->sql_isnotempty($importtable, "{$importtable}.{$shortnamefield}", true, false);
     $notemptyidnumber = $DB->sql_isnotempty($importtable, "{$importtable}.{$idnumberfield}", true, false);
@@ -196,166 +196,6 @@ function get_default_config($pluginname, $configname, $default) {
         set_config($configname, $configvalue, $pluginname);
     }
     return $configvalue;
-}
-
-/**
- * Checks the fields in the first line of the csv file, for required columns or unknown columns
- *
- * @global object $CFG
- * @param string $filename name of file to open
- * @param string $importname name of import
- * @param array $customfields available custom fields
- * @return array of errors, blank if no errors
- * @deprecated since Totara 10
- */
-function check_fields_exist($filename, $importname, $customfields = array()) {
-    global $CFG;
-
-    require_once($CFG->libdir . '/csvlib.class.php');
-
-    debugging('check_fields_exist() has been deprecated, please import csv data using \totara_completionimport\import_csv::import(), where this validation is done internally.', DEBUG_DEVELOPER);
-
-    $errors = array();
-    $pluginname = 'totara_completionimport_' . $importname;
-    $requiredcolumnns = get_columnnames($importname);
-    $allcolumns = array_merge(get_columnnames($importname), $customfields);
-
-    $csvdelimiter = get_default_config($pluginname, 'csvdelimiter', TCI_CSV_DELIMITER);
-    $csvseparator = csv_import_reader::get_delimiter(get_default_config($pluginname, 'csvseparator', TCI_CSV_SEPARATOR));
-    $csvencoding = get_default_config($pluginname, 'csvencoding', TCI_CSV_ENCODING);
-
-    if (!is_readable($filename)) {
-        $errors[] = get_string('unreadablefile', 'totara_completionimport', $filename);
-    } else if (!$handle = fopen($filename, 'r')) {
-        $errors[] = get_string('erroropeningfile', 'totara_completionimport', $filename);
-    } else {
-        // Hack to overwrite file with one that contains correct new line characters.
-        // Otherwise, the csv_iterator in the import_csv function may not interpret them correctly.
-        $size = filesize($filename);
-        $content = fread($handle, $size);
-        $content = core_text::convert($content, $csvencoding, 'utf-8');
-        // remove Unicode BOM from first line
-        $content = core_text::trim_utf8_bom($content);
-        // Fix mac/dos newlines
-        $content = preg_replace('!\r\n?!', "\n", $content);
-        file_put_contents($filename, $content);
-        $handle = fopen($filename, 'r');
-
-        // Read the first line.
-        $csvfields = fgetcsv($handle, 0, $csvseparator, $csvdelimiter);
-        if (empty($csvfields)) {
-            $errors[] = get_string('emptyfile', 'totara_completionimport', $filename);
-        } else {
-            // Clean and convert to UTF-8 and check for unknown field.
-            foreach ($csvfields as $key => $value) {
-                $csvfields[$key] = clean_param(trim($value), PARAM_TEXT);
-                $csvfields[$key] = core_text::convert($value, $csvencoding, 'utf-8');
-                if (!in_array($value, $allcolumns)) {
-                    $field = new stdClass();
-                    $field->filename = $filename;
-                    $field->columnname = $value;
-                    $errors[] = get_string('unknownfield', 'totara_completionimport', $field);
-                }
-            }
-
-            // Check for required fields.
-            foreach ($requiredcolumnns as $columnname) {
-                if (!in_array($columnname, $csvfields)) {
-                    $field = new stdClass();
-                    $field->filename = $filename;
-                    $field->columnname = $columnname;
-                    $errors[] = get_string('missingfield', 'totara_completionimport', $field);
-                }
-            }
-        }
-        fclose($handle);
-    }
-    return $errors;
-}
-
-/**
- * Imports csv data into the relevant import table
- *
- * Doesn't do any sanity checking of data at the stage, its a simple import
- *
- * @global object $CFG
- * @global object $DB
- * @param string $tempfilename full name of csv file to open
- * @param string $importname name of import
- * @param array $customfields available custom fields
- * @param int $importtime time of run
- * @deprecated since Totara 10
- */
-function import_csv($tempfilename, $importname, $importtime, $customfields = array()) {
-    global $CFG, $DB, $USER;
-
-    require_once($CFG->libdir . '/csvlib.class.php');
-    require_once($CFG->dirroot . '/totara/completionimport/csv_iterator.php');
-
-    debugging('import_csv() has been deprecated, please use \totara_completionimport\import_csv::import() instead.', DEBUG_DEVELOPER);
-
-    $tablename = get_tablename($importname);
-    $columnnames = array_merge(get_columnnames($importname), $customfields);
-    $pluginname = 'totara_completionimport_' . $importname;
-    $csvdelimiter = get_default_config($pluginname, 'csvdelimiter', TCI_CSV_DELIMITER);
-    $csvseparator = csv_import_reader::get_delimiter(get_default_config($pluginname, 'csvseparator', TCI_CSV_SEPARATOR));
-    $csvencoding = get_default_config($pluginname, 'csvencoding', TCI_CSV_ENCODING);
-    $csvdateformat = get_default_config($pluginname, 'csvdateformat', TCI_CSV_DATE_FORMAT);
-    $datefieldmap = array('completiondate' => 'completiondateparsed');
-
-    // Assume that file checks and column name checks have already been done.
-    $importcsv = new csv_iterator($tempfilename, $csvseparator, $csvdelimiter, $csvencoding, $columnnames, $importtime,
-                                  $csvdateformat, $datefieldmap);
-
-    if ($customfields) {
-        // Process the custom fields and insert the data.
-        $import = array();
-        foreach ($importcsv as $item) {
-            $customfielddata = array();
-            foreach ($item as $key => $value) {
-                if (in_array($key, $customfields)) {
-                    $customfielddata[$key] = $value;
-                }
-            }
-            if ($customfielddata) {
-                $item->customfields = serialize($customfielddata);
-            }
-            $import[] = $item;
-        }
-        $DB->insert_records_via_batch($tablename, $import);
-    } else {
-        // No custom fields, just insert the data.
-        $DB->insert_records_via_batch($tablename, $importcsv);
-    }
-
-    // Remove any empty rows at the end of the import file.
-    // But leave empty rows in the middle for error reporting.
-    // Here mainly because of a PHP bug in csv_iterator.
-    // But also to remove any unneccessary empty lines at the end of the csv file.
-    $sql = "SELECT id, rownumber
-            FROM {{$tablename}}
-            WHERE importuserid = :userid
-            AND timecreated = :timecreated
-            AND " . $DB->sql_compare_text('importerrormsg') . " = :importerrormsg
-            ORDER BY id DESC";
-    $params = array('userid' => $USER->id, 'timecreated' => $importtime, 'importerrormsg' => 'emptyrow;');
-    $emptyrows = $DB->get_records_sql($sql, $params);
-    $rownumber = 0;
-    $deleteids = array();
-    foreach ($emptyrows as $emptyrow) {
-        if ($rownumber == 0) {
-            $rownumber = $emptyrow->rownumber;
-        } else if (--$rownumber != $emptyrow->rownumber) {
-            // Not at the end any more.
-            break;
-        }
-        $deleteids[] = $emptyrow->id;
-    }
-
-    if (!empty($deleteids)) {
-        list($deletewhere, $deleteparams) = $DB->get_in_or_equal($deleteids);
-        $DB->delete_records_select($tablename, 'id ' . $deletewhere, $deleteparams);
-    }
 }
 
 /**
@@ -1999,92 +1839,6 @@ function move_sourcefile($filename, $tempfilename) {
         echo $OUTPUT->notification(get_string('cannotmovefiles', 'totara_completionimport', $a), 'notifyproblem');
         return false;
     }
-
-    return true;
-}
-
-/**
- * Main import of completions
- *
- * 1. Check the required columns exist in the csv file
- * 2. Import the csv file into the import table
- * 3. Run data checks on the import table
- * 4. Any missing courses / certifications are created as evidence in the record of learning
- * 5. Anything left over is imported into courses or certifications
- *
- * @global object $OUTPUT
- * @global object $DB
- * @param string $tempfilename name of temporary csv file
- * @param string $importname name of import
- * @param int $importtime time of import
- * @param bool $quiet If true, suppress outputting messages (for tests).
- * @return boolean
- * @deprecated since Totara 10
- */
-function import_completions($tempfilename, $importname, $importtime, $quiet = false) {
-    global $OUTPUT, $DB;
-
-    debugging('import_completions() has been deprecated, please use \totara_completionimport\import_csv::import() instead.', DEBUG_DEVELOPER);
-
-    // Increase memory limit.
-    raise_memory_limit(MEMORY_EXTRA);
-
-    // Stop time outs, this might take a while.
-    core_php_time_limit::raise(0);
-
-    // Get any evidence custom fields.
-    $customfields = get_evidence_customfields();
-
-    if ($errors = check_fields_exist($tempfilename, $importname, $customfields)) {
-        // Source file header doesn't have the required fields.
-        if (!$quiet) {
-            echo $OUTPUT->notification(get_string('missingfields', 'totara_completionimport'), 'notifyproblem');
-            echo html_writer::alist($errors);
-        }
-        unlink($tempfilename);
-        return false;
-    }
-
-    if ($errors = import_csv($tempfilename, $importname, $importtime, $customfields)) {
-        // Something went wrong with import.
-        if (!$quiet) {
-            echo $OUTPUT->notification(get_string('csvimportfailed', 'totara_completionimport'), 'notifyproblem');
-            echo html_writer::alist($errors);
-        }
-        unlink($tempfilename);
-        return false;
-    }
-    // Don't need the temporary file any more.
-    unlink($tempfilename);
-    if (!$quiet) {
-        echo $OUTPUT->notification(get_string('csvimportdone', 'totara_completionimport'), 'notifysuccess');
-    }
-
-    // Data checks - no errors returned, it adds errors to each row in the import table.
-    import_data_checks($importname, $importtime);
-
-    // Start transaction, we are dealing with live data now...
-    $transaction = $DB->start_delegated_transaction();
-
-    // Put into evidence any courses / certifications not found.
-    create_evidence($importname, $importtime);
-
-    // Run the specific course enrolment / certification assignment.
-    $functionname = 'import_' . $importname;
-    $errors = $functionname($importname, $importtime);
-    if (!empty($errors)) {
-        if (!$quiet) {
-            echo $OUTPUT->notification(get_string('error:' . $functionname, 'totara_completionimport'), 'notifyproblem');
-            echo html_writer::alist($errors);
-        }
-        return false;
-    }
-    if (!$quiet) {
-        echo $OUTPUT->notification(get_string('dataimportdone_' . $importname, 'totara_completionimport'), 'notifysuccess');
-    }
-
-    // End the transaction.
-    $transaction->allow_commit();
 
     return true;
 }

@@ -1,11 +1,20 @@
 This file describes API changes in Totara forms,
 information provided here is intended especially for developers.
 
-=== 11.1 ===
+=== 12 ===
 
+* Icon helpers are no longer used in the following templates, icon data is passed via context data:
+** totara/form/templates/element_checkbox.mustache
+** totara/form/templates/element_filemanager.mustache
+** totara/form/templates/element_filepicker.mustache
+** totara/form/templates/element_select.mustache
+** totara/form/templates/element_suffix.mustache
 * totara/form/templates/element_checkboxes.mustache has changed to use "data-required" instead of "required" HTML attribute
 * Checkboxes now validate clientside
 * utc10 date field now uses polyfil date pickers in desktop browsers
+* Removed custom build of modernizr and IE9 polyfil libraries (IE9 has not been supported since Totara 10)
+* Removed totara_form/form_clientaction_autosubmit AMD module as it is not used and does not have an equivilent source file
+* Added support for autosubmit client actions on radio items
 
 === 10 ===
 

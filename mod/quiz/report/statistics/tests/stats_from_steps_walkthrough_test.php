@@ -278,8 +278,8 @@ class quiz_report_statistics_from_steps_testcase extends mod_quiz_attempt_walkth
             $analysis = $responesstats->load_cached($qubaids, $whichtries);
             $variantsnos = $analysis->get_variant_nos();
             if (isset($expectedvariantcounts[$slot])) {
-                // Compare contents, ignore ordering of array, using canonicalize parameter of assertEquals.
-                $this->assertEquals(array_keys($expectedvariantcounts[$slot]), $variantsnos, '', 0, 10, true);
+                // Compare contents, ignore ordering of array, using assertEqualsCanonicalizing.
+                $this->assertEqualsCanonicalizing(array_keys($expectedvariantcounts[$slot]), $variantsnos);
             } else {
                 $this->assertEquals(array(1), $variantsnos);
             }

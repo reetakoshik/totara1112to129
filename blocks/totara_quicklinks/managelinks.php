@@ -24,7 +24,6 @@
 
 require_once(dirname(__FILE__) . '/../../config.php');
 require_once($CFG->libdir . '/tablelib.php');
-require_once('add_form.php');
 
 require_login();
 
@@ -59,7 +58,7 @@ if ($blockinstanceid) {
 $baseurl = new moodle_url('/blocks/totara_quicklinks/managelinks.php', $urlparams);
 $PAGE->set_url($baseurl);
 
-$mform = new totara_quicklinks_add_quicklink_form(null, array('blockinstanceid' => $blockinstanceid));
+$mform = new \block_totara_quicklinks\form\add(array('blockinstanceid' => $blockinstanceid));
 
 if ($data = $mform->get_data()) {
     $link = new stdClass;
@@ -149,7 +148,7 @@ foreach ($links as $link) {
 }
 $table->print_html();
 
-$mform->display();
+echo $mform->render();
 
 //If we have a return url then print back button
 if ($returnurl) {

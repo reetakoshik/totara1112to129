@@ -66,7 +66,5 @@ class totara_customfield_menu_test extends advanced_testcase {
             $displaydata = $customfield->display_data();
             $this->assertSame($formatdata, $displaydata);
         }
-
     }
-
 }

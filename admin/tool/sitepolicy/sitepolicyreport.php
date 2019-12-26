@@ -47,10 +47,11 @@ if (!empty($CFG->enablesitepolicies)) {
 $reportrecord = $DB->get_record('report_builder', array('shortname' => 'tool_sitepolicy'));
 $globalrestrictionset = rb_global_restriction_set::create_from_page_parameters($reportrecord);
 // Get the embedded report.
-$data = array(
-    'userid' => $USER->id, // Default to current user.
-);
-$report = reportbuilder_get_embedded_report('tool_sitepolicy', $data, false, $sid, $globalrestrictionset);
+$config = (new rb_config())
+    ->set_global_restriction_set($globalrestrictionset)
+    ->set_embeddata(['userid' => $USER->id]) // Default to current user.
+    ->set_sid($sid);
+$report = reportbuilder::create_embedded('tool_sitepolicy', $config);
 if (!$report) {
     print_error('error:couldnotgenerateembeddedreport', 'totara_reportbuilder');
 }

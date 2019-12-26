@@ -4,7 +4,6 @@ Feature: Add a new custom file type
   As an admin
   I need to add a new custom file type
 
-
   @javascript
   Scenario: Add custom file type
     Given the following "courses" exist:
@@ -29,8 +28,7 @@ Feature: Add a new custom file type
     And I should see "application/x-moodle-rules"
     And I log out
     And I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     When I add a "File" to section "1" and I fill the form with:
       | Name | Test file |
       | Select files | files/tests/fixtures/custom_filetype.mdlr |

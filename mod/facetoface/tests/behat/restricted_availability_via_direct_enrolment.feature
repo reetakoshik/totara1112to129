@@ -1,4 +1,4 @@
-@mod @mod_facetoface @availability @totara @javascript @totara_facetoface
+@mod @mod_facetoface @availability @totara @javascript
 Feature: Seminar availability based on activity completion using direct enrolment plugin
   In order to check if we can sign up for the course using seminar direct enrolment and
   Availabilty restrictions are honored
@@ -20,15 +20,13 @@ Feature: Seminar availability based on activity completion using direct enrolmen
     And I navigate to "Seminar direct enrolment" node in "Site administration > Plugins > Enrolments"
     And I select "Yes" from the "Enable existing enrolments" singleselect
     And I click on "Save changes" "button"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I follow "Course 1"
     And I add "Seminar direct enrolment" enrolment method with:
       | Custom instance name | Test student enrolment |
 
     # Create a Seminar which will be available.
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1"
     And I set the following fields to these values:
       | Name             | Available seminar |
@@ -52,7 +50,7 @@ Feature: Seminar availability based on activity completion using direct enrolmen
     And I press "Save changes"
 
     # Create a Seminar and add restriction so it won't be available until the first activity is marked as completed.
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     And I follow "Course 1"
     And I add a "Seminar" to section "1"
     And I set the following fields to these values:
@@ -84,7 +82,7 @@ Feature: Seminar availability based on activity completion using direct enrolmen
 
   Scenario: Signup link is not available when availabilty conditions are not met when using seminar direct enrolment
     And I log in as "student1"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     When I follow "Course 1"
     Then I should not see "Sign up"
     And I should see "Available seminar"
@@ -97,7 +95,7 @@ Feature: Seminar availability based on activity completion using direct enrolmen
     Given the following config values are set as admin:
       | enableavailability  | 0 |
     And I log in as "student1"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     When I follow "Course 1"
     Then I should see "Test seminar 1"
     And I should see "Available seminar"
@@ -112,7 +110,7 @@ Feature: Seminar availability based on activity completion using direct enrolmen
       | user     | course | role           |
       | student1 | C1     | student        |
     And I log in as "student1"
-    And I click on "Find Learning" in the totara menu
+    And I click on "Courses" in the totara menu
     When I follow "Course 1"
     Then I should see "Available seminar"
     And I should see "Test seminar 1"

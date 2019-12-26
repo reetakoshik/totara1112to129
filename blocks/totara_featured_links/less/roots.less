@@ -18,6 +18,9 @@
 //@author Andrew McGhie <andrew.mcghie@totaralearning.com>
 //@package block_totara_featured_links
 @import "extra_styles.less";
+@import "icon_picker.less";
+@import "../slick/slick.less";
+@import "../slick/slick-theme";
 
 @padding-vertical: 4px;
 @padding-small-horizontal: 10px;
@@ -85,7 +88,9 @@ div.tf_element_input input[type="color"] {
         }
     }
 
-    & > div:not(.block-totara-featured-links-placeholder) {
+    .block-totara-featured-links-tile,
+    .block-totara-featured-links-flex-filler,
+    .block-totara-featured-links-tile-adder {
         .display-flex;
 
         &.block-totara-featured-links-tile-small {
@@ -122,6 +127,12 @@ div.tf_element_input input[type="color"] {
         width: 100%;
         height: 100%;
 
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: center;
+
         &.ui-sortable-handle {
             cursor: move;
         }
@@ -156,7 +167,7 @@ div.tf_element_input input[type="color"] {
 
             text-align: center;
             background-color: rgba(255, 255, 255, .8);
-            z-index: 5;
+            z-index: 6;
             a.toggle-display {
                 position: absolute;
                 top: 0;
@@ -169,7 +180,7 @@ div.tf_element_input input[type="color"] {
                 justify-content: center;
                 align-items: center;
 
-                z-index: 6;
+                z-index: 7;
 
                 .ft-stack-suffix {
                     text-shadow:
@@ -242,6 +253,13 @@ div.tf_element_input input[type="color"] {
                 right: auto;
             }
         }
+    }
+    .block-totara-featured-links-content {
+        z-index: 2;
+    }
+    .block-totara-featured-links-icon {
+        line-height: 1;
+        z-index: 1;
     }
 }
 

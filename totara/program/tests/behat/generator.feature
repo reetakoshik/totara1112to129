@@ -22,6 +22,8 @@ Feature: Behat generators for programs work
       |  gentest | user001 |
       |  gentest | user002 |
     When I log in as "admin"
+    And I set the following administration settings values:
+      | catalogtype | enhanced |
     And I click on "Programs" in the totara menu
     And I should see "Generator Program Tests"
     And I click on "Generator Program Tests" "link"
@@ -31,6 +33,8 @@ Feature: Behat generators for programs work
   @javascript
   Scenario: Verify the user interface works the same as program generators
     Given I log in as "admin"
+    And I set the following administration settings values:
+      | catalogtype | enhanced |
     And I click on "Programs" in the totara menu
     And I press "Create Program"
     And I set the following fields to these values:
@@ -38,15 +42,11 @@ Feature: Behat generators for programs work
         | shortname | gentest                 |
     And I press "Save changes"
     And I click on "Assignments" "link"
-    And I click on "Individuals" "option" in the "#menucategory_select_dropdown" "css_element"
-    And I press "Add"
-    And I click on "#add-assignment-5" "css_element"
+    And I set the field "Add a new" to "Individuals"
     And I click on "user001" "link" in the "add-assignment-dialog-5" "totaradialogue"
     And I click on "user002" "link" in the "add-assignment-dialog-5" "totaradialogue"
     And I click on "Ok" "button" in the "add-assignment-dialog-5" "totaradialogue"
     And I wait "1" seconds
-    And I press "Save changes"
-    And I press "Save all changes"
     Then I should see "2 learner(s) assigned: 2 active, 0 exception(s)"
     And I click on "Programs" in the totara menu
     Then I should see "Generator Program Tests"

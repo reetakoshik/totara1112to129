@@ -152,7 +152,7 @@ class totara_flavour_helper_testcase extends advanced_testcase {
 
     public function test_get_available_flavour_definitions() {
         $result = helper::get_available_flavour_definitions();
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         if ($this->testflavouravailable) {
             $this->assertArrayHasKey('flavour_test', $result);
         }
@@ -235,7 +235,7 @@ class totara_flavour_helper_testcase extends advanced_testcase {
 
         $CFG->forceflavour = 'test';
         $result = helper::get_enforced_settings();
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertArrayHasKey('moodle', $result);
         $this->assertArrayNotHasKey('', $result);
         // Test a few settings to verify the format.
@@ -262,7 +262,7 @@ class totara_flavour_helper_testcase extends advanced_testcase {
 
         $CFG->forceflavour = 'test';
         $result = helper::get_prohibited_settings();
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertArrayHasKey('moodle', $result);
         $this->assertArrayNotHasKey('', $result);
         // Test a few settings to verify the format.

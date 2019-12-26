@@ -26,6 +26,7 @@ namespace totara_job;
 use Horde\Socket\Client\Exception;
 use totara_job\event\job_assignment_viewed;
 use totara_job\event\job_assignment_updated;
+use totara_job\event\job_assignment_deleted;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -244,7 +245,7 @@ class job_assignment {
         $this->sortorder = $record->sortorder;
         $this->positionassignmentdate = $record->positionassignmentdate;
 
-        if (isset($record->fullname) && $record->fullname !== "") {
+        if (isset($record->fullname) && trim($record->fullname) !== "") {
             $this->fullname = $record->fullname;
         } else {
             $this->fullname = null;
@@ -555,7 +556,7 @@ class job_assignment {
             return null;
 
         } else if ($name === 'fullname') {
-            if (!isset($this->fullname) || $this->fullname === "") {
+            if (!isset($this->fullname) || trim($this->fullname) === "") {
                 return get_string('jobassignmentdefaultfullname', 'totara_job', $this->idnumber);
             } else {
                 return $this->fullname;
@@ -1042,12 +1043,15 @@ class job_assignment {
                 $follower->update_internal(array('sortorder' => ($followrec->sortorder - 1)));
             }
 
+            \totara_job\event\job_assignment_deleted::create_from_instance(
+                $jobassignment,
+                \context_system::instance()
+            )->trigger();
+
             $transaction->allow_commit();
         } catch (Exception $e) {
             $transaction->rollback($e);
         }
-
-        //\totara_job\event\job_assignment_deleted::create_from_instance($this)->trigger();
 
         // Lose the object, so that it can't be used again.
         $jobassignment = null;

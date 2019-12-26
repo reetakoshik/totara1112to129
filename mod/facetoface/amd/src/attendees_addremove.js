@@ -161,6 +161,7 @@ define(['jquery', 'core/str', 'core/config'], function($, mdlstrings, mdlcfg) {
                     for (var i = 0; i < requiredstrings.length; i++) {
                         tstr[requiredstrings[i].key] = strings[i];
                     }
+
                     var name = 'bulkaddvalidation';
                     var buttons = {};
                     buttons[tstr.closebuttontitle] = function () {
@@ -173,7 +174,7 @@ define(['jquery', 'core/str', 'core/config'], function($, mdlstrings, mdlcfg) {
                             title: '<h2>' + tstr.bulkaddattendeesresults + '</h2>',
                             buttons: buttons
                         },
-                        mdlcfg.wwwroot + '/mod/facetoface/attendees/bulkadd_results.php?s=' + sessionid + '&listid=' + listid,
+                        mdlcfg.wwwroot + '/mod/facetoface/attendees/ajax/bulk_add.php?s=' + sessionid + '&listid=' + listid,
                         handler
                     );
                 };

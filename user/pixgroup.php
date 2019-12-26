@@ -31,4 +31,4 @@ require('../config.php');
 $PAGE->set_url('/user/pixgroup.php');
 $PAGE->set_context(null);
 
-redirect($OUTPUT->pix_url('spacer'));
+redirect($OUTPUT->image_url('spacer'));

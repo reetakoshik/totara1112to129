@@ -219,7 +219,8 @@ class hierarchy {
             return;
         }
 
-        $report = new reportbuilder($reportid, null, false, null, $userid);
+        $config = (new rb_config())->set_reportfor($userid);
+        $report = reportbuilder::create($reportid, $config, true);
         list($this->contentwhere, $this->contentparams) = $report->get_hierarchy_content_restrictions($this->shortprefix);
     }
 
@@ -611,7 +612,10 @@ class hierarchy {
     }
 
     /**
-     * Get descendants of an item
+     * Get descendants of an item.
+     *
+     * NOTE: Includes the given item as well!
+     *
      * @param int $id
      * @return array
      */
@@ -1172,44 +1176,38 @@ class hierarchy {
      * See {@link _delete_hierarchy_items()} in the child class for details
      *
      * @param integer $id the item id to delete
-     * @param boolean $triggerevent If true, this command will trigger a "{$prefix}_added" event handler
+     * @param boolean $triggerevent If true, this command will trigger a "{$prefix}_deleted" event handler
      *
      * @return boolean success or failure
      */
     public function delete_hierarchy_item($id, $triggerevent = true) {
-        global $DB, $USER;
+        global $DB;
 
         if (!$DB->record_exists($this->shortprefix, array('id' => $id))) {
             return false;
         }
 
-        $snapshot = $DB->get_record($this->shortprefix, array('id' => $id));
-
         // Get array of items to delete (the item specified *and* all its children).
-        $delete_list = $this->get_item_descendants($id);
-        // Make a copy for triggering events.
-        $deleted_list = $delete_list;
+        $ids = array_keys($this->get_item_descendants($id));
 
-        // Make sure we know the item's framework id.
-        $frameworkid = isset($this->frameworkid) ? $this->frameworkid :
-            $DB->get_field($this->shortprefix, 'frameworkid', array('id' => $id));
+        // Let's get snapshots for the events, if needed
+        if ($triggerevent) {
+            // We can insert this into a query as we know there is at least one record.
+            [$in_sql, $in_params] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED);
+            $snapshots = $DB->get_records_select($this->shortprefix, "id {$in_sql}", $in_params);
+        }
 
-            $transaction = $DB->start_delegated_transaction();
+        $transaction = $DB->start_delegated_transaction();
 
-            // Iterate through 1000 items at a time, because oracle can't use.
-            // More than 1000 items in an sql IN clause.
-            while ($delete_items = totara_pop_n($delete_list, 1000)) {
-                $delete_ids = array_keys($delete_items);
-                if (!$this->_delete_hierarchy_items($delete_ids)) {
-                    return false;
-                }
-            }
-            $transaction->allow_commit();
+        if (!$this->_delete_hierarchy_items($ids)) {
+            return false;
+        }
+
+        $transaction->allow_commit();
 
         // Raise an event for each item deleted to let other parts of the system know.
         if ($triggerevent) {
-            foreach ($deleted_list as $deleted_item) {
-
+            foreach ($snapshots as $snapshot) {
                 $eventclass = "\\hierarchy_{$this->prefix}\\event\\{$this->prefix}_deleted";
                 $eventclass::create_from_instance($snapshot)->trigger();
             }
@@ -2225,7 +2223,7 @@ class hierarchy {
         return '';
     }
 
-    /** Prints select box and Export button to export current report.
+    /** Prints select box and Export button to export current framework.
      *
      * A select is shown if the global settings allow exporting in
      * multiple formats. If only one format specified, prints a button.
@@ -2235,26 +2233,379 @@ class hierarchy {
      * if ($format!='') {$report->export_data($format);die;}
      * before header printed
      *
+     * @param string $baseurl
+     * @param bool $disabled
      * @return No return value but prints export select form
      */
-    function export_select($baseurl=null) {
+    function export_select($baseurl = null, $disabled = false) {
         global $CFG;
         require_once($CFG->dirroot.'/totara/hierarchy/export_form.php');
         if (empty($baseurl)) {
             $baseurl = qualified_me();
         }
-        $export = new hierarchy_export_form($baseurl, null, 'post', '', array('class' => 'hierarchy-export-form'));
+
+        $attributes = $disabled ? 'disabled="disabled"' : '';
+        $export = new hierarchy_export_form($baseurl, array('attributes' => $attributes), 'post', '', array('class' => 'hierarchy-export-form'));
         $export->display();
     }
 
     /**
-     * Exports the data from the current results, maintaining
+     * Return html for select box and Export button to export all frameworks.
+     *
+     * A select is shown if the global settings allow exporting in
+     * multiple formats. If only one format specified, prints a button.
+     * If no formats are set in global settings, no export options are shown
+     *
+     * @param string $baseurl
+     * @param bool $disabled
+     * @return string HTML code
+     */
+    public function export_frameworks_select_for_template($baseurl = null, $disabled = false) {
+        global $CFG;
+        require_once($CFG->dirroot.'/totara/hierarchy/export_frameworks_form.php');
+        if (empty($baseurl)) {
+            $baseurl = qualified_me();
+        }
+
+        $attributes = $disabled ? 'disabled="disabled"' : '';
+        $export = new hierarchy_export_frameworks_form($baseurl, array('attributes' => $attributes), 'post', '', array('class' => 'hierarchy-export-framweworks-form'));
+        return $export->render();
+    }
+
+    /**
+     * Default method returning hierarchy fields to include in export
+     *
+     * @return array Array of heading and query field maps
+     */
+    protected function get_export_fields() {
+        return [
+            'idnumber' => 'hierarchy.idnumber',
+            'fullname' => 'hierarchy.fullname',
+            'shortname' => 'hierarchy.shortname',
+            'description' => 'hierarchy.description',
+            'frameworkidnumber' => 'framework.idnumber',
+            'parentidnumber' => 'parent.idnumber',
+            'typeidnumber' => 'type.idnumber',
+            'timemodified' => 'hierarchy.timemodified',
+        ];
+    }
+
+    /**
+     * Get the definition of the fields to to export
+     *
+     * @return array Array of heading and query field maps
+     */
+    protected function get_export_field_def() {
+        global $DB;
+
+        // Always exporting all fields with default headings.
+        // Import ignore values that were not mapped
+        $fields = $this->get_export_fields();
+
+        if ($custom_fields = $DB->get_records($this->shortprefix.'_type_info_field')) {
+            foreach ($custom_fields as $field) {
+                // Need only 1 export column for duplicate customfield shortnames
+                if (!array_key_exists("customfield_{$field->shortname}", $fields)) {
+                    $fields["customfield_{$field->shortname}"] = [];
+                }
+                $fields["customfield_{$field->shortname}"][] = ['alias' => "cf_{$field->datatype}_{$field->id}", 'fieldname' => "cf_{$field->id}.data"];
+            }
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Get the export join definition
+     *
+     * @return array Array containing from clause and associated parameters
+     */
+    protected function get_export_join_def() {
+        global $DB;
+
+        $def = [];
+        $def['from'] =
+               "{{$this->shortprefix}} hierarchy
+          INNER JOIN {{$this->shortprefix}_framework} framework
+                  ON hierarchy.frameworkid = framework.id
+           LEFT JOIN {{$this->shortprefix}_type} type
+                  ON hierarchy.typeid = type.id
+           LEFT JOIN {{$this->shortprefix}} parent
+                  ON hierarchy.parentid = parent.id";
+        $def['params'] = [];
+
+        if ($custom_fields = $DB->get_records($this->shortprefix.'_type_info_field')) {
+            foreach ($custom_fields as $field) {
+                $def['from'] .= " LEFT JOIN {{$this->shortprefix}_type_info_data} cf_{$field->id}
+                                         ON hierarchy.id = cf_{$field->id}.{$this->prefix}id
+                                        AND cf_{$field->id}.fieldid = :cf_{$field->id}";
+                $def['params']["cf_{$field->id}"] = $field->id;
+            }
+        }
+
+        return $def;
+    }
+
+    /**
+     * Exports the data from the current results in a flat format
+     * including all fields and custom fields
+     *
+     * @param string $format Format for the export hr/ods/csv/xls
+     * @param bool $exportall Export all elements or only elements in this framework
+     * @param string $file File to export data to - used for testing
+     * @return void
+     */
+    public function export_data(string $format, bool $exportall = false, string $file = null) {
+        global $CFG;
+
+        if (!empty($CFG->hierarchylegacyexport)) {
+            $this->export_data_legacy($format);
+            return;
+        }
+
+        $fields = $this->get_export_field_def();
+        $joindef = $this->get_export_join_def();
+
+        $fldnames = '';
+        foreach ($fields as $alias => $field) {
+            if (is_array($field)) {
+                // Custom fields
+                foreach ($field as $cfield) {
+                    $fldnames .= ", {$cfield['fieldname']} as {$cfield['alias']}";
+                }
+            } else {
+                $fldnames .= ", {$field} as {$alias}";
+            }
+        }
+
+        $params = [];
+        $where = '';
+        if (!$exportall) {
+            $where = "WHERE hierarchy.frameworkid = :fwid";
+            $params['fwid'] = $this->frameworkid;
+        }
+
+        $sql =
+            "SELECT hierarchy.id as id {$fldnames}
+               FROM {$joindef['from']}
+              $where
+           ORDER BY hierarchy.frameworkid, hierarchy.sortthread";
+
+        $params = array_merge($params, $joindef['params']);;
+
+        $this->download_export($format, $fields, $sql, $params, $file);
+
+        if (empty($file)) {
+            die;
+        }
+    }
+
+    /**
+     * Download data in the requested format
+     *
+     * @param string $format Export format
+     * @param array $fields Array of headings and fields
+     * @param string $query SQL query to run to get results
+     * @param array $params SQL query parameters
+     * @param string $file File to export data to - used for testing
+     * @return void
+     */
+    protected function download_export(string $format, array $fields, string $query, array $params = [], string $file = null) {
+        global $CFG;
+        require_once($CFG->libdir . '/csvlib.class.php');
+
+        $shortname = $this->prefix;
+        $filename = clean_filename("{$shortname}_export.{$format}");
+
+        if (empty($file)) {
+            header("Content-Type: application/download\n");
+            header("Content-Disposition: attachment; filename=$filename");
+            header("Expires: 0");
+            header("Cache-Control: must-revalidate,post-check=0,pre-check=0");
+            header("Pragma: public");
+        }
+
+        switch($format) {
+            case 'csv':
+                $this->download_csv($filename, $fields, $query, $params, $file);
+                break;
+            case 'ods':
+                $this->download_ods($filename, $fields, $query, $params, $file);
+                break;
+            case 'xls':
+                $this->download_xls($filename, $fields, $query, $params, $file);
+                break;
+        }
+    }
+
+    /**
+     * Download data in ODS format
+     *
+     * @param string $filename Output filename
+     * @param array $fields Array of headings and fields
+     * @param string $query SQL query to run to get results
+     * @param array $params SQL query parameters
+     * @param string $file File to export data to - used for testing
+     * @return void
+     */
+    protected function download_ods(string $filename, array $fields, string $query, array $params = [], string $file = null) {
+        global $CFG;
+
+        require_once("$CFG->libdir/odslib.class.php");
+
+        $workbook = new MoodleODSWorkbook($filename);
+        $this->download_spreadsheet($workbook, $fields, $query, $params, $file);
+    }
+
+    /**
+     * Download data in XLS format
+     *
+     * @param string $filename Output filename
+     * @param array $fields Array of headings and fields
+     * @param string $query SQL query to run to get results
+     * @param array $params SQL query parameters
+     * @param string $file File to export data to - used for testing
+     * @return void
+     */
+    protected function download_xls(string $filename, array $fields, string $query, array $params = [], string $file = null) {
+        global $CFG;
+
+        require_once("$CFG->libdir/excellib.class.php");
+
+        $workbook = new MoodleExcelWorkbook($filename);
+        $this->download_spreadsheet($workbook, $fields, $query, $params, $file);
+    }
+
+    /**
+     * Write export data to spreadsheet
+     *
+     * @param mixed $workbook Initialised spreadsheet workbook
+     * @param array $fields Array of headings and fields
+     * @param string $query SQL query to run to get results
+     * @param array $params SQL query parameters
+     * @param string $file File to export data to - used for testing
+     * @return void
+     */
+    protected function download_spreadsheet($workbook, array $fields, string $query, array $params = [], $file = null) {
+        global $DB;
+
+        $worksheet = $workbook->add_worksheet('');
+        $row = 0;
+        $col = 0;
+
+        // Headings
+        foreach ($fields as $fieldid => $fieldname) {
+            $worksheet->write($row, $col, $fieldid);
+            $col++;
+        }
+        $row++;
+
+        // Actual data
+        // Use recordset to keep memory use down.
+        $data = $DB->get_recordset_sql($query, $params);
+        if ($data) {
+            foreach ($data as $datarow) {
+                $col = 0;
+
+                // Explicitly export the fields as string to avoid the type being incorrectly detected.
+                foreach ($fields as $fieldid => $fieldname) {
+                    $cellvalue = '';
+
+                    if (is_array($fieldname)) {
+                        // Custom field
+                        // Can have multiple select columns, but at most 1 will have a value
+                        foreach ($fieldname as $cfield) {
+                            if ($datarow->{$cfield['alias']}) {
+                                $cellvalue = $this->parse_customfield($cfield['alias'], $datarow->{$cfield['alias']}, true);
+                                break;
+                            }
+                        }
+                    } else {
+                        $cellvalue = $datarow->$fieldid;
+                    }
+
+                    $worksheet->write_string($row, $col++, htmlspecialchars_decode($cellvalue));
+                }
+                $row++;
+            }
+        }
+
+        $workbook->close();
+        if (empty($file)) {
+            die;
+        }
+    }
+
+    /**
+     * Download data in CSV format
+     *
+     *
+     * @param array $fields Array of headings and fields
+     * @param string $query SQL query to run to get results
+     * @param array $params SQL query parameters
+     * @param string $file Filename to write to - useful for testing purposes
+     * @return void
+     */
+    protected function download_csv(string $filename, array $fields, string $query, array $params = [], string $file = null) {
+        global $DB;
+
+        $headers = [];
+        foreach ($fields as $fieldid => $fieldname) {
+            $headers[] = $fieldid;
+        }
+
+        // The first row is to be the headers.
+        $rows = [$headers];
+
+        // Actual data
+        //Use recordset to keep memory use down
+        $data = $DB->get_recordset_sql($query, $params);
+        if ($data) {
+            foreach ($data as $datarow) {
+                $row = array();
+                foreach ($fields as $fieldid => $fieldname) {
+                    if (is_array($fieldname)) {
+                        // Custom field
+                        // Can have multiple select columns, but at most 1 will have a value
+                        $rowvalue = '';
+
+                        foreach ($fieldname as $cfield) {
+                            if ($datarow->{$cfield['alias']}) {
+                                $rowvalue = $this->parse_customfield($cfield['alias'], $datarow->{$cfield['alias']}, true);
+                                break;
+                            }
+                        }
+                        $row[$fieldid] = $rowvalue;
+
+                    } else {
+                        if ($datarow->$fieldid) {
+                            $row[$fieldid] = $datarow->$fieldid;
+                        } else {
+                            $row[$fieldid] = '';
+                        }
+                    }
+                }
+                $rows[] = $row;
+            }
+        }
+
+        if (empty($file)) {
+            csv_export_writer::download_array($filename, $rows);
+        } else {
+            $fp = fopen($file, "w");
+            fwrite($fp, csv_export_writer::print_array($rows, 'comma', '"', true));
+            fclose($fp);
+        }
+    }
+
+    /**
+     * Exports the data from the current results in , maintaining
      * sort order and active filters but removing pagination
      *
      * @param string $format Format for the export ods/csv/xls
      * @return No return but initiates save dialog
      */
-    function export_data($format) {
+    function export_data_legacy($format) {
         global $DB;
 
         $query = optional_param('query', '', PARAM_TEXT);
@@ -2317,11 +2668,11 @@ class hierarchy {
 
         switch($format) {
             case 'ods':
-                $this->download_ods($headings, $sql, $params, $maxdepth, null, $searchactive);
+                $this->download_ods_legacy($headings, $sql, $params, $maxdepth, null, $searchactive);
             case 'xls':
-                $this->download_xls($headings, $sql, $params, $maxdepth, null, $searchactive);
+                $this->download_xls_legacy($headings, $sql, $params, $maxdepth, null, $searchactive);
             case 'csv':
-                $this->download_csv($headings, $sql, $params, $maxdepth, null, $searchactive);
+                $this->download_csv_legacy($headings, $sql, $params, $maxdepth, null, $searchactive);
         }
         die;
     }
@@ -2353,7 +2704,7 @@ class hierarchy {
      * @param string $file path to the directory where the file will be saved
      * @return Returns the ODS file
      */
-    function download_ods($fields, $query, $params, $maxdepth, $file=null, $searchactive=false) {
+    function download_ods_legacy($fields, $query, $params, $maxdepth, $file=null, $searchactive=false) {
         global $CFG, $DB;
         require_once("$CFG->libdir/odslib.class.php");
         $shortname = $this->prefix;
@@ -2430,7 +2781,7 @@ class hierarchy {
      * @param string $file path to the directory where the file will be saved
      * @return Returns the Excel file
      */
-    function download_xls($fields, $query, $params, $maxdepth, $file=null, $searchactive=false) {
+    function download_xls_legacy($fields, $query, $params, $maxdepth, $file=null, $searchactive=false) {
         global $CFG, $DB;
 
         require_once("$CFG->libdir/excellib.class.php");
@@ -2508,7 +2859,7 @@ class hierarchy {
      * @param integer $maxdepth Number of the deepest depth in this hierarchy
      * @return Returns the CSV file
      */
-    function download_csv($fields, $query, $params, $maxdepth, $file=null, $searchactive=false) {
+    function download_csv_legacy($fields, $query, $params, $maxdepth, $file=null, $searchactive=false) {
         global $DB;
         $shortname = $this->prefix;
         $filename = clean_filename($shortname.'_report.csv');

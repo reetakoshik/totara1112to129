@@ -49,27 +49,29 @@ class mod_facetoface_waitlist_event_testcase extends advanced_testcase {
 
     /**
      * @param int $numberofusers    How many users to be created
+     * @param stdClass $course Course to enrol users to
      * @return stdClass[]
      */
-    private function create_users(int $numberofusers=2): array {
+    private function create_users(int $numberofusers=2, stdClass $course): array {
         $generator = $this->getDataGenerator();
         $users = array();
 
         for ($i = 0; $i < $numberofusers; $i++) {
-            $users[] = $generator->create_user();
+            $user = $generator->create_user();
+            $generator->enrol_user($user->id, $course->id);
+            $users[] = $user;
         }
 
         return $users;
     }
 
     /**
-     * @param stdClass  $user
-     * @param stdClass  $session
-     * @param stdClass  $course         Course record
-     * @param stdClass  $f2f            Facetoface record
-     * @param int       $statuscode     This is for the sign up status whether user is booked or waitlisted
+     * Create signup and force state
+     * @param stdClass $user
+     * @param stdClass $session
+     * @param string $stateclass This is for the sign up status whether user is booked or waitlisted
      */
-    private function create_signup(stdClass $user, stdClass $session, stdClass $course, stdClass $f2f, int $statuscode): void {
+    private function create_signup(stdClass $user, stdClass $session, string $stateclass): void {
         global $DB;
         if (!$DB->record_exists("job_assignment", ['userid' => $user->id])) {
             $manager = $this->getDataGenerator()->create_user();
@@ -86,18 +88,15 @@ class mod_facetoface_waitlist_event_testcase extends advanced_testcase {
             job_assignment::create($data);
         }
 
-        $discountcode = 'disc1';
-        $notificationtype = 1;
+        $signup = \mod_facetoface\signup::create($user->id, new \mod_facetoface\seminar_event($session->id));
+        \mod_facetoface\signup_helper::signup($signup);
 
-        facetoface_user_signup(
-            $session,
-            $f2f,
-            $course,
-            $discountcode,
-            $notificationtype,
-            $statuscode,
-            $user->id
-        );
+        $state = new $stateclass($signup);
+        $refClass = new ReflectionClass($signup);
+        $method = $refClass->getMethod("update_status");
+        $method->setAccessible(true);
+        $method->invoke($signup, $state);
+
     }
 
     /**
@@ -115,26 +114,29 @@ class mod_facetoface_waitlist_event_testcase extends advanced_testcase {
         $this->setAdminUser();
 
         $f2f = $this->create_facetoface();
-        $users = $this->create_users(2);
+        $course = $DB->get_record("course", ['id' => $f2f->course]);
+        $users = $this->create_users(2, $course);
 
-        $sessionid = facetoface_add_session((object)[
+        /** @var mod_facetoface_generator $f2fgenerator */
+        $f2fgenerator = $this->getDataGenerator()->get_plugin_generator("mod_facetoface");
+        $sessionid = $f2fgenerator->add_session((object)[
             'facetoface' => $f2f->id,
             'capacity' => 10,
             'timecreated' => time(),
             'timemodified' => time(),
             'usermodified' => $USER->id,
-        ], null);
+            'sessiondates' => []
+        ]);
 
         $session = $DB->get_record("facetoface_sessions", ['id' => $sessionid]);
         $session->sessiondates = [];
-        $course = $DB->get_record("course", ['id' => $f2f->course]);
 
         // Sign up the first user as a wait-listed user
-        $this->create_signup(current($users), $session, $course, $f2f, MDL_F2F_STATUS_WAITLISTED);
+        $this->create_signup(current($users), $session, \mod_facetoface\signup\state\waitlisted::class);
 
         // Sign up the second user as booked user
         next($users);
-        $this->create_signup(current($users), $session, $course, $f2f, MDL_F2F_STATUS_BOOKED);
+        $this->create_signup(current($users), $session, \mod_facetoface\signup\state\booked::class);
 
         /** @var mod_facetoface_renderer $f2frenderer */
         $f2frenderer = $PAGE->get_renderer("mod_facetoface");
@@ -158,23 +160,25 @@ class mod_facetoface_waitlist_event_testcase extends advanced_testcase {
         $this->setAdminUser();
 
         $f2f = $this->create_facetoface();
-        $users = $this->create_users(2);
+        $course = $DB->get_record("course", ['id' => $f2f->course]);
+        $users = $this->create_users(2, $course);
 
-        // Create a wait-listed event
-        $sessionid = facetoface_add_session((object)[
+        /** @var mod_facetoface_generator $f2fgenerator */
+        $f2fgenerator = $this->getDataGenerator()->get_plugin_generator("mod_facetoface");
+        $sessionid = $f2fgenerator->add_session((object)[
             'facetoface' => $f2f->id,
-            'capacity'=> 10,
+            'capacity' => 10,
             'timecreated' => time(),
             'timemodified' => time(),
-            'usermodified' => $USER->id
-        ], null);
+            'usermodified' => $USER->id,
+            'sessiondates' => []
+        ]);
 
         $session = $DB->get_record("facetoface_sessions", ['id' => $sessionid]);
         $session->sessiondates = [];
-        $course = $DB->get_record("course", ['id' => $f2f->course]);
 
         foreach ($users as $user) {
-            $this->create_signup($user, $session, $course, $f2f, MDL_F2F_STATUS_WAITLISTED);
+            $this->create_signup($user, $session, \mod_facetoface\signup\state\waitlisted::class);
         }
 
         /** @var mod_facetoface_renderer $f2frenderer */
@@ -197,29 +201,32 @@ class mod_facetoface_waitlist_event_testcase extends advanced_testcase {
         $this->setAdminUser();
 
         $f2f = $this->create_facetoface();
-        $users = $this->create_users(4);
+        $course = $DB->get_record("course", ['id' => $f2f->course]);
+        $users = $this->create_users(4, $course);
 
-        $sessionid = facetoface_add_session((object)[
+        /** @var mod_facetoface_generator $f2fgenerator */
+        $f2fgenerator = $this->getDataGenerator()->get_plugin_generator("mod_facetoface");
+        $sessionid = $f2fgenerator->add_session((object)[
             'facetoface' => $f2f->id,
             'capacity' => 2,
             'timecreated' => time(),
             'timemodified' => time(),
-            'usermodified' => $USER->id
-        ], null);
+            'usermodified' => $USER->id,
+            'sessiondates' => []
+        ]);
 
         $session = $DB->get_record("facetoface_sessions", ['id' => $sessionid]);
         $session->sessiondates = [];
-        $course = $DB->get_record("course", ['id' => $f2f->course]);
 
         // Create 1 waitlisted user here
-        $this->create_signup($users[0], $session, $course, $f2f, MDL_F2F_STATUS_WAITLISTED);
+        $this->create_signup($users[0], $session, \mod_facetoface\signup\state\waitlisted::class);
         foreach ($users as $index => $user) {
             if ($index === 0) {
                 // Skipping the first user, as the user was signed up as wait-listed user
                 continue;
             }
 
-            $this->create_signup($user, $session, $course, $f2f, MDL_F2F_STATUS_BOOKED);
+            $this->create_signup($user, $session, \mod_facetoface\signup\state\booked::class);
         }
 
         /** @var mod_facetoface_renderer $f2frenderer */

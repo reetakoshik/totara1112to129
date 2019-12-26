@@ -10,10 +10,7 @@
 // the file rb_source_[source_name].php
 
 class rb_source_[source_name] extends rb_base_source {
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $requiredcolumns;
-
-    function __construct() {
+    public function __construct() {
         $this->base = ''; // a {tablename}, or subquery
         $this->joinlist = $this->define_joinlist();
         $this->columnoptions = $this->define_columnoptions();
@@ -44,8 +41,8 @@ class rb_source_[source_name] extends rb_base_source {
         );
 
         // optionally include some standard joins
-        //$this->add_user_table_to_joinlist($joinlist, 'base', 'userid');
-        //$this->add_job_assignment_tables_to_joinlist($joinlist, 'base', 'userid');
+        //$this->add_core_user_tables($joinlist, 'base', 'userid');
+        //$this->add_totara_job_tables($joinlist, 'base', 'userid');
 
         return $joinlist;
     }
@@ -75,8 +72,8 @@ class rb_source_[source_name] extends rb_base_source {
         );
 
         // optionally include some standard columns
-        //$this->add_user_fields_to_columns($columnoptions);
-        //$this->add_job_assignment_fields_to_columns($columnoptions);
+        //$this->add_core_user_columns($columnoptions);
+        //$this->add_totara_job_columns($columnoptions);
 
         return $columnoptions;
     }
@@ -96,8 +93,8 @@ class rb_source_[source_name] extends rb_base_source {
         );
 
         // optionally include some standard filters
-        //$this->add_user_fields_to_filters($filteroptions);
-        //$this->add_job_assignment_fields_to_filters($filteroptions, 'base', 'userid'); // E.g. matching add_user_table_to_joinlist above.
+        //$this->add_core_user_filters($filteroptions);
+        //$this->add_totara_job_filters($filteroptions, 'base', 'userid'); // E.g. matching add_core_user_tables above.
 
         return $filteroptions;
     }

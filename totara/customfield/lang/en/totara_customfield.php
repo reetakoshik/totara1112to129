@@ -160,6 +160,7 @@ $string['error:invaliddatetooearly'] = 'The \'{$a->field}\' date/time custom fie
 $string['error:invaliddatetoolate'] = 'The \'{$a->field}\' date/time custom field contains a date (\'{$a->data}\') later than {$a->year}.';
 $string['error:updatecustomfield'] = 'Error updating custom field!';
 $string['error:novalue'] = 'Invalid CSV file format - "{$a}" custom field does not exist';
+$string['eventcreated'] = 'Customfield created';
 $string['eventdeleted'] = 'Customfield deleted';
 $string['eventupdated'] = 'Customfield updated';
 $string['fieldcolumns'] = 'Columns';

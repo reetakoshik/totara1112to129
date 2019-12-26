@@ -1,0 +1,67 @@
+//
+// This file is part of Totara Learn
+//
+// Copyright (C) 2018 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @copyright 2018 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Kevin Hottinger <kevin.hottinger@totaralearning.com>
+// @package   theme_roots
+
+
+.totaraNav_prim .masthead_logo {
+    flex-basis: 80%;
+    flex-grow: 1;
+    margin: auto 0;
+    vertical-align: top;
+
+    &--header {
+        font-size: @totaranav-font_size;
+        margin: @totaranav-spacing_small;
+
+        &_img {
+            height: 1.5em;
+        }
+    }
+}
+
+@media (min-width: @totaranav-screen_sm_min) {
+    .totaraNav_prim .masthead_logo {
+        flex-basis: auto;
+        flex-grow: 0;
+        height: 100%;
+
+        &--header {
+            margin: 0 @totaranav-spacing_small;
+        }
+    }
+}
+
+@media (min-width: @totaranav-screen_md_min) {
+    .totaraNav_prim .masthead_logo {
+        &--header {
+            margin: 0 @totaranav-spacing_medium;
+        }
+    }
+}
+
+// IE11 on Windows 7 & 8 has issues with flex-basis: auto
+.ie11 {
+    .masthead_logo--header_link {
+        display: block;
+        height: 1.5rem;
+    }
+}

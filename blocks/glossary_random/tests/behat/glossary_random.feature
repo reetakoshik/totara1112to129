@@ -1,4 +1,4 @@
-@block @block_glossary_random
+@block @block_glossary_random @javascript
 Feature: Random glossary entry block is used in a course
   In order to show the entries from glossary
   As a teacher
@@ -19,13 +19,12 @@ Feature: Random glossary entry block is used in a course
 
   Scenario: Student can not see the block if it is not configured
     When I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add the "Random glossary entry" block
     Then I should see "Please configure this block using the edit icon" in the "block_glossary_random" "block"
     And I log out
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And "block_glossary_random" "block" should not exist
     And I log out
 
@@ -34,18 +33,18 @@ Feature: Random glossary entry block is used in a course
       | activity | name         | intro                     | course | idnumber  | defaultapproval |
       | glossary | GlossaryAuto | Test glossary description | C1     | glossary1 | 1               |
     And I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add the "Random glossary entry" block
     And I configure the "block_glossary_random" block
     And I set the following fields to these values:
-      | Title                           | AutoGlossaryblock   |
+      | Override default block title    | Yes                 |
+      | Block title                     | AutoGlossaryblock   |
       | Take entries from this glossary | GlossaryAuto        |
       | How a new entry is chosen       | Last modified entry |
     And I press "Save changes"
     And I log out
     When I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "There are no entries yet in the chosen glossary" in the "AutoGlossaryblock" "block"
     And I click on "Add a new entry" "link" in the "AutoGlossaryblock" "block"
     And I set the following fields to these values:
@@ -80,18 +79,18 @@ Feature: Random glossary entry block is used in a course
       | activity | name           | intro                     | course | idnumber  | defaultapproval |
       | glossary | GlossaryManual | Test glossary description | C1     | glossary2 | 0               |
     And I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add the "Random glossary entry" block
     And I configure the "block_glossary_random" block
     And I set the following fields to these values:
-      | Title                           | ManualGlossaryblock |
+      | Override default block title    | Yes                 |
+      | Block title                     | ManualGlossaryblock |
       | Take entries from this glossary | GlossaryManual      |
       | How a new entry is chosen       | Last modified entry |
     And I press "Save changes"
     And I log out
     When I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "There are no entries yet in the chosen glossary" in the "ManualGlossaryblock" "block"
     And I click on "Add a new entry" "link" in the "ManualGlossaryblock" "block"
     And I set the following fields to these values:
@@ -102,7 +101,7 @@ Feature: Random glossary entry block is used in a course
     And I should see "There are no entries yet in the chosen glossary" in the "ManualGlossaryblock" "block"
     And I log out
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I should see "There are no entries yet in the chosen glossary" in the "ManualGlossaryblock" "block"
     And I follow "GlossaryManual"
     And I follow "Waiting approval"

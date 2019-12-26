@@ -87,6 +87,12 @@ class customfield_base {
 /***** The following methods may be overwritten by child classes *****/
 
     static function display_item_data($data, $extradata=array()) {
+
+        // Export return raw value
+        if (!empty($extradata['isexport'])) {
+            return $data;
+        }
+
         $options = new stdClass();
         $options->para = false;
         return format_text($data, FORMAT_MOODLE, $options);
@@ -210,8 +216,11 @@ class customfield_base {
 
     /**
      * Does some extra pre-processing for totara sync uploads.
-     * Only required for custom fields with several options
+     *
+     * Required for custom fields with several options
      * like menu of choices, and multi-select.
+     *
+     * Also suggested for other types to perform cleaning specific to that data type.
      *
      * @param  object $itemnew The item being saved
      * @return object          The same item after processing
@@ -357,7 +366,7 @@ class customfield_base {
     }
 
     /**
-     * Check if the field data is hidden to the current item 
+     * Check if the field data is hidden to the current item
      * @return  boolean
      */
     function is_hidden() {
@@ -696,7 +705,7 @@ function customfield_get_data($item, $tableprefix, $prefix, $indexfullname = tru
             case 'multiselect':
                 $datavalue = json_decode($field->data, true);
                 $values = array();
-                $dataparams = $DB->get_records("{$tableprefix}_info_data_param", array('dataid' => $field->dataid));
+                $dataparams = $DB->get_records("{$tableprefix}_info_data_param", array('dataid' => $field->dataid), 'id ASC');
                 foreach ($dataparams as $dataparam) {
                     if (isset($datavalue[$dataparam->value])) {
                         $option = $datavalue[$dataparam->value];
@@ -764,18 +773,6 @@ function customfield_get_data_shortname_key($item, $tableprefix, $prefix) {
         }
     }
     return $out;
-}
-
-
-/**
- * Returns an object with the custom fields set for the given id
- * @param  integer  id
- * @return  object
- *
- * @deprecated since 10.0
- */
-function customfield_record($id, $tableprefix) {
-    throw new coding_exception('customfield_record has been deprecated since 10.');
 }
 
 /**

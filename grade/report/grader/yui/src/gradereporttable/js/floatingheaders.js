@@ -497,9 +497,8 @@ FloatingHeaders.prototype = {
         require(['jquery'], function($) {
 
             // Generate the new fields.
-            userColumn.each(function (node) {
-                var height = $(node.getDOMNode()).outerHeight() + 'px';
-                // Create and configure the new container.
+            userColumn.each(function(node) {
+                var height = $(node.getDOMNode()).parent().outerHeight() + 'px';
                 var containerNode = Y.Node.create('<div></div>');
                 containerNode.set('innerHTML', node.get('innerHTML'))
                     .setAttribute('class', node.getAttribute('class'))
@@ -831,21 +830,6 @@ FloatingHeaders.prototype = {
         }
 
         // User column position.
-
-        if (window.right_to_left()) {
-            floatingUserTriggerPoint = Y.config.win.innerWidth + Y.config.win.pageXOffset - this.dockWidth;
-            floatingUserRelativePoint = floatingUserTriggerPoint - this.firstUserCellWidth - bodyMargin;
-            userFloats = floatingUserTriggerPoint < (this.firstUserCellLeft + this.firstUserCellWidth + bodyMargin);
-            leftTitleFloats = (floatingUserTriggerPoint - this.firstNonUserCellWidth) <
-                              (this.firstNonUserCellLeft + this.firstUserCellWidth);
-        } else {
-            floatingUserRelativePoint = Y.config.win.pageXOffset + bodyMargin;
-            floatingUserTriggerPoint = floatingUserRelativePoint + this.dockWidth + bodyMargin;
-            userFloats = floatingUserTriggerPoint > this.firstUserCellLeft + bodyMargin;
-            leftTitleFloats = floatingUserTriggerPoint > (this.firstNonUserCellLeft - this.firstUserCellWidth);
-        }
-
-        // User column position.
         // TL-9343
         var gradeparent = Y.one('.gradeparent').getDOMNode();
         // This page doesn't get translated for some reason.
@@ -961,28 +945,30 @@ FloatingHeaders.prototype = {
      * @protected
      */
     _handleResizeEvent: function() {
-        // Recalculate the position of the edge cells for scroll positioning.
-        this._calculateCellPositions();
-
-        // Simulate a scroll.
-        this._handleScrollEvent();
-
         // TOTARA: node.getComputedStyle and 'Nasty hack' replaced with jQuery method due to bug in IE11.
         var self = this;
 
         require(['jquery'], function($) {
+            var coordinates = self._getRelativeXY(self.firstUserCell);
+
             // Resize user cells.
             var userWidth = $(self.firstUserCell.getDOMNode()).outerWidth();
             var userCells = Y.all(SELECTORS.USERCELL);
             self.userColumnHeader.one('.cell').setStyle('width', userWidth);
 
             self.userColumn.all('.cell').each(function(cell, idx) {
-                var height = $(userCells.item(idx).getDOMNode()).outerHeight() + 'px';
+                var height = $(userCells.item(idx).getDOMNode()).parent().outerHeight() + 'px';
                 cell.setStyles({
                     width: userWidth,
                     height: height
                 });
             }, self);
+
+            self.userColumn.setStyles({
+                left: coordinates[0] + 'px',
+                position: 'absolute',
+                top: coordinates[1] + 'px'
+            });
 
             // Resize headers & footers.
             // This is an expensive operation, not expected to happen often.
@@ -1024,6 +1010,12 @@ FloatingHeaders.prototype = {
             }, self);
 
             self.gradeItemHeadingContainer.setStyle('width', newcontainerwidth);
+
+            // Recalculate the position of the edge cells for scroll positioning.
+            self._calculateCellPositions();
+
+            // Simulate a scroll.
+            self._handleScrollEvent();
         });
     }
 };

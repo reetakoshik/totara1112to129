@@ -388,47 +388,81 @@ function totara_resize_images_filearea($contextid, $component, $filearea, $itemi
  * Create recursively totara menu table
  *
  * @param html_table $table to add data to.
- * @param \totara_core\totara\menu\menu $item to render
+ * @param stdClass $item item record to render
  * @param int $depth of the category.
  * @param bool $up true if this category can be moved up.
  * @param bool $down true if this category can be moved down.
+ * @param bool $dimmed true if this item and descendants should be shown as dimmed (due to dimmed ascendant).
  */
-function totara_menu_table_load(html_table &$table, \totara_core\totara\menu\menu $item, $depth = 0, $up = false, $down = false) {
-    global $OUTPUT;
+function totara_menu_table_load(html_table &$table, $item = null, $depth = 0, $up = false, $down = false, $dimmed = false) {
+    global $OUTPUT, $DB;
 
-    static $str = null;
+    $str = new stdClass;
+    $str->edit = new lang_string('edit');
+    $str->delete = new lang_string('delete');
+    $str->moveup = new lang_string('moveup');
+    $str->movedown = new lang_string('movedown');
+    $str->hide = new lang_string('hide');
+    $str->show = new lang_string('show');
+    $str->spacer = $OUTPUT->spacer(array('width' => 11, 'height' => 11));
 
-    if (is_null($str)) {
-        $str = new stdClass;
-        $str->edit = new lang_string('edit');
-        $str->delete = new lang_string('delete');
-        $str->moveup = new lang_string('moveup');
-        $str->movedown = new lang_string('movedown');
-        $str->hide = new lang_string('hide');
-        $str->show = new lang_string('show');
-        $str->spacer = $OUTPUT->spacer(array('width' => 11, 'height' => 11));
+    // Nasty hack: let's store the list of processed items in the $table for now.
+    if (!isset($table->processedmenuitems)) {
+        $table->processedmenuitems = array();
     }
 
-    if ($item->id) {
-        $node = \totara_core\totara\menu\menu::node_instance($item->get_property());
-        if ($node === false) {
-            // Bad node, don't display.
+    if ($item) {
+        $parentid = $item->id;
+    } else {
+        $parentid = 0;
+    }
+    $children = $DB->get_records('totara_navigation', array('parentid' => $parentid), 'sortorder ASC, id ASC');
+
+    if ($item) {
+        if ($depth > 20) {
+            // Break out of infinite recursion.
             return;
         }
-        if ($node->is_disabled()) {
-            // Feature is disabled, do not show this in admin UI.
+        if ($item->classname === '\totara_core\totara\menu\unused') {
+            // Skip this special section and all it's children for now.
             return;
         }
-        $dimmed = ($item->visibility && $node->get_visibility() ? '' : ' dimmed');
+        $node = \totara_core\totara\menu\item::create_instance($item);
+        if (!$node) {
+            // Bad node, will be included in 'Unused' section.
+            return;
+        }
+
+        $table->processedmenuitems[$item->id] = $item->id;
+
+        $iscontainer = $node->is_container();
+        $istoodeep = ((!$iscontainer and $depth > \totara_core\totara\menu\item::MAX_DEPTH)
+            || ($iscontainer and $depth > \totara_core\totara\menu\item::MAX_DEPTH - 1));
+
+        $dimmed = $dimmed || !$item->visibility || $node->is_disabled() || $istoodeep;
+        $dimmedclass = $dimmed ? ' dimmed' : '';
+
         $url = '/totara/core/menu/index.php';
-        $itemurl = new moodle_url($node->get_url());
-        $itemurl = html_writer::link($itemurl, $node->get_url(false), array('class' => $dimmed));
+
         $itemtitle = $node->get_title();
+
+        if ($iscontainer) {
+            $itemurl = '';
+            $itemtype = get_string('menuitem:typeparent', 'totara_core');
+        } else {
+            $itemtype = get_string('menuitem:typeurl', 'totara_core');
+            $itemurl = new moodle_url($node->get_url(true));
+            $itemurl = html_writer::link($itemurl, s($node->get_url(false)), array('class' => $dimmedclass));
+        }
+
         $attributes = array();
         $attributes['title'] = $str->edit;
-        $attributes['class'] = 'totara_item_depth'.$depth.$dimmed;
+        $attributes['class'] = 'totara_item_depth'.$depth.$dimmedclass;
         $itemtitle = html_writer::link(new moodle_url('/totara/core/menu/edit.php',
                 array('id' => $item->id)), $itemtitle, $attributes);
+        if ($help = $node->get_default_admin_help()) {
+            $itemtitle .= $OUTPUT->help_icon($help[0], $help[1], null);
+        }
 
         $icons = array();
         // Edit category.
@@ -438,18 +472,22 @@ function totara_menu_table_load(html_table &$table, \totara_core\totara\menu\men
                         null, array('title' => $str->edit)
         );
         // Change visibility.
-        if ($item->visibility != \totara_core\totara\menu\menu::HIDE_ALWAYS) {
-            $icons[] = $OUTPUT->action_icon(
-                            new moodle_url($url, array('hideid' => $item->id, 'sesskey' => sesskey())),
-                            new pix_icon('t/hide', $str->hide, 'moodle', array('class' => 'iconsmall')),
-                            null, array('title' => $str->hide)
-            );
+        if (!$node->is_disabled() and $depth <= \totara_core\totara\menu\item::MAX_DEPTH) {
+            if ($item->visibility != \totara_core\totara\menu\item::VISIBILITY_HIDE) {
+                $icons[] = $OUTPUT->action_icon(
+                    new moodle_url($url, array('hideid' => $item->id, 'sesskey' => sesskey())),
+                    new pix_icon('t/hide', $str->hide, 'moodle', array('class' => 'iconsmall')),
+                    null, array('title' => $str->hide)
+                );
+            } else {
+                $icons[] = $OUTPUT->action_icon(
+                    new moodle_url($url, array('showid' => $item->id, 'sesskey' => sesskey())),
+                    new pix_icon('t/show', $str->show, 'moodle', array('class' => 'iconsmall')),
+                    null, array('title' => $str->show)
+                );
+            }
         } else {
-            $icons[] = $OUTPUT->action_icon(
-                            new moodle_url($url, array('showid' => $item->id, 'sesskey' => sesskey())),
-                            new pix_icon('t/show', $str->show, 'moodle', array('class' => 'iconsmall')),
-                            null, array('title' => $str->show)
-            );
+            $icons[] = $str->spacer;
         }
         // Move up/down.
         if ($up) {
@@ -471,40 +509,176 @@ function totara_menu_table_load(html_table &$table, \totara_core\totara\menu\men
             $icons[] = $str->spacer;
         }
         // Delete item.
-        if ($item->custom == \totara_core\totara\menu\menu::DB_ITEM) {
+        if (\totara_core\totara\menu\helper::is_item_deletable($item->id)) {
             $icons[] = $OUTPUT->action_icon(
                             new moodle_url('/totara/core/menu/delete.php', array('id' => $item->id)),
                             new pix_icon('t/delete', $str->delete, 'moodle', array('class' => 'iconsmall')),
                             null, array('title' => $str->delete)
             );
+        } else {
+            $icons[] = $str->spacer;
         }
 
-        $table->data[] = new html_table_row(array(
-                         new html_table_cell($itemtitle),
-                         new html_table_cell($itemurl),
-                         new html_table_cell(\totara_core\totara\menu\menu::get_visibility($item->visibility)),
-                         new html_table_cell(join(' ', $icons)),
+        if ($node->is_disabled()) {
+            $itemvisibility = get_string('menuitem:typedisabled', 'totara_core');
+        } else {
+            if ($istoodeep) {
+                $itemvisibility = get_string('menuitem:hiddentoodeep', 'totara_core');
+                $itemvisibility .= $OUTPUT->help_icon('menuitem:hiddentoodeep', 'totara_core', null);
+            } else {
+                $itemvisibility = $node->get_visibility_description();
+            }
+        }
+
+        if ($dimmed) {
+            $itemtype = '<span class="dimmed_text">' . $itemtype . '</span>';
+            $itemvisibility = '<span class="dimmed_text">' . $itemvisibility . '</span>';
+        }
+
+        $row = new html_table_row(array(
+             new html_table_cell($itemtitle),
+             new html_table_cell($itemtype),
+             new html_table_cell($itemurl),
+             new html_table_cell($itemvisibility),
+             new html_table_cell(join(' ', $icons)),
         ));
+
+        $row->id = \totara_core\totara\menu\helper::get_admin_edit_rowid($item->id);
+        $table->data[] = $row;
+
+        if (!$iscontainer) {
+            // Ignore invalid children, they will be included in Unused section..
+            $children = array();
+        }
     }
 
-    if ($items = $item->get_children()) {
+    if ($children) {
 
         // Print all the children recursively.
-        $countitems = count($items);
+        $countchildren = count($children);
         $count = 0;
         $first = true;
         $last  = false;
-        foreach ($items as $node) {
+        foreach ($children as $node) {
 
             $count++;
-            if ($count == $countitems) {
+            if ($count == $countchildren) {
                 $last = true;
             }
             $up    = $first ? false : true;
             $down  = $last  ? false : true;
             $first = false;
 
-            totara_menu_table_load($table, $node, $depth+1, $up, $down);
+            totara_menu_table_load($table, $node, $depth+1, $up, $down, $dimmed);
+        }
+    }
+
+    if (!$item) {
+        // We have just processed all valid used items, let's add 'Unused' container with the rest.
+        $unusedcontainerid = \totara_core\totara\menu\helper::get_unused_container_id();
+
+        list($select, $params) = $DB->get_in_or_equal($table->processedmenuitems, SQL_PARAMS_NAMED, 'mi', false, -1);
+        unset($table->processedmenuitems); // End of nasty hack.
+
+        $select = "id $select AND id <> :unusedid";
+        $params['unusedid'] = $unusedcontainerid;
+
+        $unuseditems = $DB->get_records_select('totara_navigation', $select, $params);
+        foreach ($unuseditems as $unuseditem) {
+            $unusednode = \totara_core\totara\menu\item::create_instance($unuseditem);
+            if ($unusednode) {
+                $unuseditem->node = $unusednode;
+                $unuseditem->currenttitle = $unusednode->get_title();
+            } else {
+                $unuseditem->node = null;
+                $unuseditem->currenttitle = $unuseditem->classname;
+            }
+        }
+
+        if ($unuseditems) {
+            $row = new html_table_row(array(
+                new html_table_cell(html_writer::span(get_string('unused', 'totara_core'), 'totara_item_depth1 dimmed_text')),
+                new html_table_cell(''),
+                new html_table_cell(''),
+                new html_table_cell(''),
+                new html_table_cell(''),
+            ));
+
+            $row->id = \totara_core\totara\menu\helper::get_admin_edit_rowid($unusedcontainerid);
+            $table->data[] = $row;
+
+            core_collator::asort_objects_by_property($unuseditems, 'currenttitle');
+
+            foreach ($unuseditems as $unuseditem) {
+                /** @var \totara_core\totara\menu\item $node */
+                $node = $unuseditem->node;
+
+                if (!$node) {
+                    $itemurl = '';
+                    $itemtype = get_string('error');
+                } else if ($node->is_container()) {
+                    $itemurl = '';
+                    $itemtype = get_string('menuitem:typeparent', 'totara_core');
+                } else {
+                    $itemtype = get_string('menuitem:typeurl', 'totara_core');
+                    $itemurl = new moodle_url($node->get_url(true));
+                    $itemurl = html_writer::link($itemurl, s($node->get_url(false)), array('class' => 'dimmed'));
+                }
+                $itemtype = '<span class="dimmed_text">' . $itemtype . '</span>';
+
+                if (!$node) {
+                    $attributes = array();
+                    $attributes['class'] = 'totara_item_depth2 dimmed_text';
+                    $itemtitle = html_writer::span($unuseditem->currenttitle, '', $attributes);
+                } else {
+                    $attributes = array();
+                    $attributes['title'] = $str->edit;
+                    $attributes['class'] = 'totara_item_depth2 dimmed';
+                    $itemtitle = html_writer::link(new moodle_url('/totara/core/menu/edit.php',
+                        array('id' => $unuseditem->id)), $unuseditem->currenttitle, $attributes);
+                }
+
+                $itemvisibility = '<span class="dimmed_text">' . get_string('unused', 'totara_core') . '</span>';
+
+                $icons = array();
+
+                // Edit category.
+                if (!$node) {
+                    $icons[] = $str->spacer;
+                } else {
+                    $icons[] = $OUTPUT->action_icon(
+                        new moodle_url('/totara/core/menu/edit.php', array('id' => $unuseditem->id)),
+                        new pix_icon('t/edit', $str->edit, 'moodle', array('class' => 'iconsmall')),
+                        null, array('title' => $str->edit)
+                    );
+                }
+
+                $icons[] = $str->spacer;
+                $icons[] = $str->spacer;
+                $icons[] = $str->spacer;
+
+                // Delete item if no children present and it is either custom or broken item.
+                if (\totara_core\totara\menu\helper::is_item_deletable($unuseditem->id)) {
+                    $icons[] = $OUTPUT->action_icon(
+                        new moodle_url('/totara/core/menu/delete.php', array('id' => $unuseditem->id)),
+                        new pix_icon('t/delete', $str->delete, 'moodle', array('class' => 'iconsmall')),
+                        null, array('title' => $str->delete)
+                    );
+                } else {
+                    $icons[] = $str->spacer;
+                }
+
+                $row = new html_table_row(array(
+                    new html_table_cell($itemtitle),
+                    new html_table_cell($itemtype),
+                    new html_table_cell($itemurl),
+                    new html_table_cell($itemvisibility),
+                    new html_table_cell(join(' ', $icons)),
+                ));
+
+                $row->id = \totara_core\totara\menu\helper::get_admin_edit_rowid($unuseditem->id);
+                $table->data[] = $row;
+            }
         }
     }
 }
@@ -872,17 +1046,6 @@ function totara_core_uncomplete_course_modules_completion($cm, $completion, $now
     // Purge the course completion cache.
     $cache = cache::make('core', 'completion');
     $cache->purge();
-}
-
-/**
- * @deprecated since 9.0
- */
-function totara_update_temporary_managers() {
-    global $CFG, $DB;
-
-    debugging('totara_update_temporary_managers has been deprecated since 9.0. Use \totara_job\job_assignment::update_temporary_managers instead.', DEBUG_DEVELOPER);
-
-    \totara_job\job_assignment::update_temporary_managers();
 }
 
 /**

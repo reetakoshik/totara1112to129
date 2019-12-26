@@ -1,4 +1,4 @@
-@mod @mod_lesson
+@mod @mod_lesson @javascript
 Feature: In Dashboard, teacher can see the number of student attempts to lessons
   In order to know the number of student attempts to a lesson
   As a teacher
@@ -31,8 +31,7 @@ Feature: In Dashboard, teacher can see the number of student attempts to lessons
     And I add the "Course overview" block
     And I log out
     And I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
 
   Scenario: number of student attempts
     Given I add a "Lesson" to section "1"
@@ -91,7 +90,7 @@ Feature: In Dashboard, teacher can see the number of student attempts to lessons
     And I press "Save page"
     And I log out
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test lesson name"
     And I should see "Cat is an amphibian"
     And I set the following fields to these values:
@@ -131,7 +130,7 @@ Feature: In Dashboard, teacher can see the number of student attempts to lessons
     And I should see "Your score is 3 (out of 3)."
     And I log out
     And I log in as "student2"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test lesson name"
     And I should see "Cat is an amphibian"
     And I set the following fields to these values:
@@ -152,5 +151,6 @@ Feature: In Dashboard, teacher can see the number of student attempts to lessons
     And I should see "Your score is 2 (out of 3)."
     And I log out
     And I log in as "teacher1"
-    Then I should see "You have lessons that are due"
-    And I should see "3 attempts"
+    And I should see "You have lessons that are due"
+    And I click on "You have lessons that are due" "text"
+    Then I should see "3 attempts"

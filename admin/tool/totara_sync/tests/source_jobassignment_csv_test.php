@@ -49,6 +49,7 @@ class tool_totara_sync_source_jobassignment_csv_testcase extends advanced_testca
             $CFG->dirroot . '/admin/tool/totara_sync/tests/fixtures/jobassignment/' . $fixturefile,
             $tempdir . '/csv/ready/jobassignment.csv'
         );
+        set_config('fileaccess', FILE_ACCESS_DIRECTORY, 'totara_sync');
         set_config('filesdir', $tempdir, 'totara_sync');
     }
 

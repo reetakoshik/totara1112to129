@@ -25,6 +25,9 @@ defined('MOODLE_INTERNAL') || die();
 
 use availability_language\condition;
 
+/**
+ * @group availability
+ */
 class availability_language_condition_testcase extends advanced_testcase {
     /**
      * Tests constructing and using grade condition.

@@ -57,7 +57,7 @@ class edit_current_stage extends form {
             'userassignmentid' => $userassignment->id,
         );
         $roledata = $DB->get_records_sql($sql, $params);
-        $roles = array();
+        $roles = array(-1 => get_string('allroles', 'totara_appraisal'));
         foreach ($roledata as $role) {
             $roles[$role->id] = get_string($rolekeys[$role->appraisalrole], 'totara_appraisal') . ' - ' . fullname($role);
         }
@@ -128,7 +128,7 @@ class edit_current_stage extends form {
         );
 
         // Buttons.
-        $this->model->add_action_buttons();
+        $this->model->add_action_buttons(true, get_string('savestagechanges', 'totara_appraisal'));
     }
 
     protected function validation(array $data, array $files) {

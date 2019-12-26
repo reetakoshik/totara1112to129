@@ -41,7 +41,7 @@ $component = $plan->get_component($componentname);
 $fullname = $plan->name;
 $pagetitle = format_string(get_string('learningplan', 'totara_plan').': '.$fullname);
 dp_get_plan_base_navlinks($plan->userid);
-$PAGE->navbar->add($fullname, new moodle_url('/totara/plan/view.php', array('id' => $planid)));
+$PAGE->navbar->add($fullname, new moodle_url('/totara/plan/view.php', array('id' => $plan->id)));
 $PAGE->navbar->add(get_string($component->component, 'totara_plan'), $component->get_url());
 $PAGE->navbar->add(get_string('assessitem', 'totara_plan'));
 
@@ -54,7 +54,5 @@ print $plan->display_plan_message_box();
 echo $OUTPUT->heading($fullname);
 
 print $plan->display_tabs($componentname);
-
-print $component->display_back_to_index_link();
 
 echo $OUTPUT->footer();

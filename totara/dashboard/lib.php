@@ -115,6 +115,12 @@ class totara_dashboard {
             return array();
         }
 
+        //Create a cache to store user dashbaords
+        $cache = cache::make_from_params(cache_store::MODE_REQUEST, 'totara_core', 'dashboard');
+        if ($cache->has('user_' . $userid)) {
+            return $cache->get('user_' . $userid);
+        }
+
         // Get user cohorts.
         $cohortsql = '1 = 0';
         $cohortsparams = array();
@@ -131,7 +137,9 @@ class totara_dashboard {
                   AND td.published > 0
                 ORDER BY td.sortorder
                ";
-        return $DB->get_records_sql($sql, $cohortsparams);
+        $results = $DB->get_records_sql($sql, $cohortsparams);
+        $cache->set('user_' . $userid, $results);
+        return $results;
     }
 
     /**
@@ -440,6 +448,7 @@ class totara_dashboard {
                 $block->defaultregion = $bi->defaultregion;
                 $block->defaultweight = $bi->defaultweight;
                 $block->configdata = $bi->configdata;
+                $block->common_config = $bi->common_config;
                 // Create the new block record.
                 $block->id = $DB->insert_record('block_instances', $block);
 
@@ -678,5 +687,9 @@ function totara_dashboard_page_type_list($pagetype, $parentcontext, $currentcont
     if (strpos($pagetype, 'totara-dashboard-') === 0) {
         $result[$pagetype] = get_string('pagetype-this-dashboard', 'totara_dashboard');
     }
+
+    // Allow block to be changed back to 'Any page'
+    $result['*'] = get_string('page-x', 'pagetype');
+
     return $result;
 }

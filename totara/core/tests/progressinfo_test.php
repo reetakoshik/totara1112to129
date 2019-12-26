@@ -23,7 +23,7 @@
  * @package    totara_core
  */
 
-namespace totara_core;
+namespace totara_core\progressinfo;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -35,20 +35,27 @@ class totara_core_progressinfo_testcase extends \advanced_testcase {
     public function test_from_data() {
         $progressinfo = progressinfo::from_data(progressinfo::AGGREGATE_ANY, 1, 0.55, 'customdata');
 
-        $this->assertInstanceOf('\totara_core\progressinfo', $progressinfo);
+        $this->assertInstanceOf('\totara_core\progressinfo\progressinfo', $progressinfo);
         $this->assertSame(progressinfo::AGGREGATE_ANY, $progressinfo->get_agg_method());
         $this->assertSame(1, $progressinfo->get_weight());
         $this->assertSame(0.55, $progressinfo->get_score());
         $this->assertSame('customdata', $progressinfo->get_customdata());
+        $this->assertSame('', $progressinfo->get_agg_class());
         $this->assertCount(0, $progressinfo->get_all_criteria());
+
+        $progressinfo = progressinfo::from_data(progressinfo::AGGREGATE_ANY, 1, 0.55,
+            'customdata', '\totara_core\progressinfo\progressinfo_aggregate_all');
+        $this->assertSame('\totara_core\progressinfo\progressinfo_aggregate_all', $progressinfo->get_agg_class());
     }
 
     public function test_from_data_multilevel() {
         $progressinfo = progressinfo::from_data(progressinfo::AGGREGATE_ANY, 1, 0.55, 'customdata');
-        $progressinfo->add_criteria(3, progressinfo::AGGREGATE_ALL, 2, 0.66, ['key' => 'subkey', 'value' => 'subvalue']);
+
+        $progressinfo->add_criteria(3, progressinfo::AGGREGATE_ALL, 2, 0.66,
+            ['key' => 'subkey', 'value' => 'subvalue'], '\totara_core\progressinfo\progressinfo_aggregate_all');
         $progressinfo->add_criteria(1, progressinfo::AGGREGATE_ANY, 5, 0.44, '', '');
 
-        $this->assertInstanceOf('\totara_core\progressinfo', $progressinfo);
+        $this->assertInstanceOf('\totara_core\progressinfo\progressinfo', $progressinfo);
         $this->assertSame(progressinfo::AGGREGATE_ANY, $progressinfo->get_agg_method());
         $this->assertSame(1, $progressinfo->get_weight());
         $this->assertSame(0.55, $progressinfo->get_score());
@@ -56,27 +63,30 @@ class totara_core_progressinfo_testcase extends \advanced_testcase {
         $this->assertCount(2, $progressinfo->get_all_criteria());
 
         $subprogressinfo = $progressinfo->get_criteria(3);
-        $this->assertInstanceOf('\totara_core\progressinfo', $subprogressinfo);
+        $this->assertInstanceOf('\totara_core\progressinfo\progressinfo', $subprogressinfo);
         $this->assertSame(progressinfo::AGGREGATE_ALL, $subprogressinfo->get_agg_method());
         $this->assertSame(2, $subprogressinfo->get_weight());
         $this->assertSame(0.66, $subprogressinfo->get_score());
         $this->assertSame(['key' => 'subkey', 'value' => 'subvalue'], $subprogressinfo->get_customdata());
+        $this->assertSame('\totara_core\progressinfo\progressinfo_aggregate_all', $subprogressinfo->get_agg_class());
         $this->assertCount(0, $subprogressinfo->get_all_criteria());
 
         $subprogressinfo = $progressinfo->get_criteria('3');
-        $this->assertInstanceOf('\totara_core\progressinfo', $subprogressinfo);
+        $this->assertInstanceOf('\totara_core\progressinfo\progressinfo', $subprogressinfo);
         $this->assertSame(progressinfo::AGGREGATE_ALL, $subprogressinfo->get_agg_method());
         $this->assertSame(2, $subprogressinfo->get_weight());
         $this->assertSame(0.66, $subprogressinfo->get_score());
         $this->assertSame(['key' => 'subkey', 'value' => 'subvalue'], $subprogressinfo->get_customdata());
+        $this->assertSame('\totara_core\progressinfo\progressinfo_aggregate_all', $subprogressinfo->get_agg_class());
         $this->assertCount(0, $subprogressinfo->get_all_criteria());
 
         $subprogressinfo = $progressinfo->get_criteria(1);
-        $this->assertInstanceOf('\totara_core\progressinfo', $subprogressinfo);
+        $this->assertInstanceOf('\totara_core\progressinfo\progressinfo', $subprogressinfo);
         $this->assertSame(progressinfo::AGGREGATE_ANY, $subprogressinfo->get_agg_method());
         $this->assertSame(5, $subprogressinfo->get_weight());
         $this->assertSame(0.44, $subprogressinfo->get_score());
         $this->assertNull($subprogressinfo->get_customdata());
+        $this->assertSame('', $subprogressinfo->get_agg_class());
         $this->assertCount(0, $subprogressinfo->get_all_criteria());
     }
 
@@ -84,11 +94,12 @@ class totara_core_progressinfo_testcase extends \advanced_testcase {
         $progressinfo = progressinfo::from_data(progressinfo::AGGREGATE_ANY, 1, 0.55, 'customdata');
 
         $cachedata = $progressinfo->prepare_to_cache();
-        $this->assertInternalType('array', $cachedata);
+        $this->assertIsArray($cachedata);
         $this->assertSame(progressinfo::AGGREGATE_ANY, $cachedata['agg_method']);
         $this->assertSame(1, $cachedata['weight']);
         $this->assertSame(0.55, $cachedata['score']);
         $this->assertSame('customdata', $cachedata['customdata']);
+        $this->assertSame('', $cachedata['agg_class']);
         $this->assertCount(0, $cachedata['criteria']);
 
         $progressinfo = progressinfo::wake_from_cache($cachedata);
@@ -96,52 +107,59 @@ class totara_core_progressinfo_testcase extends \advanced_testcase {
         $this->assertSame(1, $progressinfo->get_weight());
         $this->assertSame(0.55, $progressinfo->get_score());
         $this->assertSame('customdata', $progressinfo->get_customdata());
+        $this->assertSame('', $progressinfo->get_agg_class());
         $this->assertCount(0, $progressinfo->get_all_criteria());
     }
 
     public function test_from_data_caching_multilevel() {
         $progressinfo = progressinfo::from_data(progressinfo::AGGREGATE_ANY, 1, 0.55, 'customdata');
-        $progressinfo->add_criteria(3, progressinfo::AGGREGATE_ALL, 2, 0.66, ['key' => 'subkey', 'value' => 'subvalue']);
+        $progressinfo->add_criteria(3, progressinfo::AGGREGATE_ALL, 2, 0.66,
+            ['key' => 'subkey', 'value' => 'subvalue'], '\totara_core\progressinfo\progressinfo_aggregate_all');
         $progressinfo->add_criteria(1, progressinfo::AGGREGATE_ANY, 5, 0.44, '', '');
 
         $cachedata = $progressinfo->prepare_to_cache();
-        $this->assertInternalType('array', $cachedata);
+        $this->assertIsArray($cachedata);
         $this->assertSame(progressinfo::AGGREGATE_ANY, $cachedata['agg_method']);
         $this->assertSame(1, $cachedata['weight']);
         $this->assertSame(0.55, $cachedata['score']);
         $this->assertSame('customdata', $cachedata['customdata']);
+        $this->assertSame('', $cachedata['agg_class']);
         $this->assertCount(2, $cachedata['criteria']);
 
         $progressinfo = progressinfo::wake_from_cache($cachedata);
-        $this->assertInstanceOf('\totara_core\progressinfo', $progressinfo);
+        $this->assertInstanceOf('\totara_core\progressinfo\progressinfo', $progressinfo);
         $this->assertSame(progressinfo::AGGREGATE_ANY, $progressinfo->get_agg_method());
         $this->assertSame(1, $progressinfo->get_weight());
         $this->assertSame(0.55, $progressinfo->get_score());
         $this->assertSame('customdata', $progressinfo->get_customdata());
+        $this->assertSame('', $progressinfo->get_agg_class());
         $this->assertCount(2, $progressinfo->get_all_criteria());
 
         $subprogressinfo = $progressinfo->get_criteria(3);
-        $this->assertInstanceOf('\totara_core\progressinfo', $subprogressinfo);
+        $this->assertInstanceOf('\totara_core\progressinfo\progressinfo', $subprogressinfo);
         $this->assertSame(progressinfo::AGGREGATE_ALL, $subprogressinfo->get_agg_method());
         $this->assertSame(2, $subprogressinfo->get_weight());
         $this->assertSame(0.66, $subprogressinfo->get_score());
         $this->assertSame(['key' => 'subkey', 'value' => 'subvalue'], $subprogressinfo->get_customdata());
+        $this->assertSame('\totara_core\progressinfo\progressinfo_aggregate_all', $subprogressinfo->get_agg_class());
         $this->assertCount(0, $subprogressinfo->get_all_criteria());
 
         $subprogressinfo = $progressinfo->get_criteria('3');
-        $this->assertInstanceOf('\totara_core\progressinfo', $subprogressinfo);
+        $this->assertInstanceOf('\totara_core\progressinfo\progressinfo', $subprogressinfo);
         $this->assertSame(progressinfo::AGGREGATE_ALL, $subprogressinfo->get_agg_method());
         $this->assertSame(2, $subprogressinfo->get_weight());
         $this->assertSame(0.66, $subprogressinfo->get_score());
         $this->assertSame(['key' => 'subkey', 'value' => 'subvalue'], $subprogressinfo->get_customdata());
+        $this->assertSame('\totara_core\progressinfo\progressinfo_aggregate_all', $subprogressinfo->get_agg_class());
         $this->assertCount(0, $subprogressinfo->get_all_criteria());
 
         $subprogressinfo = $progressinfo->get_criteria(1);
-        $this->assertInstanceOf('\totara_core\progressinfo', $subprogressinfo);
+        $this->assertInstanceOf('\totara_core\progressinfo\progressinfo', $subprogressinfo);
         $this->assertSame(progressinfo::AGGREGATE_ANY, $subprogressinfo->get_agg_method());
         $this->assertSame(5, $subprogressinfo->get_weight());
         $this->assertSame(0.44, $subprogressinfo->get_score());
         $this->assertNull($subprogressinfo->get_customdata());
+        $this->assertSame('', $subprogressinfo->get_agg_class());
         $this->assertCount(0, $subprogressinfo->get_all_criteria());
     }
 
@@ -158,5 +176,16 @@ class totara_core_progressinfo_testcase extends \advanced_testcase {
         $this->expectException('\coding_exception');
         $verify_info->add_criteria(4,
             progressinfo::AGGREGATE_ALL, 0, 0);
+    }
+
+    /**
+     * Test invalid aggragation class exection
+     */
+    public function test_invalid_agg_class_execption() {
+        $this->resetAfterTest(true);
+
+        $this->expectException('\coding_exception');
+        $verify_info = progressinfo::from_data(progressinfo::AGGREGATE_ANY, 1, 0.55, 'customdata', 'notexistingclassname');
+        $verify_info = progressinfo::from_data(progressinfo::AGGREGATE_ANY, 1, 0.55, 'customdata', 'totara_core\progressinfo\progressinfo');
     }
 }

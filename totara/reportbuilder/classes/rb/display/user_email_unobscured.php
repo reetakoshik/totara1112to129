@@ -26,9 +26,6 @@ namespace totara_reportbuilder\rb\display;
 /**
  * Displays email text on a reportbuilder generated report.
  *
- * Note: this replaces the global rb_display_user_email_unobscured() function
- * which has now been deprecated.
- *
  * @author Murali Nair <murali.nair@totaralms.com>
  * @package totara_reportbuilder
  */
@@ -47,14 +44,7 @@ class user_email_unobscured extends base {
             return s($value);
         }
 
-        // In reality, format_text() should not be called here since emails do
-        // not need any such processing. However, the call still remains because
-        // it was in the totara_reportbuilder\rb\display\legacy class originally
-        // handling email text and removing the call could break existing sites.
-        $opts = ['filter' => false];
-        $email = format_text($value, FORMAT_HTML, $opts);
-
-        return obfuscate_mailto($email);
+        return obfuscate_mailto($value);
     }
 
     public static function is_graphable(\rb_column $column, \rb_column_option $option, \reportbuilder $report) {

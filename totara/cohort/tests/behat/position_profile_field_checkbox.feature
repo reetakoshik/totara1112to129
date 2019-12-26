@@ -39,7 +39,7 @@ Feature: Test audience with position checkbox profile field.
   Scenario: Test position with checked checkbox and audience with checked checkox.
     Given I log in as "admin"
     # Navigate to Audiences.
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Audience 1"
     And I switch to "Rule sets" tab
     # Add a rule set.
@@ -57,7 +57,7 @@ Feature: Test audience with position checkbox profile field.
   Scenario: Test position with checked checkbox and audience with unchecked checkox.
     Given I log in as "admin"
     # Navigate to Audiences.
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Audience 1"
     And I switch to "Rule sets" tab
     # Add a rule set.
@@ -72,14 +72,14 @@ Feature: Test audience with position checkbox profile field.
   @javascript
   Scenario: Test position with unchecked checkbox and audience with checked checkbox.
     Given I log in as "admin"
-    And I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    And I navigate to "Manage positions" node in "Site administration > Positions"
     And I follow "Position FW"
     And I should see "Position"
     Then I follow "Edit"
     And I click on "Position type checkbox" "checkbox"
     Then I click on "Save changes" "button"
     # Navigate to Audiences.
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Audience 1"
     And I switch to "Rule sets" tab
     # Add a rule set.
@@ -96,14 +96,14 @@ Feature: Test audience with position checkbox profile field.
   @javascript
   Scenario: Test position with unchecked checkbox and auidence with unchecked checkbox.
     Given I log in as "admin"
-    And I navigate to "Manage positions" node in "Site administration > Hierarchies > Positions"
+    And I navigate to "Manage positions" node in "Site administration > Positions"
     And I follow "Position FW"
     And I should see "Position"
     Then I follow "Edit"
     And I click on "Position type checkbox" "checkbox"
     Then I click on "Save changes" "button"
     # Navigate to Audiences.
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Audience 1"
     And I switch to "Rule sets" tab
     # Add a rule set.

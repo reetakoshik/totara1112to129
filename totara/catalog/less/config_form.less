@@ -1,0 +1,65 @@
+//
+// This file is part of Totara Learn
+//
+// Copyright (C) 2018 onwards Totara Learning Solutions LTD
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// @copyright 2018 onwards Totara Learning Solutions LTD
+// @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+// @author    Matthias Bonk <matthias.bonk@totaralearning.com>
+// @package   theme_roots
+
+.totara_catalog_admin_config_form {
+    .totara_catalog_group_row_collection {
+        margin-left: 0;
+        margin-top: 20px;
+        text-align: left;
+    }
+
+    .totara_catalog_group_row_collection div {
+        display: inline;
+    }
+
+    // Remove margin-bottom for the "Browse menu" radios
+    [data-element-id=tfiid_browse_by_general] .totara_form_element_radios {
+        margin-bottom: 0;
+    }
+
+    // Remove margin-bottom for the "Featured Learning" checkbox
+    [data-element-id=tfiid_featured_learning_enabled_general] .totara_form_element_checkbox {
+        margin-bottom: 0;
+    }
+
+    // Remove margin-bottom for the "Featured Learning Source" select
+    [data-element-id="tfiid_featured_learning_source_general"] .totara_form_element_select {
+        margin-bottom: 0;
+    }
+
+    input[name="submitbutton"] {
+        .btn-primary;
+    }
+
+    .totara_form_element_checkbox .tf_element_input {
+        float: none;
+    }
+
+    .totara_form_element_select select {
+        min-width: 160px;
+    }
+
+    .totara_form_option_invisible {
+        display: none;
+    }
+}

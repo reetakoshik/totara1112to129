@@ -29,4 +29,11 @@
         <license>MIT</license>
         <version>1.8.0</version>
     </library>
+    <library>
+        <location>slick</location>
+        <location>amd/src/slick.js</location>
+        <name>Slick</name>
+        <license>MIT</license>
+        <version>1.8.0</version>
+    </library>
 </libraries>

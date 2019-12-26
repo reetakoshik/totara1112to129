@@ -220,6 +220,12 @@ class customfield_menu extends customfield_base {
      * @return string The formatted text for display.
      */
     public static function display_item_data($data, $extradata=array()) {
+
+        // Export - return raw value
+        if (!empty($extradata['isexport'])) {
+            return $data;
+        }
+
         if (empty($data)) {
             return get_string('readonlyemptyfield', 'totara_customfield');
         } else {

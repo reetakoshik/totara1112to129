@@ -76,30 +76,6 @@ trait report_schedule_trait {
         $join = $this->reportschedulejoin;
 
         $this->joinlist[] = new \rb_join(
-            'schedule_recipient_audience',
-            'LEFT',
-            '{report_builder_schedule_email_audience}',
-            "{$join}.id = schedule_recipient_audience.scheduleid",
-            REPORT_BUILDER_RELATION_ONE_TO_MANY,
-            $join
-        );
-        $this->joinlist[] = new \rb_join(
-            'schedule_recipient_systemuser',
-            'LEFT',
-            '{report_builder_schedule_email_systemuser}',
-            "{$join}.id = schedule_recipient_systemuser.scheduleid",
-            REPORT_BUILDER_RELATION_ONE_TO_MANY,
-            $join
-        );
-        $this->joinlist[] = new \rb_join(
-            'schedule_recipient_external',
-            'LEFT',
-            '{report_builder_schedule_email_external}',
-            "{$join}.id = schedule_recipient_external.scheduleid",
-            REPORT_BUILDER_RELATION_ONE_TO_MANY,
-            $join
-        );
-        $this->joinlist[] = new \rb_join(
             'moduser',
             'LEFT',
             '{user}',
@@ -174,38 +150,51 @@ trait report_schedule_trait {
                 'joins' => $join,
             ]
         );
+
+        $from = "FROM {report_builder_schedule_email_audience} schedule_recipient_audience
+                 JOIN {cohort} cohort ON cohort.id = schedule_recipient_audience.cohortid
+                WHERE {$join}.id = schedule_recipient_audience.scheduleid";
+        $concat = $DB->sql_group_concat('schedule_recipient_audience.cohortid', ',', 'cohort.name ASC');
         $this->columnoptions[] = new \rb_column_option(
             'schedule',
             'schedule_audience',
             get_string('schedule_audience', 'rb_source_scheduled_reports'),
-            "schedule_recipient_audience.cohortid",
+            "(SELECT $concat $from)",
             [
                 'displayfunc' => 'report_schedule_audiences',
-                'grouping' => 'comma_list_unique',
-                'joins' => 'schedule_recipient_audience',
                 'capability' => ['moodle/cohort:view'],
+                'iscompound' => true,
+                'issubquery' => true,
             ]
         );
+        $from = "FROM {report_builder_schedule_email_systemuser} schedule_recipient_systemuser
+                 JOIN {user} u ON u.id = schedule_recipient_systemuser.userid AND u.deleted = 0
+                WHERE {$join}.id = schedule_recipient_systemuser.scheduleid";
+        $concat = $DB->sql_group_concat('schedule_recipient_systemuser.userid', ',', 'u.lastname ASC, u.firstname ASC');
         $this->columnoptions[] = new \rb_column_option(
             'schedule',
             'schedule_systemuser',
             get_string('schedule_systemuser', 'rb_source_scheduled_reports'),
-            "schedule_recipient_systemuser.userid",
+            "(SELECT $concat $from)",
             [
                 'displayfunc' => 'report_schedule_systemusers',
-                'grouping' => 'comma_list_unique',
-                'joins' => 'schedule_recipient_systemuser',
                 'capability' => ['moodle/user:viewdetails'],
+                'iscompound' => true,
+                'issubquery' => true,
             ]
         );
+        $from = "FROM {report_builder_schedule_email_external} schedule_recipient_external
+                WHERE {$join}.id = schedule_recipient_external.scheduleid";
+        $concat = $DB->sql_group_concat('schedule_recipient_external.email', ',', 'schedule_recipient_external.email ASC');
         $this->columnoptions[] = new \rb_column_option(
             'schedule',
             'schedule_external',
             get_string('schedule_external', 'rb_source_scheduled_reports'),
-            "schedule_recipient_external.email",
+            "(SELECT $concat $from)",
             [
-                'grouping' => 'list_unique',
-                'joins' => 'schedule_recipient_external'
+                'displayfunc' => 'plaintext',
+                'iscompound' => true,
+                'issubquery' => true,
             ]
         );
         $this->columnoptions[] = new \rb_column_option(

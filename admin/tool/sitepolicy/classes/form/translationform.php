@@ -57,19 +57,28 @@ class translationform extends form {
         $model->add(new hidden('policyversionid', PARAM_INT));
 
         // Edit section
+        /** @var section $editsection */
         $editsection = $this->model->add(new section('edit_translation', ''));
         $editsection->set_collapsible(false);
         $editsection->set_expanded(true);
 
-        $editsection->add(new static_html('primarytitle', '&nbsp;', $this->parameters['primarytitle']));
+        /** @var static_html $primarytitle */
+        $primarytitle = $editsection->add(new static_html('primarytitle', '&nbsp;', $this->parameters['primarytitle']));
+        if ($this->parameters['preformatted']) {
+            $primarytitle->set_allow_xss(true);
+        }
 
+        /** @var text $policytitle */
         $policytitle = $editsection->add(new text('title', get_string('policytitle', 'tool_sitepolicy'), PARAM_TEXT));
         $policytitle->set_attribute('size', 1335);
         $policytitle->set_attribute('required', true);
 
-        $format = $this->parameters['primarypolicytextformat'] ?? FORMAT_HTML;
-        $primarypolicy = $editsection->add(new static_html('primarypolicytext', '&nbsp;',
-            '<div class="primarypolicybox">' . \format_text($this->parameters['primarypolicytext'], $format) . '</div>'));
+        /** @var static_html $primarypolicy */
+        $primarypolicy = $editsection->add(new static_html('primarypolicytext', '&nbsp;', '<div class="primarypolicybox">' . $this->parameters['primarypolicytext'] . '</div>'));
+        if ($this->parameters['preformatted']) {
+            $primarypolicy->set_allow_xss(true);
+        }
+        /** @var editor $policyeditor */
         $policyeditor = $editsection->add(new editor('policytext', get_string('policystatement', 'tool_sitepolicy')));
         $policyeditor->set_attributes(['rows' => 20, 'required' => true]);
 
@@ -80,13 +89,17 @@ class translationform extends form {
         $model->add_clientaction(new hidden_if($editsection))->not_empty($previewfield);
 
         if ($this->parameters['versionnumber'] > 1) {
+            /** @var section $whatschangedsection */
             $whatschangedsection = $model->add(new section('whatschanged', get_string('policyversionwhatschanged', 'tool_sitepolicy')));
             $whatschangedsection->set_collapsible(true);
             $whatschangedsection->set_expanded(true);
 
-            $format = $this->parameters['primarywhatsnewformat'] ?? FORMAT_HTML;
-            $primarywhatsnew = $whatschangedsection->add(new static_html('primarywhatsnew', '&nbsp;',
-                '<div class="primarypolicybox">' . \format_text($this->parameters['primarywhatsnew'], $format) . '</div>'));
+            /** @var static_html $primarywhatsnew */
+            $primarywhatsnew = $whatschangedsection->add(new static_html('primarywhatsnew', '&nbsp;', '<div class="primarypolicybox">' . $this->parameters['primarywhatsnew'] . '</div>'));
+            if ($this->parameters['preformatted']) {
+                $primarywhatsnew->set_allow_xss(true);
+            }
+            /** @var editor $policywhatsnew */
             $policywhatsnew = $whatschangedsection->add(new editor('whatsnew', get_string('policyversionchanges', 'tool_sitepolicy')));
             $policywhatsnew->set_attributes(['rows' => 5]);
 
@@ -94,6 +107,7 @@ class translationform extends form {
         }
 
         // Preview section
+        /** @var section $previewsection */
         $previewsection = $this->model->add(new section('preview_translation', ''));
         $previewsection->set_collapsible(false);
         $previewsection->set_expanded(true);
@@ -222,7 +236,7 @@ class translationform extends form {
             'policytext' => $localisedpolicy->get_policytext(false),
             'policytextformat' => (string) $localisedpolicy->get_policytextformat(),
             'statements' => $options,
-            'whatsnew' => $localisedpolicy->get_whatsnew(),
+            'whatsnew' => $localisedpolicy->get_whatsnew(false),
             'whatsnewformat' => (string) $localisedpolicy->get_whatsnewformat(),
             'preview' => '',
         ];
@@ -230,12 +244,10 @@ class translationform extends form {
         $params = [
             // Pass primary values as parameters
             'versionnumber' => $primarypolicy->get_policyversion()->get_versionnumber(),
-            'primarylanguage' => $primarypolicy->get_language(false),
-            'primarytitle' => $primarypolicy->get_title(false),
-            'primarypolicytext' => $primarypolicy->get_policytext(false),
-            'primarypolicytextformat' => (string) $primarypolicy->get_policytextformat(),
+            'primarytitle' => $primarypolicy->get_title(),
+            'primarypolicytext' => $primarypolicy->get_policytext(),
             'primarywhatsnew' => $primarypolicy->get_whatsnew(),
-            'primarywhatsnewformat' => (string) $primarypolicy->get_whatsnewformat(),
+            'preformatted' => true,
         ];
         return [$currentdata, $params];
     }

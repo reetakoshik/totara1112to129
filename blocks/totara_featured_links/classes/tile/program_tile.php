@@ -31,10 +31,12 @@ require_once($CFG->dirroot . '/totara/program/program.class.php');
  * @package block_totara_featured_links\tile
  */
 class program_tile extends learning_item_tile {
-    protected $used_fields = ['programid', // Int The id of the program that the tile links to.
+    protected $used_fields = [
+        'programid', // Int The id of the program that the tile links to.
         'background_color', // String The hex value of the background color.
         'heading_location', // String Where the heading is located 'top' or 'bottom'.
-        'progressbar'];
+        'progressbar'
+    ];
 
     /** @var string Class for the visibility form */
     protected $visibility_form = '\block_totara_featured_links\tile\program_form_visibility';
@@ -55,7 +57,7 @@ class program_tile extends learning_item_tile {
      *
      * @return string
      */
-    public static function get_name() {
+    public static function get_name(): string {
         return get_string('program_name', 'block_totara_featured_links');
     }
 
@@ -66,7 +68,7 @@ class program_tile extends learning_item_tile {
      * {@inheritdoc}
      * @return \stdClass
      */
-    public function get_content_form_data() {
+    public function get_content_form_data(): \stdClass {
         $dataobj = parent::get_content_form_data();
         if (!empty($this->get_program())) {
             $dataobj->program_name = $this->get_program()->fullname;
@@ -86,10 +88,10 @@ class program_tile extends learning_item_tile {
      * {@inheritdoc}
      * @return array
      */
-    protected function get_content_template_data () {
+    protected function get_content_template_data(): array {
         global $USER;
         if (empty($this->get_program())) {
-            return null;
+            return [];
         }
         if (isset($this->data->progressbar) && $this->data->progressbar == '1') {
             $progressbar = prog_display_progress($this->data->programid, $USER->id);
@@ -97,8 +99,9 @@ class program_tile extends learning_item_tile {
             $progressbar = false;
         }
         $data = parent::get_content_template_data();
-        $data['heading'] = $this->get_program()->fullname;
+        $data['heading'] = format_string($this->get_program()->fullname);
         $data['progress_bar'] = $progressbar;
+
         return $data;
     }
 
@@ -109,11 +112,19 @@ class program_tile extends learning_item_tile {
      * @param \renderer_base $renderer
      * @return array
      */
-    protected function get_content_wrapper_template_data(\renderer_base $renderer) {
+    protected function get_content_wrapper_template_data(\renderer_base $renderer, array $settings = []): array {
         global $CFG;
-        $data = parent::get_content_wrapper_template_data($renderer);
+        $data = parent::get_content_wrapper_template_data($renderer, $settings);
         if (!empty($this->get_program())) {
-            $data['url'] = $CFG->wwwroot.'/totara/program/view.php?id='.$this->get_program()->id;
+            $programid = $this->get_program()->id;
+            $data['url'] = $CFG->wwwroot.'/totara/program/view.php?id='.$programid;
+            $data['background_img'] = false;
+
+            // Get program tile image to use it as background.
+            $image = $this->get_program()->get_image($programid);
+            if ($image) {
+                $data['background_img'] = $image;
+            }
         }
         return $data;
     }
@@ -123,7 +134,7 @@ class program_tile extends learning_item_tile {
      *
      * @param \stdClass $data
      */
-    public function save_content_tile($data) {
+    public function save_content_tile($data): void {
         if (isset($data->program_name_id)) {
             $this->data->programid = $data->program_name_id;
         }
@@ -135,7 +146,7 @@ class program_tile extends learning_item_tile {
      *
      * @return bool
      */
-    protected function user_can_view_content() {
+    protected function user_can_view_content(): bool {
         return boolval($this->get_program());
     }
 
@@ -164,8 +175,9 @@ class program_tile extends learning_item_tile {
      * {@inheritdoc}
      * @return array
      */
-    public function get_accessibility_text() {
-        return ['sr-only' => get_string('program_sr-only',
+    public function get_accessibility_text(): array {
+        return [
+            'sr-only' => get_string('program_sr-only',
             'block_totara_featured_links',
             $this->get_program() ? $this->get_program()->fullname : '')
         ];
@@ -178,7 +190,7 @@ class program_tile extends learning_item_tile {
      *
      * @return string of text shown if a tile is hidden but being viewed in edit mode.
      */
-    protected function get_hidden_text() {
+    protected function get_hidden_text(): string {
         if (empty($this->get_program())) {
             return get_string('program_has_been_deleted', 'block_totara_featured_links');
         } else {

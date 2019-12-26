@@ -57,6 +57,7 @@ function theme_basis_process_css($css, $theme) {
         'linkvisitedcolor' => css_processor::$DEFAULT_LINKVISITEDCOLOR,
         'headerbgc'        => css_processor::$DEFAULT_HEADERBGC,
         'buttoncolor'      => css_processor::$DEFAULT_BUTTONCOLOR,
+        'primarybuttoncolor'      => css_processor::$DEFAULT_PRIMARYBUTTONCOLOR,
     );
 
     // These default values do not have programmatic variants.
@@ -64,6 +65,7 @@ function theme_basis_process_css($css, $theme) {
         'contentbackground' => css_processor::$DEFAULT_CONTENTBACKGROUND,
         'bodybackground'    => css_processor::$DEFAULT_BODYBACKGROUND,
         'textcolor'         => css_processor::$DEFAULT_TEXTCOLOR,
+        'navtextcolor'      => css_processor::$DEFAULT_NAVTEXTCOLOR,
     );
 
     foreach (array_values($replacements) as $i => $replacement) {
@@ -101,4 +103,17 @@ function theme_basis_pluginfile($course, $cm, $context, $filearea, $args, $force
     }
 
     send_file_not_found();
+}
+
+/**
+ * Returns the URL of the favicon if available.
+ *
+ * @param theme_config $theme
+ * @return string|null
+ */
+function theme_basis_resolve_favicon($theme) {
+    if (!empty($theme->settings->favicon)) {
+        return $theme->setting_file_url('favicon', 'favicon');
+    }
+    return null;
 }

@@ -74,7 +74,7 @@ $systemcontext = context_system::instance();
 $PAGE->set_context($systemcontext);
 
 // Set up the highlighted menu (My Team or My Appraisal) and base breadcrumb.
-$PAGE->set_totara_menu_selected('appraisals');
+$PAGE->set_totara_menu_selected('\totara_appraisal\totara\menu\appraisal');
 if ($role == appraisal::ROLE_LEARNER) {
     $pageurl = new moodle_url('/totara/appraisal/index.php');
     $PAGE->navbar->add(get_string('myappraisals', 'totara_appraisal'), $pageurl);

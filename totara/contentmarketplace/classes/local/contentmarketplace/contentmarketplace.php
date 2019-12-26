@@ -129,7 +129,7 @@ abstract class contentmarketplace {
         if (file_exists($logo)) {
             // No need to screen variables here; html_writer takes care of it.
             return \html_writer::img(
-                $PAGE->theme->pix_url('logo', $this->get_plugin_name()),
+                $PAGE->theme->image_url('logo', $this->get_plugin_name()),
                 $this->name,
                 array('width' => $width, 'title' => $this->fullname, 'alt' => $this->fullname)
             );

@@ -25,9 +25,10 @@ require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/mod/facetoface/lib.php');
 
-$delete = optional_param('delete', 0, PARAM_INT);
-$show = optional_param('show', 0, PARAM_INT);
-$hide = optional_param('hide', 0, PARAM_INT);
+use mod_facetoface\asset;
+
+$id = optional_param('id', 0, PARAM_INT);
+$action = optional_param('action', '', PARAM_ALPHA);
 $confirm = optional_param('confirm', 0, PARAM_BOOL);
 $debug = optional_param('debug', 0, PARAM_INT);
 
@@ -36,57 +37,61 @@ admin_externalpage_setup('modfacetofaceassets');
 
 $returnurl = new moodle_url('/admin/settings.php', array('section' => 'modsettingfacetoface'));
 
-$report = reportbuilder_get_embedded_report('facetoface_assets', array(), false, 0);
+$report = reportbuilder::create_embedded('facetoface_assets');
 $redirectto = new moodle_url('/mod/facetoface/asset/manage.php', $report->get_current_url_params());
 
 // Handle actions.
-if ($delete) {
-    if (!$asset = $DB->get_record('facetoface_asset', array('id' => $delete, 'custom' => 0))) {
-        return($returnurl);
+if ($action === 'delete') {
+    if (empty($id)) {
+        print_error('error:assetdoesnotexist', 'facetoface', $returnurl);
     }
 
-    $assetinuse = $DB->count_records('facetoface_asset_dates', array('assetid' => $delete));
-    if ($assetinuse) {
+    $asset = new asset($id);
+
+    if ($asset->is_used()) {
         print_error('error:assetisinuse', 'facetoface', $returnurl);
     }
 
     if (!$confirm) {
         echo $OUTPUT->header();
-        $confirmurl = new moodle_url($redirectto, array('delete' => $delete, 'confirm' => 1, 'sesskey' => sesskey()));
-        echo $OUTPUT->confirm(get_string('deleteassetconfirm', 'facetoface', format_string($asset->name)), $confirmurl, $redirectto);
+        $confirmurl = new moodle_url($redirectto, array('action' => $action, 'id' => $id, 'confirm' => 1, 'sesskey' => sesskey()));
+        echo $OUTPUT->confirm(get_string('deleteassetconfirm', 'facetoface', format_string($asset->get_name())), $confirmurl, $redirectto);
         echo $OUTPUT->footer();
         die;
     }
 
     require_sesskey();
-    facetoface_delete_asset($delete);
+    $asset->delete();
+    unset($asset);
 
     totara_set_notification(get_string('assetdeleted', 'facetoface'), $redirectto, array('class' => 'notifysuccess'));
 
-} else if ($show) {
-
-    require_sesskey();
-    if (!$asset = $DB->get_record('facetoface_asset', array('id' => $show, 'custom' => 0))) {
+} else if ($action === 'show') {
+    if (empty($id)) {
         print_error('error:assetdoesnotexist', 'facetoface', $returnurl);
     }
 
-    $DB->update_record('facetoface_asset', array('id' => $show, 'hidden' => 0));
+    require_sesskey();
+    $asset = new asset($id);
+    $asset->show();
+    $asset->save();
 
     totara_set_notification(get_string('assetshown', 'facetoface'), $redirectto, array('class' => 'notifysuccess'));
 
-} else if ($hide) {
-
-    require_sesskey();
-    if (!$asset = $DB->get_record('facetoface_asset', array('id' => $hide, 'custom' => 0))) {
+} else if ($action === 'hide') {
+    if (empty($id)) {
         print_error('error:assetdoesnotexist', 'facetoface', $returnurl);
     }
 
-    $DB->update_record('facetoface_asset', array('id' => $hide, 'hidden' => 1));
+    require_sesskey();
+    $asset = new asset($id);
+    $asset->hide();
+    $asset->save();
 
     totara_set_notification(get_string('assethidden', 'facetoface'), $redirectto, array('class' => 'notifysuccess'));
 }
 
-$PAGE->set_button($report->edit_button());
+$PAGE->set_button($report->edit_button() . $PAGE->button);
 /** @var totara_reportbuilder_renderer $reportrenderer */
 $reportrenderer = $PAGE->get_renderer('totara_reportbuilder');
 

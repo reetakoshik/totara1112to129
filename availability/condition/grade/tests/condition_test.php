@@ -30,6 +30,7 @@ use availability_grade\condition;
  * Unit tests for the grade condition.
  *
  * @package availability_grade
+ * @group availability
  * @copyright 2014 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

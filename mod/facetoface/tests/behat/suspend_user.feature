@@ -20,8 +20,7 @@ Feature: Suspend user in different session times
   @javascript
   Scenario: Create sessions with different dates and add users to a face to face sessions
     Given I log in as "admin"
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
 
     # Session in the fututre
@@ -142,12 +141,11 @@ Feature: Suspend user in different session times
     And I click on "Go back" "link"
 
     # Suspend Sam1 Student1 user
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "Suspend Sam1 Student1" "link" in the "Sam1 Student1" "table_row"
     And I wait until the page is ready
 
-    And I click on "Find Learning" in the totara menu
-    And I click on "Course 1" "link"
+    And I am on "Course 1" course homepage
     And I follow "Test seminar name"
 
     # Check the result
@@ -163,7 +161,6 @@ Feature: Suspend user in different session times
     And I should see "Sam2 Student2"
 
     And I click on "Go back" "link"
-
     When I click on "Attendees" "link" in the "Event over" "table_row"
     Then I should see "Sam1 Student1"
     And I should see "Sam2 Student2"

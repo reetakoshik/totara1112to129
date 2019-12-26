@@ -35,7 +35,15 @@ class tool_totara_sync_user_csv_fasthash_testcase extends advanced_testcase {
     private $configcsv = array();
     private $config = array();
 
-    public function setUp() {
+    protected function tearDown() {
+        $this->filedir = null;
+        $this->configcsv = array();
+        $this->config = array();
+
+        parent::tearDown();
+    }
+
+    protected function setUp() {
         global $CFG;
 
         parent::setup();

@@ -119,7 +119,7 @@ Feature: auth_approved: bulk signup ops
     Then I should see "Invalid login, please try again"
 
     When I log in as "admin"
-    And I navigate to "Logs" node in "Site administration > Reports"
+    And I navigate to "Logs" node in "Site administration > Server"
     And I press "Get these logs"
     Then "jb007 (bond@example.gov) rejected for system access" row "Event name" column of "reportlog" table should contain "Account request was rejected"
     And "eve (mp@example.gov) rejected for system access" row "Event name" column of "reportlog" table should contain "Account request was rejected"
@@ -169,18 +169,18 @@ Feature: auth_approved: bulk signup ops
 
     When I log out
     And I log in as "admin"
-    And I navigate to "Logs" node in "Site administration > Reports"
+    And I navigate to "Logs" node in "Site administration > Server"
     And I press "Get these logs"
     Then "jb007 (bond@example.gov) approved for system access" row "Event name" column of "reportlog" table should contain "Account request was approved"
     And "eve (mp@example.gov) approved for system access" row "Event name" column of "reportlog" table should contain "Account request was approved"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "James Bond"
     And I follow "Unnamed job assignment (ID: 1)"
     Then I should see "Sales Engr"
     And I should see "Manager Sales (salesmgr@example.com) - salesmgr ja"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Eve Moneypenny"
     And I follow "Unnamed job assignment"
     Then I should see "Sales dept secretary"
@@ -234,12 +234,12 @@ Feature: auth_approved: bulk signup ops
 
     When I log out
     And I log in as "admin"
-    And I navigate to "Logs" node in "Site administration > Reports"
+    And I navigate to "Logs" node in "Site administration > Server"
     And I press "Get these logs"
     Then "jb007 (bond@example.gov) approved for system access" row "Event name" column of "reportlog" table should contain "Account request was approved"
     And I should not see "mp@example.gov"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "James Bond"
     And I follow "Unnamed job assignment"
     Then I should see "Sales Engr"
@@ -294,16 +294,16 @@ Feature: auth_approved: bulk signup ops
 
     When I log out
     And I log in as "admin"
-    And I navigate to "Logs" node in "Site administration > Reports"
+    And I navigate to "Logs" node in "Site administration > Server"
     And I press "Get these logs"
     Then "jb007 (bond@example.gov) approved for system access" row "Event name" column of "reportlog" table should contain "Account request was approved"
     And "eve (mp@example.gov) approved for system access" row "Event name" column of "reportlog" table should contain "Account request was approved"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "James Bond"
     Then I should see "This user has no job assignments"
 
-    When I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    When I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Eve Moneypenny"
     Then I should see "This user has no job assignments"
 

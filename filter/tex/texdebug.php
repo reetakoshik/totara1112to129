@@ -311,14 +311,6 @@
         }
     }
 
-    /**
-     * @throws coding_exception
-     * @deprecated since Totara 10
-     */
-    function execute($cmd) {
-        throw new coding_exception('execute() has been deprecated since Totara 10. Please use the \core\command\executable class');
-    }
-
     function slasharguments($texexp) {
         global $CFG;
         $admin = $CFG->wwwroot.'/'.$CFG->admin.'/settings.php?section=http';

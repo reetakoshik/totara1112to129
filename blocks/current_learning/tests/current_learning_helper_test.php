@@ -48,8 +48,8 @@ class block_current_learning_helper_testcase extends advanced_testcase {
         $duedate = $now - (60 * 60 * 24 * 1);
 
         $result = \block_current_learning\helper::get_duedate_state($duedate, $this->get_config(), $now);
-        $this->assertInternalType('array', $result);
-        $this->assertEquals(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys', 0.0, 10, true);
+        $this->assertIsArray($result);
+        $this->assertEqualsCanonicalizing(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys');
         $this->assertSame('label-danger', $result['state']);
         $this->assertTrue($result['alert']);
     }
@@ -63,8 +63,8 @@ class block_current_learning_helper_testcase extends advanced_testcase {
         $duedate = $now + (60 * 60 * 24 * 1);
 
         $result = \block_current_learning\helper::get_duedate_state($duedate, $this->get_config(), $now);
-        $this->assertInternalType('array', $result);
-        $this->assertEquals(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys', 0.0, 10, true);
+        $this->assertIsArray($result);
+        $this->assertEqualsCanonicalizing(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys');
         $this->assertSame('label-danger', $result['state']);
         $this->assertFalse($result['alert']);
     }
@@ -79,8 +79,8 @@ class block_current_learning_helper_testcase extends advanced_testcase {
         $duedate = $now + $config->warningperiod - 60;
 
         $result = \block_current_learning\helper::get_duedate_state($duedate, $config, $now);
-        $this->assertInternalType('array', $result);
-        $this->assertEquals(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys', 0.0, 10, true);
+        $this->assertIsArray($result);
+        $this->assertEqualsCanonicalizing(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys');
         $this->assertSame('label-danger', $result['state']);
         $this->assertFalse($result['alert']);
     }
@@ -95,8 +95,8 @@ class block_current_learning_helper_testcase extends advanced_testcase {
         $duedate = $now + $config->warningperiod;
 
         $result = \block_current_learning\helper::get_duedate_state($duedate, $config, $now);
-        $this->assertInternalType('array', $result);
-        $this->assertEquals(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys', 0.0, 10, true);
+        $this->assertIsArray($result);
+        $this->assertEqualsCanonicalizing(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys');
         $this->assertSame('label-danger', $result['state']);
         $this->assertFalse($result['alert']);
     }
@@ -111,8 +111,8 @@ class block_current_learning_helper_testcase extends advanced_testcase {
         $duedate = $now + $config->warningperiod + 60;
 
         $result = \block_current_learning\helper::get_duedate_state($duedate, $config, $now);
-        $this->assertInternalType('array', $result);
-        $this->assertEquals(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys', 0.0, 10, true);
+        $this->assertIsArray($result);
+        $this->assertEqualsCanonicalizing(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys');
         $this->assertSame('label-warning', $result['state']);
         $this->assertFalse($result['alert']);
     }
@@ -127,8 +127,8 @@ class block_current_learning_helper_testcase extends advanced_testcase {
         $duedate = $now + $config->alertperiod - 60;
 
         $result = \block_current_learning\helper::get_duedate_state($duedate, $config, $now);
-        $this->assertInternalType('array', $result);
-        $this->assertEquals(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys', 0.0, 10, true);
+        $this->assertIsArray($result);
+        $this->assertEqualsCanonicalizing(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys');
         $this->assertSame('label-warning', $result['state']);
         $this->assertFalse($result['alert']);
     }
@@ -143,8 +143,8 @@ class block_current_learning_helper_testcase extends advanced_testcase {
         $duedate = $now + $config->alertperiod;
 
         $result = \block_current_learning\helper::get_duedate_state($duedate, $config, $now);
-        $this->assertInternalType('array', $result);
-        $this->assertEquals(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys', 0.0, 10, true);
+        $this->assertIsArray($result);
+        $this->assertEqualsCanonicalizing(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys');
         $this->assertSame('label-warning', $result['state']);
         $this->assertFalse($result['alert']);
     }
@@ -159,8 +159,8 @@ class block_current_learning_helper_testcase extends advanced_testcase {
         $duedate = $now + $config->alertperiod + 60;
 
         $result = \block_current_learning\helper::get_duedate_state($duedate, $config, $now);
-        $this->assertInternalType('array', $result);
-        $this->assertEquals(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys', 0.0, 10, true);
+        $this->assertIsArray($result);
+        $this->assertEqualsCanonicalizing(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys');
         $this->assertSame('label-info', $result['state']);
         $this->assertFalse($result['alert']);
     }
@@ -175,8 +175,8 @@ class block_current_learning_helper_testcase extends advanced_testcase {
         $duedate = $now + (60 * 60 * 24 * 8);
 
         $result = \block_current_learning\helper::get_duedate_state($duedate, $config, $now);
-        $this->assertInternalType('array', $result);
-        $this->assertEquals(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys', 0.0, 10, true);
+        $this->assertIsArray($result);
+        $this->assertEqualsCanonicalizing(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys');
         $this->assertSame('label-info', $result['state']);
         $this->assertFalse($result['alert']);
     }
@@ -191,8 +191,8 @@ class block_current_learning_helper_testcase extends advanced_testcase {
         $duedate = $now + (60 * 60 * 24 * 90);
 
         $result = \block_current_learning\helper::get_duedate_state($duedate, $config, $now);
-        $this->assertInternalType('array', $result);
-        $this->assertEquals(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys', 0.0, 10, true);
+        $this->assertIsArray($result);
+        $this->assertEqualsCanonicalizing(['state', 'alert'], array_keys($result), 'Resulting array does not contain the expected keys');
         $this->assertSame('label-info', $result['state']);
         $this->assertFalse($result['alert']);
     }

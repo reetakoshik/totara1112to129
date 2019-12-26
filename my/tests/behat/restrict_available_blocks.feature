@@ -1,4 +1,4 @@
-@core @core_my
+@core @core_my @block @javascript
 Feature: Restrict which blocks can be added to Dashboard
   In order to restrict which blocks can be added
   As a student I need to ensure I can add the blocks

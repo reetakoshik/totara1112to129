@@ -39,6 +39,7 @@ list($options, $unrecognized) = cli_get_params(
     array(
         'drop'                  => false,
         'install'               => false,
+        'instance'              => 0,
         'buildconfig'           => false,
         'buildcomponentconfigs' => false,
         'diag'                  => false,
@@ -59,12 +60,18 @@ if (file_exists(__DIR__.'/../../../../vendor/phpunit/phpunit/composer.json')) {
     phpunit_bootstrap_error(PHPUNIT_EXITCODE_PHPUNITMISSING);
 }
 
+$instance = empty($options['instance']) ? 0 : intval($options['instance']);
+if ($instance < 0 or $instance > 99) {
+    cli_error('Instance number must be a positive number smaller than 100');
+}
+define('PHPUNIT_INSTANCE', str_pad((string)$instance, 2, '0', STR_PAD_LEFT));
+
 if ($options['run']) {
     unset($options);
     unset($unrecognized);
 
     foreach ($_SERVER['argv'] as $k=>$v) {
-        if (strpos($v, '--run') === 0) {
+        if (strpos($v, '--run') === 0 or strpos($v, '--instance') === 0) {
             unset($_SERVER['argv'][$k]);
             $_SERVER['argc'] = $_SERVER['argc'] - 1;
         }
@@ -108,6 +115,7 @@ Options:
 --buildconfig  Build /phpunit.xml from /phpunit.xml.dist that runs all tests
 --buildcomponentconfigs
                Build distributed phpunit.xml files for each component
+--instance=n   Test environment instance number, defaults to 0
 
 -h, --help     Print out this help
 

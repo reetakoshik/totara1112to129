@@ -26,7 +26,7 @@ Feature: Test the cohort association visibility report source.
     And I set the following administration settings values:
       | Enable audience-based visibility | 1 |
 
-    And I navigate to "Manage programs" node in "Site administration > Courses"
+    And I navigate to "Manage programs" node in "Site administration > Programs"
     And I follow "Miscellaneous"
     And I click on "Settings" "link" in the "Program #1" "table_row"
     And I switch to "Details" tab
@@ -38,7 +38,7 @@ Feature: Test the cohort association visibility report source.
     And I click on "OK" "button" in the "course-cohorts-visible-dialog" "totaradialogue"
     And I click on "Save changes" "button"
 
-    Given I navigate to "Manage certifications" node in "Site administration > Courses"
+    Given I navigate to "Manage certifications" node in "Site administration > Certifications"
     And I follow "Miscellaneous"
     And I click on "Settings" "link" in the "Cert #1" "table_row"
     And I switch to "Details" tab
@@ -50,8 +50,7 @@ Feature: Test the cohort association visibility report source.
     And I click on "OK" "button" in the "course-cohorts-visible-dialog" "totaradialogue"
     And I click on "Save changes" "button"
 
-    Given I click on "Find Learning" in the totara menu
-    And I follow "Course #1"
+    Given I am on "Course #1" course homepage
     And I navigate to "Edit settings" node in "Course administration"
     And I click on "Enrolled users and members of the selected audiences" "option" in the "#id_audiencevisible" "css_element"
     And I click on "Add visible audiences" "button"
@@ -62,7 +61,8 @@ Feature: Test the cohort association visibility report source.
 
   # -------------------------------
   Scenario: cohort_associations_visible_rs_00: custom report contents
-    Given I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the field "Report Name" to "Audiences"
     And I set the field "Source" to "Audience: Visible Learning"
     And I press "Create report"
@@ -132,7 +132,7 @@ Feature: Test the cohort association visibility report source.
 
   # -------------------------------
   Scenario: cohort_associations_visible_rs_01: embedded report contents
-    Given I navigate to "Manage embedded reports" node in "Site administration > Reports > Report builder"
+    Given I navigate to "Manage embedded reports" node in "Site administration > Reports"
     And I set the field "report-name" to "Audience: Visible Learning"
     And I press "id_submitgroupstandard_addfilter"
     And I follow "Audience: Visible Learning"

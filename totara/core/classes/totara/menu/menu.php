@@ -17,9 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Totata navigation library page
- *
- * @package    totara
+ * @package    totara_core
  * @subpackage navigation
  * @author     Oleg Demeshev <oleg.demeshev@totaralms.com>
  * @author     Chris Wharton <chris.wharton@catalyst-eu.net>
@@ -29,23 +27,11 @@ namespace totara_core\totara\menu;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Class to store, render and manage totara navigation category
+ * This class was originally used to update edit menu items,
+ * existing references to class constants will have to be updated
+ * to use matching constants in item class.
  *
- * @property-read int $id
- * @property-read int $parentid
- * @property-read string $title
- * @property-read string $url
- * @property-read string $classname
- * @property-read int $sortorder
- * @property-read int $depth
- * @property-read string $path
- * @property-read int $custom
- * @property-read int $customtitle
- * @property-read int $visibility
- * @property-read int $timemodified
- *
- * @package    totara
- * @subpackage navigation
+ * @deprecated since Totara 12.0
  */
 class menu implements \renderable, \IteratorAggregate {
 
@@ -57,11 +43,36 @@ class menu implements \renderable, \IteratorAggregate {
     // Database menu item - delete is allowed
     const DB_ITEM = 1;
 
-    // Visibility values.
+    /**
+     * Use item::VISIBILITY_HIDE instead
+     * @deprecated since Totara 12.0
+     * @var int
+     */
     const HIDE_ALWAYS = 0;
+    /**
+     * Use item::VISIBILITY_SHOW instead
+     * @deprecated since Totara 12.0
+     * @var int
+     */
     const SHOW_ALWAYS = 1;
-    const SHOW_WHEN_REQUIRED = 2;
+    /**
+     * Use item::VISIBILITY_SHOW instead
+     * @deprecated since Totara 12.0
+     * @var int
+     */
+    const SHOW_WHEN_REQUIRED = 2; // Use
+    /**
+     * Use item::VISIBILITY_CUSTOM instead
+     * @deprecated since Totara 12.0
+     * @var int
+     */
     const SHOW_CUSTOM = 3;
+
+    // Maximum number of levels of menu items.
+    // If increasing this number, additional .totara_item_depthX css styles need to be implemented to ensure
+    // that the top navigation menu editor table is formatted correctly. Also, the "path" db column has max
+    // length of 50, so keep an eye on that. Make sure to extend test_update_descendant_paths.
+    const MAX_DEPTH = 3;
 
     /**
      * Any access rule operator.
@@ -75,9 +86,17 @@ class menu implements \renderable, \IteratorAggregate {
      */
     const AGGREGATION_ALL = 1;
 
-    // The target attribute specifies where to open the linked document.
-    // Default _self, no target attribute
+    /**
+     * Use '' or '_self' string instead.
+     * @deprecated since Totara 12.0
+     * @var string
+     */
     const TARGET_ATTR_SELF = '_self';
+    /**
+     * Use '_blank' string instead.
+     * @deprecated since Totara 12.0
+     * @var string
+     */
     const TARGET_ATTR_BLANK = '_blank';
 
     /**
@@ -206,12 +225,14 @@ class menu implements \renderable, \IteratorAggregate {
     }
 
     /**
-     * Constructor.
-     * Constructor is protected, use totara_core_menu::get($id) to retrieve category.
+     * Use item::create_instance() instead.
+     *
+     * @deprecated since Totara 12.0
      *
      * @param \stdClass $record from DB (may not contain all fields)
      */
     protected function __construct(\stdClass $record) {
+        debugging('menu class was deprecated, use helper or item class instead', DEBUG_DEVELOPER);
         foreach ($record as $key => $val) {
             if (array_key_exists($key, self::$menufields)) {
                 $this->$key = $val;
@@ -220,15 +241,15 @@ class menu implements \renderable, \IteratorAggregate {
     }
 
     /**
-     * Returns totara_core_menu object for requested category.
-     * If id is 0, the pseudo object for root category is returned (convenient
-     * for calling other functions such as get_children()).
+     * Use item and helper classes instead.
+     *
+     * @deprecated since Totara 12.0
      *
      * @param int $id category id
      * @return null|menu
-     * @throws \moodle_exception
      */
     public static function get($id = 0) {
+        debugging('menu class was deprecated, use helper or item class instead', DEBUG_DEVELOPER);
         if (!$id) {
             if (!isset(self::$menucat0)) {
                 $record = new \stdClass();
@@ -262,227 +283,98 @@ class menu implements \renderable, \IteratorAggregate {
     /**
      * Creates a new category from raw data.
      *
-     * Data sample
-     * @global \moodle_database $DB
-     * @param array|\stdClass $data
-     * $data->title = 'New parent|child node title';
-     * $data->url = '/totara/core/tm_sync4.php';
-     * $data->parentid = 0|19;
-     * $data->classname = null|'your_class_name';
-     * $data->custom = 0;
-     * $data->customtitle = 0;
-     * $data->visibility = 2;
-     * $data->targetattr = _self;
-     * @return true
+     * @deprecated since Totara 12.0
+     *
+     * @return bool
      */
     public static function sync($data) {
-        global $DB;
-
-        $data = (object)$data;
-
-        // Check if a parentid not moved as child node to other parent node.
-        // OR if it exists at all.
-        try {
-            $parent = self::get($data->parentid);
-        } catch (\moodle_exception $e) {
-            // For somereason parent is disappeared.
-            // Get the pseudo object for root category.
-            $parent = self::get();
-        }
-        $data->parentid = $parent->id;
-
-        // Lets sort out a depth.
-        $data->depth = $parent->depth + 1;
-        // Other data.
-        $data->custom = (!isset($data->custom) ? self::DEFAULT_ITEM : (int)$data->custom);
-        $data->url    = ($data->custom == self::DB_ITEM) ? $data->url : null;
-        $data->customtitle  = (!isset($data->customtitle) ? 1 : (int)$data->customtitle);
-        $data->visibility   = (!isset($data->visibility) ? self::HIDE_ALWAYS : (int)$data->visibility);
-        $data->targetattr   = (!isset($data->targetattr) ? self::TARGET_ATTR_SELF : $data->targetattr);
-        $sortorder = isset($data->sortorder) ? $data->sortorder : null;
-        $data->sortorder = self::calculate_item_sortorder($sortorder, $parent->id);
-        $data->timemodified = time();
-
-        $data->id = $DB->insert_record('totara_navigation', $data);
-
-        // Update path (only possible after we know the category id.
-        $data->path = $parent->path . '/' . $data->id;
-        $DB->set_field('totara_navigation', 'path', $data->path, array('id' => $data->id));
-        // Add to log.
-        \totara_core\event\menuitem_sync::create_from_item($data->id)->trigger();
-
-        return $data;
+        debugging('menu::sync() method was deprecated, use \totara_core\totara\menu\helper instead', DEBUG_DEVELOPER);
+        return false;
     }
 
     /**
      * Creates a new category either from form data or from raw data
      *
-     * @global \moodle_database $DB
+     * @deprecated since Totara 12.0
+     *
      * @param array|\stdClass $data
-     * @return true
-     * @throws \moodle_exception
+     * @return bool
      */
     public function create($data) {
-        global $DB;
+       debugging('menu::create() method was deprecated, use \totara_core\totara\menu\helper::create_item() instead', DEBUG_DEVELOPER);
+       return false;
+    }
 
-        $data = (object)$data;
-        if (empty($data->parentid)) {
-            $parent = self::get();
-        } else {
-            $parent = self::get($data->parentid);
-        }
-        $data->parentid  = $parent->id;
-        $data->classname = (!isset($data->classname) ? self::DEFAULT_CLASSNAME : $data->classname);
-        $data->depth  = $parent->depth + 1;
-        $data->custom = (!isset($data->custom) ? self::DB_ITEM : (int)$data->custom);
-        $data->url    = ($data->custom == self::DB_ITEM) ? $data->url : null;
-        $data->customtitle = (!isset($data->customtitle) ? 1 : (int)$data->customtitle);
-        $data->visibility  = (!isset($data->visibility) ? self::HIDE_ALWAYS : (int)$data->visibility);
-        $data->timemodified= time();
-        $sortorder = isset($data->sortorder) ? $data->sortorder : null;
-        $data->sortorder = self::calculate_item_sortorder($sortorder, $parent->id);
-        $data->id = $DB->insert_record('totara_navigation', $data);
-        // Update path (only possible after we know the category id.
-        $data->path = $parent->path . '/' . $data->id;
-        $DB->set_field('totara_navigation', 'path', $data->path, array('id' => $data->id));
+    /**
+     * Returns the maximum depth of all of this node's children, relative to this node's depth.
+     *
+     * @deprecated since Totara 12.0
+     *
+     * @return int
+     */
+    public function max_relative_descendant_depth() {
+        debugging('menu::max_relative_descendant_depth() method was deprecated', DEBUG_DEVELOPER);
+        return 0;
+    }
 
-        \totara_core\event\menuitem_created::create_from_item($data->id)->trigger();
-
-        return $data;
+    /**
+     * Determines if the specified depth is valid, given the desired depth, the depth of descendants and the
+     * absolute maximum depth supported by the tree.
+     *
+     * @deprecated since Totara 12.0
+     *
+     * @param int $depth
+     * @return bool
+     */
+    public function can_set_depth(int $depth) {
+        debugging('menu::can_set_depth() method was deprecated', DEBUG_DEVELOPER);
+        return false;
     }
 
     /**
      * Updates the record with either form data or raw data
      *
-     * @global \moodle_database $DB
+     * @deprecated since Totara 12.0
+     *
      * @param array|\stdClass $data
-     * @return true
-     * @throws \moodle_exception
+     * @return bool
      */
     public function update($data) {
-        global $DB;
-
-        if (!$this->id) {
-            // There is no actual DB record associated with root category.
-            throw new \moodle_exception('error:findingmenuitem', 'totara_core');
-        }
-
-        if ((int)$data->parentid > 0) {
-            // Check if the children exists.
-            if ($this->get_children()) {
-                throw new \moodle_exception('error:itemhaschildren', 'totara_core');
-            }
-        }
-
-        $data = (object)$data;
-        $data->id = $this->id;
-
-        if ($this->custom == self::DEFAULT_ITEM) {
-            // If Totara default menu title changed.
-            if ($this->title !== $data->title) {
-                $data->customtitle = 1;
-            } else {
-                $data->title = $this->title;
-            }
-        }
-        if ((int)$data->parentid > 0) {
-            $data->depth = 2;
-            $data->path = '/' . $data->parentid . '/' . $data->id;
-        } else {
-            $data->depth = 1;
-            $data->path = '/' . $data->id;
-        }
-        $data->timemodified = time();
-
-        $DB->update_record('totara_navigation', $data);
-
-        \totara_core\event\menuitem_updated::create_from_item($data->id)->trigger();
-
-        return true;
+        debugging('menu::udpate() method was deprecated', DEBUG_DEVELOPER);
+        return false;
     }
 
     /**
      * Validate node data
      *
+     * @deprecated since Totara 12.0
+     *
      * @param object $data
      * @return array $errors
      */
     public static function validation($data) {
-        global $CFG;
-
-        $errors = array();
-
-        if (isset($data->title) && empty($data->title)) {
-            $errors['title'] = get_string('error:menuitemtitlerequired', 'totara_core');
-        }
-        if (\core_text::strlen($data->title) > 1024) {
-            $errors['title'] = get_string('error:menuitemtitletoolong', 'totara_core');
-        }
-
-        if ($data->custom == self::DB_ITEM) {
-            if (isset($data->url) && empty($data->url)) {
-                $errors['url'] = get_string('error:menuitemurlrequired', 'totara_core');
-            }
-            if (\core_text::strlen($data->url) > 255) {
-                $errors['url'] = get_string('error:menuitemurltoolong', 'totara_core');
-            }
-            if (!empty($data->url)) {
-                $url = $data->url;
-                if ($url[0] === '/') {
-                    $url = $CFG->wwwroot . $url;
-                }
-                $url = self::replace_url_parameter_placeholders($url);
-                if (!filter_var($url, FILTER_VALIDATE_URL)) {
-                    $errors['url'] = get_string('error:menuitemurlinvalid', 'totara_core');
-                }
-            }
-        }
-
-        if (isset($data->classname)) {
-            if (\core_text::strlen($data->classname) > 255) {
-                $errors['classname'] = get_string('error:menuitemclassnametoolong', 'totara_core');
-            }
-        }
-
-        if (isset($data->targetattr)) {
-            if (\core_text::strlen($data->targetattr) > 100) {
-                $errors['targetattr'] = get_string('error:menuitemtargetattrtoolong', 'totara_core');
-            }
-        }
-
-        return $errors;
-
+        debugging('menu::validation() method was deprecated', DEBUG_DEVELOPER);
+        return array();
     }
 
     /**
      * Replace url placeholders in custom menu items.
      *
+     * @deprecated since Totara 12.0
+     *
      * @param string $url
      * @return string
      */
     public static function replace_url_parameter_placeholders($url) {
-        global $USER, $COURSE;
-
-        $search = array(
-            '##userid##',
-            '##username##',
-            '##useremail##',
-            '##courseid##',
-        );
-        $replace = array(
-            isset($USER->id) ? $USER->id : 0,
-            isset($USER->username) ? urlencode($USER->username) : '',
-            isset($USER->email) ? urlencode($USER->email) : '',
-            isset($COURSE->id) ? $COURSE->id : SITEID,
-        );
-
-        return str_replace($search, $replace, $url);
+        debugging('menu::udpate() method was deprecated, use item::replace_url_parameter_placeholders() instead', DEBUG_DEVELOPER);
+        return item::replace_url_parameter_placeholders($url);
     }
 
     /**
      * Retrieves number of records from totara_navigation table
      *
-     * @global \moodle_database $DB
+     * @deprecated since Totara 12.0
+     *
      * @param string $whereclause
      * @param array $params
      * @return array of stdClass objects
@@ -498,183 +390,115 @@ class menu implements \renderable, \IteratorAggregate {
     /**
      * Retrieves number of records from totara_navigation table where visibility true
      *
-     * @global \moodle_database $DB
+     * @deprecated since Totara 12.0
+     *
      * @return array of stdClass objects
      */
     public static function get_nodes() {
-        global $DB;
-
-        $fields = array_keys(array_filter(self::$menufields));
-        $sql = "SELECT
-                    tn.". join(',tn.', $fields). ",
-                    (SELECT classname FROM {totara_navigation} WHERE tn.parentid = id) AS parent,
-                    (SELECT visibility FROM {totara_navigation} WHERE tn.parentid = id) AS parentvisibility
-                FROM
-                    {totara_navigation} tn
-                WHERE
-                    tn.visibility > :visibility
-                ORDER BY
-                    tn.parentid, tn.sortorder";
-        return $DB->get_records_sql($sql, array('visibility' => '0'));
+        debugging('menu::get_nodes() was deprecated', DEBUG_DEVELOPER);
+        return array();
     }
 
     /**
      * Returns array of children categories
      *
-     * @global \moodle_database $DB
+     * @deprecated since Totara 12.0
+     *
      * @return \totara_core\totara\menu\menu[] Array of totara_core_menu objects indexed by category id
      */
     public function get_children() {
-        // We need to retrieve all children by sort.
-        $rs = self::get_records('tn.parentid = :parentid', array('parentid' => $this->id));
-        if (empty($rs)) {
-            return array();
-        }
-        $rv = array();
-        foreach ($rs as $id => $item) {
-            $rv[$id] = new menu($item);
-        }
-        return $rv;
+        debugging('menu::get_children() was deprecated', DEBUG_DEVELOPER);
+        return array();
     }
 
     /**
-     * Deletes a category and all children
+     * Deletes a category.
+     *
+     * @deprecated since Totara 12.0
      *
      * @return boolean
      */
     public function delete() {
-        global $DB;
-
-        // If category is from TotaraMenu throw exception, can't delete it.
-        if (!$this->custom) {
-            throw new \moodle_exception('error:menuitemcannotberemoved', 'totara_core', null, $this->title);
-        }
-
-        $transaction = $DB->start_delegated_transaction();
-
-        // If category has children.
-        $children = $this->get_children();
-        if ($children) {
-            foreach ($children as $subitem) {
-                // Delete all children.
-                $subitem->delete();
-            }
-        }
-        // Delete the associated settings.
-        $DB->delete_records('totara_navigation_settings', array('itemid' => $this->id));
-        // Finally delete the category and it's context.
-        $DB->delete_records('totara_navigation', array('id' => $this->id));
-        $transaction->allow_commit();
-
-        // Add to log.
-        \totara_core\event\menuitem_deleted::create_from_item($this->id)->trigger();
-
-        return true;
+        debugging('menu::delete() was deprecated, use helper::delete_item() instead', DEBUG_DEVELOPER);
+        return false;
     }
 
     /**
      * Returns default visibility list.
      *
+     * @deprecated since Totara 12.0
+     *
      * @return array array(HIDE_ALWAYS, SHOW_ALWAYS, SHOW_WHEN_REQUIRED)
      */
     public static function get_visibility_list() {
-        return array(
-            self::HIDE_ALWAYS => get_string('menuitem:hide', 'totara_core'),
-            self::SHOW_ALWAYS => get_string('menuitem:show', 'totara_core'),
-            self::SHOW_WHEN_REQUIRED => get_string('menuitem:showwhenrequired', 'totara_core'),
-            self::SHOW_CUSTOM => get_string('menuitem:showcustom', 'totara_core'),
-        );
+        debugging('menu::get_visibility_list() was deprecated', DEBUG_DEVELOPER);
+        return array();
     }
 
     /**
      * Returns node visibility if exists in visibility list or empty value.
      *
+     * @deprecated since Totara 12.0
+     *
      * @param string $visibility
      * @return string empty|visibility
      */
     public static function get_visibility($visibility) {
-        $visibilitylist = self::get_visibility_list();
-        if (isset($visibilitylist[$visibility])) {
-            return $visibilitylist[$visibility];
-        }
+        debugging('menu::get_visibility() was deprecated', DEBUG_DEVELOPER);
         return '';
     }
 
     /**
      * Set child node as a parent during totara_upgrade_menu().
      *
-     * @global \moodle_database $DB
+     * @deprecated since Totara 12.0
      */
     public function set_parent() {
-        global $DB;
-
-        $DB->set_field('totara_navigation', 'parentid', '0', array('id' => (int)$this->id));
-        // Add to log.
-        \totara_core\event\menuitem_setparent::create_from_item($this->id)->trigger();
+        debugging('menu::set_parent() was deprecated', DEBUG_DEVELOPER);
     }
 
     /*
      * Change $custom property to delete a totara menu item during totara_upgrade_menu().
+     *
+     * @deprecated since Totara 12.0
      */
     public function set_custom($custom = menu::DEFAULT_ITEM) {
-        $this->custom = $custom;
+        debugging('menu::set_parent() was deprecated', DEBUG_DEVELOPER);
     }
 
     /**
      * This function returns a list representing category parent tree
      * for display or to use in a form <select> element
      *
-     * @global \moodle_database $DB
+     * @deprecated since Totara 12.0
+     *
      * @param integer $excludeid Exclude this category and its children from the lists built.
+     * @param integer $parentid The node to add to the result, and all children to be called recursively.
      * @return array of strings
      */
-    public static function make_menu_list($excludeid = 0) {
-        global $DB;
-
-        $sql = 'SELECT tn.id, tn.title FROM {totara_navigation} tn WHERE tn.id <> ? AND tn.parentid = 0 ORDER BY tn.sortorder';
-        $rs = $DB->get_recordset_sql($sql, array('id' => $excludeid));
-        $baselist[0] = get_string('top');
-        foreach ($rs as $record) {
-            $baselist[$record->id] = format_string($record->title, true);
-        }
-        $rs->close();
-
-        return $baselist;
+    public static function make_menu_list($excludeid = 0, int $parentid = 0) {
+        debugging('menu::make_menu_list() was deprecated, use helper::create_parentid_form_element() instead', DEBUG_DEVELOPER);
+        return array();
     }
 
     /**
      * Changes the sort order of this categories parent shifting this category up or down one.
      *
-     * @global \moodle_database $DB
+     * @deprecated since Totara 12.0
+     *
      * @param int $id category
      * @param bool $up If set to true the category is shifted up one spot, else its moved down.
      * @return bool true on success, false otherwise.
      */
     public static function change_sortorder($id = 0, $up = false) {
-        global $DB;
-
-        $data = self::get((int)$id);
-        $params = array($data->sortorder, $data->parentid);
-        $select = ($up ? 'sortorder < ? AND parentid = ?' : 'sortorder > ? AND parentid = ?');
-        $sort   = ($up ? 'sortorder DESC' : 'sortorder ASC');
-        $action = ($up ? 'moveup' : 'movedown');
-        $swapcategory = $DB->get_records_select('totara_navigation', $select, $params, $sort, '*', 0, 1);
-        $swapcategory = reset($swapcategory);
-        if (!$swapcategory) {
-            return false;
-        }
-
-        $DB->set_field('totara_navigation', 'sortorder', $swapcategory->sortorder, array('id' => $data->id));
-        $DB->set_field('totara_navigation', 'timemodified', time(), array('id' => $data->id));
-        $DB->set_field('totara_navigation', 'sortorder', $data->sortorder, array('id' => $swapcategory->id));
-        $DB->set_field('totara_navigation', 'timemodified', time(), array('id' => $swapcategory->id));
-
-        \totara_core\event\menuitem_sortorder::create_from_item($data->id, $action)->trigger();
-        return true;
+        debugging('menu::change_sortorder() was deprecated, use helper::change_sortorder() instead', DEBUG_DEVELOPER);
+        return false;
     }
 
     /**
      * Changes menu item visibility.
+     *
+     * @deprecated since Totara 12.0
      *
      * @global \moodle_database $DB
      * @param int menu item id
@@ -682,49 +506,18 @@ class menu implements \renderable, \IteratorAggregate {
      * @return bool True on success, false otherwise.
      */
     public static function change_visibility($id = 0, $hide = false) {
-        global $DB;
-
-        $itemid = (int)$id;
-        $update = new \stdClass;
-        $update->id = $itemid;
-        // Change visibility to hide
-        if ($hide) {
-            $visibility = $DB->get_field('totara_navigation', 'visibility', array('id' => $itemid), MUST_EXIST);
-            $update->visibility = self::HIDE_ALWAYS;
-            $update->visibilityold = $visibility;
-            $DB->update_record('totara_navigation', $update);
-        } else {
-            // Change visibility to show
-            $item = self::get($itemid);
-            $visibility = $item->visibilityold;
-            if ($visibility === null) {
-                if ($item->custom == self::DB_ITEM) {
-                    $visibility = self::SHOW_ALWAYS;
-                } else {
-                    $visibility = self::SHOW_WHEN_REQUIRED;
-                }
-            }
-            $update->visibility = $visibility;
-            $update->visibilityold = null;
-        }
-        $DB->update_record('totara_navigation', $update);
-
-        \totara_core\event\menuitem_visibility::create_from_item($itemid, $hide)->trigger();
-
-        return true;
+        debugging('menu::change_visibility() was deprecated, use helper::change_visibility() instead', DEBUG_DEVELOPER);
+        return false;
     }
 
     /**
      * Resets the menu to the default state as determined by the code.
+     *
+     * @deprecated since Totara 12.0
      */
     public static function reset_menu() {
-        global $DB;
-        // Truncate the menu table.
-        $DB->delete_records('totara_navigation');
-        // And the menu settings.
-        $DB->delete_records('totara_navigation_settings');
-        // Then recreate the defaults.
-        totara_upgrade_menu();
+        debugging('menu::reset_menu() is deprecated, use helper::reset_menu() instead.', DEBUG_DEVELOPER);
+        helper::reset_menu(false);
     }
 
     /**
@@ -734,154 +527,64 @@ class menu implements \renderable, \IteratorAggregate {
      *
      * Returns false if the classname provided is not found.
      *
+     * @deprecated since Totara 12.0
+     *
      * @param object item
      * @return \totara_core\totara\menu\item|bool - new instance or false if not found.
      */
     public static function node_instance($item) {
-        if (is_array($item)) {
-            $item = (object)$item;
-        }
-        if ($item->custom) {
-            return new \totara_core\totara\menu\item($item);
-        }
-        $classname = $item->classname;
-        if (class_exists($classname)) {
-            return new $classname($item);
+        debugging('menu::node_instance() is deprecated, use item::create_instance() instead.', DEBUG_DEVELOPER);
+        $item = item::create_instance($item);
+        if ($item) {
+            return $item;
         } else {
             return false;
         }
     }
 
     /**
-     * Given an item's preferred sortorder (or null if no preference),
-     * calculate the best real sortorder for that item. We need to
-     * check to see which values have already been used to identify this.
-     *
-     * @param int|null $defaultsort Preferred sort order for this item (or null).
-     * @param int $parentid ID of parent node. Used to calculate position if no default sort given.
-     * @return int
-     */
-    private static function calculate_item_sortorder($defaultsort, $parentid = 0) {
-        global $DB;
-        $existingsortorders = $DB->get_records_menu('totara_navigation', null, 'sortorder DESC', 'id,sortorder');
-
-        // Base position on default sort if it is given.
-        if (!is_null($defaultsort)) {
-            // Is preferred sort already used?
-            // If it is, keep incrementing sort until we find one that is available.
-            while (in_array($defaultsort, $existingsortorders)) {
-                $defaultsort++;
-            }
-            return $defaultsort;
-        }
-
-        // No default given, let's try to pick a smart default.
-
-        // Item has a parent, let's set the default sort so it appears as a child.
-        if ($parentid > 0) {
-            $parentsort = $existingsortorders[$parentid];
-            $existingchildren = $DB->get_records_menu('totara_navigation', array('parentid' => $parentid), 'sortorder DESC', 'id,sortorder');
-
-            // Add after last child, or immediately after parent if there are no children.
-            $minvalue = !empty($existingchildren) ? reset($existingchildren) : $parentsort;
-
-            // Add before the next top level item.
-            $toplevelitems = $DB->get_records_menu('totara_navigation', array('parentid' => 0), 'sortorder DESC', 'id,sortorder');
-            $maxvalue = false;
-            foreach ($toplevelitems as $id => $sort) {
-                if ($id == $parentid) {
-                    break;
-                }
-                $maxvalue = $sort;
-            }
-
-            // Sanity check.
-            if ($maxvalue && $minvalue < $maxvalue) {
-
-                // Ideally we can put this right in the middle.
-                $preferredsort = ceil(($minvalue + $maxvalue)/2);
-                if (!in_array($preferredsort, $existingsortorders)) {
-                    return $preferredsort;
-                }
-
-                // If that's taken let's try every possible space between the two.
-                $preferredsort = $minvalue + 1;
-                while ($preferredsort < $maxvalue) {
-                    if (!in_array($preferredsort, $existingsortorders)) {
-                        return $preferredsort;
-                    }
-                    $preferredsort++;
-                }
-            }
-        }
-
-        // Last resort is to add the new item to the very end.
-        $highestsort = reset($existingsortorders);
-        return (int)$highestsort + 10000;
-
-    }
-
-    /**
      * Method for obtaining a item setting.
+     *
+     * @deprecated since Totara 12.0
      *
      * @param string $type Identifies the class using the setting.
      * @param string $name Identifies the particular setting.
      * @return mixed The value of the setting $name or null if it doesn't exist.
      */
     public function get_setting($type, $name) {
-        global $DB;
-        return $DB->get_field('totara_navigation_settings', 'value',
-            array('itemid' => $this->id, 'type' => $type, 'name' => $name));
+        debugging('menu::get_setting() is deprecated, use item::get_setting() instead.', DEBUG_DEVELOPER);
+        return array();
     }
 
     /**
      * Returns all of the settings associated with this item.
      *
+     * @deprecated since Totara 12.0
+     *
      * @return array
      */
     public function get_settings() {
-        global $DB;
-        $settings = array();
-        foreach ($DB->get_records('totara_navigation_settings', array('itemid' => $this->id)) as $setting) {
-            if (!isset($settings[$setting->type])) {
-                $settings[$setting->type] = array();
-            }
-            $settings[$setting->type][$setting->name] = $setting;
-        }
-        return $settings;
+        debugging('menu::get_settings() is deprecated', DEBUG_DEVELOPER);
+        return array();
     }
 
     /**
      * Insert or update a single rule for a menu item.
+     *
+     * @deprecated since Totara 12.0
      *
      * @param string $type Identifies the class using the setting.
      * @param string $name Identifies the particular setting.
      * @param string $value New value for the setting.
      */
     public function update_setting($type, $name, $value) {
-        global $DB;
-
-        $existing = $DB->get_record('totara_navigation_settings', array('itemid' => $this->id, 'type' => $type, 'name' => $name));
-
-        $record = new \stdClass();
-        $record->timemodified = time();
-        if ($existing && $existing->value !== $value) {
-            // Its an existing setting whose value has changed.
-            $record->id = $existing->id;
-            $record->value = $value;
-            $DB->update_record('totara_navigation_settings', $record);
-        } else if (!$existing) {
-            // Its a new setting, insert it.
-            $record->itemid = $this->id;
-            $record->type = $type;
-            $record->name = $name;
-            $record->value = $value;
-            $DB->insert_record('totara_navigation_settings', $record);
-        }
+        debugging('menu::update_setting() is deprecated', DEBUG_DEVELOPER);
     }
 
     /**
      * Update several settings at once.
+     *
+     * @deprecated since Totara 12.0
      *
      * The $settings array is expected to be an array of arrays.
      * Each sub array should associative with three keys: type, name, value.
@@ -889,69 +592,20 @@ class menu implements \renderable, \IteratorAggregate {
      * @param array[] $settings
      */
     public function update_settings(array $settings) {
-        global $DB;
-
-        // Build an array of existing settings so that we don't need to fetch each one individually as we look
-        // at the setting data.
-        $now = time();
-        $existing = $this->get_settings();
-
-        // Look at each setting and either update it, insert it, or skip it (if it has not changed).
-        foreach ($settings as $setting) {
-            $type = $setting['type'];
-            $name = $setting['name'];
-            $value = $setting['value'];
-            if (isset($existing[$type][$name])) {
-                // Its an existing setting, lets check if its actually changed.
-                if ($value === $existing[$type][$name]->value) {
-                    // Nothing to do here, the setting has not changed.
-                    continue;
-                }
-                // The value has changed update the setting.
-                $record = new \stdClass;
-                $record->id = $existing[$type][$name]->id;
-                $record->timemodified = $now;
-                $record->value = $value;
-                $DB->update_record('totara_navigation_settings', $record);
-            } else {
-                // Its the first time this setting has been set.
-                $record = new \stdClass;
-                $record->timemodified = $now;
-                $record->itemid = $this->id;
-                $record->type = $type;
-                $record->name = $name;
-                $record->value = $value;
-                $DB->insert_record('totara_navigation_settings', $record);
-            }
-        }
+        debugging('menu::update_settings() is deprecated, use helper::update_custom_visibility_settings() instead.', DEBUG_DEVELOPER);
+        helper::update_custom_visibility_settings($this->id, $settings);
     }
 
     /**
      * The list of available preset rules to select from.
      *
+     * @deprecated since Totara 12.0
+     *
      * @return array $choices Rules to select from.
      */
     public static function get_preset_rule_choices() {
-        $choices = array(
-            'is_logged_in'              => get_string('menuitem:rulepreset_is_logged_in', 'totara_core'),
-            'is_not_logged_in'          => get_string('menuitem:rulepreset_is_not_logged_in', 'totara_core'),
-            'is_guest'                  => get_string('menuitem:rulepreset_is_guest', 'totara_core'),
-            'is_not_guest'              => get_string('menuitem:rulepreset_is_not_guest', 'totara_core'),
-            'is_site_admin'             => get_string('menuitem:rulepreset_is_site_admin', 'totara_core'),
-            'can_view_required_learning'=> get_string('menuitem:rulepreset_can_view_required_learning', 'totara_core'),
-            'can_view_my_team'          => get_string('menuitem:rulepreset_can_view_my_team', 'totara_core'),
-            'can_view_my_reports'       => get_string('menuitem:rulepreset_can_view_my_reports', 'totara_core'),
-            'can_view_certifications'   => get_string('menuitem:rulepreset_can_view_certifications', 'totara_core'),
-            'can_view_programs'         => get_string('menuitem:rulepreset_can_view_programs', 'totara_core'),
-            'can_view_allappraisals'    => get_string('menuitem:rulepreset_can_view_allappraisals', 'totara_core'),
-            'can_view_latestappraisal'  => get_string('menuitem:rulepreset_can_view_latest_appraisal', 'totara_core'),
-            'can_view_appraisal'        => get_string('menuitem:rulepreset_can_view_appraisal', 'totara_core'),
-            'can_view_feedback_360s'    => get_string('menuitem:rulepreset_can_view_feedback_360s', 'totara_core'),
-            'can_view_my_goals'         => get_string('menuitem:rulepreset_can_view_my_goals', 'totara_core'),
-            'can_view_learning_plans'   => get_string('menuitem:rulepreset_can_view_learning_plans', 'totara_core'),
-        );
-
-        return $choices;
+        debugging('menu::get_preset_rule_choices() is deprecated, use helper::update_custom_visibility_settings() instead.', DEBUG_DEVELOPER);
+        return item::get_visibility_preset_rule_choices();
     }
 
 }

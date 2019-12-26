@@ -12,7 +12,8 @@ Feature: Badges report filter
       | user3    | User      | Three    | user3@example.com |
       | user4    | User      | Four     | user4@example.com |
     And I log in as "admin"
-    And I navigate to "Add a new badge" node in "Site administration > Badges"
+    And I navigate to "Manage badges" node in "Site administration > Badges"
+    And I press "Add a new badge"
     And I set the following fields to these values:
       | Name          | Test Badge 1           |
       | Description   | Test badge description |
@@ -33,7 +34,8 @@ Feature: Badges report filter
     And I click on "Award badge" "button"
 
     # Add a second badge.
-    And I navigate to "Add a new badge" node in "Site administration > Badges"
+    And I navigate to "Manage badges" node in "Site administration > Badges"
+    And I press "Add a new badge"
     And I set the following fields to these values:
       | Name          | Test Badge 2           |
       | Description   | Test badge description |
@@ -52,7 +54,8 @@ Feature: Badges report filter
     And I click on "Award badge" "button"
 
   Scenario: Test badge report builder filter
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | Badge report  |
       | Source      | Badges Issued |

@@ -1,10 +1,11 @@
 This files describes API changes in /blocks/last_course_accessed,
 information provided here is intended especially for developers.
 
-=== 11.3 ===
+=== 12 ===
 
 * String helpers are no longer used in the following templates, string data is passed via context data:
 ** blocks/last_course_accessed/templates/block.mustache
+* Removed deprecated file classes/helper.php
 
 === 10.1 ===
 
@@ -12,5 +13,5 @@ information provided here is intended especially for developers.
 
 === 10.0 ===
 
-classes/helper.php class has been deprecated as the single method it contained has been depreacted and moved to core.
+classes/helper.php class has been deprecated as the single method it contained has been deprecated and moved to core.
 helper::get_last_access_text has been deprecated and moved to core. See totara_core_get_relative_time_text() in core/utils.php.

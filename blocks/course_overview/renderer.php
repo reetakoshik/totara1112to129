@@ -75,10 +75,8 @@ class block_course_overview_renderer extends plugin_renderer_base {
             $moveurl = new moodle_url('/blocks/course_overview/move.php',
                         array('sesskey' => sesskey(), 'moveto' => 0, 'courseid' => $movingcourseid));
             // Create move icon, so it can be used.
-            $movetofirsticon = html_writer::empty_tag('img',
-                    array('src' => $this->output->pix_url('movehere'),
-                        'alt' => get_string('movetofirst', 'block_course_overview', $courses[$movingcourseid]->fullname),
-                        'title' => get_string('movehere')));
+            $name = $courses[$movingcourseid]->fullname;
+            $movetofirsticon = $this->output->pix_icon('movehere', get_string('movetofirst', 'block_course_overview', $name));
             $moveurl = html_writer::link($moveurl, $movetofirsticon);
             $html .= html_writer::tag('div', $moveurl, array('class' => 'movehere'));
         }
@@ -163,10 +161,7 @@ class block_course_overview_renderer extends plugin_renderer_base {
                 $a = new stdClass();
                 $a->movingcoursename = $courses[$movingcourseid]->fullname;
                 $a->currentcoursename = $course->fullname;
-                $movehereicon = html_writer::empty_tag('img',
-                        array('src' => $this->output->pix_url('movehere'),
-                            'alt' => get_string('moveafterhere', 'block_course_overview', $a),
-                            'title' => get_string('movehere')));
+                $movehereicon = $this->output->pix_icon('movehere', get_string('moveafterhere', 'block_course_overview', $a));
                 $moveurl = html_writer::link($moveurl, $movehereicon);
                 $html .= html_writer::tag('div', $moveurl, array('class' => 'movehere'));
             }

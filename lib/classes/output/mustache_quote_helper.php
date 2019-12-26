@@ -39,7 +39,7 @@ class mustache_quote_helper {
      * Note: This helper is only compatible with the standard {{ }} delimeters.
      *
      * @param string $text The text to parse for arguments.
-     * @param Mustache_LambdaHelper $helper Used to render nested mustache variables.
+     * @param \Mustache_LambdaHelper $helper Used to render nested mustache variables.
      * @return string
      */
     public function quote($text, \Mustache_LambdaHelper $helper) {

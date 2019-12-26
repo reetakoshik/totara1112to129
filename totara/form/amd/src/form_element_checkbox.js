@@ -71,29 +71,13 @@ define(['jquery', 'totara_form/form'], function($, Form) {
      * @param {Function} done
      */
     CheckboxElement.prototype.init = function(done) {
-        var input = $('#' + this.id),
-            self = this,
-            deferred = $.Deferred(),
-            submitselector = 'input[type="submit"]:not([formnovalidate])';
+        var input = $('#' + this.id);
 
         this.input = input;
         // Call the changed method when this element is changed.
         this.input.change($.proxy(this.changed, this));
 
-        // Only do this if we need to.
-        if (input.attr('required')) {
-            require(['totara_form/modernizr'], function (Mod) {
-                if (!Mod.input.required) {
-                    input.change($.proxy(self.polyFillValidate, self));
-                    input.closest('form').find(submitselector).click($.proxy(self.polyFillValidate, self));
-                }
-                deferred.resolve();
-            });
-        } else {
-            deferred.resolve();
-        }
-
-        deferred.done(done);
+        done();
     };
 
     /**

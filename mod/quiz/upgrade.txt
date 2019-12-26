@@ -1,5 +1,9 @@
 This files describes API changes in the quiz code,
 
+=== 12 ===
+
+* mod_quiz_renderer::summary_table() has changed
+
 === 10 ===
 
 * External functions mod_quiz_external::get_attempt_data, mod_quiz_external::get_attempt_summary

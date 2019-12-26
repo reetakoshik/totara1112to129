@@ -1,0 +1,126 @@
+{{!
+   This file is part of Totara Learn
+
+   Copyright (C) 2018 onwards Totara Learning Solutions LTD
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   @author Carl Anderson <carl.anderson@totaralearning.com>
+   @package totara_core
+}}
+{{!
+    @template totara_core/quickaccesssettings
+
+    This template generates a user's quick access menu for admin navigation
+
+    Classes required for JS:
+    * totara_core__QuickAccessSettings__group
+
+    Data attributes required for JS:
+    * data-core-autoinitialise: true
+    * data-core-autoinitialise-amd: totara_core/inline-edit
+    * data-inline-edit-allow-empty
+    * data-quickaccesssettings-key
+    * data-quickaccesssettings-action
+    * data-inline-edit
+    * data-inline-edit-control
+
+   Context variables required for this template:
+    * [parent] -> title: (string) display name for this group
+    * [parent] -> key: (string) unique identifier for the group
+    * [parent] -> has_items: (bool) whether this group contains any items
+    * [parent] -> item_count: (int)  how many items this group contains
+    * [parent] -> items: (array) list of items in this group
+    * items -> label: (string) display name for the item
+    * items -> url: (string) url for this item to link to
+
+    Example context (json):
+      {
+        "has_groups" : true,
+        "group_count" : 2,
+        "groups" : [
+            {
+                "title" : "Core",
+                "has_items" : true,
+                "item_count" : 2
+                "items" : [
+                    {
+                        "label" : "Item 1",
+                        "url" : "https://www.example.com/item1.php",
+                    },
+                    {
+                        "label" : "Item 2",
+                        "url" : "https://www.example.com/item2.php",
+                    }
+                ]
+            },
+            {
+                "title" : "Learn",
+                "has_items" : true,
+                "item_count" : 1
+                "items" : [
+                    {
+                        "label" : "Item 1",
+                        "url" : "https://www.example.com/item3.php",
+                    }
+                ]
+            }
+        ]
+      }
+ }}
+
+
+{{< totara_core/accordion_item}}
+    {{$class}}totara_core__QuickAccessSettings__group{{/class}}
+    {{$attr}}
+        data-quickaccesssettings-group-key="{{key}}"
+        tabindex="-1"
+    {{/attr}}
+    {{$aria-label}}{{title}}{{/aria-label}}
+    {{$header_class}}totara_core__QuickAccessSettings__group-header{{/header_class}}
+    {{$body_class}}totara_core__QuickAccessSettings__group-content{{/body_class}}
+
+    {{$header_html}}
+        <h3 class="totara_core__InlineEdit"
+            data-core-autoinitialise="true"
+            data-core-autoinitialise-amd="totara_core/inline-edit"
+            data-quickaccesssettings-group-action="rename"
+            data-inline-edit-allow-empty="true"
+            data-inline-edit-max-length="100">
+            <span data-inline-edit>
+                {{title}}
+            </span>
+            <a href="#" data-inline-edit-control>
+                {{#flex_icon}}edit,quickaccesssettings:editgroupname,totara_core{{/flex_icon}}
+            </a>
+        </h3>
+
+        <div class="totara_core__QuickAccessSettings__group--controls" data-accordion-noop>
+            {{#actions}}
+                {{> core/action_menu }}
+            {{/actions}}
+        </div>
+    {{/header_html}}
+    {{$body_html}}
+        <ul class="totara_core__QuickAccessSettings__item-list">
+            {{! There aren't always going to be items, but we need to keep the ul so we can dynamically add them later}}
+            {{#items}}
+                {{> totara_core/quickaccesssettings_item}}
+            {{/items}}
+        </ul>
+        {{#tree_selector}}
+            {{> totara_core/select_tree}}
+        {{/tree_selector}}
+    {{/body_html}}
+{{/ totara_core/accordion_item}}

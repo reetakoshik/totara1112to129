@@ -57,7 +57,7 @@ $urlparams = array('goalid' => $goalid,
 $PAGE->set_url(new moodle_url('/totara/hierarchy/prefix/goal/assign/remove.php'), $urlparams);
 $PAGE->set_context($sitecontext);
 $PAGE->set_pagelayout('admin');
-$PAGE->set_totara_menu_selected('mygoals');
+$PAGE->set_totara_menu_selected('\totara_hierarchy\totara\menu\mygoals');
 $PAGE->set_title($strdelgoals);
 $PAGE->set_heading($strdelgoals);
 
@@ -71,10 +71,18 @@ $admin = has_capability('totara/hierarchy:managegoalassignments', $sitecontext);
 $manager = false;
 $self = false;
 
+$confirm_url_attrs = [];
+
 if ($assigntype == GOAL_ASSIGNMENT_INDIVIDUAL) {
-        $user_context = context_user::instance($modid);
-        $manager = \totara_job\job_assignment::is_managing($USER->id, $modid) && has_capability('totara/hierarchy:managestaffcompanygoal', $user_context);
-        $self = ($USER->id == $modid) && has_capability('totara/hierarchy:manageowncompanygoal', $user_context);
+    $user_context = context_user::instance($modid);
+    $manager = \totara_job\job_assignment::is_managing($USER->id, $modid) && has_capability('totara/hierarchy:managestaffcompanygoal', $user_context);
+    $self = ($USER->id == $modid) && has_capability('totara/hierarchy:manageowncompanygoal', $user_context);
+
+    // We require to pass a user assignment id attribute for individual assignments now to uniquely identify which
+    // assignment is being deleted.
+
+    $user_assignment_id = required_param('assignment_id', PARAM_INT);
+    $confirm_url_attrs['assignment_id'] = $user_assignment_id;
 }
 
 if (!($admin || $manager || $self)) {
@@ -95,9 +103,16 @@ if ($view_type) {
     $returnurl = new moodle_url('/totara/hierarchy/prefix/goal/mygoals.php', array('userid' => $modid));
 }
 
-$deleteurl = new moodle_url('/totara/hierarchy/prefix/goal/assign/remove.php',
-    array('goalid' => $goalid, 'assigntype' => $assigntype, 'modid' => $modid,
-    'view' => $view_type, 'delete' => md5($type->timecreated), 'sesskey' => $USER->sesskey));
+$confirm_url_attrs = array_merge($confirm_url_attrs, [
+    'goalid' => $goalid,
+    'assigntype' => $assigntype,
+    'modid' => $modid,
+    'view' => $view_type,
+    'delete' => md5($type->timecreated),
+    'sesskey' => $USER->sesskey
+]);
+
+$deleteurl = new moodle_url('/totara/hierarchy/prefix/goal/assign/remove.php', $confirm_url_attrs);
 
 if ($delete) {
     // Delete.
@@ -118,6 +133,7 @@ if ($delete) {
     if ($assigntype == GOAL_ASSIGNMENT_INDIVIDUAL) {
         $delete_params['assigntype'] = GOAL_ASSIGNMENT_INDIVIDUAL;
         $delete_params['assignmentid'] = 0;
+        $delete_params['id'] = $user_assignment_id;
         $snapshot = $DB->get_record($type->table, $delete_params);
         goal::delete_user_assignments($delete_params);
         $eventclass = "\\hierarchy_goal\\event\\assignment_user_deleted";

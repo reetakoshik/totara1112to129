@@ -34,13 +34,13 @@ namespace core\output;
  */
 class mustache_javascript_helper {
 
-    /** @var moodle_page $page - Page used to get requirement manager */
+    /** @var \moodle_page $page - Page used to get requirement manager */
     private $page = null;
 
     /**
      * Create new instance of mustache javascript helper.
      *
-     * @param moodle_page $page Page.
+     * @param \moodle_page $page Page.
      */
     public function __construct($page) {
         $this->page = $page;

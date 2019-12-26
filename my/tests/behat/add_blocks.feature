@@ -1,4 +1,4 @@
-@core @core_my
+@core @core_my @block @javascript
 Feature: Add blocks to dashboard page
   In order to add more functionality to dashboard page
   As a user

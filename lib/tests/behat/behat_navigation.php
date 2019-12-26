@@ -322,8 +322,8 @@ class behat_navigation extends behat_base {
      * @param array $parentnodes
      * @throws ExpectationException
      */
-    protected function select_node_in_navigation($nodetext, $parentnodes) {
-        $nodetoclick = $this->find_node_in_navigation($nodetext, $parentnodes);
+    protected function select_node_in_navigation($nodetext, $parentnodes, $nodetype = 'link') {
+        $nodetoclick = $this->find_node_in_navigation($nodetext, $parentnodes, $nodetype);
         // Throw exception if no node found.
         if (!$nodetoclick) {
             throw new ExpectationException('Navigation node "' . $nodetext . '" not found under "' .
@@ -539,18 +539,19 @@ class behat_navigation extends behat_base {
     /**
      * Go to site administration item
      *
-     * @Given /^I navigate to "(?P<nodetext_string>(?:[^"]|\\")*)" in site administration$/
+     * @Given /^I navigate to "(?P<nodetext_string>(?:[^"]|\\")*)" (node |)in site administration$/
      *
      * @throws ExpectationException
      * @param string $nodetext navigation node to click, may contain path, for example "Reports > Overview"
      * @return void
      */
-    public function i_navigate_to_in_site_administration($nodetext) {
+    public function i_navigate_to_in_site_administration($nodetext, $nodetype = 'link') {
         \behat_hooks::set_step_readonly(false);
+        $nodetype = trim($nodetype) === 'node' ? 'node' : 'link';
         $parentnodes = array_map('trim', explode('>', $nodetext));
         array_unshift($parentnodes, get_string('administrationsite'));
         $lastnode = array_pop($parentnodes);
-        $this->select_node_in_navigation($lastnode, $parentnodes);
+        $this->select_node_in_navigation($lastnode, $parentnodes, $nodetype);
     }
 
     /**
@@ -581,6 +582,23 @@ class behat_navigation extends behat_base {
         global $DB;
         $course = $DB->get_record("course", array("fullname" => $coursefullname), 'id', MUST_EXIST);
         $url = new moodle_url('/course/view.php', ['id' => $course->id]);
+        $this->getSession()->visit($this->locate_path($url->out_as_local_url(false)));
+        $this->wait_for_pending_js();
+    }
+
+    /**
+     * Opens the certification homepage.
+     *
+     * @Given /^I am on "(?P<certificationfullname_string>(?:[^"]|\\")*)" (certification|program) homepage$/
+     * @throws coding_exception
+     * @param string $certificationfullname The full name of the certification.
+     * @return void
+     */
+    public function i_am_on_certification_homepage($certificationfullname) {
+        \behat_hooks::set_step_readonly(false);
+        global $DB;
+        $certification = $DB->get_record("prog", array("fullname" => $certificationfullname), 'id', MUST_EXIST);
+        $url = new moodle_url('/totara/program/view.php', ['id' => $certification->id]);
         $this->getSession()->visit($this->locate_path($url->out_as_local_url(false)));
         $this->wait_for_pending_js();
     }

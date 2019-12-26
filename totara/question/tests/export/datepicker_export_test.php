@@ -72,7 +72,7 @@ class totara_question_datepicker_export_testcase extends advanced_testcase {
 
         $question = new stdClass();
         $question->id = 123;
-        $question->param1 ='{"withtime":"1"}';
+        $question->param1 = '{"withtime":"1"}';
 
         $expectedresult = userdate($targettime, $targetformat);
         $result = $exporter->export_data($data, $question);
@@ -91,7 +91,7 @@ class totara_question_datepicker_export_testcase extends advanced_testcase {
 
         $question = new stdClass();
         $question->id = 123;
-        $question->param1 ='{"withtime":"0"}';
+        $question->param1 = '{"withtime":"0"}';
 
         $expectedresult = userdate($targettime, $targetformat);
         $result = $exporter->export_data($data, $question);
@@ -99,4 +99,24 @@ class totara_question_datepicker_export_testcase extends advanced_testcase {
         $this->assertEquals($expectedresult, $result);
     }
 
+    public function test_export_data_with_timezone() {
+        $exporter = \totara_question\local\export_helper::create('appraisal', 'xyz', 'datepicker');
+
+        $targettime = time() - DAYSECS * 10;
+        $targetformat = get_string('strfdateattime', 'langconfig');
+        $targettimezone = "UTC+3";
+
+        $data = new stdClass();
+        $data->data_123 = $targettime;
+        $data->data_123tz = $targettimezone;
+
+        $question = new stdClass();
+        $question->id = 123;
+        $question->param1 = '{"withtime":"1","withtimezone":"1"}';
+
+        $expectedresult = userdate($targettime, $targetformat, $targettimezone) . ' ' . $targettimezone;
+        $result = $exporter->export_data($data, $question);
+
+        $this->assertEquals($expectedresult, $result);
+    }
 }

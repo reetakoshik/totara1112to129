@@ -9,7 +9,8 @@ class DefaultPage extends Base
     use ThemeTrait;
 
     public function render()
-    {
+    {   
+        global $CFG;
         $renderer = $this->renderer;
         $template = 'theme_golearningzone/standard';
 
@@ -20,7 +21,8 @@ class DefaultPage extends Base
             'side-pre'    => $this->renderer->blocks('side-pre'),
             'side-post'   => $this->renderer->blocks('side-post'),
             'main-size'   => $showBlocks ? 9 : 12,
-            'blocks-size' => $showBlocks ? 3 : 0
+            'blocks-size' => $showBlocks ? 3 : 0,
+            'siteurl'     => $CFG->wwwroot
         ];
 
         return $this->renderer->render_from_template($template, $params);

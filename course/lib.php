@@ -43,13 +43,18 @@ define('COURSE_MAX_SUMMARIES_PER_PAGE', 10);
 define('COURSE_MAX_COURSES_PER_DROPDOWN', 1000);
 // Max users in log dropdown before switching to optional.
 define('COURSE_MAX_USERS_PER_DROPDOWN', 1000);
+
+/**
+ * The following FRONTPAGE* constants are deprecated, there is no replacement.
+ * @deprecated since Totara 12
+ */
 define('FRONTPAGENEWS', '0');
 define('FRONTPAGECATEGORYNAMES', '2');
 define('FRONTPAGECATEGORYCOMBO', '4');
 define('FRONTPAGEENROLLEDCOURSELIST', '5');
 define('FRONTPAGEALLCOURSELIST', '6');
 define('FRONTPAGECOURSESEARCH', '7');
-// Important! Replaced with $CFG->frontpagecourselimit - maximum number of courses displayed on the frontpage.
+
 define('EXCELROWS', 65535);
 define('FIRSTUSEDEXCELROW', 3);
 
@@ -867,6 +872,52 @@ function add_course_module($mod) {
 }
 
 /**
+ * Creates a course section and adds it to the specified position
+ *
+ * @param int|stdClass $courseorid course id or course object
+ * @param int $position position to add to, 0 means to the end. If position is greater than
+ *        number of existing secitons, the section is added to the end. This will become sectionnum of the
+ *        new section. All existing sections at this or bigger position will be shifted down.
+ * @param bool $skipcheck the check has already been made and we know that the section with this position does not exist
+ * @return stdClass created section object
+ */
+function course_create_section($courseorid, $position = 0, $skipcheck = false) {
+    global $DB;
+    $courseid = is_object($courseorid) ? $courseorid->id : $courseorid;
+
+    // Find the last sectionnum among existing sections.
+    if ($skipcheck) {
+        $lastsection = $position - 1;
+    } else {
+        $lastsection = (int)$DB->get_field_sql('SELECT max(section) from {course_sections} WHERE course = ?', [$courseid]);
+    }
+
+    // First add section to the end.
+    $cw = new stdClass();
+    $cw->course   = $courseid;
+    $cw->section  = $lastsection + 1;
+    $cw->summary  = '';
+    $cw->summaryformat = FORMAT_HTML;
+    $cw->sequence = '';
+    $cw->name = null;
+    $cw->visible = 1;
+    $cw->availability = null;
+    $cw->id = $DB->insert_record("course_sections", $cw);
+
+    // Now move it to the specified position.
+    if ($position > 0 && $position <= $lastsection) {
+        $course = is_object($courseorid) ? $courseorid : get_course($courseorid);
+        move_section_to($course, $cw->section, $position, true);
+        $cw->section = $position;
+    }
+
+    core\event\course_section_created::create_from_section($cw)->trigger();
+
+    rebuild_course_cache($courseid, true);
+    return $cw;
+}
+
+/**
  * Creates missing course section(s) and rebuilds course cache
  *
  * @param int|stdClass $courseorid course id or course object
@@ -874,31 +925,17 @@ function add_course_module($mod) {
  * @return bool if there were any sections created
  */
 function course_create_sections_if_missing($courseorid, $sections) {
-    global $DB;
     if (!is_array($sections)) {
         $sections = array($sections);
     }
     $existing = array_keys(get_fast_modinfo($courseorid)->get_section_info_all());
-    if (is_object($courseorid)) {
-        $courseorid = $courseorid->id;
-    }
-    $coursechanged = false;
-    foreach ($sections as $sectionnum) {
-        if (!in_array($sectionnum, $existing)) {
-            $cw = new stdClass();
-            $cw->course   = $courseorid;
-            $cw->section  = $sectionnum;
-            $cw->summary  = '';
-            $cw->summaryformat = FORMAT_HTML;
-            $cw->sequence = '';
-            $id = $DB->insert_record("course_sections", $cw);
-            $coursechanged = true;
+    if ($newsections = array_diff($sections, $existing)) {
+        foreach ($newsections as $sectionnum) {
+            course_create_section($courseorid, $sectionnum, true);
         }
+        return true;
     }
-    if ($coursechanged) {
-        rebuild_course_cache($courseorid, true);
-    }
-    return $coursechanged;
+    return false;
 }
 
 /**
@@ -1193,7 +1230,8 @@ function course_delete_module($cmid, $async = false) {
     question_delete_activity($cm);
 
     // Call the delete_instance function, if it returns false throw an exception.
-    if (!$deleteinstancefunction($cm->instance)) {
+    // Totara: If instance = 0, skip this step as there is no module instance.
+    if ($cm->instance != 0 && !$deleteinstancefunction($cm->instance)) {
         throw new moodle_exception('cannotdeletemoduleinstance', '', '', null,
             "Cannot delete the module $modulename (instance).");
     }
@@ -1243,7 +1281,8 @@ function course_delete_module($cmid, $async = false) {
     $DB->delete_records('course_modules', array('id' => $cm->id));
 
     // Delete module from that section.
-    if (!delete_mod_from_section($cm->id, $cm->section)) {
+    // Totara: If instance = 0, skip this step as there is no module instance.
+    if ($cm->instance != 0 && !delete_mod_from_section($cm->id, $cm->section)) {
         throw new moodle_exception('cannotdeletemodulefromsection', '', '', null,
             "Cannot delete the module $modulename (instance) from section.");
     }
@@ -2404,8 +2443,14 @@ function create_course($data, $editoroptions = NULL) {
     // Setup the blocks
     blocks_add_default_course_blocks($course);
 
-    // Create a default section.
-    course_create_sections_if_missing($course, 0);
+    // Create default section and initial sections if specified (unless they've already been created earlier).
+    // We do not want to call course_create_sections_if_missing() because to avoid creating course cache.
+    $numsections = isset($data->numsections) ? $data->numsections : 0;
+    $existingsections = $DB->get_fieldset_sql('SELECT section from {course_sections} WHERE course = ?', [$newcourseid]);
+    $newsections = array_diff(range(0, $numsections), $existingsections);
+    foreach ($newsections as $sectionnum) {
+        course_create_section($newcourseid, $sectionnum, true);
+    }
 
     // Save any custom role names.
     save_local_role_names($course->id, (array)$data);
@@ -2886,6 +2931,8 @@ class course_request {
     public function approve() {
         global $CFG, $DB, $USER;
 
+        require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
+
         $user = $DB->get_record('user', array('id' => $this->properties->requester, 'deleted'=>0), '*', MUST_EXIST);
 
         $courseconfig = get_config('moodlecourse');
@@ -2914,6 +2961,10 @@ class course_request {
         $data->visibleold         = $data->visible;
         $data->lang               = $courseconfig->lang;
         $data->enablecompletion   = $courseconfig->enablecompletion;
+        $data->numsections        = $courseconfig->numsections;
+        $data->startdate          = usergetmidnight(time());
+
+        list($data->fullname, $data->shortname) = restore_dbops::calculate_course_names(0, $data->fullname, $data->shortname);
 
         $course = create_course($data);
         $context = context_course::instance($course->id, MUST_EXIST);
@@ -4078,6 +4129,77 @@ function course_get_user_administration_options($course, $context) {
 }
 
 /**
+ * Saves the contents of the image field used as background in the Grid Catalogue.
+ * Will remove any previous images and replace with the one uploaded
+ *
+ * @param stdClass $data data from course_edit_form
+ * @param int $courseid
+ */
+function course_save_image(stdClass $data, int $courseid) {
+    $context = context_course::instance($courseid, MUST_EXIST);
+    if (empty($data->image)) {
+        debugging('Invalid use of course_save_image(), draft area item id expected', DEBUG_DEVELOPER);
+        return;
+    }
+    $options = ['maxfiles' => 1, 'subdirs' => 0, 'accept_types' => 'web_image'];
+    file_save_draft_area_files($data->image, $context->id, 'course', 'images', 0, $options);
+}
+
+/**
+ * Return a url to the image associated with the course
+ * used as background in the Grid Catalogue.
+ *
+ * @param stdClass|int $course
+ * @return moodle_url
+ */
+function course_get_image($course) {
+    global $DB, $OUTPUT;
+
+    if (is_object($course)) {
+        if (empty($course->cacherev)) {
+            $course = $DB->get_record('course', ['id' => $course->id]);
+        }
+    } else {
+        $course = $DB->get_record('course', ['id' => $course]);
+    }
+
+    if (!$course) {
+        return $OUTPUT->image_url('course_defaultimage', 'moodle');
+    }
+    $context = context_course::instance($course->id, IGNORE_MISSING);
+    if (!$context) {
+        return $OUTPUT->image_url('course_defaultimage', 'moodle');
+    }
+
+    $fs = get_file_storage();
+    $files = $fs->get_area_files($context->id, 'course', 'images', 0, "timemodified DESC", false);
+    if ($files) {
+        $url = moodle_url::make_pluginfile_url($context->id, 'course', 'images', $course->cacherev, '/', 'image', false);
+        return $url;
+    }
+    if (get_config('course', 'defaultimage')) { // Setting here used for performance only.
+        $syscontext = context_system::instance();
+        $files = $fs->get_area_files($syscontext->id, 'course', 'defaultimage', 0, "timemodified DESC", false);
+        if ($files) {
+            $file = reset($files);
+            $themerev = theme_get_revision();
+            $url = moodle_url::make_pluginfile_url(
+                $syscontext->id,
+                'course',
+                'defaultimage',
+                $themerev,
+                '/',
+                $file->get_filename(),
+                false
+            );
+            return $url;
+        }
+    }
+
+    return $OUTPUT->image_url('course_defaultimage', 'moodle');
+}
+
+/**
  * Validates course start and end dates.
  *
  * Checks that the end course date is not greater than the start course date.
@@ -4331,4 +4453,42 @@ function course_check_module_updates_since($cm, $from, $fileareas = array(), $fi
     }
 
     return $updates;
+}
+
+/**
+ * Determine the return URL following the creation of a course.
+ *
+ * @param int $courseid ID of the course that was created.
+ * @param int $categoryid ID of the category the course was created in.
+ * @param string $returnto String representing the requested return location.
+ * @param string $returnurl Local URL path requested.
+ *
+ * @return \moodle_url URL to return to.
+ */
+function course_get_return_url($courseid, $categoryid, $returnto=0, $returnurl=''): \moodle_url {
+    global $CFG;
+    if ($returnto === 'url' && confirm_sesskey() && $returnurl) {
+        // If returnto is 'url' then $returnurl may be used as the destination to return to after saving or cancelling.
+        // Sesskey must be specified, and would be set by the form anyway.
+        return new moodle_url($returnurl);
+    }
+
+    switch ($returnto) {
+        case 'category':
+            return new moodle_url($CFG->wwwroot . '/course/index.php', array('categoryid' => $categoryid));
+        case 'catmanage':
+            return new moodle_url($CFG->wwwroot . '/course/management.php', array('categoryid' => $categoryid));
+        case 'topcatmanage':
+            return new moodle_url($CFG->wwwroot . '/course/management.php');
+        case 'topcat':
+            return new moodle_url($CFG->wwwroot . '/course/');
+        case 'pending':
+            return new moodle_url($CFG->wwwroot . '/course/pending.php');
+    }
+
+    if (!empty($courseid)) {
+        return new moodle_url($CFG->wwwroot . '/course/view.php', array('id' => $courseid));
+    }
+
+    return new moodle_url($CFG->wwwroot . '/course/');
 }

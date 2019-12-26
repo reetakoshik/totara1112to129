@@ -40,6 +40,9 @@ class totara_sync_source_jobassignment_database extends totara_sync_source_jobas
         parent::config_save($data);
     }
 
+    /**
+     * @return bool False as database sources do not use files.
+     */
     public function uses_files() {
         return false;
     }

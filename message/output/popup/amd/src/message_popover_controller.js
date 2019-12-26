@@ -170,7 +170,7 @@ define(['jquery', 'core/ajax', 'core/templates', 'core/str',
 
         if (messages.length) {
             $.each(messages, function(index, message) {
-                var strkey;
+                var strkey = '';
                 message.contexturl = URL.relativeUrl('/message/index.php', {
                     user: this.userId,
                     id: message.userid,

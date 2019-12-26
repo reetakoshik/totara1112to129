@@ -1,0 +1,14 @@
+This files describes API changes in HR Import,
+information provided here is intended especially for developers.
+
+=== 12.0 ===
+
+* Deprecated the following report builder display functions and replaced with display classes
+  * rb_source_site_logstore::rb_display_serialized(), please call tool_log\rb\display\log_serialized_preformated::display() instead.
+  * rb_source_site_logstore::rb_display_edulevel(), please call tool_log\rb\display\log_educational_level::display() instead.
+  * rb_source_site_logstore::rb_display_crud(), please call tool_log\rb\display\log_crud:display() instead.
+  * rb_source_site_logstore::rb_display_name(), please call tool_log\rb\display\log_event_name::display() instead.
+  * rb_source_site_logstore::rb_display_name_link(), please call tool_log\rb\display\log_event_name_link::display() instead.
+  * rb_source_site_logstore::rb_display_description(), please call tool_log\rb\display\log_description::display() instead.
+  * rb_source_site_logstore::rb_display_context(), please call tool_log\rb\display\log_context::display() instead.
+* rb_source_site_logstore::get_component_str() function has been deprecated.

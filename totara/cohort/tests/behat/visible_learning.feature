@@ -10,17 +10,17 @@ Feature: Assign visible learning to cohort
         | name | idnumber |
         | Cohort 1 | ASD |
         | Cohort 2 | DSA |
-      And the following "courses" exist:
-        | fullname | shortname | category |
-        | Course 1 | C1 | 0 |
-        | Course 2 | C2 | 0 |
-      And I log in as "admin"
-      And I set the following administration settings values:
-        | Enable audience-based visibility | 1 |
+    And the following "courses" exist:
+      | fullname | shortname | category |
+      | Course 1 | C1 | 0 |
+      | Course 2 | C2 | 0 |
+    And I log in as "admin"
+    And I set the following administration settings values:
+      | Enable audience-based visibility | 1 |
 
   @javascript
   Scenario: Assign courses as visible learning to a cohort
-    Given I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    Given I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Cohort 1"
     And I follow "Visible learning"
     And I press "Add courses"
@@ -32,7 +32,7 @@ Feature: Assign visible learning to cohort
 
   @javascript
   Scenario: Search for courses to assign to cohort
-    Given I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    Given I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "Cohort 1"
     And I follow "Visible learning"
     And I press "Add courses"
@@ -45,9 +45,7 @@ Feature: Assign visible learning to cohort
 
   @javascript
   Scenario: Edit course visibility for a particular course
-    Given I am on homepage
-    And I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
+    Given I am on "Course 1" course homepage
     And I follow "Edit settings"
     And I set the field "Visibility" to "Enrolled users and members of the selected audiences"
     And I click on "Add visible audiences" "button"

@@ -203,8 +203,16 @@ class customfield_define_base {
         if (empty($data->id)) {
             unset($data->id);
             $data->id = $DB->insert_record($tableprefix.'_info_field', $data);
+
+            // Trigger created event
+            $event = \totara_customfield\event\customfield_created::create_by_type($data->id, $tableprefix, (array)$data);
+            $event->trigger();
         } else {
             $DB->update_record($tableprefix.'_info_field', $data);
+
+            // Trigger update event
+            $event = \totara_customfield\event\customfield_updated::create_by_type($data->id, $tableprefix, (array)$data);
+            $event->trigger();
         }
         $data = file_postupdate_standard_editor($data, 'description', $TEXTAREA_OPTIONS, $TEXTAREA_OPTIONS['context'], 'totara_customfield', 'textarea', $data->id);
         $DB->set_field($tableprefix.'_info_field', 'description', $data->description, array('id' => $data->id));

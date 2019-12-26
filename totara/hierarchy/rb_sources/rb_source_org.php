@@ -26,10 +26,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 class rb_source_org extends rb_base_source {
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $defaultcolumns;
-    public $defaultfilters, $requiredcolumns, $sourcetitle;
-
     function __construct() {
         $this->base = '{org}';
         $this->joinlist = $this->define_joinlist();
@@ -41,6 +37,7 @@ class rb_source_org extends rb_base_source {
         $this->defaultfilters = $this->define_defaultfilters();
         $this->requiredcolumns = $this->define_requiredcolumns();
         $this->sourcetitle = get_string('sourcetitle', 'rb_source_org');
+        $this->usedcomponents[] = 'totara_hierarchy';
 
         parent::__construct();
     }
@@ -161,7 +158,7 @@ class rb_source_org extends rb_base_source {
                 'fullname',
                 get_string('name', 'rb_source_org'),
                 "base.fullname",
-                array('displayfunc' => 'orgnamelink',
+                array('displayfunc' => 'org_name_link',
                       'extrafields' => array('orgid' => 'base.id'),
                       'dbdatatype' => 'char',
                       'outputformat' => 'text')
@@ -172,7 +169,8 @@ class rb_source_org extends rb_base_source {
                 get_string('shortname', 'rb_source_org'),
                 "base.shortname",
                 array('dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'plaintext')
             ),
             new rb_column_option(
                 'org',
@@ -206,7 +204,8 @@ class rb_source_org extends rb_base_source {
                 'orgtype.fullname',
                 array('joins' => 'orgtype',
                       'dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'plaintext')
             ),
             new rb_column_option(
                 'org',
@@ -226,7 +225,8 @@ class rb_source_org extends rb_base_source {
                 "framework.fullname",
                 array('joins' => 'framework',
                       'dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'format_string')
             ),
             new rb_column_option(
                 'org',
@@ -243,7 +243,7 @@ class rb_source_org extends rb_base_source {
                 'visible',
                 get_string('visible', 'rb_source_org'),
                 'base.visible',
-                array('displayfunc' => 'yes_no')
+                array('displayfunc' => 'yes_or_no')
             ),
             new rb_column_option(
                 'org',
@@ -262,7 +262,8 @@ class rb_source_org extends rb_base_source {
                 'parent.fullname',
                 array('joins' => 'parent',
                       'dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'format_string')
             ),
             new rb_column_option(
                 'org',
@@ -271,7 +272,8 @@ class rb_source_org extends rb_base_source {
                 'comps.list',
                 array('joins' => 'comps',
                       'dbdatatype' => 'char',
-                      'outputformat' => 'text')
+                      'outputformat' => 'text',
+                      'displayfunc' => 'format_string')
             ),
             new rb_column_option(
                 'org',
@@ -293,7 +295,8 @@ class rb_source_org extends rb_base_source {
                 'membercount',
                 get_string('membercount', 'rb_source_org'),
                 'COALESCE(member.membercount, 0)',
-                array('joins' => 'member')
+                array('joins' => 'member',
+                      'displayfunc' => 'integer')
             ),
             // A count of all members of this organisation and its child organisation.
             new rb_column_option(
@@ -301,7 +304,8 @@ class rb_source_org extends rb_base_source {
                 'membercountcumulative',
                 get_string('membercountcumulative', 'rb_source_org'),
                 'COALESCE(membercumulative.membercountcumulative, 0)',
-                array('joins' => 'membercumulative')
+                array('joins' => 'membercumulative',
+                      'displayfunc' => 'integer')
             ),
         );
 
@@ -460,12 +464,16 @@ class rb_source_org extends rb_base_source {
     }
 
 
-    //
-    //
-    // Source specific column display methods
-    //
-    //
-    function rb_display_orgnamelink($orgname, $row) {
+    /**
+     * Displays organisation name as html link
+     *
+     * @deprecated Since Totara 12.0
+     * @param string $orgname
+     * @param object Report row $row
+     * @return string html link
+     */
+    public function rb_display_orgnamelink($orgname, $row) {
+        debugging('rb_source_org::rb_display_orgnamelink has been deprecated since Totara 12.0. Use totara_hierarchy\rb\display\org_name_link::display', DEBUG_DEVELOPER);
         if (empty($orgname)) {
             return '';
         }

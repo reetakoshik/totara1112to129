@@ -18,7 +18,8 @@ Feature: Global report restrictions complex interactions
     And I set the following administration settings values:
       | Enable report restrictions | 1 |
     And I press "Save changes"
-    And I navigate to "Create report" node in "Site administration > Reports > Report builder"
+    And I navigate to "Manage user reports" node in "Site administration > Reports"
+    And I press "Create report"
     And I set the following fields to these values:
       | Report Name | User report |
       | Source      | User        |
@@ -26,7 +27,7 @@ Feature: Global report restrictions complex interactions
     And I switch to "Content" tab
     And I set the field "Global report restrictions" to "1"
     And I press "Save changes"
-    And I navigate to "Global report restrictions" node in "Site administration > Reports > Report builder"
+    And I navigate to "Global report restrictions" node in "Site administration > Reports"
     And I press "New restriction"
     And I set the following fields to these values:
       | Name        | test restriction 1    |
@@ -42,7 +43,7 @@ Feature: Global report restrictions complex interactions
     And I wait "1" seconds
     And I switch to "Users allowed to select restriction" tab
     And I press "Make this restriction available to all users"
-    And I navigate to "Global report restrictions" node in "Site administration > Reports > Report builder"
+    And I navigate to "Global report restrictions" node in "Site administration > Reports"
     And I press "New restriction"
     And I set the following fields to these values:
       | Name        | test restriction 2    |

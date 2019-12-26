@@ -67,42 +67,11 @@ define(['jquery', 'totara_form/form'], function($, Form) {
      * @param {Function} done
      */
     TextElement.prototype.init = function(done) {
-        var id = this.id,
-            deferreds = [];
-        this.input = $('#' + id);
+        this.input = $('#' + this.id);
         // Call the changed method when this element is changed.
         this.input.change($.proxy(this.changed, this));
 
-        if (this.input.attr('required')) {
-            var requireddeferred = $.Deferred();
-            deferreds.push(requireddeferred);
-            require(['totara_form/modernizr'], function (mod) {
-                if (!mod.input.required) {
-                    require(['totara_form/polyfill_required-lazy'], function (poly) {
-                        poly.init(id);
-                        requireddeferred.resolve();
-                    });
-                } else {
-                    requireddeferred.resolve();
-                }
-            });
-        }
-        if (this.input.attr('placeholder')) {
-            var placeholderdeferred = $.Deferred();
-            deferreds.push(placeholderdeferred);
-            require(['totara_form/modernizr'], function (mod) {
-                if (!mod.input.placeholder) {
-                    require(['totara_form/polyfill_placeholder-lazy'], function (poly) {
-                        poly.init(id);
-                        placeholderdeferred.resolve();
-                    });
-                } else {
-                    placeholderdeferred.resolve();
-                }
-            });
-        }
-
-        $.when.apply($, deferreds).done(done);
+        done();
     };
 
     TextElement.prototype.getValue = function() {

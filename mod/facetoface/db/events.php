@@ -29,20 +29,60 @@ if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');    ///  It must be included from a Moodle page
 }
 
-$observers = array(
-    array(
-        'eventname' => '\core\event\user_deleted',
-        'callback' => 'facetoface_event_handler::user_deleted',
-        'includefile' => '/mod/facetoface/lib.php',
-    ),
-    array(
-        'eventname' => '\totara_core\event\user_suspended',
-        'callback' => 'facetoface_event_handler::user_suspended',
-        'includefile' => '/mod/facetoface/lib.php',
-    ),
-    array(
-        'eventname' => '\core\event\user_enrolment_deleted',
-        'callback' => 'facetoface_event_handler::user_unenrolled',
-        'includefile' => '/mod/facetoface/lib.php',
-    ),
-);
+/**
+ * Events in seminars are widely used for interaction with external (to seminar itself) features:
+ * 1. Responding to external events that need internal functionality: unenrols, suspensions, etc
+ * 2. Responding to internal events that need external functionality: calendars, completions, notifications, etc.
+ *      This is done, to limit responsibilities of states. E.g. state doesn't need to know whether it should send
+ *      notifications or change completions state.
+ */
+$observers = [
+    [
+        'eventname' => \core\event\user_deleted::class,
+        'callback' => '\mod_facetoface\event_handler::user_deleted',
+    ],
+    [
+        'eventname' => \totara_core\event\user_suspended::class,
+        'callback' => '\mod_facetoface\event_handler::user_suspended',
+    ],
+    [
+        'eventname' => \core\event\user_enrolment_deleted::class,
+        'callback' => '\mod_facetoface\event_handler::user_unenrolled',
+    ],
+    [
+        'eventname' => \mod_facetoface\event\booking_booked::class,
+        'callback' => '\mod_facetoface\event_handler::mark_completion_in_progress'
+    ],
+    [
+        'eventname' => \mod_facetoface\event\booking_waitlisted::class,
+        'callback' => '\mod_facetoface\event_handler::mark_completion_in_progress'
+    ],
+    [
+        'eventname' => \mod_facetoface\event\booking_booked::class,
+        'callback' => '\mod_facetoface\event_handler::add_calendar_booked_entry'
+    ],
+    [
+        'eventname' => \mod_facetoface\event\booking_waitlisted::class,
+        'callback' => '\mod_facetoface\event_handler::add_calendar_booked_entry'
+    ],
+    [
+        'eventname' => \mod_facetoface\event\booking_cancelled::class,
+        'callback' => '\mod_facetoface\event_handler::remove_calendar_booked_entry'
+    ],
+    [
+        'eventname' => \mod_facetoface\event\booking_booked::class,
+        'callback' => '\mod_facetoface\event_handler::send_notification_booked'
+    ],
+    [
+        'eventname' => \mod_facetoface\event\booking_waitlisted::class,
+        'callback' => '\mod_facetoface\event_handler::send_notification_waitlisted'
+    ],
+    [
+        'eventname' => \mod_facetoface\event\booking_requested::class,
+        'callback' => '\mod_facetoface\event_handler::send_notification_requested'
+    ],
+    [
+        'eventname' => \totara_job\event\job_assignment_deleted::class,
+        'callback'  => '\mod_facetoface\event_handler::job_assignment_deleted',
+    ],
+];

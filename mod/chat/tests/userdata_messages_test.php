@@ -122,7 +122,7 @@ class mod_chat_userdata_messages_test extends chat_testcase {
             'human_time' => $date->format('F j, Y, g:i a T'),
         ];
 
-        if ($expected->system) {
+        if ($expected->issystem) {
             switch ($expected->message) {
                 case 'enter':
                     $message['message'] = get_string('messageenter', 'chat', fullname($user));
@@ -297,8 +297,8 @@ class mod_chat_userdata_messages_test extends chat_testcase {
             CONTEXT_MODULE
         ];
 
-        $this->assertEquals($expected, messages::get_compatible_context_levels(),
-            "Chat message user_data item is expected to work with a wide range of contexts", .0, 10, true);
+        $this->assertEqualsCanonicalizing($expected, messages::get_compatible_context_levels(),
+            "Chat message user_data item is expected to work with a wide range of contexts");
     }
 
     public function test_it_purges_chat_messages_for_system_context() {

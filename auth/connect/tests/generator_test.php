@@ -91,7 +91,7 @@ class auth_connect_generator_testcase extends advanced_testcase {
         $this->assertCount(2, $DB->get_records('user', array()));
         $serveruser = $generator->get_fake_server_user();
         $this->assertCount(2, $DB->get_records('user', array()));
-        $this->assertInternalType('array', $serveruser);
+        $this->assertIsArray($serveruser);
         $serveruser = (object)$serveruser;
         $this->assertGreaterThan(10000 + get_admin()->id, $serveruser->id);
         $this->assertObjectHasAttribute('username', $serveruser);

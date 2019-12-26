@@ -30,10 +30,3 @@ $string['pluginname'] = 'Last Course Accessed';
 $string['lastcourseaccessed'] = 'Last Course Accessed';
 $string['last_course_accessed:addinstance'] = 'Add a new last course accessed block to this page';
 $string['last_course_accessed:myaddinstance'] = 'Add a new last course accessed block to the My Learning page';
-
-/*
- * @deprecated since Totara 10.0
- */
-$string['last_access_five_minutes'] = 'Within the last five minutes';
-$string['last_access_half_hour'] = 'Within the last half-hour';
-$string['last_access_hour'] = 'Within the last hour';

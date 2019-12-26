@@ -264,7 +264,7 @@ class course_enrolment_manager {
      * @return array Two-element array with SQL and params for WHERE clause
      */
     protected function get_filter_sql() {
-        global $DB;
+        global $DB, $CFG;
 
         // Search condition.
         $extrafields = get_extra_user_fields($this->get_context());
@@ -295,23 +295,26 @@ class course_enrolment_manager {
             }
         }
 
+        // Totara: for enrol_round_time_for_query()
+        require_once($CFG->dirroot . '/lib/enrollib.php');
+
         // Status condition.
         if ($this->statusfilter === ENROL_USER_ACTIVE) {
             $sql .= " AND ue.status = :active AND e.status = :enabled AND ue.timestart < :now1
                     AND (ue.timeend = 0 OR ue.timeend > :now2)";
-            $now = round(time(), -2); // rounding helps caching in DB
+            list($now1, $now2) = enrol_round_time_for_query(); // rounding helps caching in DB
             $params += array('enabled' => ENROL_INSTANCE_ENABLED,
                              'active' => ENROL_USER_ACTIVE,
-                             'now1' => $now,
-                             'now2' => $now);
+                             'now1' => $now1,
+                             'now2' => $now2);
         } else if ($this->statusfilter === ENROL_USER_SUSPENDED) {
             $sql .= " AND (ue.status = :inactive OR e.status = :disabled OR ue.timestart > :now1
                     OR (ue.timeend <> 0 AND ue.timeend < :now2))";
-            $now = round(time(), -2); // rounding helps caching in DB
+            list($now1, $now2) = enrol_round_time_for_query(); // rounding helps caching in DB
             $params += array('disabled' => ENROL_INSTANCE_DISABLED,
                              'inactive' => ENROL_USER_SUSPENDED,
-                             'now1' => $now,
-                             'now2' => $now);
+                             'now1' => $now1,
+                             'now2' => $now2);
         }
 
         return array($sql, $params);

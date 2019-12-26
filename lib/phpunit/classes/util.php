@@ -223,6 +223,7 @@ class phpunit_util extends testing_util {
             // Appraisal detail report source class exists, reset its caches just in case they have been used.
             rb_source_appraisal_detail::reset_cache();
         }
+        \totara_catalog\cache_handler::reset_all_caches();
 
         \core_search\manager::clear_static();
         core_user::reset_caches();
@@ -256,6 +257,10 @@ class phpunit_util extends testing_util {
         if (class_exists('reportbuilder', false)) {
             reportbuilder::reset_caches();
             reportbuilder::reset_source_object_cache();
+
+            // Reset source object helpers, these cache data used to create columms and filters.
+            \totara_customfield\report_builder_field_loader::reset();
+            \core_tag\report_builder_tag_loader::reset();
         }
 
         //TODO MDL-25290: add more resets here and probably refactor them to new core function
@@ -390,6 +395,9 @@ class phpunit_util extends testing_util {
      * @return void
      */
     public static function bootstrap_moodle_info() {
+        if (defined('PHPUNIT_PARATEST') and PHPUNIT_PARATEST) {
+            return;
+        }
         echo self::get_site_info();
     }
 
@@ -626,7 +634,15 @@ class phpunit_util extends testing_util {
             <testsuite name="@component@_testsuite">
                 <directory suffix="_test.php">.</directory>
             </testsuite>
-        </testsuites>';
+        </testsuites>
+        <filter>
+            <whitelist processUncoveredFilesFromWhitelist="false">
+                <directory suffix=".php">.</directory>
+                <exclude>
+                    <directory suffix="_test.php">.</directory>
+                </exclude>
+            </whitelist>
+        </filter>';
 
         // Start a sequence between 100000 and 199000 to ensure each call to init produces
         // different ids in the database.  This reduces the risk that hard coded values will

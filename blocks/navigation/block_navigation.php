@@ -95,15 +95,6 @@ class block_navigation extends block_base {
     }
 
     /**
-     * Find out if an instance can be docked.
-     *
-     * @return bool true or false depending on whether the instance can be docked or not.
-     */
-    function instance_can_be_docked() {
-        return (parent::instance_can_be_docked() && (empty($this->config->enabledock) || $this->config->enabledock=='yes'));
-    }
-
-    /**
      * Gets Javascript that may be required for navigation
      */
     function get_required_javascript() {

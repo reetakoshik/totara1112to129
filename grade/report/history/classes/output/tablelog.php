@@ -474,6 +474,12 @@ class tablelog extends \table_sql implements \renderable {
             $histories = $DB->get_records_sql($sql, $params, $this->pagesize * $this->page, $this->pagesize);
         }
         foreach ($histories as $history) {
+
+            // TOTARA - Escape potential XSS in idnumber field.
+            if (!empty($history->idnumber)) {
+                $history->idnumber = s($history->idnumber);
+            }
+
             $this->rawdata[] = $history;
         }
         // Set initial bars.

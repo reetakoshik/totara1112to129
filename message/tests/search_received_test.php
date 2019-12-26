@@ -41,6 +41,12 @@ class message_received_search_testcase extends advanced_testcase {
      */
     protected $messagereceivedareaid = null;
 
+    protected function tearDown() {
+        $this->messagereceivedareaid = null;
+
+        parent::tearDown();
+    }
+
     /**
      * Setting up the test environment
      * @return void

@@ -26,6 +26,10 @@ $string['settings-header-logo'] = 'Logo';
 $string['settings-header-logodescription'] = 'Upload logo';
 $string['settings-header-badges'] = 'Enable badges';
 $string['settings-header-badgesdescription'] = 'Enable badges';
+
+$string['settings-header-rmbtitle'] = 'Remove Block Title';
+$string['settings-header-rmbtitledescription'] = '&nbsp;';
+
 $string['settings-header-alerts'] = 'Enable alerts';
 $string['settings-header-alertsdescription'] = 'Enable alerts';
 $string['settings-header-notifications'] = 'Enable notifications';
@@ -34,6 +38,8 @@ $string['settings-header-messages'] = 'Enable messages';
 $string['settings-header-messagesdescription'] = 'Enable messages';
 $string['settings-header-search'] = 'Enable search';
 $string['settings-header-searchdescription'] = 'Enable search';
+$string['settings-block-headerborder'] = 'Disable header border';
+$string['settings-block-headerborderdescription'] = 'Disable header border';
 
 $string['settings-theme-name'] = 'Theme';
 $string['settings-theme-palette'] = 'Palette';
@@ -99,3 +105,7 @@ $string['settings-footer-color'] = 'Footer color';
 $string['settings-footer-colordescription'] = 'Footer color';
 
 $string['resettouronpage'] = 'Reset user tour on this page';
+$string['region-top'] = 'Top';
+$string['region-bottom'] = 'Bottom';
+$string['courseimage'] = 'Image <b>(recommended size 25x25 pixels)</b>';
+$string['programimage'] = 'Image <b>(recommended size 25x25 pixels)</b>';

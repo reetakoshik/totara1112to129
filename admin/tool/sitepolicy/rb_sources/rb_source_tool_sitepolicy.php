@@ -30,9 +30,6 @@ global $CFG;
 require_once($CFG->dirroot . '/admin/tool/sitepolicy/rb_sources/rb_filter_policy_select_version.php');
 
 class rb_source_tool_sitepolicy extends rb_base_source {
-    public $base, $joinlist, $columnoptions, $filteroptions;
-    public $contentoptions, $paramoptions, $requiredcolumns;
-
     public function __construct($groupid, rb_global_restriction_set $globalrestrictionset = null) {
         $this->usedcomponents[] = 'tool_sitepolicy';
 
@@ -127,7 +124,7 @@ class rb_source_tool_sitepolicy extends rb_base_source {
 
         );
         // optionally include some standard joins
-        $this->add_user_table_to_joinlist($joinlist, 'base', 'userid');
+        $this->add_core_user_tables($joinlist, 'base', 'userid');
         return $joinlist;
     }
 
@@ -142,7 +139,8 @@ class rb_source_tool_sitepolicy extends rb_base_source {
                 'primarytitle',
                 get_string('policytitle', 'rb_source_tool_sitepolicy'),
                 'primarylocalisedpolicy.title',
-                array('joins' => 'primarylocalisedpolicy')),
+                array('joins' => 'primarylocalisedpolicy',
+                      'displayfunc' => 'format_string')),
 
             new rb_column_option(
                 'primarypolicy',
@@ -157,14 +155,16 @@ class rb_source_tool_sitepolicy extends rb_base_source {
                 'primarycreatedby',
                 get_string('policycreatedby', 'rb_source_tool_sitepolicy'),
                 'author.username',
-                array('joins' => 'author')),
+                array('joins' => 'author',
+                      'displayfunc' => 'plaintext')),
 
             new rb_column_option(
                 'primarypolicy',
                 'versionnumber',
                 get_string('policyversion', 'rb_source_tool_sitepolicy'),
                 'policyversion.versionnumber',
-                array('joins' => 'policyversion')),
+                array('joins' => 'policyversion',
+                      'displayfunc' => 'plaintext')),
 
             new rb_column_option(
                 'primarypolicy',
@@ -191,14 +191,16 @@ class rb_source_tool_sitepolicy extends rb_base_source {
                 'publishedby',
                 get_string('policypublishedby', 'rb_source_tool_sitepolicy'),
                 'publisher.username',
-                array('joins' => 'publisher')),
+                array('joins' => 'publisher',
+                      'displayfunc' => 'plaintext')),
 
             new rb_column_option(
                 'primarypolicy',
                 'primarystatement',
                 get_string('policystatement', 'rb_source_tool_sitepolicy'),
                 'primarylocalisedconsent.statement',
-                array('joins' => 'primarylocalisedconsent')),
+                array('joins' => 'primarylocalisedconsent',
+                      'displayfunc' => 'format_text')),
 
             new rb_column_option(
                 'primarypolicy',
@@ -218,7 +220,7 @@ class rb_source_tool_sitepolicy extends rb_base_source {
                 get_string('userreponseconsented', 'rb_source_tool_sitepolicy'),
                 'base.hasconsented',
                 array(
-                    'displayfunc' => 'yes_no')),
+                    'displayfunc' => 'yes_or_no')),
 
             new rb_column_option(
                 'userpolicy',
@@ -233,7 +235,8 @@ class rb_source_tool_sitepolicy extends rb_base_source {
                 'statement',
                 get_string('userreponsestatement', 'rb_source_tool_sitepolicy'),
                 'localisedconsent.statement',
-                array('joins' => 'localisedconsent')),
+                array('joins' => 'localisedconsent',
+                      'displayfunc' => 'format_text')),
 
             new rb_column_option(
                 'userpolicy',
@@ -254,7 +257,7 @@ class rb_source_tool_sitepolicy extends rb_base_source {
                 'base.timeconsented',
                 array('displayfunc' => 'nice_datetime')),
             );
-        $this->add_user_fields_to_columns($columnoptions);
+        $this->add_core_user_columns($columnoptions);
         return $columnoptions;
     }
 
@@ -332,7 +335,7 @@ class rb_source_tool_sitepolicy extends rb_base_source {
                 ]),
 
         );
-        $this->add_user_fields_to_filters($filteroptions);
+        $this->add_core_user_filters($filteroptions);
         return $filteroptions;
     }
 

@@ -24,6 +24,7 @@
 global $DB, $PAGE;
 
 require_once(__DIR__ . '/../../config.php');
+require_once($CFG->dirroot . '/totara/completioneditor/classes/course_editor.php');
 
 $section = optional_param('section', 'overview', PARAM_ALPHA);
 $courseid = required_param('courseid', PARAM_INT);
@@ -198,9 +199,9 @@ if ($form->is_cancelled()) {
 
         if (!empty($cccc)) {
             if (empty($cccc->id)) {
-                \core_completion\helper::write_criteria_completion($cccc, 'Crit compl manually created');
+                \core_completion\helper::write_criteria_completion($cccc, 'Crit compl manually created', true);
             } else {
-                \core_completion\helper::write_criteria_completion($cccc, 'Crit compl manually updated');
+                \core_completion\helper::write_criteria_completion($cccc, 'Crit compl manually updated', true);
             }
         }
 

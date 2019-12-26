@@ -14,13 +14,13 @@ Feature: Apply audience membership rules using custom date field
       | user2    | user2     | two      | user2@example.com |
       | user3    | user3     | three    | user3@example.com |
     And I log in as "admin"
-    And I navigate to "User profile fields" node in "Site administration > Users > Accounts"
+    And I navigate to "User profile fields" node in "Site administration > Users"
     And I select "Date (no timezone)" from the "Create a new profile field" singleselect
     And I set the following fields to these values:
       | shortname | joindate  |
       | Name      | Join Date |
     And I press "Save changes"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I click on "Edit" "link" in the "user1" "table_row"
     And I set the following fields to these values:
       | profile_field_joindate[enabled] | 1    |
@@ -35,7 +35,7 @@ Feature: Apply audience membership rules using custom date field
       | profile_field_joindate[month]   | July |
       | profile_field_joindate[year]    | 2015 |
     And I press "Update profile"
-    And I navigate to "Audiences" node in "Site administration > Users > Accounts"
+    And I navigate to "Audiences" node in "Site administration > Audiences"
     And I follow "audience1"
     And I follow "Rule sets"
 

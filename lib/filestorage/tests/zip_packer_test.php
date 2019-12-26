@@ -29,46 +29,70 @@ global $CFG;
 require_once($CFG->libdir . '/filestorage/file_progress.php');
 
 class core_files_zip_packer_testcase extends advanced_testcase implements file_progress {
-    protected $testfile;
-    protected $files;
-
     /**
      * @var array Progress information passed to the progress reporter
      */
     protected $progress;
 
     protected function tearDown() {
-        $this->testfile = null;
-        $this->files = null;
         $this->progress = null;
         parent::tearDown();
     }
 
-    protected function setUp() {
-        parent::setUp();
-
-        $this->testfile = __DIR__.'/fixtures/test.txt';
+    public function create_test_files() {
+        $testfile = __DIR__.'/fixtures/test.txt';
 
         $fs = get_file_storage();
         $context = context_system::instance();
         if (!$file = $fs->get_file($context->id, 'phpunit', 'data', 0, '/', 'test.txt')) {
             $file = $fs->create_file_from_pathname(
                 array('contextid'=>$context->id, 'component'=>'phpunit', 'filearea'=>'data', 'itemid'=>0, 'filepath'=>'/', 'filename'=>'test.txt'),
-                $this->testfile);
+                $testfile);
         }
 
-        $this->files = array(
-            'test.test' => $this->testfile,
-            'testíček.txt' => $this->testfile,
-            'Prüfung.txt' => $this->testfile,
-            '测试.txt' => $this->testfile,
-            '試験.txt' => $this->testfile,
+        return [
+            'test.test' => $testfile,
+            'testíček.txt' => $testfile,
+            'Prüfung.txt' => $testfile,
+            '测试.txt' => $testfile,
+            '試験.txt' => $testfile,
             'Žluťoučký/Koníček.txt' => $file,
-        );
+        ];
+    }
+
+    /**
+     * Create test files and archive them.
+     *
+     * @return bool|stored_file
+     */
+    public function create_test_archive_stored_file() {
+        $context = context_system::instance();
+
+        $files = $this->create_test_files();
+
+        $packer = get_file_packer('application/zip');
+        return $packer->archive_to_storage($files, $context->id, 'phpunit', 'test', 0, '/', 'archive.zip');
+    }
+
+    /**
+     * Create test files and archive them.
+     *
+     * @return string file name
+     */
+    public function create_test_archive_file() {
+        global $CFG;
+
+        $files = $this->create_test_files();
+
+        $archive = "$CFG->tempdir/archive.zip";
+
+        $packer = get_file_packer('application/zip');
+        $packer->archive_to_pathname($files, $archive);
+
+        return $archive;
     }
 
     public function test_get_packer() {
-        $this->resetAfterTest(false);
         $packer = get_file_packer();
         $this->assertInstanceOf('zip_packer', $packer);
 
@@ -76,12 +100,7 @@ class core_files_zip_packer_testcase extends advanced_testcase implements file_p
         $this->assertInstanceOf('zip_packer', $packer);
     }
 
-    /**
-     * @depends test_get_packer
-     */
     public function test_list_files() {
-        $this->resetAfterTest(false);
-
         $files = array(
             __DIR__.'/fixtures/test_moodle_22.zip',
             __DIR__.'/fixtures/test_moodle.zip',
@@ -101,16 +120,18 @@ class core_files_zip_packer_testcase extends advanced_testcase implements file_p
 
         $packer = get_file_packer('application/zip');
 
+        $testfiles = $this->create_test_files();
+
         foreach ($files as $archive) {
             $archivefiles = $packer->list_files($archive);
             $this->assertTrue(is_array($archivefiles), "Archive not extracted properly: ".basename($archive).' ');
-            $this->assertTrue(count($this->files) === count($archivefiles) or count($this->files) === count($archivefiles) - 1); // Some zippers create empty dirs.
+            $this->assertTrue(count($testfiles) === count($archivefiles) or count($testfiles) === count($archivefiles) - 1); // Some zippers create empty dirs.
             foreach ($archivefiles as $file) {
                 if ($file->pathname === 'Žluťoučký/') {
                     // Some zippers create empty dirs.
                     continue;
                 }
-                $this->assertArrayHasKey($file->pathname, $this->files, "File $file->pathname not extracted properly: ".basename($archive).' ');
+                $this->assertArrayHasKey($file->pathname, $testfiles, "File $file->pathname not extracted properly: ".basename($archive).' ');
             }
         }
 
@@ -139,27 +160,24 @@ class core_files_zip_packer_testcase extends advanced_testcase implements file_p
         $this->assertSame(array(), $archivefiles);
     }
 
-    /**
-     * @depends test_list_files
-     */
     public function test_archive_to_pathname() {
         global $CFG;
 
-        $this->resetAfterTest(false);
+        $testfiles = $this->create_test_files();
 
         $packer = get_file_packer('application/zip');
         $archive = "$CFG->tempdir/archive.zip";
 
         $this->assertFileNotExists($archive);
-        $result = $packer->archive_to_pathname($this->files, $archive);
+        $result = $packer->archive_to_pathname($testfiles, $archive);
         $this->assertTrue($result);
         $this->assertFileExists($archive);
 
         $archivefiles = $packer->list_files($archive);
         $this->assertTrue(is_array($archivefiles));
-        $this->assertEquals(count($this->files), count($archivefiles));
+        $this->assertEquals(count($testfiles), count($archivefiles));
         foreach ($archivefiles as $file) {
-            $this->assertArrayHasKey($file->pathname, $this->files);
+            $this->assertArrayHasKey($file->pathname, $testfiles);
         }
 
         // Test invalid files parameter.
@@ -197,93 +215,84 @@ class core_files_zip_packer_testcase extends advanced_testcase implements file_p
         unlink($archive);
     }
 
-    /**
-     * @depends test_archive_to_pathname
-     */
     public function test_archive_to_storage() {
-        $this->resetAfterTest(false);
+        $testfiles = $this->create_test_files();
 
         $packer = get_file_packer('application/zip');
         $fs = get_file_storage();
         $context = context_system::instance();
 
         $this->assertFalse($fs->file_exists($context->id, 'phpunit', 'test', 0, '/', 'archive.zip'));
-        $result = $packer->archive_to_storage($this->files, $context->id, 'phpunit', 'test', 0, '/', 'archive.zip');
+        $result = $packer->archive_to_storage($testfiles, $context->id, 'phpunit', 'test', 0, '/', 'archive.zip');
         $this->assertInstanceOf('stored_file', $result);
         $this->assertTrue($fs->file_exists($context->id, 'phpunit', 'test', 0, '/', 'archive.zip'));
 
         $archivefiles = $result->list_files($packer);
         $this->assertTrue(is_array($archivefiles));
-        $this->assertEquals(count($this->files), count($archivefiles));
+        $this->assertEquals(count($testfiles), count($archivefiles));
         foreach ($archivefiles as $file) {
-            $this->assertArrayHasKey($file->pathname, $this->files);
+            $this->assertArrayHasKey($file->pathname, $testfiles);
         }
     }
 
-    /**
-     * @depends test_archive_to_storage
-     */
     public function test_extract_to_pathname() {
         global $CFG;
 
-        $this->resetAfterTest(false);
+        $testfile = __DIR__.'/fixtures/test.txt';
+        $testfiles = $this->create_test_files();
+        $archive = $this->create_test_archive_file();
 
         $packer = get_file_packer('application/zip');
         $fs = get_file_storage();
         $context = context_system::instance();
 
         $target = "$CFG->tempdir/test/";
-        $testcontent = file_get_contents($this->testfile);
+        $testcontent = file_get_contents($testfile);
 
         @mkdir($target, $CFG->directorypermissions);
         $this->assertTrue(is_dir($target));
 
-        $archive = "$CFG->tempdir/archive.zip";
         $this->assertFileExists($archive);
         $result = $packer->extract_to_pathname($archive, $target);
         $this->assertTrue(is_array($result));
-        $this->assertEquals(count($this->files), count($result));
-        foreach ($this->files as $file => $unused) {
+        $this->assertEquals(count($testfiles), count($result));
+        foreach ($testfiles as $file => $unused) {
             $this->assertTrue($result[$file]);
             $this->assertFileExists($target.$file);
             $this->assertSame($testcontent, file_get_contents($target.$file));
         }
 
-        $archive = $fs->get_file($context->id, 'phpunit', 'test', 0, '/', 'archive.zip');
+        $archive = $this->create_test_archive_stored_file();
         $this->assertNotEmpty($archive);
         $result = $packer->extract_to_pathname($archive, $target);
         $this->assertTrue(is_array($result));
-        $this->assertEquals(count($this->files), count($result));
-        foreach ($this->files as $file => $unused) {
+        $this->assertEquals(count($testfiles), count($result));
+        foreach ($testfiles as $file => $unused) {
             $this->assertTrue($result[$file]);
             $this->assertFileExists($target.$file);
             $this->assertSame($testcontent, file_get_contents($target.$file));
         }
     }
 
-    /**
-     * @depends test_archive_to_storage
-     */
     public function test_extract_to_pathname_onlyfiles() {
         global $CFG;
 
-        $this->resetAfterTest(false);
+        $testfile = __DIR__.'/fixtures/test.txt';
+        $testfiles = $this->create_test_files();
+        $archive = $this->create_test_archive_file();
 
         $packer = get_file_packer('application/zip');
-        $fs = get_file_storage();
-        $context = context_system::instance();
 
         $target = "$CFG->tempdir/onlyfiles/";
-        $testcontent = file_get_contents($this->testfile);
+        $testcontent = file_get_contents($testfile);
 
         @mkdir($target, $CFG->directorypermissions);
         $this->assertTrue(is_dir($target));
 
         $onlyfiles = array('test', 'test.test', 'Žluťoučký/Koníček.txt', 'Idontexist');
-        $willbeextracted = array_intersect(array_keys($this->files), $onlyfiles);
-        $donotextract = array_diff(array_keys($this->files), $onlyfiles);
+        $willbeextracted = array_intersect(array_keys($testfiles), $onlyfiles);
+        $donotextract = array_diff(array_keys($testfiles), $onlyfiles);
 
-        $archive = "$CFG->tempdir/archive.zip";
         $this->assertFileExists($archive);
         $result = $packer->extract_to_pathname($archive, $target, $onlyfiles);
         $this->assertTrue(is_array($result));
@@ -301,31 +310,20 @@ class core_files_zip_packer_testcase extends advanced_testcase implements file_p
 
     }
 
-    /**
-     * @depends test_archive_to_storage
-     */
     public function test_extract_to_pathname_returnvalue_successful() {
-        global $CFG;
-
-        $this->resetAfterTest(false);
+        $archive = $this->create_test_archive_file();
 
         $packer = get_file_packer('application/zip');
 
         $target = make_request_directory();
 
-        $archive = "$CFG->tempdir/archive.zip";
         $this->assertFileExists($archive);
         $result = $packer->extract_to_pathname($archive, $target, null, null, true);
         $this->assertTrue($result);
     }
 
-    /**
-     * @depends test_archive_to_storage
-     */
     public function test_extract_to_pathname_returnvalue_failure() {
         global $CFG;
-
-        $this->resetAfterTest(false);
 
         $packer = get_file_packer('application/zip');
 
@@ -336,38 +334,36 @@ class core_files_zip_packer_testcase extends advanced_testcase implements file_p
         $this->assertFalse($result);
     }
 
-    /**
-     * @depends test_archive_to_storage
-     */
     public function test_extract_to_storage() {
         global $CFG;
 
-        $this->resetAfterTest(false);
+        $testfile = __DIR__.'/fixtures/test.txt';
+        $testfiles = $this->create_test_files();
 
         $packer = get_file_packer('application/zip');
         $fs = get_file_storage();
         $context = context_system::instance();
 
-        $testcontent = file_get_contents($this->testfile);
+        $testcontent = file_get_contents($testfile);
 
-        $archive = $fs->get_file($context->id, 'phpunit', 'test', 0, '/', 'archive.zip');
+        $archive = $this->create_test_archive_stored_file();
         $this->assertNotEmpty($archive);
         $result = $packer->extract_to_storage($archive, $context->id, 'phpunit', 'target', 0, '/');
         $this->assertTrue(is_array($result));
-        $this->assertEquals(count($this->files), count($result));
-        foreach ($this->files as $file => $unused) {
+        $this->assertEquals(count($testfiles), count($result));
+        foreach ($testfiles as $file => $unused) {
             $this->assertTrue($result[$file]);
             $stored_file = $fs->get_file_by_hash(sha1("/$context->id/phpunit/target/0/$file"));
             $this->assertInstanceOf('stored_file', $stored_file);
             $this->assertSame($testcontent, $stored_file->get_content());
         }
 
-        $archive = "$CFG->tempdir/archive.zip";
+        $archive = $this->create_test_archive_file();
         $this->assertFileExists($archive);
         $result = $packer->extract_to_storage($archive, $context->id, 'phpunit', 'target', 0, '/');
         $this->assertTrue(is_array($result));
-        $this->assertEquals(count($this->files), count($result));
-        foreach ($this->files as $file => $unused) {
+        $this->assertEquals(count($testfiles), count($result));
+        foreach ($testfiles as $file => $unused) {
             $this->assertTrue($result[$file]);
             $stored_file = $fs->get_file_by_hash(sha1("/$context->id/phpunit/target/0/$file"));
             $this->assertInstanceOf('stored_file', $stored_file);
@@ -376,13 +372,8 @@ class core_files_zip_packer_testcase extends advanced_testcase implements file_p
         unlink($archive);
     }
 
-    /**
-     * @depends test_extract_to_storage
-     */
     public function test_add_files() {
         global $CFG;
-
-        $this->resetAfterTest(false);
 
         $packer = get_file_packer('application/zip');
         $archive = "$CFG->tempdir/archive.zip";
@@ -485,9 +476,6 @@ class core_files_zip_packer_testcase extends advanced_testcase implements file_p
         $this->assertFileNotExists($archive);
     }
 
-    /**
-     * @depends test_add_files
-     */
     public function test_open_archive() {
         global $CFG;
 
@@ -539,17 +527,18 @@ class core_files_zip_packer_testcase extends advanced_testcase implements file_p
         global $CFG;
 
         // Set up.
-        $this->resetAfterTest(true);
         $packer = get_file_packer('application/zip');
         $archive = "$CFG->tempdir/archive.zip";
         $context = context_system::instance();
 
+        $testfiles = $this->create_test_files();
+
         // Archive to pathname.
         $this->progress = array();
-        $result = $packer->archive_to_pathname($this->files, $archive, true, $this);
+        $result = $packer->archive_to_pathname($testfiles, $archive, true, $this);
         $this->assertTrue($result);
         // Should send progress at least once per file.
-        $this->assertTrue(count($this->progress) >= count($this->files));
+        $this->assertTrue(count($this->progress) >= count($testfiles));
         // Each progress will be indeterminate.
         $this->assertEquals(
                 array(file_progress::INDETERMINATE, file_progress::INDETERMINATE),
@@ -573,10 +562,10 @@ class core_files_zip_packer_testcase extends advanced_testcase implements file_p
 
         // Archive to storage.
         $this->progress = array();
-        $archivefile = $packer->archive_to_storage($this->files, $context->id,
+        $archivefile = $packer->archive_to_storage($testfiles, $context->id,
                 'phpunit', 'test', 0, '/', 'archive.zip', null, true, $this);
         $this->assertInstanceOf('stored_file', $archivefile);
-        $this->assertTrue(count($this->progress) >= count($this->files));
+        $this->assertTrue(count($this->progress) >= count($testfiles));
         $this->assertEquals(
                 array(file_progress::INDETERMINATE, file_progress::INDETERMINATE),
                 $this->progress[0]);
@@ -587,24 +576,24 @@ class core_files_zip_packer_testcase extends advanced_testcase implements file_p
         check_dir_exists($target);
         $result = $packer->extract_to_pathname($archive, $target, null, $this);
         remove_dir($target);
-        $this->assertEquals(count($this->files), count($result));
-        $this->assertTrue(count($this->progress) >= count($this->files));
+        $this->assertEquals(count($testfiles), count($result));
+        $this->assertTrue(count($this->progress) >= count($testfiles));
         $this->check_progress_toward_max();
 
         // Extract to storage (from storage).
         $this->progress = array();
         $result = $packer->extract_to_storage($archivefile, $context->id,
                 'phpunit', 'target', 0, '/', null, $this);
-        $this->assertEquals(count($this->files), count($result));
-        $this->assertTrue(count($this->progress) >= count($this->files));
+        $this->assertEquals(count($testfiles), count($result));
+        $this->assertTrue(count($this->progress) >= count($testfiles));
         $this->check_progress_toward_max();
 
         // Extract to storage (from path).
         $this->progress = array();
         $result = $packer->extract_to_storage($archive, $context->id,
                 'phpunit', 'target', 0, '/', null, $this);
-        $this->assertEquals(count($this->files), count($result));
-        $this->assertTrue(count($this->progress) >= count($this->files));
+        $this->assertEquals(count($testfiles), count($result));
+        $this->assertTrue(count($this->progress) >= count($testfiles));
         $this->check_progress_toward_max();
 
         // Wipe created disk file.

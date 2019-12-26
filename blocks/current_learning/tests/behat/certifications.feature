@@ -10,11 +10,11 @@ Feature: User certifications and their courses appear correctly in the current l
       | username | firstname | lastname | email |
       | user001 | fn_001 | ln_001 | user001@example.com |
     And the following "courses" exist:
-      | fullname           | shortname | format | enablecompletion | completionstartonenrol |
-      | Certify Course 1   | CC1       | topics | 1                | 1                      |
-      | Certify Course 2   | CC2       | topics | 1                | 1                      |
-      | Recertify Course 1 | RC1       | topics | 1                | 1                      |
-      | Recertify Course 2 | RC2       | topics | 1                | 1                      |
+      | fullname           | shortname | format | enablecompletion |
+      | Certify Course 1   | CC1       | topics | 1                |
+      | Certify Course 2   | CC2       | topics | 1                |
+      | Recertify Course 1 | RC1       | topics | 1                |
+      | Recertify Course 2 | RC2       | topics | 1                |
     And I log in as "admin"
     And I set the following administration settings values:
       | menulifetime | 0 |
@@ -22,15 +22,15 @@ Feature: User certifications and their courses appear correctly in the current l
     And I set self completion for "Certify Course 2" in the "Miscellaneous" category
     And I set self completion for "Recertify Course 1" in the "Miscellaneous" category
     And I set self completion for "Recertify Course 2" in the "Miscellaneous" category
-    And I click on "Certifications" in the totara menu
-    And I press "Create Certification"
+    And I navigate to "Manage certifications" node in "Site administration > Certifications"
+    And I press "Add new certification"
     And I set the following fields to these values:
       | Full name  | Test Certification |
       | Short name | tstcert            |
     And I press "Save changes"
 
     # Add CS 1.
-    And I click on "Content" "link"
+    And I switch to "Content" tab
     And I click on "addcontent_ce" "button" in the "#programcontent_ce" "css_element"
     And I click on "Miscellaneous" "link" in the "addmulticourse" "totaradialogue"
     And I click on "Certify Course 1" "link" in the "addmulticourse" "totaradialogue"
@@ -43,7 +43,7 @@ Feature: User certifications and their courses appear correctly in the current l
     And I click on "Ok" "button" in the "addmulticourse" "totaradialogue"
 
     # Use OR operator.
-    And I click on "or" "option" in the ".nextsetoperator-and select" "css_element"
+    And I set the field with xpath "//div[@class='nextsetoperator-and']/child::select" to "or"
 
     # Add recert CS.
     And I click on "addcontent_rc" "button" in the "#programcontent_rc" "css_element"
@@ -57,9 +57,9 @@ Feature: User certifications and their courses appear correctly in the current l
     And I set the following fields to these values:
       | activenum | 6 |
       | windownum | 2 |
-    And I click on "Month(s)" "option" in the "#id_activeperiod" "css_element"
-    And I click on "Month(s)" "option" in the "#id_windowperiod" "css_element"
-    And I click on "Use certification completion date" "option" in the "#id_recertifydatetype" "css_element"
+    And I set the field "activeperiod" to "Month(s)"
+    And I set the field "windowperiod" to "Month(s)"
+    And I set the field "recertifydatetype" to "Use certification completion date"
     And I press "Save changes"
     And I click on "Save all changes" "button"
     And I log out

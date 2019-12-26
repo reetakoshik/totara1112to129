@@ -37,9 +37,7 @@ Feature: Minimum Seminar bookings
       | Default minimum bookings | 5 |
 
   Scenario: Confirm default minimum bookings is set correctly
-    Given I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I click on "Turn editing on" "button"
+    Given I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | name | test activity |
     And I follow "View all events"
@@ -70,9 +68,7 @@ Feature: Minimum Seminar bookings
     And I click on "Editing Trainer" "text" in the "#admin-facetoface_session_rolesnotify" "css_element"
     And I click on "<notification to>" "checkbox" in the "#admin-facetoface_session_rolesnotify" "css_element"
     And I press "Save changes"
-    Given I click on "Find Learning" in the totara menu
-    And I follow "Course 1"
-    And I click on "Turn editing on" "button"
+    Given I am on "Course 1" course homepage with editing mode on
     And I add a "Seminar" to section "1" and I fill the form with:
       | name | test activity |
     And I follow "View all events"
@@ -99,11 +95,12 @@ Feature: Minimum Seminar bookings
     And I click on "Student One, student1@example.com" "option"
     And I click on "Trainer One, trainer1@example.com" "option"
     And I click on "Teacher One, teacher1@example.com" "option"
-    And I click on "Add" "button"
+    And I press exact "add"
     And I click on "Continue" "button"
     And I click on "Confirm" "button"
     And I should see "Bulk add attendees success"
     And I run the scheduled task "mod_facetoface\task\send_notifications_task"
+    And I run all adhoc tasks
 
     # Confirm that the alert was sent.
     And I log out
@@ -141,15 +138,12 @@ Feature: Minimum Seminar bookings
     And I click on "Dashboard" in the totara menu
     And I should not see "Event under minimum bookings for: test activity"
 
-  Examples:
-    | notification to                        | student    | trainer    | teacher    | creator    | manager    |
-    | Learner                                | should     | should not | should not | should not | should not |
+    Examples:
+      | notification to                        | student    | trainer    | teacher    | creator    | manager    |
+      | Learner                                | should     | should not | should not | should not | should not |
 
-    # Trainer, otherwise it clicks on "Editing Trainer"
-    | id_s__facetoface_session_rolesnotify_4 | should not | should     | should not | should not | should not |
-    | Editing Trainer                        | should not | should not | should     | should not | should not |
-    | Course creator                         | should not | should not | should not | should     | should not |
-    | Site Manager                           | should not | should not | should not | should not | should     |
-
-
-
+      # Trainer, otherwise it clicks on "Editing Trainer"
+      | id_s__facetoface_session_rolesnotify_4 | should not | should     | should not | should not | should not |
+      | Editing Trainer                        | should not | should not | should     | should not | should not |
+      | Course creator                         | should not | should not | should not | should     | should not |
+      | Site Manager                           | should not | should not | should not | should not | should     |

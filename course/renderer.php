@@ -452,7 +452,7 @@ class core_course_renderer extends plugin_renderer_base {
      * @return string
      */
     public function course_section_cm_completion($course, &$completioninfo, cm_info $mod, $displayoptions = array()) {
-        global $CFG;
+        global $CFG, $USER;
         $output = '';
         if (!empty($displayoptions['hidecompletion']) || !isloggedin() || isguestuser() || !$mod->uservisible) {
             return $output;
@@ -496,6 +496,23 @@ class core_course_renderer extends plugin_renderer_base {
                 case COMPLETION_COMPLETE_FAIL:
                     $completionicon = 'auto-fail'; break;
             }
+            // Totara: If grade is hidden, do not show pass/fail, only complete.
+            if ($completiondata->completionstate == COMPLETION_COMPLETE_PASS || $completiondata->completionstate == COMPLETION_COMPLETE_FAIL) {
+                require_once($CFG->dirroot . "/lib/grade/grade_item.php");
+                $grade_item = grade_item::fetch(array('courseid' => $course->id, 'itemmodule' => $mod->modname, 'iteminstance' => $mod->instance));
+                if ($grade_item->is_hidden()) {
+                    $completionicon = 'auto-y';
+                } else {
+                    require_once($CFG->dirroot . "/lib/grade/grade_grade.php");
+                    $grades = grade_grade::fetch_users_grades($grade_item, array($USER->id));
+                    if (!empty($grades[$USER->id])) {
+                        $grade_grade = $grades[$USER->id];
+                        if ($grade_grade->is_hidden()) {
+                            $completionicon = 'auto-y';
+                        }
+                    }
+                }
+            }
         }
         if ($completionicon) {
             $formattedname = $mod->get_formatted_name();
@@ -535,11 +552,8 @@ class core_course_renderer extends plugin_renderer_base {
                     'type' => 'hidden', 'name' => 'modulename', 'value' => $formattedname));
                 $output .= html_writer::empty_tag('input', array(
                     'type' => 'hidden', 'name' => 'completionstate', 'value' => $newstate));
-                $output .= html_writer::empty_tag('input', array(
-                    'type' => 'image',
-                    'src' => $this->output->pix_url('i/completion-'.$completionicon),
-                    'alt' => $imgalt, 'title' => $imgtitle,
-                    'aria-live' => 'polite'));
+                $output .= html_writer::tag('button',
+                    $this->output->pix_icon('i/completion-' . $completionicon, $imgalt), array('class' => 'btn btn-link'));
                 $output .= html_writer::end_tag('div');
                 $output .= html_writer::end_tag('form');
 
@@ -1111,11 +1125,8 @@ class core_course_renderer extends plugin_renderer_base {
         }
         $content = '';
         $classes = trim('panel panel-default coursebox clearfix '. $additionalclasses);
-        if ($chelper->get_show_courses() >= self::COURSECAT_SHOW_COURSES_EXPANDED) {
-            $nametag = 'h3';
-        } else {
+        if ($chelper->get_show_courses() < self::COURSECAT_SHOW_COURSES_EXPANDED) {
             $classes .= ' collapsed';
-            $nametag = 'div';
         }
 
         // .coursebox
@@ -1138,7 +1149,7 @@ class core_course_renderer extends plugin_renderer_base {
             $coursename,
             array('class' => $dimmed, 'style' => 'background-image:url(' . totara_get_icon($course->id, TOTARA_ICON_TYPE_COURSE) . ')')
         );
-        $content .= html_writer::tag($nametag, $coursenamelink, array('class' => 'coursename'));
+        $content .= html_writer::tag('div', $coursenamelink, array('class' => 'coursename'));
 
         // If we display course in collapsed form but the course has summary or course contacts, display the link to the info page.
         $content .= html_writer::start_tag('div', array('class' => 'moreinfo'));
@@ -1710,13 +1721,13 @@ class core_course_renderer extends plugin_renderer_base {
         // Add action buttons
         $output .= $this->container_start('buttons');
         $context = get_category_or_system_context($coursecat->id);
-        if (has_capability('moodle/course:create', $context)) {
-            // Print link to create a new course, for the 1st available category.
-            if ($coursecat->id) {
-                $url = new moodle_url('/course/edit.php', array('category' => $coursecat->id, 'returnto' => 'category'));
-            } else {
-                $url = new moodle_url('/course/edit.php', array('category' => $CFG->defaultrequestcategory, 'returnto' => 'topcat'));
-            }
+
+        $wm = new \core_course\workflow_manager\coursecreate();
+        $params = ['category' => !empty($coursecat->id) ? $coursecat->id : $CFG->defaultrequestcategory];
+        $params['returnto'] = ($coursecat->id) ? 'category' : 'topcat';
+        $wm->set_params($params);
+        if ($wm->workflows_available()) {
+            $url = $wm->get_url();
             $output .= $this->single_button($url, get_string('addnewcourse'), 'get');
         }
         ob_start();
@@ -1909,11 +1920,13 @@ class core_course_renderer extends plugin_renderer_base {
     /**
      * Returns HTML to display one remote course
      *
+     * @deprecated since Totara 12, use the new structure block instead.
      * @param stdClass $course remote course information, contains properties:
            id, remoteid, shortname, fullname, hostid, summary, summaryformat, cat_name, hostname
      * @return string
      */
     protected function frontpage_remote_course(stdClass $course) {
+        debugging(__FUNCTION__ . ' is deprecated, please use the new structure block instance', DEBUG_DEVELOPER);
         $url = new moodle_url('/auth/mnet/jump.php', array(
             'hostid' => $course->hostid,
             'wantsurl' => '/course/view.php?id='. $course->remoteid
@@ -1947,10 +1960,12 @@ class core_course_renderer extends plugin_renderer_base {
     /**
      * Returns HTML to display one remote host
      *
+     * @deprecated since Totara 12, use the new structure block instead.
      * @param array $host host information, contains properties: name, url, count
      * @return string
      */
     protected function frontpage_remote_host($host) {
+        debugging(__FUNCTION__ . ' is deprecated, please use the new structure block instance', DEBUG_DEVELOPER);
         $output = '';
         $output .= html_writer::start_tag('div', array('class' => 'coursebox remotehost clearfix'));
         $output .= html_writer::start_tag('div', array('class' => 'info'));
@@ -1972,10 +1987,12 @@ class core_course_renderer extends plugin_renderer_base {
      *
      * Also lists remote courses or remote hosts if MNET authorisation is used
      *
+     * @deprecated since Totara 12, use the new structure block instead.
      * @return string
      */
     public function frontpage_my_courses() {
         global $USER, $CFG, $DB;
+        debugging(__FUNCTION__ . ' is deprecated, please use the new structure block instance', DEBUG_DEVELOPER);
 
         if (!isloggedin() or isguestuser()) {
             return '';
@@ -1999,10 +2016,10 @@ class core_course_renderer extends plugin_renderer_base {
         if (!empty($courses) || !empty($rcourses) || !empty($rhosts)) {
 
             $chelper = new coursecat_helper();
-            if (count($courses) > $CFG->frontpagecourselimit) {
+            if (count($courses) > 200) {
                 // There are more enrolled courses than we can display, display link to 'My courses'.
                 $totalcount = count($courses);
-                $courses = array_slice($courses, 0, $CFG->frontpagecourselimit, true);
+                $courses = array_slice($courses, 0, 200, true);
                 $chelper->set_courses_display_options(array(
                         'viewmoreurl' => new moodle_url('/totara/dashboard/'),
                         'viewmoretext' => new lang_string('mycourses')
@@ -2042,24 +2059,26 @@ class core_course_renderer extends plugin_renderer_base {
     /**
      * Returns HTML to print list of available courses for the frontpage
      *
+     * @deprecated since Totara 12, use the structure block instead.
      * @return string
      */
     public function frontpage_available_courses() {
         global $CFG;
+        debugging(__FUNCTION__ . ' is deprecated, please use the new structure block instance', DEBUG_DEVELOPER);
         require_once($CFG->libdir. '/coursecatlib.php');
 
         $chelper = new coursecat_helper();
         $chelper->set_show_courses(self::COURSECAT_SHOW_COURSES_EXPANDED)->
                 set_courses_display_options(array(
                     'recursive' => true,
-                    'limit' => $CFG->frontpagecourselimit,
+                    'limit' => 200,
                     'viewmoreurl' => new moodle_url('/course/index.php'),
                     'viewmoretext' => new lang_string('fulllistofcourses')));
 
         $chelper->set_attributes(array('class' => 'frontpage-course-list-all'));
         $courses = coursecat::get(0)->get_courses($chelper->get_courses_display_options());
         $totalcount = coursecat::get(0)->get_courses_count($chelper->get_courses_display_options());
-        if (!$totalcount && !$this->page->user_is_editing() && has_capability('moodle/course:create', context_system::instance())) {
+        if (!$totalcount && !$this->page->user_is_editing()) {
             // Print link to create a new course, for the 1st available category.
             return $this->add_new_course_button();
         }
@@ -2074,8 +2093,17 @@ class core_course_renderer extends plugin_renderer_base {
     public function add_new_course_button() {
         global $CFG;
         // Print link to create a new course, for the 1st available category.
+        $wm = new \core_course\workflow_manager\coursecreate();
+        $wm->set_params([
+            'category' => $CFG->defaultrequestcategory,
+            'returnto' => 'topcat',
+        ]);
+        $url = $wm->get_url();
+        if (!$wm->workflows_available()) {
+            return '';
+        }
+
         $output = $this->container_start('buttons');
-        $url = new moodle_url('/course/edit.php', array('category' => $CFG->defaultrequestcategory, 'returnto' => 'topcat'));
         $output .= $this->single_button($url, get_string('addnewcourse'), 'get');
         $output .= $this->container_end('buttons');
         return $output;
@@ -2084,13 +2112,15 @@ class core_course_renderer extends plugin_renderer_base {
     /**
      * Returns HTML to print tree with course categories and courses for the frontpage
      *
+     * @deprecated since Totara 12, use the structure block instead.
      * @return string
      */
     public function frontpage_combo_list() {
         global $CFG;
+        debugging(__FUNCTION__.' is deprecated, please use the new structure block instance', DEBUG_DEVELOPER);
         require_once($CFG->libdir. '/coursecatlib.php');
         $chelper = new coursecat_helper();
-        $chelper->set_subcat_depth($CFG->maxcategorydepth)->
+        $chelper->set_subcat_depth(2)->
             set_categories_display_options(array(
                 'limit' => $CFG->coursesperpage,
                 'viewmoreurl' => new moodle_url('/course/index.php',
@@ -2108,13 +2138,15 @@ class core_course_renderer extends plugin_renderer_base {
     /**
      * Returns HTML to print tree of course categories (with number of courses) for the frontpage
      *
+     * @deprecated since Totara 12, use the structure block instead.
      * @return string
      */
     public function frontpage_categories_list() {
         global $CFG;
+        debugging(__FUNCTION__.' is deprecated, please use the new structure block instance', DEBUG_DEVELOPER);
         require_once($CFG->libdir. '/coursecatlib.php');
         $chelper = new coursecat_helper();
-        $chelper->set_subcat_depth($CFG->maxcategorydepth)->
+        $chelper->set_subcat_depth(2)->
                 set_show_courses(self::COURSECAT_SHOW_COURSES_COUNT)->
                 set_categories_display_options(array(
                     'limit' => $CFG->coursesperpage,

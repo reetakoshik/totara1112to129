@@ -13,14 +13,14 @@ Feature: Tables can be sorted by additional names
     And I log in as "admin"
     And I set the following administration settings values:
       | uselegacybrowselistofusersreport | 1 |
-    And I navigate to "User policies" node in "Site administration > Users > Permissions"
+    And I navigate to "User policies" node in "Site administration > Permissions"
     And the following config values are set as admin:
     | fullnamedisplay | firstname middlename lastname |
     | alternativefullnameformat | firstname middlename alternatename lastname |
 
   @javascript
   Scenario: All user names are show and sortable in the administration user list.
-    Given I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    Given I navigate to "Browse list of users" node in "Site administration > Users"
     Then the following should exist in the "users" table:
     | First name / Middle name / Alternate name / Surname | Email address |
     | Admin User | moodle@example.com |

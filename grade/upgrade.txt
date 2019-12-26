@@ -1,8 +1,10 @@
 This files describes API changes in /blocks/last_course_accessed,
 information provided here is intended especially for developers.
 
-=== 11.3 ===
+=== 12.0 ===
 
 * String helpers are no longer used in the following templates, string data is passed via context data:
 ** grade/templates/weight_field.mustache
 ** grade/templates/weight_override_field.mustache
+* core_grading_renderer::management_action_icon() has changed to use the pix_icon api
+* core_grading_renderer::pick_action_icon() has changed to use the pix_icon api

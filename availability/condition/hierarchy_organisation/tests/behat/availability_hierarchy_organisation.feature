@@ -32,9 +32,7 @@ Feature: Adding organisation assignment activity access restriction
   Scenario: Test organisation assignment condition prevents student access
     # Basic setup.
     Given I log in as "admin"
-    And I am on site homepage
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
 
     # Add a page.
     And I add a "Page" to section "1"
@@ -71,8 +69,7 @@ Feature: Adding organisation assignment activity access restriction
     # Log in as student
     When I log out
     And I log in as "student1"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
 
     Then I should see "Test Page 1" in the "region-main" "region"
     And I should not see "Test Page 2" in the "region-main" "region"

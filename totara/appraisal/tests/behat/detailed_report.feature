@@ -1,4 +1,4 @@
-@javascript @totara @totara_appraisal @totara_reportbuilder
+@javascript @totara @totara_appraisal @totara_reportbuilder @totara_core_menu
 Feature: Test appraisal detailed report with numeric question
   In order to ensure the appraisals works as expected
   As an admin
@@ -107,7 +107,7 @@ Feature: Test appraisal detailed report with numeric question
 
     # Add data for User One
     When I log in as "user1"
-    And I click on "Performance" in the totara menu
+    And I click on "Latest Appraisal" in the totara menu
     And I press "Start"
     And I set the following fields to these values:
       | Your answer | 3 |

@@ -53,17 +53,12 @@ Feature: Enrolment plugin cron tasks
 
     # Using program assignment through Organisation for all cases
     And I log in as "admin"
-    And I click on "Programs" in the totara menu
-    And I follow "Test Program 1"
+    And I am on "Test Program 1" program homepage
     And I press "Edit program details"
     And I switch to "Assignments" tab
-    And I select "Organisations" from the "Add a new" singleselect
-    And I click on "Add" "button" in the "#category_select" "css_element"
-    And I press "Add organisations to program"
+    And I set the field "Add a new" to "Organisations"
     And I click on "Organisation1" "link" in the "Add organisations to program" "totaradialogue"
     And I click on "Ok" "button" in the "Add organisations to program" "totaradialogue"
-    And I press "Save changes"
-    And I press "Save all changes"
     Then I should see "Organisation1"
 
     # Ensure Audience syn External unenrol action is set to "Disable course enrolment and remove roles"
@@ -86,7 +81,7 @@ Feature: Enrolment plugin cron tasks
 
     # Change learner1's organisation
     When I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner One"
     And I follow "full1"
     And I click on "Delete" "link" in the "#organisationtitle" "css_element"
@@ -107,17 +102,15 @@ Feature: Enrolment plugin cron tasks
     And I run the scheduled task "\totara_program\task\user_assignments_task"
     And I log in as "learner1"
     Then I should not see "Test Program 1"
-    When I click on "Programs" in the totara menu
-    And I follow "Test Program 1"
+    When I am on "Test Program 1" program homepage
     Then "//input[@type='submit' and @value='Not available' and @disabled]" "xpath_element" should exist in the "Course 1" "table_row"
-    When I click on "Courses" in the totara menu
-    And I follow "Course 1"
+    When I am on "Course 1" course homepage
     Then I should see "You can not enrol yourself in this course"
     And I log out
 
     # Change learner1's organisation again to re-assign him to the program
     When I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner One"
     And I follow "full1"
     And I click on "Choose organisation" "button"
@@ -149,7 +142,7 @@ Feature: Enrolment plugin cron tasks
 
     # Change learner1's organisation
     When I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner One"
     And I follow "full1"
     And I click on "Delete" "link" in the "#organisationtitle" "css_element"
@@ -170,17 +163,15 @@ Feature: Enrolment plugin cron tasks
     And I run the scheduled task "\totara_program\task\user_assignments_task"
     And I log in as "learner1"
     Then I should not see "Test Program 1"
-    When I click on "Programs" in the totara menu
-    And I follow "Test Program 1"
+    When I am on "Test Program 1" program homepage
     Then "//input[@type='submit' and @value='Not available' and @disabled]" "xpath_element" should exist in the "Course 1" "table_row"
-    When I click on "Courses" in the totara menu
-    And I follow "Course 1"
+    When I am on "Course 1" course homepage
     Then I should see "You can not enrol yourself in this course"
     And I log out
 
     # Change learner1's organisation again to re-assign him to the program
     When I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner One"
     And I follow "full1"
     And I click on "Choose organisation" "button"
@@ -212,7 +203,7 @@ Feature: Enrolment plugin cron tasks
 
     # Change learner1's organisation
     When I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner One"
     And I follow "full1"
     And I click on "Delete" "link" in the "#organisationtitle" "css_element"
@@ -233,17 +224,15 @@ Feature: Enrolment plugin cron tasks
     And I run the scheduled task "\totara_program\task\clean_enrolment_plugins_task"
     And I log in as "learner1"
     Then I should not see "Test Program 1"
-    When I click on "Programs" in the totara menu
-    And I follow "Test Program 1"
+    When I am on "Test Program 1" program homepage
     Then "//input[@type='submit' and @value='Not available' and @disabled]" "xpath_element" should exist in the "Course 1" "table_row"
-    When I click on "Courses" in the totara menu
-    And I follow "Course 1"
+    When I am on "Course 1" course homepage
     Then I should see "You can not enrol yourself in this course"
     And I log out
 
     # Change learner1's organisation again to re-assign him to the program
     When I log in as "admin"
-    And I navigate to "Browse list of users" node in "Site administration > Users > Accounts"
+    And I navigate to "Browse list of users" node in "Site administration > Users"
     And I follow "Learner One"
     And I follow "full1"
     And I click on "Choose organisation" "button"

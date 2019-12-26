@@ -34,7 +34,7 @@ class totara_reportbuilder_role_access_testcase extends advanced_testcase {
 
     public function test_get_all_access_plugins() {
         $result = reportbuilder::get_all_access_plugins();
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         foreach ($result as $name => $instance) {
             $this->assertStringEndsWith('_access', $name);
             $this->assertInstanceOf('totara_reportbuilder\rb\access\base', $instance);
@@ -50,7 +50,7 @@ class totara_reportbuilder_role_access_testcase extends advanced_testcase {
 
         $reportid = $this->create_report('user', 'report 1');
 
-        $rb = new reportbuilder($reportid);
+        $rb = reportbuilder::create($reportid);
 
         $enabled = reportbuilder::get_setting($reportid, 'role_access', 'enable');
         $this->assertSame('1', $enabled);
@@ -302,6 +302,75 @@ class totara_reportbuilder_role_access_testcase extends advanced_testcase {
         $result = array_keys($result);
         $expected = array($reportid8);
         $this->assertSame($expected, $result);
+    }
+
+    public function test_has_reports() {
+        global $DB;
+        $this->resetAfterTest();
+
+        $syscontext = context_system::instance();
+
+        $admin = get_admin();
+        $manager = $this->getDataGenerator()->create_user();
+        $creator = $this->getDataGenerator()->create_user();
+        $student = $this->getDataGenerator()->create_user();
+        $nobody = $this->getDataGenerator()->create_user();
+        $guest = guest_user();
+
+        $managerrole = $DB->get_record('role', ['shortname' => 'manager'], '*', MUST_EXIST);
+        $creatorrole = $DB->get_record('role', ['shortname' => 'coursecreator'], '*', MUST_EXIST);
+        $studentrole = $DB->get_record('role', ['shortname' => 'student'], '*', MUST_EXIST);
+        $userrole = $DB->get_record('role', ['shortname' => 'user'], '*', MUST_EXIST);
+        $guestrole = $DB->get_record('role', ['shortname' => 'guest'], '*', MUST_EXIST);
+
+        $course = $this->getDataGenerator()->create_course();
+        $this->getDataGenerator()->role_assign($managerrole->id, $manager->id, $syscontext->id);
+        $this->getDataGenerator()->role_assign($creatorrole->id, $creator->id, $syscontext->id);
+        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
+
+        $reportid1 = $this->create_report('user', 'report 1');
+        $this->configure_role_access($reportid1, 'site', [$managerrole->id]);
+
+        $reportid2 = $this->create_report('user', 'report 2');
+        $this->configure_role_access($reportid2, 'any', [$studentrole->id]);
+
+        $reportid3 = $this->create_report('user', 'report 3');
+        $this->configure_role_access($reportid3, 'site', [$studentrole->id]);
+
+        $reportid4 = $this->create_report('user', 'report 4');
+        $this->configure_role_access($reportid4, 'site', [$managerrole->id, $studentrole->id, $creatorrole->id]);
+
+        $reportid5 = $this->create_report('user', 'report 5');
+        $this->configure_role_access($reportid5, 'any', [$managerrole->id, $studentrole->id, $creatorrole->id]);
+
+        $reportid6 = $this->create_report('user', 'report 6');
+        $this->configure_role_access($reportid6, 'site', []);
+
+        $reportid7 = $this->create_report('user', 'report 7');
+        $this->configure_role_access($reportid7, 'site', [$userrole->id]);
+
+        $reportid8 = $this->create_report('user', 'report 8');
+        $this->configure_role_access($reportid8, 'site', [$guestrole->id]);
+
+        // Test results for each user.
+        $this->assertTrue(reportbuilder::has_reports($admin->id));
+        $this->assertTrue(reportbuilder::has_reports($manager->id));
+        $this->assertTrue(reportbuilder::has_reports($creator->id));
+        $this->assertTrue(reportbuilder::has_reports($student->id));
+        $this->assertTrue(reportbuilder::has_reports($nobody->id));
+        $this->assertTrue(reportbuilder::has_reports($guest->id));
+        $this->assertTrue(reportbuilder::has_reports(0));
+
+        // Update access for some reports.
+        $this->configure_role_access($reportid8, 'site', []);
+        $this->configure_role_access($reportid7, 'site', [$managerrole->id]);
+        $this->assertTrue(reportbuilder::has_reports($admin->id));
+        $this->assertTrue(reportbuilder::has_reports($manager->id));
+        $this->assertTrue(reportbuilder::has_reports($creator->id));
+        $this->assertTrue(reportbuilder::has_reports($student->id));
+        $this->assertFalse(reportbuilder::has_reports($guest->id));
+        $this->assertFalse(reportbuilder::has_reports($nobody->id));
+        $this->assertFalse(reportbuilder::has_reports(0));
     }
 
     /**

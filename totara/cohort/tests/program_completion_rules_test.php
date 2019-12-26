@@ -39,6 +39,7 @@ require_once($CFG->dirroot . '/totara/cohort/lib.php');
 class totara_cohort_program_completion_rules_testcase extends reportcache_advanced_testcase {
 
     private $userprograms = array();
+    /** @var totara_cohort_generator $cohort_generator */
     private $cohort_generator = null;
     private $cohort = null;
     private $ruleset = 0;
@@ -46,6 +47,14 @@ class totara_cohort_program_completion_rules_testcase extends reportcache_advanc
     private $program2 = null;
     private $program3 = null;
     private $program4 = null;
+    private $user1;
+    private $user2;
+    private $user3;
+    private $user4;
+    private $user5;
+    private $user6;
+    private $user7;
+    private $teststart = null;
 
     protected function tearDown() {
         $this->userprograms = null;
@@ -56,6 +65,14 @@ class totara_cohort_program_completion_rules_testcase extends reportcache_advanc
         $this->program2 = null;
         $this->program3 = null;
         $this->program4 = null;
+        $this->user1 = null;
+        $this->user2 = null;
+        $this->user3 = null;
+        $this->user4 = null;
+        $this->user5 = null;
+        $this->user6 = null;
+        $this->user7 = null;
+        $this->teststart = null;
         parent::tearDown();
     }
 
@@ -90,6 +107,9 @@ class totara_cohort_program_completion_rules_testcase extends reportcache_advanc
         set_config('enablecompletion', 1);
         $this->resetAfterTest(true);
         $this->setAdminUser();
+
+        // Prevent random failures by using the same now timestamps for all test data.
+        $this->teststart = time();
 
         // Set totara_cohort generator.
         $this->cohort_generator = $this->getDataGenerator()->get_plugin_generator('totara_cohort');
@@ -139,35 +159,34 @@ class totara_cohort_program_completion_rules_testcase extends reportcache_advanc
         $this->getDataGenerator()->assign_program($this->program4->id, $usersprogram3);
 
         // Create timecreated for each user.
-        $now = time();
         $timecreated = array();
-        $timecreated[$this->user1->id] = $now - (5 * DAYSECS);
-        $timecreated[$this->user2->id] = $now - (5 * DAYSECS);
-        $timecreated[$this->user3->id] = $now - (3 * DAYSECS);
-        $timecreated[$this->user4->id] = $now - (2 * DAYSECS);
-        $timecreated[$this->user5->id] = $now - (4 * DAYSECS);
-        $timecreated[$this->user6->id] = $now - (3 * DAYSECS);
-        $timecreated[$this->user7->id] = $now - (7 * DAYSECS);
+        $timecreated[$this->user1->id] = $this->teststart - (5 * DAYSECS);
+        $timecreated[$this->user2->id] = $this->teststart - (5 * DAYSECS);
+        $timecreated[$this->user3->id] = $this->teststart - (3 * DAYSECS);
+        $timecreated[$this->user4->id] = $this->teststart - (2 * DAYSECS);
+        $timecreated[$this->user5->id] = $this->teststart - (4 * DAYSECS);
+        $timecreated[$this->user6->id] = $this->teststart - (3 * DAYSECS);
+        $timecreated[$this->user7->id] = $this->teststart - (7 * DAYSECS);
 
         // Create timestarted for each user.
         $timestarted = array();
-        $timestarted[$this->user1->id] = $now - (3 * DAYSECS);
-        $timestarted[$this->user2->id] = $now - (5 * DAYSECS);
-        $timestarted[$this->user3->id] = $now - (2 * DAYSECS);
-        $timestarted[$this->user4->id] = $now - (4 * DAYSECS);
-        $timestarted[$this->user5->id] = $now - (3 * DAYSECS);
-        $timestarted[$this->user6->id] = $now - (5 * DAYSECS);
-        $timestarted[$this->user7->id] = $now - (5 * DAYSECS);
+        $timestarted[$this->user1->id] = $this->teststart - (3 * DAYSECS);
+        $timestarted[$this->user2->id] = $this->teststart - (5 * DAYSECS);
+        $timestarted[$this->user3->id] = $this->teststart - (2 * DAYSECS);
+        $timestarted[$this->user4->id] = $this->teststart - (4 * DAYSECS);
+        $timestarted[$this->user5->id] = $this->teststart - (3 * DAYSECS);
+        $timestarted[$this->user6->id] = $this->teststart - (5 * DAYSECS);
+        $timestarted[$this->user7->id] = $this->teststart - (5 * DAYSECS);
 
         // Create timecompleted for each user.
         $timecompleted = array();
-        $timecompleted[$this->user1->id] = $now - (1 * DAYSECS);
-        $timecompleted[$this->user2->id] = $now - (2 * DAYSECS);
-        $timecompleted[$this->user3->id] = $now - (1 * DAYSECS);
-        $timecompleted[$this->user4->id] = $now - (1 * DAYSECS);
-        $timecompleted[$this->user5->id] = $now - (2 * DAYSECS);
-        $timecompleted[$this->user6->id] = $now + (1 * DAYSECS);
-        $timecompleted[$this->user7->id] = $now - (1 * DAYSECS);
+        $timecompleted[$this->user1->id] = $this->teststart - (1 * DAYSECS);
+        $timecompleted[$this->user2->id] = $this->teststart - (2 * DAYSECS);
+        $timecompleted[$this->user3->id] = $this->teststart - (1 * DAYSECS);
+        $timecompleted[$this->user4->id] = $this->teststart - (1 * DAYSECS);
+        $timecompleted[$this->user5->id] = $this->teststart - (2 * DAYSECS);
+        $timecompleted[$this->user6->id] = $this->teststart + (1 * DAYSECS);
+        $timecompleted[$this->user7->id] = $this->teststart - (1 * DAYSECS);
 
         // Make completion for programs.
         foreach ($this->userprograms as $programid => $users) {
@@ -233,16 +252,17 @@ class totara_cohort_program_completion_rules_testcase extends reportcache_advanc
 
         // Create a ruleset.
         $this->ruleset = cohort_rule_create_ruleset($this->cohort->draftcollectionid);
+        $this->assertEquals(0, $DB->count_records('cohort_members', array('cohortid' => $this->cohort->id)));
     }
 
     /**
      * Data provider for program completion date rule.
      */
     public function data_program_completion_date() {
-        $now = time();
+        // NOTE: we cannot use $this->>timestart here because it is in different instance.
         $data = array(
-            array(array('operator' => COHORT_RULE_COMPLETION_OP_DATE_LESSTHAN, 'date' => $now - DAYSECS),  array('program1'), 1),
-            array(array('operator' => COHORT_RULE_COMPLETION_OP_DATE_GREATERTHAN, 'date' => $now - DAYSECS), array('program1'), 2),
+            array(array('operator' => COHORT_RULE_COMPLETION_OP_DATE_LESSTHAN, 'date' => 'yesterday'),  array('program1'), 1),
+            array(array('operator' => COHORT_RULE_COMPLETION_OP_DATE_GREATERTHAN, 'date' => 'yesterday'), array('program1'), 2),
             array(array('operator' => COHORT_RULE_COMPLETION_OP_BEFORE_PAST_DURATION, 'date' => 1),  array('program2'), 4),
             array(array('operator' => COHORT_RULE_COMPLETION_OP_WITHIN_PAST_DURATION, 'date' => 3), array('program2'), 4),
             array(array('operator' => COHORT_RULE_COMPLETION_OP_WITHIN_FUTURE_DURATION, 'date' => 1), array('program2'), 1),
@@ -266,6 +286,11 @@ class totara_cohort_program_completion_rules_testcase extends reportcache_advanc
             $listofids[] = $this->{$program}->id;
         }
 
+        if ($params['date'] === 'yesterday') {
+            // NOTE: the test dates are wrong, we have to ask for a bit later than exactly one day ago.
+            $params['date'] = $this->teststart - DAYSECS - HOURSECS;
+        }
+
         /**
          * Program completion data per users in program2:
          * user3 -> time started: -1day  - time completed = +1 day(future)  - completion time: 2 days
@@ -276,12 +301,11 @@ class totara_cohort_program_completion_rules_testcase extends reportcache_advanc
          */
         if ($params['operator'] === COHORT_RULE_COMPLETION_OP_AFTER_FUTURE_DURATION) {
             // Make completion in the future to test this rule.
-            $now = time();
             $days = 1;
             $users = $this->userprograms[$this->program2->id];
             foreach ($users as $user) {
-                $timecreated = $now - ($days * DAYSECS);
-                $timecompleted = $now + ($days * DAYSECS);
+                $timecreated = $this->teststart - ($days * DAYSECS);
+                $timecompleted = $this->teststart + ($days * DAYSECS);
                 $program = new program($this->program2->id);
                 $completionsettings = array(
                     'status'        => STATUS_PROGRAM_COMPLETE,

@@ -33,7 +33,7 @@ global $CFG;
 require_once($CFG->dirroot . '/totara/hierarchy/lib.php');
 require_once($CFG->dirroot . '/totara/hierarchy/prefix/organisation/lib.php');
 
-class getitemsexcludingchildren_test extends advanced_testcase {
+class totara_hierarchy_getitems_testcase extends advanced_testcase {
 
     private $orgs = array();
 
@@ -193,7 +193,6 @@ class getitemsexcludingchildren_test extends advanced_testcase {
             $output = $org->get_items_excluding_children($testcase);
             $this->assertEquals($testcase, $output);
         }
-        $this->resetAfterTest(false);
     }
 
     function test_cases_with_duplicates() {
@@ -212,7 +211,6 @@ class getitemsexcludingchildren_test extends advanced_testcase {
             $output = $org->get_items_excluding_children($testcase);
             $this->assertEquals(array_unique($testcase), $output);
         }
-        $this->resetAfterTest(false);
     }
 
 
@@ -236,7 +234,6 @@ class getitemsexcludingchildren_test extends advanced_testcase {
             $output = $org->get_items_excluding_children($testcase['before']);
             $this->assertEquals($testcase['after'], $output);
         }
-        $this->resetAfterTest(false);
     }
 
     function test_cases_with_duplicates_and_children() {
@@ -259,6 +256,5 @@ class getitemsexcludingchildren_test extends advanced_testcase {
             $output = $org->get_items_excluding_children($testcase['before']);
             $this->assertEquals($testcase['after'], $output);
         }
-        $this->resetAfterTest(false);
     }
 }
