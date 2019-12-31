@@ -6,7 +6,6 @@ class block_image_link extends block_base
 
     $this->title = get_string('pluginname', 'block_image_link');
         
-
     }
 
     public function instance_allow_multiple() {
@@ -21,7 +20,7 @@ class block_image_link extends block_base
         if ($this->content !== null) {
           return $this->content;
         }
-        $caption = isset($this->config->image_caption) ? $this->config->image_caption : '';
+        $caption = isset($this->config->config_title) ? $this->config->config_title : '';
         if($caption){
 
           $this->title = str_replace('Image Link block',$caption,'Image Link block');

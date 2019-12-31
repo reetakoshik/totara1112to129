@@ -62,7 +62,11 @@ class block_totara_featured_links extends block_base {
         if ($this->content !== null) {
             return $this->content;
         }
+        $configtitle = isset($this->block->config->config_title) ? $this->block->config->config_title : '';
+        if($configtitle){
 
+          $this->title = str_replace('Featured Links',$configtitle,'Featured Links');
+        }
         $editing = $this->page->user_is_editing();
 
         if (!isset($this->content)) {

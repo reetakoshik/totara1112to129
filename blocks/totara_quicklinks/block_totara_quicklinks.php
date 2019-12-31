@@ -42,7 +42,11 @@ class block_totara_quicklinks extends block_base {
         if($this->content !== NULL) {
             return $this->content;
         }
+        $configtitle = isset($this->block->config->config_title) ? $this->block->config->config_title : '';        
+        if($configtitle){
 
+          $this->title = str_replace('Quick Links',$configtitle,'Quick Links');
+        }
         $this->content = new stdClass;
         $this->content->text   = '';
         $this->content->footer = '';
