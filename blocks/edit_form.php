@@ -495,8 +495,15 @@ class block_edit_form extends moodleform {
         ]);
         
         $caption = isset($this->block->config->image_caption) ? $this->block->config->image_caption : '';
-        
+        $captionupdate = isset($this->block->config->image_caption_update) ? $this->block->config->image_caption_update : '';
+
+        if($captionupdate != 'update'){
         $form->setDefault('cs_title', $caption);
+         }
+
+        else{
+        $form->setDefault('cs_title', $this->block->get_common_config_value('title', $this->block->get_title()));   
+        }
 
         $form->setType('cs_title', PARAM_TEXT);
         $form->disabledIf('cs_title', 'cs_override_title', 'notchecked');
