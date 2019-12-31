@@ -495,15 +495,19 @@ class block_edit_form extends moodleform {
         ]);
         
         $caption = isset($this->block->config->image_caption) ? $this->block->config->image_caption : '';
+        $configtitle = isset($this->block->config->config_title) ? $this->block->config->config_title : '';
         $captionupdate = isset($this->block->config->image_caption_update) ? $this->block->config->image_caption_update : '';
 
         if($captionupdate !== 'update'){
-             if($caption){ 
+            if($caption){ 
                     $form->setDefault('cs_title', $caption);
-                }
-             else{ 
+            }
+            elseif($configtitle){
+                $form->setDefault('cs_title', $configtitle);
+            } 
+            else{ 
                     $form->setDefault('cs_title', $this->block->get_common_config_value('title', $this->block->get_title())); 
-                }
+            }
          }
 
         else{
