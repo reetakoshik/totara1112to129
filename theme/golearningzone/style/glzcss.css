@@ -2497,7 +2497,7 @@ h2 {
     padding-left:0;
     padding-right: 15px;
     margin: 20px 0 5px 0; 
-    font-family: 'Open Sans', sans-serif !important;
+    font-family: 'Open Sans', sans-serif;
     letter-spacing: 1.1px;
 	font-weight:500 !important;
 	-webkit-font-smoothing: antialiased;
@@ -4081,11 +4081,11 @@ label[for=item_label] .modicon .fa-tag:before
 }
 
  h2{
-	font-family:  sans-serif, 'Arimo' !important;
+	font-family:  sans-serif, 'Arimo';
 	/*font-size:33px !important;*/
 } 
 h3{
-	font-family:  sans-serif, 'Arimo' !important;
+	font-family:  sans-serif, 'Arimo';
 	/*font-size:33px !important;*/
 }
 /* css for 6 sept */
