@@ -20,7 +20,7 @@ class block_image_link extends block_base
         if ($this->content !== null) {
           return $this->content;
         }
-        $caption = isset($this->config->config_title) ? $this->config->config_title : '';
+        $caption = isset($this->config->image_caption) ? $this->config->image_caption : '';
         if($caption){
 
           $this->title = str_replace('Image Link block',$caption,'Image Link block');
