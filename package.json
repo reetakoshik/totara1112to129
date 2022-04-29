@@ -3,7 +3,7 @@
     "private": true,
     "description": "Totara LMS",
     "devDependencies": {
-        "async": "1.5.2",
+        "async": "2.6.4",
         "eslint": "3.7.1",
         "gherkin-lint": "2.11.1",
         "grunt": "1.0.1",
